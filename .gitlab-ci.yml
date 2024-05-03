@@ -53,10 +53,3 @@ svelte-check:
   stage: test
   script:
     - npm run check
-
-deploy-job:
-  stage: deploy
-  environment: production
-  script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
