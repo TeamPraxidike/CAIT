@@ -12,3 +12,128 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Difficulty {
+    easy
+    medium
+    hard
+}
+
+enum PublicationType {
+    Material
+    Circuit
+}
+
+enum MaterialType {
+    Presentation
+    Assignment
+    Notebook
+    Video
+    Dataset
+}
+
+model Users {
+    id          Int @id @default(autoincrement())
+    firstName   String
+    lastName    String
+    email       String
+    reputation  Int @default(0)
+
+    saved       Publication[] @relation("saved")
+    posts       Publication[]
+
+    mantaining  Publication[] @relation("mantainers")
+    comments    Comment[]
+    replies     Reply[]
+    isAdmin     Boolean
+}
+
+model Publication {
+    id                  Int @id @default(autoincrement())
+    title               String
+    description         String
+    mantainers          Users[] @relation("mantainers")
+    difficulty          Difficulty
+    likes               Int
+    tags                Tag[]
+    learningObjectives  String[]
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+
+    comments            Comment[]
+
+    publisher           Users @relation(fields: [publisherId], references: [id])
+    publisherId         Int
+    savedBy             Users[] @relation("saved")
+    type                PublicationType
+
+    node                Node[]
+
+    material            Material?
+    circuit             Circuit?
+}
+
+model Material {
+    id              Int @id @default(autoincrement())
+    copyright       Boolean
+    timeEstimate    Int
+    theoryPractice  Float
+    type            MaterialType
+    files           String[]
+
+    publicationId   Int @unique
+    publication     Publication @relation(fields: [publicationId], references: [id])
+}
+
+model Circuit {
+    id              Int @id @default(autoincrement())
+
+    nodes           Node[]
+    publicationId   Int @unique
+    publication     Publication @relation(fields: [publicationId], references: [id])
+}
+
+model Node {
+    id          Int @id @default(autoincrement())
+    circuitId   Int
+    circuit     Circuit @relation(fields: [circuitId], references: [id])
+
+    contentId   Int
+    content     Publication @relation(fields: [contentId], references: [id])
+}
+
+model Tag {
+    id Int      @id @default(autoincrement())
+    content     String
+    publication Publication[]
+}
+
+model Comment {
+    id                  Int @id @default(autoincrement())
+    publicationId       Int
+    publication         Publication @relation(fields: [publicationId], references: [id])
+
+    userId              Int
+    user                Users @relation(fields: [userId], references: [id])
+
+    replies             Reply[]
+    likes               Int
+    content             String
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+}
+
+model Reply {
+    id                  Int @id @default(autoincrement())
+
+    commentId           Int
+    comment             Comment @relation(fields: [commentId], references: [id])
+
+    userId              Int
+    user                Users @relation(fields: [userId], references: [id])
+
+    likes               Int
+    content             String
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+}
