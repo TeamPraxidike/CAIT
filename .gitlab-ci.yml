@@ -17,6 +17,8 @@
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
 image: node:latest
+variables:
+  DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgress"
 
 stages:          # List of stages for jobs, and their order of execution
   - build
