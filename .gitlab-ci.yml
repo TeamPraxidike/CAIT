@@ -18,7 +18,10 @@
 
 image: node:latest
 variables:
-  DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgress"
+  DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgress"
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
 
 stages:          # List of stages for jobs, and their order of execution
   - build
@@ -43,10 +46,6 @@ test-cov:
   services:
     - name: postgres:latest
       alias: postgres
-      variables:
-        POSTGRES_DB: postgres
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
       command: ["start"]
   script:
     - npm run test
