@@ -3,7 +3,7 @@ import { Difficulty } from '@prisma/client';
 import { PublicationType } from '@prisma/client';
 import { MaterialType } from '@prisma/client';
 
-const prisma:PrismaClient = new PrismaClient();
+export const prisma:PrismaClient = new PrismaClient();
 
 /**
  * Adds a new user to the database. Sets his reputation to 0.
@@ -12,8 +12,8 @@ const prisma:PrismaClient = new PrismaClient();
  * @param email
  * @param isAdmin
  */
-export async function addUser(firstName: string, lastName: string, email: string, isAdmin: boolean) {
-    return prisma.users.create({
+export async function createUser(firstName: string, lastName: string, email: string, isAdmin: boolean) {
+    return prisma.user.create({
         data: {
             firstName: firstName,
             lastName: lastName,
@@ -29,7 +29,7 @@ export async function addUser(firstName: string, lastName: string, email: string
  * @param id
  */
 export async function getUserById(id: number) {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
         where: {
             id: id
         },
