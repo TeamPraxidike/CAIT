@@ -19,12 +19,8 @@
 image: node:latest
 variables:
   DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgress"
-  POSTGRES_DB: postgres
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: postgres
-  POSTGRES_PORT: 5432
-  POSTGRES_HOST: postgres
-  POSTGRES_HOST_AUTH_METHOD: trust
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375/
 
 stages:          # List of stages for jobs, and their order of execution
   - build
@@ -45,11 +41,10 @@ build-job:
 
 test-cov:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.43.0-jammy
+  image:
+    name: docker/compose:latest
   services:
-    - name: postgres:latest
-      alias: postgres
-      command: ["start"]
+    - docker:dind
   script:
     - npm run test
   coverage: '/line-rate="([0-9]*\.[0-9]+)"/'
