@@ -2,6 +2,7 @@
 
 // Components
 import Meta from "$lib/components/Meta.svelte";
-
+import Header from "$lib/components/Header.svelte";
 
 export {Meta}
+export {Header}
