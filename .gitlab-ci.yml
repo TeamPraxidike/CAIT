@@ -22,6 +22,7 @@ variables:
 
 stages:          # List of stages for jobs, and their order of execution
   - build
+  - lint
   - test
 
 build-job:
@@ -37,17 +38,21 @@ build-job:
     paths:
       - node_modules/
 
-test-cov:
+eslint:   # This job also runs in the test stage.
+  stage: lint    # It can run at the same time as unit-test-job (in parallel).
+  script:
+    - npm run lint
+
+svelte-check:
+  stage: lint
+  script:
+    - npm run check
+
+test-unit:
   stage: test
-  services:
-    - postgres
-  variables:
-    POSTGRES_DB: postgres
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
 
   script:
-    - npm run test
+    - npm run test:unit
   coverage: '/line-rate="([0-9]*\.[0-9]+)"/'
   artifacts:
     reports:
@@ -55,12 +60,19 @@ test-cov:
         coverage_format: cobertura
         path: reports/coverage/cobertura-coverage.xml
 
-eslint:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
-  script:
-    - npm run lint
-
-svelte-check:
+test-integration:
   stage: test
+  services:
+    - postgres
+  variables:
+    POSTGRES_DB: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
   script:
-    - npm run check
+    - npm run test:integration
+  coverage: '/line-rate="([0-9]*\.[0-9]+)"/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: reports/coverage/cobertura-coverage.xml
