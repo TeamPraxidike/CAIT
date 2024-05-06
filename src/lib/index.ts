@@ -3,6 +3,6 @@
 // Components
 import Meta from "$lib/components/Meta.svelte";
 import Header from "$lib/components/Header.svelte";
+import Grid from "$lib/components/Grid.svelte";
 
-export {Meta}
-export {Header}
+export {Meta, Header, Grid}
