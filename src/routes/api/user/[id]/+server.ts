@@ -1,4 +1,4 @@
-import {getUserById} from "$lib/db";
+import {getUserById} from "$lib/database/db";
 
 export async function GET({ params }) {
     const { id } = params;

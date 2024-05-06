@@ -1,5 +1,5 @@
 import {beforeEach} from "vitest";
-import {prisma} from "$lib/db"
+import {prisma} from "$lib/database"
 
 
 const resetDb = async () => {

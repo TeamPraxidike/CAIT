@@ -1,10 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { Difficulty } from '@prisma/client';
 import { PublicationType } from '@prisma/client';
 import { MaterialType } from '@prisma/client';
 
-export const prisma:PrismaClient = new PrismaClient();
-
+import {prisma} from "$lib/database";
 /**
  * Adds a new user to the database. Sets his reputation to 0.
  * @param firstName

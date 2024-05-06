@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {testingUrl} from "./setup";
-import {createUser, prisma} from "$lib/db";
+import {createUser, prisma} from "$lib/database";
 
 describe('Users', () => {
     describe('[GET] /publication/:id', () => {
