@@ -18,9 +18,7 @@
 
 image: node:latest
 variables:
-  DATABASE_URL: "postgres://postgres:postgres@docker:5432/postgress"
-  DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375/
+  DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
 
 stages:          # List of stages for jobs, and their order of execution
   - build
@@ -41,12 +39,13 @@ build-job:
 
 test-cov:
   stage: test
-  image:
-    name: docker/compose:latest
   services:
-    - docker:dind
-  before_script:
-    - apk add --update nodejs npm bash
+    - postgres
+  variables:
+    POSTGRES_DB: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+
   script:
     - npm run test
   coverage: '/line-rate="([0-9]*\.[0-9]+)"/'
