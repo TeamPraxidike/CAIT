@@ -45,6 +45,8 @@ test-cov:
     name: docker/compose:latest
   services:
     - docker:dind
+  before_script:
+    - apk add --update nodejs npm
   script:
     - npm run test
   coverage: '/line-rate="([0-9]*\.[0-9]+)"/'
