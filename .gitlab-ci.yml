@@ -18,7 +18,7 @@
 
 image: node:latest
 variables:
-  DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgress"
+  DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgress"
   POSTGRES_DB: postgres
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: postgres
