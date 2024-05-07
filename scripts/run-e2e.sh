@@ -11,6 +11,7 @@ if [ -z "$CI" ]; then
   "$DIR"/wait-for-it.sh "${DATABASE_URL}" -- echo '🟢 - Database is ready!'  # wait for the database to be ready
 fi
 
+npx playwright install-deps                                                # install playwright dependencies
 npx playwright install                                                     # install playwright browsers for testing
 npx prisma migrate dev --name init                                         # run the migrations
 playwright test                                                            # run playwright tests
