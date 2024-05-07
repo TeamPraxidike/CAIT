@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "test:unit": "vitest --coverage -c ./vitest.config.unit.ts",
     "test:integration": "scripts/run-integration.sh",
-    "test:e2e": "playwright test"
+    "test:e2e": "scripts/run-e2e.sh",
+    "test:e2e:report": "scripts/run-e2e.sh && playwright show-report"
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",

@@ -2,7 +2,7 @@
 
 <div class="container h-full mx-auto flex justify-center items-center">
 	<div class="space-y-5">
-		<h1 class="h1">Let's get cracking bones!</h1>
+		<h1 class="h1">CAIT</h1>
 		<p>Start by exploring:</p>
 		<ul>
 			<li><code class="code">/src/routes/+layout.svelte</code> - barebones layout</li>
