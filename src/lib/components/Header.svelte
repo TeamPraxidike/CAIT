@@ -37,7 +37,7 @@
 
 <header class="w-screen dark:bg-surface-900 bg-surface-50 border-b border-surface-600 dark:border-surface-300">
     <Grid>
-        <img class="col-start-1 h-16 w-16" src=favicon.png alt="CAIT Logo"/>
+        <enhanced:img class="col-start-1 h-16 w-16" src="/static/favicon.png" alt="CAIT Logo"/>
             <button  class = "col-end-5 self-center justify-self-end w-12 h-8 " on:click={toggleDropDown}>
                 <Icon icon="solar:hamburger-menu-outline" className="text-surface-600 dark:text-surface-50" width="48" height="32"/>
             </button>
