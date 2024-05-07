@@ -24,14 +24,6 @@ enum PublicationType {
   Circuit
 }
 
-enum MaterialType {
-  Presentation
-  Assignment
-  Notebook
-  Video
-  Dataset
-}
-
 model User {
   id         Int    @id @default(autoincrement())
   firstName  String
@@ -56,7 +48,7 @@ model Publication {
   description        String
   maintainers        User[]     @relation("maintainers")
   difficulty         Difficulty
-  likes              Int
+  likes              Int        @default(0)
   tags               Tag[]
   learningObjectives String[]
   createdAt          DateTime   @default(now())
@@ -70,24 +62,23 @@ model Publication {
   likedBy            User[] @relation("liked")
   usedBy             User[] @relation("usesInCourse")
 
-  reports            Int
+  reports            Int        @default(0)
   type               PublicationType
 
   node               Node[]
 
-  materials          Material[]
+  materials          Material?
   circuit            Circuit?
 }
 
 model Material {
   id             Int          @id @default(autoincrement())
   copyright      Boolean
-  timeEstimate   Int
-  theoryPractice Float
-  type           MaterialType
-  file           String
+  timeEstimate   Int?
+  theoryPractice Float?
+  files          String[]
 
-  publicationId  Int
+  publicationId  Int         @unique
   publication    Publication @relation(fields: [publicationId], references: [id])
 }
 
