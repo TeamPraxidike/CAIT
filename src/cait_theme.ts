@@ -87,15 +87,15 @@ export const cait_theme: CustomThemeConfig = {
 		"--color-error-800": "66 0 0", // #420000
 		"--color-error-900": "31 0 0", // #1F0000
 		// surface | #F9F9FA
-		"--color-surface-50": "255 255 255", // #FFFFFF
-		"--color-surface-100": "255 255 255", // #FFFFFF
-		"--color-surface-200": "252 252 253", // #FCFCFD
-		"--color-surface-300": "252 252 253", // #FCFCFD
-		"--color-surface-400": "249 249 250", // #F9F9FA
-		"--color-surface-500": "249 249 250", // #F9F9FA
-		"--color-surface-600": "194 194 204", // #C2C2CC
-		"--color-surface-700": "141 141 160", // #8D8DA0
-		"--color-surface-800": "90 90 108", // #5A5A6C
-		"--color-surface-900": "46 46 56", // #2E2E38
+		"--color-surface-50": "242 242 242", // #F2F2F2
+		"--color-surface-100": "230 230 230", // #E6E6E6
+		"--color-surface-200": "204 204 204", // #CCCCCC
+		"--color-surface-300": "181 181 181", // #B5B5B5
+		"--color-surface-400": "156 156 156", // #9C9C9C
+		"--color-surface-500": "130 130 130", // #828282
+		"--color-surface-600": "105 105 105", // #696969
+		"--color-surface-700": "79 79 79", // #4F4F4F
+		"--color-surface-800": "56 56 56", // #383838
+		"--color-surface-900": "30 30 30", // #1E1E1E
 	}
 }
