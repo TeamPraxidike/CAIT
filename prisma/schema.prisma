@@ -39,8 +39,10 @@ model User {
   email      String
   reputation Int    @default(0)
 
-  saved Publication[] @relation("saved")
-  posts Publication[]
+  saved        Publication[] @relation("saved")
+  posts        Publication[]
+  liked        Publication[] @relation("liked")
+  usesInCourse Publication[] @relation("usesInCourse")
 
   mantaining Publication[] @relation("mantainers")
   comments   Comment[]
@@ -62,10 +64,14 @@ model Publication {
 
   comments Comment[]
 
-  publisher   User            @relation(fields: [publisherId], references: [id])
+  publisher   User   @relation(fields: [publisherId], references: [id])
   publisherId Int
-  savedBy     User[]          @relation("saved")
-  type        PublicationType
+  savedBy     User[] @relation("saved")
+  likedBy     User[] @relation("liked")
+  usedBy      User[] @relation("usesInCourse")
+
+  reports Int
+  type    PublicationType
 
   node Node[]
 
@@ -100,6 +106,9 @@ model Node {
 
   contentId Int
   content   Publication @relation(fields: [contentId], references: [id])
+
+  prerequisites Node[] @relation("next")
+  next          Node[] @relation("next")
 }
 
 model Tag {

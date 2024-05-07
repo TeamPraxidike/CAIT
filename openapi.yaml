@@ -1,0 +1,770 @@
+openapi: 3.0.3
+info:
+  title: Reviews API Specification
+  description: Reviews API Specification in OpenAPI specification. Three component schemas are employed namely Review, Book and Comment. Each request is summarized and explained with descriptions.
+  version: 1.0.1
+
+
+tags:
+  - name: User
+    description: End-points for operations on/with users
+  - name: Material
+    description: End-points for operations on/with materials
+  - name: Circuit
+    description: End-points for operations on/with circuits
+  - name: Comment
+    description: End-points for operations on/with circuits
+
+servers:
+  - url: http://localhost:5143
+
+paths:
+  /user:
+    post:
+      tags:
+        - User
+      summary: Update a user
+      requestBody:
+        description: The new user information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+
+      responses:
+        '200':
+          description: Successfully updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot edit this profile, authentication failed
+        '404':
+          description: This user does not exist
+        '500':
+          description: Server Error
+
+    put:
+      tags:
+        - User
+      summary: Add a user
+      requestBody:
+        description: The user information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+
+      responses:
+        '200':
+          description: Successfully added user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add this profile (not a teacher for example), authentication failed
+        '500':
+          description: Server Error
+
+  /user/{userId}:
+    get:
+      tags:
+        - User
+      summary: Get a user with a given id
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user to get
+
+      responses:
+        '200':
+          description: Successfully retrieved user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '404':
+          description: This user does not exist
+        '500':
+          description: Server Error
+
+    delete:
+      tags:
+        - User
+      summary: Deletes a user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user to be deleted
+
+      responses:
+        '200':
+          description: Successfully deleted user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '404':
+          description: This user does not exist
+        '500':
+          description: Server Error
+
+
+
+  /material:
+    post:
+      tags:
+        - Material
+      summary: Update a material
+      requestBody:
+        description: The new material information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Material'
+
+      responses:
+        '200':
+          description: Successfully updated material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot edit this Material, authentication failed
+        '403':
+          description: User cannot edit this Material, he is not a mantainer
+        '404':
+          description: This material does not exist
+        '500':
+          description: Server Error
+
+    put:
+      tags:
+        - Material
+      summary: Add a material
+      requestBody:
+        description: The material information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Material'
+
+      responses:
+        '200':
+          description: Successfully added material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add Materials, authentication failed
+        '500':
+          description: Server Error
+
+  /material/{publicationId}:
+    get:
+      tags:
+        - Material
+      summary: Get a material with a given id
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication to get (not material)
+
+      responses:
+        '200':
+          description: Successfully retrieved the material
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publication:
+                    $ref: '#/components/schemas/Publication'
+                  circuit:
+                    $ref: '#/components/schemas/Material'
+        '400':
+          description: Bad request
+        '404':
+          description: This user does not exist
+        '500':
+          description: Server Error
+
+    delete:
+      tags:
+        - Material
+      summary: Deletes a user
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the material to be deleted
+
+      responses:
+        '200':
+          description: Successfully deleted material (and its publication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publication:
+                    $ref: '#/components/schemas/Publication'
+                  circuit:
+                    $ref: '#/components/schemas/Material'
+        '400':
+          description: Bad request
+        '404':
+          description: This material does not exist
+        '500':
+          description: Server Error
+
+  /circuit:
+    post:
+      tags:
+        - Circuit
+      summary: Update a circuit
+      requestBody:
+        description: The new circuit information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Circuit'
+
+      responses:
+        '200':
+          description: Successfully updated circuit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Circuit'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot edit this circuit, authentication failed
+        '403':
+          description: User cannot edit this circuit, he is not a mantainer
+        '404':
+          description: This circuit does not exist
+        '500':
+          description: Server Error
+
+    put:
+      tags:
+        - Circuit
+      summary: Add a circuit
+      requestBody:
+        description: The circuit information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Circuit'
+
+      responses:
+        '200':
+          description: Successfully added circuit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Circuit'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add circuits, authentication failed
+        '500':
+          description: Server Error
+
+  /circuit/{publicationId}:
+    get:
+      tags:
+        - Circuit
+      summary: Get a circuit with a given id
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication to get (not circuit)
+
+      responses:
+        '200':
+          description: Successfully retrieved the circuit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publication:
+                    $ref: '#/components/schemas/Publication'
+                  circuit:
+                    $ref: '#/components/schemas/Circuit'
+
+        '400':
+          description: Bad request
+        '404':
+          description: This circuit does not exist
+        '500':
+          description: Server Error
+
+    delete:
+      tags:
+        - Circuit
+      summary: Deletes a circuit and its publication
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the circuit to be deleted
+
+      responses:
+        '200':
+          description: Successfully deleted material (and its publication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publication:
+                    $ref: '#/components/schemas/Publication'
+                  circuit:
+                    $ref: '#/components/schemas/Circuit'
+        '400':
+          description: Bad request
+        '404':
+          description: This material does not exist
+        '500':
+          description: Server Error
+
+
+
+  /comment:
+    post:
+      tags:
+        - Comment
+      summary: Update a comment
+      requestBody:
+        description: The new comment information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+
+      responses:
+        '200':
+          description: Successfully updated comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot edit this comment, authentication failed
+        '403':
+          description: User cannot edit this comment, he is not the original author
+        '404':
+          description: This comment does not exist
+        '500':
+          description: Server Error
+
+    put:
+      tags:
+        - Comment
+      summary: Add a comment
+      requestBody:
+        description: The comment information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+
+      responses:
+        '200':
+          description: Successfully added comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add comment, authentication failed
+        '500':
+          description: Server Error
+
+  /comment/{commentId}:
+    get:
+      tags:
+        - Comment
+      summary: Get a comment with a given id
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the comment to get
+
+      responses:
+        '200':
+          description: Successfully retrieved the comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+        '400':
+          description: Bad request
+        '404':
+          description: This comment does not exist
+        '500':
+          description: Server Error
+
+    delete:
+      tags:
+        - Comment
+      summary: Deletes a comment and its publication
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the comment to be deleted
+
+      responses:
+        '200':
+          description: Successfully deleted comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request
+        '404':
+          description: This comment does not exist
+        '500':
+          description: Server Error
+
+
+
+
+components:
+  schemas:
+    User:
+      type: object
+      description: user profile
+      properties:
+        id:
+          type: number
+          format: long
+          example: 4
+        firstName:
+          type: string
+          example: Martin
+        lastName:
+          type: string
+          example: Damyanov
+        email:
+          type: string
+          example: something@abv.com
+        reputation:
+          type: number
+          format: int
+          example: 500
+        saved:
+          type: array
+          items:
+            $ref: '#/components/schemas/Publication'
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Publication'
+        liked:
+          type: array
+          items:
+            $ref: '#/components/schemas/Publication'
+        usesInCourse:
+          type: array
+          items:
+            $ref: '#/components/schemas/Publication'
+        mantaining:
+          type: array
+          items:
+            $ref: '#/components/schemas/Publication'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reply'
+        isAdmin:
+          type: boolean
+
+
+
+    Publication:
+      type: object
+      description: A publication is a parent object of materials and circuits and it holds a reference to one of them
+      properties:
+        id:
+          type: number
+          format: long
+        title:
+          type: string
+        description:
+          type: string
+        mantainers:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        difficulty:
+          type: string
+          enum:
+            - easy
+            - medium
+            - hard
+        likes:
+          type: number
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        learningObjectives:
+          type: string
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        publisherId:
+          type: number
+          format: long
+        savedBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        likedBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        usedBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        reports:
+          type: number
+          description: How many reports does this publication have
+        publicationType:
+          type: string
+          enum:
+            - Material
+            - Circuit
+
+
+    Material:
+      type: object
+      description: Material is a type of publication that only holds files
+      properties:
+        id:
+          type: number
+          format: long
+        copyright:
+          type: boolean
+          description: is this material copyrighted
+        timeEstimate:
+          type: number
+          description: Time estimate in minutes
+        theoryPractice:
+          type: number
+          format: float
+          description: The ratio of theory to practice on a material
+        type:
+          type: string
+          enum:
+            - Presentation
+            - Assignment
+            - Notebook
+            - Video
+            - Dataset
+        files:
+          type: array
+          items:
+            type: string
+        publicationId:
+          type: number
+          format: long
+          description: which publication is this material linked with
+
+
+    Circuit:
+      type: object
+      description: a circuit is a type of publication that can hold multiple publications with their relative ordering set by the user
+      properties:
+        id:
+          type: number
+          format: long
+        nodes:
+          type: array
+          description: A list of nodes in this circuit
+          items:
+            $ref: '#/components/schemas/Node'
+        publicationId:
+          type: number
+          format: long
+          description: which publication is this material linked with
+
+
+    Node:
+      type: object
+      description: Nodes are the element of the circuit that hold the publications and their prerequisites
+      properties:
+        id:
+          type: number
+          format: long
+        circuitId:
+          type: number
+          format: number
+          description: The circuit this node belongs to
+        contentId:
+          type: number
+          format: long
+          description: the publication that this node holds
+        prerequisites:
+          type: array
+          description: the nodes directly before this one in the circuit
+          items:
+            $ref: '#/components/schemas/Node'
+        next:
+          type: array
+          description: the nodes directly after this one in the circuit
+          items:
+            $ref: '#/components/schemas/Node'
+
+
+
+    Tag:
+      type: object
+      description: a tag that can be applied to publications
+      properties:
+        id:
+          type: number
+          format: long
+          description: Unique identifier for a tag
+          example: 1130597
+        contents:
+          type: string
+        publication:
+          type: array
+          items:
+            $ref: '#/components/schemas/Publication'
+
+
+
+    Comment:
+      type: object
+      description: A comment that can go under any publication
+      properties:
+        id:
+          type: number
+          format: long
+          example: 456789
+        publicationId:
+          type: number
+          format: long
+          description: which publication is this comment on
+          example: 456789345
+        userId:
+          type: number
+          format: long
+          description: User that posted the comment
+          example: 7638595
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reply'
+          description: The replies to a comment
+        likes:
+          type: number
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+
+
+    Reply:
+      type: object
+      description: A reply to a comment
+      properties:
+        id:
+          type: number
+          format: long
+          example: 68338249
+        commentId:
+          type: number
+          format: long
+          description: the comment the reply was posted to
+          example: 65876598
+        userId:
+          type: number
+          format: long
+          description: the user that posted the reply
+          example: 90090909
+        likes:
+          type: number
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
