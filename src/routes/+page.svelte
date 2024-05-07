@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Meta} from "$lib";
+    import {Meta, DifficultySelection} from "$lib";
 </script>
 
 <Meta title="Home" description="CAIT" type="site" />
@@ -15,4 +15,5 @@
 			<li><a href="/contact">Contact</a></li>
 		</ul>
 	</nav>
+	<DifficultySelection/>
 </main>
