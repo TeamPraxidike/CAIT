@@ -9,9 +9,10 @@ if [ -z "$CI" ]; then
   docker-compose up -d db-test                                              # start the database
   echo '🟡 - Waiting for database to be ready...'                            # wait for the database to be ready
   "$DIR"/wait-for-it.sh "${DATABASE_URL}" -- echo '🟢 - Database is ready!'  # wait for the database to be ready
+else
+  npx playwright install-deps                                                # install playwright dependencies
+  npx playwright install                                                     # install playwright browsers for testing
 fi
 
-npx playwright install-deps                                                # install playwright dependencies
-npx playwright install                                                     # install playwright browsers for testing
 npx prisma migrate dev --name init                                         # run the migrations
-playwright test                                                            # run playwright tests
+npx playwright test                                                            # run playwright tests

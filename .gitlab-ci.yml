@@ -51,7 +51,6 @@ svelte-check:
 
 test-unit:
   stage: test-light
-
   script:
     - npm run test:unit
   coverage: '/line-rate="([0-9]*\.[0-9]+)"/'
@@ -80,6 +79,7 @@ test-integration:
 
 test-e2e:
   stage: test-heavy
+  timeout: 30 minutes
   services:
     - postgres:16.2
   variables:
@@ -88,9 +88,4 @@ test-e2e:
     POSTGRES_PASSWORD: postgres
   script:
     - npm run test:e2e
-  coverage: '/line-rate="([0-9]*\.[0-9]+)"/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: reports/coverage/cobertura-coverage.xml
+  cache:
