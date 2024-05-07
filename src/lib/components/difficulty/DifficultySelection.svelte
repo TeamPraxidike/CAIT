@@ -5,7 +5,7 @@ export let difficulty: string;
 </script>
 
 
-<RadioGroup display="flex" active="variant-filled-primary" hover="hover:variant-soft-primary" class="col-span-2">
+<RadioGroup display="flex" active="variant-filled-primary" hover="hover:variant-soft-primary">
     <RadioItem bind:group={difficulty} name="justify" value={"easy"}>
        <div>
            <EasyDiff/>
