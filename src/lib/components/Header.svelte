@@ -13,7 +13,7 @@
     }
 
     let dropDown: boolean = false;
-    let loggedIn: boolean = true;
+    let loggedIn: boolean = false;
 
     const navOptions : NavOption[] = [
         { text: 'About', link: '/about' },
@@ -58,10 +58,13 @@
             <div>
                 <LightSwitch />
             </div>
+
+            {#if loggedIn}
             <div class="border-l border-surface-300 h-8"/>
             <div>
                 <Icon icon="gg:profile" className = "text-surface-600 justify-self-end" width="32" height="32"/>
             </div>
+                {/if}
         </div>
 
         <button  class = "col-end-5 self-center justify-self-end w-12 h-8 md:hidden" on:click={toggleDropDown}>
