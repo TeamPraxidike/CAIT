@@ -1,6 +1,5 @@
 <script lang="ts">
-    import {Meta, Tag} from "$lib";
+    import {Meta} from "$lib";
 </script>
 
 <Meta title="Home" description="CAIT" type="site" />
-<Tag tagText="ejdjknwjdEFEFNEnwfn"/>
