@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: Reviews API Specification
-  description: Reviews API Specification in OpenAPI specification. Three component schemas are employed namely Review, Book and Comment. Each request is summarized and explained with descriptions.
+  title: CAIT API Specification
+  description: CAIT API Specification in OpenAPI specification. Each request is summarized and explained with descriptions.
   version: 1.0.1
 
 
@@ -13,7 +13,7 @@ tags:
   - name: Circuit
     description: End-points for operations on/with circuits
   - name: Comment
-    description: End-points for operations on/with circuits
+    description: End-points for operations on/with comments
 
 servers:
   - url: http://localhost:5143

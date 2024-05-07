@@ -44,7 +44,7 @@ model User {
   liked        Publication[] @relation("liked")
   usesInCourse Publication[] @relation("usesInCourse")
 
-  mantaining Publication[] @relation("mantainers")
+  maintaining Publication[] @relation("maintainers")
   comments   Comment[]
   replies    Reply[]
   isAdmin    Boolean
@@ -54,7 +54,7 @@ model Publication {
   id                 Int        @id @default(autoincrement())
   title              String
   description        String
-  mantainers         User[]     @relation("mantainers")
+  maintainers        User[]     @relation("maintainers")
   difficulty         Difficulty
   likes              Int
   tags               Tag[]
@@ -62,21 +62,21 @@ model Publication {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
-  comments Comment[]
+  comments           Comment[]
 
-  publisher   User   @relation(fields: [publisherId], references: [id])
-  publisherId Int
-  savedBy     User[] @relation("saved")
-  likedBy     User[] @relation("liked")
-  usedBy      User[] @relation("usesInCourse")
+  publisher          User   @relation(fields: [publisherId], references: [id])
+  publisherId        Int
+  savedBy            User[] @relation("saved")
+  likedBy            User[] @relation("liked")
+  usedBy             User[] @relation("usesInCourse")
 
-  reports Int
-  type    PublicationType
+  reports            Int
+  type               PublicationType
 
-  node Node[]
+  node               Node[]
 
-  material Material?
-  circuit  Circuit?
+  materials          Material[]
+  circuit            Circuit?
 }
 
 model Material {
@@ -85,30 +85,29 @@ model Material {
   timeEstimate   Int
   theoryPractice Float
   type           MaterialType
-  files          String[]
+  file           String
 
-  publicationId Int         @unique
-  publication   Publication @relation(fields: [publicationId], references: [id])
+  publicationId  Int
+  publication    Publication @relation(fields: [publicationId], references: [id])
 }
 
 model Circuit {
-  id Int @id @default(autoincrement())
-
+  id            Int         @id @default(autoincrement())
   nodes         Node[]
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id])
 }
 
 model Node {
-  id        Int     @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   circuitId Int
-  circuit   Circuit @relation(fields: [circuitId], references: [id])
+  circuit   Circuit     @relation(fields: [circuitId], references: [id])
 
   contentId Int
   content   Publication @relation(fields: [contentId], references: [id])
 
-  prerequisites Node[] @relation("next")
-  next          Node[] @relation("next")
+  prerequisites Node[] @relation("edge")
+  next          Node[] @relation("edge")
 }
 
 model Tag {
@@ -126,7 +125,7 @@ model Comment {
   user   User @relation(fields: [userId], references: [id])
 
   replies   Reply[]
-  likes     Int
+  likes     Int      @default(0)
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -141,7 +140,7 @@ model Reply {
   userId Int
   user   User @relation(fields: [userId], references: [id])
 
-  likes     Int
+  likes     Int @default(0)
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
