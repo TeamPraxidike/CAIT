@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",
+    "@iconify/svelte": "^4.0.2",
     "@playwright/test": "^1.28.1",
     "@prisma/client": "^5.13.0",
     "@skeletonlabs/skeleton": "2.9.2",
