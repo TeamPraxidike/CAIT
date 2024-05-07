@@ -9,8 +9,10 @@
 	import css from 'highlight.js/lib/languages/css';
 	import javascript from 'highlight.js/lib/languages/javascript';
 	import typescript from 'highlight.js/lib/languages/typescript';
+    import {Grid, Header} from "$lib"
 
-	hljs.registerLanguage('xml', xml); // for HTML
+
+    hljs.registerLanguage('xml', xml); // for HTML
 	hljs.registerLanguage('css', css);
 	hljs.registerLanguage('javascript', javascript);
 	hljs.registerLanguage('typescript', typescript);
@@ -49,14 +51,13 @@
     <link rel="icon" href="/images/favicons/favicon-128.png" sizes="128x128" type="image/png">
 </svelte:head>
 
-<!--Header-->
+<Header/>
 
-<main class="text-surface-900
-             grid grid-cols-4 gap-x-2 mx-4
-             md:grid-cols-8 md:gap-x-4 md:mx-8
-             lg:grid-cols-12 lg:gap-x-2 lg:mx-32
-             xl:mx-64">
-    <slot />
-</main>
+<div class="w-screen dark:text-surface-50 text-surface-900">
+    <Grid>
+        <slot />
+    </Grid>
+</div>
+
 
 <!--Footer-->
