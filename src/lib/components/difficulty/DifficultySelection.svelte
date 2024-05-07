@@ -1,10 +1,24 @@
-<script>
+<script lang="ts">
 import {EasyDiff, MedDiff, HardDiff} from "$lib";
-
+import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+export let difficulty: string;
 </script>
 
-<div class="flex items-end justify-start space-x-4">
-    <EasyDiff/>
-    <MedDiff/>
-    <HardDiff/>
-</div>
+
+<RadioGroup display="flex" active="variant-filled-primary" hover="hover:variant-soft-primary" class="col-span-2">
+    <RadioItem bind:group={difficulty} name="justify" value={"easy"}>
+       <div>
+           <EasyDiff/>
+       </div>
+    </RadioItem>
+    <RadioItem bind:group={difficulty} name="justify" value={"intermediate"}>
+        <div>
+            <MedDiff/>
+        </div>
+    </RadioItem>
+    <RadioItem bind:group={difficulty} name="justify" value={"advanced"}>
+        <div>
+            <HardDiff/>
+        </div>
+    </RadioItem>
+</RadioGroup>
