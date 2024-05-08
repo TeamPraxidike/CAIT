@@ -14,6 +14,12 @@ tags:
     description: End-points for operations on/with circuits
   - name: Comment
     description: End-points for operations on/with comments
+  - name: Reply
+    description: End-points for operations on/with replies
+  - name: Tag
+    description: End-points for operations on/with tags
+  - name: Node
+    description: End-points for operations on/with nodes
 
 servers:
   - url: http://localhost:5143
@@ -23,13 +29,59 @@ paths:
     post:
       tags:
         - User
+      summary: Add a user
+      requestBody:
+        description: The user information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              firstName: "Martin"
+              lastName: "Panayotov"
+              email: "yoanmarinov@abv.bg"
+              profilePic: "vasil.png"
+        required: true
+
+      responses:
+        '200':
+          description: Successfully added user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add this profile (not a teacher for example), authentication failed
+        '500':
+          description: Server Error
+
+  /user/{userId}:
+    put:
+      tags:
+        - User
       summary: Update a user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user to update
       requestBody:
         description: The new user information
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
+            example:
+              firstName: "Panayot"
+              lastName: "Martinov"
+              email: "marinyoanov@abv.bg"
+              profilePic: "lisav.png"
+        required: true
 
       responses:
         '200':
@@ -47,32 +99,6 @@ paths:
         '500':
           description: Server Error
 
-    put:
-      tags:
-        - User
-      summary: Add a user
-      requestBody:
-        description: The user information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-
-      responses:
-        '200':
-          description: Successfully added user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot add this profile (not a teacher for example), authentication failed
-        '500':
-          description: Server Error
-
-  /user/{userId}:
     get:
       tags:
         - User
@@ -128,18 +154,225 @@ paths:
           description: Server Error
 
 
+  /user/{userId}/saved/{publicationId}:
+    post:
+      tags:
+        - User
+      summary: Save a publication
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication (could be material or circuit)
+
+      responses:
+        '200':
+          description: Successfully saved publication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot save this publication
+        '404':
+          description: User/Publication not found
+        '500':
+          description: Server Error
+
+  /user/{userId}/liked/{publicationId}:
+    post:
+      tags:
+        - User
+      summary: Like a publication
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication (could be material or circuit)
+
+      responses:
+        '200':
+          description: Successfully liked publication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot like this publication
+        '404':
+          description: User/Publication not found
+        '500':
+          description: Server Error
+
+  /user/{userId}/use-in-course/{publicationId}:
+    post:
+      tags:
+        - User
+      summary: Mark publication as used in course
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication (could be material or circuit)
+
+      responses:
+        '200':
+          description: Successfully marked usage of publication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '401':
+          description: Cannot perform action
+        '404':
+          description: User/Publication not found
+        '500':
+          description: Server Error
+
+
 
   /material:
     post:
       tags:
         - Material
+      summary: Add a material
+      requestBody:
+        description: The material information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Material'
+            example:
+              title: "Understanding Electronics"
+              description: "A comprehensive guide to basic electronics."
+              difficulty: "Beginner"
+              tags: ["electronics", "education"]
+              learningObjectives: ["Understand basic circuits", "Learn about resistors"]
+              publisherId: 0
+              type: "Material"
+              material:
+                coverPic: "url_to_picture"
+                copyright: true
+                timeEstimate: 120
+                theoryPractice: 0.75
+                files: ["file1.pdf", "file2.pdf"]
+
+
+      responses:
+        '200':
+          description: Successfully added material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add Materials, authentication failed
+        '500':
+          description: Server Error
+
+
+  /material/{publicationId}:
+    patch:
+      tags:
+        - Material
+      summary: Like a material
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication to update
+
+      responses:
+        '200':
+          description: Successfully liked material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot like this Material, authentication failed
+        '404':
+          description: This material does not exist
+        '500':
+          description: Server Error
+
+    put:
+      tags:
+        - Material
       summary: Update a material
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication to update
+
       requestBody:
         description: The new material information
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Material'
+            example:
+              title: "Understanding Electronics"
+              description: "A comprehensive guide to basic electronics."
+              difficulty: "Beginner"
+              tags: ["electronics", "education"]
+              learningObjectives: ["Understand basic circuits", "Learn about resistors"]
+              publisherId: 0
+              type: "Material"
+              material:
+                id: 1
+                coverPic: "url_to_picture"
+                copyright: true
+                timeEstimate: 0
+                theoryPractice: 0
+                files: ["string"]
 
       responses:
         '200':
@@ -159,32 +392,6 @@ paths:
         '500':
           description: Server Error
 
-    put:
-      tags:
-        - Material
-      summary: Add a material
-      requestBody:
-        description: The material information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Material'
-
-      responses:
-        '200':
-          description: Successfully added material
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Material'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot add Materials, authentication failed
-        '500':
-          description: Server Error
-
-  /material/{publicationId}:
     get:
       tags:
         - Material
@@ -220,7 +427,7 @@ paths:
     delete:
       tags:
         - Material
-      summary: Deletes a user
+      summary: Deletes a material and its publication
       parameters:
         - in: path
           name: publicationId
@@ -253,7 +460,84 @@ paths:
     post:
       tags:
         - Circuit
+      summary: Add a circuit
+      requestBody:
+        description: The circuit information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Circuit'
+            example:
+              title: "Understanding Electronics"
+              description: "A comprehensive guide to basic electronics."
+              difficulty: "Beginner"
+              tags: ["electronics", "education"]
+              learningObjectives: ["Understand basic circuits", "Learn about resistors"]
+              publisherId: 0
+              type: "Circuit"
+              circuit:
+                id: 1
+                nodes:
+                  []
+
+      responses:
+        '200':
+          description: Successfully added circuit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Circuit'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add circuits, authentication failed
+        '500':
+          description: Server Error
+
+  /circuit/{publicationId}:
+    patch:
+      tags:
+        - Circuit
+      summary: Like a circuit
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication to like
+
+      responses:
+        '200':
+          description: Successfully updated circuit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Circuit'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot edit this circuit, authentication failed
+        '403':
+          description: User cannot edit this circuit, he is not a mantainer
+        '404':
+          description: This circuit does not exist
+        '500':
+          description: Server Error
+
+    put:
+      tags:
+        - Circuit
       summary: Update a circuit
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication to get
       requestBody:
         description: The new circuit information
         content:
@@ -279,32 +563,6 @@ paths:
         '500':
           description: Server Error
 
-    put:
-      tags:
-        - Circuit
-      summary: Add a circuit
-      requestBody:
-        description: The circuit information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Circuit'
-
-      responses:
-        '200':
-          description: Successfully added circuit
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Circuit'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot add circuits, authentication failed
-        '500':
-          description: Server Error
-
-  /circuit/{publicationId}:
     get:
       tags:
         - Circuit
@@ -376,7 +634,69 @@ paths:
     post:
       tags:
         - Comment
+      summary: Add a comment
+      requestBody:
+        description: The comment information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+
+      responses:
+        '200':
+          description: Successfully added comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add comment, authentication failed
+        '500':
+          description: Server Error
+
+  /comment/{commentId}:
+    patch:
+      tags:
+        - Comment
+      summary: Like a comment
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the comment to update
+
+      responses:
+        '200':
+          description: Successfully liked comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot like this comment, authentication failed
+        '404':
+          description: This comment does not exist
+        '500':
+          description: Server Error
+    put:
+      tags:
+        - Comment
       summary: Update a comment
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the comment to update
       requestBody:
         description: The new comment information
         content:
@@ -402,32 +722,6 @@ paths:
         '500':
           description: Server Error
 
-    put:
-      tags:
-        - Comment
-      summary: Add a comment
-      requestBody:
-        description: The comment information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Comment'
-
-      responses:
-        '200':
-          description: Successfully added comment
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comment'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot add comment, authentication failed
-        '500':
-          description: Server Error
-
-  /comment/{commentId}:
     get:
       tags:
         - Comment
@@ -459,7 +753,7 @@ paths:
     delete:
       tags:
         - Comment
-      summary: Deletes a comment and its publication
+      summary: Deletes a comment
       parameters:
         - in: path
           name: commentId
@@ -483,7 +777,274 @@ paths:
         '500':
           description: Server Error
 
+  /reply:
+    post:
+      tags:
+        - Reply
+      summary: Add a reply
+      requestBody:
+        description: The reply information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reply'
 
+      responses:
+        '200':
+          description: Successfully added reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot reply to this comment, authentication failed
+        '500':
+          description: Server Error
+
+  /reply/{replyId}:
+    patch:
+      tags:
+        - Reply
+      summary: Like a reply
+      parameters:
+        - in: path
+          name: replyId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the reply to like
+
+      responses:
+        '200':
+          description: Successfully liked reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot like this reply, authentication failed
+        '404':
+          description: This reply does not exist
+        '500':
+          description: Server Error
+    put:
+      tags:
+        - Reply
+      summary: Update a reply
+      parameters:
+        - in: path
+          name: replyId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the reply to update
+
+      requestBody:
+        description: The new reply information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reply'
+
+      responses:
+        '200':
+          description: Successfully updated reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot edit this reply, authentication failed
+        '403':
+          description: User cannot edit this reply, he is not the original author
+        '404':
+          description: This reply does not exist
+        '500':
+          description: Server Error
+
+    get:
+      tags:
+        - Reply
+      summary: Get a reply with a given id
+      parameters:
+        - in: path
+          name: replyId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the reply to get
+
+      responses:
+        '200':
+          description: Successfully retrieved the reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+
+        '400':
+          description: Bad request
+        '404':
+          description: This reply does not exist
+        '500':
+          description: Server Error
+
+    delete:
+      tags:
+        - Reply
+      summary: Deletes a reply
+      parameters:
+        - in: path
+          name: replyId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the reply to get
+
+      responses:
+        '200':
+          description: Successfully deleted reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Bad request
+        '404':
+          description: This reply does not exist
+        '500':
+          description: Server Error
+
+
+  /tag:
+    post:
+      tags:
+        - Tag
+      summary: Add a tag
+      requestBody:
+        description: The tag information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+
+      responses:
+        '200':
+          description: Successfully added tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot tag, authentication failed
+        '500':
+          description: Server Error
+
+  /tag/{tagId}:
+    put:
+      tags:
+        - Tag
+      summary: Update a tag
+      parameters:
+        - in: path
+          name: tagId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the tag update
+
+      requestBody:
+        description: The new reply information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+
+      responses:
+        '200':
+          description: Successfully updated tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot edit this tag, authentication failed
+        '403':
+          description: User cannot edit this tag, he is not the original author
+        '404':
+          description: This tag does not exist
+        '500':
+          description: Server Error
+
+    get:
+      tags:
+        - Tag
+      summary: Get a tag with a given id
+      parameters:
+        - in: path
+          name: tagId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the tag to get
+
+      responses:
+        '200':
+          description: Successfully retrieved the tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+
+        '400':
+          description: Bad request
+        '404':
+          description: This tag does not exist
+        '500':
+          description: Server Error
+
+    delete:
+      tags:
+        - Tag
+      summary: Deletes a tag
+      parameters:
+        - in: path
+          name: tagId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the tag to delete
+
+      responses:
+        '200':
+          description: Successfully deleted tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: Bad request
+        '404':
+          description: This tag does not exist
+        '500':
+          description: Server Error
 
 
 components:
@@ -505,6 +1066,9 @@ components:
         email:
           type: string
           example: something@abv.com
+        profilePic:
+          type: string
+          example: "vaskolore.png"
         reputation:
           type: number
           format: int
@@ -613,6 +1177,8 @@ components:
         id:
           type: number
           format: long
+        coverPic:
+          type: string
         copyright:
           type: boolean
           description: is this material copyrighted
@@ -623,14 +1189,6 @@ components:
           type: number
           format: float
           description: The ratio of theory to practice on a material
-        type:
-          type: string
-          enum:
-            - Presentation
-            - Assignment
-            - Notebook
-            - Video
-            - Dataset
         files:
           type: array
           items:
