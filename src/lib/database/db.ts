@@ -1,6 +1,5 @@
 import { Difficulty } from '@prisma/client';
 import { PublicationType } from '@prisma/client';
-import { MaterialType } from '@prisma/client';
 
 import {prisma} from "$lib/database";
 /**
@@ -56,6 +55,7 @@ async function createPublication(
             title: title,
             description: description,
             likes: 0,
+            reports: 0,
             difficulty: difficulty,
             publisherId: publisherId,
             type: type,
@@ -79,7 +79,6 @@ export async function createMaterialPublication(
         timeEstimate: number,
         theoryPractice: number,
         files: string[]
-        type: MaterialType
     }
 ) {
 
@@ -98,9 +97,7 @@ export async function createMaterialPublication(
             publicationId: publication.id,
             timeEstimate: materialData.timeEstimate,
             theoryPractice: materialData.theoryPractice,
-            files: materialData.files,
             copyright: materialData.copyright,
-            type: materialData.type
         },
     });
 }
