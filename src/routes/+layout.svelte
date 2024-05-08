@@ -31,7 +31,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://cait.tudelft.nl/">
-    <meta name="theme-color" content="#EDBB3A"> <!-- TODO: @vguenov update this to primary colour -->
+    <meta name="theme-color" content="#00A6D6">
 
     <!--  Open Graph  -->
     <meta property="og:url"                 content="https://cait.tudelft.nl/" />
