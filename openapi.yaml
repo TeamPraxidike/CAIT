@@ -491,6 +491,22 @@ paths:
         '500':
           description: Server Error
 
+    get:
+      tags:
+        - Material
+      summary: Get all materials in the system
+      responses:
+        '200':
+          description: Successfully retreived materials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+        '401':
+          description: User cannot search for Materials, authentication failed
+        '500':
+          description: Server Error
+
 
   /material/{publicationId}:
     put:
@@ -573,8 +589,10 @@ paths:
                     $ref: '#/components/schemas/Material'
         '400':
           description: Bad request
+        '401':
+          description: User not authenticated
         '404':
-          description: This user does not exist
+          description: This material does not exist
         '500':
           description: Server Error
 
@@ -634,6 +652,24 @@ paths:
                 nodes:
                   []
 
+      responses:
+        '200':
+          description: Successfully added circuit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Circuit'
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot add circuits, authentication failed
+        '500':
+          description: Server Error
+
+    get:
+      tags:
+        - Circuit
+      summary: Get all circuits in the system
       responses:
         '200':
           description: Successfully added circuit
