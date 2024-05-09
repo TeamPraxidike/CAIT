@@ -1,8 +1,14 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 // Components
+// place files you want to import through the `$lib` alias in this folder.
+
+// Components
 import Meta from "$lib/components/Meta.svelte";
 import Header from "$lib/components/Header.svelte";
 import Grid from "$lib/components/Grid.svelte";
+import DifficultySelection from "$lib/components/difficulty/DifficultySelection.svelte";
+import Tag from "$lib/components/Tag.svelte";
+import DiffBar from "$lib/components/difficulty/DiffBar.svelte";
 
-export {Meta, Header, Grid}
+export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar}
