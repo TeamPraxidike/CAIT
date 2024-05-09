@@ -55,7 +55,6 @@ async function createPublication(
             title: title,
             description: description,
             likes: 0,
-            reports: 0,
             difficulty: difficulty,
             publisherId: publisherId,
             type: type,
