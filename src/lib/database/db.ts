@@ -75,9 +75,10 @@ export async function createMaterialPublication(
         description: string,
         copyright: boolean,
         difficulty: Difficulty, // TODO figure out how to make people using this not import Difficulty type from prisma
-        timeEstimate: number,
-        theoryPractice: number,
-        files: string[]
+        timeEstimate?: number,
+        theoryPractice?: number,
+        files?: string[],
+        titles?: string[]
     }
 ) {
 
@@ -90,8 +91,7 @@ export async function createMaterialPublication(
         PublicationType.Material
     );
 
-    // Step 2: Create the Material and link it to the Publication
-    return prisma.material.create({
+    const material = await prisma.material.create({
         data: {
             publicationId: publication.id,
             timeEstimate: materialData.timeEstimate,
@@ -99,6 +99,22 @@ export async function createMaterialPublication(
             copyright: materialData.copyright,
         },
     });
+
+    if(materialData.files === undefined || materialData.titles === undefined) return material;
+
+    for (const file of materialData.files) {
+        const index = materialData.files.indexOf(file);
+        await prisma.file.create({
+            data: {
+                path: file,
+                title: materialData.titles[index], // Example file title
+                materialId: material.id, // Associate the file with the newly created Material
+            },
+        });
+    }
+
+    // Step 2: Create the Material and link it to the Publication
+    return material;
 }
 
 /**

@@ -46,7 +46,7 @@ model User {
 model PublicationUsedInCourse {
   // the user that is using the publication
   userId Int
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int
   course        String[]
@@ -68,7 +68,7 @@ model Publication {
 
   comments Comment[]
 
-  publisher   User   @relation(fields: [publisherId], references: [id])
+  publisher   User   @relation(fields: [publisherId], references: [id], onDelete: Cascade)
   publisherId Int
   savedBy     User[] @relation("saved")
   likedBy     User[] @relation("liked")
@@ -91,30 +91,30 @@ model Material {
   files          File[]
 
   publicationId Int         @unique
-  publication   Publication @relation(fields: [publicationId], references: [id])
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 }
 
 model File {
   path       String   @id
   title      String
   materialId Int
-  material   Material @relation(fields: [materialId], references: [id])
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
 }
 
 model Circuit {
   id            Int         @id @default(autoincrement())
   nodes         Node[]
   publicationId Int         @unique
-  publication   Publication @relation(fields: [publicationId], references: [id])
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 }
 
 model Node {
   id        Int     @id @default(autoincrement())
   circuitId Int
-  circuit   Circuit @relation(fields: [circuitId], references: [id])
+  circuit   Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
 
   contentId Int
-  content   Publication @relation(fields: [contentId], references: [id])
+  content   Publication @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
   prerequisites Node[] @relation("edge")
   next          Node[] @relation("edge")
@@ -129,10 +129,10 @@ model Tag {
 model Comment {
   id            Int         @id @default(autoincrement())
   publicationId Int
-  publication   Publication @relation(fields: [publicationId], references: [id])
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
   userId Int
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   replies   Reply[]
   likes     Int      @default(0)
@@ -145,10 +145,10 @@ model Reply {
   id Int @id @default(autoincrement())
 
   commentId Int
-  comment   Comment @relation(fields: [commentId], references: [id])
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   userId Int
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   likes     Int      @default(0)
   content   String
