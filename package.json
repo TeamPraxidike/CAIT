@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "setup": "npm install && npx prisma generate",
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
