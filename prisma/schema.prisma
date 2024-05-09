@@ -24,37 +24,43 @@ enum PublicationType {
   Circuit
 }
 
-enum MaterialType {
-  Presentation
-  Assignment
-  Notebook
-  Video
-  Dataset
-}
-
 model User {
-  id         Int    @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   firstName  String
   lastName   String
   email      String
-  reputation Int    @default(0)
+  profilePic String?
+  reputation Int     @default(0)
 
-  saved Publication[] @relation("saved")
-  posts Publication[]
+  saved            Publication[]             @relation("saved")
+  posts            Publication[]
+  liked            Publication[]             @relation("liked")
+  usedPublications PublicationUsedInCourse[]
 
-  mantaining Publication[] @relation("mantainers")
-  comments   Comment[]
-  replies    Reply[]
-  isAdmin    Boolean
+  maintaining Publication[] @relation("maintainers")
+  comments    Comment[]
+  replies     Reply[]
+  isAdmin     Boolean
+}
+
+model PublicationUsedInCourse {
+  // the user that is using the publication
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  publicationId Int
+  course        String[]
+
+  @@id([publicationId, userId])
 }
 
 model Publication {
   id                 Int        @id @default(autoincrement())
   title              String
   description        String
-  mantainers         User[]     @relation("mantainers")
+  maintainers        User[]     @relation("maintainers")
   difficulty         Difficulty
-  likes              Int
+  likes              Int        @default(0)
   tags               Tag[]
   learningObjectives String[]
   createdAt          DateTime   @default(now())
@@ -62,32 +68,41 @@ model Publication {
 
   comments Comment[]
 
-  publisher   User            @relation(fields: [publisherId], references: [id])
+  publisher   User   @relation(fields: [publisherId], references: [id])
   publisherId Int
-  savedBy     User[]          @relation("saved")
-  type        PublicationType
+  savedBy     User[] @relation("saved")
+  likedBy     User[] @relation("liked")
+
+  reports Int             @default(0)
+  type    PublicationType
 
   node Node[]
 
-  material Material?
-  circuit  Circuit?
+  materials Material?
+  circuit   Circuit?
 }
 
 model Material {
-  id             Int          @id @default(autoincrement())
+  id             Int     @id @default(autoincrement())
+  coverPic       String?
   copyright      Boolean
-  timeEstimate   Int
-  theoryPractice Float
-  type           MaterialType
-  files          String[]
+  timeEstimate   Int?
+  theoryPractice Float?
+  files          File[]
 
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id])
 }
 
-model Circuit {
-  id Int @id @default(autoincrement())
+model File {
+  path       String   @id
+  title      String
+  materialId Int
+  material   Material @relation(fields: [materialId], references: [id])
+}
 
+model Circuit {
+  id            Int         @id @default(autoincrement())
   nodes         Node[]
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id])
@@ -100,6 +115,9 @@ model Node {
 
   contentId Int
   content   Publication @relation(fields: [contentId], references: [id])
+
+  prerequisites Node[] @relation("edge")
+  next          Node[] @relation("edge")
 }
 
 model Tag {
@@ -117,7 +135,7 @@ model Comment {
   user   User @relation(fields: [userId], references: [id])
 
   replies   Reply[]
-  likes     Int
+  likes     Int      @default(0)
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -132,7 +150,7 @@ model Reply {
   userId Int
   user   User @relation(fields: [userId], references: [id])
 
-  likes     Int
+  likes     Int      @default(0)
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
