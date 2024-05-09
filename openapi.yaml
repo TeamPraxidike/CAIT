@@ -502,10 +502,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Material'
-        '400':
-          description: Bad request
         '401':
-          description: User cannot add Materials, authentication failed
+          description: User cannot search for Materials, authentication failed
         '500':
           description: Server Error
 
@@ -591,8 +589,10 @@ paths:
                     $ref: '#/components/schemas/Material'
         '400':
           description: Bad request
+        '401':
+          description: User not authenticated
         '404':
-          description: This user does not exist
+          description: This material does not exist
         '500':
           description: Server Error
 
