@@ -4,5 +4,7 @@
 import Meta from "$lib/components/Meta.svelte";
 import Header from "$lib/components/Header.svelte";
 import Grid from "$lib/components/Grid.svelte";
+import TheoryAppBar from "$lib/components/TheoryAppBar.svelte";
+import value from "$lib/components/TheoryAppBar.svelte";
 
-export {Meta, Header, Grid}
+export {Meta, Header, Grid, TheoryAppBar, value}
