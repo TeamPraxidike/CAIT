@@ -1,5 +1,5 @@
-import { Difficulty } from '@prisma/client';
-import { PublicationType } from '@prisma/client';
+import { Difficulty, PublicationType } from '@prisma/client';
+
 
 import {prisma} from "$lib/database";
 /**
