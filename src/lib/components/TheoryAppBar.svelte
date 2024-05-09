@@ -1,7 +1,7 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
     //import { writable } from 'svelte/store';
-    import {afterUpdate, onMount} from "svelte";
+    import {onMount} from "svelte";
 
     export let value: number = 0.5;
     export let editable: boolean = false;
