@@ -12,17 +12,12 @@ describe('Circuits', () => {
             expect(body).not.toHaveProperty('firstName');
         });
 
-        // it('should respond with 200 and the publication if it exists', async () => {
-        //     const newUser =
-        //         await createUser('ivan', 'shishman', 'ivanshishman@pliska.bg', false);
-        //
-        //     const response = await fetch(`${testingUrl}/user/${newUser.id}`, {method: 'GET'});
-        //     expect(response.status).toBe(200);
-        //     const body = await response.json();
-        //     expect(body.id).toBe(newUser.id);
-        //
-        //     // no one else is actually in the db
-        //     expect(await prisma.user.count()).toBe(1);
-        // });
+        it('should respond with 400 if the id is malformed', async () => {
+            const response = await fetch(`${testingUrl}/circuit/-1`, {method: 'GET'});
+            expect(response.status).toBe(400);
+            const body = await response.json();
+            expect(body.error).toEqual('Bad Request - Invalid ID');
+            expect(body).not.toHaveProperty('id');
+        });
     });
 });
