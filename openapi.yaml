@@ -1540,7 +1540,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Publication'
-        usesInCourse:
+        publicationsUsedInCourse:
           type: array
           items:
             $ref: '#/components/schemas/Publication'

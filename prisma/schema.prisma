@@ -32,15 +32,26 @@ model User {
   profilePic String?
   reputation Int     @default(0)
 
-  saved        Publication[] @relation("saved")
-  posts        Publication[]
-  liked        Publication[] @relation("liked")
-  usesInCourse Publication[] @relation("usesInCourse")
+  saved            Publication[]             @relation("saved")
+  posts            Publication[]
+  liked            Publication[]             @relation("liked")
+  usedPublications PublicationUsedInCourse[]
 
   maintaining Publication[] @relation("maintainers")
   comments    Comment[]
   replies     Reply[]
   isAdmin     Boolean
+}
+
+model PublicationUsedInCourse {
+  // the user that is using the publication
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  publicationId Int
+  course        String[]
+
+  @@id([publicationId, userId])
 }
 
 model Publication {
@@ -61,7 +72,6 @@ model Publication {
   publisherId Int
   savedBy     User[] @relation("saved")
   likedBy     User[] @relation("liked")
-  usedBy      User[] @relation("usesInCourse")
 
   reports Int             @default(0)
   type    PublicationType
