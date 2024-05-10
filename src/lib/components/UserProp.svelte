@@ -1,23 +1,23 @@
 <script lang="ts">
     import {createEventDispatcher} from "svelte";
+    import type {User} from "@prisma/client";
     const dispatch = createEventDispatcher()
     export const removeMaintainer=()=> {
         dispatch("removeMaintainer", {value: name})
     }
     export let view: "home"|"publish"|"material"|"search"
-    export let userId:number|null;
-    export let rep = 0;
+    export let user:User
+    let userId=user.id;
+    let rep = user.reputation;
     export let posts = 0;
-    export let name = "Ivan";
+    let name = user.firstName + user.lastName;
     export let userPhotoUrl:string;
     export let role:"Maintainer"|"Publisher"|null
     export let department = "Department Info"
-    let link:string;
-    if(userId===null)
-        link="/user"
-    else
-        // Not sure exactly how the link to the page would look like
-        link = `/user/${name}/${userId}`
+    // Not sure exactly how the link to the page would look like
+    //todo: change to actual link
+    let link = `/user/${name}/${userId}`
+    link=`/user`
 </script>
 
 {#if view === "search"}
