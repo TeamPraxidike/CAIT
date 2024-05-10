@@ -1,0 +1,2 @@
+/* THIS LINE SETS UP EXPECT MATCHERS FOR THE SVELTE TESTING LIBRARY */ /* DO NOT REMOVE THIS LINE */
+import '@testing-library/jest-dom/vitest'
