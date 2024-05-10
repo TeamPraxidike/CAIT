@@ -5,8 +5,6 @@
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
 
-
-
     type NavOption = {
         text: string;
         link: string;
@@ -17,10 +15,9 @@
 
     const navOptions : NavOption[] = [
         { text: 'About', link: '/about' },
-        { text: 'Materials', link: '/materials' },
-        { text: 'Circuits', link: '/circuits' },
-        { text: 'My Publications', link: '/mypublications' },
-        { text: 'Saved Materials', link: '/saved' },
+        { text: 'Browse Publications', link: '/publications' },
+        { text: 'My Publications', link: '/profile/mypublications' },
+        { text: 'Saved Materials', link: '/profile/saved' },
 
 
     ]
@@ -38,7 +35,7 @@
             <enhanced:img class="h-16 w-16 hidden md:block" src="/static/Logo.webp" alt="CAIT Logo"/>
         </div>
 
-        <div class="hidden col-start-2 col-span-7 gap-2 lg:gap-4 items-center justify-center flex hidden md:flex">
+        <div class="hidden col-start-2 col-span-7 gap-2 lg:gap-4 items-center justify-center md:flex">
             {#each navOptions as opt}
                 <a class=" group transition text-surface-800 dark:text-surface-50 h-full flex items-center justify-center md:px-2 xl:px-4" href={opt.link} >
                     <span class="bg-left-bottom bg-gradient-to-r from-primary-500 to-primary-500 bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-300 ease-in flex items-center justify-center">
