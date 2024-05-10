@@ -15,8 +15,7 @@ import {Tag} from "$lib"
     export let saved:boolean = true;
     export let numMaterials:number = 1
     export let used:number = 1
-    export let tags:string[] = ["Very Big Tag", "shit", "nsnsngrfnfgdb", "One More " ]
-    //export let tags:string[] = ["tag", "tag", "tag", "tag"]
+    export let tags:string[] = ["Very Big Tag", "short", "nsnsngrfnfgdb", "One More " ]
 
 
 
@@ -24,7 +23,6 @@ import {Tag} from "$lib"
 
 
 
-// const dispatch = createEventDispatcher()
     $:likedColor = liked ? "text-secondary-500" : "text-surface-500"
     $:savedColor = saved ? "text-secondary-500" : "text-surface-500"
 
@@ -45,7 +43,6 @@ import {Tag} from "$lib"
     const handleHover = () => isHovered = !isHovered;
 
 
-    //$: maxTags = calcMaxTags()
     const updateContainerWidth = () => {
         if (container)
         {
@@ -57,7 +54,6 @@ import {Tag} from "$lib"
     const calcMaxTags = () => {
             let res = 0
             let currentWidth = 0
-            console.log(tagWidths)
 
             for (let i = 0; i<tagWidths.length; i++)
             {
@@ -74,12 +70,6 @@ import {Tag} from "$lib"
                     break
                 }
             }
-
-            console.log("Data")
-            console.log(currentWidth)
-            console.log(containerWidth)
-            console.log(res)
-
         return res
     }
 
@@ -93,13 +83,10 @@ import {Tag} from "$lib"
         if(hoverDiv){
             hoverDiv.addEventListener('mouseenter', handleHover);
             hoverDiv.addEventListener('mouseleave', handleHover);
-            //translateHover = hoverDiv.getBoundingClientRect().width/2-popupDiv.getBoundingClientRect().width/2
-            //translateHover = (hoverDiv.getBoundingClientRect().right-hoverDiv.getBoundingClientRect().left)/2 + hoverDiv.offsetLeft - ((popupDiv.getBoundingClientRect().right-popupDiv.getBoundingClientRect().left)/2)
 
             return () => {
                 hoverDiv.removeEventListener('mouseenter', handleHover);
                 hoverDiv.removeEventListener('mouseleave', handleHover);
-                //window.removeEventListener('resize', updateContainerWidth);
 
             };}
 
