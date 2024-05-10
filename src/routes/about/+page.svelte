@@ -1,13 +1,19 @@
 <script lang="ts">
-    import { TheoryAppBar} from "$lib";
-
-    let finalValue:number = 0.75;
+    import {PublicationCard} from "$lib";
+    let tags = ["Ann","Ann","hdhd","Matrix"]
+    let tags1 = ["K-nn","ML","Ann","CNN"]
+    let tags2 = ["Ann","Ann","hdhd","Stupid njnjnb "]
+    let tags3 = ["The most decriptive tag possible that could exist ever"]
 
 
 </script>
 
-    <h1>ABOUT</h1>
-<div class = "flex">
-    <div><TheoryAppBar bind:value={finalValue} editable={true}></TheoryAppBar></div>
-        <p>Final value: {finalValue}</p>
-</div>
+
+<PublicationCard name="Very very very very very very very very very very very looooooooooooooooooooooooooooooooooooooooo" liked="{true}" saved="{false}" tags={tags} numMaterials="{3}"/>
+<PublicationCard liked="{true}" saved="{false}" used="{7}" tags={tags1} numMaterials="{3}"/>
+<PublicationCard liked="{true}" saved="{false}" tags={tags} numMaterials="{3}"/>
+<PublicationCard liked="{true}" saved="{false}" tags={tags2} numMaterials="{3}"/>
+<PublicationCard liked="{true}" saved="{false}" tags={tags3} numMaterials="{3}"/>
+<PublicationCard liked="{true}" saved="{false}" numMaterials="{3}"/>
+<PublicationCard liked="{true}" saved="{false}" numMaterials="{3}"/>
+
