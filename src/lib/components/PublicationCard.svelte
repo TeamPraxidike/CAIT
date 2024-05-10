@@ -37,47 +37,48 @@ import {Tag} from "$lib"
     let container : HTMLDivElement;
     let containerWidth:number=0;
     let isHovered = false;
-    let maxTags = 2
+    let maxTags = tags.length
     let tagWidths: number[] = tags.map(() => 0)
 
 
-    // $:if (hoverDiv && popupDiv)
-    //        translateHover =  hoverDiv.getBoundingClientRect().width/2-popupDiv.getBoundingClientRect().width/2
 
     const handleHover = () => isHovered = !isHovered;
 
 
-$: maxTags = calcMaxTags()
-    // const updateContainerWidth = () => {
-    //     containerWidth = container.getBoundingClientRect().width;
-    //     maxTags = calcMaxTags();
-    //
-    // };
+    //$: maxTags = calcMaxTags()
+    const updateContainerWidth = () => {
+        if (container)
+        {
+            containerWidth = container.getBoundingClientRect().width
+            maxTags = calcMaxTags()
+        }
+    }
 
     const calcMaxTags = () => {
-        let res = 0
-        let currentWidth = 0
-        console.log(tagWidths)
-        let curWidths = tagWidths.map(x => x+8)
-        console.log(curWidths)
+            let res = 0
+            let currentWidth = 0
+            console.log(tagWidths)
 
-        for (let i = 0; i<tagWidths.length; i++)
-        {
-            if (currentWidth + tagWidths[i] <= containerWidth)
+            for (let i = 0; i<tagWidths.length; i++)
             {
-                currentWidth+=(tagWidths[i])
-                res++
+                let checkLast = i===tagWidths.length-1 ? tagWidths[i] : tagWidths[i] + 24
+
+
+                if (currentWidth + checkLast <= containerWidth)
+                {
+                    currentWidth+=(tagWidths[i]) + 8
+                    res++
+                }
+
+                else {
+                    break
+                }
             }
 
-            else {
-                break
-            }
-        }
-
-        console.log("Data")
-        console.log(currentWidth)
-        console.log(containerWidth)
-        console.log(res)
+            console.log("Data")
+            console.log(currentWidth)
+            console.log(containerWidth)
+            console.log(res)
 
         return res
     }
@@ -86,7 +87,7 @@ $: maxTags = calcMaxTags()
 
     onMount(() => {
         containerWidth = container.getBoundingClientRect().width
-        //window.addEventListener('resize', updateContainerWidth);
+        window.addEventListener('resize', updateContainerWidth);
 
         maxTags = calcMaxTags()
         if(hoverDiv){
@@ -119,29 +120,29 @@ $: maxTags = calcMaxTags()
         <div class=" flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
             <!-- Title and difficulty -->
             <div class = "w-full">
-                <div class="flex justify-between gap-2">
-                    <h4 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-100 self-center"> {name}</h4>
-                    <div class="self-center">
-                        {#if (numMaterials === 1)}
-                            <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
-                        {:else}
-                            <div class="py-1" bind:this={hoverDiv}>
-                                <Icon icon="clarity:file-group-solid" class="text-primary-600 text-lg self-center"/>
-                                {#if isHovered}
-                                    <div class="absolute  mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300" style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-                                        <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
-                                        <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
-                                        <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
+                <div class="flex justify-between">
+                    <h4 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {name}</h4>
+                   <div class="flex gap-2 self-center">
+                           {#if (numMaterials === 1)}
+                               <Icon icon="mdi:presentation" class="text-primary-600 text-lg"/>
+                           {:else}
+                               <div class="py-1" bind:this={hoverDiv}>
+                                   <Icon icon="clarity:file-group-solid" class="text-primary-600 text-lg"/>
+                                   {#if isHovered}
+                                       <div class="absolute  mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300" style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+                                           <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
+                                           <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
+                                           <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
 
-                                    </div>
-                                {/if}
-                            </div>
+                                       </div>
+                                   {/if}
+                               </div>
 
-                        {/if}
-                    </div>
-                    <div class="self-center">
-                        <DiffBar diff = {"hard"}></DiffBar>
-                    </div>
+                           {/if}
+                       <div class="self-center">
+                           <DiffBar diff = {"hard"}></DiffBar>
+                       </div>
+                   </div>
                 </div>
 
 
@@ -151,7 +152,7 @@ $: maxTags = calcMaxTags()
 
             </div>
 
-            <p class = "w-full line-clamp-3 text-xs text-surface-500  dark:text-surface-600">Lorem ipsum dolor sit a metsda awdafg mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem... Lorem ipsum dolor sit a metsda awdafg mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem.. Lorem ipsum dolor sit a metsda awdafg mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem..</p>
+            <p class = "w-full line-clamp-3 text-xs text-surface-500  dark:text-surface-400">Lorem ipsum dolor sit a metsda awdafg mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem... Lorem ipsum dolor sit a metsda awdafg mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem.. Lorem ipsum dolor sit a metsda awdafg mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem..</p>
 
 
             <div bind:this={container} class = "flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
@@ -166,8 +167,8 @@ $: maxTags = calcMaxTags()
                     {/if}
                 </div>
             </div>
-
-            <div class="bg-surface-200 w-full h-px"/>
+                <div class="w-full space-y-2">
+                    <hr class="opacity-50">
                 <div class="w-full flex justify-between">
                     <button class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</button>
                     <div class="flex gap-2">
@@ -177,7 +178,7 @@ $: maxTags = calcMaxTags()
                                 <span>472</span>
                             </button>
 
-                            <hr>
+                            <div class="h-2/3 w-px bg-surface-200"></div>
 
                             <button bind:this={bookmark} class="flex items-center text-xl text-surface-500 h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg" on:click={() => toggleSave()}>
                                 <Icon icon="ic:baseline-bookmark" class="text-lg {savedColor}"/>
@@ -186,7 +187,7 @@ $: maxTags = calcMaxTags()
 
                         <Icon icon="gg:profile" class = "text-surface-600 justify-self-end self-center size-6"/>
                     </div>
-
+                </div>
                 </div>
             </div>
     </div>
