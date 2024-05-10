@@ -24,8 +24,8 @@
                     </div>
                 </div>
                 <div class="flex flex-col items-start w-full">
-                        <span class="dark:text-surface-50 text-surface-800 text-xs md:text-xl">Rep: {rep}</span>
-                        <span class="dark:text-surface-50 text-surface-800 text-xs md:text-xl">Posts: {posts}</span>
+                        <span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Rep: {rep}</span>
+                        <span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Posts: {posts}</span>
                 </div>
             </div>
         </div>
