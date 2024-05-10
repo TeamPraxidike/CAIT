@@ -28,7 +28,7 @@ stages:          # List of stages for jobs, and their order of execution
 build-job:
   stage: build
   script:
-    - npm install
+    - npm run script
   cache:
     paths:
       - node_modules/
