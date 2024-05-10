@@ -9,7 +9,7 @@ import {Tag} from "$lib"
 
 
 
-    export let name:string = "Deatils About CNN and ANN"
+    export let name:string = "Details About CNN and ANN"
 
     export let liked:boolean = true;
     export let saved:boolean = true;
@@ -51,26 +51,32 @@ import {Tag} from "$lib"
         }
     }
 
+    /*
+    * calculates the maximum amounts of tags allowed for the width of the card so that it doesn't overflow with tags
+    * returns set max amount of tags: number
+     */
     const calcMaxTags = () => {
+            //set vars to keep track of the result and current width of the tags we have already allowed
             let res = 0
             let currentWidth = 0
 
             for (let i = 0; i<tagWidths.length; i++)
             {
-                let checkLast = i===tagWidths.length-1 ? tagWidths[i] : tagWidths[i] + 24
+                //We check if the tag is last in order: If it is not we need to accommodate for the potential
+                //pixels that +remainingTags will generate in the component later
+                let checkLast = i===tagWidths.length-1 ? tagWidths[i] : tagWidths[i] + 24;
 
 
+                //Check if adding the next tag would cause an overflow in the width and add it only if that's the case
                 if (currentWidth + checkLast <= containerWidth)
                 {
-                    currentWidth+=(tagWidths[i]) + 8
-                    res++
+                    //update width and res
+                    currentWidth+=(tagWidths[i]) + 8;
+                    res++;
                 }
 
-                else {
-                    break
-                }
             }
-        return res
+        return res;
     }
 
 
@@ -89,7 +95,6 @@ import {Tag} from "$lib"
                 hoverDiv.removeEventListener('mouseleave', handleHover);
 
             };}
-
     });
 
 </script>
