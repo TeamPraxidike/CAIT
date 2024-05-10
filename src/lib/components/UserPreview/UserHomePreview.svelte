@@ -13,26 +13,17 @@
     }
 </script>
 <button on:click={() => enterUserProfile({userId})}>
-    <div  class="w-30 h-20 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2  md:pb-2 md:pt-2 md:pr-3 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
-        <div class="flex space-x-3 items-center w-full">
-            <div class="w-10 h-10 {userPhotoUrl === '' ? 'bg-surface-500 placeholder-circle' :  ''  }">
+    <div class="w-48 h-20 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 pl-2 pr-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
+        <div class="flex space-x-3 items-center">
+            <div class="w-12 h-12 {userPhotoUrl === '' ? 'bg-surface-500 placeholder-circle' :  ''  }">
             </div>
             <div class="flex flex-col items-start w-full">
-                <div>
-                    <div id="nameDiv">{name}</div>
-                    <hr class="bg-surface-300"/>
+                <div class="max-w-full">
+                    <span class="dark:text-surface-50 max-w-full hover:overflow-visible truncate">{name}</span>
+                    <hr class="dark:bg-surface-50 bg-surface-300"/>
                 </div>
-                <div>
-                    <div class="flex space-x-1 w-full">
-                        <div>Rep:</div>
-                        <div>{rep}</div>
-                    </div>
-
-                    <div class="flex space-x-1 w-full">
-                        <div>Posts:</div>
-                        <div>{posts}</div>
-                    </div>
-                </div>
+                <span>Rep: {rep}</span>
+                <span>Posts: {posts}</span>
             </div>
         </div>
     </div>
