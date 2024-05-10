@@ -14,7 +14,7 @@
     export let saved: boolean = true;
     export let numMaterials: number = 1;
     export let used: number = 1;
-    export let tags: string[] = ['Very Big Tag', 'short', 'nsnsngrfnfgdb', 'One More '];
+    export let tags: string[] = ['Very Big Tag', 'nsnsngrfnfgdb', 'One More ', 'short'];
 
 
     $:likedColor = liked ? "text-secondary-500" : "text-surface-500"
@@ -59,11 +59,13 @@
 
 
             //Check if adding the next tag would cause an overflow in the width and add it only if that's the case
-            if (currentWidth + checkLast <= containerWidth) {
-                //update width and res
-                currentWidth += (tagWidths[i]) + 8;
-                res++;
+            if (!(currentWidth + checkLast <= containerWidth)) {
+                break;
             }
+            //update width and res
+
+            currentWidth += (tagWidths[i]) + 8;
+            res++;
 
         }
         return res;
