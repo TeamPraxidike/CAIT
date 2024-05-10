@@ -1,9 +1,8 @@
 <script lang="ts">
-    import {PublicationCard} from "$lib";
-
-
-
 </script>
+
+<h1>ABOUT</h1>
+
 
 
 
