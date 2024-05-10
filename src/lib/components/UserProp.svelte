@@ -1,6 +1,8 @@
 <script lang="ts">
     import {createEventDispatcher} from "svelte";
     import type {User} from "@prisma/client";
+
+
     const dispatch = createEventDispatcher()
     export const removeMaintainer=()=> {
         dispatch("removeMaintainer", {value: name})
@@ -18,14 +20,18 @@
     //todo: change to actual link
     let link = `/user/${name}/${userId}`
     link=`/user`
+    export let popupName:string
+
 </script>
 
-<div class="dark:text-surface-50 dark:opacity-80 text-surface-800 bg-surface-50 dark:bg-surface-600" data-popup="popupHover">
-    {name}
+<div class="dark:text-surface-50 dark:opacity-80 text-surface-800 bg-surface-50 dark:bg-surface-600" data-popup={popupName}>
+    <p>{name}</p>
+    <div class="arrow variant-soft-secondary" />
+
 </div>
 
 {#if view === "search"}
-    <a href={link} style="height:fit-content" class=" col-span-2 flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
+    <a href={link} style="height:fit-content"  class=" col-span-2 flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
         <div class="flex flex-col space-y-1 items-start w-full md:pb-2" >
             <div class="w-full flex flex-col items-center">
                 <div class=" w-10 h-10 md:w-28 md:h-28 {userPhotoUrl === '' ? 'bg-surface-500 placeholder-circle' :  ''  }">
@@ -76,13 +82,13 @@
     </div>
 <!--home-->
     {:else }
-    <a href={link} class="col-span-2 h-20 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 pl-2 pr-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
+    <a href={link} class=" [&>*]:pointer-events-none flex-none col-span-2 h-20 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 pl-2 pr-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
         <div class="flex space-x-3 items-center">
             <div class="w-12 h-12 {userPhotoUrl === '' ? 'bg-surface-500 placeholder-circle' :  ''  }">
             </div>
             <div class="flex flex-col items-start w-full">
                 <div class="max-w-full">
-                    <span class="dark:text-surface-50 line-clamp-1">{name}</span>
+                    <div class="dark:text-surface-50 max-w-full line-clamp-1">{name}</div>
                     <hr class="dark:bg-surface-50 bg-surface-300"/>
                 </div>
                 <span>Rep: {rep}</span>
