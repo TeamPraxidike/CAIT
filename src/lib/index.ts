@@ -10,8 +10,9 @@ import DiffBar from "$lib/components/difficulty/DiffBar.svelte";
 import UserProfileBar from "$lib/components/user/UserProfileBar.svelte";
 import IconLink from "$lib/components/generic/IconLink.svelte";
 import UserMenu from "$lib/components/user/UserMenu.svelte";
+import Footer from "$lib/components/page/Footer.svelte";
 
 // Stores
 import {authStore} from "$lib/stores/auth";
 
-export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar, UserProfileBar, authStore, IconLink, UserMenu}
+export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar, UserProfileBar, authStore, IconLink, UserMenu,Footer}
