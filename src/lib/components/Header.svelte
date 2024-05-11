@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {authStore, Grid} from "$lib";
+    import {authStore, Grid, IconLink, UserPopUp} from "$lib";
     import {LightSwitch, type PopupSettings, popup} from '@skeletonlabs/skeleton';
     import Icon from "@iconify/svelte";
     import { slide } from 'svelte/transition';
@@ -21,16 +21,19 @@
 
     let dropDown: boolean = false;
     let loggedIn: boolean;
-    $: loggedIn = $authStore.userid !== null;
+    $: loggedIn = $authStore.user !== null;
 
     const toggleDropDown = () => dropDown = !dropDown;
 
-    // TODO: THIS WOULD ACTUALLY BE A CALL TO THE AUTH SERVICE
-    const login = () => authStore.setAuth(1, '1234');
-    const logout = () => authStore.clearAuth();
+    // TODO: THIS WOULD ACTUALLY BE A CALL TO THE AUTH SERVICE. CURRENTLY IT'S A MOCK CALL TO THE API TO GET FDR
+    const login = () => {
+        fetch('/api/user/1').then(res => res.json()).then(data => {
+            authStore.setAuth(data, 'token');
+        }).catch(err => console.error(err));
+    };
 </script>
 
-<header class="w-screen shadow-lg dark:bg-surface-800  bg-surface-50 border-b border-surface-600 dark:border-surface-300 md:border-none">
+<header class="w-screen shadow-lg dark:bg-surface-800  bg-surface-50 border-b border-surface-300 md:border-none">
     <Grid>
         <a href="/" class = "col-start-1">
             <enhanced:img class="h-16 w-16 md:hidden" src="/static/favicon.png" alt="CAIT Logo"/>
@@ -60,43 +63,64 @@
 
             {#if loggedIn}
                 <div class="border-l border-surface-300 h-8"/>
-                <div use:popup={popupHover} class="cursor-pointer [&>*]:pointer-events-none">
+                <div use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                     <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
                 </div>
-                <div class="card p-4 bg-surface-50 border border-surface-300
-                            dark:text-surface-50" data-popup="popupHover">
-                    <a href="/{$authStore.userid}">Profile</a>
-                    <div class="text-sm">Hello, {$authStore.userid}</div>
-                    <button on:click={logout} class="variant-soft-surface rounded-lg p-1">Log out</button>
+                <div data-popup="popupHover">
+                    <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
+                    <UserPopUp />
                 </div>
             {/if}
         </div>
 
-        <button  class = "col-end-5 self-center justify-self-end w-12 h-8 md:hidden" on:click={toggleDropDown}>
+        <button  class="col-end-5 self-center justify-self-end w-12 h-8 md:hidden" on:click={toggleDropDown}>
                 <Icon icon="solar:hamburger-menu-outline" className="text-surface-600 dark:text-surface-50" width="48" height="32"/>
             </button>
-        {#if dropDown}
-            <div class="col-span-4 w-full" transition:slide={{ delay: 0, duration: 400, easing: quartOut, axis: 'y' }}>
-                <div class="flex flex-col items-stretch">
-                    {#each navOptions as opt}
-                        <a class="md:underline text-surface-800" href={opt.link} on:click={toggleDropDown}>
-                            <div class="p-4 rounded-lg flex justify-between  items-center dark:text-surface-50">
-                            {opt.text}
-                             <Icon icon="oui:arrow-right" className="text-sm text-surface-600"/>
 
+        {#if dropDown}
+            <div class="col-span-4 w-full flex flex-col items-stretch" transition:slide={{ delay: 0, duration: 400, easing: quartOut, axis: 'y' }}>
+                {#each navOptions as opt}
+                    <a class="md:underline text-surface-800" href={opt.link} on:click={toggleDropDown}>
+                        <div class="p-4 rounded-lg flex justify-between  items-center dark:text-surface-50">
+                        {opt.text}
+                         <Icon icon="oui:arrow-right" className="text-sm text-surface-600"/>
+
+                        </div>
+                    </a>
+                    <hr class="bg-surface-600 border-0 dark:bg-surface-300 my-2">
+                {/each}
+
+
+                {#if loggedIn}
+                    <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
+                    <div class="grid grid-cols-2">
+                        <a href="/{$authStore.user?.id}"
+                           class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
+                            <enhanced:img class="h-16 w-16 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
+                            <div class="flex flex-col">
+                                <span>{$authStore.user?.firstName}</span>
+                                <span class="text-sm">Go to profile</span>
                             </div>
                         </a>
-                        <hr class="bg-surface-600 border-0 dark:bg-surface-300">
-                    {/each}
-
-
-                    <div class="flex justify-between p-4 items-center">
-                        <div class="xl:col-start-12">
-                            <LightSwitch />
-                        </div>
-
-                        <button on:click={login} class="btn rounded-lg variant-ghost-primary">Sign In</button>
+                        <IconLink p="p-4" icon="ion:person-sharp" href="/{$authStore.user?.id}" link="Profile"/>
+                        <IconLink p="p-4" icon="ion:bookmark-sharp" href="/{$authStore.user?.id}/saved" link="Saved"/>
+                        <IconLink p="p-4" icon="ion:book" href="/{$authStore.user?.id}/publication" link="Publications"/>
+                        <IconLink p="p-4" icon="ion:settings-sharp" href="/settings" link="Settings"/>
                     </div>
+                {/if}
+
+                <div class="flex justify-between p-4 items-center">
+                    <div class="xl:col-start-12">
+                        <LightSwitch />
+                    </div>
+
+                    {#if loggedIn}
+                        <div use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
+                            <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
+                        </div>
+                    {:else}
+                        <button on:click={login} class="btn rounded-lg variant-ghost-primary">Sign In</button>
+                    {/if}
                 </div>
             </div>
         {/if}
