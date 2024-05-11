@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Meta, UserProfileBar} from "$lib";
+    import {Meta, UserProfileBar, authStore} from "$lib";
     import type { PageServerData } from './$types';
     import type {User} from "@prisma/client";
 

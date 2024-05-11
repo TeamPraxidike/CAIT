@@ -14,8 +14,19 @@ export async function GET({ params }) {
             isAdmin: false,
         }
 
+        const user2: User = {
+            id: 2,
+            firstName: 'Winston',
+            lastName: 'Churchill',
+            email: 'winchurch@parl.gov.uk',
+            reputation: 1232,
+            isAdmin: false,
+        }
+
         if (id === '1')
             return new Response(JSON.stringify(user), { status: 200 });
+        if (id === '2')
+            return new Response(JSON.stringify(user2), { status: 200 });
         else
             return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
 
