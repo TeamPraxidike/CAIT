@@ -10,8 +10,10 @@ import DifficultySelection from "$lib/components/difficulty/DifficultySelection.
 import Tag from "$lib/components/Tag.svelte";
 import DiffBar from "$lib/components/difficulty/DiffBar.svelte";
 import UserProfileBar from "$lib/components/UserProfileBar.svelte";
-import TheoryAppBar from "$lib/components/TheoryAppBar.svelte";
-import PublicationCard from "$lib/components/PublicationCard.svelte";
-import Comment from "$lib/components/Comment.svelte";
+import IconLink from "$lib/components/IconLink.svelte";
+import UserPopUp from "$lib/components/UserPopUp.svelte";
 
-export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar, UserProfileBar, TheoryAppBar, PublicationCard, SearchBar, UserProp, Comment, authStore}
+// Stores
+import {authStore} from "$lib/stores/auth";
+
+export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar, UserProfileBar, authStore, TheoryAppBar, PublicationCard, SearchBar, UserProp, Comment, IconLink, UserPopUp}
