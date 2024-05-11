@@ -9,7 +9,7 @@
     /**
      * Check if the current user is the same as the user being viewed.
      */
-    const currentlyAuth = () => $authStore.user === user.id;
+    const currentlyAuth = () => $authStore.userid === user.id;
 </script>
 
 <div class="col-span-4 flex flex-col items-center gap-2 text-surface-800 rounded-b-lg pb-4 border border-surface-300 border-t-0
