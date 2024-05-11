@@ -2,7 +2,7 @@ import { describe, it, expect, vi} from 'vitest';
 import {
     getAllCircuits,
     getCircuitByPublicationId
-} from '$lib/database/circuit';
+} from '$lib/database';
 
 import {prisma} from "$lib/database";
 

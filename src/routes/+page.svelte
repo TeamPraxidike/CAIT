@@ -11,5 +11,6 @@
 				<code class="code">/src/routes/+page.svelte</code> - this page, you can replace the contents
 			</li>
 		</ul>
+
 	</div>
 </div>

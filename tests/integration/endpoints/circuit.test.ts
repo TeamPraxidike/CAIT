@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {testingUrl} from "./setup";
+import {testingUrl} from "../setup";
 // import {getAllCircuits, getCircuitByPublicationId, prisma} from "$lib/database";
 
 describe('Circuits', () => {

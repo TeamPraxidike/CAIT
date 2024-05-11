@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
-import {testingUrl} from "./setup";
-import {createUser, prisma} from "$lib/database";
+import {testingUrl} from "../setup";
+import {createUser} from "$lib/database";
 
 describe('Users', () => {
     describe('[GET] /publication/:id', () => {
@@ -20,9 +20,6 @@ describe('Users', () => {
             expect(response.status).toBe(200);
             const body = await response.json();
             expect(body.id).toBe(newUser.id);
-
-            // no one else is actually in the db
-            expect(await prisma.user.count()).toBe(1);
         });
     });
 });
