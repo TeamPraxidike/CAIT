@@ -15,5 +15,21 @@ npx prisma migrate dev --name init                                         # run
 npm run build                                                              # build the project
 npm run preview &                                                          # start the server in the background - port 4173
 SERVER_PID=$!                                                              # save the server PID so we can kill it later
-vitest -c ./vitest.config.integration.ts                                   # run your tests
+echo "Server started with PID: $SERVER_PID"
+npx vitest -c ./vitest.config.integration.ts                                   # run your tests
+
 kill $SERVER_PID                                                           # kill the server once the tests are done
+echo "Killed PID: $SERVER_PID"
+
+# Get PID of the process using port 4173
+SOCKET_PID=$(lsof -t -i :4173)
+
+# Kill the server process that is actually using the port
+if [[ ! -z "$SOCKET_PID" ]]; then
+    echo "Found PID holding up the port, performing cleanup"
+    kill $SOCKET_PID
+    echo "Killed PID: $SOCKET_PID"
+else
+    echo "No process found using port."
+fi
+
