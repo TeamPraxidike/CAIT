@@ -1,4 +1,4 @@
-import type { PageServerLoad } from './$types';
+import type { LayoutServerLoad } from './$types';
 import type {User} from "@prisma/client";
 import {error} from '@sveltejs/kit';
 
@@ -8,7 +8,7 @@ import {error} from '@sveltejs/kit';
  * It could be a user id which is bad for SEO or a slug from their name which is much preferable!
  * Examples of slugs: 'john-doe', 'jane-doe', 'jane-smith'
  */
-export const load: PageServerLoad = async ({params, fetch}) => {
+export const load: LayoutServerLoad = async ({params, fetch}) => {
     // {fetch, params}
     const uRes = await fetch(`/api/user/${params.user}`);
 
