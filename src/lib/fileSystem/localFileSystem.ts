@@ -1,40 +1,42 @@
 import fs from "fs";
 import {randomUUID} from "node:crypto";
 import type FileSystem from "$lib/fileSystem/fileSystem";
+import path from 'path'
 
 export class LocalFileSystem implements FileSystem {
-    readonly basePath = 'static\\uploadedFiles\\';
+    //readonly basePath = 'static\\uploadedFiles\\';
+    readonly basePath = path.join("static", "uploadedFiles");
 
     /**
      * Delete a file from the local file system (the server)
-     * @param path the path to the file
+     * @param pathArg the path to the file
      */
-    deleteFile(path: string) {
-        fs.unlink(this.basePath + path, (err) => {
+    deleteFile(pathArg: string) {
+        fs.unlink(path.join(this.basePath, pathArg), (err) => {
             if (err) throw err;
-            console.log(path + ' deleted!');
+            console.log(pathArg + ' deleted!');
         });
     }
 
     /**
      * Edit a file in the local file system (the server)
-     * @param path the path to the file
+     * @param pathArg the path to the file
      * @param file the binary data of the file
      */
-    async editFile(path: string, file: Blob) {
-        fs.writeFileSync(this.basePath + path, Buffer.from(await file.arrayBuffer()));
-        return path;
+    async editFile(pathArg: string, file: Blob) {
+        fs.writeFileSync(path.join(this.basePath, pathArg), Buffer.from(await file.arrayBuffer()));
+        return pathArg;
     }
 
     /**
      * Read a file from the local file system (the server) and returns a buffer with the raw binary data.
      * This function might be better to avoid, as if you are calling it from a server file you can directly access the file system.
-     * @param path the path to the file
+     * @param pathArg the path to the file
      */
-    readFile(path: string) {
+    readFile(pathArg: string) {
         try{
-            console.log("Reading file " + this.basePath + path);
-            return fs.readFileSync(this.basePath + path);
+            console.log("Reading file " + path.join(this.basePath, pathArg));
+            return fs.readFileSync(path.join(this.basePath, pathArg));
         } catch (error) {
             throw error;
         }
@@ -58,11 +60,11 @@ export class LocalFileSystem implements FileSystem {
         try {
             const fileContent = await file.arrayBuffer();
             const buffer = Buffer.from(fileContent);
-            const path = `${randomUUID()}` + `.${(name + "").split('.').pop()}`;
+            const pathFileNameGenerated = `${randomUUID()}` + `.${(name + "").split('.').pop()}`;
 
-            fs.writeFileSync(this.basePath + path, buffer);
-            console.log(name + " saved as " + path);
-            return path;
+            fs.writeFileSync(path.join(this.basePath, pathFileNameGenerated), buffer);
+            console.log(name + " saved as " + pathFileNameGenerated);
+            return pathFileNameGenerated;
         } catch (error) {
             throw error;
         }
