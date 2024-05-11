@@ -160,7 +160,7 @@ export async function addNodeToCircuit(publicationId: number, nodeId: number) {
 
     return prisma.circuit.update({
         where: {
-            publicationId: publicationId
+            publicationId: publication.id
         },
         data: {
             nodes: {
