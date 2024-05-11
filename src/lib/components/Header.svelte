@@ -80,7 +80,7 @@
             </button>
 
         {#if dropDown}
-            <div class="col-span-4 w-full flex flex-col items-stretch" transition:slide={{ delay: 0, duration: 400, easing: quartOut, axis: 'y' }}>
+            <div class="md:hidden col-span-4 w-full flex flex-col items-stretch" transition:slide={{ delay: 0, duration: 400, easing: quartOut, axis: 'y' }}>
                 {#each navOptions as opt}
                     <a class="md:underline text-surface-800" href={opt.link} on:click={toggleDropDown}>
                         <div class="p-4 rounded-lg flex justify-between  items-center dark:text-surface-50">
