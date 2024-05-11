@@ -1,7 +1,7 @@
 import { Difficulty, PublicationType } from '@prisma/client';
 
 
-import {prisma} from "$lib/database";
+import {addFiles, prisma} from "$lib/database";
 /**
  * Adds a new user to the database. Sets his reputation to 0.
  * @param firstName
@@ -77,12 +77,11 @@ export async function createMaterialPublication(
         difficulty: Difficulty, // TODO figure out how to make people using this not import Difficulty type from prisma
         timeEstimate?: number,
         theoryPractice?: number,
-        files?: string[],
+        paths?: string[],
         titles?: string[]
     }
 ) {
 
-    // Step 1: Create the Publication
     const publication = await createPublication(
         materialData.title,
         materialData.description,
@@ -97,23 +96,12 @@ export async function createMaterialPublication(
             timeEstimate: materialData.timeEstimate,
             theoryPractice: materialData.theoryPractice,
             copyright: materialData.copyright,
-        },
+        }
     });
 
-    if(materialData.files === undefined || materialData.titles === undefined) return material;
+    if(materialData.paths === undefined || materialData.titles === undefined) return material;
 
-    for (const file of materialData.files) {
-        const index = materialData.files.indexOf(file);
-        await prisma.file.create({
-            data: {
-                path: file,
-                title: materialData.titles[index], // Example file title
-                materialId: material.id, // Associate the file with the newly created Material
-            },
-        });
-    }
-
-    // Step 2: Create the Material and link it to the Publication
+    await addFiles(materialData.paths, materialData.titles, material.id);
     return material;
 }
 

@@ -13,7 +13,7 @@ describe("createMaterialPublication", () => {
             timeEstimate: 1000,
             theoryPractice: 9,
             copyright: true,
-            files: ["./vasko/nqma/kraka.txt"],
+            paths: ["./vasko/nqma/kraka.txt"],
             titles: ["vaskoGoworiNaKitaiski.txt"]
         })
         expect(material).toHaveProperty("id");
@@ -34,3 +34,4 @@ describe("createMaterialPublication", () => {
         expect(file.title).toEqual("vaskoGoworiNaKitaiski.txt");
     });
 });
+

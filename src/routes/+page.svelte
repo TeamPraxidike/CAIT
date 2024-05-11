@@ -11,5 +11,16 @@
 				<code class="code">/src/routes/+page.svelte</code> - this page, you can replace the contents
 			</li>
 		</ul>
+
+		<form method="POST" enctype="multipart/form-data">
+			<label>
+				add a todo:
+				<input
+					type="file"
+					name="file"
+				/>
+				<button type="submit" >Upload</button>
+			</label>
+		</form>
 	</div>
 </div>
