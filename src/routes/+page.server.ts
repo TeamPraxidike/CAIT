@@ -4,9 +4,10 @@ import {Difficulty} from "@prisma/client";
 export const actions = {
     default: async ({ request }) => {
         const data = await request.formData();
+        const name = (data.get('file') as File).name;
         
         const fileSystem = new LocalFileSystem();
-        const path = await fileSystem.saveFile(data.get('file') as Blob);
+        const path = await fileSystem.saveFile(data.get('file') as Blob, name);
 
         const materialData = {
             title: data.get('title'),
@@ -17,15 +18,18 @@ export const actions = {
             theoryPractice: data.get('theoryPractice'),
             userId: data.get('userId'),
             paths: [path],
-            titles: [data.get('file')]
+            titles: [name]
         };
 
-        await fetch("/api/material", {
+        await fetch(request.url + "api/material", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(materialData)
         });
+
+        console.log((fileSystem.readFile(path)).toString());
+        fileSystem.deleteFile(path);
     }
 };
