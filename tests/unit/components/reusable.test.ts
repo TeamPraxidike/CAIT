@@ -24,5 +24,6 @@ describe("Tag Component", () => {
         // should not render anything besides the comment that the tag is there
         expect(host.innerHTML).toContain("<!--<Tag>-->");
         expect(host.innerHTML).not.toContain("</p>");
+        expect(host.innerHTML).not.toContain("<p");
     });
 })
