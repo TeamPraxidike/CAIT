@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {authStore, Grid, IconLink, UserPopUp} from "$lib";
+    import {authStore, Grid, UserMenu} from "$lib";
     import {LightSwitch, type PopupSettings, popup} from '@skeletonlabs/skeleton';
     import Icon from "@iconify/svelte";
     import { slide } from 'svelte/transition';
@@ -10,7 +10,9 @@
         link: string;
     }
     const navOptions : NavOption[] = [
+        { text: 'Home', link: '/' },
         { text: 'About', link: '/about' },
+        { text: 'Browse', link: '/browse' },
     ]
 
     const popupHover: PopupSettings = {
@@ -33,7 +35,7 @@
     };
 </script>
 
-<header class="w-screen shadow-lg dark:bg-surface-800  bg-surface-50 border-b border-surface-300 md:border-none">
+<header class="w-screen shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none">
     <Grid>
         <a href="/" class = "col-start-1">
             <enhanced:img class="h-16 w-16 md:hidden" src="/static/favicon.png" alt="CAIT Logo"/>
@@ -52,7 +54,7 @@
 
         <div class="hidden md:flex col-start-11 col-span-2 md:gap-2 xl:gap-4 items-center justify-self-end">
                 {#if loggedIn}
-                    <button class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Publish</button>
+                    <a href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Publish</a>
                 {:else}
                     <button on:click={login} class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Sign In</button>
                 {/if}
@@ -68,7 +70,7 @@
                 </div>
                 <div data-popup="popupHover">
                     <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
-                    <UserPopUp />
+                    <UserMenu device="desktop" />
                 </div>
             {/if}
         </div>
@@ -93,20 +95,7 @@
 
                 {#if loggedIn}
                     <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
-                    <div class="grid grid-cols-2">
-                        <a href="/{$authStore.user?.id}"
-                           class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
-                            <enhanced:img class="h-16 w-16 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
-                            <div class="flex flex-col">
-                                <span>{$authStore.user?.firstName}</span>
-                                <span class="text-sm">Go to profile</span>
-                            </div>
-                        </a>
-                        <IconLink p="p-4" icon="ion:person-sharp" href="/{$authStore.user?.id}" link="Profile"/>
-                        <IconLink p="p-4" icon="ion:bookmark-sharp" href="/{$authStore.user?.id}/saved" link="Saved"/>
-                        <IconLink p="p-4" icon="ion:book" href="/{$authStore.user?.id}/publication" link="Publications"/>
-                        <IconLink p="p-4" icon="ion:settings-sharp" href="/settings" link="Settings"/>
-                    </div>
+                    <UserMenu device="mobile" />
                 {/if}
 
                 <div class="flex justify-between p-4 items-center">
