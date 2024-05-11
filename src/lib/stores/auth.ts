@@ -1,8 +1,9 @@
 import {type Writable, writable} from "svelte/store";
+import type {User} from "@prisma/client";
 
 
 type AuthStruct = {
-    userid: number|null,
+    user: User|null,
     session: string|null,
 }
 
@@ -14,8 +15,8 @@ type AuthStruct = {
  */
 interface AuthStore {
     subscribe: (run: (value: AuthStruct) => void, invalidate?: (value?: AuthStruct) => void) => () => void,
-    setAuth: (userid: number, session: string) => void,
-    clearAuth: () => void,
+    setAuth: (user: User, session: string) => void,
+    logout: () => void,
 }
 
 /**
@@ -23,7 +24,7 @@ interface AuthStore {
  *
  * @returns The writable store, with the following methods:
  * - setAuth(userid: number, session: string) - will set the userid and session
- * - clearAuth() - will set the userid and session to null
+ * - logout() - will set the userid and session to null
  * - subscribe - the standard svelte store subscribe method
  *
  * The store will also save the data to the sessionStorage, so it will persist between page reloads.
@@ -33,7 +34,7 @@ interface AuthStore {
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
  */
 const createAuthStore = ():AuthStore => {
-    let initialData: AuthStruct = {userid: null, session: null};
+    let initialData: AuthStruct = {user: null, session: null};
 
     if (typeof window !== 'undefined') {
         const sessionData = window.sessionStorage.getItem('authStore');
@@ -54,11 +55,12 @@ const createAuthStore = ():AuthStore => {
 
     return {
         subscribe,
-        setAuth: (userid: number, session: string) => {
-            set({userid, session});
+        /* This is more than insecure, must change */
+        setAuth: (user: User, session: string) => {
+            set({user, session});
         },
-        clearAuth: () => {
-            set({userid: null, session: null});
+        logout: () => {
+            set({user: null, session: null});
         }
     };
 }
