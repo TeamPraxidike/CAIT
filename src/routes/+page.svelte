@@ -4,7 +4,7 @@
 
 <Meta title="Home" description="CAIT" type="site" />
 
-<div id="hero" class="col-span-4 flex flex-col-reverse row-start-1 items-center
+<div id="hero" class="col-span-4 flex gap-y-8 flex-col-reverse row-start-1 items-center
                 md:col-span-8 md:gap-12 md:grid md:grid-cols-6
                 lg:col-span-12 lg:grid-cols-12 lg:gap-6">
 
@@ -25,7 +25,7 @@
             <h6 class="text-sm dark:text-surface-300">Used by TU Delft and the entirety of the world</h6>
         </div>
     </div>
-    <img data-testid="xl-hero" class="w-3/4 sm:w-1/2 md:col-span-3 md:w-full lg:col-start-7 lg:col-span-6" src="/favicon.png" alt="">
+    <img data-testid="xl-hero" class="w-full sm:w-1/2 md:col-span-3 md:w-full lg:col-start-7 lg:col-span-6 xl:p-4" src="/heroArt.png" alt="">
     <hr class="col-span-full row-start-2">
 </div>
 
