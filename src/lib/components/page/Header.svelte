@@ -37,7 +37,7 @@
 
 <header class="w-screen shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none">
     <Grid>
-        <a href="/static" class = "col-start-1">
+        <a href="/" class = "col-start-1">
             <enhanced:img class="h-16 w-16 md:hidden" src="/static/favicon.png" alt="CAIT Logo"/>
             <enhanced:img class="h-16 w-16 hidden md:block" src="/static/Logo.webp" alt="CAIT Logo"/>
         </a>
