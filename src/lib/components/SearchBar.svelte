@@ -1,5 +1,6 @@
 <script lang="ts">
     import {createEventDispatcher} from "svelte";
+    import Icon from '@iconify/svelte';
 
     export let searchType:"materials"| "users" | "circuits" | "my publications" | "saved"
     export let inputKeywords:string
@@ -11,14 +12,12 @@
 </script>
 
 
-<div class="col-span-3 md:col-span-4 h-6 md:h-8 relative justify-center">
-    <!-- Search input field -->
-    <input on:input={searchQuery} type="text" bind:value={inputKeywords} class="w-full rounded-lg h-full" placeholder="Search {searchType}">
-
+<div class="w-full h-8 relative justify-center border border-surface-400 dark:border-surface-700 rounded-lg focus-within:ring-2 focus-within:ring-primary-300 dark:focus-within:ring-primary-700 focus-within:border-none flex">
     <!-- Search icon button -->
-    <button on:click={searchQuery} class="absolute top-0 bottom-0 right-0">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3/4"  viewBox="0 0 24 24" {...$$props}>
-            <path fill="#00a6d6" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5S14 7.01 14 9.5S11.99 14 9.5 14" />
-        </svg>
+    <button on:click={searchQuery} class="">
+        <Icon icon="ci:search-magnifying-glass" class="size-6 text-surface-600 dark:text-surface-400 pl-2"/>
     </button>
+    <!-- Search input field -->
+    <input on:input={searchQuery} type="text" bind:value={inputKeywords} class="w-11/12 rounded-lg border-none focus:ring-0 h-full dark:bg-surface-900 text-surface-800 dark:text-surface-100" placeholder="Browse {searchType}">
+
 </div>
