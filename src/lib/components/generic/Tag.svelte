@@ -1,6 +1,6 @@
 <script lang="ts">
     export let tagText:string
-    export let width:number;
+    export let width:number = 0;
 </script>
 
 {#if tagText !== ""}
