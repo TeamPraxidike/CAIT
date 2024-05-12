@@ -11,5 +11,6 @@ import Tag from "$lib/components/Tag.svelte";
 import DiffBar from "$lib/components/difficulty/DiffBar.svelte";
 import TheoryAppBar from "$lib/components/TheoryAppBar.svelte";
 import PublicationCard from "$lib/components/PublicationCard.svelte";
+import Comment from "$lib/components/Comment.svelte";
 
-export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar, TheoryAppBar, PublicationCard, SearchBar, UserProp}
+export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar, TheoryAppBar, PublicationCard, SearchBar, UserProp, Comment}
