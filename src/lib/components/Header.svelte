@@ -16,8 +16,8 @@
 
     const navOptions: NavOption[] = [
         { text: 'About', link: '/about' },
-        { text: 'Materials', link: '/materials' },
-        { text: 'Circuits', link: '/circuits' },
+        { text: 'Materials', link: '/browse?type=materials' },
+        { text: 'Circuits', link: '/browse?type=circuits' },
         { text: 'My Publications', link: '/mypublications' },
         { text: 'Saved Materials', link: '/saved' }
 
