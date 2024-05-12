@@ -13,8 +13,11 @@ import UserProfileBar from "$lib/components/user/UserProfileBar.svelte";
 import IconLink from "$lib/components/generic/IconLink.svelte";
 import UserMenu from "$lib/components/user/UserMenu.svelte";
 import Footer from "$lib/components/page/Footer.svelte";
+import Section from "$lib/components/generic/Section.svelte";
 
 // Stores
 import {authStore} from "$lib/stores/auth";
 
-export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar, UserProfileBar, authStore, TheoryAppBar, PublicationCard, SearchBar, UserProp, Comment, IconLink, UserMenu, Footer}
+const lorem = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?";
+
+export {Tag,Meta, Header, Grid, DifficultySelection, DiffBar, UserProfileBar, authStore, TheoryAppBar, PublicationCard, SearchBar, UserProp, Comment, IconLink, UserMenu,Footer,Section, lorem}
