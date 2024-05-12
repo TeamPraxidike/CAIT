@@ -92,7 +92,7 @@
 </script>
 
 
-<div class="col-span-4 md:col-span-3 h-[360px] rounded-lg shadow-md ">
+<div class="col-span-4 lg:col-span-3 h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800">
     <div class="w-full relative h-2/5 rounded-t-lg">
         {#if used > 5}
             <p

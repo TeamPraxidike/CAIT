@@ -53,7 +53,7 @@
 
 <Header/>
 
-<div class="w-screen dark:text-surface-50 text-surface-900">
+<div class="w-screen dark:text-surface-50 text-surface-900 mt-32">
     <Grid>
         <slot />
     </Grid>
