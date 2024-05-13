@@ -14,7 +14,6 @@ describe('get specific material', () => {
 
         const material = await getMaterialByPublicationId(1);
         expect(material).toMatchObject({ id: 2, coverPic: 'cover1.jpg', publicationId: 1 });
-        expect(material).toHaveLength(1);
     });
 });
 
