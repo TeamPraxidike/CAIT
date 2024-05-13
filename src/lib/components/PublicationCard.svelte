@@ -94,17 +94,14 @@
 <div class="col-span-4 lg:col-span-3 h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800">
 	<div class="w-full relative h-2/5 rounded-t-lg">
 		{#if used > 5}
-			<p
-				class=" absolute mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-lg bg-opacity-50 text-surface-700 dark:text-surface-200">
+			<p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
 				Used in {used} courses</p>
 		{:else if used > 0}
-			<p
-				class=" absolute mt-2 right-1 text-xs p-1 bg-surface-500 rounded-lg bg-opacity-50 text-surface-600 dark:text-surface-300">
+			<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface">
 				Used in {used} courses</p>
 		{/if}
 	</div>
-	<div
-		class=" flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
+	<div class="flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
 		<!-- Title and difficulty -->
 		<div class="w-full">
 			<div class="flex justify-between">
