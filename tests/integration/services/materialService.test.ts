@@ -4,7 +4,7 @@ import { Difficulty } from '@prisma/client';
 
 describe('createMaterialPublication', () => {
 	it('should create a material publication with files', async () => {
-		const user = await createUser('John', 'Doe', 'l', 'pic', false);
+		const user = await createUser('John', 'Doe', 'l', 'pic');
 		const material = await createMaterialPublication({
 			title: 'Priklucheniqta na Vasko',
 			description: 'Vasko nqma kraka',
