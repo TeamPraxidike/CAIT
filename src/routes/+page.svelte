@@ -34,7 +34,7 @@
     <hr class="col-span-full row-start-2">
 </div>
 
-<div class="col-span-full flex flex-col gap-10 my-20">
+<main class="col-span-full flex flex-col gap-10 my-20">
     <Section title="Circuits" description={lorem} subtitle="Define your learning flow"/>
     <Section title="Circuits" description={lorem} subtitle="Define your workflow"/>
-</div>
+</main>
