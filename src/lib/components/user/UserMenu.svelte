@@ -1,7 +1,7 @@
 <script lang="ts">
     import {authStore, IconLink} from "$lib";
 
-    export let device:'mobile'|'desktop';
+    export let device: 'mobile' | 'desktop';
 
     const logout = () => authStore.logout();
 </script>
@@ -22,8 +22,8 @@
         <IconLink p="p-4" icon="ion:settings-sharp" href="/settings" link="Settings"/>
     </div>
 {:else}
-    <div class="card bg-surface-50 border border-surface-300 p-4 w-64
-                            dark:text-surface-50 dark:border-none" >
+    <div class="card relative z-20 bg-surface-50 border border-surface-300 p-4 w-64
+                            dark:text-surface-50 dark:border-none">
         <div class="flex flex-col">
             <a href="/{$authStore.user?.id}"
                class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1
