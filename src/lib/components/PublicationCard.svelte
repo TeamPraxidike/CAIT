@@ -150,7 +150,7 @@
 		<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
 			<div class="flex gap-1">
 				{#each tags.slice(0, maxTags) as tag, i}
-					<Tag bind:width={tagWidths[i]} tagText={tag}></Tag>
+					<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"></Tag>
 				{/each}
 			</div>
 			<div class=" self-center">
