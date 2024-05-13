@@ -12,7 +12,8 @@
     const navOptions : NavOption[] = [
         { text: 'Home', link: '/' },
         { text: 'About', link: '/about' },
-        { text: 'Browse', link: '/browse' },
+        { text: 'Browse Materials', link: '/browse?type=material' },
+        { text: 'Browse Circuits', link: '/browse?type=circuit' },
     ]
 
     const popupHover: PopupSettings = {
