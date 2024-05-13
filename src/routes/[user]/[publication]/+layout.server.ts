@@ -1,14 +1,8 @@
-import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
-import {
-	Difficulty,
-	type Publication,
-	PublicationType,
-	type User,
-} from '@prisma/client';
+import type { LayoutServerLoad } from './$types';
+import { Difficulty, type Publication, PublicationType } from '@prisma/client';
 import { lorem } from '$lib';
 
-export const load: PageServerLoad = async () => {
+export const load: LayoutServerLoad = async () => {
 	//{ params, fetch }
 	let publication: Publication = {
 		id: 0,
