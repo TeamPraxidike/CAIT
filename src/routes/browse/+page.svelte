@@ -58,10 +58,10 @@
     const toggleSortBy = () => {
         //If sort by is active just close all the dropdowns else we first need to close down every other dropdown and then dropdown the sort by
         if (!sortByActive) {
-            untoggleEverything();
+            clearAll();
             sortByActive = true;
         } else {
-            untoggleEverything();
+            clearAll();
         }
     };
     //Make the border light blue showing the current toggle is active
