@@ -7,15 +7,16 @@ import {addFiles, prisma} from "$lib/database";
  * @param firstName
  * @param lastName
  * @param email
+ * @param profilePic
  * @param isAdmin
  */
-export async function createUser(firstName: string, lastName: string, email: string, isAdmin: boolean) {
+export async function createUser(firstName: string, lastName: string, email: string, profilePic: string,isAdmin: boolean) {
     return prisma.user.create({
         data: {
             firstName: firstName,
             lastName: lastName,
             email: email,
-            reputation: 0,
+            profilePic: profilePic,
             isAdmin: isAdmin,
         },
     });
