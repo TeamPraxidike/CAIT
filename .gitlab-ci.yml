@@ -16,14 +16,15 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
-image: node:latest
+image: node:22
 variables:
   DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
 
 stages:          # List of stages for jobs, and their order of execution
   - build
   - lint
-  - test
+  - test-light
+  - test-heavy
 
 build-job:
   stage: build
@@ -38,8 +39,8 @@ build-job:
     paths:
       - node_modules/
 
-eslint:   # This job also runs in the test stage.
-  stage: lint    # It can run at the same time as unit-test-job (in parallel).
+eslint:
+  stage: lint
   script:
     - npm run lint
 
@@ -49,8 +50,7 @@ svelte-check:
     - npm run check
 
 test-unit:
-  stage: test
-
+  stage: test-light
   script:
     - npm run test:unit
   coverage: '/line-rate="([0-9]*\.[0-9]+)"/'
@@ -61,9 +61,9 @@ test-unit:
         path: reports/coverage/cobertura-coverage.xml
 
 test-integration:
-  stage: test
+  stage: test-heavy
   services:
-    - postgres
+    - postgres:16.2
   variables:
     POSTGRES_DB: postgres
     POSTGRES_USER: postgres
@@ -76,3 +76,16 @@ test-integration:
       coverage_report:
         coverage_format: cobertura
         path: reports/coverage/cobertura-coverage.xml
+
+test-e2e:
+  stage: test-heavy
+  timeout: 30 minutes
+  services:
+    - postgres:16.2
+  variables:
+    POSTGRES_DB: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+  script:
+    - npm run test:e2e
+  cache:

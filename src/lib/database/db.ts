@@ -1,8 +1,7 @@
-import { Difficulty } from '@prisma/client';
-import { PublicationType } from '@prisma/client';
-import { MaterialType } from '@prisma/client';
+import { Difficulty, PublicationType } from '@prisma/client';
 
-import {prisma} from "$lib/database";
+
+import {addFiles, prisma} from "$lib/database";
 /**
  * Adds a new user to the database. Sets his reputation to 0.
  * @param firstName
@@ -76,14 +75,13 @@ export async function createMaterialPublication(
         description: string,
         copyright: boolean,
         difficulty: Difficulty, // TODO figure out how to make people using this not import Difficulty type from prisma
-        timeEstimate: number,
-        theoryPractice: number,
-        files: string[]
-        type: MaterialType
+        timeEstimate?: number,
+        theoryPractice?: number,
+        paths?: string[],
+        titles?: string[]
     }
 ) {
 
-    // Step 1: Create the Publication
     const publication = await createPublication(
         materialData.title,
         materialData.description,
@@ -92,17 +90,19 @@ export async function createMaterialPublication(
         PublicationType.Material
     );
 
-    // Step 2: Create the Material and link it to the Publication
-    return prisma.material.create({
+    const material = await prisma.material.create({
         data: {
             publicationId: publication.id,
             timeEstimate: materialData.timeEstimate,
             theoryPractice: materialData.theoryPractice,
-            files: materialData.files,
             copyright: materialData.copyright,
-            type: materialData.type
-        },
+        }
     });
+
+    if(materialData.paths === undefined || materialData.titles === undefined) return material;
+
+    await addFiles(materialData.paths, materialData.titles, material.id);
+    return material;
 }
 
 /**
@@ -160,7 +160,7 @@ export async function addNodeToCircuit(publicationId: number, nodeId: number) {
 
     return prisma.circuit.update({
         where: {
-            publicationId: publicationId
+            publicationId: publication.id
         },
         data: {
             nodes: {
