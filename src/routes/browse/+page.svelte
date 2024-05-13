@@ -3,8 +3,6 @@
 	import { page } from '$app/stores';
 	import { fly } from 'svelte/transition';
 	import Icon from '@iconify/svelte';
-	import { InputChip } from '@skeletonlabs/skeleton';
-	import { onMount } from 'svelte';
 
 
 	let searchWord: string = '';
@@ -47,14 +45,13 @@
 	//Used to make the dropdown appear/disappear
 	const toggleSortBy = () => {
 		//If sort by is active just close all the dropdowns else we first need to close down every other dropdown and then dropdown the sort by
-		if (!sortByActive){
-			untoggleEverything()
-			sortByActive= true
+		if (!sortByActive) {
+			untoggleEverything();
+			sortByActive = true;
+		} else {
+			untoggleEverything();
 		}
-		else{
-			untoggleEverything()
-		}
-	}
+	};
 	//Make the border light blue showing the current toggle is active
 	$: sortByBorder = sortByActive ? "border-primary-400" : "border-surface-400"
 
@@ -76,14 +73,13 @@
 
 	//Used to make the dropdown appear/disappear
 	const toggleDiff = () => {
-		if (!diffActive){
-			untoggleEverything()
-			diffActive= true
+		if (!diffActive) {
+			untoggleEverything();
+			diffActive = true;
+		} else {
+			untoggleEverything();
 		}
-		else{
-			untoggleEverything()
-		}
-	}
+	};
 	//Make the border light blue showing the current toggle is active
 	$: diffBorder = diffActive ? "border-primary-400" : "border-surface-400"
 	//Updates the "Difficulty" text for easier understanding
@@ -100,16 +96,15 @@
 	//TAGS functionality
 
 	const toggleTag = () => {
-		if (!tagActive){
-			untoggleEverything()
-			tagActive= true
+		if (!tagActive) {
+			untoggleEverything();
+			tagActive = true;
+		} else {
+			untoggleEverything();
 		}
-		else{
-			untoggleEverything()
-		}
-	}
+	};
 	$: tagBorder = tagActive ? "border-primary-400" : "border-surface-400"
-	$: tagBackground = (t:string) => selectedTags.includes(t) ? "bg-primary-100 hover:bg-primary-100" : "hover:bg-primary-50" //colors in light blue if the tag is already selected in the dropdown
+	$: tagBackground = (t: string) => selectedTags.includes(t) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50'; //colors in light blue if the tag is already selected in the dropdown
 
 	/*
 		*Updates the selected tags and reassigns the variable
@@ -147,58 +142,56 @@
 	//PUBLISHER functionality
 
 	const togglePublisher = () => {
-		if (!publisherActive){
-			untoggleEverything()
-			publisherActive= true
+		if (!publisherActive) {
+			untoggleEverything();
+			publisherActive = true;
+		} else {
+			untoggleEverything();
 		}
-		else{
-			untoggleEverything()
-		}
-	}
-	$: publisherBorder = publisherActive ? "border-primary-400" : "border-surface-400"
-	$: publisherBackground = (t:string) => selectedPublishers.includes(t) ? "bg-primary-100 hover:bg-primary-100" : "hover:bg-primary-50" //colors in light blue if the tag is already selected in the dropdown
+	};
+	$: publisherBorder = publisherActive ? 'border-primary-400' : 'border-surface-400';
+	$: publisherBackground = (t: string) => selectedPublishers.includes(t) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50'; //colors in light blue if the tag is already selected in the dropdown
 
 	/*
 		*Updates the selected publishers and reassigns the variable
 	 */
-	const updatePublishers = (name:string) => {
+	const updatePublishers = (name: string) => {
 
-		if (selectedPublishers.includes(name)){
-			selectedPublishers = selectedPublishers.filter(item => item!==name) //if we are removing a tag remove it from selected tags
+		if (selectedPublishers.includes(name)) {
+			selectedPublishers = selectedPublishers.filter(item => item !== name); //if we are removing a tag remove it from selected tags
+		} else {
+			selectedPublishers = [...selectedPublishers, name]; //if we are selecting a tag add it to the selected tags
 		}
-		else {
-			selectedPublishers = [...selectedPublishers, name] //if we are selecting a tag add it to the selected tags
-		}
-	}
+	};
 
 
 	/*
 		* Update the publishers shown in the dropdown based on what has been inputted
 	 */
 	const updateFilterPublishers = () => {
-		publisherText = publisherInput.value.toLowerCase() ?? ""
-		if (publisherText === "")
-			displayPublishers = allPublisherNames // if there is no text display all without filtering
+		publisherText = publisherInput.value.toLowerCase() ?? '';
+		if (publisherText === '')
+			displayPublishers = allPublisherNames; // if there is no text display all without filtering
 		else
-			displayPublishers = allPublisherNames.filter(name => name.toLowerCase().includes(publisherText ?? ""))
-	}
+			displayPublishers = allPublisherNames.filter(name => name.toLowerCase().includes(publisherText ?? ''));
+	};
 
 	/*
 		* Remove publisher action called by the X on the line
 	 */
-	const removePublisher = (name:string) => {
-		selectedPublishers = selectedPublishers.filter(publisher => publisher!==name)
-	}
+	const removePublisher = (name: string) => {
+		selectedPublishers = selectedPublishers.filter(publisher => publisher !== name);
+	};
 
 	/*
 	*Method that makes all the dropdowns go up; Used so whenever you dropdown a menu it closes all others
 	 */
 	const untoggleEverything = () => {
-		sortByActive = false
-		diffActive = false
-		tagActive = false
-		publisherActive = false
-	}
+		sortByActive = false;
+		diffActive = false;
+		tagActive = false;
+		publisherActive = false;
+	};
 
 
 
@@ -228,9 +221,10 @@
 
 						{#if displayTags.length === 0}
 							<p class="p-2 text-xs text-left text-surface-600">No Matching Tags</p>
-							{:else}
+						{:else}
 							{#each displayTags as tag}
-								<button class="text-xs p-1 pl-2 text-left text-surface-600 w-full {tagBackground(tag)}" on:click={updateTags}>{tag}</button>
+								<button class="text-xs p-1 pl-2 text-left text-surface-600 w-full {tagBackground(tag)}"
+												on:click={updateTags}>{tag}</button>
 							{/each}
 						{/if}
 					</div>
@@ -239,7 +233,9 @@
 
 			<!-------Publishers-------->
 			<div class="space-y-1 relative">
-				<button class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {publisherBorder}" on:click={togglePublisher}>
+				<button
+					class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {publisherBorder}"
+					on:click={togglePublisher}>
 					<span class="flex-grow text-surface-700">Publishers</span>
 					{#if publisherActive}
 						<Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text" />
@@ -248,13 +244,17 @@
 					{/if}
 				</button>
 				{#if publisherActive}
-					<div class="absolute min-w-32 flex flex-col rounded-lg border border-surface-400 bg-surface-50" transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
-						<input bind:this={publisherInput} class="text-xs border-none rounded-lg focus:ring-0" on:input={updateFilterPublishers} placeholder="Search for publishers"/>
+					<div class="absolute min-w-32 flex flex-col rounded-lg border border-surface-400 bg-surface-50"
+							 transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
+						<input bind:this={publisherInput} class="text-xs border-none rounded-lg focus:ring-0"
+									 on:input={updateFilterPublishers} placeholder="Search for publishers" />
 						{#if displayPublishers.length === 0}
-								<p class="p-2 text-xs text-left text-surface-600">No Matching Publishers</p>
-							{:else}
+							<p class="p-2 text-xs text-left text-surface-600">No Matching Publishers</p>
+						{:else}
 							{#each displayPublishers as publisher}
-								<button class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-600  {publisherBackground(publisher)}" on:click={() => updatePublishers(publisher)}>
+								<button
+									class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-600  {publisherBackground(publisher)}"
+									on:click={() => updatePublishers(publisher)}>
 									<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />
 									<span class="w-full h-full">{publisher}</span>
 								</button>
@@ -314,7 +314,7 @@
 		</div>
 	</div>
 
-	<div class="col-span-full flex gap-2">
+<div class="col-span-full flex gap-2">
 		{#if (selectedTags.length!==0)}
 			<div class=" flex gap-2 items-center">
 				<p class="text-xs text-surface-600">Tags:</p>
@@ -326,19 +326,21 @@
 			</div>
 		{/if}
 
-		{#if (selectedPublishers.length!==0)}
-			<div class=" flex gap-2 items-center">
-				<p class="text-xs text-surface-600">Publishers:</p>
-				{#each selectedPublishers as sp}
-					<div class="flex gap-1 items-center">
-						<Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile" />
-						<p class="text-xs">{sp}</p>
-						<button class="h-full" on:click={() => removePublisher(sp)}><Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5" /></button>
+	{#if (selectedPublishers.length !== 0)}
+		<div class=" flex gap-2 items-center">
+			<p class="text-xs text-surface-600">Publishers:</p>
+			{#each selectedPublishers as sp}
+				<div class="flex gap-1 items-center">
+					<Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile" />
+					<p class="text-xs">{sp}</p>
+					<button class="h-full" on:click={() => removePublisher(sp)}>
+						<Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5" />
+					</button>
 
-					</div>
-				{/each}
-			</div>
-		{/if}
+				</div>
+			{/each}
+		</div>
+	{/if}
 	</div>
 
 
