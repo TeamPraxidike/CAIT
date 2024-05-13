@@ -1,6 +1,8 @@
 import {describe, it, expect} from 'vitest';
-import {testingUrl} from "../setup";
+import {testingUrl, resetUserTable} from "../setup";
 import {createUser} from "$lib/database";
+
+await resetUserTable();
 
 describe('Users', () => {
     describe('[GET] /user/:id', () => {

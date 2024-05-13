@@ -49,6 +49,14 @@ export async function resetCircuitTable() {
     }
 }
 
+export async function resetUserTable() {
+    try {
+        await prisma.user.deleteMany({});
+    } catch (error) {
+        console.error('Failed to reset User table:', error);
+    }
+}
+
 
 // // reset all tables before each test
 // beforeEach(async () => {
