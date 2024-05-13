@@ -1,7 +1,9 @@
-import { Difficulty, PublicationType } from '@prisma/client';
+import {Difficulty, PublicationType} from '@prisma/client';
 
 
 import {addFiles, prisma} from "$lib/database";
+import {Prisma} from "@prisma/client/extension";
+
 /**
  * Adds a new user to the database. Sets his reputation to 0.
  * @param firstName
@@ -42,15 +44,17 @@ export async function getUserById(id: number) {
  * @param difficulty
  * @param publisherId
  * @param type
+ * @param prismaContext
  */
 async function createPublication(
     title: string,
     description: string,
     difficulty: Difficulty,
     publisherId: number,
-    type: PublicationType
+    type: PublicationType,
+    prismaContext: Prisma.TransactionClient = prisma // default to normal client or use argument
 ) {
-    return prisma.publication.create({
+    return prismaContext.publication.create({
         data: {
             title: title,
             description: description,
@@ -81,28 +85,30 @@ export async function createMaterialPublication(
         titles?: string[]
     }
 ) {
+    return await prisma.$transaction(async (prismaTransaction) => {
+        const publication = await createPublication(
+            materialData.title,
+            materialData.description,
+            materialData.difficulty,
+            materialData.userId,
+            PublicationType.Material,
+            prismaTransaction
+        );
 
-    const publication = await createPublication(
-        materialData.title,
-        materialData.description,
-        materialData.difficulty,
-        materialData.userId,
-        PublicationType.Material
-    );
+        const material = await prismaTransaction.material.create({
+            data: {
+                publicationId: publication.id,
+                timeEstimate: materialData.timeEstimate,
+                theoryPractice: materialData.theoryPractice,
+                copyright: materialData.copyright,
+            }
+        });
 
-    const material = await prisma.material.create({
-        data: {
-            publicationId: publication.id,
-            timeEstimate: materialData.timeEstimate,
-            theoryPractice: materialData.theoryPractice,
-            copyright: materialData.copyright,
-        }
-    });
+        if(materialData.paths === undefined || materialData.titles === undefined) return material;
 
-    if(materialData.paths === undefined || materialData.titles === undefined) return material;
-
-    await addFiles(materialData.paths, materialData.titles, material.id);
-    return material;
+        await addFiles(materialData.paths, materialData.titles, material.id, prismaTransaction);
+        return material;
+    })
 }
 
 /**
@@ -119,19 +125,22 @@ export async function createCircuitPublication(
         difficulty: Difficulty
     }
 ) {
-    const publication = await createPublication(
-        circuitData.title,
-        circuitData.description,
-        circuitData.difficulty,
-        circuitData.userId,
-        PublicationType.Circuit
-    );
+    return await prisma.$transaction(async (prismaTransaction) => {
+        const publication = await createPublication(
+            circuitData.title,
+            circuitData.description,
+            circuitData.difficulty,
+            circuitData.userId,
+            PublicationType.Circuit,
+            prismaTransaction
+        );
 
-    return prisma.circuit.create({
-        data: {
-            publicationId: publication.id,
-        },
-    });
+        return prismaTransaction.circuit.create({
+            data: {
+                publicationId: publication.id,
+            },
+        });
+    })
 }
 
 /**

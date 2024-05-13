@@ -1,11 +1,10 @@
 import {getCircuitByPublicationId} from "$lib/database/circuit";
-import type { RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ params }) => {
+export async function GET({ params }) {
     // Authentication step
     // return 401 if user not authenticated
 
-    const publicationId = Number(params.publicationId);
+    const publicationId = parseInt(params.publicationId);
 
     if (isNaN(publicationId) || publicationId <= 0) {
         return new Response(
@@ -15,13 +14,13 @@ export const GET: RequestHandler = async ({ params }) => {
     }
 
     try {
-        const material = await getCircuitByPublicationId(publicationId);
-        if (!material) {
+        const circuit = await getCircuitByPublicationId(publicationId);
+        if (!circuit) {
             return new Response(
                 JSON.stringify({ error: "Circuit Not Found"}
                 ), { status: 404 });
         }
-        return new Response(JSON.stringify(material), { status: 200 });
+        return new Response(JSON.stringify(circuit), { status: 200 });
     } catch (error) {
         return new Response(JSON.stringify({ error: "Server Error" }), { status: 500 });
     }

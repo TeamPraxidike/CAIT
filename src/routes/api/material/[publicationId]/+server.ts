@@ -1,11 +1,10 @@
 import {getMaterialByPublicationId} from "$lib/database/material";
-import type { RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ params }) => {
+export async function GET({ params }) {
     // Authentication step
     // return 401 if user not authenticated
 
-    const publicationId = Number(params.publicationId);
+    const publicationId = parseInt(params.publicationId);
 
     if (isNaN(publicationId) || publicationId <= 0) {
         return new Response(

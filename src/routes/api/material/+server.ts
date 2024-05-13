@@ -1,7 +1,6 @@
 import {getAllMaterials, createMaterialPublication} from "$lib/database";
 import type { RequestHandler } from '@sveltejs/kit';
 
-// import fs from "fs";
 /**
  * Get all materials
  */

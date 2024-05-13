@@ -14,6 +14,7 @@ describe('get specific circuit', () => {
 
         const material = await getCircuitByPublicationId(1);
         expect(material).toMatchObject({ id: 2, publicationId: 1 });
+        expect(material).toHaveLength(1);
     });
 });
 
