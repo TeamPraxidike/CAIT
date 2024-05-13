@@ -44,7 +44,7 @@
 
 
 </script>
-<div class="flex items-center justify-center items-center ">
+<div class="flex justify-center items-center ">
     <div class="bg-primary-500 flex-col items-center justify-center p-1 rounded-md border border-surface-600">
         <div class="flex justify-center text-xl text-surface-50">
             <Icon icon="solar:notebook-bold"/>
@@ -54,7 +54,7 @@
     <div tabindex="0" role="button" bind:this={divElement} on:mousemove={handleOnMove} on:touchmove={handleOnMoveTouch}
          on:mousedown={start} on:mouseup={finsih} on:touchstart={start} on:touchend={finsih}>
         <div
-          class="relative flex items-center items-center w-24 md:w-36 xl:w-44 h-4 md:h-6 xl:h-8 border-y border-surface-600">
+          class="relative flex items-center w-24 md:w-36 xl:w-44 h-4 md:h-6 xl:h-8 border-y border-surface-600">
             <div class="bg-primary-500 h-4 md:h-6 xl:h-8 flex items-center border-y  border-surface-600 "
                  style="width: {value*100}%" />
             <div
