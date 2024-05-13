@@ -208,7 +208,7 @@
 			<!-------Tags-------->
 			<div class="space-y-1 relative">
 				<button class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {tagBorder}" on:click={toggleTag}>
-					<span class="flex-grow text-surface-700">Tags</span>
+					<span class="flex-grow text-surface-700 dark:text-surface-300">Tags</span>
 					{#if tagActive}
 						<Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text" />
 					{:else}
@@ -236,7 +236,7 @@
 				<button
 					class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {publisherBorder}"
 					on:click={togglePublisher}>
-					<span class="flex-grow text-surface-700">Publishers</span>
+					<span class="flex-grow text-surface-700 dark:text-surface-300">Publishers</span>
 					{#if publisherActive}
 						<Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text" />
 					{:else}
@@ -267,7 +267,7 @@
 			<!-------Difficulty-------->
 			<div class="space-y-1 relative">
 				<button class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {diffBorder}" on:click={toggleDiff}>
-					<span class="flex-grow text-surface-700">{diffText}</span>
+					<span class="flex-grow text-surface-700 dark:text-surface-300">{diffText}</span>
 					{#if diffActive}
 						<Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text" />
 					{:else}
@@ -286,7 +286,7 @@
 			<!-------SortBy-------->
 			<div class="space-y-1 relative">
 				<button class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}" on:click={toggleSortBy}>
-					<span class="flex-grow text-surface-700">{sortByText}</span>
+					<span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
 					{#if sortByActive}
 						<Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text" />
 						{:else}
@@ -317,7 +317,7 @@
 <div class="col-span-full flex gap-2">
 		{#if (selectedTags.length!==0)}
 			<div class=" flex gap-2 items-center">
-				<p class="text-xs text-surface-600">Tags:</p>
+				<p class="text-xs text-surface-600 dark:text-surface-200">Tags:</p>
 				{#each selectedTags as tag}
 					<div>
 						<Tag tagText="{tag}" width="{0}" removable="{true}" on:Remove={removeTag}/>
@@ -328,7 +328,7 @@
 
 	{#if (selectedPublishers.length !== 0)}
 		<div class=" flex gap-2 items-center">
-			<p class="text-xs text-surface-600">Publishers:</p>
+			<p class="text-xs text-surface-600 dark:text-surface-200">Publishers:</p>
 			{#each selectedPublishers as sp}
 				<div class="flex gap-1 items-center">
 					<Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile" />

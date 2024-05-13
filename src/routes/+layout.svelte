@@ -11,9 +11,8 @@
 	import typescript from 'highlight.js/lib/languages/typescript';
     import {Footer, Grid, Header} from "$lib"
     // Highlight JS
-    import { Grid, Header } from '$lib';
     // Floating UI for Popups
-    import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
+    //import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
 
 
     hljs.registerLanguage('xml', xml); // for HTML
