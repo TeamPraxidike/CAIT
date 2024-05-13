@@ -10,6 +10,9 @@
 	import javascript from 'highlight.js/lib/languages/javascript';
 	import typescript from 'highlight.js/lib/languages/typescript';
     import {Footer, Grid, Header} from "$lib"
+    // Highlight JS
+    // Floating UI for Popups
+    //import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
 
 
     hljs.registerLanguage('xml', xml); // for HTML
@@ -53,7 +56,7 @@
 
 <Header/>
 
-<div class="w-screen dark:text-surface-50 text-surface-900">
+<div class="w-screen dark:text-surface-50 text-surface-900 mt-32">
     <Grid>
         <slot />
     </Grid>
