@@ -4,7 +4,6 @@ info:
   description: CAIT API Specification in OpenAPI specification. Each request is summarized and explained with descriptions.
   version: 1.0.1
 
-
 tags:
   - name: User
     description: End-points for operations on/with users
@@ -39,10 +38,10 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
             example:
-              firstName: "Martin"
-              lastName: "Panayotov"
-              email: "yoanmarinov@abv.bg"
-              profilePic: "vasil.png"
+              firstName: 'Martin'
+              lastName: 'Panayotov'
+              email: 'yoanmarinov@abv.bg'
+              profilePic: 'vasil.png'
         required: true
 
       responses:
@@ -79,10 +78,10 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
             example:
-              firstName: "Panayot"
-              lastName: "Martinov"
-              email: "marinyoanov@abv.bg"
-              profilePic: "lisav.png"
+              firstName: 'Panayot'
+              lastName: 'Martinov'
+              email: 'marinyoanov@abv.bg'
+              profilePic: 'lisav.png'
         required: true
 
       responses:
@@ -154,7 +153,6 @@ paths:
           description: This user does not exist
         '500':
           description: Server Error
-
 
   /user/{userId}/saved/{publicationId}:
     post:
@@ -444,8 +442,6 @@ paths:
         '500':
           description: Server Error
 
-
-
   /material:
     post:
       tags:
@@ -458,24 +454,20 @@ paths:
             schema:
               $ref: '#/components/schemas/Material'
             example:
-              title: "Understanding Electronics"
-              description: "A comprehensive guide to basic electronics."
-              difficulty: "Beginner"
-              tags: ["electronics", "education"]
-              learningObjectives: ["Understand basic circuits", "Learn about resistors"]
+              title: 'Understanding Electronics'
+              description: 'A comprehensive guide to basic electronics.'
+              difficulty: 'Beginner'
+              tags: ['electronics', 'education']
+              learningObjectives:
+                ['Understand basic circuits', 'Learn about resistors']
               publisherId: 0
-              type: "Material"
+              type: 'Material'
               material:
-                coverPic: "url_to_picture"
+                coverPic: 'url_to_picture'
                 copyright: true
                 timeEstimate: 120
                 theoryPractice: 0.75
-                files:
-                  {
-                    "path": "string",
-                    "title": "string",
-                    "materialId": 0
-                  }
+                files: { 'path': 'string', 'title': 'string', 'materialId': 0 }
 
       responses:
         '200':
@@ -507,7 +499,6 @@ paths:
         '500':
           description: Server Error
 
-
   /material/{publicationId}:
     put:
       tags:
@@ -529,20 +520,21 @@ paths:
             schema:
               $ref: '#/components/schemas/Material'
             example:
-              title: "Understanding Electronics"
-              description: "A comprehensive guide to basic electronics."
-              difficulty: "Beginner"
-              tags: ["electronics", "education"]
-              learningObjectives: ["Understand basic circuits", "Learn about resistors"]
+              title: 'Understanding Electronics'
+              description: 'A comprehensive guide to basic electronics.'
+              difficulty: 'Beginner'
+              tags: ['electronics', 'education']
+              learningObjectives:
+                ['Understand basic circuits', 'Learn about resistors']
               publisherId: 0
-              type: "Material"
+              type: 'Material'
               material:
                 id: 1
-                coverPic: "url_to_picture"
+                coverPic: 'url_to_picture'
                 copyright: true
                 timeEstimate: 0
                 theoryPractice: 0
-                files: ["string"]
+                files: ['string']
 
       responses:
         '200':
@@ -640,17 +632,17 @@ paths:
             schema:
               $ref: '#/components/schemas/Circuit'
             example:
-              title: "Understanding Electronics"
-              description: "A comprehensive guide to basic electronics."
-              difficulty: "Beginner"
-              tags: ["electronics", "education"]
-              learningObjectives: ["Understand basic circuits", "Learn about resistors"]
+              title: 'Understanding Electronics'
+              description: 'A comprehensive guide to basic electronics.'
+              difficulty: 'Beginner'
+              tags: ['electronics', 'education']
+              learningObjectives:
+                ['Understand basic circuits', 'Learn about resistors']
               publisherId: 0
-              type: "Circuit"
+              type: 'Circuit'
               circuit:
                 id: 1
-                nodes:
-                  []
+                nodes: []
 
       responses:
         '200':
@@ -1142,7 +1134,6 @@ paths:
         '500':
           description: Server Error
 
-
   /tag:
     post:
       tags:
@@ -1383,7 +1374,6 @@ paths:
         '500':
           description: Server Error
 
-
   /file:
     post:
       tags:
@@ -1501,7 +1491,6 @@ paths:
         '500':
           description: Server Error
 
-
 components:
   schemas:
     User:
@@ -1523,7 +1512,7 @@ components:
           example: something@abv.com
         profilePic:
           type: string
-          example: "vaskolore.png"
+          example: 'vaskolore.png'
         reputation:
           type: number
           format: int
@@ -1558,8 +1547,6 @@ components:
             $ref: '#/components/schemas/Reply'
         isAdmin:
           type: boolean
-
-
 
     Publication:
       type: object
@@ -1624,7 +1611,6 @@ components:
             - Material
             - Circuit
 
-
     Material:
       type: object
       description: Material is a type of publication that only holds files
@@ -1637,15 +1623,15 @@ components:
           nullable: true
         copyright:
           type: boolean
-          description: "Is this material copyrighted"
+          description: 'Is this material copyrighted'
         timeEstimate:
           type: integer
-          description: "Time estimate in minutes"
+          description: 'Time estimate in minutes'
           nullable: true
         theoryPractice:
           type: number
           format: float
-          description: "The ratio of theory to practice on a material"
+          description: 'The ratio of theory to practice on a material'
           nullable: true
         files:
           type: array
@@ -1654,7 +1640,7 @@ components:
         publicationId:
           type: integer
           format: int64
-          description: "Which publication is this material linked with"
+          description: 'Which publication is this material linked with'
 
     File:
       type: object
@@ -1662,15 +1648,14 @@ components:
       properties:
         id:
           type: string
-          description: "The unique path to the file location"
+          description: 'The unique path to the file location'
         title:
           type: string
-          description: "Title of the file"
+          description: 'Title of the file'
         materialId:
           type: integer
           format: int64
-          description: "ID of the material to which the file is linked"
-
+          description: 'ID of the material to which the file is linked'
 
     Circuit:
       type: object
@@ -1688,7 +1673,6 @@ components:
           type: number
           format: long
           description: which publication is this material linked with
-
 
     Node:
       type: object
@@ -1716,8 +1700,6 @@ components:
           items:
             $ref: '#/components/schemas/Node'
 
-
-
     Tag:
       type: object
       description: a tag that can be applied to publications
@@ -1733,8 +1715,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Publication'
-
-
 
     Comment:
       type: object
@@ -1769,7 +1749,6 @@ components:
         updatedAt:
           type: string
           format: date
-
 
     Reply:
       type: object

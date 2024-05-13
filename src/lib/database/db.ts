@@ -1,7 +1,6 @@
 import { Difficulty, PublicationType } from '@prisma/client';
 
-
-import {addFiles, prisma} from "$lib/database";
+import { addFiles, prisma } from '$lib/database';
 /**
  * Adds a new user to the database. Sets his reputation to 0.
  * @param firstName
@@ -10,16 +9,22 @@ import {addFiles, prisma} from "$lib/database";
  * @param profilePic
  * @param isAdmin
  */
-export async function createUser(firstName: string, lastName: string, email: string, profilePic: string,isAdmin: boolean) {
-    return prisma.user.create({
-        data: {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            profilePic: profilePic,
-            isAdmin: isAdmin,
-        },
-    });
+export async function createUser(
+	firstName: string,
+	lastName: string,
+	email: string,
+	profilePic: string,
+	isAdmin: boolean,
+) {
+	return prisma.user.create({
+		data: {
+			firstName: firstName,
+			lastName: lastName,
+			email: email,
+			profilePic: profilePic,
+			isAdmin: isAdmin,
+		},
+	});
 }
 
 /**
@@ -27,13 +32,13 @@ export async function createUser(firstName: string, lastName: string, email: str
  * @param id
  */
 export async function getUserById(id: number) {
-    const user = await prisma.user.findUnique({
-        where: {
-            id: id
-        },
-    });
-    console.log('User:', user);
-    return user;
+	const user = await prisma.user.findUnique({
+		where: {
+			id: id,
+		},
+	});
+	console.log('User:', user);
+	return user;
 }
 
 /**
@@ -45,22 +50,22 @@ export async function getUserById(id: number) {
  * @param type
  */
 async function createPublication(
-    title: string,
-    description: string,
-    difficulty: Difficulty,
-    publisherId: number,
-    type: PublicationType
+	title: string,
+	description: string,
+	difficulty: Difficulty,
+	publisherId: number,
+	type: PublicationType,
 ) {
-    return prisma.publication.create({
-        data: {
-            title: title,
-            description: description,
-            likes: 0,
-            difficulty: difficulty,
-            publisherId: publisherId,
-            type: type,
-        },
-    });
+	return prisma.publication.create({
+		data: {
+			title: title,
+			description: description,
+			likes: 0,
+			difficulty: difficulty,
+			publisherId: publisherId,
+			type: type,
+		},
+	});
 }
 
 /**
@@ -69,41 +74,39 @@ async function createPublication(
  * the title, the description, the difficulty, the time estimate,
  * the theory to practice ratio, the files and the type of the material (dataset, assignment, etc.).
  */
-export async function createMaterialPublication(
-    materialData: {
-        userId: number, // TODO may be better to be the user, dont know how to specify type then
-        title: string,
-        description: string,
-        copyright: boolean,
-        difficulty: Difficulty, // TODO figure out how to make people using this not import Difficulty type from prisma
-        timeEstimate?: number,
-        theoryPractice?: number,
-        paths?: string[],
-        titles?: string[]
-    }
-) {
+export async function createMaterialPublication(materialData: {
+	userId: number; // TODO may be better to be the user, dont know how to specify type then
+	title: string;
+	description: string;
+	copyright: boolean;
+	difficulty: Difficulty; // TODO figure out how to make people using this not import Difficulty type from prisma
+	timeEstimate?: number;
+	theoryPractice?: number;
+	paths?: string[];
+	titles?: string[];
+}) {
+	const publication = await createPublication(
+		materialData.title,
+		materialData.description,
+		materialData.difficulty,
+		materialData.userId,
+		PublicationType.Material,
+	);
 
-    const publication = await createPublication(
-        materialData.title,
-        materialData.description,
-        materialData.difficulty,
-        materialData.userId,
-        PublicationType.Material
-    );
+	const material = await prisma.material.create({
+		data: {
+			publicationId: publication.id,
+			timeEstimate: materialData.timeEstimate,
+			theoryPractice: materialData.theoryPractice,
+			copyright: materialData.copyright,
+		},
+	});
 
-    const material = await prisma.material.create({
-        data: {
-            publicationId: publication.id,
-            timeEstimate: materialData.timeEstimate,
-            theoryPractice: materialData.theoryPractice,
-            copyright: materialData.copyright,
-        }
-    });
+	if (materialData.paths === undefined || materialData.titles === undefined)
+		return material;
 
-    if(materialData.paths === undefined || materialData.titles === undefined) return material;
-
-    await addFiles(materialData.paths, materialData.titles, material.id);
-    return material;
+	await addFiles(materialData.paths, materialData.titles, material.id);
+	return material;
 }
 
 /**
@@ -111,28 +114,26 @@ export async function createMaterialPublication(
  * @param circuitData This is an object that contains the id of the user who created the circuit,
  * the title, the description and the difficulty
  */
-export async function createCircuitPublication(
-    circuitData: {
-        userId: number, // may have to be the user, dont know how to specify type then
-        title: string,
-        description: string,
-        copyright: boolean,
-        difficulty: Difficulty
-    }
-) {
-    const publication = await createPublication(
-        circuitData.title,
-        circuitData.description,
-        circuitData.difficulty,
-        circuitData.userId,
-        PublicationType.Circuit
-    );
+export async function createCircuitPublication(circuitData: {
+	userId: number; // may have to be the user, dont know how to specify type then
+	title: string;
+	description: string;
+	copyright: boolean;
+	difficulty: Difficulty;
+}) {
+	const publication = await createPublication(
+		circuitData.title,
+		circuitData.description,
+		circuitData.difficulty,
+		circuitData.userId,
+		PublicationType.Circuit,
+	);
 
-    return prisma.circuit.create({
-        data: {
-            publicationId: publication.id,
-        },
-    });
+	return prisma.circuit.create({
+		data: {
+			publicationId: publication.id,
+		},
+	});
 }
 
 /**
@@ -140,11 +141,11 @@ export async function createCircuitPublication(
  * @param id
  */
 export async function getPublicationById(id: number) {
-    return prisma.publication.findUnique({
-        where: {
-            id: id
-        },
-    });
+	return prisma.publication.findUnique({
+		where: {
+			id: id,
+		},
+	});
 }
 
 // TODO I dont know if this replaces the whole array of nodes or just adds the new one
@@ -155,20 +156,21 @@ export async function getPublicationById(id: number) {
  * @param nodeId
  */
 export async function addNodeToCircuit(publicationId: number, nodeId: number) {
-    const publication = await getPublicationById(publicationId);
-    if(publication === null) throw new Error('Publication not found');
-    if(publication.type !== PublicationType.Circuit) throw new Error('Publication is not a circuit');
+	const publication = await getPublicationById(publicationId);
+	if (publication === null) throw new Error('Publication not found');
+	if (publication.type !== PublicationType.Circuit)
+		throw new Error('Publication is not a circuit');
 
-    return prisma.circuit.update({
-        where: {
-            publicationId: publication.id
-        },
-        data: {
-            nodes: {
-                connect: {
-                    id: nodeId
-                }
-            }
-        }
-    });
+	return prisma.circuit.update({
+		where: {
+			publicationId: publication.id,
+		},
+		data: {
+			nodes: {
+				connect: {
+					id: nodeId,
+				},
+			},
+		},
+	});
 }

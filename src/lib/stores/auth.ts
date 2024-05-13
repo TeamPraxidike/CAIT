@@ -1,11 +1,10 @@
-import {type Writable, writable} from "svelte/store";
-import type {User} from "@prisma/client";
-
+import { type Writable, writable } from 'svelte/store';
+import type { User } from '@prisma/client';
 
 type AuthStruct = {
-    user: User|null,
-    session: string|null,
-}
+	user: User | null;
+	session: string | null;
+};
 
 /**
  * The AuthStore interface
@@ -14,9 +13,12 @@ type AuthStruct = {
  * The store will hold the userid and session, and will save the data to the sessionStorage.
  */
 interface AuthStore {
-    subscribe: (run: (value: AuthStruct) => void, invalidate?: (value?: AuthStruct) => void) => () => void,
-    setAuth: (user: User, session: string) => void,
-    logout: () => void,
+	subscribe: (
+		run: (value: AuthStruct) => void,
+		invalidate?: (value?: AuthStruct) => void,
+	) => () => void;
+	setAuth: (user: User, session: string) => void;
+	logout: () => void;
 }
 
 /**
@@ -33,37 +35,37 @@ interface AuthStore {
  * @link https://svelte.dev/docs/svelte-store#writable
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
  */
-const createAuthStore = ():AuthStore => {
-    let initialData: AuthStruct = {user: null, session: null};
+const createAuthStore = (): AuthStore => {
+	let initialData: AuthStruct = { user: null, session: null };
 
-    if (typeof window !== 'undefined') {
-        const sessionData = window.sessionStorage.getItem('authStore');
-        if (sessionData) {
-            initialData = JSON.parse(sessionData);
-        }
-    }
+	if (typeof window !== 'undefined') {
+		const sessionData = window.sessionStorage.getItem('authStore');
+		if (sessionData) {
+			initialData = JSON.parse(sessionData);
+		}
+	}
 
-    const store:Writable<AuthStruct> = writable(initialData);
+	const store: Writable<AuthStruct> = writable(initialData);
 
-    store.subscribe(($store) => {
-        if (typeof window !== 'undefined') {
-            window.sessionStorage.setItem('authStore', JSON.stringify($store));
-        }
-    });
+	store.subscribe(($store) => {
+		if (typeof window !== 'undefined') {
+			window.sessionStorage.setItem('authStore', JSON.stringify($store));
+		}
+	});
 
-    const {subscribe, set} = store;
+	const { subscribe, set } = store;
 
-    return {
-        subscribe,
-        /* This is more than insecure, must change */
-        setAuth: (user: User, session: string) => {
-            set({user, session});
-        },
-        logout: () => {
-            set({user: null, session: null});
-        }
-    };
-}
+	return {
+		subscribe,
+		/* This is more than insecure, must change */
+		setAuth: (user: User, session: string) => {
+			set({ user, session });
+		},
+		logout: () => {
+			set({ user: null, session: null });
+		},
+	};
+};
 
 /* Create the store */
 export const authStore = createAuthStore();
