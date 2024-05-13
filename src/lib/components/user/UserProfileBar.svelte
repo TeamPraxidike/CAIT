@@ -12,24 +12,24 @@
     const currentlyAuth = () => $authStore.user?.id === user.id;
 </script>
 
-<div class="col-span-4 flex flex-col items-center gap-2 text-surface-800 rounded-b-lg pb-4 border border-surface-300 border-t-0
+<div class="col-span-4 flex flex-col items-center gap-2 text-surface-800 rounded-b-lg pb-4 border border-surface-300 border-t-0 self-start
             sm:col-span-4 sm:flex-row sm:px-8 sm:flex-wrap
             md:col-span-8 md:py-8
-            lg:col-span-12
-            xl:col-span-4 xl:row-span-12
+            lg:col-span-12 lg:px-4
+            xl:col-span-3
             dark:bg-surface-800 dark:text-surface-50 dark:border-none">
-    <enhanced:img class="w-64 rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>
+    <enhanced:img class="w-40 md:w-64 xl:w-full rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>
     <div class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
                 sm:flex-col sm:items-start
                 md:w-7/12 md:justify-start
                 xl:w-full">
-        <h2 class="text-xl">{user.firstName} {user.lastName}</h2>
+        <h2 class="text-lg md:text-xl">{user.firstName} {user.lastName}</h2>
         <p class="variant-soft-primary md:hidden p-2 rounded-lg">Reputation: {user.reputation}</p>
 
         <div class="hidden md:flex items-start flex-col gap-4 text-surface-700 dark:text-surface-200 ">
-            <p>Email: {user.email}</p>
-            <hr class="w-full">
-            <p class="text-surface-700 dark:text-surface-400">
+            <p class="lg:text-sm 2xl:text-base">Email: {user.email}</p>
+            <hr class="w-11/12">
+            <p class="text-surface-700 text-sm dark:text-surface-400">
                 {about}
             </p>
             <div class="flex gap-2 flex-wrap">
