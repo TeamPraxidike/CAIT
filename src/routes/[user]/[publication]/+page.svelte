@@ -1,11 +1,11 @@
 <script lang="ts">
     import {type File, type Publication} from "@prisma/client";
-    import type {PageData} from './$types';
-    import {DiffBar, getDateDifference, Meta, Tag, TheoryAppBar, lorem, FileTable, Render, Comment} from "$lib";
+    import type {LayoutServerData} from './$types';
+    import {DiffBar, getDateDifference, Meta, Tag, lorem, FileTable, Render, Comment} from "$lib";
     import {onMount} from "svelte";
     import Icon from "@iconify/svelte";
 
-    export let data: PageData;
+    export let data: LayoutServerData;
 
     let publication: Publication = data.publication;
 
@@ -30,22 +30,22 @@
             path: "slides.pdf",
             title: "slides.pdf",
             materialId: 1
-        },{
+        }, {
             path: "slide.pptx",
             title: "slide.pptx",
             materialId: 1
-        },{
+        }, {
             path: "code.py",
             title: "code.py",
             materialId: 1
-        },{
+        }, {
             path: "README.md",
             title: "README.md",
             materialId: 1
         }
     ]
 
-    let activeFile:File = files[0];
+    let activeFile: File = files[0];
 
     let comments = [
         {
@@ -105,11 +105,11 @@
     <div class="w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-12">
         <div class="flex flex-col row-start-3">
             {#each comments as comment}
-                <Comment interaction={comment} popupName="aaa" isReply={false} />
+                <Comment interaction={comment} popupName="aaa" isReply={false}/>
             {/each}
         </div>
-        <FileTable {files} bind:activeFile={activeFile} />
+        <FileTable {files} bind:activeFile={activeFile}/>
         <hr class="row-start-2">
-        <Render {activeFile} />
+        <Render {activeFile}/>
     </div>
 </div>
