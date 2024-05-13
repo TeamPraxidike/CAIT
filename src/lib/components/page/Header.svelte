@@ -12,8 +12,8 @@
     const navOptions : NavOption[] = [
         { text: 'Home', link: '/' },
         { text: 'About', link: '/about' },
-        { text: 'Browse Materials', link: '/browse?type=material' },
-        { text: 'Browse Circuits', link: '/browse?type=circuit' },
+        { text: 'Browse Materials', link: '/browse?type=materials' },
+        { text: 'Browse Circuits', link: '/browse?type=circuits' },
     ]
 
     const popupHover: PopupSettings = {
@@ -54,11 +54,11 @@
         </div>
 
         <div class="hidden md:flex col-start-11 col-span-2 md:gap-2 xl:gap-4 items-center justify-self-end">
-                {#if loggedIn}
-                    <a href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Publish</a>
-                {:else}
-                    <button on:click={login} class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Sign In</button>
-                {/if}
+            {#if loggedIn}
+                <a href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Publish</a>
+            {:else}
+                <button on:click={login} class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Sign In</button>
+            {/if}
             <div class="border-l border-surface-300 h-8"/>
             <div>
                 <LightSwitch />
@@ -77,16 +77,16 @@
         </div>
 
         <button  class="col-end-5 self-center justify-self-end w-12 h-8 md:hidden" on:click={toggleDropDown}>
-                <Icon icon="solar:hamburger-menu-outline" className="text-surface-600 dark:text-surface-50" width="48" height="32"/>
-            </button>
+            <Icon icon="solar:hamburger-menu-outline" className="text-surface-600 dark:text-surface-50" width="48" height="32"/>
+        </button>
 
         {#if dropDown}
             <div class="md:hidden col-span-4 w-full flex flex-col items-stretch" transition:slide={{ delay: 0, duration: 400, easing: quartOut, axis: 'y' }}>
                 {#each navOptions as opt}
                     <a class="md:underline text-surface-800" href={opt.link} on:click={toggleDropDown}>
                         <div class="p-4 rounded-lg flex justify-between  items-center dark:text-surface-50">
-                        {opt.text}
-                         <Icon icon="oui:arrow-right" className="text-sm text-surface-600"/>
+                            {opt.text}
+                            <Icon icon="oui:arrow-right" className="text-sm text-surface-600"/>
 
                         </div>
                     </a>

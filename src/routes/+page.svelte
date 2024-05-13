@@ -20,7 +20,7 @@
         </div>
         <div class="flex flex-col gap-2 mb-20">
             <div class="flex gap-2">
-                <a href="/browse"><button class="btn p-3 rounded-lg bg-primary-500 font-bold">See Publications</button></a>
+                <a href="/browse"><button class="btn p-3 text-surface-100 rounded-lg bg-primary-500 font-bold">See Publications</button></a>
             </div>
             <h6 class="text-sm dark:text-surface-300">Used by TU Delft and the entirety of the world</h6>
         </div>
