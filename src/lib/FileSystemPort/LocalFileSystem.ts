@@ -1,8 +1,12 @@
 import fs from 'fs';
 import { randomUUID } from 'node:crypto';
-import type FileSystem from '$lib/fileSystem/fileSystem';
+import type FileSystem from '$lib/FileSystemPort/FileSystem';
 import path from 'path';
+import { Blob } from 'node:buffer';
 
+/**
+ * Adapter interface for the FileSystem Port that deals with file management locally.
+ */
 export class LocalFileSystem implements FileSystem {
 	//readonly basePath = 'static\\uploadedFiles\\';
 	readonly basePath = path.join('static', 'uploadedFiles');

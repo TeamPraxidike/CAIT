@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { LocalFileSystem } from '$lib/fileSystem/localFileSystem';
+import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import fs from 'fs';
 import path from 'path';
+import { Blob } from 'node:buffer';
 
 const basePath = path.join('static', 'uploadedFiles');
 
