@@ -9,7 +9,7 @@
 	import css from 'highlight.js/lib/languages/css';
 	import javascript from 'highlight.js/lib/languages/javascript';
 	import typescript from 'highlight.js/lib/languages/typescript';
-    import {Grid, Header} from "$lib"
+    import {Footer, Grid, Header} from "$lib"
 
 
     hljs.registerLanguage('xml', xml); // for HTML
@@ -59,5 +59,6 @@
     </Grid>
 </div>
 
+<Footer />
 
 <!--Footer-->
