@@ -8,7 +8,7 @@
 
 
     export let name: string = 'Details About CNN and ANN';
-
+	export let className: string = 'col-span-4 lg:col-span-3';
 	export let liked: boolean = true;
 	export let saved: boolean = true;
 	export let numMaterials: number = 1;
@@ -91,7 +91,7 @@
 </script>
 
 
-<div class="col-span-4 lg:col-span-3 h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800">
+<div class="{className} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
 	<div class="w-full relative h-2/5 rounded-t-lg">
 		{#if used > 5}
 			<p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
