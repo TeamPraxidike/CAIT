@@ -14,7 +14,7 @@ describe('Users', () => {
 
         it('should respond with 200 and the publication if it exists', async () => {
             const newUser =
-                await createUser('ivan', 'shishman', 'ivanshishman@pliska.bg', false);
+                await createUser('ivan', 'shishman', 'ivanshishman@pliska.bg', "vasko.png", false);
 
             const response = await fetch(`${testingUrl}/user/${newUser.id}`, {method: 'GET'});
             expect(response.status).toBe(200);

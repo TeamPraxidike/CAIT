@@ -11,6 +11,7 @@ export async function GET({ params }) {
             lastName: 'Roosevelt',
             email: 'franklindroosvelt@usa.gov',
             reputation: 1238,
+            profilePic: "aaa",
             isAdmin: false,
         }
 
@@ -20,6 +21,7 @@ export async function GET({ params }) {
             lastName: 'Churchill',
             email: 'winchurch@parl.gov.uk',
             reputation: 1232,
+            profilePic: "aaa",
             isAdmin: false,
         }
 

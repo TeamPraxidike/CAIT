@@ -34,7 +34,7 @@ describe('Materials', () => {
 describe("createMaterialPublication", () => {
     it("should create a material publication with files", async () => {
 
-        const user = await createUser("Vasko", "Vasko", "Vasko", false);
+        const user = await createUser("Vasko", "Vasko", "Vasko","vasko", false);
         const materialData = {
             title: 'Vasko and Friends',
             description: 'Vasko falls in love with Travis Scott',
