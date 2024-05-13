@@ -1,7 +1,5 @@
 import {
 	getPublicationById,
-	createUser,
-	getUserById,
 	createCircuitPublication,
 	createMaterialPublication,
 	addNodeToCircuit,
@@ -10,6 +8,7 @@ import {
 import { getMaterialByPublicationId, getAllMaterials } from './material';
 
 import { getCircuitByPublicationId, getAllCircuits } from './circuit';
+import {getUserById, createUser} from "$lib/database/user";
 
 import { addFiles } from '$lib/database/file';
 import { prisma } from './prisma';

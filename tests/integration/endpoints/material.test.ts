@@ -7,20 +7,20 @@ import { prisma } from '$lib/database';
 
 describe('Materials', () => {
 	describe('[GET] /material/:id', () => {
-		// it('should respond with 404 if the publication of type material does not exist', async () => {
-		//     const response = await fetch(`${testingUrl}/material/1`, {method: 'GET'});
-		//     expect(response.status).toBe(404);
-		//     const body = await response.json();
-		//     expect(body.error).toBe('Material Not Found');
-		//     expect(body).not.toHaveProperty('firstName');
-		// });
-
-		it('should respond with 200 if the publication of type material exists', async () => {
-			const response = await fetch(`${testingUrl}/material/1`, {
-				method: 'GET',
-			});
-			expect(response.status).toBe(200);
+		it('should respond with 404 if the publication of type material does not exist', async () => {
+		    const response = await fetch(`${testingUrl}/material/1`, {method: 'GET'});
+		    expect(response.status).toBe(404);
+		    const body = await response.json();
+		    expect(body.error).toBe('Material Not Found');
+		    expect(body).not.toHaveProperty('firstName');
 		});
+
+		// it('should respond with 200 if the publication of type material exists', async () => {
+		// 	const response = await fetch(`${testingUrl}/material/1`, {
+		// 		method: 'GET',
+		// 	});
+		// 	expect(response.status).toBe(200);
+		// });
 
 		it('should respond with 400 if the id is malformed', async () => {
 			const response = await fetch(`${testingUrl}/material/-1`, {
@@ -36,7 +36,7 @@ describe('Materials', () => {
 
 describe('createMaterialPublication', () => {
 	it('should create a material publication with files', async () => {
-		const user = await createUser('Vasko', 'Vasko', 'Vasko', 'vasko', false);
+		const user = await createUser('Vasko', 'Vasko', 'Vasko', 'vasko');
 		const materialData = {
 			title: 'Vasko and Friends',
 			description: 'Vasko falls in love with Travis Scott',

@@ -28,6 +28,7 @@ model User {
   id         Int     @id @default(autoincrement())
   firstName  String
   lastName   String
+  username   String  @unique
   email      String
   profilePic String?
   reputation Int     @default(0)
@@ -40,7 +41,7 @@ model User {
   maintaining Publication[] @relation("maintainers")
   comments    Comment[]
   replies     Reply[]
-  isAdmin     Boolean
+  isAdmin     Boolean       @default(false)
 }
 
 model PublicationUsedInCourse {
