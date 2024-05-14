@@ -10,7 +10,7 @@
     export let isReply:boolean;
     export let liked = false;
 		//for now, here , we need to fetch it for each comment, which is kind of pain, but sure
-		export let userName = "Zlatan Ibrahimovic"
+		export let userName = "Tom Viering"
 		export let browsingUser = 1
 		export let popupName:string;
 		let user = interaction.userId
@@ -120,7 +120,7 @@
 
 
 
-<div bind:this={commentDiv} class="peer/comment {isReply ? 'col-start-2 md:col-start-2 md:col-span-7': 'col-start-1 md:col-start-1 md:col-span-8'} relative rounded-lg flex gap-2 p-1 " >
+<div bind:this={commentDiv} class="{isReply ? 'col-start-2 md:col-start-2 md:col-span-7': 'col-start-1 md:col-start-1 md:col-span-8'} col-span-full relative rounded-lg flex gap-2 p-1 " >
 	<div class="w-12 h-12 placeholder-circle">
 	</div>
 	<div class="flex flex-col w-full">
