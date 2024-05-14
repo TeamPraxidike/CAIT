@@ -190,11 +190,11 @@
     };
 </script>
 
-<div class="col-span-4 ">
+<div class="col-span-4  mt-28">
     <SearchBar searchType="materials" bind:inputKeywords={searchWord}/>
 </div>
 
-<div class="col-span-full lg:col-span-8 flex justify-between gap-8">
+<div class="col-span-full lg:col-span-8 flex justify-between gap-8 mt-28">
     <div class="flex gap-2">
 
         <!-------Tags-------->
