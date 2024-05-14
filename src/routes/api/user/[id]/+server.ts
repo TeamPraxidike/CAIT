@@ -1,6 +1,4 @@
-import {editUser, getUserById} from "$lib/database";
-import type {userEditData} from "$lib/database";
-import {deleteUser} from "$lib/database/user";
+import {deleteUser, editUser, getUserById, type userEditData} from "$lib/database";
 
 export async function GET({ params }) {
 	const { id } = params;
@@ -42,6 +40,3 @@ export async function PUT({ params , request}) {
         return new Response(JSON.stringify({ error }), { status: 500 });
     }
 }
-
-
-

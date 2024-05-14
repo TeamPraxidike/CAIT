@@ -1,11 +1,10 @@
-import { getMaterialByPublicationId } from '$lib/database/material';
-import type { RequestHandler } from '@sveltejs/kit';
+import {getMaterialByPublicationId} from "$lib/database/material";
 
-export const GET: RequestHandler = async ({ params }) => {
-	// Authentication step
-	// return 401 if user not authenticated
+export async function GET({ params }) {
+    // Authentication step
+    // return 401 if user not authenticated
 
-	const publicationId = Number(params.publicationId);
+    const publicationId = parseInt(params.publicationId);
 
 	if (isNaN(publicationId) || publicationId <= 0) {
 		return new Response(JSON.stringify({ error: 'Bad Request - Invalid ID' }), {
@@ -26,4 +25,4 @@ export const GET: RequestHandler = async ({ params }) => {
 			status: 500,
 		});
 	}
-};
+}

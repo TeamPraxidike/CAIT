@@ -20,12 +20,13 @@ import {prisma} from "$lib/database";
  */
 export async function createUser(firstName: string, lastName: string, email: string, profilePic: string) {
 
+    const username = await generateUsername(firstName, lastName);
 
     return prisma.user.create({
         data: {
             firstName: firstName,
             lastName: lastName,
-            username: await generateUsername(firstName, lastName),
+            username: username,
             email: email,
             profilePic: profilePic,
         },

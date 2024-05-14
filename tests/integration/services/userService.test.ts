@@ -2,7 +2,9 @@ import {createUser, getUserById} from "$lib/database";
 import {describe, it, expect} from "vitest";
 import {randomUUID} from "node:crypto";
 import {editUser} from "$lib/database/user";
+import {resetUserTable} from "../setup";
 
+await resetUserTable();
 
 describe("Creating users", () => {
     it("should increase the id by 1", async () => {

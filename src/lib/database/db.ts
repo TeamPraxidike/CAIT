@@ -1,4 +1,5 @@
-import { Difficulty, PublicationType } from '@prisma/client';
+import {Difficulty, PublicationType} from '@prisma/client';
+import {Prisma} from "@prisma/client/extension";
 
 import { addFiles, prisma } from '$lib/database';
 
@@ -9,24 +10,26 @@ import { addFiles, prisma } from '$lib/database';
  * @param difficulty
  * @param publisherId
  * @param type
+ * @param prismaContext
  */
 async function createPublication(
-	title: string,
-	description: string,
-	difficulty: Difficulty,
-	publisherId: number,
-	type: PublicationType,
+    title: string,
+    description: string,
+    difficulty: Difficulty,
+    publisherId: number,
+    type: PublicationType,
+    prismaContext: Prisma.TransactionClient = prisma // default to normal client or use argument
 ) {
-	return prisma.publication.create({
-		data: {
-			title: title,
-			description: description,
-			likes: 0,
-			difficulty: difficulty,
-			publisherId: publisherId,
-			type: type,
-		},
-	});
+    return prismaContext.publication.create({
+        data: {
+            title: title,
+            description: description,
+            likes: 0,
+            difficulty: difficulty,
+            publisherId: publisherId,
+            type: type,
+        },
+    });
 }
 
 /**
@@ -35,39 +38,43 @@ async function createPublication(
  * the title, the description, the difficulty, the time estimate,
  * the theory to practice ratio, the files and the type of the material (dataset, assignment, etc.).
  */
-export async function createMaterialPublication(materialData: {
-	userId: number; // TODO may be better to be the user, dont know how to specify type then
-	title: string;
-	description: string;
-	copyright: boolean;
-	difficulty: Difficulty; // TODO figure out how to make people using this not import Difficulty type from prisma
-	timeEstimate?: number;
-	theoryPractice?: number;
-	paths?: string[];
-	titles?: string[];
-}) {
-	const publication = await createPublication(
-		materialData.title,
-		materialData.description,
-		materialData.difficulty,
-		materialData.userId,
-		PublicationType.Material,
-	);
+export async function createMaterialPublication(
+    materialData: {
+        userId: number, // TODO may be better to be the user, dont know how to specify type then
+        title: string,
+        description: string,
+        copyright: boolean,
+        difficulty: Difficulty, // TODO figure out how to make people using this not import Difficulty type from prisma
+        timeEstimate?: number,
+        theoryPractice?: number,
+        paths?: string[],
+        titles?: string[]
+    }
+) {
+    return await prisma.$transaction(async (prismaTransaction) => {
+        const publication = await createPublication(
+            materialData.title,
+            materialData.description,
+            materialData.difficulty,
+            materialData.userId,
+            PublicationType.Material,
+            prismaTransaction
+        );
 
-	const material = await prisma.material.create({
-		data: {
-			publicationId: publication.id,
-			timeEstimate: materialData.timeEstimate,
-			theoryPractice: materialData.theoryPractice,
-			copyright: materialData.copyright,
-		},
-	});
+        const material = await prismaTransaction.material.create({
+            data: {
+                publicationId: publication.id,
+                timeEstimate: materialData.timeEstimate,
+                theoryPractice: materialData.theoryPractice,
+                copyright: materialData.copyright,
+            }
+        });
 
-	if (materialData.paths === undefined || materialData.titles === undefined)
-		return material;
+        if(materialData.paths === undefined || materialData.titles === undefined) return material;
 
-	await addFiles(materialData.paths, materialData.titles, material.id);
-	return material;
+        await addFiles(materialData.paths, materialData.titles, material.id, prismaTransaction);
+        return material;
+    })
 }
 
 /**
@@ -75,26 +82,31 @@ export async function createMaterialPublication(materialData: {
  * @param circuitData This is an object that contains the id of the user who created the circuit,
  * the title, the description and the difficulty
  */
-export async function createCircuitPublication(circuitData: {
-	userId: number; // may have to be the user, dont know how to specify type then
-	title: string;
-	description: string;
-	copyright: boolean;
-	difficulty: Difficulty;
-}) {
-	const publication = await createPublication(
-		circuitData.title,
-		circuitData.description,
-		circuitData.difficulty,
-		circuitData.userId,
-		PublicationType.Circuit,
-	);
+export async function createCircuitPublication(
+    circuitData: {
+        userId: number, // may have to be the user, dont know how to specify type then
+        title: string,
+        description: string,
+        copyright: boolean,
+        difficulty: Difficulty
+    }
+) {
+    return await prisma.$transaction(async (prismaTransaction) => {
+        const publication = await createPublication(
+            circuitData.title,
+            circuitData.description,
+            circuitData.difficulty,
+            circuitData.userId,
+            PublicationType.Circuit,
+            prismaTransaction
+        );
 
-	return prisma.circuit.create({
-		data: {
-			publicationId: publication.id,
-		},
-	});
+        return prismaTransaction.circuit.create({
+            data: {
+                publicationId: publication.id,
+            },
+        });
+    })
 }
 
 /**

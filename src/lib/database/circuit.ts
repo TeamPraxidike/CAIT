@@ -18,5 +18,11 @@ export async function getCircuitByPublicationId(publicationId: number) {
  * Returns the all publications of type Circuit in the database
  */
 export async function getAllCircuits() {
-	return prisma.circuit.findMany();
+    return prisma.circuit.findMany({
+        include: {
+            publication: true,
+            nodes: false
+        }
+    });
 }
+
