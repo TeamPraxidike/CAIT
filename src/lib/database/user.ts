@@ -1,5 +1,6 @@
 import {prisma} from "$lib/database";
 
+
 // @ts-ignore
 /**
  * Adds a new user to the database. Generates a unique username based on the user's first and last name.
@@ -18,6 +19,20 @@ import {prisma} from "$lib/database";
  * @param profilePic
  */
 export async function createUser(firstName: string, lastName: string, email: string, profilePic: string) {
+
+
+    return prisma.user.create({
+        data: {
+            firstName: firstName,
+            lastName: lastName,
+            username: await generateUsername(firstName, lastName),
+            email: email,
+            profilePic: profilePic,
+        },
+    });
+}
+
+async function generateUsername(firstName: string, lastName: string) {
     const users = await prisma.user.findMany({
         where: {
             firstName: firstName,
@@ -40,16 +55,7 @@ export async function createUser(firstName: string, lastName: string, email: str
     } else {
         username = firstName + lastName + '_' + (maxNumber + 1);
     }
-
-    return prisma.user.create({
-        data: {
-            firstName: firstName,
-            lastName: lastName,
-            username: username,
-            email: email,
-            profilePic: profilePic,
-        },
-    });
+    return username;
 }
 
 
@@ -66,6 +72,10 @@ export async function getUserById(id: number) {
     });
 }
 
+/**
+ * Deletes a user from the database
+ * @param userId
+ */
 export async function deleteUser(userId: number) {
     return prisma.user.delete({
         where: {
@@ -73,5 +83,29 @@ export async function deleteUser(userId: number) {
         }
     });
 }
+
+type userEditData = {
+    id: number,
+    firstName: string,
+    lastName: string,
+    email: string,
+    profilePic: string,
+}
+
+export async function editUser(user : userEditData) {
+    return prisma.user.update({
+        where: {
+            id: user.id
+        },
+        data: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            profilePic: user.profilePic,
+            username: await generateUsername(user.firstName, user.lastName)
+        }
+    });
+}
+
 
 

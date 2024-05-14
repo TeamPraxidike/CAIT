@@ -1,6 +1,7 @@
 import {createUser, getUserById} from "$lib/database";
 import {describe, it, expect} from "vitest";
 import {randomUUID} from "node:crypto";
+import {editUser} from "$lib/database/user";
 
 
 describe("Creating users", () => {
@@ -14,6 +15,23 @@ describe("Creating users", () => {
         }
     });
 });
+
+describe("Editing users", () => {
+    it("should change users", async () => {
+        const user = await createUser("Bobi", "Bobi", "email@email", "vasko.pdf");
+
+        await editUser({id: user.id, firstName: "Kiro", lastName: "Breika", email: "l", profilePic: "pdf.pdf"});
+
+        const editedUser = await getUserById(user.id);
+        expect(editedUser).toHaveProperty("firstName", "Kiro");
+        expect(editedUser).toHaveProperty("lastName", "Breika");
+        expect(editedUser).toHaveProperty("email", "l");
+        expect(editedUser).toHaveProperty("profilePic", "pdf.pdf");
+
+        expect(editedUser).toHaveProperty("username", "KiroBreika");
+    });
+});
+
 
 
 
