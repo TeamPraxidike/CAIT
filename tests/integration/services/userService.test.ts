@@ -30,6 +30,7 @@ describe("Editing users", () => {
 
         expect(editedUser).toHaveProperty("username", "KiroBreika");
     });
+
 });
 
 

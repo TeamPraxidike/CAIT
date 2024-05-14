@@ -84,7 +84,7 @@ export async function deleteUser(userId: number) {
     });
 }
 
-type userEditData = {
+export type userEditData = {
     id: number,
     firstName: string,
     lastName: string,

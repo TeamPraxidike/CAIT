@@ -1,6 +1,7 @@
 import {describe, it, expect, beforeEach} from 'vitest';
 import {testingUrl} from "../setup";
 import {createUser, getUserById} from "$lib/database";
+import type {userEditData} from "$lib/database";
 
 describe('Users', () => {
 	describe('[GET] /user/:id', () => {
@@ -95,6 +96,41 @@ describe('Users', () => {
 				}
 			});
 			expect(deleteResponse.status).toBe(200);
+		});
+	});
+
+	describe('[PUT] /user/:id', () => {
+		it('should succesfully delete already existing users', async () => {
+
+			const body = {
+				firstName: 'FirstName',
+				lastName: 'LastName',
+				email: 'email@student.tudelft.nl',
+				profilePic: 'boiko.sh'
+			};
+
+			const newUser =
+				await createUser(body.firstName, body.lastName, body.email, body.profilePic);
+
+			const editUser : userEditData  = {
+				id: newUser.id,
+				firstName: 'coolName',
+				lastName: 'coolLastName',
+				email: 'email@student.tudelft.nl',
+				profilePic: 'boiko.sh'
+			};
+
+			const response = await fetch(`${testingUrl}/user/${newUser.id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(editUser)
+			});
+			const user = await response.json();
+			expect(response.status).toBe(200);
+
+			expect(user).toHaveProperty("firstName", "coolName");
 		});
 	});
 });
