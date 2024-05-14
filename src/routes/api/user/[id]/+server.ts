@@ -1,4 +1,4 @@
-import {getUserById} from "$lib/database/db";
+import type { User } from '@prisma/client';
 
 export async function GET({ params }) {
     try {
@@ -9,3 +9,4 @@ export async function GET({ params }) {
         return new Response(JSON.stringify({ error }), { status: 500 });
     }
 }
+

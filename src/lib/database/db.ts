@@ -1,6 +1,5 @@
 import {Difficulty, PublicationType} from '@prisma/client';
 
-
 import {addFiles, prisma} from "$lib/database";
 import {Prisma} from "@prisma/client/extension";
 
@@ -9,18 +8,25 @@ import {Prisma} from "@prisma/client/extension";
  * @param firstName
  * @param lastName
  * @param email
+ * @param profilePic
  * @param isAdmin
  */
-export async function createUser(firstName: string, lastName: string, email: string, isAdmin: boolean) {
-    return prisma.user.create({
-        data: {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            reputation: 0,
-            isAdmin: isAdmin,
-        },
-    });
+export async function createUser(
+	firstName: string,
+	lastName: string,
+	email: string,
+	profilePic: string,
+	isAdmin: boolean,
+) {
+	return prisma.user.create({
+		data: {
+			firstName: firstName,
+			lastName: lastName,
+			email: email,
+			profilePic: profilePic,
+			isAdmin: isAdmin,
+		},
+	});
 }
 
 /**
@@ -28,13 +34,13 @@ export async function createUser(firstName: string, lastName: string, email: str
  * @param id
  */
 export async function getUserById(id: number) {
-    const user = await prisma.user.findUnique({
-        where: {
-            id: id
-        },
-    });
-    console.log('User:', user);
-    return user;
+	const user = await prisma.user.findUnique({
+		where: {
+			id: id,
+		},
+	});
+	console.log('User:', user);
+	return user;
 }
 
 /**
@@ -148,11 +154,11 @@ export async function createCircuitPublication(
  * @param id
  */
 export async function getPublicationById(id: number) {
-    return prisma.publication.findUnique({
-        where: {
-            id: id
-        },
-    });
+	return prisma.publication.findUnique({
+		where: {
+			id: id,
+		},
+	});
 }
 
 // TODO I dont know if this replaces the whole array of nodes or just adds the new one
@@ -163,20 +169,21 @@ export async function getPublicationById(id: number) {
  * @param nodeId
  */
 export async function addNodeToCircuit(publicationId: number, nodeId: number) {
-    const publication = await getPublicationById(publicationId);
-    if(publication === null) throw new Error('Publication not found');
-    if(publication.type !== PublicationType.Circuit) throw new Error('Publication is not a circuit');
+	const publication = await getPublicationById(publicationId);
+	if (publication === null) throw new Error('Publication not found');
+	if (publication.type !== PublicationType.Circuit)
+		throw new Error('Publication is not a circuit');
 
-    return prisma.circuit.update({
-        where: {
-            publicationId: publication.id
-        },
-        data: {
-            nodes: {
-                connect: {
-                    id: nodeId
-                }
-            }
-        }
-    });
+	return prisma.circuit.update({
+		where: {
+			publicationId: publication.id,
+		},
+		data: {
+			nodes: {
+				connect: {
+					id: nodeId,
+				},
+			},
+		},
+	});
 }

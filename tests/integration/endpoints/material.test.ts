@@ -111,7 +111,6 @@ describe('Materials', async () => {
             expect(responseBody).toHaveLength(0);
         });
 
-
         it('should handle one material', async () => {
             const materialData = await populate("0");
 
@@ -193,7 +192,3 @@ describe('Materials', async () => {
         });
     });
 });
-
-
-
-

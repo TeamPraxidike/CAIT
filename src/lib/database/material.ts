@@ -1,17 +1,17 @@
-import {prisma} from "$lib/database";
+import { prisma } from '$lib/database';
 
 /**
  * Returns a publication of type Material with the given id.
  * @param publicationId - id of publication linked to material
  */
 export async function getMaterialByPublicationId(publicationId: number) {
-    return prisma.material.findUnique({
-        where: { publicationId: publicationId },
-        include: {
-            publication: true,
-            files: true
-        }
-    });
+	return prisma.material.findUnique({
+		where: { publicationId: publicationId },
+		include: {
+			publication: true,
+			files: true,
+		},
+	});
 }
 
 /**

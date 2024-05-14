@@ -18,10 +18,12 @@ describe('Users', () => {
             const newUser =
                 await createUser('ivan', 'shishman', 'ivanshishman@pliska.bg', false);
 
-            const response = await fetch(`${testingUrl}/user/${newUser.id}`, {method: 'GET'});
-            expect(response.status).toBe(200);
-            const body = await response.json();
-            expect(body.id).toBe(newUser.id);
-        });
-    });
+			const response = await fetch(`${testingUrl}/user/${newUser.id}`, {
+				method: 'GET',
+			});
+			expect(response.status).toBe(200);
+			const body = await response.json();
+			expect(body.id).toBe(newUser.id);
+		});
+	});
 });
