@@ -6,7 +6,7 @@ export default mergeConfig(viteConfig, defineConfig({
     test: {
         include: ['tests/integration/**/*.test.ts'],
         //pool: "forks", // no threads
-        maxConcurrency: 5, // Run five test files at a time
+        maxConcurrency: 5, // Run max 5 concurrent tests at a time
         setupFiles: ['tests/integration/setup.ts'],
         coverage: {
             enabled: true,

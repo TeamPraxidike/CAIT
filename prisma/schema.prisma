@@ -63,6 +63,7 @@ model Publication {
   likes              Int        @default(0)
   tags               Tag[]
   learningObjectives String[]
+  prerequisites      String[]
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
