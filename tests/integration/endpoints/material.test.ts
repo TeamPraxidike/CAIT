@@ -9,7 +9,7 @@ import {
 
 
 async function populate(arg: string) {
-    const user = await createUser("Vasko", "Vasko", "Vasko", false);
+    const user = await createUser("Vasko", "Vasko", "Vasko", "path",false);
     return {
         title: 'Vasko and Friends',
         description: 'Vasko falls in love with Travis Scott',
@@ -159,7 +159,7 @@ describe('Materials', async () => {
 
     describe('[POST] /material', () => {
         it("should create a material publication with files", async () => {
-            const user = await createUser("John", "Doe", "l", false);
+            const user = await createUser("John", "Doe", "l", "path", false);
             const material = await createMaterialPublication({
                 title: "Priklucheniqta na Vasko",
                 description: "Vasko nqma kraka",

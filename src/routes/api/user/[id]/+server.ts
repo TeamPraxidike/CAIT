@@ -1,4 +1,4 @@
-import type { User } from '@prisma/client';
+import { getUserById } from '$lib/database';
 
 export async function GET({ params }) {
     try {

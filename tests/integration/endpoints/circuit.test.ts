@@ -4,7 +4,7 @@ import {createCircuitPublication, createUser} from "$lib/database";
 import {Difficulty} from "@prisma/client";
 
 async function populate() {
-    const user = await createUser("Vasko", "Vasko", "Vasko", false);
+    const user = await createUser("Vasko", "Vasko", "Vasko", "path", false);
     return  {
         title: 'Vasko and Friends',
         description: 'Vasko falls in love with Travis Scott',
