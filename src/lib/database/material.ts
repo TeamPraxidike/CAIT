@@ -3,7 +3,7 @@ import {Difficulty} from "@prisma/client";
 import {Prisma} from "@prisma/client/extension";
 
 /**
- * Returns a publication of type Material with the given id.
+ * [GET] Returns a publication of type Material with the given id.
  * @param publicationId - id of publication linked to material
  */
 export async function getMaterialByPublicationId(publicationId: number) {
@@ -17,7 +17,19 @@ export async function getMaterialByPublicationId(publicationId: number) {
 }
 
 /**
- * Returns an updated publication of type Material with the given id.
+ * [GET] Returns the all publications of type Material in the database
+ */
+export async function getAllMaterials() {
+    return prisma.material.findMany({
+        include: {
+            publication: true,
+            files: false
+        }
+    });
+}
+
+/**
+ * [POST] Returns an updated publication of type Material with the given id.
  * @param publicationId
  * @param title
  * @param description
@@ -38,9 +50,9 @@ export async function updateMaterialByPublicationId(
 	learningObjectives: string[],
 	prerequisites: string[],
 	coverPic: string,
-	copyright: boolean = false,
-	timeEstimate: number = 0,
-	theoryPractice: number = 0,
+	copyright: boolean,
+	timeEstimate: number,
+	theoryPractice: number,
 	prismaContext: Prisma.TransactionClient = prisma
 ) {
 	return prismaContext.material.update({
@@ -70,76 +82,4 @@ export async function updateMaterialByPublicationId(
 			files: true,
 		}
 	});
-}
-
-export async function updateMaterialConnectMaintainers(publicationId: number, maintainerConnect: number[],
-													   prismaContext: Prisma.TransactionClient = prisma) {
-	return prismaContext.publication.update({
-		where: { id: publicationId },
-		data: {
-			maintainers: {
-				connect: maintainerConnect.map(id => ({ id })),
-			}
-		},
-		include:{
-			materials: true
-		}
-	});
-}
-
-export async function updateMaterialDisconnectMaintainers(publicationId: number, maintainerDisconnect: number[],
-														  prismaContext: Prisma.TransactionClient = prisma) {
-	return prismaContext.publication.update({
-		where: { id: publicationId },
-		data: {
-			maintainers: {
-				disconnect: maintainerDisconnect.map(id => ({ id })),
-			}
-		},
-		include:{
-			materials: true
-		}
-	});
-}
-
-export async function updateMaterialConnectTags(publicationId: number, tagConnect: number[],
-												prismaContext: Prisma.TransactionClient = prisma) {
-	return prismaContext.publication.update({
-		where: { id: publicationId },
-		data: {
-			tags: {
-				connect: tagConnect.map(id => ({ id })),
-			}
-		},
-		include:{
-			materials: true
-		}
-	});
-}
-
-export async function updateMaterialDisconnectTags(publicationId: number,tagDisconnect: number[],
-												   prismaContext: Prisma.TransactionClient = prisma) {
-	return prismaContext.publication.update({
-		where: { id: publicationId },
-		data: {
-			tags: {
-				disconnect: tagDisconnect.map(id => ({ id })),
-			}
-		},
-		include:{
-			materials: true
-		}
-	});
-}
-
-/**
- * Returns the all publications of type Material in the database
- */
-export async function getAllMaterials() {
-    return prisma.material.findMany({
-        include: {
-            publication: true,
-            files: false
-        }
-    });
 }

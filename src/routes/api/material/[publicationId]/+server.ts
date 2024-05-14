@@ -1,65 +1,5 @@
 import {getMaterialByPublicationId, updateMaterialByPublicationId,
-updateMaterialConnectMaintainers, updateMaterialDisconnectMaintainers,
-updateMaterialConnectTags, updateMaterialDisconnectTags} from "$lib/database/material";
-import {prisma} from "$lib/database";
-import {Prisma} from "@prisma/client/extension";
-
-
-async function connectMaintainers(publicationId: number, maintainerConnect: string[],
-								  prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-	// ids of users to connect as maintainers
-	const maintainerConParsed = maintainerConnect.map((number: string) => {
-		const parsed = parseInt(number);
-		if (isNaN(parsed)) {
-			throw new Error(`Invalid number in maintainer connect: ${number}`);
-		}
-		return parsed;
-	});
-
-	await updateMaterialConnectMaintainers(publicationId, maintainerConParsed, prismaContext);
-}
-
-async function disconnectMaintainers(publicationId: number, maintainerDisconnect: string[],
-									 prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-// ids of users to disconnect as maintainers
-	const maintainerDisParsed = maintainerDisconnect.map((number: string) => {
-		const parsed = parseInt(number);
-		if (isNaN(parsed)) {
-			throw new Error(`Invalid number in maintainer disconnect: ${number}`);
-		}
-		return parsed;
-	});
-
-	await updateMaterialDisconnectMaintainers(publicationId, maintainerDisParsed, prismaContext);
-}
-
-async function connectTags(publicationId: number, tagConnect: string[],
-						   prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-// ids of tags to connect
-	const tagConnectParsed = tagConnect.map((number: string) => {
-		const parsed = parseInt(number);
-		if (isNaN(parsed)) {
-			throw new Error(`Invalid number in tag connect: ${number}`);
-		}
-		return parsed;
-	});
-
-	await updateMaterialConnectTags(publicationId, tagConnectParsed, prismaContext);
-}
-
-async function disconnectTags(publicationId: number, tagDisconnect: string[],
-							  prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-// ids of tags to disconnect
-	const tagDisconnectParsed = tagDisconnect.map((number: string) => {
-		const parsed = parseInt(number, 10);
-		if (isNaN(parsed)) {
-			throw new Error(`Invalid number in tag disconnect: ${number}`);
-		}
-		return parsed;
-	});
-
-	await updateMaterialDisconnectTags(publicationId, tagDisconnectParsed, prismaContext);
-}
+connectTags, disconnectTags, disconnectMaintainers, connectMaintainers, prisma} from "$lib/database";
 
 /**
  * Get material by id
@@ -146,6 +86,8 @@ export async function POST({ request, params }) {
 					status: 404,
 				});
 			}
+
+			return material;
 		});
 
 		return new Response(JSON.stringify({ material }), { status: 200 });
