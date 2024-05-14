@@ -18,10 +18,15 @@ export async function getMaterialByPublicationId(publicationId: number) {
  * Returns the all publications of type Material in the database
  */
 export async function getAllMaterials() {
-    return prisma.material.findMany({
-        include: {
-            publication: true,
-            files: false
-        }
-    });
+	return prisma.material.findMany({
+		include: {
+			publication: true,
+			files: false,
+		},
+	});
+}
+export async function deleteMaterialByPublicationId(publicationId: number) {
+	return prisma.material.delete({
+		where: { publicationId: publicationId },
+	});
 }
