@@ -25,4 +25,4 @@ export async function GET({ params }) {
 			status: 500,
 		});
 	}
-};
+}
