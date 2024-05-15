@@ -1,8 +1,8 @@
 import {
-    getCircuitByPublicationId, connectTags, disconnectTags,
-    disconnectMaintainers, connectMaintainers, prisma, handleConnections
+    getCircuitByPublicationId, prisma, handleConnections
 } from "$lib/database";
 import {updateCircuitByPublicationId} from "$lib/database/circuit";
+import {addNode, deleteNode, editNode} from "$lib/database/node";
 
 export async function GET({ params }) {
     // Authentication step
@@ -31,11 +31,11 @@ export async function GET({ params }) {
 }
 
 /**
- * Update material
+ * Update circuit
  * @param request
  * @param params
  */
-export async function POST({ request, params }) {
+export async function PUT({ request, params }) {
     // Authentication step
     // return 401 if user not authenticated
 
@@ -53,14 +53,25 @@ export async function POST({ request, params }) {
 
             const body = await request.json();
 
+            // add nodes
+            for (const node of body.nodes.add) {
+                await addNode(node.title, node.info, body.materialId, prismaTransaction);
+            }
+
+            // delete nodes
+            for (const node of body.nodes.delete) {
+                await deleteNode(node.path, prismaTransaction);
+            }
+
+            // edit existing nodes
+            for (const node of body.nodes.edit) {
+                await editNode(node.path, node.title, node.info, prismaTransaction);
+            }
+
             const circuit = await updateCircuitByPublicationId(
-                publicationId,
-                body.title,
-                body.description,
-                body.difficulty,
-                body.learningObjectives,
-                body.prerequisites,
-                prismaTransaction
+                publicationId, body.title, body.description,
+                body.difficulty, body.learningObjectives,
+                body.prerequisites, prismaTransaction
             );
             if (!circuit) {
                 return new Response(JSON.stringify({error: 'Circuit Not Found'}), {

@@ -41,7 +41,7 @@ export async function GET({ params }) {
  * @param request
  * @param params
  */
-export async function POST({ request, params }) {
+export async function PUT({ request, params }) {
 	// Authentication step
 	// return 401 if user not authenticated
 
@@ -59,17 +59,17 @@ export async function POST({ request, params }) {
 
 			const body = await request.json();
 
-			// Add files
+			// add files
 			for (const file of body.files.add) {
 				await addFile(file.title, file.info, body.materialId, prismaTransaction);
 			}
 
-			// Delete files
+			// delete files
 			for (const file of body.files.delete) {
 				await deleteFile(file.path, prismaTransaction);
 			}
 
-			// Edit existing files
+			// edit existing files
 			for (const file of body.files.edit) {
 				await editFile(file.path, file.title, file.info, prismaTransaction);
 			}

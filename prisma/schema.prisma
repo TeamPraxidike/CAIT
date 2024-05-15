@@ -114,6 +114,8 @@ model Node {
   circuitId Int
   circuit   Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
 
+  extensions String[]
+
   contentId Int
   content   Publication @relation(fields: [contentId], references: [id], onDelete: Cascade)
 

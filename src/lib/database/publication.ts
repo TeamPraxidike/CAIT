@@ -19,18 +19,10 @@ export async function handleConnections(request: Request, publicationId: number,
     if (body.maintainerConnect.length > 0) {
         await connectMaintainers(publicationId, body.maintainerConnect, prismaTransaction);
     }
-    if (body.maintainerDisconnect.length > 0) {
-        await disconnectMaintainers(publicationId, body.maintainerDisconnect, prismaTransaction);
-    }
     if (body.tagConnect.length > 0) {
         await connectTags(publicationId, body.tagConnect, prismaTransaction);
     }
-    if (body.tagDisconnect.length > 0) {
-        await disconnectTags(publicationId, body.tagDisconnect, prismaTransaction);
-    }
 }
-
-
 
 /**
  * Checks list for correctness
@@ -55,17 +47,6 @@ export async function connectMaintainers(publicationId: number, maintainerConnec
     }
 }
 
-export async function disconnectMaintainers(publicationId: number, maintainerDisconnect: number[],
-                                     prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-    try{
-        // ids of users to disconnect as maintainers
-        await checkList(maintainerDisconnect);
-        await updatePublicationDisconnectMaintainers(publicationId, maintainerDisconnect, prismaContext);
-    } catch (error) {
-        throw new Error(`Invalid number in maintainer disconnect`);
-    }
-}
-
 export async function connectTags(publicationId: number, tagConnect: number[],
                            prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
     try{
@@ -77,22 +58,22 @@ export async function connectTags(publicationId: number, tagConnect: number[],
     }
 }
 
-export async function disconnectTags(publicationId: number, tagDisconnect: number[],
-                              prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-    try{
-        // ids of tags to disconnect
-        await checkList(tagDisconnect);
-        await updatePublicationDisconnectTags(publicationId, tagDisconnect, prismaContext);
-    } catch (error) {
-        throw new Error(`Invalid number in tag disconnect`);
-    }
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 export async function updatePublicationConnectMaintainers(publicationId: number, maintainerConnect: number[],
                                                           prismaContext: Prisma.TransactionClient = prisma) {
+    // wipe all connections
+    await prismaContext.publication.update({
+        where: { id: publicationId },
+        data: {
+            maintainers: {
+                set: []
+            }
+        }
+    });
+
+    // establish updated ones
     return prismaContext.publication.update({
         where: { id: publicationId },
         data: {
@@ -103,37 +84,24 @@ export async function updatePublicationConnectMaintainers(publicationId: number,
     });
 }
 
-export async function updatePublicationDisconnectMaintainers(publicationId: number, maintainerDisconnect: number[],
-                                                             prismaContext: Prisma.TransactionClient = prisma) {
-    return prismaContext.publication.update({
+export async function updatePublicationConnectTags(publicationId: number, tagConnect: number[],
+                                                   prismaContext: Prisma.TransactionClient = prisma) {
+    // wipe all connections
+    await prismaContext.publication.update({
         where: { id: publicationId },
         data: {
-            maintainers: {
-                disconnect: maintainerDisconnect.map(id => ({ id })),
+            tags: {
+                set: []
             }
         }
     });
-}
 
-export async function updatePublicationConnectTags(publicationId: number, tagConnect: number[],
-                                                   prismaContext: Prisma.TransactionClient = prisma) {
+    // establish new ones
     return prismaContext.publication.update({
         where: { id: publicationId },
         data: {
             tags: {
                 connect: tagConnect.map(id => ({ id })),
-            }
-        }
-    });
-}
-
-export async function updatePublicationDisconnectTags(publicationId: number,tagDisconnect: number[],
-                                                      prismaContext: Prisma.TransactionClient = prisma) {
-    return prismaContext.publication.update({
-        where: { id: publicationId },
-        data: {
-            tags: {
-                disconnect: tagDisconnect.map(id => ({ id })),
             }
         }
     });
