@@ -12,7 +12,7 @@ export default mergeConfig(
 			setupFiles: ['tests/unit/setup.ts'],
 			coverage: {
 				enabled: true,
-				reporter: ['cobertura'],
+				reporter: ['text'],
 				provider: 'istanbul',
 				reportsDirectory: './reports/coverage',
 				include: ['src/lib/**/*.ts'],

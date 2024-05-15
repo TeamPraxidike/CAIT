@@ -25,9 +25,6 @@
 	};
 	$: border = active ? 'border-primary-400' : 'border-surface-400';
 	$: roundingMenuItem = (i: number, arrL: number) => {
-		console.log('Start');
-		console.log(i);
-		console.log(arrL);
 		if (i === (arrL - 1))
 			return 'rounded-b-lg';
 		else if (i === 0 && !profilePic) {

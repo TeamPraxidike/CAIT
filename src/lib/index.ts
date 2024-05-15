@@ -18,6 +18,8 @@ import TheoryAppBar from '$lib/components/TheoryAppBar.svelte';
 import PublicationCard from '$lib/components/PublicationCard.svelte';
 import Comment from '$lib/components/Comment.svelte';
 import Filter from '$lib/components/Filter.svelte';
+import type { AuthStruct } from '$lib/stores/auth';
+import type { AuthStore } from '$lib/stores/auth';
 
 // Stores
 import { authStore } from '$lib/stores/auth';
@@ -45,4 +47,6 @@ export {
 	Section,
 	lorem,
 	Filter,
+	type AuthStruct,
+	type AuthStore,
 };

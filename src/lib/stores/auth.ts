@@ -1,7 +1,7 @@
 import { type Writable, writable } from 'svelte/store';
 import type { User } from '@prisma/client';
 
-type AuthStruct = {
+export type AuthStruct = {
 	user: User | null;
 	session: string | null;
 };
@@ -12,7 +12,7 @@ type AuthStruct = {
  * This is the interface for the AuthStore, which is a writable store that holds the auth data.
  * The store will hold the userid and session, and will save the data to the sessionStorage.
  */
-interface AuthStore {
+export interface AuthStore {
 	subscribe: (
 		run: (value: AuthStruct) => void,
 		invalidate?: (value?: AuthStruct) => void,
