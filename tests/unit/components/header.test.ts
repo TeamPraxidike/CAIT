@@ -16,6 +16,7 @@ const { mockAuthStore } = await vi.hoisted(
 // Create a mock user
 const mockUser = {
 	id: 1,
+	username: 'Vasko Prasko',
 	firstName: 'John',
 	lastName: 'Doe',
 	email: 'john.doe@example.com',
