@@ -2,63 +2,90 @@ import {Prisma} from "@prisma/client/extension";
 import {prisma} from "$lib/database/prisma";
 
 ////////////////////////////////////////////////
-//   HELPER METHODS (parsing)
+//   HELPER METHODS
 ////////////////////////////////////////////////
 
-export async function connectMaintainers(publicationId: number, maintainerConnect: string[],
+
+/**
+ * Main method that handles linking/unlinking of tags and maintainers to publications
+ * @param request
+ * @param publicationId
+ * @param prismaTransaction
+ */
+export async function handleConnections(request: Request, publicationId: number,
+                                        prismaTransaction: Prisma.TransactionClient = prisma) {
+    const body = await request.json();
+
+    if (body.maintainerConnect.length > 0) {
+        await connectMaintainers(publicationId, body.maintainerConnect, prismaTransaction);
+    }
+    if (body.maintainerDisconnect.length > 0) {
+        await disconnectMaintainers(publicationId, body.maintainerDisconnect, prismaTransaction);
+    }
+    if (body.tagConnect.length > 0) {
+        await connectTags(publicationId, body.tagConnect, prismaTransaction);
+    }
+    if (body.tagDisconnect.length > 0) {
+        await disconnectTags(publicationId, body.tagDisconnect, prismaTransaction);
+    }
+}
+
+
+
+/**
+ * Checks list for correctness
+ * @param list
+ */
+export async function checkList(list: number[]) {
+    for (const num of list) {
+        if (isNaN(num) || num <= 0) {
+            throw new Error(`Invalid number in list ${num}`);
+        }
+    }
+}
+
+export async function connectMaintainers(publicationId: number, maintainerConnect: number[],
                                   prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-    // ids of users to connect as maintainers
-    const maintainerConParsed = maintainerConnect.map((number: string) => {
-        const parsed = parseInt(number);
-        if (isNaN(parsed)) {
-            throw new Error(`Invalid number in maintainer connect: ${number}`);
-        }
-        return parsed;
-    });
-
-    await updatePublicationConnectMaintainers(publicationId, maintainerConParsed, prismaContext);
+    try{
+        // ids of users to connect as maintainers
+        await checkList(maintainerConnect);
+        await updatePublicationConnectMaintainers(publicationId, maintainerConnect, prismaContext);
+    } catch (error) {
+        throw new Error(`Invalid number in maintainer connect`);
+    }
 }
 
-export async function disconnectMaintainers(publicationId: number, maintainerDisconnect: string[],
+export async function disconnectMaintainers(publicationId: number, maintainerDisconnect: number[],
                                      prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-// ids of users to disconnect as maintainers
-    const maintainerDisParsed = maintainerDisconnect.map((number: string) => {
-        const parsed = parseInt(number);
-        if (isNaN(parsed)) {
-            throw new Error(`Invalid number in maintainer disconnect: ${number}`);
-        }
-        return parsed;
-    });
-
-    await updatePublicationDisconnectMaintainers(publicationId, maintainerDisParsed, prismaContext);
+    try{
+        // ids of users to disconnect as maintainers
+        await checkList(maintainerDisconnect);
+        await updatePublicationDisconnectMaintainers(publicationId, maintainerDisconnect, prismaContext);
+    } catch (error) {
+        throw new Error(`Invalid number in maintainer disconnect`);
+    }
 }
 
-export async function connectTags(publicationId: number, tagConnect: string[],
+export async function connectTags(publicationId: number, tagConnect: number[],
                            prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-// ids of tags to connect
-    const tagConnectParsed = tagConnect.map((number: string) => {
-        const parsed = parseInt(number);
-        if (isNaN(parsed)) {
-            throw new Error(`Invalid number in tag connect: ${number}`);
-        }
-        return parsed;
-    });
-
-    await updatePublicationConnectTags(publicationId, tagConnectParsed, prismaContext);
+    try{
+        // ids of tags to connect
+        await checkList(tagConnect);
+        await updatePublicationConnectTags(publicationId, tagConnect, prismaContext);
+    } catch (error) {
+        throw new Error(`Invalid number in tag connect`);
+    }
 }
 
-export async function disconnectTags(publicationId: number, tagDisconnect: string[],
+export async function disconnectTags(publicationId: number, tagDisconnect: number[],
                               prismaContext: Prisma.TransactionClient = prisma): Promise<void> {
-// ids of tags to disconnect
-    const tagDisconnectParsed = tagDisconnect.map((number: string) => {
-        const parsed = parseInt(number, 10);
-        if (isNaN(parsed)) {
-            throw new Error(`Invalid number in tag disconnect: ${number}`);
-        }
-        return parsed;
-    });
-
-    await updatePublicationDisconnectTags(publicationId, tagDisconnectParsed, prismaContext);
+    try{
+        // ids of tags to disconnect
+        await checkList(tagDisconnect);
+        await updatePublicationDisconnectTags(publicationId, tagDisconnect, prismaContext);
+    } catch (error) {
+        throw new Error(`Invalid number in tag disconnect`);
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

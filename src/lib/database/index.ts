@@ -12,13 +12,18 @@ import { getMaterialByPublicationId, getAllMaterials, updateMaterialByPublicatio
 import { getCircuitByPublicationId, getAllCircuits, updateCircuitByPublicationId} from './circuit';
 
 import { updatePublicationConnectTags, updatePublicationDisconnectTags, updatePublicationDisconnectMaintainers,
-updatePublicationConnectMaintainers, connectMaintainers, connectTags, disconnectMaintainers, disconnectTags} from './publication';
+updatePublicationConnectMaintainers, connectMaintainers, connectTags, disconnectMaintainers, disconnectTags,
+handleConnections} from './publication';
 
 import { addFiles } from '$lib/database/file';
 import { prisma } from './prisma';
+import {LocalFileSystem} from "$lib/FileSystemPort/LocalFileSystem";
+
+const fileSystem = new LocalFileSystem();
 
 export {
 	prisma,
+	fileSystem,
 	createUser,
 	getUserById,
 	getPublicationById,
@@ -39,5 +44,6 @@ export {
 	connectTags,
 	disconnectMaintainers,
 	disconnectTags,
+	handleConnections,
 	addFiles,
 };

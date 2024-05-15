@@ -1,5 +1,7 @@
-import {getCircuitByPublicationId, connectTags, disconnectTags,
-    disconnectMaintainers, connectMaintainers, prisma} from "$lib/database";
+import {
+    getCircuitByPublicationId, connectTags, disconnectTags,
+    disconnectMaintainers, connectMaintainers, prisma, handleConnections
+} from "$lib/database";
 import {updateCircuitByPublicationId} from "$lib/database/circuit";
 
 export async function GET({ params }) {
@@ -45,22 +47,11 @@ export async function POST({ request, params }) {
         });
     }
 
-    const body = await request.json();
-
     try {
         const circuit = await prisma.$transaction(async (prismaTransaction) => {
-            if (body.maintainerConnect.length > 0) {
-                await connectMaintainers(publicationId, body.maintainerConnect, prismaTransaction);
-            }
-            if (body.maintainerDisconnect.length > 0) {
-                await disconnectMaintainers(publicationId, body.maintainerDisconnect, prismaTransaction);
-            }
-            if (body.tagConnect.length > 0) {
-                await connectTags(publicationId, body.tagConnect, prismaTransaction);
-            }
-            if (body.tagDisconnect.length > 0) {
-                await disconnectTags(publicationId, body.tagDisconnect, prismaTransaction);
-            }
+            await handleConnections(request, publicationId, prismaTransaction);
+
+            const body = await request.json();
 
             const circuit = await updateCircuitByPublicationId(
                 publicationId,

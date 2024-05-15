@@ -1,5 +1,7 @@
-import {getMaterialByPublicationId, updateMaterialByPublicationId,
-connectTags, disconnectTags, disconnectMaintainers, connectMaintainers, prisma} from "$lib/database";
+import {
+	getMaterialByPublicationId, updateMaterialByPublicationId, prisma, handleConnections
+} from "$lib/database";
+import {addFile, deleteFile, editFile} from "$lib/database/file";
 
 /**
  * Get material by id
@@ -51,35 +53,31 @@ export async function POST({ request, params }) {
 		});
 	}
 
-	const body = await request.json();
-
 	try {
 		const material = await prisma.$transaction(async (prismaTransaction) => {
-			if (body.maintainerConnect.length > 0) {
-				await connectMaintainers(publicationId, body.maintainerConnect, prismaTransaction);
+			await handleConnections(request, publicationId, prismaTransaction);
+
+			const body = await request.json();
+
+			// Add files
+			for (const file of body.files.add) {
+				await addFile(file.title, file.info, body.materialId, prismaTransaction);
 			}
-			if (body.maintainerDisconnect.length > 0) {
-				await disconnectMaintainers(publicationId, body.maintainerDisconnect, prismaTransaction);
+
+			// Delete files
+			for (const file of body.files.delete) {
+				await deleteFile(file.path, prismaTransaction);
 			}
-			if (body.tagConnect.length > 0) {
-				await connectTags(publicationId, body.tagConnect, prismaTransaction);
-			}
-			if (body.tagDisconnect.length > 0) {
-				await disconnectTags(publicationId, body.tagDisconnect, prismaTransaction);
+
+			// Edit existing files
+			for (const file of body.files.edit) {
+				await editFile(file.path, file.title, file.info, prismaTransaction);
 			}
 
 			const material = await updateMaterialByPublicationId(
-				publicationId,
-				body.title,
-				body.description,
-				body.difficulty,
-				body.learningObjectives,
-				body.prerequisites,
-				body.coverPic,
-				body.copyright,
-				body.timeEstimate,
-				body.theoryPractice,
-				prismaTransaction
+				publicationId, body.title, body.description, body.difficulty,
+				body.learningObjectives, body.prerequisites, body.coverPic, body.copyright,
+				body.timeEstimate, body.theoryPractice, prismaTransaction
 			);
 			if (!material) {
 				return new Response(JSON.stringify({error: 'Material Not Found'}), {
