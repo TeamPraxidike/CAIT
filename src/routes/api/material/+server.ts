@@ -43,7 +43,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		});
 		return new Response(JSON.stringify({ material }), { status: 200 });
 	} catch (error) {
-		return new Response(JSON.stringify({ error: 'Server Error' }), {
+		return new Response(JSON.stringify({ error: `Server Error ${error}` }), {
 			status: 500,
 		});
 	}

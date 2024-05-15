@@ -18,6 +18,7 @@ describe('User Components', () => {
 		firstName: 'Ivan',
 		lastName: 'Guenov',
 		email: 'kitajski@gmail.com',
+		username: 'ivanguenov',
 		profilePic: '',
 		reputation: 5,
 		isAdmin: false,

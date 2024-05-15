@@ -59,7 +59,7 @@ describe('User Components', () => {
 		expect(host.innerHTML).not.toContain('Edited');
 		expect(host.innerHTML).toContain('just now');
 		expect(host.innerHTML).toContain('5');
-		expect(host.innerHTML).toContain('Zlatan Ibrahimovic');
+		expect(host.innerHTML).toContain('Tom Viering');
 		expect(host.innerHTML).toContain('Reply');
 	});
 	it('should render comment with edited ', () => {
@@ -75,7 +75,7 @@ describe('User Components', () => {
 		expect(host.innerHTML).toContain('Edited');
 		expect(host.innerHTML).toContain('just now');
 		expect(host.innerHTML).toContain('5');
-		expect(host.innerHTML).toContain('Zlatan Ibrahimovic');
+		expect(host.innerHTML).toContain('Tom Viering');
 	});
 	it('should render comment created prior to current moment ', () => {
 		const instance = new Comment({
@@ -90,7 +90,7 @@ describe('User Components', () => {
 		expect(host.innerHTML).toContain('Edited');
 		expect(host.innerHTML).toContain('ago');
 		expect(host.innerHTML).toContain('5');
-		expect(host.innerHTML).toContain('Zlatan Ibrahimovic');
+		expect(host.innerHTML).toContain('Tom Viering');
 	});
 	it('should render reply with no reply option ', () => {
 		const instance = new Comment({
@@ -105,7 +105,7 @@ describe('User Components', () => {
 		expect(host.innerHTML).not.toContain('Edited');
 		expect(host.innerHTML).toContain('just now');
 		expect(host.innerHTML).toContain('5');
-		expect(host.innerHTML).toContain('Zlatan Ibrahimovic');
+		expect(host.innerHTML).toContain('Tom Viering');
 		expect(host.innerHTML).not.toContain('Reply');
 	});
 });
