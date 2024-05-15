@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {authStore, Grid, UserMenu} from "$lib";
-    import {LightSwitch, type PopupSettings, popup} from '@skeletonlabs/skeleton';
-    import Icon from "@iconify/svelte";
+    import { authStore, Grid, UserMenu } from '$lib';
+    import { LightSwitch, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+    import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
 

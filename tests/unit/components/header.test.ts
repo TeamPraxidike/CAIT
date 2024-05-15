@@ -1,16 +1,14 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-	computePosition,
-	autoUpdate,
-	flip,
-	shift,
-	offset,
 	arrow,
+	autoUpdate,
+	computePosition,
+	flip,
+	offset,
+	shift,
 } from '@floating-ui/dom';
 import { storePopup } from '@skeletonlabs/skeleton';
 import Header from '$lib/components/page/Header.svelte';
-import { type Writable } from 'svelte/store';
-import type { AuthStruct } from '$lib';
 const { mockAuthStore } = await vi.hoisted(
 	() => import('$lib/stores/mock/auth.mock'),
 );
@@ -25,7 +23,6 @@ const mockUser = {
 	reputation: 100,
 	isAdmin: false,
 };
-let mockStore: Writable<AuthStruct>;
 
 describe('Header Component', () => {
 	let host: HTMLDivElement;
@@ -53,8 +50,6 @@ describe('Header Component', () => {
 
 		storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
-		//mockStore.set({ user: mockUser, session: 'aa' });
-
 		const instance = new Header({
 			target: host,
 			props: {},
@@ -70,15 +65,12 @@ describe('Header Component', () => {
 	});
 
 	it('should render sign in header when signed in', async () => {
-		// Render the Header component
 		mockAuthStore.mockSetSubscribeValue({
 			user: null,
 			session: 'aa',
 		});
 
 		storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
-
-		//mockStore.set({ user: mockUser, session: 'aa' });
 
 		const instance = new Header({
 			target: host,
