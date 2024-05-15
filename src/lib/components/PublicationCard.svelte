@@ -112,7 +112,7 @@
 					class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {name}</h4>
 				<div class="flex gap-2 self-center">
 					{#if (numMaterials === 1)}
-						<Icon icon="mdi:presentation" class="text-primary-600 text-lg" />
+						<Icon id = "icon2" icon="mdi:presentation" class="text-primary-600 text-lg" />
 					{:else}
 						<div class="py-1" bind:this={hoverDiv}>
 							<Icon icon="clarity:file-group-solid" class="text-primary-600 text-lg" />
@@ -120,7 +120,7 @@
 								<div
 									class="absolute  mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
 									style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-									<Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center" />
+									<Icon id="icon1" icon="mdi:presentation" class="text-primary-600 text-lg self-center" />
 									<Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center" />
 									<Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center" />
 
