@@ -4,7 +4,7 @@ import { lorem } from '$lib';
 
 export const load: LayoutServerLoad = async () => {
 	//{ params, fetch }
-	let publication: Publication = {
+	const publication: Publication = {
 		id: 0,
 		title: 'Convolutional neural networks',
 		description: lorem,

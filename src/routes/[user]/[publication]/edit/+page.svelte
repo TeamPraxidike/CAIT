@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {LayoutServerData} from './$types';
+    import type {LayoutServerData} from '../$types';
     import type {File, Publication} from "@prisma/client";
     import {DifficultySelection, FileTable, lorem, Meta, Render, Tag} from "$lib";
     import {FileDropzone} from "@skeletonlabs/skeleton";
