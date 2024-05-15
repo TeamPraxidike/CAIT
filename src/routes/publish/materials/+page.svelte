@@ -62,30 +62,27 @@
                 <label for="description">Difficulty:</label>
                 <DifficultySelection difficulty="easy" />
             </div>
-
-            <div class="flex gap-2">
-                <div class="w-1/2">
-                    <label for="learning-objectives">Learning Objectives:</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="learning-objectives" bind:this={loInput}
-                               class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
-                        <button on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""}}
-                                class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+</button>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        {#each LOs as LO}
-                            <Tag tagText={LO} removable={true}/>
-                        {/each}
-                    </div>
+            <div class="w-full">
+                <label for="learning-objectives">Learning Objectives:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="learning-objectives" bind:this={loInput}
+                           class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
+                    <button on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""}}
+                            class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+</button>
                 </div>
-                <div class="w-1/2">
-                    <label for="tags">Tags:</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="tags" bind:this={tagInput}
-                               class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
-                        <button on:click={() => { tags = [...tags, tagInput.value]; tagInput.value = ""}}
-                                class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+</button>
-                    </div>
+                <div class="flex flex-wrap gap-2">
+                    {#each LOs as LO}
+                        <p class="w-full">{LO}</p>
+                    {/each}
+                </div>
+            </div>
+            <div class="w-1/2">
+                <label for="tags">Tags:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="tags" bind:this={tagInput}
+                           class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
+                    <button on:click={() => { tags = [...tags, tagInput.value]; tagInput.value = ""}}
+                            class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+</button>
                 </div>
             </div>
 
