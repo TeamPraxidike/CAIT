@@ -9,10 +9,14 @@ describe('Tag Component', () => {
 		document.body.appendChild(host);
 	});
 
-	it('should render tag', () => {
-		const instance = new Tag({ target: host, props: { tagText: 'example' } });
+	it('should render tag but not the remove button if tag is not removable', () => {
+		const instance = new Tag({
+			target: host,
+			props: { tagText: 'example', removable: false },
+		});
 		expect(instance).toBeTruthy();
 		expect(host.innerHTML).toContain('example');
+		expect(host.innerHTML).not.toContain('button');
 		expect(host.innerHTML).toContain('<!--<Tag>-->');
 	});
 
@@ -24,5 +28,16 @@ describe('Tag Component', () => {
 		expect(host.innerHTML).toContain('<!--<Tag>-->');
 		expect(host.innerHTML).not.toContain('</p>');
 		expect(host.innerHTML).not.toContain('<p');
+	});
+
+	it('should render tag and the remove button if tag is not removable', () => {
+		const instance = new Tag({
+			target: host,
+			props: { tagText: 'example', removable: false },
+		});
+		expect(instance).toBeTruthy();
+		expect(host.innerHTML).toContain('example');
+		expect(host.innerHTML).not.toContain('button');
+		expect(host.innerHTML).toContain('<!--<Tag>-->');
 	});
 });
