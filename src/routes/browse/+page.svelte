@@ -47,6 +47,10 @@
     let displayPublishers: string[] = allPublisherNames; //
     let publisherActive = false
 
+    let selectedTypes: string[] = [];
+    let allTypes: string[] = ["Presentation", "Dataset", "Video", "Assignment", "Code"]; //array with all the tags MOCK
+    let typeActive = false
+
 
     //SORT BY Functionality
 
@@ -90,6 +94,10 @@
         selectedDiff = selectedDiff.filter(diff => diff !== name);
     };
 
+    const removeType = (name: string) => {
+        selectedTypes= selectedTypes.filter(type => type !== name);
+    };
+
     /*
     *Method that makes all the dropdowns go up; Used so whenever you dropdown a menu it closes all others
      */
@@ -98,6 +106,7 @@
         diffActive = false;
         tagActive = false;
         publisherActive = false;
+        typeActive = false;
     };
 
 
@@ -118,10 +127,12 @@
                 on:clearSettings={untoggleEverything} profilePic="{true}"></Filter>
         <Filter bind:active="{diffActive}" bind:all="{allDiff}" bind:display="{allDiff}" bind:selected="{selectedDiff}"
                 label="Difficulty" on:clearSettings={untoggleEverything} profilePic="{false}"></Filter>
+        <Filter bind:active="{typeActive}" bind:all="{allTypes}" bind:display="{allTypes}" bind:selected="{selectedTypes}"
+                label="Types" on:clearSettings={untoggleEverything} profilePic="{false}"></Filter>
 
         <!-------SortBy-------->
         <div class="space-y-1 relative">
-            <button class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
+            <button class=" text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
                     on:click={toggleSortBy}>
                 <span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
                 {#if sortByActive}
@@ -190,6 +201,20 @@
                 <div class="flex gap-1 items-center">
                     <p class="text-xs">{sd}</p>
                     <button class="h-full" on:click={() => removeDifficulty(sd)}>
+                        <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5" />
+                    </button>
+                </div>
+            {/each}
+        </div>
+    {/if}
+
+    {#if (selectedTypes.length !== 0)}
+        <div class=" flex gap-2 items-center">
+            <p class="text-xs text-surface-600 dark:text-surface-200">Type:</p>
+            {#each selectedTypes as tp}
+                <div class="flex gap-1 items-center">
+                    <p class="text-xs">{tp}</p>
+                    <button class="h-full" on:click={() => removeType(tp)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5" />
                     </button>
                 </div>

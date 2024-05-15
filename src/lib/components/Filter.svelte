@@ -40,6 +40,16 @@
 	const update = (event: MouseEvent) => {
 		const target = event.target as HTMLButtonElement;
 		let text = target.textContent ?? '';
+
+		if (text.startsWith(" ")) {
+			text = text.substring(1)
+		}
+
+		if (text.endsWith(" ")) {
+			text = text.slice(0, -1)
+		}
+
+
 		if (selected.includes(text)) {
 			selected = selected.filter(item => item !== text); //if we are removing a tag remove it from selected tags
 		} else {
@@ -64,7 +74,7 @@
 
 <div class="space-y-1 relative">
 	<button
-		class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
+		class=" text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
 		on:click={toggle}>
 		<span class="flex-grow text-surface-700 dark:text-surface-300">{label}</span>
 		{#if active}

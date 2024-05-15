@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { PublicationCard, Filter } from '$lib';
+import { PublicationCard } from '$lib';
 
 describe('Filter Component', () => {
 	let host: HTMLDivElement;
