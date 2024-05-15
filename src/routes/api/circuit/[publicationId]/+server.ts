@@ -2,7 +2,6 @@ import {
 	getCircuitByPublicationId,
 	deleteCircuitByPublicationId,
 } from '$lib/database';
-import { json } from '@sveltejs/kit';
 
 export async function GET({ params }) {
 	// Authentication step
@@ -32,23 +31,25 @@ export async function GET({ params }) {
 }
 
 export async function DELETE({ params }) {
-	const publicationId = parseInt(params.publicationId);
-	if (isNaN(publicationId) || publicationId <= 0) {
-		return json(
-			{ error: 'Bad Delete Request - Invalid Circuit Id' },
+	const id = parseInt(params.publicationId);
+	if (isNaN(id) || id <= 0) {
+		return new Response(
+			JSON.stringify({ error: 'Bad Delete Request - Invalid Circuit Id' }),
 			{ status: 400 },
 		);
 	}
 	try {
-		const circuit = await deleteCircuitByPublicationId(publicationId);
+		const circuit = await getCircuitByPublicationId(id);
 		if (!circuit) {
-			return json({ error: 'Circuit Not Found' }, { status: 404 });
+			return new Response(JSON.stringify({ error: 'Circuit Not Found' }), {
+				status: 404,
+			});
 		}
-		return json(
-			{ message: 'Successful deletion of circuit' + publicationId },
-			{ status: 200 },
-		);
+		await deleteCircuitByPublicationId(id);
+		return new Response(JSON.stringify(circuit), { status: 200 });
 	} catch (error) {
-		return json({ error: 'Server Error ' }, { status: 500 });
+		return new Response(JSON.stringify({ error: 'Server Error' }), {
+			status: 500,
+		});
 	}
 }
