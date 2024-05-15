@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TheoryAppBar } from '$lib';
 
-describe('Tag Component', () => {
+describe('TheoryAppBar Component', () => {
 	let host: HTMLDivElement;
 
 	beforeEach(() => {
