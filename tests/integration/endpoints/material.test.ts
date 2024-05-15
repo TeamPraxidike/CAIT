@@ -199,6 +199,7 @@ describe('Materials', async () => {
 			await resetMaterialTable();
 		});
 	});
+
 	describe('[DELETE] /material/:id', () => {
 		it('should respond with 400 if the id is < 0', async () => {
 			const response = await fetch(`${testingUrl}/material/-1`, {
@@ -210,5 +211,48 @@ describe('Materials', async () => {
 			expect(body).not.toHaveProperty('publicationId');
 			expect(body).not.toHaveProperty('timeEstimate');
 		});
+	});
+	it('should respond with 200 if successful', async () => {
+		const user = await createUser('John66', 'Doe', 'l', 'path');
+		const material = {
+			title: 'Priklucheniqta na Vasko',
+			description: 'Vasko nqma kraka',
+			difficulty: Difficulty.hard,
+			userId: user.id,
+			timeEstimate: 1000,
+			theoryPractice: 9,
+			copyright: true,
+			paths: ['./vasko/nqma/kraka5.txt'],
+			titles: ['vaskoGoworiNaKitaiski.txt'],
+		};
+		const createdResponse = await fetch(`${testingUrl}/material`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(material),
+		});
+		const createdMat = await createdResponse.json();
+		const filePrev = await prisma.file.findUnique({
+			where: { path: './vasko/nqma/kraka5.txt' },
+		});
+		expect(filePrev).toBeTruthy();
+
+		const response = await fetch(
+			`${testingUrl}/material/${createdMat.material.publicationId}`,
+			{
+				method: 'DELETE',
+			},
+		);
+		const file = await prisma.file.findUnique({
+			where: { path: './vasko/nqma/kraka5.txt' },
+		});
+		expect(file).toBeFalsy();
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body).toHaveProperty('id');
+		expect(body).toHaveProperty('timeEstimate');
+
+		await resetMaterialTable();
 	});
 });
