@@ -1,6 +1,6 @@
 import {
 	getMaterialByPublicationId, updateMaterialByPublicationId, prisma, handleConnections,
-	type FileInfo, convertBlobToNodeBlob, fileSystem, deleteMaterialByPublicationId
+	type FileInfo, convertBlobToNodeBlob, fileSystem, deleteMaterialByPublicationId, type FetchedFileArray
 } from "$lib/database";
 import {addFile, deleteFile, editFile} from "$lib/database/file";
 import {Blob as NodeBlob} from "node:buffer";
@@ -72,8 +72,7 @@ export async function PUT({ request, params }) {
 
 			const fileInfo: FileInfo = body.FileInfo
 
-			// save file content for return
-			const fileData: { fileId: string, data: Buffer }[] = [];
+			const fileData: FetchedFileArray = [];
 
 			// add files
 			for (const file of fileInfo.add) {

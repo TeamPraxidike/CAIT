@@ -1,12 +1,12 @@
 import {
 	getPublicationById,
 	createCircuitPublication,
-	createMaterialPublication,
+	//createMaterialPublication,
 	addNodeToCircuit,
 } from './db';
 
 import { getMaterialByPublicationId, getAllMaterials,
-	updateMaterialByPublicationId, deleteMaterialByPublicationId } from './material';
+	updateMaterialByPublicationId, deleteMaterialByPublicationId, createMaterialPublication } from './material';
 
 import { getCircuitByPublicationId, getAllCircuits,
 	updateCircuitByPublicationId, deleteCircuitByPublicationId } from './circuit';
@@ -32,6 +32,13 @@ export type FileInfo = {
 	delete: { path: string }[];
 	edit: { path: string, title: string; info: Blob;  }[];
 };
+
+export type FetchedFileItem = {
+	fileId: string;
+	data: Buffer;
+};
+
+export type FetchedFileArray = FetchedFileItem[];
 
 export type NodeInfo = {
 	add: { circuitId: number; publicationId: number }[];
