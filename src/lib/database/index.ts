@@ -5,9 +5,17 @@ import {
 	addNodeToCircuit,
 } from './db';
 
-import { getMaterialByPublicationId, getAllMaterials } from './material';
+import {
+	getMaterialByPublicationId,
+	getAllMaterials,
+	deleteMaterialByPublicationId,
+} from './material';
 
-import { getCircuitByPublicationId, getAllCircuits } from './circuit';
+import {
+	getCircuitByPublicationId,
+	getAllCircuits,
+	deleteCircuitByPublicationId,
+} from './circuit';
 import {getUserById, createUser, deleteUser, editUser} from "$lib/database/user";
 import type {userEditData} from "$lib/database/user";
 
@@ -27,6 +35,8 @@ export {
 	getCircuitByPublicationId,
 	getAllCircuits,
 	addFiles,
+	deleteCircuitByPublicationId,
+	deleteMaterialByPublicationId,
 	deleteUser,
 	editUser,
 };
