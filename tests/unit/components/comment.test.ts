@@ -11,7 +11,7 @@ import {
 import { storePopup } from '@skeletonlabs/skeleton';
 storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
-describe('User Components', () => {
+describe('Comments', () => {
 	let host: HTMLDivElement;
 	const comment = {
 		id: 1,
