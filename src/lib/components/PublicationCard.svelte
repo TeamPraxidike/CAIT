@@ -1,12 +1,11 @@
 <script lang="ts">
 
-    import {DiffBar, Tag} from '$lib';
+    import {DiffBar, getDateDifference, Tag} from '$lib';
 
     import Icon from '@iconify/svelte';
     import {fly} from 'svelte/transition';
     import {onMount} from 'svelte';
     import type { Publication } from '@prisma/client';
-
     export let publication:Publication;
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
@@ -15,6 +14,7 @@
     export let used: number = 1;
     export let tags: string[] = ['Very Big Tag', 'nsnsngrfnfgdb', 'One More ', 'short'];
 
+    let lastUpdated: string = getDateDifference(publication.updatedAt, new Date());
 
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
     $:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
@@ -135,7 +135,7 @@
             </div>
 
 
-            <p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">Updated 10 days ago</p>
+            <p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
 
 
         </div>

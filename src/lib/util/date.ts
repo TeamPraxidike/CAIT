@@ -17,8 +17,11 @@ export function getDateDifference(startDate: Date, endDate: Date): string {
 	const days = differenceInDays(endDate, startDate);
 	const weeks = differenceInWeeks(endDate, startDate);
 	const months = differenceInMonths(endDate, startDate);
+	const years = Math.floor(months / 12);
 
-	if (months >= 1) {
+	if(years >= 1) {
+		return `${years} year${years > 1 ? 's' : ''} ago`;
+	} else if (months >= 1) {
 		return `${months} month${months > 1 ? 's' : ''} ago`;
 	} else if (weeks >= 1) {
 		return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
