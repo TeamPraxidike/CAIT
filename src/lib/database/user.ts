@@ -1,5 +1,4 @@
-import {prisma} from "$lib/database";
-
+import { prisma } from '$lib/database';
 
 // @ts-ignore
 /**
@@ -18,59 +17,63 @@ import {prisma} from "$lib/database";
  * @param email
  * @param profilePic
  */
-export async function createUser(firstName: string, lastName: string, email: string, profilePic: string) {
+export async function createUser(
+	firstName: string,
+	lastName: string,
+	email: string,
+	profilePic: string,
+) {
+	const username = await generateUsername(firstName, lastName);
 
-    const username = await generateUsername(firstName, lastName);
-
-    return prisma.user.create({
-        data: {
-            firstName: firstName,
-            lastName: lastName,
-            username: username,
-            email: email,
-            profilePic: profilePic,
-        },
-    });
+	return prisma.user.create({
+		data: {
+			firstName: firstName,
+			lastName: lastName,
+			username: username,
+			email: email,
+			profilePic: profilePic,
+		},
+	});
 }
 
 async function generateUsername(firstName: string, lastName: string) {
-    const users = await prisma.user.findMany({
-        where: {
-            firstName: firstName,
-            lastName: lastName
-        }
-    });
+	const users = await prisma.user.findMany({
+		where: {
+			firstName: firstName,
+			lastName: lastName,
+		},
+	});
 
-    let maxNumber: number = users.length > 0 ? 1 : 0
+	let maxNumber: number = users.length > 0 ? 1 : 0;
 
-    users.forEach(user => {
-        const num = parseInt(user.username.split('_')[1]);
-        if (!isNaN(num) && num > maxNumber) {
-            maxNumber = num;
-        }
-    });
+	users.forEach((user) => {
+		const num = parseInt(user.username.split('_')[1]);
+		if (!isNaN(num) && num > maxNumber) {
+			maxNumber = num;
+		}
+	});
 
-    let username: string;
-    if (maxNumber == 0) {
-        username = firstName + lastName;
-    } else {
-        username = firstName + lastName + '_' + (maxNumber + 1);
-    }
-    return username;
+	let username: string;
+	if (maxNumber == 0) {
+		username = firstName + lastName;
+	} else {
+		username = firstName + lastName + '_' + (maxNumber + 1);
+	}
+	return username;
 }
-
 
 /**
  * Returns the user with the given id.
  * @param id
  */
 export async function getUserById(id: number) {
-    // console.log('User:', user);
-    return prisma.user.findUnique({
-        where: {
-            id: id
-        },
-    });
+	// console.log('User:', user);
+	return prisma.user.findUnique({
+		where: { id },
+		include: {
+			posts: true,
+		},
+	});
 }
 
 /**
@@ -78,35 +81,32 @@ export async function getUserById(id: number) {
  * @param userId
  */
 export async function deleteUser(userId: number) {
-    return prisma.user.delete({
-        where: {
-            id: userId
-        }
-    });
+	return prisma.user.delete({
+		where: {
+			id: userId,
+		},
+	});
 }
 
 export type userEditData = {
-    id: number,
-    firstName: string,
-    lastName: string,
-    email: string,
-    profilePic: string,
+	id: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+	profilePic: string;
+};
+
+export async function editUser(user: userEditData) {
+	return prisma.user.update({
+		where: {
+			id: user.id,
+		},
+		data: {
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email,
+			profilePic: user.profilePic,
+			username: await generateUsername(user.firstName, user.lastName),
+		},
+	});
 }
-
-export async function editUser(user : userEditData) {
-    return prisma.user.update({
-        where: {
-            id: user.id
-        },
-        data: {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            profilePic: user.profilePic,
-            username: await generateUsername(user.firstName, user.lastName)
-        }
-    });
-}
-
-
-

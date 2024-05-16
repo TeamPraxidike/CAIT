@@ -1,12 +1,11 @@
 <script lang="ts">
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
     import type {LayoutData} from './$types';
-    import type {User} from "@prisma/client";
 
     /* This is the data that was returned from the server */
     export let data: LayoutData;
 
-    let user: User = data.user;
+    let user = data.user;
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -18,20 +17,13 @@
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         Saved Publications
     </h3>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
+    <p>aa</p>
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         {user.firstName}'s Publications
     </h3>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
-    <PublicationCard className="col-span-1"/>
+    {#each data.user.posts as publication}
+        <PublicationCard {publication} />
+    {/each}
 </div>
 
 

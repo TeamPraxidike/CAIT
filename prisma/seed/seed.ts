@@ -13,8 +13,8 @@ const main = async () => {
 	await seed.$resetDatabase();
 
 	// Seed the database with 10 user
-	await seed.user((x) => x(10));
 	await seed.material((x) => x(10));
+	await seed.user((x) => x(10));
 
 	process.exit();
 };
