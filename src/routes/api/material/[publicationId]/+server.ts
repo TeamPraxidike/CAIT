@@ -1,6 +1,6 @@
 import {
 	getMaterialByPublicationId, updateMaterialByPublicationId, prisma, handleConnections,
-	type FileInfo, convertBlobToNodeBlob, fileSystem
+	type FileInfo, convertBlobToNodeBlob, fileSystem, deleteMaterialByPublicationId
 } from "$lib/database";
 import {addFile, deleteFile, editFile} from "$lib/database/file";
 import {Blob as NodeBlob} from "node:buffer";
