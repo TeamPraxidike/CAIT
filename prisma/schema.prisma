@@ -116,8 +116,8 @@ model Node {
 
   extensions String[]
 
-  contentId Int
-  content   Publication @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  publicationId Int
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
   prerequisites Node[] @relation("edge")
   next          Node[] @relation("edge")

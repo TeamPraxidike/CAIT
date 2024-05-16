@@ -1,7 +1,9 @@
 import {
-	getMaterialByPublicationId, updateMaterialByPublicationId, prisma, handleConnections
+	getMaterialByPublicationId, updateMaterialByPublicationId, prisma, handleConnections,
+	type FileInfo, convertBlobToNodeBlob
 } from "$lib/database";
 import {addFile, deleteFile, editFile} from "$lib/database/file";
+import {Blob as NodeBlob} from "node:buffer";
 
 /**
  * Get material by id
@@ -59,19 +61,23 @@ export async function PUT({ request, params }) {
 
 			const body = await request.json();
 
+			const fileInfo: FileInfo = body.FileInfo
+
 			// add files
-			for (const file of body.files.add) {
-				await addFile(file.title, file.info, body.materialId, prismaTransaction);
+			for (const file of fileInfo.add) {
+				const info: NodeBlob = await convertBlobToNodeBlob(file.info);
+				await addFile(file.title, info, body.materialId, prismaTransaction);
 			}
 
 			// delete files
-			for (const file of body.files.delete) {
+			for (const file of fileInfo.delete) {
 				await deleteFile(file.path, prismaTransaction);
 			}
 
 			// edit existing files
-			for (const file of body.files.edit) {
-				await editFile(file.path, file.title, file.info, prismaTransaction);
+			for (const file of fileInfo.edit) {
+				const info: NodeBlob = await convertBlobToNodeBlob(file.info);
+				await editFile(file.path, file.title, info, prismaTransaction);
 			}
 
 			const material = await updateMaterialByPublicationId(

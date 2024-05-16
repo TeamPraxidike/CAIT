@@ -13,17 +13,9 @@ export async function getCircuitByPublicationId(publicationId: number) {
 			publication: true,
 			nodes: {
 				include: {
-					content: true,
-					prerequisites: {
-						include: {
-							content: true,
-						},
-					},
-					next: {
-						include: {
-							content: true,
-						},
-					},
+					publication: true,
+					prerequisites: true,
+					next: true
 				}
 			},
 		},

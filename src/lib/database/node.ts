@@ -1,69 +1,104 @@
-import {prisma} from "$lib/database";
+import {getPublicationById, prisma} from "$lib/database";
 import {Prisma} from "@prisma/client/extension";
-import {Blob} from "node:buffer";
-import {fileSystem} from "$lib/database";
+import {PublicationType} from "@prisma/client";
 
-export async function addNode(title: string, info: Blob, materialId: number,
-                              prismaContext: Prisma.TransactionClient = prisma) {
 
-    try{
-        const path = await fileSystem.saveFile(info, title);
-        try{
-            await prismaContext.file.create({
-                data: {
-                    path: path,
-                    title: title,
-                    materialId: materialId, // Associate the File with Material, could use connect, shouldn't matter
-                },
-            });
-        } catch(errorDatabase){
-            console.log(`Error while saving file ${title} in the the database.`);
-            fileSystem.deleteFile(path);
-            throw new Error("Rollback");
+/**
+ * Gets the extensions needed for the frontend icons within the node cards
+ * @param publicationId
+ */
+export async function fetchExtensions(publicationId: number){
+    const publication = await getPublicationById(publicationId);
+    if (!publication) {throw new Error("No publication found.");}
+
+    if (publication.type === PublicationType.Circuit && publication.circuit) {return ["circuit"];}
+    else if (publication.type === PublicationType.Material && publication.materials){
+        const extensions: string[] = [];
+        for (const file of publication.materials.files){
+            extensions.push(file.path.split(".")[1]);
         }
-    } catch (errorFileSystem){
-        console.log(`Error while saving file ${title} in the system`);
-        throw new Error("Rollback");
+
+        return extensions;
     }
 }
 
-export async function editNode(path: string, title: string, info: Blob,
-                               prismaContext: Prisma.TransactionClient = prisma) {
-
-    try{
-        await prismaContext.file.update({
-            where: {
-                path: path
-            },
+export async function handleEdges(next: { fromId: number; toId: number[] }[],
+                                  prismaContext: Prisma.TransactionClient = prisma){
+    for (const edge of next){
+        if (edge.fromId <= 0 || isNaN(edge.fromId)){
+            throw new Error("Invalid id found");
+        }
+        await prismaContext.node.update({
+            where: { id: edge.fromId },
             data: {
-                title: title
-            },
+                next: {
+                    connect: edge.toId.map(id => ({id}))
+                }
+            }
         });
 
-        try {
-            await fileSystem.editFile(path, info);
-        } catch (errorFileSystem){
-            console.log(`Error while editing file ${title} in the system.`);
-            throw new Error("Rollback");
+        for (const to of edge.toId) {
+            await prismaContext.node.update({
+                where: { id: to },
+                data: {
+                    prerequisites: {
+                        connect: {
+                            id: edge.fromId
+                        }
+                    }
+                }
+            });
         }
-    } catch(errorDatabase){
-        console.log(`Error while editing file ${title} in the the database.`);
-        throw new Error("Rollback");
     }
 }
 
-export async function deleteNode(path: string, prismaContext: Prisma.TransactionClient = prisma) {
-    try{
-        await prismaContext.file.delete({where: {path: path}});
 
-        try {
-            fileSystem.deleteFile(path);
-        } catch (errorFileSystem){
-            console.log(`Error while deleting file in the system.`);
-            throw new Error("Rollback");
-        }
-    } catch(errorDatabase){
-        console.log(`Error while editing file in the database.`);
-        throw new Error("Rollback");
+export async function addNode(circuitId: number, publicationId: number,
+                              prismaContext: Prisma.TransactionClient = prisma) {
+
+    const extensions = await fetchExtensions(publicationId);
+
+    try{
+        return prismaContext.node.create({
+            data: {
+                circuitId: circuitId,
+                publicationId: publicationId,
+                extensions: extensions
+            }
+        });
+    } catch (error){
+        throw new Error("Error while creating node");
+    }
+}
+
+export async function editNode(nodeId: number, publicationId: number,
+                               prismaContext: Prisma.TransactionClient = prisma) {
+
+    const extensions = await fetchExtensions(publicationId);
+
+    try{
+        return prismaContext.node.update({
+            where: {
+                id: nodeId
+            },
+            data: {
+                publicationId: publicationId,
+                extensions: extensions
+            }
+        });
+    } catch (error){
+        throw new Error("Error while updating node");
+    }
+}
+
+export async function deleteNode(nodeId: number, prismaContext: Prisma.TransactionClient = prisma) {
+    try{
+        return prismaContext.node.delete({
+            where: {
+                id: nodeId
+            }
+        });
+    } catch (error){
+        throw new Error("Error while deleting node");
     }
 }

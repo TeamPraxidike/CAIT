@@ -1,8 +1,8 @@
 import {
-    getCircuitByPublicationId, prisma, handleConnections
+    getCircuitByPublicationId, prisma, handleConnections, type NodeInfo
 } from "$lib/database";
 import {updateCircuitByPublicationId} from "$lib/database/circuit";
-import {addNode, deleteNode, editNode} from "$lib/database/node";
+import {addNode, deleteNode, editNode, handleEdges} from "$lib/database/node";
 
 export async function GET({ params }) {
     // Authentication step
@@ -53,20 +53,24 @@ export async function PUT({ request, params }) {
 
             const body = await request.json();
 
+            const nodeInfo: NodeInfo = body.NodeInfo;
+
             // add nodes
-            for (const node of body.nodes.add) {
-                await addNode(node.title, node.info, body.materialId, prismaTransaction);
+            for (const node of nodeInfo.add) {
+                await addNode(node.circuitId, node.publicationId, prismaTransaction);
             }
 
             // delete nodes
-            for (const node of body.nodes.delete) {
-                await deleteNode(node.path, prismaTransaction);
+            for (const node of nodeInfo.delete) {
+                await deleteNode(node.nodeId, prismaTransaction);
             }
 
             // edit existing nodes
-            for (const node of body.nodes.edit) {
-                await editNode(node.path, node.title, node.info, prismaTransaction);
+            for (const node of nodeInfo.edit) {
+                await editNode(node.nodeId, node.publicationId, prismaTransaction);
             }
+
+            await handleEdges(nodeInfo.next);
 
             const circuit = await updateCircuitByPublicationId(
                 publicationId, body.title, body.description,
