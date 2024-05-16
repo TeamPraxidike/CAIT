@@ -36,10 +36,10 @@ export type NodeInfo = {
 	next: { fromId: number; toId: number[] }[];
 };
 
-export async function convertBlobToNodeBlob(browserBlob: Blob): Promise<NodeBlob> {
+export async function convertBlobToNodeBlob(browserBlob: Blob): Promise<{ buffer: Buffer; info: NodeBlob }> {
 	const arrayBuffer = await browserBlob.arrayBuffer();
 	const buffer = Buffer.from(arrayBuffer);
-	return {buffer: buffer, blob: new NodeBlob([buffer], { type: browserBlob.type })};
+	return {buffer: buffer, info: new NodeBlob([buffer], { type: browserBlob.type })};
 }
 
 export {

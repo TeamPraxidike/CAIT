@@ -88,7 +88,7 @@ export async function PUT({ request, params }) {
 
 			// edit existing files
 			for (const file of fileInfo.edit) {
-				const {buffer, info}: NodeBlob = await convertBlobToNodeBlob(file.info);
+				const {buffer, info} = await convertBlobToNodeBlob(file.info);
 				await editFile(file.path, file.title, info, prismaTransaction);
 				fileData.push({fileId: file.path, data: buffer});
 			}
