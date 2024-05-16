@@ -1,13 +1,33 @@
 import {describe, it, expect, beforeEach} from 'vitest';
 import {testingUrl, resetUserTable} from "../setup";
-import {createUser, getUserById, type userEditData} from "$lib/database";
+import {createUser, getUserById, prisma, type userEditData} from "$lib/database";
 
-await resetUserTable();
+//await resetUserTable();
+
+async function getExistingUserIDs() {
+	const users = await prisma.user.findMany({
+		select: {
+			id: true,
+		},
+	});
+	return users.map(user => user.id);
+}
+
+function generateRandomID() {
+	return Math.floor(Math.random() * 1000000); // Adjust the range as needed
+}
 
 describe('Users', () => {
     describe('[GET] /user/:id', () => {
         it('should respond with 404 if the user does not exist', async () => {
-            const response = await fetch(`${testingUrl}/user/1`, {method: 'GET'});
+			const userIds: number[] = await getExistingUserIDs();
+
+			let randomID;
+			do {
+				randomID = generateRandomID();
+			} while (userIds.includes(randomID));
+
+            const response = await fetch(`${testingUrl}/user/${randomID}`, {method: 'GET'});
             expect(response.status).toBe(404);
             const body = await response.json();
             expect(body.error).toBe('User not found');
