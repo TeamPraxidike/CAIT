@@ -18,6 +18,7 @@ export const load: LayoutServerLoad = async ({ params, fetch }) => {
 		error(uRes.status, uRes.statusText);
 	}
 
-	const user: User = await uRes.json();
+	const user = await uRes.json();
+	console.log(user);
 	return { user };
 };

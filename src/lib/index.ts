@@ -22,13 +22,22 @@ import Circuit from '$lib/components/circuits/Circuit.svelte';
 import CircuitPureHTML from '$lib/components/circuits/CircuitPureHTML.svelte';
 
 import type { AuthStore, AuthStruct } from '$lib/stores/auth';
+import FileTable from '$lib/components/FileTable.svelte';
+import Render from '$lib/components/Render.svelte';
+
 // Stores
 import { authStore } from '$lib/stores/auth';
+
+// util
+import { getDateDifference } from '$lib/util/date';
 
 const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
 
 export {
+	getDateDifference,
+	Render,
+	FileTable,
 	Tag,
 	Meta,
 	Header,

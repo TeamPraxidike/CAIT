@@ -1,4 +1,9 @@
-export async function load({ url }) {
+export async function load({ url, fetch }) {
 	const type = url.searchParams.get('type') || 'materials';
-	return { type };
+
+	// get all the materials
+	const pubRes = await fetch('/api/material');
+	const body = await pubRes.json();
+
+	return { type, publications: body };
 }
