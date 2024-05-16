@@ -120,12 +120,12 @@
     function handleCancel() {
         commentText = '';
         isFocused = false;
+        textarea.style.height=originalHeight;
     }
     /*
     adding this method to test for demo mainly, most likely would be a form with post that happens when you click the cmomment button
      */
     function addComment(){
-        console.log(commentText);
         let newComment = {
             id: maxCommentId,
             content: commentText,
@@ -137,7 +137,6 @@
             replies:[]
         }
         maxCommentId++;
-        commentText='';
         isFocused=false;
         textarea.style.height=originalHeight;
         comments = [newComment, ...comments];
@@ -148,9 +147,7 @@
             comments
         }else{
             comments = comments.filter(comment => comment.id !== value.interaction.id);
-            console.log(comments)
         }
-        console.log("delete from page", value.interaction.id)   ;
 
     }
     onMount(() => {
@@ -209,10 +206,10 @@
 <div class="flex mb-2 gap-2 col-span-full items-center">
     <enhanced:img class="w-10 md:w-16 rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>
 <!--    <textarea class="flex-grow border-0 border-b border-gray-300 rounded-none p-2 resize-none" placeholder="Enter text here" rows="1"></textarea>-->
-    <form use:enhance method="POST" action="?/comment" class="flex-grow ">
+    <form use:enhance method="POST" class="flex-grow ">
         <div class="flex-grow pt-2 items-center">
         <textarea
-          name="commentText"
+          name="comment"
           bind:this={textarea}
           class="w-full border-0 border-b border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm"
           placeholder="Start a discussion..."
@@ -221,12 +218,10 @@
           on:input={adjustHeight}
           on:focus={handleFocus}
           on:blur={handleBlur}></textarea>
-            {#if isFocused}
-                <div class="flex justify-end mt-2 gap-2">
-                    <button class="variant-soft-surface px-4 py-2 rounded-lg hover:variant-filled-surface" on:click={handleCancel}>Cancel</button>
-                    <button class="variant-soft-primary px-4 py-2 rounded-lg hover:variant-filled-primary mr-2" on:click={addComment}>Comment</button>
-                </div>
-            {/if}
+            <div class="flex justify-end mt-2 gap-2">
+                <button class="variant-soft-surface px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-surface" on:click={handleCancel}>Cancel</button>
+                <button class="variant-soft-primary px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-primary mr-2" formaction="?/comment" on:click={addComment}>Comment</button>
+            </div>
         </div>
     </form>
 
