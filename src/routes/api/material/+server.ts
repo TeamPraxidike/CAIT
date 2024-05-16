@@ -1,13 +1,8 @@
 import {
-	getAllMaterials,
-	createMaterialPublication,
-	prisma,
-	type FileInfo,
-	handleConnections,
-	convertBlobToNodeBlob, type FetchedFileArray, type FetchedFileItem
+	getAllMaterials, createMaterialPublication, prisma,
+	type FileInfo, handleConnections, convertBlobToNodeBlob, type FetchedFileArray, getMaterialByPublicationId,
+	addFile, bufToBase64
 } from '$lib/database';
-import type { RequestHandler } from '@sveltejs/kit';
-import {addFile} from "$lib/database/file";
 
 /**
  * Get all materials
@@ -35,7 +30,7 @@ export async function POST({ request }) {
 	// Authentication step
 	// return 401 if user not authenticated
 	try {
-		const material = await prisma.$transaction(async (prismaTransaction) => {
+		const createdMaterial = await prisma.$transaction(async (prismaTransaction) => {
 			const body = await request.json();
 
 			const fileInfo: FileInfo = body.FileInfo
@@ -46,9 +41,7 @@ export async function POST({ request }) {
 				body.timeEstimate, body.theoryPractice, prismaTransaction
 			);
 			if (!material) {
-				return new Response(JSON.stringify({error: 'Bad Request'}), {
-					status: 400,
-				});
+				return null;
 			}
 
 			await handleConnections(request, material.publicationId, prismaTransaction);
@@ -65,7 +58,22 @@ export async function POST({ request }) {
 			return {material, fileData};
 		});
 
-		return new Response(JSON.stringify({material}), {status: 200});
+		// check if material is null
+		if (!createdMaterial) {
+			return new Response(JSON.stringify({error: 'Bad Request'}), {
+				status: 400,
+			});
+		}
+
+		// get material including updated relations
+		const actualMaterial = await getMaterialByPublicationId(createdMaterial.material.publicationId);
+
+		// If JSON stringify cannot handle raw Buffer, use this:
+		// const transformedFileData = await bufToBase64(createdMaterial.fileData);
+
+		const fileData = createdMaterial.fileData;
+
+		return new Response(JSON.stringify({actualMaterial, fileData}), {status: 200});
 	} catch (error) {
 		return new Response(JSON.stringify({error: 'Server Error'}), {
 			status: 500,

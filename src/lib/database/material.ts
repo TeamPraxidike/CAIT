@@ -78,8 +78,7 @@ export async function createMaterialPublication(
 			}
 		},
 		include: {
-			publication: true,
-			files: true,
+			publication: true
 		}
 	});
 }

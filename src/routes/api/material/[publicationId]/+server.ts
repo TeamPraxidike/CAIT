@@ -1,8 +1,9 @@
 import {
 	getMaterialByPublicationId, updateMaterialByPublicationId, prisma, handleConnections,
-	type FileInfo, convertBlobToNodeBlob, fileSystem, deleteMaterialByPublicationId, type FetchedFileArray
+	type FileInfo, convertBlobToNodeBlob, fileSystem, deleteMaterialByPublicationId, type FetchedFileArray,
+	bufToBase64, addFile, deleteFile, editFile
 } from "$lib/database";
-import {addFile, deleteFile, editFile} from "$lib/database/file";
+import {} from "$lib/database/file";
 import {Blob as NodeBlob} from "node:buffer";
 
 /**
@@ -33,11 +34,15 @@ export async function GET({ params }) {
 		}
 
 		// file content for return
-		const fileData: {fileId: string, data: Buffer}[] = [];
+		const fileData: FetchedFileArray = [];
+
 		for (const file of material.files) {
 			const currentFileData = fileSystem.readFile(file.path);
 			fileData.push({fileId: file.path, data: currentFileData});
 		}
+
+		// If JSON stringify cannot handle raw Buffer, use this:
+		//const transformedFileData = await bufToBase64(fileData);
 
 		return new Response(JSON.stringify({material, fileData}), { status: 200 });
 	} catch (error) {
@@ -65,7 +70,7 @@ export async function PUT({ request, params }) {
 	}
 
 	try {
-		const material = await prisma.$transaction(async (prismaTransaction) => {
+		const updatedMaterial = await prisma.$transaction(async (prismaTransaction) => {
 			await handleConnections(request, publicationId, prismaTransaction);
 
 			const body = await request.json();
@@ -99,15 +104,25 @@ export async function PUT({ request, params }) {
 				body.timeEstimate, body.theoryPractice, prismaTransaction
 			);
 			if (!material) {
-				return new Response(JSON.stringify({error: 'Material Not Found'}), {
-					status: 404,
-				});
+				return null;
 			}
 
 			return {material, fileData};
 		});
 
-		return new Response(JSON.stringify({material}), {status: 200});
+		// check if material is null
+		if (!updatedMaterial) {
+			return new Response(JSON.stringify({error: 'Bad Request'}), {
+				status: 400,
+			});
+		}
+
+		// If JSON stringify cannot handle raw Buffer, use this:
+		//const transformedFileData = await bufToBase64(updatedMaterial.fileData);
+
+		const fileData = updatedMaterial.fileData;
+
+		return new Response(JSON.stringify({updatedMaterial, fileData}), {status: 200});
 	} catch (error) {
 		return new Response(JSON.stringify({error: 'Server Error'}), {
 			status: 500,

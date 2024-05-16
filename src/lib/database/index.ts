@@ -1,6 +1,6 @@
 import {
 	getPublicationById,
-	createCircuitPublication,
+	//createCircuitPublication,
 	//createMaterialPublication,
 	addNodeToCircuit,
 } from './db';
@@ -9,7 +9,7 @@ import { getMaterialByPublicationId, getAllMaterials,
 	updateMaterialByPublicationId, deleteMaterialByPublicationId, createMaterialPublication } from './material';
 
 import { getCircuitByPublicationId, getAllCircuits,
-	updateCircuitByPublicationId, deleteCircuitByPublicationId } from './circuit';
+	updateCircuitByPublicationId, deleteCircuitByPublicationId, createCircuitPublication } from './circuit';
 
 import { updatePublicationConnectTags, updatePublicationConnectMaintainers, connectMaintainers,
 	connectTags, handleConnections} from './publication';
@@ -20,7 +20,7 @@ import {getUserById, createUser, deleteUser, editUser} from "$lib/database/user"
 import type {userEditData} from "$lib/database/user";
 
 
-import { addFiles } from '$lib/database/file';
+import { addFiles, addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
 import { prisma } from './prisma';
 import {LocalFileSystem} from "$lib/FileSystemPort/LocalFileSystem";
 import {Blob as NodeBlob} from "node:buffer"
@@ -56,6 +56,10 @@ export async function convertBlobToNodeBlob(browserBlob: Blob): Promise<{ buffer
 export {
 	prisma,
 	fileSystem,
+	addFile,
+	editFile,
+	deleteFile,
+	bufToBase64,
 	createUser,
 	getUserById,
 	getPublicationById,

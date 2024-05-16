@@ -1,7 +1,15 @@
-import {prisma} from "$lib/database";
+import {type FetchedFileArray, fileSystem, prisma} from "$lib/database";
 import {Prisma} from "@prisma/client/extension";
 import {Blob} from "node:buffer";
-import {fileSystem} from "$lib/database";
+
+export async function bufToBase64(files: FetchedFileArray) {
+    // If JSON stringify cannot handle raw Buffer, use this:
+    return files.map(file => ({
+        ...file,
+        data: file.data.toString('base64')
+    }));
+}
+
 
 export async function addFiles(paths: string[], titles: string[], materialId: number,
                                prismaContext: Prisma.TransactionClient = prisma) {
