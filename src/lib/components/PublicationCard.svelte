@@ -5,9 +5,9 @@
     import Icon from '@iconify/svelte';
     import {fly} from 'svelte/transition';
     import {onMount} from 'svelte';
+    import type { Publication } from '@prisma/client';
 
-
-    export let name: string = 'Details About CNN and ANN';
+    export let publication:Publication;
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
     export let saved: boolean = true;
@@ -75,6 +75,8 @@
         containerWidth = container.getBoundingClientRect().width;
         window.addEventListener('resize', updateContainerWidth);
 
+        console.log(publication);
+
         maxTags = calcMaxTags();
         if (hoverDiv) {
             hoverDiv.addEventListener('mouseenter', handleHover);
@@ -106,7 +108,7 @@
         <div class="w-full">
             <div class="flex justify-between">
                 <h4
-                        class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {name}</h4>
+                        class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}</h4>
                 <div class="flex gap-2 self-center">
                     {#if (numMaterials === 1)}
                         <Icon icon="mdi:presentation" class="text-primary-600 text-lg"/>
@@ -138,10 +140,7 @@
 
         </div>
 
-        <p class="w-full line-clamp-3 text-xs text-surface-500  dark:text-surface-400">Lorem ipsum dolor sit a metsda
-            awdafg mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem... Lorem ipsum dolor sit a metsda awdafg
-            mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem.. Lorem ipsum dolor sit a metsda awdafg
-            mainaaubfaefbg aiuofbae d asd]adwwa. Lorem lorem lorem lorem..</p>
+        <p class="w-full line-clamp-3 text-xs text-surface-500  dark:text-surface-400">{publication.description}</p>
 
 
         <div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
@@ -159,7 +158,7 @@
         <div class="w-full space-y-2">
             <hr class="opacity-50">
             <div class="w-full flex justify-between">
-                <button class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</button>
+                <a href="{publication.publisherId}/{publication.id}" class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
                 <div class="flex gap-2">
                     <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
                         <button

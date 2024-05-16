@@ -1,8 +1,10 @@
 <script lang="ts">
-    import {PublicationCard, SearchBar, Tag} from '$lib';
+    import { PublicationCard, SearchBar, Tag, UserProp } from '$lib';
     import {page} from '$app/stores';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
+    import type { Material, Publication, User } from '@prisma/client';
+    import type { PageData } from './$types';
 
 
     let searchWord: string = '';
@@ -190,6 +192,11 @@
         tagActive = false;
         publisherActive = false;
     };
+
+
+    export let data:PageData;
+    let materials = data.publications;
+
 </script>
 
 <div class="col-span-4 mt-32">
@@ -348,14 +355,6 @@
     {/if}
 </div>
 
-
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
+{#each materials as material}
+    <PublicationCard publication={material.publication} />
+{/each}

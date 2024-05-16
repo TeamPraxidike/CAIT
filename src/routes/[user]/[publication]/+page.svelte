@@ -1,7 +1,7 @@
 <script lang="ts">
     import {type File, type Publication} from "@prisma/client";
     import type {LayoutServerData} from './$types';
-    import {DiffBar, getDateDifference, Meta, Tag, lorem, FileTable, Render, Comment} from "$lib";
+    import {DiffBar, getDateDifference, Meta, Tag, FileTable, Render, Comment} from "$lib";
     import {onMount} from "svelte";
     import Icon from "@iconify/svelte";
 
@@ -84,7 +84,7 @@
             <Tag tagText={tag} removable={false}/>
         {/each}
     </div>
-    <p class="text-surface-700 dark:text-surface-400">{lorem + lorem}</p>
+    <p class="text-surface-700 dark:text-surface-400">{publication.description}</p>
 
     <div class="flex items-center text-3xl rounded-lg border mt-4">
         <button
