@@ -12,7 +12,22 @@ describe('Filter Component', () => {
 	it('should render Filter non active', () => {
 		const instance = new PublicationCard({
 			target: host,
-			props: { used: 6 },
+			props: {
+				used: 6,
+				publication: {
+					id: 1,
+					title: 'aaa',
+					description: 'string',
+					difficulty: 'hard',
+					likes: 2,
+					learningObjectives: ['s'],
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					publisherId: 3,
+					reports: 2,
+					type: 'Material',
+				},
+			},
 		});
 		expect(instance).toBeTruthy();
 		expect(host.innerHTML).toContain('DiffBar');
