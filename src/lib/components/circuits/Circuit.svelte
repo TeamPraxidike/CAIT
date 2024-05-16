@@ -1,74 +1,156 @@
 <script lang="ts">
-	import cytoscape from 'cytoscape';
 	import { onMount } from 'svelte';
-
-	//export let nodes:string[] = ['Node1', 'Node2', 'Node3', 'Node4', 'Node5']
-
-	let cy;
-	let container : HTMLDivElement
+	import cytoscape from 'cytoscape';
+	import Node from '@prisma/client'
 
 
-	function generateDots(rows:number, cols:number) {
-		const rowGap = container.offsetHeight / rows;
-		const colGap = container.offsetWidth / cols;
-
-		for (let row = 0; row < rows; row++) {
-			for (let col = 0; col < cols; col++) {
-				const dot = document.createElement('div');
-				dot.classList.add('dot', 'absolute', 'bg-surface-400', 'rounded-full');
-				dot.style.width = `1.5px`;
-				dot.style.height = `1.5px`;
-				dot.style.left = `${col * colGap}px`;
-				dot.style.top = `${row * rowGap}px`;
-				container.appendChild(dot);
-			}
-		}
+	interface Cytoscape  {
+			style : () => void
 	}
+
+	interface Edge {
+		id:string
+		source:string
+		target:string
+	}
+
+	//export let dbNodes : Node[];
+
+	 let idNodes : string[];
+	 let edges : Edge[];
+	 let cy;
+
+
+
 	onMount(() => {
-		generateDots(50, 50)
+		// Initialize Cytoscape
 		cy = cytoscape({
-			container: container,
+			container: document.getElementById('cy'),
 			elements: [
-				{ data: { id: 'node1' } },
-				{ data: { id: 'node2' } },
-				{ data: { id: 'node3' } },
-				{ data: { id: 'node4' } },
-				{ data: { id: 'edge1', source: 'node1', target: 'node2' } },
-				{ data: { id: 'edge2', source: 'node2', target: 'node3' } },
-				{ data: { id: 'edge3', source: 'node1', target: 'node3' } },
-				{ data: { id: 'edge3', source: 'node1', target: 'node4' } },
+				{ data: { id: 'a' } },
+				{ data: { id: 'b' } },
+				{ data: { id: 'c' } },
+				{ data: { id: 'd' } },
+				{ data: { id: 'e' } },
+				{ data: { id: 'ab', source: 'a', target: 'b' } },
+				{ data: { id: 'bc', source: 'b', target: 'c' } },
+				{ data: { id: 'cd', source: 'c', target: 'd' } },
+				{ data: { id: 'de', source: 'd', target: 'e' } },
 			],
 			style: [
 				{
 					selector: 'node',
 					style: {
-						'content': 'data(id)',
+						'width': '100px',
+						'height': '60px',
+						'shape': 'round-rectangle',
+						'background-color': '#F9F9FA',
+						'border-width' : '1px',
+						'border-color' : '#0088AD',
+						'color': '#646478',
+						'font-size': '12px',
 						'text-valign': 'center',
-						'text-halign': 'center'
-					}
+						'text-halign': 'center',
+						'label': 'data(id)',
+					},
 				},
+
+
 				{
 					selector: 'edge',
 					style: {
-						'curve-style': 'bezier',
-						'target-arrow-shape': 'triangle'
-					}
-				}
-			]
+
+						'width': 2,
+						'line-color': '#646478',
+						'curve-style' : 'bezier',
+						'target-arrow-color': '#646478',
+						'target-arrow-shape': 'triangle',
+					},
+				},
+			],
+			layout: {
+				name: 'grid',
+			},
 		});
 
+		// Apply HTML labels to nodes
+		// cy.nodeHtmlLabel([
+		// 	{
+		// 		query: 'node',
+		// 		tpl: function(data : any) {
+		// 			return `<div class="node-content">
+    //                 <div class="node-title">${data.id}</div>
+    //                 <div class="node-icons">
+    //                   <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
+    //                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
+    //                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
+    //                 </div>
+    //               </div>`;
+		// 		}
+		// 	}
+		// ]);
 
-		// Render Svelte components for custom nodes
-		// document.querySelectorAll('.cy-node').forEach(nodeElement => {
-		// 	const id = nodeElement.getAttribute('data-id');
-		// 	const NodeComponent = new Node({ target: nodeElement, props: { id } });
-		// });
+		cy.on('click', 'node', (event) => {
+			alert("node clicked" + event.target.id())
+		});
+
+		cy.on('mouseenter', (event) => {
+			const node = event.target;
+			console.log("Here")
+			console.log(node.id)
+			node.style('background-color', 'blue'); // Change color to blue
+		});
+
+		// Add event listener to change color back on mouse leave
+		cy.on('mouseleave', 'node', (event) => {
+			const node = event.target;
+			console.log("Here")
+			console.log(node.id)
+			node.style('background-color', '#666'); // Change color back to default
+		});
 	});
-
-
-
 </script>
 
+<style>
+    #cy {
+        width: 800px;
+        height: 600px;
+        border: 1px solid black;
+    }
+    :global(.node-content) {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 90px;
+        height: 90px;
+        text-align: center;
+        background-color: #666;
+        color: white;
+        border-radius: 5px;
+        padding: 5px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
 
-<div bind:this = "{container}" class="w-full h-full"></div>
+    :global(.node):hover{
+        background-color: #770000;
+        color: white;
+    }
+    :global(.node-title) {
+        font-size: 14px;
+        font-weight: bold;
+    }
+    :global(.node-icons) {
+        display: flex;
+        justify-content: center;
+    }
+    :global(.node-icons svg) {
+        width: 15px;
+        height: 15px;
+        margin: 0 2px;
+        fill: #7ee787;
+    }
+</style>
 
+<div id="cy"></div>

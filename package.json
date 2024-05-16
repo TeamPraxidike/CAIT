@@ -62,7 +62,9 @@
 	"dependencies": {
 		"@floating-ui/dom": "1.6.4",
 		"cytoscape": "^3.29.2",
+		"cytoscape-node-html-label": "^1.2.2",
 		"date-fns": "^3.6.0",
-		"highlight.js": "11.9.0"
+		"highlight.js": "11.9.0",
+		"interactjs": "^1.10.27"
 	}
 }
