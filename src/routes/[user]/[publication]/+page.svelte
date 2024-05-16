@@ -219,8 +219,8 @@
           on:focus={handleFocus}
           on:blur={handleBlur}></textarea>
             <div class="flex justify-end mt-2 gap-2">
-                <button class="variant-soft-surface px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-surface" on:click={handleCancel}>Cancel</button>
-                <button class="variant-soft-primary px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-primary mr-2" formaction="?/comment" on:click={addComment}>Comment</button>
+                <button class="variant-soft-surface px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-surface" type="button" on:click={handleCancel}>Cancel</button>
+                <button class="variant-soft-primary px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-primary mr-2" type="submit" formaction="?/comment" on:click={addComment}>Comment</button>
             </div>
         </div>
     </form>

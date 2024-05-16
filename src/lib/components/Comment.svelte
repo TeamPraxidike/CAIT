@@ -23,7 +23,7 @@
     let isExpanded = false;
     let lineClamp = isReply ? "line-clamp-2":"line-clamp-3"
 
-    let content: HTMLParagraphElement
+    //let content: HTMLParagraphElement
     let commentDiv: HTMLDivElement
 
     let editing = false;
@@ -105,7 +105,7 @@
 
 
 <div bind:this={commentDiv}
-     class="{isReply ? 'col-start-2 md:col-start-2 md:col-span-7': 'col-start-1 md:col-start-1 md:col-span-8'} col-span-full relative rounded-lg flex gap-2 p-1 ">
+     class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full relative rounded-lg flex gap-2 p-1 ">
     <div class="w-12 h-12 placeholder-circle">
     </div>
     <div class="flex flex-col w-full">
@@ -113,9 +113,11 @@
         <div class="flex gap-3 items-center max-w-full">
             <span class="text-surface-800 dark:text-surface-50 font-bold text-l">{userName}</span>
             <span class="text-surface-400 text-sm">{created}</span>
+
+
             <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-200 dark:hover:bg-surface-800"
                     use:popup={popupMenu}>
-                <Icon icon="ph:dots-three-vertical" style="color: 7F7F94"/>
+                <Icon icon="ph:dots-three-vertical" height="20" style="color: #19191F"/>
             </button>
         </div>
 
