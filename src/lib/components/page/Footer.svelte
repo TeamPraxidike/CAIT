@@ -31,7 +31,6 @@
                 <div class="flex flex-col gap-2">
                     <a href="/about">About</a>
                     <a href="/browse">Browse</a>
-                    <a href="/publish">Publish</a>
                 </div>
                 <div class="flex flex-col gap-2">
                     <a href="/contact">Contact</a>
