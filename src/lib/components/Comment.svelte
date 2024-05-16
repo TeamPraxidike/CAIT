@@ -5,21 +5,23 @@
     import type {PopupSettings} from '@skeletonlabs/skeleton';
     import {popup} from '@skeletonlabs/skeleton';
     import { getDateDifference } from '$lib';
+
     //assuming that you create the comment object prior to creating the components when adding a new comment, having all info available in it
     export let interaction: Comment | Reply;
     export let isReply: boolean;
     export let liked = false;
+
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = "Tom Viering"
-    //export let browsingUser = 1
+    export let browsingUser = 1
     export let popupName: string;
     let user = interaction.userId
     let text = interaction.content
     let likes = interaction.likes
     let created: string
     let edited = ""
-    let isExpanded = true;
-    let lineClamp = "line-clamp-3"
+    let isExpanded = false;
+    let lineClamp = isReply ? "line-clamp-2":"line-clamp-3"
 
     let content: HTMLParagraphElement
     let commentDiv: HTMLDivElement
@@ -31,7 +33,7 @@
 
 
 
-    $:lineClamp = isExpanded ? "line-clamp-none" : "line-clamp-2"
+    $:lineClamp = isExpanded ? "line-clamp-none" : isReply ? "line-clamp-2":"line-clamp-3"
     $:created = getDateDifference(interaction.createdAt, new Date())
 
     const dispatch = createEventDispatcher()
@@ -75,8 +77,8 @@
     };
 
     const confirmDelete = () => {
-        dispatch(isReply ? 'deleteReply' : 'deleteComment', {value: interaction.id});
-        console.log('delete')
+        dispatch('deleteInteraction', {value: {interaction: interaction, reply:isReply}});
+        //console.log('delete')
         showConfirmation = false;
     };
 
@@ -106,7 +108,7 @@
      class="{isReply ? 'col-start-2 md:col-start-2 md:col-span-7': 'col-start-1 md:col-start-1 md:col-span-8'} col-span-full relative rounded-lg flex gap-2 p-1 ">
     <div class="w-12 h-12 placeholder-circle">
     </div>
-    <div class="flex flex-col max-w-full">
+    <div class="flex flex-col w-full">
 
         <div class="flex gap-3 items-center max-w-full">
             <span class="text-surface-800 dark:text-surface-50 font-bold text-l">{userName}</span>
@@ -127,59 +129,57 @@
                       class="float-right rounded-lg dark:bg-surface-800 hover:variant-filled-primary dark:hover:bg-surface-700 text-surface:700 variant-soft-primary"
                       on:click={saveChanges}>Save
                     </button>
-
                 </div>
             {:else }
                 <p
-                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
+                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full">{text}</p>
                 <!--{#if truncated}-->
                 <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
                     {isExpanded ? 'Show Less' : 'Show More'}
                 </button>
             {/if}
+            <!--{/if}-->
+        </div>
 
-<!--            &lt;!&ndash;{/if}&ndash;&gt;-->
-<!--        </div>-->
+        <div class="flex items-center gap-5">
+            <div class="flex gap-1 items-center">
+                <button on:click={handleLike}>
+                    {#if liked}
+                        <Icon icon="mdi:like" style="color: #00A6D6"/>
+                    {:else }
+                        <Icon icon="mdi:like-outline" style="color: #7F7F94"/>
+                    {/if}
+                </button>
+                <div class="text-surface-500">{likes}</div>
+            </div>
 
-<!--        <div class="flex items-center gap-5">-->
-<!--            <div class="flex gap-1 items-center">-->
-<!--                <button on:click={handleLike}>-->
-<!--                    {#if liked}-->
-<!--                        <Icon icon="mdi:like" style="color: #00A6D6"/>-->
-<!--                    {:else }-->
-<!--                        <Icon icon="mdi:like-outline" style="color: #7F7F94"/>-->
-<!--                    {/if}-->
-<!--                </button>-->
-<!--                <div class="text-surface-500">{likes}</div>-->
-<!--            </div>-->
+            {#if !isReply}
+                <button class="hover:underline text-primary-500">Reply</button>
+            {/if}
 
-<!--            {#if !isReply}-->
-<!--                <button class="hover:underline text-primary-500">Reply</button>-->
-<!--            {/if}-->
+            <div class="ml-10 text-surface-400 text-sm">{edited}</div>
+        </div>
 
-<!--            <div class="ml-10 text-surface-400 text-sm">{edited}</div>-->
-<!--        </div>-->
-
-<!--    </div>-->
+    </div>
 </div>
 
-<!--<div data-popup="{popupName}">-->
-<!--    <div class="flex flex-col w-12 gap-2 bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">-->
-<!--        <button id="copyButton" on:click={copyToClipboard}-->
-<!--                class="rounded-lg hover:bg-surface-300 dark:hover:bg-surface-700">-->
-<!--            Copy-->
-<!--        </button>-->
-<!--        &lt;!&ndash;		only visible when user is the one who published, don't know how would work yey, just a setup&ndash;&gt;-->
-<!--        {#if browsingUser === user}-->
-<!--            <button id="editButton" on:click={startEditing}-->
-<!--                    class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">-->
-<!--                Edit-->
-<!--            </button>-->
-<!--            <button on:click={handleDelete} id="deleteButton"-->
-<!--                    class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">-->
-<!--                Delete-->
-<!--            </button>-->
-<!--        {/if}-->
+<div data-popup="{popupName}">
+    <div class="flex flex-col w-12 gap-2 bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">
+        <button id="copyButton" on:click={copyToClipboard}
+                class="rounded-lg hover:bg-surface-300 dark:hover:bg-surface-700">
+            Copy
+        </button>
+        <!--		only visible when user is the one who published, don't know how would work yey, just a setup-->
+        {#if browsingUser === user}
+            <button id="editButton" on:click={startEditing}
+                    class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
+                Edit
+            </button>
+            <button on:click={handleDelete} id="deleteButton"
+                    class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
+                Delete
+            </button>
+        {/if}
     </div>
 </div>
 

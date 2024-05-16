@@ -1,10 +1,10 @@
 <script lang="ts">
     import {type File, type Publication} from "@prisma/client";
     import type {LayoutServerData} from './$types';
-    import {DiffBar, getDateDifference, Meta, Tag, FileTable, Render, Comment} from "$lib";
+    import { DiffBar, getDateDifference, Meta, Tag, FileTable, Render, Comment} from '$lib';
     import {onMount} from "svelte";
     import Icon from "@iconify/svelte";
-
+    import {enhance} from "$app/forms"
     export let data: LayoutServerData;
 
     let publication: Publication = data.publication;
@@ -20,6 +20,9 @@
 
     let created: string;
     $:created = getDateDifference(publication.createdAt, new Date())
+
+    let isFocused = false;
+    let originalHeight: string
 
     onMount(() => {
         created = getDateDifference(publication.createdAt, new Date())
@@ -47,6 +50,31 @@
 
     let activeFile: File = files[0];
 
+    let maxCommentId = 3;
+    //let maxReplyId = 3;
+
+
+    let replies = [
+        {
+            id: 1,
+            content: "This is a reply",
+            publicationId: 1,
+            userId: 1,
+            likes: 0,
+            updatedAt: new Date(),
+            createdAt: new Date()
+        },
+        {
+            id: 2,
+            content: "This is a very long reply that provides a lot of information that is helpful and positive to the publisher, engaging in a meaningful conversation that sparks innovation in the mind of the reader through its sheer wisdom and expressive genius",
+            publicationId: 1,
+            userId: 1,
+            likes: 0,
+            updatedAt: new Date(),
+            createdAt: new Date()
+        }
+    ]
+
     let comments = [
         {
             id: 1,
@@ -55,18 +83,79 @@
             userId: 1,
             likes: 0,
             updatedAt: new Date(),
-            createdAt: new Date()
+            createdAt: new Date(),
+            replies: replies
         },
         {
-            id: 1,
-            content: "This is a comment",
+            id: 2,
+            content: "This is a very long comment that provides a lot of information that is helpful and positive to the publisher, engaging in a meaningful conversation that sparks innovation in the mind of the reader through its sheer wisdom and expressive genius, resulting in ascending to a higher level of clarity about ANNs.",
             publicationId: 1,
             userId: 1,
             likes: 0,
             updatedAt: new Date(),
-            createdAt: new Date()
+            createdAt: new Date(),
+            replies: replies
+
         }
     ]
+
+    let commentText = '';
+    let textarea:HTMLTextAreaElement;
+
+    function adjustHeight() {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    function handleFocus() {
+        isFocused = true;
+    }
+
+    function handleBlur() {
+        if (commentText === '') {
+            isFocused = false;
+        }
+    }
+
+    function handleCancel() {
+        commentText = '';
+        isFocused = false;
+    }
+    /*
+    adding this method to test for demo mainly, most likely would be a form with post that happens when you click the cmomment button
+     */
+    function addComment(){
+        console.log(commentText);
+        let newComment = {
+            id: maxCommentId,
+            content: commentText,
+            publicationId: 1,
+            userId: 1,
+            likes: 0,
+            updatedAt: new Date(),
+            createdAt: new Date(),
+            replies:[]
+        }
+        maxCommentId++;
+        commentText='';
+        isFocused=false;
+        textarea.style.height=originalHeight;
+        comments = [newComment, ...comments];
+    }
+    function handleDelete(event:CustomEvent){
+        const value = event.detail.value;
+        if(value.reply){
+            comments
+        }else{
+            comments = comments.filter(comment => comment.id !== value.interaction.id);
+            console.log(comments)
+        }
+        console.log("delete from page", value.interaction.id)   ;
+
+    }
+    onMount(() => {
+        originalHeight = getComputedStyle(textarea).height;
+    });
 
 </script>
 
@@ -104,12 +193,48 @@
     </div>
     <div class="w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-12">
         <div class="flex flex-col row-start-3">
-            {#each comments as comment}
-                <Comment interaction={comment} popupName="aaa" isReply={false}/>
-            {/each}
+
         </div>
         <FileTable {files} bind:activeFile={activeFile}/>
         <hr class="row-start-2">
         <Render {activeFile}/>
     </div>
 </div>
+
+<div class="col-span-full flex flex-col mb-1 gap-1">
+    <h2 class="text-3xl">Discussion Forum</h2>
+    <hr class="col-span-full">
+</div>
+
+<div class="flex mb-2 gap-2 col-span-full items-center">
+    <enhanced:img class="w-10 md:w-16 rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>
+<!--    <textarea class="flex-grow border-0 border-b border-gray-300 rounded-none p-2 resize-none" placeholder="Enter text here" rows="1"></textarea>-->
+    <form use:enhance method="POST" action="?/comment" class="flex-grow ">
+        <div class="flex-grow pt-2 items-center">
+        <textarea
+          name="commentText"
+          bind:this={textarea}
+          class="w-full border-0 border-b border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm"
+          placeholder="Start a discussion..."
+          rows="1"
+          bind:value={commentText}
+          on:input={adjustHeight}
+          on:focus={handleFocus}
+          on:blur={handleBlur}></textarea>
+            {#if isFocused}
+                <div class="flex justify-end mt-2 gap-2">
+                    <button class="variant-soft-surface px-4 py-2 rounded-lg hover:variant-filled-surface" on:click={handleCancel}>Cancel</button>
+                    <button class="variant-soft-primary px-4 py-2 rounded-lg hover:variant-filled-primary mr-2" on:click={addComment}>Comment</button>
+                </div>
+            {/if}
+        </div>
+    </form>
+
+</div>
+
+{#each comments as comment (comment.id)}
+    <Comment on:deleteInteraction={handleDelete} interaction={comment} popupName="comment + {comment.id} + {comment.updatedAt.toDateString()}" isReply={false}/>
+    {#each comment.replies as reply (reply.id)}
+            <Comment interaction={reply} popupName="reply + {reply.id} + {reply.updatedAt.toDateString()}" isReply={true}/>
+    {/each}
+{/each}
