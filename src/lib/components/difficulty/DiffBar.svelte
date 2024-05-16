@@ -1,6 +1,6 @@
 <script lang="ts">
     export let diff:'hard'|'medium'|'easy';
-    export let className:string = "h-12 w-12";
+    export let className:string = "h-6 w-6";
 
     let colour:string;
     switch(diff) {
