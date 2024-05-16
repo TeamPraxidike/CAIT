@@ -10,7 +10,7 @@
     export let isReply: boolean;
     export let liked = false;
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
-    export let userName = "Zlatan Ibrahimovic"
+    export let userName = "Tom Viering"
     export let browsingUser = 1
     export let popupName: string;
     let user = interaction.userId
