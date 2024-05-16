@@ -1,6 +1,6 @@
 import {
 	getMaterialByPublicationId, updateMaterialByPublicationId, prisma, handleConnections,
-	type FileInfo, convertBlobToNodeBlob
+	type FileInfo, convertBlobToNodeBlob, fileSystem
 } from "$lib/database";
 import {addFile, deleteFile, editFile} from "$lib/database/file";
 import {Blob as NodeBlob} from "node:buffer";
@@ -30,7 +30,15 @@ export async function GET({ params }) {
 				status: 404,
 			});
 		}
-		return new Response(JSON.stringify(material), { status: 200 });
+
+		// file content for return
+		const fileData: {fileId: string, data: Buffer}[] = [];
+		for (const file of material.files) {
+			const currentFileData = fileSystem.readFile(file.path);
+			fileData.push({fileId: file.path, data: currentFileData});
+		}
+
+		return new Response(JSON.stringify({material, fileData}), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
@@ -63,10 +71,14 @@ export async function PUT({ request, params }) {
 
 			const fileInfo: FileInfo = body.FileInfo
 
+			// save file content for return
+			const fileData: {fileId: string, data: Buffer}[] = [];
+
 			// add files
 			for (const file of fileInfo.add) {
-				const info: NodeBlob = await convertBlobToNodeBlob(file.info);
-				await addFile(file.title, info, body.materialId, prismaTransaction);
+				const {buffer, info} = await convertBlobToNodeBlob(file.info);
+				const createdFile = await addFile(file.title, info, body.materialId, prismaTransaction);
+				fileData.push({fileId: createdFile.path, data: buffer});
 			}
 
 			// delete files
@@ -76,8 +88,9 @@ export async function PUT({ request, params }) {
 
 			// edit existing files
 			for (const file of fileInfo.edit) {
-				const info: NodeBlob = await convertBlobToNodeBlob(file.info);
+				const {buffer, info}: NodeBlob = await convertBlobToNodeBlob(file.info);
 				await editFile(file.path, file.title, info, prismaTransaction);
+				fileData.push({fileId: file.path, data: buffer});
 			}
 
 			const material = await updateMaterialByPublicationId(
@@ -91,7 +104,7 @@ export async function PUT({ request, params }) {
 				});
 			}
 
-			return material;
+			return {material, fileData};
 		});
 
 		return new Response(JSON.stringify({ material }), { status: 200 });

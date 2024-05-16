@@ -39,7 +39,7 @@ export type NodeInfo = {
 export async function convertBlobToNodeBlob(browserBlob: Blob): Promise<NodeBlob> {
 	const arrayBuffer = await browserBlob.arrayBuffer();
 	const buffer = Buffer.from(arrayBuffer);
-	return new NodeBlob([buffer], { type: browserBlob.type });
+	return {buffer: buffer, blob: new NodeBlob([buffer], { type: browserBlob.type })};
 }
 
 export {

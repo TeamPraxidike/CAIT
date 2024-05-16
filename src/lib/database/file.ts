@@ -25,7 +25,7 @@ export async function addFile(title: string, info: Blob, materialId: number,
     try{
         const path = await fileSystem.saveFile(info, title);
         try{
-            await prismaContext.file.create({
+            return prismaContext.file.create({
                 data: {
                     path: path,
                     title: title,
