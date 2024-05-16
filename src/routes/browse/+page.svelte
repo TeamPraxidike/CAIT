@@ -118,7 +118,7 @@
     <SearchBar searchType="materials" bind:inputKeywords={searchWord}/>
 </div>
 
-<div class="col-span-full lg:col-span-8 flex justify-between gap-8 mt-28">
+<div class="col-span-full lg:col-span-8 flex justify-between gap-8">
     <div class="flex gap-2">
         <Filter bind:active="{tagActive}" bind:all="{allTags}" bind:display="{displayTags}" bind:selected="{selectedTags}"
                 label="Tags" on:clearSettings={untoggleEverything} profilePic="{false}"></Filter>
