@@ -26,12 +26,17 @@ export async function getCircuitByPublicationId(publicationId: number) {
  * [GET] Returns the all publications of type Circuit in the database
  */
 export async function getAllCircuits() {
-    return prisma.circuit.findMany({
-        include: {
-            publication: true,
-            nodes: false
-        }
-    });
+	return prisma.circuit.findMany({
+		include: {
+			publication: true,
+			nodes: false,
+		},
+	});
+}
+export async function deleteCircuitByPublicationId(publicationId: number) {
+	return prisma.material.delete({
+		where: { publicationId: publicationId },
+	});
 }
 
 /**
@@ -77,4 +82,3 @@ export async function updateCircuitByPublicationId(
 		}
 	});
 }
-

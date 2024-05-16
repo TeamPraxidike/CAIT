@@ -1,20 +1,24 @@
 import {
 	getPublicationById,
-	createUser,
-	getUserById,
 	createCircuitPublication,
 	createMaterialPublication,
 	addNodeToCircuit,
 } from './db';
 
-import { getMaterialByPublicationId, getAllMaterials, updateMaterialByPublicationId } from './material';
+import { getMaterialByPublicationId, getAllMaterials,
+	updateMaterialByPublicationId, deleteMaterialByPublicationId } from './material';
 
-import { getCircuitByPublicationId, getAllCircuits, updateCircuitByPublicationId} from './circuit';
+import { getCircuitByPublicationId, getAllCircuits,
+	updateCircuitByPublicationId, deleteCircuitByPublicationId } from './circuit';
 
 import { updatePublicationConnectTags, updatePublicationConnectMaintainers, connectMaintainers,
 	connectTags, handleConnections} from './publication';
 
 import {handleEdges, fetchExtensions, addNode, editNode, deleteNode} from './node'
+
+import {getUserById, createUser, deleteUser, editUser} from "$lib/database/user";
+import type {userEditData} from "$lib/database/user";
+
 
 import { addFiles } from '$lib/database/file';
 import { prisma } from './prisma';
@@ -67,5 +71,13 @@ export {
 	addNode,
 	deleteNode,
 	editNode,
-	addFiles
+	addFiles,
+	deleteCircuitByPublicationId,
+	deleteMaterialByPublicationId,
+	deleteUser,
+	editUser
 };
+
+export type {
+	userEditData
+}

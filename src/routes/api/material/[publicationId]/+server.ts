@@ -11,11 +11,12 @@ import {Blob as NodeBlob} from "node:buffer";
  * @constructor
  */
 
-export async function GET({ params }) {
-    // Authentication step
-    // return 401 if user not authenticated
 
-    const publicationId = parseInt(params.publicationId);
+export async function GET({ params }) {
+	// Authentication step
+	// return 401 if user not authenticated
+
+	const publicationId = parseInt(params.publicationId);
 
 	if (isNaN(publicationId) || publicationId <= 0) {
 		return new Response(JSON.stringify({ error: 'Bad Request - Invalid ID' }), {
@@ -58,7 +59,7 @@ export async function PUT({ request, params }) {
 	const publicationId = parseInt(params.publicationId);
 
 	if (isNaN(publicationId) || publicationId <= 0) {
-		return new Response(JSON.stringify({ error: 'Bad Request - Invalid ID' }), {
+		return new Response(JSON.stringify({error: 'Bad Request - Invalid ID'}), {
 			status: 400,
 		});
 	}
@@ -72,7 +73,7 @@ export async function PUT({ request, params }) {
 			const fileInfo: FileInfo = body.FileInfo
 
 			// save file content for return
-			const fileData: {fileId: string, data: Buffer}[] = [];
+			const fileData: { fileId: string, data: Buffer }[] = [];
 
 			// add files
 			for (const file of fileInfo.add) {
@@ -107,7 +108,32 @@ export async function PUT({ request, params }) {
 			return {material, fileData};
 		});
 
-		return new Response(JSON.stringify({ material }), { status: 200 });
+		return new Response(JSON.stringify({material}), {status: 200});
+	} catch (error) {
+		return new Response(JSON.stringify({error: 'Server Error'}), {
+			status: 500,
+		});
+	}
+}
+
+export async function DELETE({ params }) {
+	const id = parseInt(params.publicationId);
+
+	if (isNaN(id) || id <= 0) {
+		return new Response(
+			JSON.stringify({ error: 'Bad Delete Request - Invalid Material Id' }),
+			{ status: 400 },
+		);
+	}
+	try {
+		const material = await getMaterialByPublicationId(id);
+		if (!material) {
+			return new Response(JSON.stringify({ error: 'Material Not Found' }), {
+				status: 404,
+			});
+		}
+		await deleteMaterialByPublicationId(id);
+		return new Response(JSON.stringify(material), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,

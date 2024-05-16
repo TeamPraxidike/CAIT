@@ -1,8 +1,10 @@
 <script lang="ts">
-    import {PublicationCard, SearchBar, Tag} from '$lib';
+    import { PublicationCard, SearchBar, Tag, UserProp } from '$lib';
     import {page} from '$app/stores';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
+    import type { Material, Publication, User } from '@prisma/client';
+    import type { PageData } from './$types';
 
 
     let searchWord: string = '';
@@ -46,10 +48,10 @@
     const toggleSortBy = () => {
         //If sort by is active just close all the dropdowns else we first need to close down every other dropdown and then dropdown the sort by
         if (!sortByActive) {
-            untoggleEverything();
+            clearAll();
             sortByActive = true;
         } else {
-            untoggleEverything();
+            clearAll();
         }
     };
     //Make the border light blue showing the current toggle is active
@@ -71,10 +73,10 @@
     //Used to make the dropdown appear/disappear
     const toggleDiff = () => {
         if (!diffActive) {
-            untoggleEverything();
+            clearAll();
             diffActive = true;
         } else {
-            untoggleEverything();
+            clearAll();
         }
     };
     //Make the border light blue showing the current toggle is active
@@ -94,10 +96,10 @@
 
     const toggleTag = () => {
         if (!tagActive) {
-            untoggleEverything();
+            clearAll();
             tagActive = true;
         } else {
-            untoggleEverything();
+            clearAll();
         }
     };
     $: tagBorder = tagActive ? "border-primary-400" : "border-surface-400"
@@ -139,17 +141,18 @@
 
     const togglePublisher = () => {
         if (!publisherActive) {
-            untoggleEverything();
+            clearAll();
             publisherActive = true;
         } else {
-            untoggleEverything();
+            clearAll();
         }
     };
     $: publisherBorder = publisherActive ? 'border-primary-400' : 'border-surface-400';
     $: publisherBackground = (t: string) => selectedPublishers.includes(t) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50'; //colors in light blue if the tag is already selected in the dropdown
 
-    /*
-        *Updates the selected publishers and reassigns the variable
+    /**
+     * Updates the selected publishers and reassigns the variable
+     * @param name - the name of the publisher
      */
     const updatePublishers = (name: string) => {
 
@@ -161,8 +164,8 @@
     };
 
 
-    /*
-        * Update the publishers shown in the dropdown based on what has been inputted
+    /**
+     * Update the publishers shown in the dropdown based on what has been inputted
      */
     const updateFilterPublishers = () => {
         publisherText = publisherInput.value.toLowerCase() ?? '';
@@ -172,29 +175,35 @@
             displayPublishers = allPublisherNames.filter(name => name.toLowerCase().includes(publisherText ?? ''));
     };
 
-    /*
-        * Remove publisher action called by the X on the line
+    /**
+     * Remove publisher action called by the X on the line
+     * @param name - the name of the publisher
      */
     const removePublisher = (name: string) => {
         selectedPublishers = selectedPublishers.filter(publisher => publisher !== name);
     };
 
-    /*
-    *Method that makes all the dropdowns go up; Used so whenever you dropdown a menu it closes all others
+    /**
+     * Method that makes all the dropdowns go up; Used so whenever you drop down a menu it closes all others
      */
-    const untoggleEverything = () => {
+    const clearAll = () => {
         sortByActive = false;
         diffActive = false;
         tagActive = false;
         publisherActive = false;
     };
+
+
+    export let data:PageData;
+    let materials = data.publications;
+
 </script>
 
-<div class="col-span-4 ">
+<div class="col-span-4 mt-32">
     <SearchBar searchType="materials" bind:inputKeywords={searchWord}/>
 </div>
 
-<div class="col-span-full lg:col-span-8 flex justify-between gap-8">
+<div class="col-span-full lg:col-span-8 flex justify-between gap-8 mt-32">
     <div class="flex gap-2">
 
         <!-------Tags-------->
@@ -346,14 +355,6 @@
     {/if}
 </div>
 
-
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
-<PublicationCard/>
+{#each materials as material}
+    <PublicationCard publication={material.publication} />
+{/each}

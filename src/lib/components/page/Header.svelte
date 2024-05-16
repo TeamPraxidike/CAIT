@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {authStore, Grid, UserMenu} from "$lib";
-    import {LightSwitch, type PopupSettings, popup} from '@skeletonlabs/skeleton';
-    import Icon from "@iconify/svelte";
+    import { authStore, Grid, UserMenu } from '$lib';
+    import { LightSwitch, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+    import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
 
@@ -66,7 +66,7 @@
 
             {#if loggedIn}
                 <div class="border-l border-surface-300 h-8"/>
-                <div use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
+                <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                     <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
                 </div>
                 <div data-popup="popupHover">
@@ -105,7 +105,7 @@
                     </div>
 
                     {#if loggedIn}
-                        <div use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
+                        <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                             <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
                         </div>
                     {:else}

@@ -1,47 +1,7 @@
 import {Difficulty, PublicationType} from '@prisma/client';
-
-import {addFiles, prisma} from "$lib/database";
 import {Prisma} from "@prisma/client/extension";
 
-/**
- * Adds a new user to the database. Sets his reputation to 0.
- * @param firstName
- * @param lastName
- * @param email
- * @param profilePic
- * @param isAdmin
- */
-export async function createUser(
-	firstName: string,
-	lastName: string,
-	email: string,
-	profilePic: string,
-	isAdmin: boolean,
-) {
-	return prisma.user.create({
-		data: {
-			firstName: firstName,
-			lastName: lastName,
-			email: email,
-			profilePic: profilePic,
-			isAdmin: isAdmin,
-		},
-	});
-}
-
-/**
- * Returns the user with the given id.
- * @param id
- */
-export async function getUserById(id: number) {
-	const user = await prisma.user.findUnique({
-		where: {
-			id: id,
-		},
-	});
-	console.log('User:', user);
-	return user;
-}
+import { addFiles, prisma } from '$lib/database';
 
 /**
  * Creates a new publication with the given data. Sets the likes to 0.
