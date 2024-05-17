@@ -111,3 +111,68 @@ export async function editUser(user: userEditData) {
 		},
 	});
 }
+
+export async function likePublication(userId: number, publicationId: number) {
+	await prisma.$transaction(async (prismaTransaction) => {
+		await prismaTransaction.user.update({
+			where: {
+				id: userId
+			},
+			data: {
+				liked: {
+					connect: {
+						id: publicationId
+					}
+				}
+			}
+		});
+		await prismaTransaction.publication.update({
+			where: {
+				id: publicationId
+			},
+			data: {
+				likes: {
+					increment: 1
+				}
+			}
+		});
+	});
+}
+
+export async function getLikedPublications(userId: number) {
+	return prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			liked: true
+		}
+	});
+}
+
+export async function unlikePublication(userId: number, publicationId: number) {
+	await prisma.$transaction(async (prismaTransaction) => {
+		await prismaTransaction.user.update({
+			where: {
+				id: userId
+			},
+			data: {
+				liked: {
+					disconnect: {
+						id: publicationId
+					}
+				}
+			}
+		});
+		await prismaTransaction.publication.update({
+			where: {
+				id: publicationId
+			},
+			data: {
+				likes: {
+					decrement: 1
+				}
+			}
+		});
+	});
+}
