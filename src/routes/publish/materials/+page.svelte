@@ -91,9 +91,11 @@
                            class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
                 </div>
             </div>
+
+
             <div class="flex flex-col gap-4">
                 <hr />
-                <FileDropzone multiple name="files" bind:files={files} />
+                <FileDropzone multiple name="file" bind:files={files} />
                 <FileTable download={true} {files} bind:activeFile={activeFile}/>
             </div>
             <button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50">Publish</button>

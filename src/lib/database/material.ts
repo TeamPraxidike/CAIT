@@ -47,6 +47,7 @@ export async function deleteMaterialByPublicationId(publicationId: number) {
  * @param prismaContext
  */
 export async function createMaterialPublication(
+	userId: number,
 	title: string,
 	description: string,
 	difficulty: Difficulty,
@@ -66,14 +67,13 @@ export async function createMaterialPublication(
 			theoryPractice: theoryPractice,
 			publication: {
 				create: {
-					data: {
-						title: title,
-						description: description,
-						difficulty: difficulty,
-						learningObjectives: learningObjectives,
-						prerequisites: prerequisites,
-						type: PublicationType.Material
-					}
+					title: title,
+					description: description,
+					difficulty: difficulty,
+					learningObjectives: learningObjectives,
+					prerequisites: prerequisites,
+					type: PublicationType.Material,
+					publisherId: userId
 				}
 			}
 		},

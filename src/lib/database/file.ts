@@ -6,7 +6,7 @@ export async function bufToBase64(files: FetchedFileArray) {
     // If JSON stringify cannot handle raw Buffer, use this:
     return files.map(file => ({
         ...file,
-        data: file.data.toString('base64')
+        data: file.data.toString()
     }));
 }
 
@@ -27,7 +27,7 @@ export async function addFiles(paths: string[], titles: string[], materialId: nu
     }
 }
 
-export async function addFile(title: string, info: Blob, materialId: number,
+export async function addFile(title: string, type:string, info: Blob, materialId: number,
                                prismaContext: Prisma.TransactionClient = prisma) {
 
     try{
@@ -37,6 +37,7 @@ export async function addFile(title: string, info: Blob, materialId: number,
                 data: {
                     path: path,
                     title: title,
+                    type,
                     materialId: materialId, // Associate the File with Material, could use connect, shouldn't matter
                 },
             });

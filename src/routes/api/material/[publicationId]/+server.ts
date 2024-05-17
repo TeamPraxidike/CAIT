@@ -1,9 +1,8 @@
 import {
 	getMaterialByPublicationId, updateMaterialByPublicationId, prisma, handleConnections,
-	type FileInfo, convertBlobToNodeBlob, fileSystem, deleteMaterialByPublicationId, type FetchedFileArray,
+	type FileInfo, fileSystem, deleteMaterialByPublicationId, type FetchedFileArray,
 	bufToBase64, addFile, deleteFile, editFile
-} from "$lib/database";
-import {} from "$lib/database/file";
+} from '$lib/database';
 import {Blob as NodeBlob} from "node:buffer";
 
 /**
@@ -38,13 +37,13 @@ export async function GET({ params }) {
 
 		for (const file of material.files) {
 			const currentFileData = fileSystem.readFile(file.path);
-			fileData.push({fileId: file.path, data: currentFileData});
+			fileData.push({fileId: file.path, data: currentFileData.toString('base64')});
 		}
 
 		// If JSON stringify cannot handle raw Buffer, use this:
-		//const transformedFileData = await bufToBase64(fileData);
+		const transformedFileData = await bufToBase64(fileData);
 
-		return new Response(JSON.stringify({material, fileData}), { status: 200 });
+		return new Response(JSON.stringify({material, transformedFileData}), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500
@@ -75,15 +74,16 @@ export async function PUT({ request, params }) {
 
 			const body = await request.json();
 
-			const fileInfo: FileInfo = body.FileInfo
+			const fileInfo: FileInfo = body.fileInfo
 
 			const fileData: FetchedFileArray = [];
 
 			// add files
 			for (const file of fileInfo.add) {
-				const {buffer, info} = await convertBlobToNodeBlob(file.info);
-				const createdFile = await addFile(file.title, info, body.materialId, prismaTransaction);
-				fileData.push({fileId: createdFile.path, data: buffer});
+				const buffer:Buffer = Buffer.from(file.info, 'base64');
+				const info: NodeBlob = new NodeBlob([buffer]);
+				const createdFile = await addFile(file.title, file.type, info, body.materialId, prismaTransaction);
+				fileData.push({fileId: createdFile.path, data: buffer.toString('base64')});
 			}
 
 			// delete files
@@ -93,9 +93,10 @@ export async function PUT({ request, params }) {
 
 			// edit existing files
 			for (const file of fileInfo.edit) {
-				const {buffer, info} = await convertBlobToNodeBlob(file.info);
+				const buffer:Buffer = Buffer.from(file.info, 'base64');
+				const info: NodeBlob = new NodeBlob([buffer]);
 				await editFile(file.path, file.title, info, prismaTransaction);
-				fileData.push({fileId: file.path, data: buffer});
+				fileData.push({fileId: file.path, data: buffer.toString('base64')});
 			}
 
 			const material = await updateMaterialByPublicationId(

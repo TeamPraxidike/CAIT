@@ -1,13 +1,63 @@
 <script lang="ts">
-    import {type Publication} from "@prisma/client";
     import type {LayoutServerData} from './$types';
     import { DiffBar, getDateDifference, Meta, Tag, FileTable, Render, Comment} from '$lib';
     import {onMount} from "svelte";
     import Icon from "@iconify/svelte";
     import {enhance} from "$app/forms"
+    import type { FetchedFileArray } from '$lib/database';
+    import type { Publication } from '@prisma/client';
     export let data: LayoutServerData;
+    import type { File as PrismaFile } from '@prisma/client';
 
-    let publication: Publication = data.publication;
+    let serverData:{
+        transformedFileData: FetchedFileArray,
+        material: {
+            id: number,
+            copyright: boolean,
+            coverPic: string,
+            timeEstimate: number,
+            theoryPractice: number,
+            files: PrismaFile[],
+            publication: Publication
+        }
+    } = data.serverData;
+
+    function createFileList(files: File[]): FileList {
+        const fileProperties = files.reduce((acc, _, index) => {
+            acc[index] = {
+                get() { return files[index] || null }
+            };
+            return acc;
+        }, {} as { [key: number]: { get: () => File | null } });
+
+        return Object.create({
+            length: files.length
+        }, fileProperties);
+    }
+
+    function base64ToFile(base64String: string, filename: string, type: string): File {
+        let bstr = atob(base64String);
+        let n = bstr.length;
+        let u8arr = new Uint8Array(n);
+
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+
+        return new File([u8arr], filename, {type});
+    }
+
+    let files:FileList = createFileList(serverData.transformedFileData.map(fetchedFile => {
+        const name = serverData.material.files.find(file => {
+            return file.path === fetchedFile.fileId; // Add return statement here
+        })?.title || 'Untitled';
+        const type  = serverData.material.files.find(file => {
+            return file.path === fetchedFile.fileId; // Add return statement here
+        })?.type || 'Untitled';
+
+        return base64ToFile(fetchedFile.data, name, type);
+    }));
+    let activeFile: File;
 
     let liked: boolean = true;
     let saved: boolean = true;
@@ -19,17 +69,11 @@
     let tags: string[] = ['Very Big Tag', 'nsnsngrfnfgdb', 'One More ', 'short'];
 
     let created: string;
-    $:created = getDateDifference(publication.createdAt, new Date())
+    $:created = getDateDifference(serverData.material.publication.createdAt, new Date())
 
     let isFocused = false;
     let originalHeight: string
 
-    onMount(() => {
-        created = getDateDifference(publication.createdAt, new Date())
-    })
-
-    let files:FileList;
-    let activeFile: File;
     let leftHeight:number;
     let maxCommentId = 3;
 
@@ -131,14 +175,15 @@
     }
     onMount(() => {
         originalHeight = getComputedStyle(textarea).height;
+        created = getDateDifference(serverData.material.publication.createdAt, new Date())
     });
 
 </script>
 
-<Meta title={publication.title} description="CAIT" type="site"/>
+<Meta title={serverData.material.publication.title} description="CAIT" type="site"/>
 
 <div class="col-span-full flex flex-col items-start my-20">
-    <h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{publication.title}</h2>
+    <h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
     <div class="flex gap-2">
         <p class="text-sm text-surface-500">{created}</p>
         <Icon icon="mdi:presentation" class="text-xl text-surface-500"/>
@@ -149,7 +194,7 @@
             <Tag tagText={tag} removable={false}/>
         {/each}
     </div>
-    <p class="text-surface-700 dark:text-surface-400">{publication.description}</p>
+    <p class="text-surface-700 dark:text-surface-400">{serverData.material.publication.description}</p>
 
     <div class="flex items-center text-3xl rounded-lg border mt-4">
         <button
@@ -167,7 +212,7 @@
             <Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark"/>
         </button>
     </div>
-    <div bind:clientHeight={leftHeight} class="w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-12">
+    <div bind:clientHeight={leftHeight} class="min-h-96 w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-12">
         <div class="flex flex-col row-start-3">
 
         </div>

@@ -8,5 +8,5 @@ export const load: LayoutServerLoad = async ({ params, fetch }) => {
 		error(pRes.status, pRes.statusText);
 	}
 
-	return await pRes.json();
+	return { serverData: await pRes.json() };
 };

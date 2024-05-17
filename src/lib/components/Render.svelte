@@ -29,7 +29,7 @@
             <div>Loading...</div>
         {:then file}
             {#if activeFile.type.startsWith('image')}
-                <img src={URL.createObjectURL(new Blob([file], { type: activeFile.type }))} alt="Rendered from ArrayBuffer" />
+                <img src={URL.createObjectURL(new Blob([file], { type: 'image/png' }))} alt="Rendered from ArrayBuffer" />
             {:else if activeFile.type.startsWith('text') || activeFile.type.startsWith('application')}
                 <CodeBlock language={getLanguage(activeFile.type)} code={decoder.decode(file)} />
             {:else}

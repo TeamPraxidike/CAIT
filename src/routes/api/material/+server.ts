@@ -1,8 +1,10 @@
 import {
 	getAllMaterials, createMaterialPublication, prisma,
-	type FileInfo, handleConnections, convertBlobToNodeBlob, type FetchedFileArray, getMaterialByPublicationId,
-	addFile, bufToBase64
+	type FileInfo, handleConnections, type FetchedFileArray, getMaterialByPublicationId,
+	addFile, bufToBase64, type MaterialForm
 } from '$lib/database';
+
+import {Blob as NodeBlob} from "node:buffer"
 
 /**
  * Get all materials
@@ -31,28 +33,34 @@ export async function POST({ request }) {
 	// return 401 if user not authenticated
 	try {
 		const createdMaterial = await prisma.$transaction(async (prismaTransaction) => {
-			const body = await request.json();
-
-			const fileInfo: FileInfo = body.FileInfo
+			const body:MaterialForm = await request.json();
+			const fileInfo: FileInfo = body.fileInfo
 
 			const material = await createMaterialPublication(
-				body.title, body.description, body.difficulty,
+				body.userId, body.title, body.description, body.difficulty,
 				body.learningObjectives, body.prerequisites, body.coverPic, body.copyright,
 				body.timeEstimate, body.theoryPractice, prismaTransaction
 			);
-			if (!material) {
-				return null;
-			}
 
-			await handleConnections(request, material.publicationId, prismaTransaction);
+			console.log("BACKEND FILEINFO: ", fileInfo);
+
+			if (!material) return null;
+
+			// await handleConnections(request, material.publicationId, prismaTransaction);
 
 			const fileData: FetchedFileArray = [];
 
 			// add files
 			for (const file of fileInfo.add) {
-				const {buffer, info} = await convertBlobToNodeBlob(file.info);
-				const createdFile = await addFile(file.title, info, material.id, prismaTransaction);
-				fileData.push({fileId: createdFile.path, data: buffer});
+				console.log("FILES");
+				console.log(typeof file);
+				console.log(file);
+
+				const buffer:Buffer = Buffer.from(file.info, 'base64');
+				const info: NodeBlob = new NodeBlob([buffer]);
+
+				const createdFile = await addFile(file.title, file.type, info, material.id, prismaTransaction);
+				fileData.push({fileId: createdFile.path, data: file.info});
 			}
 
 			return {material, fileData};
@@ -75,6 +83,7 @@ export async function POST({ request }) {
 
 		return new Response(JSON.stringify({actualMaterial, transformedFileData}), {status: 200});
 	} catch (error) {
+		console.log(error);
 		return new Response(JSON.stringify({error: 'Server Error'}), {
 			status: 500,
 		});

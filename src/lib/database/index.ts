@@ -24,18 +24,33 @@ import { addFiles, addFile, deleteFile, editFile, bufToBase64 } from '$lib/datab
 import { prisma } from './prisma';
 import {LocalFileSystem} from "$lib/FileSystemPort/LocalFileSystem";
 import {Blob as NodeBlob} from "node:buffer"
+import { Difficulty } from '@prisma/client';
 
 const fileSystem = new LocalFileSystem();
 
+export type MaterialForm = {
+	userId: number,
+	title: string,
+	description: string,
+	difficulty: Difficulty,
+	learningObjectives: string[],
+	prerequisites: string[],
+	coverPic: string,
+	copyright: boolean,
+	timeEstimate: number,
+	theoryPractice: 34,
+	fileInfo:FileInfo
+}
+
 export type FileInfo = {
-	add: { title: string; info: Blob }[];
+	add: { title: string, type:string ; info: string }[];
 	delete: { path: string }[];
-	edit: { path: string, title: string; info: Blob;  }[];
+	edit: { path: string, title: string; info: string;  }[];
 };
 
 export type FetchedFileItem = {
 	fileId: string;
-	data: Buffer;
+	data: string;
 };
 
 export type FetchedFileArray = FetchedFileItem[];
@@ -46,12 +61,6 @@ export type NodeInfo = {
 	edit: { nodeId: number, publicationId: number }[];
 	next: { fromId: number; toId: number[] }[];
 };
-
-export async function convertBlobToNodeBlob(browserBlob: Blob): Promise<{ buffer: Buffer; info: NodeBlob }> {
-	const arrayBuffer = await browserBlob.arrayBuffer();
-	const buffer = Buffer.from(arrayBuffer);
-	return {buffer: buffer, info: new NodeBlob([buffer], { type: browserBlob.type })};
-}
 
 export {
 	prisma,
