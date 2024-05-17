@@ -43,7 +43,23 @@ import {
 	deleteUser,
 	editUser,
 } from '$lib/database/user';
+
+import {
+	createComment,
+	deleteComment,
+	getComment,
+	updateComment,
+} from '$lib/database/comment';
+
+import {
+	getReply,
+	deleteReply,
+	updateReply,
+	createReply,
+} from '$lib/database/reply';
 import type { userEditData } from '$lib/database/user';
+import type { editReplyData, createReplyData } from '$lib/database/reply';
+import type { createCommentData, editCommentData } from '$lib/database/comment';
 
 import { addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
 import { prisma } from './prisma';
@@ -119,6 +135,20 @@ export {
 	deleteMaterialByPublicationId,
 	deleteUser,
 	editUser,
+	updateComment,
+	createComment,
+	deleteComment,
+	getComment,
+	deleteReply,
+	getReply,
+	updateReply,
+	createReply,
 };
 
-export type { userEditData };
+export type {
+	userEditData,
+	createReplyData,
+	createCommentData,
+	editCommentData,
+	editReplyData,
+};
