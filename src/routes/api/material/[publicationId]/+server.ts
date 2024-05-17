@@ -118,11 +118,11 @@ export async function PUT({ request, params }) {
 		}
 
 		// If JSON stringify cannot handle raw Buffer, use this:
-		//const transformedFileData = await bufToBase64(updatedMaterial.fileData);
+		const transformedFileData = await bufToBase64(updatedMaterial.fileData);
 
-		const fileData = updatedMaterial.fileData;
+	//	const fileData = updatedMaterial.fileData;
 
-		return new Response(JSON.stringify({updatedMaterial, fileData}), {status: 200});
+		return new Response(JSON.stringify({updatedMaterial, transformedFileData}), {status: 200});
 	} catch (error) {
 		return new Response(JSON.stringify({error: 'Server Error'}), {
 			status: 500,

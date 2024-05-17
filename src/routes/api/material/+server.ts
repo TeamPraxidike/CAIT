@@ -69,11 +69,11 @@ export async function POST({ request }) {
 		const actualMaterial = await getMaterialByPublicationId(createdMaterial.material.publicationId);
 
 		// If JSON stringify cannot handle raw Buffer, use this:
-		// const transformedFileData = await bufToBase64(createdMaterial.fileData);
+		const transformedFileData = await bufToBase64(createdMaterial.fileData);
 
-		const fileData = createdMaterial.fileData;
+		//const fileData = createdMaterial.fileData;
 
-		return new Response(JSON.stringify({actualMaterial, fileData}), {status: 200});
+		return new Response(JSON.stringify({actualMaterial, transformedFileData}), {status: 200});
 	} catch (error) {
 		return new Response(JSON.stringify({error: 'Server Error'}), {
 			status: 500,
