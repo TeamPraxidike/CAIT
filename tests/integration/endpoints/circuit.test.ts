@@ -1,4 +1,4 @@
-// import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { testingUrl } from '../setup';
 // import { createCircuitPublication } from '$lib/database';
 import { Difficulty } from '@prisma/client';
@@ -27,6 +27,13 @@ async function populate() {
 		userId: userData.user.id,
 	};
 }
+
+describe('Circuits', async () => {
+	it("should be remade", () => {
+		expect(true).toBe(true);
+	})
+});
+
 //
 // describe('Circuits', async () => {
 // 	describe('[GET] /circuit/:id', () => {

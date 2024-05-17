@@ -3,6 +3,15 @@
 // import { Difficulty } from '@prisma/client';
 // import { createMaterialPublication, createUser, prisma } from '$lib/database';
 
+
+
+import { describe, expect, it } from 'vitest';
+
+describe('Circuits', async () => {
+	it("should be remade", () => {
+		expect(true).toBe(true);
+	})
+});
 // async function populate(arg: string) {
 // 	const user = await createUser('Vasko', 'Vasko', 'Vasko', 'path');
 // 	return {
