@@ -30,8 +30,6 @@
         {:then file}
             {#if activeFile.type.startsWith('image')}
                 <img src={URL.createObjectURL(new Blob([file], { type: activeFile.type }))} alt="Rendered from ArrayBuffer" />
-            <!--{:else if activeFile.type === 'application/pdf'}-->
-            <!--    <img src={pdfData} alt="Rendered PDF" />-->
             {:else if activeFile.type.startsWith('text') || activeFile.type.startsWith('application')}
                 <CodeBlock language={getLanguage(activeFile.type)} code={decoder.decode(file)} />
             {:else}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {type File, type Publication} from "@prisma/client";
+    import {type Publication} from "@prisma/client";
     import type {LayoutServerData} from './$types';
     import { DiffBar, getDateDifference, Meta, Tag, FileTable, Render, Comment} from '$lib';
     import {onMount} from "svelte";
@@ -28,31 +28,10 @@
         created = getDateDifference(publication.createdAt, new Date())
     })
 
-    let files = [
-        {
-            path: "slides.pdf",
-            title: "slides.pdf",
-            materialId: 1
-        }, {
-            path: "slide.pptx",
-            title: "slide.pptx",
-            materialId: 1
-        }, {
-            path: "code.py",
-            title: "code.py",
-            materialId: 1
-        }, {
-            path: "README.md",
-            title: "README.md",
-            materialId: 1
-        }
-    ]
-
-    let activeFile: File = files[0];
-
+    let files:FileList;
+    let activeFile: File;
+    let leftHeight:number;
     let maxCommentId = 3;
-    //let maxReplyId = 3;
-
 
     let replies = [
         {
@@ -123,7 +102,7 @@
         textarea.style.height=originalHeight;
     }
     /*
-    adding this method to test for demo mainly, most likely would be a form with post that happens when you click the cmomment button
+    adding this method to test for demo mainly, most likely would be a form with post that happens when you click the comment button
      */
     function addComment(){
         let newComment = {
@@ -188,13 +167,13 @@
             <Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark"/>
         </button>
     </div>
-    <div class="w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-12">
+    <div bind:clientHeight={leftHeight} class="w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-12">
         <div class="flex flex-col row-start-3">
 
         </div>
         <FileTable {files} bind:activeFile={activeFile}/>
         <hr class="row-start-2">
-        <Render {activeFile}/>
+        <Render height={leftHeight} {activeFile}/>
     </div>
 </div>
 
