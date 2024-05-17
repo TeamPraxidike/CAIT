@@ -30,6 +30,9 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	try {
 		// prisma will automatically complain if the user does not exist so no need to check
+
+		const paths = body.paths.map((path: string) => body.title + '/' + path);
+
 		const material = await createMaterialPublication({
 			userId: body.userId,
 			title: body.title,
@@ -38,7 +41,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			difficulty: body.difficulty,
 			timeEstimate: body.timeEstimate,
 			theoryPractice: body.theoryPractice,
-			paths: body.paths,
+			paths,
 			titles: body.titles,
 		});
 		return new Response(JSON.stringify({ material }), { status: 200 });
