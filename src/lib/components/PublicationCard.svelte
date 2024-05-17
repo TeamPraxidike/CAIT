@@ -165,7 +165,7 @@
                                 class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
                                 on:click={() => toggleLike()}>
                             <Icon bind:this={star} class="text-lg {likedColor}" icon="material-symbols:star"/>
-                            <span>472</span>
+                            <span>{publication.likes}</span>
                         </button>
 
                         <div class="h-2/3 w-px bg-surface-200"></div>

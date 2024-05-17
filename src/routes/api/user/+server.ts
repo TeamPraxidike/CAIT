@@ -3,7 +3,6 @@ import { createUser, prisma } from '$lib/database';
 export async function POST({ request }) {
 	// authentication step here
 	const userjson = await request.json();
-	console.log('aaa');
 	try {
 		const user = await createUser(
 			userjson.firstName,

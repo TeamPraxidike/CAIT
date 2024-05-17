@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
-	import Node from '@prisma/client'
 
 
-	interface Cytoscape  {
-			style : () => void
-	}
+
 
 	interface Edge {
 		id:string
