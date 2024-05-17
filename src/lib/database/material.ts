@@ -26,7 +26,7 @@ export async function getAllMaterials(
 ) {
 	const where: any = { AND: [] };
 	if (publishers.length > 0) {
-		where.AND.push({ publisherId: { in: publishers } });
+		where.AND.push({ publication: { publisherId: { in: publishers } } });
 	}
 
 	if (diff.length > 0) {

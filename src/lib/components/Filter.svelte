@@ -106,7 +106,7 @@
 <!--						{/if}-->
 <!--						<span class="w-full h-full">{dis}</span>-->
 <!--					</button>-->
-					<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display} bind:selected={selected} on:update={update}/>
+					<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display} on:update={update}/>
 				{/each}
 			{/if}
 		</div>

@@ -8,8 +8,6 @@
 
 	export let profilePic : boolean;
 
-	export let selected: {id:number, val:string } [];
-
 	export let label:string;
 	export let selectedIds:number [];
 	export let selectedVals:string [];
