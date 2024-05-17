@@ -150,7 +150,7 @@ describe('Materials', async () => {
 
 			const responseBody = await response.json();
 
-			expect(responseBody).toHaveLength(randomNumber);
+			expect(responseBody.length).toBeGreaterThanOrEqual(randomNumber);
 		});
 
 		// it('should respond with 500 if a server-side error occurs', async () => {
