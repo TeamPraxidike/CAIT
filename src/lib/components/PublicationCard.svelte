@@ -75,8 +75,6 @@
         containerWidth = container.getBoundingClientRect().width;
         window.addEventListener('resize', updateContainerWidth);
 
-        console.log(publication);
-
         maxTags = calcMaxTags();
         if (hoverDiv) {
             hoverDiv.addEventListener('mouseenter', handleHover);

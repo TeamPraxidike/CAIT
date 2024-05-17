@@ -1,5 +1,4 @@
 import type { LayoutServerLoad } from './$types';
-import type { User } from '@prisma/client';
 import { error } from '@sveltejs/kit';
 
 /**
@@ -12,13 +11,10 @@ export const load: LayoutServerLoad = async ({ params, fetch }) => {
 	// {fetch, params}
 	const uRes = await fetch(`/api/user/${params.user}`);
 
-	console.log(uRes.status, uRes.statusText);
-
 	if (uRes.status !== 200) {
 		error(uRes.status, uRes.statusText);
 	}
 
 	const user = await uRes.json();
-	console.log(user);
 	return { user };
 };

@@ -14,7 +14,10 @@ import {prisma} from "$lib/database/prisma";
  */
 export async function handleConnections(request: Request, publicationId: number,
                                         prismaTransaction: Prisma.TransactionClient = prisma) {
+    console.log("handleConnections");
     const body = await request.json();
+
+    console.log(body);
 
     if (body.maintainerConnect.length > 0) {
         await connectMaintainers(publicationId, body.maintainerConnect, prismaTransaction);

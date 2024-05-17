@@ -4,11 +4,13 @@
     import Icon from '@iconify/svelte';
     import type {PopupSettings} from '@skeletonlabs/skeleton';
     import {popup} from '@skeletonlabs/skeleton';
-    import {getDateDifference} from "$lib";
+    import { getDateDifference } from '$lib';
+
     //assuming that you create the comment object prior to creating the components when adding a new comment, having all info available in it
     export let interaction: Comment | Reply;
     export let isReply: boolean;
     export let liked = false;
+
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = "Tom Viering"
     export let browsingUser = 1
@@ -19,9 +21,9 @@
     let created: string
     let edited = ""
     let isExpanded = false;
-    let lineClamp = "line-clamp-3"
+    let lineClamp = isReply ? "line-clamp-2":"line-clamp-3"
 
-    let content: HTMLParagraphElement
+    //let content: HTMLParagraphElement
     let commentDiv: HTMLDivElement
 
     let editing = false;
@@ -31,7 +33,7 @@
 
 
 
-    $:lineClamp = isExpanded ? "line-clamp-none" : "line-clamp-2"
+    $:lineClamp = isExpanded ? "line-clamp-none" : isReply ? "line-clamp-2":"line-clamp-3"
     $:created = getDateDifference(interaction.createdAt, new Date())
 
     const dispatch = createEventDispatcher()
@@ -75,8 +77,8 @@
     };
 
     const confirmDelete = () => {
-        dispatch(isReply ? 'deleteReply' : 'deleteComment', {value: interaction.id});
-        console.log('delete')
+        dispatch('deleteInteraction', {value: {interaction: interaction, reply:isReply}});
+        //console.log('delete')
         showConfirmation = false;
     };
 
@@ -103,17 +105,19 @@
 
 
 <div bind:this={commentDiv}
-     class="peer/comment {isReply ? 'col-start-2 md:col-start-2 md:col-span-7': 'col-start-1 md:col-start-1 md:col-span-8'} relative rounded-lg flex gap-2 p-1 ">
+     class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full relative rounded-lg flex gap-2 p-1 ">
     <div class="w-12 h-12 placeholder-circle">
     </div>
     <div class="flex flex-col w-full">
 
-        <div class="flex gap-3 items-center">
+        <div class="flex gap-3 items-center max-w-full">
             <span class="text-surface-800 dark:text-surface-50 font-bold text-l">{userName}</span>
             <span class="text-surface-400 text-sm">{created}</span>
+
+
             <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-200 dark:hover:bg-surface-800"
                     use:popup={popupMenu}>
-                <Icon icon="ph:dots-three-vertical" style="color: 7F7F94"/>
+                <Icon icon="ph:dots-three-vertical" height="20" style="color: #19191F"/>
             </button>
         </div>
 
@@ -122,20 +126,20 @@
                 <div>
                     <textarea rows="5"
                               class="border-b border-surface-200 border-opacity-50 dark:border-surface-100 dark:border-opacity-50 text-surface-800 text-opacity-90 dark:text-opacity-90 dark:bg-surface-800 dark:text-surface-50 w-full"
-                              bind:value={newText}/>
-                    <button class="float-right rounded-lg dark:bg-surface-800 hover:bg-surface-300 dark:hover:bg-surface-700 text-surface:700"
-                            on:click={saveChanges}>Save
+                              bind:value={newText} />
+                    <button
+                      class="float-right rounded-lg dark:bg-surface-800 hover:variant-filled-primary dark:hover:bg-surface-700 text-surface:700 variant-soft-primary"
+                      on:click={saveChanges}>Save
                     </button>
                 </div>
             {:else }
-                <p bind:this={content}
-                   class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 mt-2 {lineClamp} text-md">{text}</p>
+                <p
+                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full">{text}</p>
                 <!--{#if truncated}-->
                 <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
                     {isExpanded ? 'Show Less' : 'Show More'}
                 </button>
             {/if}
-
             <!--{/if}-->
         </div>
 
