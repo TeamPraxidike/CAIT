@@ -10,7 +10,7 @@
     import type { File as PrismaFile } from '@prisma/client';
 
     let serverData:{
-        transformedFileData: FetchedFileArray,
+        fileData: FetchedFileArray,
         material: {
             id: number,
             copyright: boolean,
@@ -47,7 +47,7 @@
         return new File([u8arr], filename, {type});
     }
 
-    let files:FileList = createFileList(serverData.transformedFileData.map(fetchedFile => {
+    let files:FileList = createFileList(serverData.fileData.map(fetchedFile => {
         const name = serverData.material.files.find(file => {
             return file.path === fetchedFile.fileId; // Add return statement here
         })?.title || 'Untitled';
