@@ -56,11 +56,11 @@
                 <DifficultySelection difficulty="easy" />
             </div>
             <div class="w-full">
-                <label for="learning-objectives">Learning Objectives:</label>
+                <label for="learning_objective_input">Learning Objectives:</label>
                 <div class="flex gap-2">
-                    <input type="text" id="learning-objectives" bind:this={loInput}
+                    <input type="text" name="learning_objective_input" id="learning_objective_input" bind:this={loInput}
                            class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
-                    <button type="button" on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""}}
+                    <button type="button" name="add_lo" on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""}}
                             class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+</button>
                 </div>
                 <ol class="list-decimal bg-surface-100 list-inside gap-2 max-h-40 overflow-y-auto">
@@ -70,11 +70,11 @@
                 </ol>
             </div>
             <div class="w-1/2">
-                <label for="tags">Tags:</label>
+                <label for="tags_input">Tags:</label>
                 <div class="flex gap-2">
-                    <input type="text" id="tags" bind:this={tagInput}
+                    <input type="text" name="tags_input" id="tags_input" bind:this={tagInput}
                            class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
-                    <button type="button" on:click={() => { tags = [...tags, tagInput.value]; tagInput.value = ""}}
+                    <button type="button" name="add_tag" on:click={() => { tags = [...tags, tagInput.value]; tagInput.value = ""}}
                             class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+</button>
                 </div>
             </div>
