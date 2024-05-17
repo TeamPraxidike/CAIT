@@ -58,7 +58,7 @@ describe("Liking publications", () => {
         if(liked === null){
             throw Error("liked was null");
         }
-        expect(liked.liked.length).toBe(1);
+        expect(liked.liked).toHaveLength(1);
         expect(liked.liked[0].id).toBe(publication.publicationId);
         expect(liked.liked[0].title).toBe("cool publication");
     });
