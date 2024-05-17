@@ -134,8 +134,11 @@ export async function likePublication(userId: number, publicationId: number) {
 	if (liked === null) throw Error("Liked publications were not found");
 	if(liked.liked.map(x => x.id).includes(publicationId)) {
 		await unlike(userId, publicationId);
+		return "Publication unliked successfully"
+		// return liked.liked
 	} else {
 		await like(userId, publicationId);
+		return "Publication liked successfully"
 	}
 }
 

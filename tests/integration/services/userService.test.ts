@@ -38,6 +38,7 @@ describe("Editing users", () => {
 describe("Liking publications", () => {
     let user : User;
     let publication : Material;
+    let likedMessage : string;
     beforeEach(async () => {
         user = await createUser("Bobi", "Damyanov", "email2@email", "vasko.pdf");
         publication = await createMaterialPublication({
@@ -47,10 +48,11 @@ describe("Liking publications", () => {
             copyright: true,
             difficulty: Difficulty.easy
         });
-        await likePublication(user.id, publication.publicationId);
+        likedMessage = await likePublication(user.id, publication.publicationId);
     });
 
     it("should add it to the liked list", async () => {
+        expect(likedMessage).toBe("Publication liked successfully");
         const liked = await getLikedPublications(user.id);
         if(liked === null){
             throw Error("liked was null");
@@ -69,7 +71,9 @@ describe("Liking publications", () => {
     });
 
     it("should remove it from the liked list when unliked", async () => {
-        await likePublication(user.id, publication.publicationId);
+        const response = await likePublication(user.id, publication.publicationId);
+        expect(response).toBe("Publication unliked successfully");
+
         const liked = await getLikedPublications(user.id);
         if(liked === null){
             throw Error("liked was null");
