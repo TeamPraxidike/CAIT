@@ -1,36 +1,16 @@
 <script lang="ts">
-    import type {File} from "@prisma/client";
     import {DifficultySelection, FileTable, lorem, Meta, Render, Tag} from "$lib";
     import {FileDropzone} from "@skeletonlabs/skeleton";
 
 
-    let tags: string[] = ['Very Big Tag', 'nsnsngrfnfgdb', 'One More ', 'short'];
-    let files = [
-        {
-            path: "slides.pdf",
-            title: "slides.pdf",
-            materialId: 1
-        }, {
-            path: "slide.pptx",
-            title: "slide.pptx",
-            materialId: 1
-        }, {
-            path: "code.py",
-            title: "code.py",
-            materialId: 1
-        }, {
-            path: "README.md",
-            title: "README.md",
-            materialId: 1
-        }
-    ]
+    let tags: string[] = [];
 
-    let activeFile: File = files[0];
-
+    let files:FileList;
+    let activeFile: File;
     let LOs:string[] = [];
-
     let loInput:HTMLInputElement;
     let tagInput:HTMLInputElement;
+    let leftHeight:number;
 </script>
 
 <Meta title="Publish" description="CAIT" type="site"/>
@@ -42,17 +22,17 @@
             <Tag tagText={tag} removable={false}/>
         {/each}
     </div>
-    <div class="w-full flex flex-col lg:grid gap-8 grid-cols-2 mt-12">
-        <div class="flex flex-col w-full gap-8">
+    <div class="w-full flex flex-col row- lg:grid gap-8 grid-cols-2 items-start mt-12">
+        <div bind:clientHeight={leftHeight} class="flex flex-col w-full gap-8">
             <div class="flex gap-4 items-center">
                 <label for="title">Title:</label>
-                <input type="text" id="title"
+                <input type="text" name="title"
                        class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
             </div>
 
             <div class="flex flex-col gap-2">
                 <label for="description">Description:</label>
-                <textarea id="description"
+                <textarea name="description"
                           class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
                     {lorem + lorem}
                 </textarea>
@@ -89,22 +69,22 @@
             <div class="flex gap-2">
                 <div class="w-1/2">
                     <label for="estimate">Time Estimate:</label>
-                    <input type="text" id="estimate"
+                    <input type="text" name="estimate"
                            class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
                 </div>
                 <div class="w-1/2">
                     <label for="copyright">Copyright:</label>
-                    <input type="text" id="copyright"
+                    <input type="text" name="copyright"
                            class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
                 </div>
             </div>
+            <div class="flex flex-col gap-4">
+                <hr />
+                <FileDropzone multiple name="files" bind:files={files} />
+                <FileTable download={false} {files} bind:activeFile={activeFile}/>
+            </div>
+            <button class="btn rounded-lg variant-filled-primary text-surface-50">Publish</button>
         </div>
-        <Render {activeFile}/>
-        <div class="flex flex-col gap-4">
-            <hr />
-            <FileDropzone name="a" />
-            <FileTable {files} bind:activeFile={activeFile}/>
-        </div>
-        <button class="btn rounded-lg variant-filled-primary text-surface-50">Publish</button>
+        <Render height={leftHeight} {activeFile}/>
     </div>
 </form>

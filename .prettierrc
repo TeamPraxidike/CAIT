@@ -6,5 +6,6 @@
   "bracketSameLine": true,
   "arrowParens": "always",
   "htmlWhitespaceSensitivity": "css",
-  "singleAttributePerLine": true
+  "singleAttributePerLine": true,
+  "tabWidth": 4
 }
