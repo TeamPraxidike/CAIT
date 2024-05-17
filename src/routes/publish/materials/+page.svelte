@@ -8,6 +8,7 @@
 
     let files:FileList;
     let activeFile: File;
+
     let LOs:string[] = [];
     let loInput:HTMLInputElement;
     let tagInput:HTMLInputElement;
