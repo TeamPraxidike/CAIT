@@ -15,7 +15,11 @@ describe('Filter Component', () => {
 			props: {
 				label: 'Filter',
 				selected: [],
-				all: ['Option1', 'Option2', 'Option3'],
+				all: [
+					{ id: 5, val: 'Option1' },
+					{ id: 5, val: 'Option2' },
+					{ id: 5, val: 'Option3' },
+				],
 				display: [],
 				active: false,
 				profilePic: false,
@@ -36,7 +40,11 @@ describe('Filter Component', () => {
 			props: {
 				label: 'Filter',
 				selected: [],
-				all: ['Option1', 'Option2', 'Option3'],
+				all: [
+					{ id: 5, val: 'Option1' },
+					{ id: 5, val: 'Option2' },
+					{ id: 5, val: 'Option3' },
+				],
 				display: [],
 				active: true,
 				profilePic: true,
@@ -58,8 +66,15 @@ describe('Filter Component', () => {
 			props: {
 				label: 'Filter',
 				selected: [],
-				all: ['Option1', 'Option2', 'Option3'],
-				display: ['Option1', 'Option2'],
+				all: [
+					{ id: 5, val: 'Option1' },
+					{ id: 5, val: 'Option2' },
+					{ id: 5, val: 'Option3' },
+				],
+				display: [
+					{ id: 5, val: 'Option1' },
+					{ id: 5, val: 'Option2' },
+				],
 				active: true,
 				profilePic: true,
 			},

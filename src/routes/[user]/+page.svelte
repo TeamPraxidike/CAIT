@@ -17,9 +17,11 @@
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         Saved Publications
     </h3>
-    <p>aa</p>
+    {#each data.user.posts as publication}
+        <PublicationCard {publication} />
+    {/each}
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
-        {user.firstName}'s Publications
+        Franklin's Publications
     </h3>
     {#each data.user.posts as publication}
         <PublicationCard {publication} />

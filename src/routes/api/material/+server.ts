@@ -1,50 +1,139 @@
-import { getAllMaterials, createMaterialPublication } from '$lib/database';
+import {
+	getAllMaterials, createMaterialPublication, prisma,
+	type FileInfo, handleConnections, type FetchedFileArray, getMaterialByPublicationId,
+	addFile, bufToBase64, type MaterialForm
+} from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
+import { Difficulty } from '@prisma/client';
+import {Blob as NodeBlob} from "node:buffer"
+
+/**
+ * Convert a difficulty string to difficulty enum
+ */
+function mapToDifficulty(difficulty: string): Difficulty {
+	switch (difficulty.toLowerCase()) {
+		case 'easy':
+			return Difficulty.easy;
+		case 'medium':
+			return Difficulty.medium;
+		case 'hard':
+			return Difficulty.hard;
+		default:
+			throw new Error(`Invalid difficulty: ${difficulty}`);
+	}
+}
 
 /**
  * Get all materials
  */
-export async function GET() {
+export const GET: RequestHandler = async ({ url }) => {
 	// Authentication step
 	// return 401 if user not authenticated
 
 	try {
-		const materials = await getAllMaterials();
+		console.log('Here');
+		const t = url.searchParams.get('tags');
+		const tags = t ? t.split(',') : [];
+		console.log(tags);
+		const d = url.searchParams.get('difficulty');
+		const diff = d ? d.split(',').map(mapToDifficulty) : [];
+
+		console.log(diff);
+		const p = url.searchParams.get('publishers');
+		const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
+		console.log(publishers);
+		const ty = url.searchParams.get('types');
+		const type = ty ? ty.split(',') : [];
+		console.log(type);
+
+		const materials = await getAllMaterials(tags, publishers, diff, type);
+		console.log('DB return');
+		console.log(materials);
 		return new Response(JSON.stringify(materials), { status: 200 });
 	} catch (error) {
+		console.log('There was an Error');
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
 	}
-};
+}
 
 /**
- * Create a new material publication. Adds the files to the database.
+ * Create a publication of type material
  * @param request
+ * @param params
  */
 export async function POST({ request }) {
-	const body = await request.json();
-
 	// Authentication step
 	// return 401 if user not authenticated
-
 	try {
-		// prisma will automatically complain if the user does not exist so no need to check
-		const material = await createMaterialPublication({
-			userId: body.userId,
-			title: body.title,
-			description: body.description,
-			copyright: body.copyright,
-			difficulty: body.difficulty,
-			timeEstimate: body.timeEstimate,
-			theoryPractice: body.theoryPractice,
-			paths: body.paths,
-			titles: body.titles,
+		const createdMaterial = await prisma.$transaction(async (prismaTransaction) => {
+			const body:MaterialForm = await request.json();
+			const fileInfo: FileInfo = body.fileInfo
+
+			const material = await createMaterialPublication(
+				body.userId, body.title, body.description, body.difficulty,
+				body.learningObjectives, body.prerequisites, body.coverPic, body.copyright,
+				body.timeEstimate, body.theoryPractice, prismaTransaction
+			);
+
+			if (!material) {
+				return new Response(JSON.stringify({error: 'Bad Request'}), {
+					status: 400,
+				});
+			}
+
+			// await handleConnections(request, material.publicationId, prismaTransaction);
+
+			// add files
+			for (const file of fileInfo.add) {
+				const buffer:Buffer = Buffer.from(file.info, 'base64');
+				// const info: NodeBlob = new NodeBlob([buffer]);
+
+				await addFile(file.title, file.type, buffer, material.id, prismaTransaction);
+			}
+
+			return material;
 		});
-		return new Response(JSON.stringify({ material }), { status: 200 });
+
+		const id = createdMaterial.id;
+
+		return new Response(JSON.stringify({id}), {status: 200});
 	} catch (error) {
-		return new Response(JSON.stringify({ error: `Server Error ${error}` }), {
+		console.log(error);
+		return new Response(JSON.stringify({error: 'Server Error'}), {
 			status: 500,
 		});
 	}
-};
+}
+
+// /**
+//  * Create a new material publication. Adds the files to the database.
+//  * @param request
+//  */
+// export async function POST({ request }) {
+// 	const body = await request.json();
+//
+// 	// Authentication step
+// 	// return 401 if user not authenticated
+//
+// 	try {
+// 		// prisma will automatically complain if the user does not exist so no need to check
+// 		const material = await createMaterialPublication({
+// 			userId: body.userId,
+// 			title: body.title,
+// 			description: body.description,
+// 			copyright: body.copyright,
+// 			difficulty: body.difficulty,
+// 			timeEstimate: body.timeEstimate,
+// 			theoryPractice: body.theoryPractice,
+// 			paths: body.paths,
+// 			titles: body.titles,
+// 		});
+// 		return new Response(JSON.stringify({ material }), { status: 200 });
+// 	} catch (error) {
+// 		return new Response(JSON.stringify({ error: `Server Error ${error}` }), {
+// 			status: 500,
+// 		});
+// 	}
+// }

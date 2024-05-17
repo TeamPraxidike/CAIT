@@ -1,39 +1,21 @@
 <script lang="ts">
     import type {LayoutServerData} from '../$types';
-    import type {File, Publication} from "@prisma/client";
+    import type {Publication} from "@prisma/client";
     import {DifficultySelection, FileTable, lorem, Meta, Render, Tag} from "$lib";
     import {FileDropzone} from "@skeletonlabs/skeleton";
 
     export let data: LayoutServerData;
-    let publication: Publication = data.publication;
+    let publication: Publication = data.serverData.publication;
 
     let tags: string[] = ['Very Big Tag', 'nsnsngrfnfgdb', 'One More ', 'short'];
-    let files = [
-        {
-            path: "slides.pdf",
-            title: "slides.pdf",
-            materialId: 1
-        }, {
-            path: "slide.pptx",
-            title: "slide.pptx",
-            materialId: 1
-        }, {
-            path: "code.py",
-            title: "code.py",
-            materialId: 1
-        }, {
-            path: "README.md",
-            title: "README.md",
-            materialId: 1
-        }
-    ]
-
-    let activeFile: File = files[0];
+    let files:FileList;
+    let activeFile:File;
 
     let LOs:string[] = [];
 
     let loInput:HTMLInputElement;
     let tagInput:HTMLInputElement;
+    let leftHeight:number;
 </script>
 
 <Meta title={publication.title} description="CAIT" type="site"/>
@@ -104,13 +86,13 @@
                            class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
                 </div>
             </div>
+            <div class="flex flex-col gap-4">
+                <hr />
+                <FileDropzone multiple name="files" bind:files={files} />
+                <FileTable download={true} {files} bind:activeFile={activeFile}/>
+            </div>
+            <button class="btn rounded-lg variant-filled-primary text-surface-50">Edit</button>
         </div>
-        <Render {activeFile}/>
-        <div class="flex flex-col gap-4">
-            <hr />
-            <FileDropzone name="a" />
-            <FileTable {files} bind:activeFile={activeFile}/>
-        </div>
-        <button class="btn rounded-lg variant-filled-primary text-surface-50">Edit</button>
+        <Render height={leftHeight} {activeFile}/>
     </div>
 </form>

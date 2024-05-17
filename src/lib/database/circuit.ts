@@ -1,6 +1,6 @@
 import { prisma } from '$lib/database';
 import {Prisma} from "@prisma/client/extension";
-import {Difficulty} from "@prisma/client";
+import {Difficulty, PublicationType} from "@prisma/client";
 
 /**
  * [GET] Returns a publication of type Circuit with the given id.
@@ -40,7 +40,45 @@ export async function deleteCircuitByPublicationId(publicationId: number) {
 }
 
 /**
- * [POST] Returns an updated publication of type Circuit with the given id.
+ * [POST] Returns a created publication of type Circuit
+ * @param title
+ * @param description
+ * @param difficulty
+ * @param learningObjectives
+ * @param prerequisites
+ * @param prismaContext
+ */
+export async function createCircuitPublication(
+	title: string,
+	description: string,
+	difficulty: Difficulty,
+	learningObjectives: string[],
+	prerequisites: string[],
+	prismaContext: Prisma.TransactionClient = prisma
+) {
+	return prismaContext.circuit.create({
+		data: {
+			publication: {
+				create: {
+					data: {
+						title: title,
+						description: description,
+						difficulty: difficulty,
+						learningObjectives: learningObjectives,
+						prerequisites: prerequisites,
+						type: PublicationType.Circuit
+					}
+				}
+			}
+		},
+		include: {
+			publication: true
+		}
+	});
+}
+
+/**
+ * [PUT] Returns an updated publication of type Circuit with the given id.
  * @param publicationId
  * @param title
  * @param description

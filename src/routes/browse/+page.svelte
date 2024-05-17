@@ -1,14 +1,21 @@
 <script lang="ts">
-    import { PublicationCard, SearchBar, Tag, UserProp } from '$lib';
+    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import {page} from '$app/stores';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
-    import type { Material, Publication, User } from '@prisma/client';
-    import type { PageData } from './$types';
+    import type { Material, Publication, User, Tag } from '@prisma/client';
+    import type { PageServerData } from './$types';
 
-
+    export let data:PageServerData;
     let searchWord: string = '';
-    $:pageType = $page.data.type;
+    let materials = data.publications;
+    let users = data.users
+    console.log(users)
+
+
+
+    $:pageType = data.type;
     $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
     $: peopleText = pageType === 'people' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
     $: circuitsText = pageType === 'circuits' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
@@ -21,25 +28,33 @@
     let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
     let sortByActive = false
     let sortByText = 'Sort By'
-    let diffOptions: string[] = ["Easy", "Moderate", "Hard"]
+
+    let selectedDiff: {id:number, val:string }[] = []
+    let diffOptions: { id: number, val: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, val: x }));
     let diffActive = false
-    let diffText = 'Difficulty'
 
     //Variables needed to deal with Tags
-    let selectedTags: string[] = []; //keeps track of selected tags
-    let allTags: string[] = ["ANN", "CNN", "Something Else", "A very Long tag", "Another One", "Vasko", "is", "the", "best", "I"]; //array with all the tags MOCK
-    let displayTags: string[] = allTags; //
+    let selectedTags: {id:number, val:string }[] = []; //keeps track of selected tags
+    let allTags: {id:number, val:string }[] = ["Mini", "ANN", "CNN", "Something Else", "A very Long tag", "Another One", "Vasko", "is", "the", "best", "I"].map(x => ({id : 0, val : x}));  //array with all the tags MOCK
+    let displayTags: {id:number, val:string }[] = allTags; //
     let tagActive = false
-    let tagInput: HTMLInputElement;
-    let tagText: string;
+
 
     //Variables needed to deal with Publishers
-    let selectedPublishers: string[] = []; //keeps track of selected tags
-    let allPublisherNames: string[] = ["Winston Churchill", "Franklin D. Roosevelt", "Vasko", "Bog Bezkrak", "Franklin Kostenurkata", "Goti Boti"]; //array with all the tags MOCK
-    let displayPublishers: string[] = allPublisherNames; //
+    let selectedPublishers: {id:number, val:string }[] = [];//keeps track of selected tags
+    let allPublisherNames: {id:number, val:string }[] = users.map( (x:any) => ({id : x.id, val:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
+    let displayPublishers: {id:number, val:string }[] = allPublisherNames; //
     let publisherActive = false
-    let publisherInput: HTMLInputElement;
-    let publisherText: string;
+
+    //Variables needed to deal with Types
+    let selectedTypes: {id:number, val:string }[] = []; //keeps track of selected tags
+    let allTypes: {id:number, val:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, val : x})); //array with all the tags MOCK
+    let displayTypes: {id:number, val:string }[] = allTypes; //
+    let typeActive = false
+
+    $:console.log(selectedTypes, selectedTags, selectedPublishers, selectedDiff)
+
+
 
 
     //SORT BY Functionality
@@ -68,119 +83,24 @@
     }
 
 
-    //DIFFICULTY Functionality
-
-    //Used to make the dropdown appear/disappear
-    const toggleDiff = () => {
-        if (!diffActive) {
-            clearAll();
-            diffActive = true;
-        } else {
-            clearAll();
-        }
-    };
-    //Make the border light blue showing the current toggle is active
-    $: diffBorder = diffActive ? "border-primary-400" : "border-surface-400"
-    //Updates the "Difficulty" text for easier understanding
-    const updateDiff = (event: MouseEvent) => {
-        //Take the selected option
-        const target = event.target as HTMLButtonElement
-        // change the text of the dropdown button
-        diffText = target.textContent ?? 'Difficulty';
-        //close the dropdown upon selection
-        diffActive = false;
-    }
-
-
-    //TAGS functionality
-
-    const toggleTag = () => {
-        if (!tagActive) {
-            clearAll();
-            tagActive = true;
-        } else {
-            clearAll();
-        }
-    };
-    $: tagBorder = tagActive ? "border-primary-400" : "border-surface-400"
-    $: tagBackground = (t: string) => selectedTags.includes(t) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50'; //colors in light blue if the tag is already selected in the dropdown
-
-    /*
-        *Updates the selected tags and reassigns the variable
-     */
-    const updateTags = (event: MouseEvent) => {
-        const target = event.target as HTMLButtonElement
-        let tagText = target.textContent ?? '';
-        if (selectedTags.includes(tagText)) {
-            selectedTags = selectedTags.filter(item => item !== tagText) //if we are removing a tag remove it from selected tags
-        } else {
-            selectedTags = [...selectedTags, tagText] //if we are selecting a tag add it to the selected tags
-        }
-    }
-
-
-    /*
-        * Update the tags shown in the dropdown based on what has been inputted
-     */
-    const updateFilterTags = () => {
-        tagText = tagInput.value.toLowerCase() ?? ""
-        if (tagText === "")
-            displayTags = allTags // if there is no text display all without filtering
-        else
-            displayTags = allTags.filter(tag => tag.toLowerCase().includes(tagText ?? ""))
-    }
-
-    /*
-        * Remove tag action called by the X on the line
+    /**
+     * Remove tag action called by the X on the line
+     *
      */
     const removeTag = (event: CustomEvent) => {
-        selectedTags = selectedTags.filter(item => item !== event.detail.text)
+        selectedTags = selectedTags.filter(item => item.val !== event.detail.text)
     }
 
-    //PUBLISHER functionality
-
-    const togglePublisher = () => {
-        if (!publisherActive) {
-            clearAll();
-            publisherActive = true;
-        } else {
-            clearAll();
-        }
-    };
-    $: publisherBorder = publisherActive ? 'border-primary-400' : 'border-surface-400';
-    $: publisherBackground = (t: string) => selectedPublishers.includes(t) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50'; //colors in light blue if the tag is already selected in the dropdown
-
-    /**
-     * Updates the selected publishers and reassigns the variable
-     * @param name - the name of the publisher
-     */
-    const updatePublishers = (name: string) => {
-
-        if (selectedPublishers.includes(name)) {
-            selectedPublishers = selectedPublishers.filter(item => item !== name); //if we are removing a tag remove it from selected tags
-        } else {
-            selectedPublishers = [...selectedPublishers, name]; //if we are selecting a tag add it to the selected tags
-        }
+    const removePublisher = (name: {id:number, val:string }) => {
+        selectedPublishers = selectedPublishers.filter(publisher => publisher.val !== name.val);
     };
 
-
-    /**
-     * Update the publishers shown in the dropdown based on what has been inputted
-     */
-    const updateFilterPublishers = () => {
-        publisherText = publisherInput.value.toLowerCase() ?? '';
-        if (publisherText === '')
-            displayPublishers = allPublisherNames; // if there is no text display all without filtering
-        else
-            displayPublishers = allPublisherNames.filter(name => name.toLowerCase().includes(publisherText ?? ''));
+    const removeDiff = (name:{id:number, val:string }) => {
+        selectedDiff = selectedDiff.filter(diff => diff.val !== name.val);
     };
 
-    /**
-     * Remove publisher action called by the X on the line
-     * @param name - the name of the publisher
-     */
-    const removePublisher = (name: string) => {
-        selectedPublishers = selectedPublishers.filter(publisher => publisher !== name);
+    const removeType = (name: {id:number, val:string }) => {
+        selectedTypes = selectedTypes.filter(diff => diff.val !== name.val);
     };
 
     /**
@@ -191,11 +111,36 @@
         diffActive = false;
         tagActive = false;
         publisherActive = false;
+        typeActive = false;
     };
 
+    const sendFiltersToAPI = async () => {
+        // Construct the URL with query parameters based on selected filters
+        const queryParams = new URLSearchParams({
+            publishers: selectedPublishers.map(x => x.id).join(','),
+            difficulty: selectedDiff.map(x => x.val).join(','),
+            types: selectedTypes.map(x => x.val).join(','),
+            tags: selectedTags.map(x => x.val).join(',')
+        });
+        const url = `/api/material?${queryParams.toString()}`;
 
-    export let data:PageData;
-    let materials = data.publications;
+        // Make a GET request to the API
+        await fetch(url)
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              return response.json();
+          })
+          .then(data => {
+              // Handle the response data from the API
+              materials = data
+              console.log(materials)
+          })
+          .catch(error => {
+              console.error('There was a problem with the fetch operation:', error);
+          });
+    };
 
 </script>
 
@@ -206,93 +151,16 @@
 <div class="col-span-full lg:col-span-8 flex justify-between gap-8 mt-32">
     <div class="flex gap-2">
 
-        <!-------Tags-------->
-        <div class="space-y-1 relative">
-            <button class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {tagBorder}"
-                    on:click={toggleTag}>
-                <span class="flex-grow text-surface-700 dark:text-surface-300">Tags</span>
-                {#if tagActive}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text"/>
-                {:else}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5"/>
-                {/if}
-            </button>
-            {#if tagActive}
-                <div class="absolute min-w-32 flex flex-col rounded-lg border border-surface-400 bg-surface-50"
-                     transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
-                    <input bind:this={tagInput} class="text-xs border-none rounded-lg focus:ring-0"
-                           on:input={updateFilterTags} placeholder="Search for tags"/>
+        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}/>
+        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll}/>
+        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}/>
+        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
 
-                    {#if displayTags.length === 0}
-                        <p class="p-2 text-xs text-left text-surface-600">No Matching Tags</p>
-                    {:else}
-                        {#each displayTags as tag}
-                            <button class="text-xs p-1 pl-2 text-left text-surface-600 w-full {tagBackground(tag)}"
-                                    on:click={updateTags}>{tag}</button>
-                        {/each}
-                    {/if}
-                </div>
-            {/if}
-        </div>
 
-        <!-------Publishers-------->
-        <div class="space-y-1 relative">
-            <button
-                    class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {publisherBorder}"
-                    on:click={togglePublisher}>
-                <span class="flex-grow text-surface-700 dark:text-surface-300">Publishers</span>
-                {#if publisherActive}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text"/>
-                {:else}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5"/>
-                {/if}
-            </button>
-            {#if publisherActive}
-                <div class="absolute min-w-32 flex flex-col rounded-lg border border-surface-400 bg-surface-50"
-                     transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
-                    <input bind:this={publisherInput} class="text-xs border-none rounded-lg focus:ring-0"
-                           on:input={updateFilterPublishers} placeholder="Search for publishers"/>
-                    {#if displayPublishers.length === 0}
-                        <p class="p-2 text-xs text-left text-surface-600">No Matching Publishers</p>
-                    {:else}
-                        {#each displayPublishers as publisher}
-                            <button
-                                    class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-600  {publisherBackground(publisher)}"
-                                    on:click={() => updatePublishers(publisher)}>
-                                <Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile"/>
-                                <span class="w-full h-full">{publisher}</span>
-                            </button>
-                        {/each}
-                    {/if}
-                </div>
-            {/if}
-        </div>
-
-        <!-------Difficulty-------->
-        <div class="space-y-1 relative">
-            <button class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {diffBorder}"
-                    on:click={toggleDiff}>
-                <span class="flex-grow text-surface-700 dark:text-surface-300">{diffText}</span>
-                {#if diffActive}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text"/>
-                {:else}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5"/>
-                {/if}
-            </button>
-            {#if diffActive}
-                <div class="absolute left-0 right-0 flex flex-col rounded-lg border border-surface-400 bg-surface-50"
-                     transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
-                    {#each diffOptions as dopt}
-                        <button class="text-xs p-1 rounded-lg hover:bg-primary-50 text-left text-surface-600"
-                                on:click={updateDiff}>{dopt}</button>
-                    {/each}
-                </div>
-            {/if}
-        </div>
-
+        <form action=""><button on:click={sendFiltersToAPI}>Apply</button></form>
         <!-------SortBy-------->
         <div class="space-y-1 relative">
-            <button class=" text-xs lg:text-sm rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
+            <button class=" text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
                     on:click={toggleSortBy}>
                 <span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
                 {#if sortByActive}
@@ -302,7 +170,7 @@
                 {/if}
             </button>
             {#if sortByActive}
-                <div class="absolute left-0 right-0 flex flex-col rounded-lg border border-surface-400 bg-surface-50"
+                <div class="absolute left-0 right-0 flex flex-col rounded-lg border border-surface-400 bg-surface-50 min-w-32"
                      transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
                     {#each sortOptions as sopt}
                         <button class="text-xs p-1 rounded-lg hover:bg-primary-50 text-left text-surface-600"
@@ -332,7 +200,7 @@
             <p class="text-xs text-surface-600 dark:text-surface-200">Tags:</p>
             {#each selectedTags as tag}
                 <div>
-                    <Tag tagText="{tag}" width="{0}" removable="{true}" on:Remove={removeTag}/>
+                    <TagComponent tagText="{tag.val}" width="{0}" removable="{true}" on:Remove={removeTag}/>
                 </div>
             {/each}
         </div>
@@ -344,7 +212,7 @@
             {#each selectedPublishers as sp}
                 <div class="flex gap-1 items-center">
                     <Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile"/>
-                    <p class="text-xs">{sp}</p>
+                    <p class="text-xs">{sp.val}</p>
                     <button class="h-full" on:click={() => removePublisher(sp)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
@@ -353,8 +221,43 @@
             {/each}
         </div>
     {/if}
+
+    {#if (selectedDiff.length !== 0)}
+        <div class=" flex gap-2 items-center">
+            <p class="text-xs text-surface-600 dark:text-surface-200">Difficulty:</p>
+            {#each selectedDiff as sd}
+                <div class="flex gap-1 items-center">
+                    <p class="text-xs">{sd.val}</p>
+                    <button class="h-full" on:click={() => removeDiff(sd)}>
+                        <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
+                    </button>
+                </div>
+            {/each}
+        </div>
+    {/if}
+
+{#if (selectedTypes.length !== 0)}
+    <div class=" flex gap-2 items-center">
+        <p class="text-xs text-surface-600 dark:text-surface-200">Type:</p>
+        {#each selectedTypes as sd}
+            <div class="flex gap-1 items-center">
+                <p class="text-xs">{sd.val}</p>
+                <button class="h-full" on:click={() => removeType(sd)}>
+                    <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
+                </button>
+            </div>
+        {/each}
+    </div>
+{/if}
 </div>
 
 {#each materials as material}
     <PublicationCard publication={material.publication} />
 {/each}
+
+
+<!--{#await }-->
+<!--	-->
+<!--{:then } -->
+<!--	-->
+<!--{/await}-->

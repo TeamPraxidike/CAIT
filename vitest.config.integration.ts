@@ -10,7 +10,7 @@ export default mergeConfig(viteConfig, defineConfig({
         setupFiles: ['tests/integration/setup.ts'],
         coverage: {
             enabled: true,
-            reporter: ['cobertura'],
+            reporter: ['text'],
             provider: 'istanbul',
             reportsDirectory: './reports/coverage',
             include: ['src/lib/**/*.ts']

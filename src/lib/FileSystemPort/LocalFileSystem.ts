@@ -27,10 +27,10 @@ export class LocalFileSystem implements FileSystem {
 	 * @param pathArg the path to the file
 	 * @param file the binary data of the file
 	 */
-	async editFile(pathArg: string, file: Blob) {
+	async editFile(pathArg: string, file: Buffer) {
 		fs.writeFileSync(
 			path.join(this.basePath, pathArg),
-			Buffer.from(await file.arrayBuffer()),
+			file
 		);
 		return pathArg;
 	}
@@ -60,17 +60,17 @@ export class LocalFileSystem implements FileSystem {
 	 * @param file the binary data of the file
 	 * @param name  the name of the file - used to determine the file extension
 	 */
-	async saveFile(file: Blob, name: string): Promise<string> {
+	async saveFile(file: Buffer, name: string): Promise<string> {
 		if (!file) {
 			throw new Error('No file provided');
 		}
 		try {
-			const fileContent = await file.arrayBuffer();
-			const buffer = Buffer.from(fileContent);
+			// const fileContent = await file.arrayBuffer();
+			// const buffer = Buffer.from(fileContent);
 			const pathFileNameGenerated =
 				`${randomUUID()}` + `.${(name + '').split('.').pop()}`;
 
-			fs.writeFileSync(path.join(this.basePath, pathFileNameGenerated), buffer);
+			fs.writeFileSync(path.join(this.basePath, pathFileNameGenerated), file);
 			console.log(name + ' saved as ' + pathFileNameGenerated);
 			return pathFileNameGenerated;
 		} catch (error) {
