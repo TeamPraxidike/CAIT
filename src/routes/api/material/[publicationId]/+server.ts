@@ -21,7 +21,7 @@ export async function GET({ params }) {
 
 	if (isNaN(publicationId) || publicationId <= 0) {
 		return new Response(JSON.stringify({ error: 'Bad Request - Invalid ID' }), {
-			status: 400,
+			status: 400
 		});
 	}
 
@@ -29,7 +29,7 @@ export async function GET({ params }) {
 		const material = await getMaterialByPublicationId(publicationId);
 		if (!material) {
 			return new Response(JSON.stringify({ error: 'Material Not Found' }), {
-				status: 404,
+				status: 404
 			});
 		}
 
@@ -47,7 +47,7 @@ export async function GET({ params }) {
 		return new Response(JSON.stringify({material, fileData}), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
-			status: 500,
+			status: 500
 		});
 	}
 }
@@ -136,21 +136,21 @@ export async function DELETE({ params }) {
 	if (isNaN(id) || id <= 0) {
 		return new Response(
 			JSON.stringify({ error: 'Bad Delete Request - Invalid Material Id' }),
-			{ status: 400 },
+			{ status: 400 }
 		);
 	}
 	try {
 		const material = await getMaterialByPublicationId(id);
 		if (!material) {
 			return new Response(JSON.stringify({ error: 'Material Not Found' }), {
-				status: 404,
+				status: 404
 			});
 		}
 		await deleteMaterialByPublicationId(id);
 		return new Response(JSON.stringify(material), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
-			status: 500,
+			status: 500
 		});
 	}
 }

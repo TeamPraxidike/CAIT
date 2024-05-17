@@ -6,60 +6,69 @@
 	import 'highlight.js/styles/github-dark.css';
 	import { storeHighlightJs } from '@skeletonlabs/skeleton';
 
-    /* DO NOT DELETE THOSE COMMENTS */
-	// import xml from 'highlight.js/lib/languages/xml';
-	// import css from 'highlight.js/lib/languages/css';
-	// import javascript from 'highlight.js/lib/languages/javascript';
-	// import typescript from 'highlight.js/lib/languages/typescript';
-    // hljs.registerLanguage('xml', xml); // for HTML
-    // hljs.registerLanguage('css', css);
-    // hljs.registerLanguage('javascript', javascript);
-    // hljs.registerLanguage('typescript', typescript);
+	/* DO NOT DELETE THOSE COMMENTS */
+	import xml from 'highlight.js/lib/languages/xml';
+	import css from 'highlight.js/lib/languages/css';
+	import javascript from 'highlight.js/lib/languages/javascript';
+	import typescript from 'highlight.js/lib/languages/typescript';
+	import python from 'highlight.js/lib/languages/python';
+	import rust from 'highlight.js/lib/languages/rust'
+	import plaintext from 'highlight.js/lib/languages/plaintext'
+
+	hljs.registerLanguage('xml', xml); // for HTML
+	hljs.registerLanguage('css', css);
+	hljs.registerLanguage('javascript', javascript);
+	hljs.registerLanguage('typescript', typescript);
+	hljs.registerLanguage('python', python);
+	hljs.registerLanguage('rust', rust);
+	hljs.registerLanguage('plaintext', plaintext);
 
 
-    import {Footer, Grid, Header} from "$lib"
+
+	import { Footer, Grid, Header } from '$lib';
+
 	storeHighlightJs.set(hljs);
 
 	// Floating UI for Popups
-  import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
-  import { storePopup } from '@skeletonlabs/skeleton';
+	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
+	import { storePopup } from '@skeletonlabs/skeleton';
 
-  storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 </script>
 
 
 <svelte:head>
-    <meta charset="utf-8">
-    <meta name="author" content="Praxidike">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="https://cait.tudelft.nl/">
-    <meta name="theme-color" content="#00A6D6">
+	<meta charset="utf-8">
+	<meta name="author" content="Praxidike">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="canonical" href="https://cait.tudelft.nl/">
+	<meta name="theme-color" content="#00A6D6">
 
-    <!--  Open Graph  -->
-    <meta property="og:url"                 content="https://cait.tudelft.nl/" />
-    <meta property="og:site_name"           content="CAIT" />
-    <!--    <meta property="og:image"               content="https://conventions.praxidike.org/ogmeta.png">-->
-    <meta property="og:image:alt"           content="CAIT - Community for AI Teachers">
-    <meta property="og:image:width"         content="1200">
-    <meta property="og:image:height"        content="630">
-    <meta property="og:locale"              content="en_US" />
+	<!--  Open Graph  -->
+	<meta property="og:url" content="https://cait.tudelft.nl/" />
+	<meta property="og:site_name" content="CAIT" />
+	<!--    <meta property="og:image"               content="https://conventions.praxidike.org/ogmeta.png">-->
+	<meta property="og:image:alt" content="CAIT - Community for AI Teachers">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="630">
+	<meta property="og:locale" content="en_US" />
 
-    <!--  Twitter  -->
-    <meta name="twitter:card" content="summary_large_image">
-    <link rel="icon" href="/images/favicons/favicon-16.png" sizes="16x16" type="image/png">
-    <link rel="icon" href="/images/favicons/favicon-32.png" sizes="32x32" type="image/png">
-    <link rel="icon" href="/images/favicons/favicon-48.png" sizes="48x48" type="image/png">
-    <link rel="icon" href="/images/favicons/favicon-64.png" sizes="64x64" type="image/png">
-    <link rel="icon" href="/images/favicons/favicon-128.png" sizes="128x128" type="image/png">
+	<!--  Twitter  -->
+	<meta name="twitter:card" content="summary_large_image">
+	<link rel="icon" href="/images/favicons/favicon-16.png" sizes="16x16" type="image/png">
+	<link rel="icon" href="/images/favicons/favicon-32.png" sizes="32x32" type="image/png">
+	<link rel="icon" href="/images/favicons/favicon-48.png" sizes="48x48" type="image/png">
+	<link rel="icon" href="/images/favicons/favicon-64.png" sizes="64x64" type="image/png">
+	<link rel="icon" href="/images/favicons/favicon-128.png" sizes="128x128" type="image/png">
 </svelte:head>
 
-<Header/>
+<Header />
 
 <div class="w-screen dark:text-surface-50 text-surface-900">
-    <Grid>
-        <slot />
-    </Grid>
+	<Grid>
+		<slot />
+	</Grid>
 </div>
 
 <Footer />
