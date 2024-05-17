@@ -19,14 +19,45 @@ export async function getMaterialByPublicationId(publicationId: number) {
 /**
  * [GET] Returns the all publications of type Material in the database
  */
-export async function getAllMaterials() {
+export async function getAllMaterials(
+	tags: string[],
+	publishers: number[],
+	diff: Difficulty[],
+	type: string[],
+) {
+	const where: any = { AND: [] };
+	if (publishers.length > 0) {
+		where.AND.push({ publication: { publisherId: { in: publishers } } });
+	}
+
+	if (diff.length > 0) {
+		where.AND.push({ publication: { difficulty: { in: diff } } });
+	}
+
+	if (tags.length > 0) {
+		where.AND.push({ tags: { some: { content: { in: tags } } } });
+	}
+
+	if (type.length > 0) {
+		where.AND.push({ type: { in: type } });
+	}
+
+	console.log('WhereClause');
+	console.log(where);
+
 	return prisma.material.findMany({
+		where,
 		include: {
-			publication: true,
+			publication: {
+				include: {
+					tags: true,
+				},
+			},
 			files: false,
 		},
 	});
 }
+
 export async function deleteMaterialByPublicationId(publicationId: number) {
 	return prisma.material.delete({
 		where: { publicationId: publicationId },
