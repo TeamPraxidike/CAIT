@@ -28,28 +28,31 @@
     let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
     let sortByActive = false
     let sortByText = 'Sort By'
-    let selectedDiff: string[] = []
-    let diffOptions: string[] = ["Easy", "Medium", "Hard"]
+
+    let selectedDiff: {id:number, val:string }[] = []
+    let diffOptions: { id: number, val: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, val: x }));
     let diffActive = false
 
     //Variables needed to deal with Tags
-    let selectedTags: string[] = []; //keeps track of selected tags
-    let allTags: string[] = ["Mini", "ANN", "CNN", "Something Else", "A very Long tag", "Another One", "Vasko", "is", "the", "best", "I"]; //array with all the tags MOCK
-    let displayTags: string[] = allTags; //
+    let selectedTags: {id:number, val:string }[] = []; //keeps track of selected tags
+    let allTags: {id:number, val:string }[] = ["Mini", "ANN", "CNN", "Something Else", "A very Long tag", "Another One", "Vasko", "is", "the", "best", "I"].map(x => ({id : 0, val : x}));  //array with all the tags MOCK
+    let displayTags: {id:number, val:string }[] = allTags; //
     let tagActive = false
 
 
     //Variables needed to deal with Publishers
-    let selectedPublishers: string[] = [];//keeps track of selected tags
-    let allPublisherNames: string[] = users.map( (x:any) => x.firstNname + " " + x.lastName); //array with all the tags MOCK
-    let displayPublishers: string[] = allPublisherNames; //
+    let selectedPublishers: {id:number, val:string }[] = [];//keeps track of selected tags
+    let allPublisherNames: {id:number, val:string }[] = users.map( (x:any) => ({id : x.id, val:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
+    let displayPublishers: {id:number, val:string }[] = allPublisherNames; //
     let publisherActive = false
 
     //Variables needed to deal with Types
-    let selectedTypes: string[] = []; //keeps track of selected tags
-    let allTypes: string[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"]; //array with all the tags MOCK
-    let displayTypes: string[] = allTypes; //
+    let selectedTypes: {id:number, val:string }[] = []; //keeps track of selected tags
+    let allTypes: {id:number, val:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, val : x})); //array with all the tags MOCK
+    let displayTypes: {id:number, val:string }[] = allTypes; //
     let typeActive = false
+
+    $:console.log(selectedTypes, selectedTags, selectedPublishers, selectedDiff)
 
 
 
@@ -85,19 +88,19 @@
      *
      */
     const removeTag = (event: CustomEvent) => {
-        selectedTags = selectedTags.filter(item => item !== event.detail.text)
+        selectedTags = selectedTags.filter(item => item.val !== event.detail.text)
     }
 
-    const removePublisher = (name: string) => {
-        selectedPublishers = selectedPublishers.filter(publisher => publisher !== name);
+    const removePublisher = (name: {id:number, val:string }) => {
+        selectedPublishers = selectedPublishers.filter(publisher => publisher.val !== name.val);
     };
 
-    const removeDiff = (name: string) => {
-        selectedDiff = selectedDiff.filter(diff => diff !== name);
+    const removeDiff = (name:{id:number, val:string }) => {
+        selectedDiff = selectedDiff.filter(diff => diff.val !== name.val);
     };
 
-    const removeType = (name: string) => {
-        selectedTypes = selectedTypes.filter(diff => diff !== name);
+    const removeType = (name: {id:number, val:string }) => {
+        selectedTypes = selectedTypes.filter(diff => diff.val !== name.val);
     };
 
     /**
@@ -114,10 +117,10 @@
     const sendFiltersToAPI = async () => {
         // Construct the URL with query parameters based on selected filters
         const queryParams = new URLSearchParams({
-            publishers: selectedPublishers.join(','),
-            difficulty: selectedDiff.join(','),
-            types: selectedTypes.join(','),
-            tags: selectedTags.join(',')
+            publishers: selectedPublishers.map(x => x.id).join(','),
+            difficulty: selectedDiff.map(x => x.val).join(','),
+            types: selectedTypes.map(x => x.val).join(','),
+            tags: selectedTags.map(x => x.val).join(',')
         });
         const url = `/api/material?${queryParams.toString()}`;
 
@@ -139,24 +142,6 @@
           });
     };
 
-
-    // const formSubmit = (event : SubmitEvent) =>{
-    //
-    //     //event.preventDefault()
-    //     pubInput.value = selectedPublishers.join(',')
-    //     diffInput.value = selectedDiff.join(',')
-    //     tagInput.value = selectedTags.join(',')
-    //     typeInput.value = selectedTypes.join(',')
-    //     // const queryParams = new URLSearchParams({
-    //     //     publishers: selectedPublishers.join(','),
-    //     //     difficulty: selectedDiff.join(','),
-    //     //     types: selectedTypes.join(','),
-    //     //     tags: selectedTags.join(',')
-    //     // });
-    //     // window.location.href = `/browse?${queryParams.toString()}`;
-    // }
-
-
 </script>
 
 <div class="col-span-4 mt-32">
@@ -172,14 +157,6 @@
         <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
 
 
-<!--        <form bind:this={form} on:submit={formSubmit} action="/browse" method="GET">-->
-<!--            <input class="hidden" type="text" id="publishers" name="publishers" bind:this={pubInput} />-->
-<!--            <input class="hidden" type="text" id="difficulty" name="difficulty" bind:this="{diffInput}" />-->
-<!--            <input class="hidden" type="text" id="types" name="types" bind:this="{typeInput}" />-->
-<!--            <input class="hidden" type="text" id="tags" name="tags" bind:this="{tagInput}" />-->
-
-<!--            <button class ="text-xs" type="submit" >Apply</button>-->
-<!--        </form>-->
         <form action=""><button on:click={sendFiltersToAPI}>Apply</button></form>
         <!-------SortBy-------->
         <div class="space-y-1 relative">
@@ -223,7 +200,7 @@
             <p class="text-xs text-surface-600 dark:text-surface-200">Tags:</p>
             {#each selectedTags as tag}
                 <div>
-                    <TagComponent tagText="{tag}" width="{0}" removable="{true}" on:Remove={removeTag}/>
+                    <TagComponent tagText="{tag.val}" width="{0}" removable="{true}" on:Remove={removeTag}/>
                 </div>
             {/each}
         </div>
@@ -235,7 +212,7 @@
             {#each selectedPublishers as sp}
                 <div class="flex gap-1 items-center">
                     <Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile"/>
-                    <p class="text-xs">{sp}</p>
+                    <p class="text-xs">{sp.val}</p>
                     <button class="h-full" on:click={() => removePublisher(sp)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
@@ -250,7 +227,7 @@
             <p class="text-xs text-surface-600 dark:text-surface-200">Difficulty:</p>
             {#each selectedDiff as sd}
                 <div class="flex gap-1 items-center">
-                    <p class="text-xs">{sd}</p>
+                    <p class="text-xs">{sd.val}</p>
                     <button class="h-full" on:click={() => removeDiff(sd)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
@@ -264,7 +241,7 @@
         <p class="text-xs text-surface-600 dark:text-surface-200">Type:</p>
         {#each selectedTypes as sd}
             <div class="flex gap-1 items-center">
-                <p class="text-xs">{sd}</p>
+                <p class="text-xs">{sd.val}</p>
                 <button class="h-full" on:click={() => removeType(sd)}>
                     <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                 </button>

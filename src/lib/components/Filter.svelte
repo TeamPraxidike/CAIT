@@ -3,11 +3,17 @@
 	import { createEventDispatcher } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
+	import FilterButton from '$lib/components/FilterButton.svelte';
 
 	export let label: string;
-	export let selected: string[] = []; //keeps track of selected tags
-	export let all: string[] = ['ANN', 'CNN', 'Something Else', 'A very Long tag', 'Another One', 'Vasko', 'is', 'the', 'best', 'I']; //array with all the tags MOCK
-	export let display: string[] = all; //
+	export let selected: {id:number, val:string } [];
+
+	$: selectedIds = selected.map(x => x.id)
+	$: selectedVals = selected.map(x => x.val)
+
+	//export let selectedIds: number[];
+	export let all: {id:number, val:string } [];
+	export let display: {id:number, val:string } [] = all;
 	export let active = false;
 	let input: HTMLInputElement;
 
@@ -24,22 +30,14 @@
 		}
 	};
 	$: border = active ? 'border-primary-400' : 'border-surface-400';
-	$: roundingMenuItem = (i: number, arrL: number) => {
-		if (i === (arrL - 1))
-			return 'rounded-b-lg';
-		else if (i === 0 && !profilePic) {
-			return 'rounded-t-lg';
-		}
-		return '';
-	};
-	$: background = (t: string) => selected.includes(t) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50'; //colors in light blue if the tag is already selected in the dropdown
+
 
 	/*
 			*Updates the selected tags and reassigns the variable
 	 */
-	const update = (event: MouseEvent) => {
-		const target = event.target as HTMLButtonElement;
-		let text = target.textContent ?? '';
+	const update = (event: CustomEvent) => {
+
+		let text = event.detail.idval.val;
 
 		if (text.startsWith(" ")) {
 			text = text.substring(1)
@@ -50,10 +48,14 @@
 		}
 
 
-		if (selected.includes(text)) {
-			selected = selected.filter(item => item !== text); //if we are removing a tag remove it from selected tags
-		} else {
-			selected = [...selected, text]; //if we are selecting a tag add it to the selected tags
+		if (label === "Publisher" && selectedIds.includes(event.detail.idval.id)) {
+			selected = selected.filter(item => item.id !== event.detail.idval.id); //if we are removing a tag remove it from selected tags
+		}
+		else if (selectedVals.includes(event.detail.idval.val)){
+			selected = selected.filter(item => item.val !== event.detail.idval.val); //if we are removing a tag remove it from selected tags
+		}
+		else {
+			selected = [...selected, {id : event.detail.idval.id, val:text}]; //if we are selecting a tag add it to the selected tags
 		}
 	};
 
@@ -66,7 +68,7 @@
 		if (text === '')
 			display = all; // if there is no text display all without filtering
 		else
-			display = all.filter(tag => tag.toLowerCase().includes(text ?? ''));
+			display = all.filter(x => x.val.toLowerCase().includes(text ?? ''));
 	};
 
 
@@ -96,15 +98,15 @@
 			{:else}
 				{#each display as dis, i}
 
-					<button
-						class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-600 {roundingMenuItem(i, display 	.length)} {background(dis)}"
-						on:click={update}>
-						{#if profilePic}
-							<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />
-						{/if}
-						<span class="w-full h-full">{dis}</span>
-
-					</button>
+<!--					<button-->
+<!--						class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-600 {roundingMenuItem(i, display.length)} {background(dis)}"-->
+<!--						on:click={update}>-->
+<!--						{#if profilePic}-->
+<!--							<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />-->
+<!--						{/if}-->
+<!--						<span class="w-full h-full">{dis}</span>-->
+<!--					</button>-->
+					<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display} bind:selected={selected} on:update={update}/>
 				{/each}
 			{/if}
 		</div>
