@@ -16,7 +16,7 @@ import { updatePublicationConnectTags, updatePublicationConnectMaintainers, conn
 
 import {handleEdges, fetchExtensions, addNode, editNode, deleteNode} from './node'
 
-import {getUserById, createUser, deleteUser, editUser} from "$lib/database/user";
+import {getUserById, createUser, deleteUser, editUser, likePublication, getLikedPublications} from "$lib/database/user";
 import type {userEditData} from "$lib/database/user";
 
 
@@ -75,7 +75,9 @@ export {
 	deleteCircuitByPublicationId,
 	deleteMaterialByPublicationId,
 	deleteUser,
-	editUser
+	editUser,
+	likePublication,
+	getLikedPublications
 };
 
 export type {

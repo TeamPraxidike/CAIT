@@ -113,6 +113,16 @@ export async function editUser(user: userEditData) {
 }
 
 export async function likePublication(userId: number, publicationId: number) {
+	const liked = await getLikedPublications(userId);
+	if (liked === null) throw Error("Liked publications were not found");
+	if(liked.liked.map(x => x.id).includes(publicationId)) {
+		await unlike(userId, publicationId);
+	} else {
+		await like(userId, publicationId);
+	}
+}
+
+async function like(userId: number, publicationId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
@@ -139,18 +149,7 @@ export async function likePublication(userId: number, publicationId: number) {
 	});
 }
 
-export async function getLikedPublications(userId: number) {
-	return prisma.user.findUnique({
-		where: {
-			id: userId
-		},
-		select: {
-			liked: true
-		}
-	});
-}
-
-export async function unlikePublication(userId: number, publicationId: number) {
+async function unlike(userId: number, publicationId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
@@ -174,5 +173,16 @@ export async function unlikePublication(userId: number, publicationId: number) {
 				}
 			}
 		});
+	});
+}
+
+export async function getLikedPublications(userId: number) {
+	return prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			liked: true
+		}
 	});
 }

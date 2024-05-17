@@ -1,7 +1,7 @@
 import {createMaterialPublication, createUser, getPublicationById, getUserById} from "$lib/database";
 import {describe, it, expect, beforeEach} from "vitest";
 import {randomUUID} from "node:crypto";
-import {editUser, getLikedPublications, likePublication, unlikePublication} from "$lib/database/user";
+import {editUser, getLikedPublications, likePublication} from "$lib/database/user";
 import {resetUserTable} from "../setup";
 import {Difficulty, type Material, type User} from "@prisma/client";
 
@@ -50,7 +50,6 @@ describe("Liking publications", () => {
         await likePublication(user.id, publication.publicationId);
     });
 
-
     it("should add it to the liked list", async () => {
         const liked = await getLikedPublications(user.id);
         if(liked === null){
@@ -61,7 +60,7 @@ describe("Liking publications", () => {
         expect(liked.liked[0].title).toBe("cool publication");
     });
 
-    it("should increase the liked value in the publication", async () => {
+    it("should increase the likes value in the publication", async () => {
         const updatedPublication = await getPublicationById(publication.publicationId);
         if(updatedPublication === null) {
             throw Error("Publication does not exist");
@@ -70,7 +69,7 @@ describe("Liking publications", () => {
     });
 
     it("should remove it from the liked list when unliked", async () => {
-        await unlikePublication(user.id, publication.publicationId);
+        await likePublication(user.id, publication.publicationId);
         const liked = await getLikedPublications(user.id);
         if(liked === null){
             throw Error("liked was null");
@@ -78,8 +77,8 @@ describe("Liking publications", () => {
         expect(liked.liked.length).toBe(0);
     });
 
-    it("should decrement the number of liked in the publication", async () => {
-        await unlikePublication(user.id, publication.publicationId);
+    it("should decrement the number of likes in the publication", async () => {
+        await likePublication(user.id, publication.publicationId);
         const updatedPublication = await getPublicationById(publication.publicationId);
         if(updatedPublication === null) {
             throw Error("Publication does not exist");
@@ -87,6 +86,14 @@ describe("Liking publications", () => {
         expect(updatedPublication.likes).toBe(0);
     });
 
+    it("should only allow a user to like each publication once", async () => {
+       for(let i = 0; i < 10; i++){
+           await likePublication(user.id, publication.publicationId);
+       }
+       const liked = await getLikedPublications(user.id);
+       if(liked === null) throw new Error("Could not get liked publications list");
+       expect(liked.liked.length).toBe(1);
+    });
 });
 
 
