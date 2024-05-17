@@ -1,7 +1,7 @@
-import {Difficulty, PublicationType} from '@prisma/client';
-import {Prisma} from "@prisma/client/extension";
+import { Difficulty, PublicationType } from '@prisma/client';
+import { Prisma } from '@prisma/client/extension';
 
-import { addFiles, prisma } from '$lib/database';
+import { prisma } from '$lib/database';
 
 /**
  * Creates a new publication with the given data. Sets the likes to 0.
@@ -13,23 +13,23 @@ import { addFiles, prisma } from '$lib/database';
  * @param prismaContext
  */
 async function createPublication(
-    title: string,
-    description: string,
-    difficulty: Difficulty,
-    publisherId: number,
-    type: PublicationType,
-    prismaContext: Prisma.TransactionClient = prisma // default to normal client or use argument
+	title: string,
+	description: string,
+	difficulty: Difficulty,
+	publisherId: number,
+	type: PublicationType,
+	prismaContext: Prisma.TransactionClient = prisma, // default to normal client or use argument
 ) {
-    return prismaContext.publication.create({
-        data: {
-            title: title,
-            description: description,
-            likes: 0,
-            difficulty: difficulty,
-            publisherId: publisherId,
-            type: type,
-        },
-    });
+	return prismaContext.publication.create({
+		data: {
+			title: title,
+			description: description,
+			likes: 0,
+			difficulty: difficulty,
+			publisherId: publisherId,
+			type: type,
+		},
+	});
 }
 
 // /**
@@ -82,31 +82,29 @@ async function createPublication(
  * @param circuitData This is an object that contains the id of the user who created the circuit,
  * the title, the description and the difficulty
  */
-export async function createCircuitPublication(
-    circuitData: {
-        userId: number, // may have to be the user, dont know how to specify type then
-        title: string,
-        description: string,
-        copyright: boolean,
-        difficulty: Difficulty
-    }
-) {
-    return await prisma.$transaction(async (prismaTransaction) => {
-        const publication = await createPublication(
-            circuitData.title,
-            circuitData.description,
-            circuitData.difficulty,
-            circuitData.userId,
-            PublicationType.Circuit,
-            prismaTransaction
-        );
+export async function createCircuitPublication(circuitData: {
+	userId: number; // may have to be the user, dont know how to specify type then
+	title: string;
+	description: string;
+	copyright: boolean;
+	difficulty: Difficulty;
+}) {
+	return await prisma.$transaction(async (prismaTransaction) => {
+		const publication = await createPublication(
+			circuitData.title,
+			circuitData.description,
+			circuitData.difficulty,
+			circuitData.userId,
+			PublicationType.Circuit,
+			prismaTransaction,
+		);
 
-        return prismaTransaction.circuit.create({
-            data: {
-                publicationId: publication.id,
-            },
-        });
-    })
+		return prismaTransaction.circuit.create({
+			data: {
+				publicationId: publication.id,
+			},
+		});
+	});
 }
 
 /**
@@ -118,14 +116,14 @@ export async function getPublicationById(id: number) {
 		where: {
 			id: id,
 		},
-        include: {
-            materials: {
-                include: {
-                    files: true
-                }
-            },
-            circuit: true
-        }
+		include: {
+			materials: {
+				include: {
+					files: true,
+				},
+			},
+			circuit: true,
+		},
 	});
 }
 

@@ -5,47 +5,71 @@ import {
 	addNodeToCircuit,
 } from './db';
 
-import { getMaterialByPublicationId, getAllMaterials,
-	updateMaterialByPublicationId, deleteMaterialByPublicationId, createMaterialPublication } from './material';
+import {
+	getMaterialByPublicationId,
+	getAllMaterials,
+	updateMaterialByPublicationId,
+	deleteMaterialByPublicationId,
+	createMaterialPublication,
+} from './material';
 
-import { getCircuitByPublicationId, getAllCircuits,
-	updateCircuitByPublicationId, deleteCircuitByPublicationId, createCircuitPublication } from './circuit';
+import {
+	getCircuitByPublicationId,
+	getAllCircuits,
+	updateCircuitByPublicationId,
+	deleteCircuitByPublicationId,
+	createCircuitPublication,
+} from './circuit';
 
-import { updatePublicationConnectTags, updatePublicationConnectMaintainers, connectMaintainers,
-	connectTags, handleConnections} from './publication';
+import {
+	updatePublicationConnectTags,
+	updatePublicationConnectMaintainers,
+	connectMaintainers,
+	connectTags,
+	handleConnections,
+} from './publication';
 
-import {handleEdges, fetchExtensions, addNode, editNode, deleteNode} from './node'
+import {
+	handleEdges,
+	fetchExtensions,
+	addNode,
+	editNode,
+	deleteNode,
+} from './node';
 
-import {getUserById, createUser, deleteUser, editUser} from "$lib/database/user";
-import type {userEditData} from "$lib/database/user";
+import {
+	getUserById,
+	createUser,
+	deleteUser,
+	editUser,
+} from '$lib/database/user';
+import type { userEditData } from '$lib/database/user';
 
-
-import { addFiles, addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
+import { addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
 import { prisma } from './prisma';
-import {LocalFileSystem} from "$lib/FileSystemPort/LocalFileSystem";
-import {Blob as NodeBlob} from "node:buffer"
+import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { Difficulty } from '@prisma/client';
 
 const fileSystem = new LocalFileSystem();
 
 export type MaterialForm = {
-	userId: number,
-	title: string,
-	description: string,
-	difficulty: Difficulty,
-	learningObjectives: string[],
-	prerequisites: string[],
-	coverPic: string,
-	copyright: boolean,
-	timeEstimate: number,
-	theoryPractice: 34,
-	fileInfo:FileInfo
-}
+	userId: number;
+	title: string;
+	description: string;
+	difficulty: Difficulty;
+	learningObjectives: string[];
+	prerequisites: string[];
+	coverPic: string;
+	copyright: boolean;
+	timeEstimate: number;
+	theoryPractice: 34;
+	fileInfo: FileInfo;
+};
 
 export type FileInfo = {
-	add: { title: string, type:string ; info: string }[];
+	add: { title: string; type: string; info: string }[];
 	delete: { path: string }[];
-	edit: { path: string, title: string; info: string }[];
+	edit: { path: string; title: string; info: string }[];
 };
 
 export type FetchedFileItem = {
@@ -58,7 +82,7 @@ export type FetchedFileArray = FetchedFileItem[];
 export type NodeInfo = {
 	add: { circuitId: number; publicationId: number }[];
 	delete: { nodeId: number }[];
-	edit: { nodeId: number, publicationId: number }[];
+	edit: { nodeId: number; publicationId: number }[];
 	next: { fromId: number; toId: number[] }[];
 };
 
@@ -91,13 +115,10 @@ export {
 	addNode,
 	deleteNode,
 	editNode,
-	addFiles,
 	deleteCircuitByPublicationId,
 	deleteMaterialByPublicationId,
 	deleteUser,
-	editUser
+	editUser,
 };
 
-export type {
-	userEditData
-}
+export type { userEditData };
