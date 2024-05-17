@@ -37,13 +37,8 @@ import {
 	deleteNode,
 } from './node';
 
-import {
-	getUserById,
-	createUser,
-	deleteUser,
-	editUser,
-} from '$lib/database/user';
-import type { userEditData } from '$lib/database/user';
+import {getUserById, createUser, deleteUser, editUser, likePublication, getLikedPublications} from "$lib/database/user";
+import type {userEditData} from "$lib/database/user";
 
 import { addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
 import { prisma } from './prisma';
@@ -119,6 +114,8 @@ export {
 	deleteMaterialByPublicationId,
 	deleteUser,
 	editUser,
+	likePublication,
+	getLikedPublications
 };
 
 export type { userEditData };

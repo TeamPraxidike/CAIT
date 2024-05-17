@@ -226,11 +226,43 @@ paths:
         '500':
           description: Server Error
 
+  /user/{userId}/liked:
+    get:
+      tags:
+        - User
+      summary: Return liked publications of a user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user
+
+      responses:
+        '200':
+          description: Successfully liked publication
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Publication'
+        '204':
+          description: Successful request but there are no liked publications
+        '400':
+          description: Bad request
+        '404':
+          description: User/Publication not found
+        '500':
+          description: Server Error
+
   /user/{userId}/liked/{publicationId}:
     post:
       tags:
         - User
-      summary: Like a publication, automatically increase like counter
+      summary: Like or unlike a publication, automatically increase/decrease like counter
       parameters:
         - in: path
           name: userId
@@ -253,46 +285,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                oneOf:
+                  - type: string
+                    example: "Publication liked successfully"
+                  - type: string
+                    example: "Publication unliked successfully"
         '400':
           description: Bad request
         '401':
           description: User cannot like this publication
-        '404':
-          description: User/Publication not found
-        '500':
-          description: Server Error
-    delete:
-      tags:
-        - User
-      summary: Remove like on a publication, automatically decrease like counter
-      parameters:
-        - in: path
-          name: userId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the user
-        - in: path
-          name: publicationId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the publication (could be material or circuit)
-
-      responses:
-        '200':
-          description: Successfully removed like on a publication
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot unlike this publication
         '404':
           description: User/Publication not found
         '500':
@@ -1778,3 +1779,4 @@ components:
         updatedAt:
           type: string
           format: date
+
