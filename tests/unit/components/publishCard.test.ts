@@ -21,6 +21,7 @@ describe('Filter Component', () => {
 					difficulty: 'hard',
 					likes: 2,
 					learningObjectives: ['s'],
+					prerequisites: ['p'],
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					publisherId: 3,

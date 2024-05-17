@@ -1,7 +1,7 @@
 import { getAllCircuits } from '$lib/database/circuit';
 import type { RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async () => {
+export async function GET( ) {
 	// Authentication step
 	// return 401 if user not authenticated
 

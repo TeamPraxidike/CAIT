@@ -118,6 +118,14 @@ export async function getPublicationById(id: number) {
 		where: {
 			id: id,
 		},
+        include: {
+            materials: {
+                include: {
+                    files: true
+                }
+            },
+            circuit: true
+        }
 	});
 }
 

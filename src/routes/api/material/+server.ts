@@ -57,7 +57,7 @@ export const GET: RequestHandler = async ({ url }) => {
  * Create a new material publication. Adds the files to the database.
  * @param request
  */
-export const POST: RequestHandler = async ({ request }) => {
+export async function POST({ request }) {
 	const body = await request.json();
 
 	// Authentication step

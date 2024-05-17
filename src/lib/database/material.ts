@@ -1,8 +1,9 @@
 import { prisma } from '$lib/database';
-import { Difficulty } from '@prisma/client';
+import {Difficulty} from "@prisma/client";
+import {Prisma} from "@prisma/client/extension";
 
 /**
- * Returns a publication of type Material with the given id.
+ * [GET] Returns a publication of type Material with the given id.
  * @param publicationId - id of publication linked to material
  */
 export async function getMaterialByPublicationId(publicationId: number) {
@@ -16,7 +17,7 @@ export async function getMaterialByPublicationId(publicationId: number) {
 }
 
 /**
- * Returns the all publications of type Material in the database
+ * [GET] Returns the all publications of type Material in the database
  */
 export async function getAllMaterials(
 	tags: string[],
@@ -60,5 +61,61 @@ export async function getAllMaterials(
 export async function deleteMaterialByPublicationId(publicationId: number) {
 	return prisma.material.delete({
 		where: { publicationId: publicationId },
+	});
+}
+
+/**
+ * [POST] Returns an updated publication of type Material with the given id.
+ * @param publicationId
+ * @param title
+ * @param description
+ * @param difficulty
+ * @param learningObjectives
+ * @param prerequisites
+ * @param coverPic
+ * @param copyright
+ * @param timeEstimate
+ * @param theoryPractice
+ * @param prismaContext
+ */
+export async function updateMaterialByPublicationId(
+	publicationId: number,
+	title: string,
+	description: string,
+	difficulty: Difficulty,
+	learningObjectives: string[],
+	prerequisites: string[],
+	coverPic: string,
+	copyright: boolean,
+	timeEstimate: number,
+	theoryPractice: number,
+	prismaContext: Prisma.TransactionClient = prisma
+) {
+	return prismaContext.material.update({
+		where: { publicationId: publicationId },
+		data: {
+			coverPic: coverPic,
+			copyright: copyright,
+			timeEstimate: timeEstimate,
+			theoryPractice: theoryPractice,
+			publication: {
+				update: {
+					where:{
+						id: publicationId,
+					},
+					data: {
+						title: title,
+						description: description,
+						difficulty: difficulty,
+						learningObjectives: learningObjectives,
+						prerequisites: prerequisites
+					}
+				}
+			}
+		},
+		include: {
+			publication: true,
+			files: true,
+		}
 	});
 }

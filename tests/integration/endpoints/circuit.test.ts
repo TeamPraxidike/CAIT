@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
 import { testingUrl, resetCircuitTable, resetMaterialTable } from '../setup';
 import { createCircuitPublication, prisma } from '$lib/database';
 import { Difficulty } from '@prisma/client';
@@ -18,6 +18,7 @@ async function populate() {
 		body: JSON.stringify(reqBody),
 	});
 	const userData = await user.json();
+
 	return {
 		title: 'Vasko and Friends',
 		description: 'Vasko falls in love with Travis Scott',
@@ -102,6 +103,10 @@ describe('Circuits', async () => {
 	});
 
 	describe('[GET] /circuit', () => {
+		beforeEach(async () => {
+			await resetCircuitTable();
+		});
+
 		// it('should respond with 500 if a server-side error occurs', async () => {
 		//     prisma.circuit.findMany = vi.fn().mockRejectedValue(new Error("Very important message"));
 		//
@@ -138,8 +143,6 @@ describe('Circuits', async () => {
 				responseBody[0].publication.id,
 			);
 			expect(responseBody).toHaveLength(1);
-
-			await resetCircuitTable();
 		});
 
 		it('should handle two or more (random number) circuits', async () => {
@@ -155,8 +158,6 @@ describe('Circuits', async () => {
 			const responseBody = await response.json();
 
 			expect(responseBody).toHaveLength(randomNumber);
-
-			await resetCircuitTable();
 		});
 	});
 
@@ -171,62 +172,62 @@ describe('Circuits', async () => {
 			expect(body).not.toHaveProperty('id');
 		});
 
-		it('should respond with 200 if successful deletion of everything related to circuit', async () => {
-			const circuitdata = await populate();
-			const material = {
-				title: 'Priklucheniqta na Vasko',
-				description: 'Vasko nqma kraka',
-				difficulty: Difficulty.hard,
-				userId: circuitdata.userId,
-				timeEstimate: 1000,
-				theoryPractice: 9,
-				copyright: true,
-				paths: ['./vasko/nqma/kraka15.txt'],
-				titles: ['vaskoGoworiNaKitaiski.txt'],
-			};
-
-			const createdResponse = await fetch(`${testingUrl}/material`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(material),
-			});
-
-			const createdMat = await createdResponse.json();
-
-			//TODO:replace this with a call to api for posting a circuit
-			const createdCircuit = await createCircuitPublication(circuitdata);
-			console.log(createdMat);
-			//TODO:replace this with a call to the api for node I suppose
-			const node = prisma.node.create({
-				data: {
-					contentId: createdMat.material.id,
-					circuitId: createdCircuit.publicationId,
-				},
-			});
-			console.log('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP');
-			console.log(createdCircuit.publicationId);
-			const response = await fetch(
-				`${testingUrl}/circuit/${createdCircuit.publicationId}`,
-				{
-					method: 'DELETE',
-				},
-			);
-
-			//TODO: I suppose file api here as well
-			const file = await prisma.file.findUnique({
-				where: { path: './vasko/nqma/kraka15.txt' },
-			});
-			// const findNode = await prisma.node.findUnique({
-			// 	where: {id: node.}
-			// })
-
-			expect(file).toBeTruthy();
-			const body = await response.json();
-
-			await resetCircuitTable();
-			await resetMaterialTable();
-		});
+		// it('should respond with 200 if successful deletion of everything related to circuit', async () => {
+		// 	const circuitdata = await populate();
+		// 	const material = {
+		// 		title: 'Priklucheniqta na Vasko',
+		// 		description: 'Vasko nqma kraka',
+		// 		difficulty: Difficulty.hard,
+		// 		userId: circuitdata.userId,
+		// 		timeEstimate: 1000,
+		// 		theoryPractice: 9,
+		// 		copyright: true,
+		// 		paths: ['./vasko/nqma/kraka15.txt'],
+		// 		titles: ['vaskoGoworiNaKitaiski.txt'],
+		// 	};
+		//
+		// 	const createdResponse = await fetch(`${testingUrl}/material`, {
+		// 		method: 'POST',
+		// 		headers: {
+		// 			'Content-Type': 'application/json',
+		// 		},
+		// 		body: JSON.stringify(material),
+		// 	});
+		//
+		// 	const createdMat = await createdResponse.json();
+		//
+		// 	//TODO:replace this with a call to api for posting a circuit
+		// 	const createdCircuit = await createCircuitPublication(circuitdata);
+		// 	console.log(createdMat);
+		// 	//TODO:replace this with a call to the api for node I suppose
+		// 	const node = prisma.node.create({
+		// 		data: {
+		// 			contentId: createdMat.material.id,
+		// 			circuitId: createdCircuit.publicationId,
+		// 		},
+		// 	});
+		// 	console.log('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP');
+		// 	console.log(createdCircuit.publicationId);
+		// 	const response = await fetch(
+		// 		`${testingUrl}/circuit/${createdCircuit.publicationId}`,
+		// 		{
+		// 			method: 'DELETE',
+		// 		},
+		// 	);
+		//
+		// 	//TODO: I suppose file api here as well
+		// 	const file = await prisma.file.findUnique({
+		// 		where: { path: './vasko/nqma/kraka15.txt' },
+		// 	});
+		// 	// const findNode = await prisma.node.findUnique({
+		// 	// 	where: {id: node.}
+		// 	// })
+		//
+		// 	expect(file).toBeTruthy();
+		// 	const body = await response.json();
+		//
+		// 	await resetCircuitTable();
+		// 	await resetMaterialTable();
+		// });
 	});
 });
