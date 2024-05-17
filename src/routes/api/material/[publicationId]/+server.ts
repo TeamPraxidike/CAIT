@@ -41,9 +41,9 @@ export async function GET({ params }) {
 		}
 
 		// If JSON stringify cannot handle raw Buffer, use this:
-		const transformedFileData = await bufToBase64(fileData);
+		//const transformedFileData = await bufToBase64(fileData);
 
-		return new Response(JSON.stringify({material, transformedFileData}), { status: 200 });
+		return new Response(JSON.stringify({material, fileData}), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500
@@ -76,14 +76,11 @@ export async function PUT({ request, params }) {
 
 			const fileInfo: FileInfo = body.fileInfo
 
-			const fileData: FetchedFileArray = [];
-
 			// add files
 			for (const file of fileInfo.add) {
 				const buffer:Buffer = Buffer.from(file.info, 'base64');
-				const info: NodeBlob = new NodeBlob([buffer]);
-				const createdFile = await addFile(file.title, file.type, info, body.materialId, prismaTransaction);
-				fileData.push({fileId: createdFile.path, data: buffer.toString('base64')});
+				// const info: NodeBlob = new NodeBlob([buffer]);
+				await addFile(file.title, file.type, buffer, body.materialId, prismaTransaction);
 			}
 
 			// delete files
@@ -94,9 +91,8 @@ export async function PUT({ request, params }) {
 			// edit existing files
 			for (const file of fileInfo.edit) {
 				const buffer:Buffer = Buffer.from(file.info, 'base64');
-				const info: NodeBlob = new NodeBlob([buffer]);
-				await editFile(file.path, file.title, info, prismaTransaction);
-				fileData.push({fileId: file.path, data: buffer.toString('base64')});
+				// const info: NodeBlob = new NodeBlob([buffer]);
+				await editFile(file.path, file.title, buffer, prismaTransaction);
 			}
 
 			const material = await updateMaterialByPublicationId(
@@ -105,25 +101,17 @@ export async function PUT({ request, params }) {
 				body.timeEstimate, body.theoryPractice, prismaTransaction
 			);
 			if (!material) {
-				return null;
+				return new Response(JSON.stringify({error: 'Bad Request'}), {
+					status: 400,
+				});
 			}
 
-			return {material, fileData};
+			return material;
 		});
 
-		// check if material is null
-		if (!updatedMaterial) {
-			return new Response(JSON.stringify({error: 'Bad Request'}), {
-				status: 400,
-			});
-		}
+		const id = updatedMaterial.id;
 
-		// If JSON stringify cannot handle raw Buffer, use this:
-		const transformedFileData = await bufToBase64(updatedMaterial.fileData);
-
-	//	const fileData = updatedMaterial.fileData;
-
-		return new Response(JSON.stringify({updatedMaterial, transformedFileData}), {status: 200});
+		return new Response(JSON.stringify({id}), {status: 200});
 	} catch (error) {
 		return new Response(JSON.stringify({error: 'Server Error'}), {
 			status: 500,

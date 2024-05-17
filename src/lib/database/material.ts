@@ -35,6 +35,7 @@ export async function deleteMaterialByPublicationId(publicationId: number) {
 
 /**
  * [POST] Returns a created publication of type Material
+ * @param userId
  * @param title
  * @param description
  * @param difficulty

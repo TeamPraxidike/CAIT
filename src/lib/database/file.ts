@@ -10,24 +10,7 @@ export async function bufToBase64(files: FetchedFileArray) {
     }));
 }
 
-
-export async function addFiles(paths: string[], titles: string[], materialId: number,
-                               prismaContext: Prisma.TransactionClient = prisma) {
-    if(paths.length !== titles.length) throw new Error("Paths and titles must be of equal length");
-
-    for (const file of paths) {
-        const index = paths.indexOf(file);
-        await prismaContext.file.create({
-            data: {
-                path: file,
-                title: titles[index], // Example file title
-                materialId: materialId, // Associate the file with the newly created Material
-            },
-        });
-    }
-}
-
-export async function addFile(title: string, type:string, info: Blob, materialId: number,
+export async function addFile(title: string, type:string, info: Buffer, materialId: number,
                                prismaContext: Prisma.TransactionClient = prisma) {
 
     try{
@@ -52,7 +35,7 @@ export async function addFile(title: string, type:string, info: Blob, materialId
     }
 }
 
-export async function editFile(path: string, title: string, info: Blob,
+export async function editFile(path: string, title: string, info: Buffer,
                                prismaContext: Prisma.TransactionClient = prisma) {
 
         try{

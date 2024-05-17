@@ -42,46 +42,28 @@ export async function POST({ request }) {
 				body.timeEstimate, body.theoryPractice, prismaTransaction
 			);
 
-			console.log("BACKEND FILEINFO: ", fileInfo);
-
-			if (!material) return null;
+			if (!material) {
+				return new Response(JSON.stringify({error: 'Bad Request'}), {
+					status: 400,
+				});
+			}
 
 			// await handleConnections(request, material.publicationId, prismaTransaction);
 
-			const fileData: FetchedFileArray = [];
-
 			// add files
 			for (const file of fileInfo.add) {
-				console.log("FILES");
-				console.log(typeof file);
-				console.log(file);
-
 				const buffer:Buffer = Buffer.from(file.info, 'base64');
-				const info: NodeBlob = new NodeBlob([buffer]);
+				// const info: NodeBlob = new NodeBlob([buffer]);
 
-				const createdFile = await addFile(file.title, file.type, info, material.id, prismaTransaction);
-				fileData.push({fileId: createdFile.path, data: file.info});
+				await addFile(file.title, file.type, buffer, material.id, prismaTransaction);
 			}
 
-			return {material, fileData};
+			return material;
 		});
 
-		// check if material is null
-		if (!createdMaterial) {
-			return new Response(JSON.stringify({error: 'Bad Request'}), {
-				status: 400,
-			});
-		}
+		const id = createdMaterial.id;
 
-		// get material including updated relations
-		const actualMaterial = await getMaterialByPublicationId(createdMaterial.material.publicationId);
-
-		// If JSON stringify cannot handle raw Buffer, use this:
-		const transformedFileData = await bufToBase64(createdMaterial.fileData);
-
-		//const fileData = createdMaterial.fileData;
-
-		return new Response(JSON.stringify({actualMaterial, transformedFileData}), {status: 200});
+		return new Response(JSON.stringify({id}), {status: 200});
 	} catch (error) {
 		console.log(error);
 		return new Response(JSON.stringify({error: 'Server Error'}), {

@@ -7,8 +7,8 @@ import { Blob } from 'node:buffer';
  * @see LocalFileSystem
  */
 export default interface FileSystem {
-	saveFile(file: Blob, name: string): Promise<string>;
+	saveFile(file: Buffer, name: string): Promise<string>;
 	deleteFile(path: string): void;
 	readFile(path: string): Buffer;
-	editFile(path: string, file: Blob): Promise<string>;
+	editFile(path: string, file: Buffer): Promise<string>;
 }

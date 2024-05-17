@@ -45,7 +45,7 @@ export type MaterialForm = {
 export type FileInfo = {
 	add: { title: string, type:string ; info: string }[];
 	delete: { path: string }[];
-	edit: { path: string, title: string; info: string;  }[];
+	edit: { path: string, title: string; info: string }[];
 };
 
 export type FetchedFileItem = {
