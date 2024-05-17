@@ -5,7 +5,7 @@
     import {FileDropzone} from "@skeletonlabs/skeleton";
 
     export let data: LayoutServerData;
-    let publication: Publication = data.publication;
+    let publication: Publication = data.serverData.publication;
 
     let tags: string[] = ['Very Big Tag', 'nsnsngrfnfgdb', 'One More ', 'short'];
     let files:FileList;
