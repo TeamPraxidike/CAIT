@@ -14,6 +14,7 @@
     let leftHeight:number;
 
     $:uid = $authStore.user?.id || 0;
+
     // eslint-disable-next-line svelte/valid-compile
     export let form: ActionData;
 </script>
@@ -92,7 +93,7 @@
             <div class="flex flex-col gap-4">
                 <hr />
                 <FileDropzone multiple name="files" bind:files={files} />
-                <FileTable download={false} {files} bind:activeFile={activeFile}/>
+                <FileTable download={true} {files} bind:activeFile={activeFile}/>
             </div>
             <button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50">Publish</button>
         </div>

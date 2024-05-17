@@ -171,7 +171,7 @@
         <div class="flex flex-col row-start-3">
 
         </div>
-        <FileTable {files} bind:activeFile={activeFile}/>
+        <FileTable download={true} {files} bind:activeFile={activeFile}/>
         <hr class="row-start-2">
         <Render height={leftHeight} {activeFile}/>
     </div>
