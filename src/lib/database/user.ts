@@ -32,6 +32,7 @@ export async function createUser(
 			username: username,
 			email: email,
 			profilePic: profilePic,
+			isAdmin: false
 		},
 	});
 }

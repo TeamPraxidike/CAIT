@@ -1,44 +1,92 @@
 import {
 	getPublicationById,
-	createCircuitPublication,
-	createMaterialPublication,
+	//createCircuitPublication,
+	//createMaterialPublication,
 	addNodeToCircuit,
 } from './db';
 
-import {
-	getMaterialByPublicationId,
-	getAllMaterials,
-	deleteMaterialByPublicationId,
-} from './material';
+import { getMaterialByPublicationId, getAllMaterials,
+	updateMaterialByPublicationId, deleteMaterialByPublicationId, createMaterialPublication } from './material';
 
-import {
-	getCircuitByPublicationId,
-	getAllCircuits,
-	deleteCircuitByPublicationId,
-} from './circuit';
+import { getCircuitByPublicationId, getAllCircuits,
+	updateCircuitByPublicationId, deleteCircuitByPublicationId, createCircuitPublication } from './circuit';
+
+import { updatePublicationConnectTags, updatePublicationConnectMaintainers, connectMaintainers,
+	connectTags, handleConnections} from './publication';
+
+import {handleEdges, fetchExtensions, addNode, editNode, deleteNode} from './node'
+
 import {getUserById, createUser, deleteUser, editUser} from "$lib/database/user";
 import type {userEditData} from "$lib/database/user";
 
-import { addFiles } from '$lib/database/file';
+
+import { addFiles, addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
 import { prisma } from './prisma';
+import {LocalFileSystem} from "$lib/FileSystemPort/LocalFileSystem";
+import {Blob as NodeBlob} from "node:buffer"
+
+const fileSystem = new LocalFileSystem();
+
+export type FileInfo = {
+	add: { title: string; info: Blob }[];
+	delete: { path: string }[];
+	edit: { path: string, title: string; info: Blob;  }[];
+};
+
+export type FetchedFileItem = {
+	fileId: string;
+	data: Buffer;
+};
+
+export type FetchedFileArray = FetchedFileItem[];
+
+export type NodeInfo = {
+	add: { circuitId: number; publicationId: number }[];
+	delete: { nodeId: number }[];
+	edit: { nodeId: number, publicationId: number }[];
+	next: { fromId: number; toId: number[] }[];
+};
+
+export async function convertBlobToNodeBlob(browserBlob: Blob): Promise<{ buffer: Buffer; info: NodeBlob }> {
+	const arrayBuffer = await browserBlob.arrayBuffer();
+	const buffer = Buffer.from(arrayBuffer);
+	return {buffer: buffer, info: new NodeBlob([buffer], { type: browserBlob.type })};
+}
 
 export {
 	prisma,
+	fileSystem,
+	addFile,
+	editFile,
+	deleteFile,
+	bufToBase64,
 	createUser,
 	getUserById,
 	getPublicationById,
 	createCircuitPublication,
 	createMaterialPublication,
 	addNodeToCircuit,
+	updateMaterialByPublicationId,
 	getMaterialByPublicationId,
 	getAllMaterials,
 	getCircuitByPublicationId,
 	getAllCircuits,
+	updatePublicationConnectMaintainers,
+	updatePublicationConnectTags,
+	updateCircuitByPublicationId,
+	connectMaintainers,
+	connectTags,
+	handleConnections,
+	handleEdges,
+	fetchExtensions,
+	addNode,
+	deleteNode,
+	editNode,
 	addFiles,
 	deleteCircuitByPublicationId,
 	deleteMaterialByPublicationId,
 	deleteUser,
-	editUser,
+	editUser
 };
 
 export type {

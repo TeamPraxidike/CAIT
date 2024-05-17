@@ -18,9 +18,9 @@ tags:
   - name: Tag
     description: End-points for operations on/with tags
   - name: Node
-    description: End-points for operations on/with nodes
+    description: (NOT USED) End-points for operations on/with nodes
   - name: File
-    description: End-points for operations on/with files
+    description: (NOT USED) End-points for operations on/with files
 
 servers:
   - url: http://localhost:5143
@@ -370,77 +370,77 @@ paths:
         '500':
           description: Server Error
 
-  /user/{userId}/maintaining/{publicationId}:
-    post:
-      tags:
-        - User
-      summary: Appoint user as maintaner for publication
-      parameters:
-        - in: path
-          name: userId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the user
-        - in: path
-          name: publicationId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the publication (could be material or circuit)
-
-      responses:
-        '200':
-          description: Successfully appointed user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Bad request
-        '401':
-          description: Cannot perform action
-        '404':
-          description: User/Publication not found
-        '500':
-          description: Server Error
-    delete:
-      tags:
-        - User
-      summary: Remove maintainer status for certain publication
-      parameters:
-        - in: path
-          name: userId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the user
-        - in: path
-          name: publicationId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the publication (could be material or circuit)
-
-      responses:
-        '200':
-          description: Successfully removed maintainer status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Bad request
-        '401':
-          description: Cannot perform action
-        '404':
-          description: User/Publication not found
-        '500':
-          description: Server Error
+  #  /user/{userId}/maintaining/{publicationId}:
+  #    post:
+  #      tags:
+  #        - User
+  #      summary: Appoint user as maintaner for publication
+  #      parameters:
+  #        - in: path
+  #          name: userId
+  #          schema:
+  #            type: number
+  #            format: long
+  #          required: true
+  #          description: Numeric ID of the user
+  #        - in: path
+  #          name: publicationId
+  #          schema:
+  #            type: number
+  #            format: long
+  #          required: true
+  #          description: Numeric ID of the publication (could be material or circuit)
+  #
+  #      responses:
+  #        '200':
+  #          description: Successfully appointed user
+  #          content:
+  #            application/json:
+  #              schema:
+  #                $ref: '#/components/schemas/User'
+  #        '400':
+  #          description: Bad request
+  #        '401':
+  #          description: Cannot perform action
+  #        '404':
+  #          description: User/Publication not found
+  #        '500':
+  #          description: Server Error
+  #    delete:
+  #      tags:
+  #        - User
+  #      summary: Remove maintainer status for certain publication
+  #      parameters:
+  #        - in: path
+  #          name: userId
+  #          schema:
+  #            type: number
+  #            format: long
+  #          required: true
+  #          description: Numeric ID of the user
+  #        - in: path
+  #          name: publicationId
+  #          schema:
+  #            type: number
+  #            format: long
+  #          required: true
+  #          description: Numeric ID of the publication (could be material or circuit)
+  #
+  #      responses:
+  #        '200':
+  #          description: Successfully removed maintainer status
+  #          content:
+  #            application/json:
+  #              schema:
+  #                $ref: '#/components/schemas/User'
+  #        '400':
+  #          description: Bad request
+  #        '401':
+  #          description: Cannot perform action
+  #        '404':
+  #          description: User/Publication not found
+  #        '500':
+  #          description: Server Error
 
   /material:
     post:
@@ -1254,242 +1254,242 @@ paths:
         '500':
           description: Server Error
 
-  /node:
-    post:
-      tags:
-        - Node
-      summary: Add a node to a circuit
-      requestBody:
-        description: The node information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Node'
-
-      responses:
-        '200':
-          description: Successfully added node
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Node'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot tag, authentication failed
-        '500':
-          description: Server Error
-
-  /node/{nodeId}:
-    put:
-      tags:
-        - Node
-      summary: Update a node
-      parameters:
-        - in: path
-          name: nodeId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the node update
-
-      requestBody:
-        description: The new reply information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Node'
-
-      responses:
-        '200':
-          description: Successfully updated node
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Node'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot edit this node, authentication failed
-        '403':
-          description: User cannot edit this node, he is not the original author
-        '404':
-          description: This node does not exist
-        '500':
-          description: Server Error
-
-    get:
-      tags:
-        - Node
-      summary: Get a node with a given id
-      parameters:
-        - in: path
-          name: nodeId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the node to get
-
-      responses:
-        '200':
-          description: Successfully retrieved the node
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Node'
-
-        '400':
-          description: Bad request
-        '404':
-          description: This node does not exist
-        '500':
-          description: Server Error
-
-    delete:
-      tags:
-        - Node
-      summary: Deletes a node
-      parameters:
-        - in: path
-          name: nodeId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the node to delete
-
-      responses:
-        '200':
-          description: Successfully deleted node
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Node'
-        '400':
-          description: Bad request
-        '404':
-          description: This node does not exist
-        '500':
-          description: Server Error
-
-  /file:
-    post:
-      tags:
-        - File
-      summary: Add a file to a material entity
-      requestBody:
-        description: The file information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/File'
-
-      responses:
-        '200':
-          description: Successfully added file
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/File'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot add file, authentication failed
-        '500':
-          description: Server Error
-
-  /file/{fileId}:
-    put:
-      tags:
-        - File
-      summary: Update a file
-      parameters:
-        - in: path
-          name: fileId
-          schema:
-            type: string
-          required: true
-          description: Path ID of the file update
-
-      requestBody:
-        description: The new file information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/File'
-
-      responses:
-        '200':
-          description: Successfully updated file
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/File'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot edit this file, authentication failed
-        '403':
-          description: User cannot edit this file, he is not the original author
-        '404':
-          description: This node does not exist
-        '500':
-          description: Server Error
-
-    get:
-      tags:
-        - File
-      summary: Get a file with a given id
-      parameters:
-        - in: path
-          name: fileId
-          schema:
-            type: string
-          required: true
-          description: Path ID of the file to get
-
-      responses:
-        '200':
-          description: Successfully retrieved the file
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/File'
-
-        '400':
-          description: Bad request
-        '404':
-          description: This file does not exist
-        '500':
-          description: Server Error
-
-    delete:
-      tags:
-        - File
-      summary: Deletes a file
-      parameters:
-        - in: path
-          name: fileId
-          schema:
-            type: string
-          required: true
-          description: Path ID of the file to delete
-
-      responses:
-        '200':
-          description: Successfully deleted file
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/File'
-        '400':
-          description: Bad request
-        '404':
-          description: This file does not exist
-        '500':
-          description: Server Error
+#  /node:
+#    post:
+#      tags:
+#        - Node
+#      summary: Add a node to a circuit
+#      requestBody:
+#        description: The node information
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/Node'
+#
+#      responses:
+#        '200':
+#          description: Successfully added node
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Node'
+#        '400':
+#          description: Bad request
+#        '401':
+#          description: User cannot tag, authentication failed
+#        '500':
+#          description: Server Error
+#
+#  /node/{nodeId}:
+#    put:
+#      tags:
+#        - Node
+#      summary: Update a node
+#      parameters:
+#        - in: path
+#          name: nodeId
+#          schema:
+#            type: number
+#            format: long
+#          required: true
+#          description: Numeric ID of the node update
+#
+#      requestBody:
+#        description: The new reply information
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/Node'
+#
+#      responses:
+#        '200':
+#          description: Successfully updated node
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Node'
+#        '400':
+#          description: Bad request
+#        '401':
+#          description: User cannot edit this node, authentication failed
+#        '403':
+#          description: User cannot edit this node, he is not the original author
+#        '404':
+#          description: This node does not exist
+#        '500':
+#          description: Server Error
+#
+#    get:
+#      tags:
+#        - Node
+#      summary: Get a node with a given id
+#      parameters:
+#        - in: path
+#          name: nodeId
+#          schema:
+#            type: number
+#            format: long
+#          required: true
+#          description: Numeric ID of the node to get
+#
+#      responses:
+#        '200':
+#          description: Successfully retrieved the node
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Node'
+#
+#        '400':
+#          description: Bad request
+#        '404':
+#          description: This node does not exist
+#        '500':
+#          description: Server Error
+#
+#    delete:
+#      tags:
+#        - Node
+#      summary: Deletes a node
+#      parameters:
+#        - in: path
+#          name: nodeId
+#          schema:
+#            type: number
+#            format: long
+#          required: true
+#          description: Numeric ID of the node to delete
+#
+#      responses:
+#        '200':
+#          description: Successfully deleted node
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Node'
+#        '400':
+#          description: Bad request
+#        '404':
+#          description: This node does not exist
+#        '500':
+#          description: Server Error
+#
+#  /file:
+#    post:
+#      tags:
+#        - File
+#      summary: Add a file to a material entity
+#      requestBody:
+#        description: The file information
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/File'
+#
+#      responses:
+#        '200':
+#          description: Successfully added file
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/File'
+#        '400':
+#          description: Bad request
+#        '401':
+#          description: User cannot add file, authentication failed
+#        '500':
+#          description: Server Error
+#
+#  /file/{fileId}:
+#    put:
+#      tags:
+#        - File
+#      summary: Update a file
+#      parameters:
+#        - in: path
+#          name: fileId
+#          schema:
+#            type: string
+#          required: true
+#          description: Path ID of the file update
+#
+#      requestBody:
+#        description: The new file information
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/File'
+#
+#      responses:
+#        '200':
+#          description: Successfully updated file
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/File'
+#        '400':
+#          description: Bad request
+#        '401':
+#          description: User cannot edit this file, authentication failed
+#        '403':
+#          description: User cannot edit this file, he is not the original author
+#        '404':
+#          description: This node does not exist
+#        '500':
+#          description: Server Error
+#
+#    get:
+#      tags:
+#        - File
+#      summary: Get a file with a given id
+#      parameters:
+#        - in: path
+#          name: fileId
+#          schema:
+#            type: string
+#          required: true
+#          description: Path ID of the file to get
+#
+#      responses:
+#        '200':
+#          description: Successfully retrieved the file
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/File'
+#
+#        '400':
+#          description: Bad request
+#        '404':
+#          description: This file does not exist
+#        '500':
+#          description: Server Error
+#
+#    delete:
+#      tags:
+#        - File
+#      summary: Deletes a file
+#      parameters:
+#        - in: path
+#          name: fileId
+#          schema:
+#            type: string
+#          required: true
+#          description: Path ID of the file to delete
+#
+#      responses:
+#        '200':
+#          description: Successfully deleted file
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/File'
+#        '400':
+#          description: Bad request
+#        '404':
+#          description: This file does not exist
+#        '500':
+#          description: Server Error
 
 components:
   schemas:

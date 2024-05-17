@@ -40,7 +40,7 @@ export class LocalFileSystem implements FileSystem {
 	 * This function might be better to avoid, as if you are calling it from a server file you can directly access the file system.
 	 * @param pathArg the path to the file
 	 */
-	readFile(pathArg: string) {
+	readFile(pathArg: string): Buffer {
 		try {
 			console.log('Reading file ' + path.join(this.basePath, pathArg));
 			return fs.readFileSync(path.join(this.basePath, pathArg));

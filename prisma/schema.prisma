@@ -28,7 +28,7 @@ model User {
   id         Int     @id @default(autoincrement())
   firstName  String
   lastName   String
-  username   String  @unique
+  username   String  @unique @default(uuid())
   email      String
   profilePic String?
   reputation Int     @default(0)
@@ -64,6 +64,7 @@ model Publication {
   likes              Int        @default(0)
   tags               Tag[]
   learningObjectives String[]
+  prerequisites      String[]
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
@@ -114,8 +115,10 @@ model Node {
   circuitId Int
   circuit   Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
 
-  contentId Int
-  content   Publication @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  extensions String[]
+
+  publicationId Int
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
   prerequisites Node[] @relation("edge")
   next          Node[] @relation("edge")
