@@ -30,7 +30,7 @@ describe('get all materials', () => {
 			{ id: 4, coverPic: 'cover2.jpg', publicationId: 2 },
 		]);
 
-		const materials = await getAllMaterials();
+		const materials = await getAllMaterials([], [], [], []);
 		expect(materials).toHaveLength(2);
 		expect(materials[0].publicationId).toBe(1);
 		expect(materials[1].publicationId).toBe(2);
