@@ -162,6 +162,61 @@ describe('Users', () => {
 		});
 	});
 
+	describe('[GET] /user/:id/liked', () => {
+		it("should return an empty list for a newly created user", async () => {
+			const user =
+				await createUser("Halil", "uisnfgkfvm", "email@gmail", "picture.picture");
+
+			const response = await fetch(`${testingUrl}/user/${user.id}/liked`);
+			expect(response.status).toBe(204);
+		});
+
+		it("should return 404 when user does not exist", async () => {
+			const response = await fetch(`${testingUrl}/user/${9848906}/liked`);
+			expect(response.status).toBe(404);
+		});
+
+		it("should return a list with liked posts as content", async () => {
+			const user =
+				await createUser("Halil", "uisnfgkfvm", "email@gmail", "picture.picture");
+			const publication = await createMaterialPublication({
+				userId: user.id,
+				title: "cool publication 2",
+				description: "This publication has description",
+				copyright: true,
+				difficulty: Difficulty.easy
+			});
+
+			await fetch(`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`, {
+				method: 'POST',
+			});
+
+			const response = await fetch(`${testingUrl}/user/${user.id}/liked`);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveLength(1);
+			expect(responseBody[0].id).toBe(publication.publicationId);
+
+			const publication2 = await createMaterialPublication({
+				userId: user.id,
+				title: "cool publication 2",
+				description: "This publication has description",
+				copyright: true,
+				difficulty: Difficulty.easy
+			});
+
+			await fetch(`${testingUrl}/user/${user.id}/liked/${publication2.publicationId}`, {
+				method: 'POST',
+			});
+			const response2 = await fetch(`${testingUrl}/user/${user.id}/liked`);
+			const responseBody2 = await response2.json();
+			expect(responseBody2).toHaveLength(2);
+			expect(responseBody2[0].id).toBe(publication.publicationId);
+			expect(responseBody2[1].id).toBe(publication2.publicationId);
+		});
+	});
+
 	describe('[POST] /user/:id/liked/:publicationId', () => {
 		it('should successfully like a publication', async () => {
 			const body = {

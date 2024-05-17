@@ -6,8 +6,8 @@ export async function GET({params}) {
     if(!user) return new Response(JSON.stringify({error: 'User not found'}), {status: 404});
 
     const liked = await getLikedPublications(parseInt(id));
-    if(liked === null) return new Response(JSON.stringify({error: 'Liked publications were not found'}), {status: 404});
-    if(liked.liked.length === 0) return new Response(JSON.stringify({message: 'No liked publications'}), {status: 204});
+    if(liked === null) return new Response(JSON.stringify({error: 'Server error'}), {status: 500});
+    if(liked.liked.length === 0) return new Response(null, {status: 204});
 
     return new Response(JSON.stringify(liked.liked), {status: 200});
 }

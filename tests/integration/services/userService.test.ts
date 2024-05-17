@@ -39,6 +39,7 @@ describe("Liking publications", () => {
     let user : User;
     let publication : Material;
     let likedMessage : string;
+
     beforeEach(async () => {
         user = await createUser("Bobi", "Damyanov", "email2@email", "vasko.pdf");
         publication = await createMaterialPublication({
