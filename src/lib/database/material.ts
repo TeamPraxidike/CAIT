@@ -1,5 +1,5 @@
 import { prisma } from '$lib/database';
-import {Difficulty} from "@prisma/client";
+import {Difficulty, PublicationType} from "@prisma/client";
 import {Prisma} from "@prisma/client/extension";
 
 /**
@@ -65,7 +65,58 @@ export async function deleteMaterialByPublicationId(publicationId: number) {
 }
 
 /**
- * [POST] Returns an updated publication of type Material with the given id.
+ * [POST] Returns a created publication of type Material
+ * @param userId
+ * @param title
+ * @param description
+ * @param difficulty
+ * @param learningObjectives
+ * @param prerequisites
+ * @param coverPic
+ * @param copyright
+ * @param timeEstimate
+ * @param theoryPractice
+ * @param prismaContext
+ */
+export async function createMaterialPublication(
+	userId: number,
+	title: string,
+	description: string,
+	difficulty: Difficulty,
+	learningObjectives: string[],
+	prerequisites: string[],
+	coverPic: string,
+	copyright: boolean,
+	timeEstimate: number,
+	theoryPractice: number,
+	prismaContext: Prisma.TransactionClient = prisma
+) {
+	return prismaContext.material.create({
+		data: {
+			coverPic: coverPic,
+			copyright: copyright,
+			timeEstimate: timeEstimate,
+			theoryPractice: theoryPractice,
+			publication: {
+				create: {
+					title: title,
+					description: description,
+					difficulty: difficulty,
+					learningObjectives: learningObjectives,
+					prerequisites: prerequisites,
+					type: PublicationType.Material,
+					publisherId: userId
+				}
+			}
+		},
+		include: {
+			publication: true
+		}
+	});
+}
+
+/**
+ * [PUT] Returns an updated publication of type Material with the given id.
  * @param publicationId
  * @param title
  * @param description

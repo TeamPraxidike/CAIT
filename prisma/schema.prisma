@@ -99,6 +99,7 @@ model Material {
 model File {
   path       String   @id
   title      String
+  type       String   @default("filetypeguz")
   materialId Int
   material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
 }
