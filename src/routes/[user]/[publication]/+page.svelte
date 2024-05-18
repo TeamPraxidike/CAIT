@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {LayoutServerData} from './$types';
-    import { DiffBar, getDateDifference, Meta, Tag, FileTable, Render, Comment} from '$lib';
+    import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment} from '$lib';
     import {onMount} from "svelte";
     import Icon from "@iconify/svelte";
     import {enhance} from "$app/forms"
@@ -48,8 +48,6 @@
         return base64ToFile(fetchedFile.data, name, type);
     }));
 
-    let activeFile: File;
-
     let liked: boolean = true;
     let saved: boolean = true;
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
@@ -65,7 +63,6 @@
     let isFocused = false;
     let originalHeight: string
 
-    let leftHeight:number;
     let maxCommentId = 3;
 
     let replies = [
@@ -183,9 +180,8 @@
             <Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark"/>
         </button>
     </div>
-    <div bind:clientHeight={leftHeight} class="min-h-96 w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-4">
-        <FileTable download={true} {files} bind:activeFile={activeFile}/>
-        <Render height={leftHeight} {activeFile}/>
+    <div class="min-h-96 w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-4">
+        <FileTable download={true} {files}/>
     </div>
 </div>
 

@@ -10,6 +10,7 @@ import type { MaterialForm } from '$lib/database';
  */
 async function filesToAddOperation(fileList: FileList) {
 	const addPromises = Array.from(fileList).map(async (file) => {
+		console.log(typeof file);
 		const buffer = await file.arrayBuffer();
 		const info = Buffer.from(buffer).toString('base64');
 
@@ -33,23 +34,26 @@ export const actions = {
 		const data = await request.formData();
 
 		const fileList: FileList = data.getAll('file') as unknown as FileList;
+		console.log(fileList);
 		if (!fileList) return { status: 400, message: 'No files provided' };
 
 		const add = await filesToAddOperation(fileList);
 
 		const material: MaterialForm = {
 			userId: Number(data.get('userId')?.toString()),
-			title: data.get('title')?.toString() || '',
-			description: data.get('description')?.toString() || '',
-			difficulty: 'easy',
-			learningObjectives: [
-				data.get('learningObjectives')?.toString() || '',
-			],
-			prerequisites: [data.get('prerequisites')?.toString() || ''],
-			coverPic: data.get('coverPic')?.toString() || '',
-			copyright: Boolean(data.get('copyright')),
-			timeEstimate: Number(data.get('estimate')?.toString()),
-			theoryPractice: 34,
+			metaData: {
+				title: data.get('title')?.toString() || '',
+				description: data.get('description')?.toString() || '',
+				difficulty: 'easy',
+				learningObjectives: [
+					data.get('learningObjectives')?.toString() || '',
+				],
+				prerequisites: [data.get('prerequisites')?.toString() || ''],
+				coverPic: data.get('coverPic')?.toString() || '',
+				copyright: Boolean(data.get('copyright')),
+				timeEstimate: Number(data.get('estimate')?.toString()),
+				theoryPractice: 34,
+			},
 			fileDiff: {
 				add: add,
 				delete: [],

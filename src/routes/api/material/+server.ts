@@ -33,27 +33,17 @@ export const GET: RequestHandler = async ({ url }) => {
 	// return 401 if user not authenticated
 
 	try {
-		console.log('Here');
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
-		console.log(tags);
 		const d = url.searchParams.get('difficulty');
 		const diff = d ? d.split(',').map(mapToDifficulty) : [];
-
-		console.log(diff);
 		const p = url.searchParams.get('publishers');
 		const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
-		console.log(publishers);
 		const ty = url.searchParams.get('types');
 		const type = ty ? ty.split(',') : [];
-		console.log(type);
-
 		const materials = await getAllMaterials(tags, publishers, diff, type);
-		console.log('DB return');
-		console.log(materials);
 		return new Response(JSON.stringify(materials), { status: 200 });
 	} catch (error) {
-		console.log('There was an Error');
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
@@ -69,7 +59,7 @@ export async function POST({ request }) {
 	// Authentication step
 	// return 401 if user not authenticated
 
-	const body:MaterialForm = await request.json();
+	const body: MaterialForm = await request.json();
 	const metaData = body.metaData;
 	const userId = body.userId;
 	const fileInfo: FileDiffActions = body.fileDiff;
@@ -80,7 +70,7 @@ export async function POST({ request }) {
 				const material = await createMaterialPublication(
 					userId,
 					metaData,
-					prismaTransaction
+					prismaTransaction,
 				);
 
 				if (!material) {

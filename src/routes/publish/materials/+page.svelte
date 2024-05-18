@@ -1,19 +1,26 @@
 <script lang="ts">
-	import { DifficultySelection, FileTable, authStore, Meta, Render, Tag } from '$lib';
-	import { FileDropzone } from '@skeletonlabs/skeleton';
+	import { DifficultySelection, FileTable, authStore, Meta, Tag } from '$lib';
+	import { FileDropzone, Stepper, Step } from '@skeletonlabs/skeleton';
 	import { fade } from 'svelte/transition';
+
+	import { enhance } from '$app/forms';
+
 	import type { ActionData } from './$types';
+	import type { Difficulty } from '@prisma/client';
 
 	let tags: string[] = [];
-
 	let files: FileList;
-	let activeFile: File;
+
+	let title: string = '';
+	let description: string = '';
+	let difficulty: Difficulty = 'easy';
+	let estimate: string = '';
+	let copyright: string = '';
+
 
 	let LOs: string[] = [];
 	let loInput: HTMLInputElement;
 	let tagInput: HTMLInputElement;
-	let leftHeight: number;
-
 	$:uid = $authStore.user?.id || 0;
 
 	// eslint-disable-next-line svelte/valid-compile
@@ -23,79 +30,109 @@
 <Meta title="Publish" description="CAIT" type="site" />
 
 {#if form?.status === 200}
-	<p class="col-span-full p-4 variant-soft-success">Successfully submitted!</p>
+	<p class="absolute col-span-full p-4 variant-soft-success">Successfully submitted!</p>
 {:else if form?.status === 400}
-	<p class="col-span-full p-4 variant-soft-error">Error: {form.message}</p>
+	<p class="absolute col-span-full p-4 variant-soft-error">Error: {form.message}</p>
 {/if}
 
-<h2 class="col-span-full mt-40 text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">Publish a publication</h2>
 <form method="POST"
 	  enctype="multipart/form-data"
 	  action="?/publish"
-	  class="col-span-full items-start mb-40
-			 lg:grid lg:gap-4 lg:grid-cols-2">
+	  class="col-start-2 col-span-10 my-20 pr-10 shadow p-4"
+	  use:enhance={({formData}) => {
+		  Array.from(files).forEach(file => {
+			if (file.size > 1024*1024*100) {
+			   alert('File size exceeds 100MB')
+			} else {
+			   formData.append('file', file)
+			}
+		  });
 
-	<div class="flex flex-col gap-2">
-		<input class="hidden" type="number" name="userId" bind:value={uid}>
-		<input type="text" name="title" placeholder="Title"
-			   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
-		<textarea name="description" placeholder="Description..."
-				  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
-
-		<label for="description">Difficulty:</label>
-		<DifficultySelection difficulty="easy" />
-	</div>
-
-	<div>
-		<label for="learning_objective_input">Learning Objectives:</label>
-		<div class="flex gap-2">
-			<input type="text" name="learning_objective_input" id="learning_objective_input" bind:this={loInput}
-				   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
-			<button type="button" name="add_lo" on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""}}
-					class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
-			</button>
-		</div>
-		<ol class="list-decimal bg-surface-100 list-inside gap-2 max-h-40 overflow-y-auto">
-			{#each LOs as LO}
-				<li transition:fade={{duration: 200}}>{LO}</li>
-			{/each}
-		</ol>
-
-		<label for="tags_input">Tags:</label>
-		<div class="flex gap-2">
-			<input type="text" name="tags_input" id="tags_input" bind:this={tagInput}
-				   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
-			<button type="button" name="add_tag"
-					on:click={() => { tags = [...tags, tagInput.value]; tagInput.value = ""}}
-					class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+</button>
-		</div>
-
-		<div class="flex flex-wrap gap-2">
-			{#each tags as tag}
-				<Tag tagText={tag} removable={false} />
-			{/each}
-		</div>
-
-		<div class="flex gap-2">
-			<div class="w-1/2">
-				<label for="estimate">Time Estimate:</label>
-				<input type="text" name="estimate"
+		  formData.append('userId', uid.toString());
+		  formData.append('title', title);
+		  formData.append('description', description);
+		  formData.append('difficulty', difficulty);
+		  formData.append('estimate', estimate);
+		  formData.append('copyright', copyright);
+		  formData.append('tags', tags.join(','));
+		  formData.append('learning_objectives', LOs.join(','));
+	  }}>
+	<Stepper buttonCompleteType="submit">
+		<Step>
+			<svelte:fragment slot="header">Upload files</svelte:fragment>
+			<FileDropzone multiple name="file" bind:files={files} />
+			<FileTable download={false} {files} />
+		</Step>
+		<Step>
+			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
+			<div class="flex flex-col gap-2">
+				<input type="text" name="title" placeholder="Title" bind:value={title}
 					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+				<textarea name="description" placeholder="Description..." bind:value={description}
+						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>
-			<div class="w-1/2">
-				<label for="copyright">Copyright:</label>
-				<input type="text" name="copyright"
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+		</Step>
+		<Step>
+			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
+			<DifficultySelection bind:difficulty={difficulty} />
+			<div>
+				<label for="learning_objective_input">Learning Objectives:</label>
+				<div class="flex gap-2">
+					<input type="text" name="learning_objective_input" id="learning_objective_input" bind:this={loInput}
+						   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
+					<button type="button" name="add_lo"
+							on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""}}
+							class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
+					</button>
+				</div>
+				<ol class="list-decimal bg-surface-100 list-inside gap-2 max-h-40 overflow-y-auto">
+					{#each LOs as LO}
+						<li transition:fade={{duration: 200}}>{LO}</li>
+					{/each}
+				</ol>
+
+				<label for="tags_input">Tags:</label>
+				<div class="flex gap-2">
+					<input type="text" name="tags_input" id="tags_input" bind:this={tagInput}
+						   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
+					<button type="button" name="add_tag"
+							on:click={() => { tags = [...tags, tagInput.value]; tagInput.value = ""}}
+							class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
+					</button>
+				</div>
+
+				<div class="flex flex-wrap gap-2">
+					{#each tags as tag}
+						<Tag tagText={tag} removable={false} />
+					{/each}
+				</div>
+
+				<div class="flex gap-2">
+					<div class="w-1/2">
+						<label for="estimate">Time Estimate:</label>
+						<input type="text" name="estimate" bind:value={estimate}
+							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+					</div>
+					<div class="w-1/2">
+						<label for="copyright">Copyright:</label>
+						<input type="text" name="copyright" bind:value={copyright}
+							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+					</div>
+				</div>
 			</div>
-		</div>
-	</div>
-
-	<hr class="col-span-2 my-4">
-
-	<div bind:clientHeight={leftHeight} class="flex flex-col gap-4">
-		<FileDropzone multiple name="file" bind:files={files} />
-		<FileTable download={true} {files} bind:activeFile={activeFile} />
-		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50">Publish</button>
-	</div>
-	<Render height={leftHeight} {activeFile} />
+		</Step>
+		<Step>
+			<svelte:fragment slot="header">Review</svelte:fragment>
+			<div class="flex flex-col gap-2">
+				<h2 class="text-2xl">Title: {title}</h2>
+				<p class="text-lg">Description: {description}</p>
+				<p class="text-lg">Difficulty: {difficulty}</p>
+				<p class="text-lg">Learning Objectives: {LOs.join(', ')}</p>
+				<p class="text-lg">Tags: {tags.join(', ')}</p>
+				<p class="text-lg">Time Estimate: {estimate}</p>
+				<p class="text-lg">Copyright: {copyright}</p>
+			</div>
+			<FileTable download={false} {files} />
+		</Step>
+	</Stepper>
 </form>
