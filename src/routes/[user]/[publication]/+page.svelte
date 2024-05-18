@@ -55,7 +55,7 @@
     const toggleLike = () => liked = !liked;
     const toggleSave = () => saved = !saved;
 
-    let tags: string[] = ['Very Big Tag', 'nsnsngrfnfgdb', 'One More ', 'short'];
+    let tags: string[] = serverData.material.publication.tags.map(tag => tag.content);
 
     let created: string;
     $:created = getDateDifference(serverData.material.publication.createdAt, new Date())

@@ -1,19 +1,15 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import { Filter, PublicationCard, SearchBar } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
-    import {page} from '$app/stores';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
-    import type { Material, Publication, User, Tag } from '@prisma/client';
     import type { PageServerData } from './$types';
+    import type { Tag } from '@prisma/client';
 
     export let data:PageServerData;
     let searchWord: string = '';
     let materials = data.publications;
     let users = data.users
-    console.log(users)
-
-
 
     $:pageType = data.type;
     $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
@@ -29,27 +25,27 @@
     let sortByActive = false
     let sortByText = 'Sort By'
 
-    let selectedDiff: {id:number, val:string }[] = []
-    let diffOptions: { id: number, val: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, val: x }));
+    let selectedDiff: {id:number, content:string }[] = []
+    let diffOptions: { id: number, content: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, content: x }));
     let diffActive = false
 
     //Variables needed to deal with Tags
-    let selectedTags: {id:number, val:string }[] = []; //keeps track of selected tags
-    let allTags: {id:number, val:string }[] = ["Mini", "ANN", "CNN", "Something Else", "A very Long tag", "Another One", "Vasko", "is", "the", "best", "I"].map(x => ({id : 0, val : x}));  //array with all the tags MOCK
-    let displayTags: {id:number, val:string }[] = allTags; //
+    let selectedTags: {id:number, content:string }[] = []; //keeps track of selected tags
+    let allTags: {id: number, content:string }[] = data.tags.map((x: Tag) => ({ id: 0, content: x.content }));
+    let displayTags: {id:number, content:string }[] = allTags;
     let tagActive = false
 
 
     //Variables needed to deal with Publishers
-    let selectedPublishers: {id:number, val:string }[] = [];//keeps track of selected tags
-    let allPublisherNames: {id:number, val:string }[] = users.map( (x:any) => ({id : x.id, val:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
-    let displayPublishers: {id:number, val:string }[] = allPublisherNames; //
+    let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
+    let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
+    let displayPublishers: {id:number, content:string }[] = allPublisherNames; //
     let publisherActive = false
 
     //Variables needed to deal with Types
-    let selectedTypes: {id:number, val:string }[] = []; //keeps track of selected tags
-    let allTypes: {id:number, val:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, val : x})); //array with all the tags MOCK
-    let displayTypes: {id:number, val:string }[] = allTypes; //
+    let selectedTypes: {id:number, content:string }[] = []; //keeps track of selected tags
+    let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+    let displayTypes: {id:number, content:string }[] = allTypes; //
     let typeActive = false
 
     $:console.log(selectedTypes, selectedTags, selectedPublishers, selectedDiff)
@@ -88,19 +84,19 @@
      *
      */
     const removeTag = (event: CustomEvent) => {
-        selectedTags = selectedTags.filter(item => item.val !== event.detail.text)
+        selectedTags = selectedTags.filter(item => item.content !== event.detail.text)
     }
 
-    const removePublisher = (name: {id:number, val:string }) => {
-        selectedPublishers = selectedPublishers.filter(publisher => publisher.val !== name.val);
+    const removePublisher = (name: {id:number, content:string }) => {
+        selectedPublishers = selectedPublishers.filter(publisher => publisher.content !== name.content);
     };
 
-    const removeDiff = (name:{id:number, val:string }) => {
-        selectedDiff = selectedDiff.filter(diff => diff.val !== name.val);
+    const removeDiff = (name:{id:number, content:string }) => {
+        selectedDiff = selectedDiff.filter(diff => diff.content !== name.content);
     };
 
-    const removeType = (name: {id:number, val:string }) => {
-        selectedTypes = selectedTypes.filter(diff => diff.val !== name.val);
+    const removeType = (name: {id:number, content:string }) => {
+        selectedTypes = selectedTypes.filter(diff => diff.content !== name.content);
     };
 
     /**
@@ -118,15 +114,16 @@
         // Construct the URL with query parameters based on selected filters
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
-            difficulty: selectedDiff.map(x => x.val).join(','),
-            types: selectedTypes.map(x => x.val).join(','),
-            tags: selectedTags.map(x => x.val).join(',')
+            difficulty: selectedDiff.map(x => x.content).join(','),
+            types: selectedTypes.map(x => x.content).join(','),
+            tags: selectedTags.map(x => x.content).join(',')
         });
         const url = `/api/material?${queryParams.toString()}`;
 
         // Make a GET request to the API
         await fetch(url)
           .then(response => {
+              console.log(response);
               if (!response.ok) {
                   throw new Error('Network response was not ok');
               }
@@ -135,7 +132,6 @@
           .then(data => {
               // Handle the response data from the API
               materials = data
-              console.log(materials)
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);
@@ -200,7 +196,7 @@
             <p class="text-xs text-surface-600 dark:text-surface-200">Tags:</p>
             {#each selectedTags as tag}
                 <div>
-                    <TagComponent tagText="{tag.val}" width="{0}" removable="{true}" on:Remove={removeTag}/>
+                    <TagComponent tagText="{tag.content}" width="{0}" removable="{true}" on:Remove={removeTag}/>
                 </div>
             {/each}
         </div>
@@ -212,7 +208,7 @@
             {#each selectedPublishers as sp}
                 <div class="flex gap-1 items-center">
                     <Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile"/>
-                    <p class="text-xs">{sp.val}</p>
+                    <p class="text-xs">{sp.content}</p>
                     <button class="h-full" on:click={() => removePublisher(sp)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
@@ -227,7 +223,7 @@
             <p class="text-xs text-surface-600 dark:text-surface-200">Difficulty:</p>
             {#each selectedDiff as sd}
                 <div class="flex gap-1 items-center">
-                    <p class="text-xs">{sd.val}</p>
+                    <p class="text-xs">{sd.content}</p>
                     <button class="h-full" on:click={() => removeDiff(sd)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
@@ -241,7 +237,7 @@
         <p class="text-xs text-surface-600 dark:text-surface-200">Type:</p>
         {#each selectedTypes as sd}
             <div class="flex gap-1 items-center">
-                <p class="text-xs">{sd.val}</p>
+                <p class="text-xs">{sd.content}</p>
                 <button class="h-full" on:click={() => removeType(sd)}>
                     <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                 </button>
@@ -254,10 +250,3 @@
 {#each materials as material}
     <PublicationCard publication={material.publication} />
 {/each}
-
-
-<!--{#await }-->
-<!--	-->
-<!--{:then } -->
-<!--	-->
-<!--{/await}-->

@@ -6,21 +6,21 @@
     import {fly} from 'svelte/transition';
     import {onMount} from 'svelte';
     import type { Publication } from '@prisma/client';
-    export let publication:Publication;
+    export let publication:Publication & {
+        tags: { content: string }[]
+    };
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let numMaterials: number = 1;
     export let used: number = 1;
-    export let tags: string[] = ['Very Big Tag', 'nsnsngrfnfgdb', 'One More ', 'short'];
+    export let tags: string[] = publication.tags.map(tag => tag.content);
 
     let lastUpdated: string = getDateDifference(publication.updatedAt, new Date());
 
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
     $:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
-    let star: Icon;
-    let bookmark: HTMLButtonElement;
     const toggleLike = () => liked = !liked;
     const toggleSave = () => saved = !saved;
 
@@ -42,26 +42,21 @@
         }
     };
 
-    /*
-    * calculates the maximum amounts of tags allowed for the width of the card so that it doesn't overflow with tags
-    * returns set max amount of tags: number
+    /**
+     * Calculates the maximum amounts of tags allowed for the width of the card so that it doesn't overflow with tags
+     * @returns set max amount of tags: number
      */
     const calcMaxTags = () => {
-        //set vars to keep track of the result and current width of the tags we have already allowed
         let res = 0;
         let currentWidth = 0;
 
         for (let i = 0; i < tagWidths.length; i++) {
-            //We check if the tag is last in order: If it is not we need to accommodate for the potential
-            //pixels that +remainingTags will generate in the component later
             let checkLast = i === tagWidths.length - 1 ? tagWidths[i] : tagWidths[i] + 24;
 
 
-            //Check if adding the next tag would cause an overflow in the width and add it only if that's the case
             if (!(currentWidth + checkLast <= containerWidth)) {
                 break;
             }
-            //update width and res
 
             currentWidth += (tagWidths[i]) + 8;
             res++;
@@ -75,7 +70,7 @@
         containerWidth = container.getBoundingClientRect().width;
         window.addEventListener('resize', updateContainerWidth);
 
-        maxTags = calcMaxTags();
+        maxTags = 10;
         if (hoverDiv) {
             hoverDiv.addEventListener('mouseenter', handleHover);
             hoverDiv.addEventListener('mouseleave', handleHover);
@@ -162,13 +157,13 @@
                         <button
                                 class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
                                 on:click={() => toggleLike()}>
-                            <Icon bind:this={star} class="text-lg {likedColor}" icon="material-symbols:star"/>
+                            <Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
                             <span>{publication.likes}</span>
                         </button>
 
                         <div class="h-2/3 w-px bg-surface-200"></div>
 
-                        <button bind:this={bookmark}
+                        <button
                                 class="flex items-center text-xl text-surface-500 h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
                                 on:click={() => toggleSave()}>
                             <Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>

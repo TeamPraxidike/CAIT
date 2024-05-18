@@ -1,5 +1,14 @@
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import type { MaterialForm } from '$lib/database';
+import type { Tag } from '@prisma/client';
+
+export const load: PageServerLoad = async ({ fetch }) => {
+	const tagRes = await fetch('/api/tags');
+
+	const tags: Tag[] = await tagRes.json();
+
+	return { tags };
+};
 
 /**
  * Helper function to convert a list of files to a list of objects that can be added to the database.
@@ -31,6 +40,7 @@ export const actions = {
 	 * @param fetch the fetch function to send requests to the server, *provided by SvelteKit*
 	 */
 	publish: async ({ request, fetch }) => {
+		console.log('PUBLISHING!');
 		const data = await request.formData();
 
 		const fileList: FileList = data.getAll('file') as unknown as FileList;

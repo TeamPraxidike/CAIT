@@ -2,13 +2,13 @@ export async function load({ url, fetch }) {
 	const type = url.searchParams.get('type') || 'materials';
 
 	// get all the materials
-	const pubRes = await fetch(`/api/material`);
-	const body = await pubRes.json();
+	const publications = await (await fetch(`/api/material`)).json();
+	const users = await (await fetch(`/api/user`)).json();
+	const tags = await (await fetch(`/api/tags`)).json();
 
-	const users = await fetch(`/api/user`);
-	const bodyUsers = await users.json();
+	console.log(tags);
 
-	return { type, publications: body, users: bodyUsers };
+	return { type, publications, users, tags };
 }
 
 export const actions = {

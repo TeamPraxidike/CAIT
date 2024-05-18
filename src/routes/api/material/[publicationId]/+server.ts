@@ -95,11 +95,11 @@ export async function PUT({ request, params }) {
 	try {
 		const updatedMaterial = await prisma.$transaction(
 			async (prismaTransaction) => {
-				await handleConnections(
-					request,
-					publicationId,
-					prismaTransaction,
-				);
+				// await handleConnections(
+				// 	request,
+				// 	publicationId,
+				// 	prismaTransaction,
+				// );
 
 				// add files
 				for (const file of fileInfo.add) {
