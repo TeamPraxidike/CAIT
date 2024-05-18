@@ -1,5 +1,6 @@
 <script lang="ts">
     import { CodeBlock } from '@skeletonlabs/skeleton';
+    import Icon from '@iconify/svelte';
 
     export let activeFile:File;
 
@@ -23,7 +24,7 @@
     }
 </script>
 
-<div style="max-height: {lineHeight}px;" class="min-h-40 border rounded-lg row-span-3 snap-y overflow-y-auto scroll-smooth snap-mandatory">
+<div style="height: {lineHeight}px;" class="min-h-92  border rounded-lg snap-y overflow-y-auto scroll-smooth snap-mandatory">
     {#if activeFile}
         {#await activeFile.arrayBuffer()}
             <div>Loading...</div>
@@ -33,7 +34,10 @@
             {:else if activeFile.type.startsWith('text') || activeFile.type.startsWith('application')}
                 <CodeBlock language={getLanguage(activeFile.type)} code={decoder.decode(file)} />
             {:else}
-                <p>Unsupported file type: {activeFile.type}</p>
+                <div class="h-full w-full flex flex-col gap-2 justify-center items-center text-surface-500 dark:text-surface-300">
+                    <Icon icon="bi:file-earmark" class="text-4xl text-surface-500 dark:text-surface-300" />
+                    <p>Unsupported file type: {activeFile.type}</p>
+                </div>
             {/if}
         {:catch error}
             <div>Error: {error.message}</div>

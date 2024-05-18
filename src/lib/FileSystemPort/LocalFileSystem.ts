@@ -2,10 +2,12 @@ import fs from 'fs';
 import { randomUUID } from 'node:crypto';
 import type FileSystem from '$lib/FileSystemPort/FileSystem';
 import path from 'path';
-import { Blob } from 'node:buffer';
 
 /**
  * Adapter interface for the FileSystem Port that deals with file management locally.
+ * This is used to abstract the file system operations from the rest of the application.
+ * This class is used to interact with the local file system (within the server) and
+ * not with a cloud bucket storage.
  */
 export class LocalFileSystem implements FileSystem {
 	//readonly basePath = 'static\\uploadedFiles\\';
@@ -28,10 +30,7 @@ export class LocalFileSystem implements FileSystem {
 	 * @param file the binary data of the file
 	 */
 	async editFile(pathArg: string, file: Buffer) {
-		fs.writeFileSync(
-			path.join(this.basePath, pathArg),
-			file
-		);
+		fs.writeFileSync(path.join(this.basePath, pathArg), file);
 		return pathArg;
 	}
 
@@ -70,7 +69,10 @@ export class LocalFileSystem implements FileSystem {
 			const pathFileNameGenerated =
 				`${randomUUID()}` + `.${(name + '').split('.').pop()}`;
 
-			fs.writeFileSync(path.join(this.basePath, pathFileNameGenerated), file);
+			fs.writeFileSync(
+				path.join(this.basePath, pathFileNameGenerated),
+				file,
+			);
 			console.log(name + ' saved as ' + pathFileNameGenerated);
 			return pathFileNameGenerated;
 		} catch (error) {

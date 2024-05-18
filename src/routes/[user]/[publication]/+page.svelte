@@ -4,23 +4,13 @@
     import {onMount} from "svelte";
     import Icon from "@iconify/svelte";
     import {enhance} from "$app/forms"
-    import type { FetchedFileArray } from '$lib/database';
-    import type { Publication } from '@prisma/client';
-    export let data: LayoutServerData;
-    import type { File as PrismaFile } from '@prisma/client';
 
-    let serverData:{
-        fileData: FetchedFileArray,
-        material: {
-            id: number,
-            copyright: boolean,
-            coverPic: string,
-            timeEstimate: number,
-            theoryPractice: number,
-            files: PrismaFile[],
-            publication: Publication
-        }
-    } = data.serverData;
+    /**
+     * Preface: load the data from the server
+     */
+    export let data: LayoutServerData;
+    import type { PublicationViewLoad } from './+layout.server';
+    let serverData:PublicationViewLoad = data.loadedPublication;
 
     function createFileList(files: File[]): FileList {
         const fileProperties = files.reduce((acc, _, index) => {
@@ -57,6 +47,7 @@
 
         return base64ToFile(fetchedFile.data, name, type);
     }));
+
     let activeFile: File;
 
     let liked: boolean = true;
@@ -86,15 +77,6 @@
             likes: 0,
             updatedAt: new Date(),
             createdAt: new Date()
-        },
-        {
-            id: 2,
-            content: "This is a very long reply that provides a lot of information that is helpful and positive to the publisher, engaging in a meaningful conversation that sparks innovation in the mind of the reader through its sheer wisdom and expressive genius",
-            publicationId: 1,
-            userId: 1,
-            likes: 0,
-            updatedAt: new Date(),
-            createdAt: new Date()
         }
     ]
 
@@ -108,17 +90,6 @@
             updatedAt: new Date(),
             createdAt: new Date(),
             replies: replies
-        },
-        {
-            id: 2,
-            content: "This is a very long comment that provides a lot of information that is helpful and positive to the publisher, engaging in a meaningful conversation that sparks innovation in the mind of the reader through its sheer wisdom and expressive genius, resulting in ascending to a higher level of clarity about ANNs.",
-            publicationId: 1,
-            userId: 1,
-            likes: 0,
-            updatedAt: new Date(),
-            createdAt: new Date(),
-            replies: replies
-
         }
     ]
 
@@ -212,24 +183,18 @@
             <Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark"/>
         </button>
     </div>
-    <div bind:clientHeight={leftHeight} class="min-h-96 w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-12">
-        <div class="flex flex-col row-start-3">
-
-        </div>
+    <div bind:clientHeight={leftHeight} class="min-h-96 w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-4">
         <FileTable download={true} {files} bind:activeFile={activeFile}/>
-        <hr class="row-start-2">
         <Render height={leftHeight} {activeFile}/>
     </div>
 </div>
 
 <div class="col-span-full flex flex-col mb-1 gap-1">
     <h2 class="text-3xl">Discussion Forum</h2>
-    <hr class="col-span-full">
 </div>
 
 <div class="flex mb-2 gap-2 col-span-full items-center">
     <enhanced:img class="w-10 md:w-16 rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>
-<!--    <textarea class="flex-grow border-0 border-b border-gray-300 rounded-none p-2 resize-none" placeholder="Enter text here" rows="1"></textarea>-->
     <form use:enhance method="POST" class="flex-grow ">
         <div class="flex-grow pt-2 items-center">
         <textarea
