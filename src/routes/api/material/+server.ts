@@ -5,6 +5,7 @@ import {
 	type FileDiffActions,
 	addFile,
 	type MaterialForm,
+	handleConnections,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty } from '@prisma/client';

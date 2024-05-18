@@ -88,7 +88,7 @@ export async function connectTags(
 			prismaContext,
 		);
 	} catch (error) {
-		throw new Error(`Invalid number in tag connect`);
+		throw new Error(`Invalid string in tag connect`);
 	}
 }
 
