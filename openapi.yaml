@@ -489,11 +489,13 @@ paths:
       summary: Get all materials in the system
       responses:
         '200':
-          description: Successfully retreived materials
+          description: Successfully retrieved materials
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Material'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Material'
         '401':
           description: User cannot search for Materials, authentication failed
         '500':
@@ -1134,7 +1136,7 @@ paths:
         '500':
           description: Server Error
 
-  /tag:
+  /tags:
     post:
       tags:
         - Tag
@@ -1157,47 +1159,29 @@ paths:
           description: Bad request
         '401':
           description: User cannot tag, authentication failed
+        '403':
+          description: Tag already exists
         '500':
           description: Server Error
 
-  /tag/{tagId}:
-    put:
+    get:
       tags:
         - Tag
-      summary: Update a tag
-      parameters:
-        - in: path
-          name: tagId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the tag update
-
-      requestBody:
-        description: The new reply information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Tag'
-
+      summary: Get all tags in the system
       responses:
         '200':
-          description: Successfully updated tag
+          description: Successfully retrieved tags
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Tag'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot edit this tag, authentication failed
-        '403':
-          description: User cannot edit this tag, he is not the original author
-        '404':
-          description: This tag does not exist
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+
         '500':
           description: Server Error
+
+  /tags/{tagContent}:
 
     get:
       tags:
@@ -1205,12 +1189,11 @@ paths:
       summary: Get a tag with a given id
       parameters:
         - in: path
-          name: tagId
+          name: tagContent
           schema:
-            type: number
-            format: long
+            type: string
           required: true
-          description: Numeric ID of the tag to get
+          description: The content of the tag
 
       responses:
         '200':
@@ -1233,12 +1216,11 @@ paths:
       summary: Deletes a tag
       parameters:
         - in: path
-          name: tagId
+          name: tagContent
           schema:
-            type: number
-            format: long
+            type: string
           required: true
-          description: Numeric ID of the tag to delete
+          description: The content of the tag
 
       responses:
         '200':
@@ -1704,13 +1686,9 @@ components:
       type: object
       description: a tag that can be applied to publications
       properties:
-        id:
-          type: number
-          format: long
-          description: Unique identifier for a tag
-          example: 1130597
         contents:
           type: string
+          description: "Unique content of the tag"
         publication:
           type: array
           items:
