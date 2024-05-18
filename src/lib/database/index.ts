@@ -42,6 +42,8 @@ import {
 	createUser,
 	deleteUser,
 	editUser,
+	likePublication,
+	getLikedPublications
 } from '$lib/database/user';
 
 import {
@@ -60,7 +62,6 @@ import {
 import type { userEditData } from '$lib/database/user';
 import type { editReplyData, createReplyData } from '$lib/database/reply';
 import type { createCommentData, editCommentData } from '$lib/database/comment';
-import {getUserById, createUser, deleteUser, editUser, likePublication, getLikedPublications} from "$lib/database/user";
 
 import { addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
 import { prisma } from './prisma';
