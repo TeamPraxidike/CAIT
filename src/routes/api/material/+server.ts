@@ -1,11 +1,13 @@
 import {
-	getAllMaterials, createMaterialPublication, prisma,
-	type FileInfo, handleConnections, type FetchedFileArray, getMaterialByPublicationId,
-	addFile, bufToBase64, type MaterialForm
+	addFile,
+	createMaterialPublication,
+	type FileInfo,
+	getAllMaterials,
+	type MaterialForm,
+	prisma,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty } from '@prisma/client';
-import {Blob as NodeBlob} from "node:buffer"
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -56,7 +58,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			status: 500,
 		});
 	}
-}
+};
 
 /**
  * Create a publication of type material
@@ -67,41 +69,60 @@ export async function POST({ request }) {
 	// Authentication step
 	// return 401 if user not authenticated
 	try {
-		const createdMaterial = await prisma.$transaction(async (prismaTransaction) => {
-			const body:MaterialForm = await request.json();
-			const fileInfo: FileInfo = body.fileInfo
+		const createdMaterial = await prisma.$transaction(
+			async (prismaTransaction) => {
+				const body: MaterialForm = await request.json();
+				const fileInfo: FileInfo = body.fileInfo;
 
-			const material = await createMaterialPublication(
-				body.userId, body.title, body.description, body.difficulty,
-				body.learningObjectives, body.prerequisites, body.coverPic, body.copyright,
-				body.timeEstimate, body.theoryPractice, prismaTransaction
-			);
+				const material = await createMaterialPublication(
+					body.userId,
+					body.title,
+					body.description,
+					body.difficulty,
+					body.learningObjectives,
+					body.prerequisites,
+					body.coverPic,
+					body.copyright,
+					body.timeEstimate,
+					body.theoryPractice,
+					prismaTransaction,
+				);
 
-			if (!material) {
-				return new Response(JSON.stringify({error: 'Bad Request'}), {
-					status: 400,
-				});
-			}
+				if (!material) {
+					return new Response(
+						JSON.stringify({ error: 'Bad Request' }),
+						{
+							status: 400,
+						},
+					);
+				}
 
-			// await handleConnections(request, material.publicationId, prismaTransaction);
+				// await handleConnections(request, material.publicationId, prismaTransaction);
 
-			// add files
-			for (const file of fileInfo.add) {
-				const buffer:Buffer = Buffer.from(file.info, 'base64');
-				// const info: NodeBlob = new NodeBlob([buffer]);
+				// add files
+				for (const file of fileInfo.add) {
+					const buffer: Buffer = Buffer.from(file.info, 'base64');
+					// const info: NodeBlob = new NodeBlob([buffer]);
 
-				await addFile(file.title, file.type, buffer, material.id, prismaTransaction);
-			}
+					await addFile(
+						file.title,
+						file.type,
+						buffer,
+						material.id,
+						prismaTransaction,
+					);
+				}
 
-			return material;
-		});
+				return material;
+			},
+		);
 
 		const id = createdMaterial.id;
 
-		return new Response(JSON.stringify({id}), {status: 200});
+		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
 		console.log(error);
-		return new Response(JSON.stringify({error: 'Server Error'}), {
+		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
 	}
