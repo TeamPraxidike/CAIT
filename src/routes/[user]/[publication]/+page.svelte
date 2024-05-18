@@ -172,7 +172,7 @@
                 class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
                 on:click={() => toggleLike()}>
             <Icon class="text-2xl {likedColor}" icon="material-symbols:star"/>
-            <span>472</span>
+            <span>{serverData.material.publication.likes}</span>
         </button>
         <button class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg">
             <Icon class="xl:text-2xl" icon="material-symbols:download"/>
@@ -213,7 +213,6 @@
             </div>
         </div>
     </form>
-
 </div>
 
 {#each comments as comment (comment.id)}

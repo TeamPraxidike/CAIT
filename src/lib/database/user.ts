@@ -24,7 +24,7 @@ export async function createUser(
 			username: username,
 			email: email,
 			profilePic: profilePic,
-			isAdmin: false
+			isAdmin: false,
 		},
 	});
 }
@@ -74,7 +74,6 @@ async function generateUsername(firstName: string, lastName: string) {
  * @param id
  */
 export async function getUserById(id: number) {
-	// console.log('User:', user);
 	return prisma.user.findUnique({
 		where: { id },
 		include: {
@@ -131,14 +130,14 @@ export async function editUser(user: userEditData) {
  */
 export async function likePublication(userId: number, publicationId: number) {
 	const liked = await getLikedPublications(userId);
-	if (liked === null) throw Error("Liked publications were not found");
-	if(liked.liked.map(x => x.id).includes(publicationId)) {
+	if (liked === null) throw Error('Liked publications were not found');
+	if (liked.liked.map((x) => x.id).includes(publicationId)) {
 		await unlike(userId, publicationId);
-		return "Publication unliked successfully";
+		return 'Publication unliked successfully';
 		// return liked.liked
 	} else {
 		await like(userId, publicationId);
-		return "Publication liked successfully"
+		return 'Publication liked successfully';
 	}
 }
 
@@ -153,25 +152,25 @@ async function like(userId: number, publicationId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
-				id: userId
+				id: userId,
 			},
 			data: {
 				liked: {
 					connect: {
-						id: publicationId
-					}
-				}
-			}
+						id: publicationId,
+					},
+				},
+			},
 		});
 		await prismaTransaction.publication.update({
 			where: {
-				id: publicationId
+				id: publicationId,
 			},
 			data: {
 				likes: {
-					increment: 1
-				}
-			}
+					increment: 1,
+				},
+			},
 		});
 	});
 }
@@ -187,25 +186,25 @@ async function unlike(userId: number, publicationId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
-				id: userId
+				id: userId,
 			},
 			data: {
 				liked: {
 					disconnect: {
-						id: publicationId
-					}
-				}
-			}
+						id: publicationId,
+					},
+				},
+			},
 		});
 		await prismaTransaction.publication.update({
 			where: {
-				id: publicationId
+				id: publicationId,
 			},
 			data: {
 				likes: {
-					decrement: 1
-				}
-			}
+					decrement: 1,
+				},
+			},
 		});
 	});
 }
@@ -217,10 +216,10 @@ async function unlike(userId: number, publicationId: number) {
 export async function getLikedPublications(userId: number) {
 	return prisma.user.findUnique({
 		where: {
-			id: userId
+			id: userId,
 		},
 		select: {
-			liked: true
-		}
+			liked: true,
+		},
 	});
 }
