@@ -95,7 +95,7 @@
 		<Step>
 			<svelte:fragment slot="header">Upload files</svelte:fragment>
 			<FileDropzone multiple name="file" bind:files={files} />
-			<FileTable download={false} {files} />
+			<FileTable {files} />
 		</Step>
 		<Step>
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
@@ -173,7 +173,7 @@
 				<p class="text-lg">Time Estimate: {estimate}</p>
 				<p class="text-lg">Copyright: {copyright}</p>
 			</div>
-			<FileTable download={false} {files} />
+			<FileTable {files} />
 		</Step>
 	</Stepper>
 </form>

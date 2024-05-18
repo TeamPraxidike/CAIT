@@ -44,7 +44,7 @@ export const actions = {
 		const data = await request.formData();
 
 		const fileList: FileList = data.getAll('file') as unknown as FileList;
-		console.log(fileList);
+
 		if (!fileList) return { status: 400, message: 'No files provided' };
 
 		const add = await filesToAddOperation(fileList);

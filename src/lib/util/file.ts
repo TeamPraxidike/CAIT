@@ -1,3 +1,71 @@
+import { type File as PrismaFile } from '@prisma/client';
+
+export function createFileList(
+	fetchedFiles: {
+		fileId: string;
+		data: string;
+	}[],
+	prismaFiles: PrismaFile[],
+): FileList {
+	const files = fetchedArrayToFileArray(fetchedFiles, prismaFiles);
+
+	const fileProperties = files.reduce(
+		(acc, _, index) => {
+			acc[index] = {
+				get() {
+					return files[index] || null;
+				},
+			};
+			return acc;
+		},
+		{} as { [key: number]: { get: () => File | null } },
+	);
+
+	return Object.create(
+		{
+			length: files.length,
+		},
+		fileProperties,
+	);
+}
+
+export function fetchedArrayToFileArray(
+	fetchedFiles: {
+		fileId: string;
+		data: string;
+	}[],
+	prismaFiles: PrismaFile[],
+): File[] {
+	return fetchedFiles.map((fetchedFile) => {
+		const name =
+			prismaFiles.find((file) => {
+				return file.path === fetchedFile.fileId; // Add return statement here
+			})?.title || 'Untitled';
+		const type =
+			prismaFiles.find((file) => {
+				return file.path === fetchedFile.fileId; // Add return statement here
+			})?.type || 'Untitled';
+
+		return base64ToFile(fetchedFile.data, name, type);
+	});
+}
+
+export function base64ToFile(
+	base64String: string,
+	filename: string,
+	type: string,
+): File {
+	const bstr = atob(base64String);
+	let n = bstr.length;
+	const u8arr = new Uint8Array(n);
+
+	while (n--) {
+		u8arr[n] = bstr.charCodeAt(n);
+	}
+
+	return new File([u8arr], filename, { type });
+}
+
 export const IconMap: Map<string, string> = new Map([
 	['application/pdf', 'vscode-icons:file-type-pdf2'],
 	['application/msword', 'vscode-icons:file-type-word'],

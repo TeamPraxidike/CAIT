@@ -6,7 +6,7 @@
 
 	export let files: FileList;
 
-	export let download: boolean;
+	export let operation: 'download' | 'view' | 'edit' = 'view';
 	const ms = getModalStore();
 
 
@@ -30,10 +30,15 @@
 						  class="text-xl text-surface-500" />
 					<button type="button"
 							class="hover:text-surface-700 underline cursor-pointer text-surface-500">{file.name}</button>
-					{#if download}
-						<a type="button" href={URL.createObjectURL(file)} download="{file.name}" class="ml-auto">
+					{#if operation === 'download'}
+						<a type="button" href={URL.createObjectURL(file)} download="{file.name}" class="ml-auto" on:click|stopPropagation>
 							<Icon class="xl:text-2xl" icon="material-symbols:download" />
 						</a>
+					{:else if operation === 'edit'}
+						<div class="ml-auto flex gap-2 items-center">
+							<Icon class="xl:text-2xl" icon="mdi:pencil" />
+							<Icon class="xl:text-2xl" icon="mdi:delete" />
+						</div>
 					{/if}
 				</button>
 			{/each}
