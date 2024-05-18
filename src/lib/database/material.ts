@@ -10,7 +10,11 @@ export async function getMaterialByPublicationId(publicationId: number) {
 	return prisma.material.findUnique({
 		where: { publicationId: publicationId },
 		include: {
-			publication: true,
+			publication: {
+				include: {
+					tags: true,
+				},
+			},
 			files: true,
 		},
 	});
@@ -35,7 +39,9 @@ export async function getAllMaterials(
 	}
 
 	if (tags.length > 0) {
-		where.AND.push({ tags: { some: { content: { in: tags } } } });
+		where.AND.push({
+			publication: { tags: { some: { content: { in: tags } } } },
+		});
 	}
 
 	if (type.length > 0) {
@@ -69,16 +75,16 @@ export async function deleteMaterialByPublicationId(publicationId: number) {
  */
 export async function createMaterialPublication(
 	userId: number,
-	metaData:{
-		title: string,
-		description: string,
-		difficulty: Difficulty,
-		learningObjectives: string[],
-		prerequisites: string[],
-		coverPic: string,
-		copyright: boolean,
-		timeEstimate: number,
-		theoryPractice: number
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		coverPic: string;
+		copyright: boolean;
+		timeEstimate: number;
+		theoryPractice: number;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
@@ -115,15 +121,15 @@ export async function createMaterialPublication(
 export async function updateMaterialByPublicationId(
 	publicationId: number,
 	metaData: {
-		title: string,
-		description: string,
-		difficulty: Difficulty,
-		learningObjectives: string[],
-		prerequisites: string[],
-		coverPic: string,
-		copyright: boolean,
-		timeEstimate: number,
-		theoryPractice: number
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		coverPic: string;
+		copyright: boolean;
+		timeEstimate: number;
+		theoryPractice: number;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
