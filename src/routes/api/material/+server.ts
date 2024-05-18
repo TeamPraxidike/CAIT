@@ -60,6 +60,8 @@ export async function POST({ request }) {
 	// return 401 if user not authenticated
 
 	const body: MaterialForm = await request.json();
+	const tags = body.metaData.tags;
+	const maintainers = body.metaData.maintainers;
 	const metaData = body.metaData;
 	const userId = body.userId;
 	const fileInfo: FileDiffActions = body.fileDiff;
@@ -82,7 +84,12 @@ export async function POST({ request }) {
 					);
 				}
 
-				//await handleConnections(request, material.publicationId, prismaTransaction);
+				await handleConnections(
+					tags,
+					maintainers,
+					material.publicationId,
+					prismaTransaction,
+				);
 
 				// add files
 				for (const file of fileInfo.add) {
@@ -111,34 +118,3 @@ export async function POST({ request }) {
 		});
 	}
 }
-
-// /**
-//  * Create a new material publication. Adds the files to the database.
-//  * @param request
-//  */
-// export async function POST({ request }) {
-// 	const body = await request.json();
-//
-// 	// Authentication step
-// 	// return 401 if user not authenticated
-//
-// 	try {
-// 		// prisma will automatically complain if the user does not exist so no need to check
-// 		const material = await createMaterialPublication({
-// 			userId: body.userId,
-// 			title: body.title,
-// 			description: body.description,
-// 			copyright: body.copyright,
-// 			difficulty: body.difficulty,
-// 			timeEstimate: body.timeEstimate,
-// 			theoryPractice: body.theoryPractice,
-// 			paths: body.paths,
-// 			titles: body.titles,
-// 		});
-// 		return new Response(JSON.stringify({ material }), { status: 200 });
-// 	} catch (error) {
-// 		return new Response(JSON.stringify({ error: `Server Error ${error}` }), {
-// 			status: 500,
-// 		});
-// 	}
-// }

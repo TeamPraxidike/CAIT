@@ -7,22 +7,22 @@ import { prisma } from '$lib/database/prisma';
 
 /**
  * Main method that handles linking/unlinking of tags and maintainers to publications
- * @param request
+ * @param tags
+ * @param maintainers
  * @param publicationId
  * @param prismaTransaction
  */
 export async function handleConnections(
-	request: Request,
+	tags: string[],
+	maintainers: number[],
 	publicationId: number,
 	prismaTransaction: Prisma.TransactionClient = prisma,
 ) {
-	const body = await request.json();
-
-	if (body.maintainerConnect.length > 0) {
-		await connectMaintainers(publicationId, body.maintainerConnect, prismaTransaction,);
+	if (maintainers.length > 0) {
+		await connectMaintainers(publicationId, maintainers, prismaTransaction);
 	}
-	if (body.tagConnect.length > 0) {
-		await connectTags(publicationId, body.tagConnect, prismaTransaction);
+	if (tags.length > 0) {
+		await connectTags(publicationId, tags, prismaTransaction);
 	}
 }
 
@@ -157,7 +157,9 @@ export async function updatePublicationConnectTags(
 		where: { id: publicationId },
 		data: {
 			tags: {
-				connect: tagConnect.map((content:string) => ({ content: content.toLowerCase() })),
+				connect: tagConnect.map((content: string) => ({
+					content: content.toLowerCase(),
+				})),
 			},
 		},
 	});

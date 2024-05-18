@@ -9,6 +9,7 @@
 	import type { Difficulty } from '@prisma/client';
 
 	let tags: string[] = [];
+	let maintainers: string[] = [];
 	let files: FileList;
 
 	let title: string = '';
@@ -21,6 +22,7 @@
 	let LOs: string[] = [];
 	let loInput: HTMLInputElement;
 	let tagInput: HTMLInputElement;
+	let maintainersInput: HTMLInputElement;
 	$:uid = $authStore.user?.id || 0;
 
 	// eslint-disable-next-line svelte/valid-compile
@@ -54,8 +56,9 @@
 		  formData.append('difficulty', difficulty);
 		  formData.append('estimate', estimate);
 		  formData.append('copyright', copyright);
-		  formData.append('tags', tags.join(','));
-		  formData.append('learning_objectives', LOs.join(','));
+		  formData.append('tags', tags.join(';'));
+		  formData.append('maintainers', uid.toString());
+		  formData.append('learning_objectives', LOs.join(';'));
 	  }}>
 	<Stepper buttonCompleteType="submit">
 		<Step>
@@ -81,7 +84,7 @@
 					<input type="text" name="learning_objective_input" id="learning_objective_input" bind:this={loInput}
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
 					<button type="button" name="add_lo"
-							on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""}}
+							on:click={() => { LOs.push(loInput.value); loInput.value = ""}}
 							class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
 					</button>
 				</div>
@@ -96,14 +99,28 @@
 					<input type="text" name="tags_input" id="tags_input" bind:this={tagInput}
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
 					<button type="button" name="add_tag"
-							on:click={() => { tags = [...tags, tagInput.value]; tagInput.value = ""}}
+							on:click={() => { tags.push(tagInput.value); tagInput.value = ""}}
 							class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
 					</button>
 				</div>
-
 				<div class="flex flex-wrap gap-2">
 					{#each tags as tag}
 						<Tag tagText={tag} removable={false} />
+					{/each}
+				</div>
+
+				<label for="maintainers_input">Maintainers:</label>
+				<div class="flex gap-2">
+					<input type="text" name="maintainers_input" id="maintainers_input" bind:this={maintainersInput}
+						   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
+					<button type="button" name="add_tag"
+							on:click={() => { maintainers.push(maintainersInput.value); maintainersInput.value = ""}}
+							class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
+					</button>
+				</div>
+				<div class="flex flex-wrap gap-2">
+					{#each maintainers as maintainer}
+						<Tag tagText={maintainer} removable={false} />
 					{/each}
 				</div>
 

@@ -45,14 +45,21 @@ export const actions = {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',
 				difficulty: 'easy',
-				learningObjectives: [
-					data.get('learningObjectives')?.toString() || '',
-				],
+				learningObjectives: data
+					.get('learningObjectives')
+					?.toString()
+					.split(';') || [''],
 				prerequisites: [data.get('prerequisites')?.toString() || ''],
 				coverPic: data.get('coverPic')?.toString() || '',
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: 34,
+				tags: data.get('tags')?.toString().split(';') || [''],
+				maintainers: data
+					.get('maintainers')
+					?.toString()
+					.split(';')
+					.map(Number) || [Number(data.get('userId')?.toString())],
 			},
 			fileDiff: {
 				add: add,
