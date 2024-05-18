@@ -36,6 +36,14 @@ export async function addFile(
 	}
 }
 
+/**
+ * UNUSED
+ * @ignore DO NOT USE NOW (missing type field)
+ * @param path
+ * @param title
+ * @param info
+ * @param prismaContext
+ */
 export async function editFile(
 	path: string,
 	title: string,

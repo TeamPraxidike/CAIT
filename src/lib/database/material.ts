@@ -64,43 +64,37 @@ export async function deleteMaterialByPublicationId(publicationId: number) {
 /**
  * [POST] Returns a created publication of type Material
  * @param userId
- * @param title
- * @param description
- * @param difficulty
- * @param learningObjectives
- * @param prerequisites
- * @param coverPic
- * @param copyright
- * @param timeEstimate
- * @param theoryPractice
+ * @param metaData
  * @param prismaContext
  */
 export async function createMaterialPublication(
 	userId: number,
-	title: string,
-	description: string,
-	difficulty: Difficulty,
-	learningObjectives: string[],
-	prerequisites: string[],
-	coverPic: string,
-	copyright: boolean,
-	timeEstimate: number,
-	theoryPractice: number,
+	metaData:{
+		title: string,
+		description: string,
+		difficulty: Difficulty,
+		learningObjectives: string[],
+		prerequisites: string[],
+		coverPic: string,
+		copyright: boolean,
+		timeEstimate: number,
+		theoryPractice: number
+	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.material.create({
 		data: {
-			coverPic: coverPic,
-			copyright: copyright,
-			timeEstimate: timeEstimate,
-			theoryPractice: theoryPractice,
+			coverPic: metaData.coverPic,
+			copyright: metaData.copyright,
+			timeEstimate: metaData.timeEstimate,
+			theoryPractice: metaData.theoryPractice,
 			publication: {
 				create: {
-					title: title,
-					description: description,
-					difficulty: difficulty,
-					learningObjectives: learningObjectives,
-					prerequisites: prerequisites,
+					title: metaData.title,
+					description: metaData.description,
+					difficulty: metaData.difficulty,
+					learningObjectives: metaData.learningObjectives,
+					prerequisites: metaData.prerequisites,
 					type: PublicationType.Material,
 					publisherId: userId,
 				},
@@ -115,48 +109,42 @@ export async function createMaterialPublication(
 /**
  * [PUT] Returns an updated publication of type Material with the given id.
  * @param publicationId
- * @param title
- * @param description
- * @param difficulty
- * @param learningObjectives
- * @param prerequisites
- * @param coverPic
- * @param copyright
- * @param timeEstimate
- * @param theoryPractice
+ * @param metaData
  * @param prismaContext
  */
 export async function updateMaterialByPublicationId(
 	publicationId: number,
-	title: string,
-	description: string,
-	difficulty: Difficulty,
-	learningObjectives: string[],
-	prerequisites: string[],
-	coverPic: string,
-	copyright: boolean,
-	timeEstimate: number,
-	theoryPractice: number,
+	metaData: {
+		title: string,
+		description: string,
+		difficulty: Difficulty,
+		learningObjectives: string[],
+		prerequisites: string[],
+		coverPic: string,
+		copyright: boolean,
+		timeEstimate: number,
+		theoryPractice: number
+	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.material.update({
 		where: { publicationId: publicationId },
 		data: {
-			coverPic: coverPic,
-			copyright: copyright,
-			timeEstimate: timeEstimate,
-			theoryPractice: theoryPractice,
+			coverPic: metaData.coverPic,
+			copyright: metaData.copyright,
+			timeEstimate: metaData.timeEstimate,
+			theoryPractice: metaData.theoryPractice,
 			publication: {
 				update: {
 					where: {
 						id: publicationId,
 					},
 					data: {
-						title: title,
-						description: description,
-						difficulty: difficulty,
-						learningObjectives: learningObjectives,
-						prerequisites: prerequisites,
+						title: metaData.title,
+						description: metaData.description,
+						difficulty: metaData.difficulty,
+						learningObjectives: metaData.learningObjectives,
+						prerequisites: metaData.prerequisites,
 					},
 				},
 			},

@@ -59,16 +59,18 @@ const fileSystem = new LocalFileSystem();
  * It is used in the `MaterialForm.svelte` component and on the server side on the POST request to `/api/materials`.
  */
 type MaterialForm = {
-	userId: number;
-	title: string;
-	description: string;
-	difficulty: Difficulty;
-	learningObjectives: string[];
-	prerequisites: string[];
-	coverPic: string;
-	copyright: boolean;
-	timeEstimate: number;
-	theoryPractice: 34;
+	userId: number
+	metaData:{
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		coverPic: string;
+		copyright: boolean;
+		timeEstimate: number;
+		theoryPractice: number;
+	}
 	fileDiff: FileDiffActions;
 };
 

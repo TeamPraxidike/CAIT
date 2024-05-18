@@ -19,11 +19,7 @@ export async function handleConnections(
 	const body = await request.json();
 
 	if (body.maintainerConnect.length > 0) {
-		await connectMaintainers(
-			publicationId,
-			body.maintainerConnect,
-			prismaTransaction,
-		);
+		await connectMaintainers(publicationId, body.maintainerConnect, prismaTransaction,);
 	}
 	if (body.tagConnect.length > 0) {
 		await connectTags(publicationId, body.tagConnect, prismaTransaction);
@@ -31,13 +27,25 @@ export async function handleConnections(
 }
 
 /**
- * Checks list for correctness
+ * Checks list for correctness in maintainers
  * @param list
  */
-export async function checkList(list: number[]) {
+export async function checkMaintainerList(list: number[]) {
 	for (const num of list) {
 		if (isNaN(num) || num <= 0) {
 			throw new Error(`Invalid number in list ${num}`);
+		}
+	}
+}
+
+/**
+ * Checks list for correctness in tags
+ * @param list
+ */
+export async function checkTagList(list: string[]) {
+	for (const str of list) {
+		if (str.length === 0) {
+			throw new Error(`Invalid string in list ${str}`);
 		}
 	}
 }
@@ -55,7 +63,7 @@ export async function connectMaintainers(
 ): Promise<void> {
 	try {
 		// ids of users to connect as maintainers
-		await checkList(maintainerConnect);
+		await checkMaintainerList(maintainerConnect);
 		await updatePublicationConnectMaintainers(
 			publicationId,
 			maintainerConnect,
@@ -68,12 +76,12 @@ export async function connectMaintainers(
 
 export async function connectTags(
 	publicationId: number,
-	tagConnect: number[],
+	tagConnect: string[],
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<void> {
 	try {
 		// ids of tags to connect
-		await checkList(tagConnect);
+		await checkTagList(tagConnect);
 		await updatePublicationConnectTags(
 			publicationId,
 			tagConnect,
@@ -126,12 +134,12 @@ export async function updatePublicationConnectMaintainers(
  * @note this will first wipe all connections and then establish new ones
  *
  * @param publicationId - id of publication
- * @param tagConnect - list of tag ids to connect
+ * @param tagConnect - list of tag contents to connect
  * @param prismaContext - prisma transaction client
  */
 export async function updatePublicationConnectTags(
 	publicationId: number,
-	tagConnect: number[],
+	tagConnect: string[],
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// wipe all connections
@@ -149,7 +157,7 @@ export async function updatePublicationConnectTags(
 		where: { id: publicationId },
 		data: {
 			tags: {
-				connect: tagConnect.map((id) => ({ id })),
+				connect: tagConnect.map((content:string) => ({ content: content.toLowerCase() })),
 			},
 		},
 	});

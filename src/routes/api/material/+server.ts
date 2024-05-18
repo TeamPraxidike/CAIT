@@ -68,24 +68,19 @@ export const GET: RequestHandler = async ({ url }) => {
 export async function POST({ request }) {
 	// Authentication step
 	// return 401 if user not authenticated
+
+	const body:MaterialForm = await request.json();
+	const metaData = body.metaData;
+	const userId = body.userId;
+	const fileInfo: FileDiffActions = body.fileDiff;
+
 	try {
 		const createdMaterial = await prisma.$transaction(
 			async (prismaTransaction) => {
-				const body: MaterialForm = await request.json();
-				const fileInfo: FileDiffActions = body.fileDiff;
-
 				const material = await createMaterialPublication(
-					body.userId,
-					body.title,
-					body.description,
-					body.difficulty,
-					body.learningObjectives,
-					body.prerequisites,
-					body.coverPic,
-					body.copyright,
-					body.timeEstimate,
-					body.theoryPractice,
-					prismaTransaction,
+					userId,
+					metaData,
+					prismaTransaction
 				);
 
 				if (!material) {
@@ -97,12 +92,11 @@ export async function POST({ request }) {
 					);
 				}
 
-				// await handleConnections(request, material.publicationId, prismaTransaction);
+				//await handleConnections(request, material.publicationId, prismaTransaction);
 
 				// add files
 				for (const file of fileInfo.add) {
 					const buffer: Buffer = Buffer.from(file.info, 'base64');
-					// const info: NodeBlob = new NodeBlob([buffer]);
 
 					await addFile(
 						file.title,
