@@ -4,7 +4,7 @@
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
 	import 'highlight.js/styles/github-dark.css';
-	import { initializeStores, Modal, storeHighlightJs } from '@skeletonlabs/skeleton';
+	import { initializeStores, Modal, storeHighlightJs, Toast } from '@skeletonlabs/skeleton';
 
 	initializeStores();
 
@@ -39,6 +39,7 @@
 
 
 <Modal />
+<Toast />
 
 <svelte:head>
 	<meta charset="utf-8">

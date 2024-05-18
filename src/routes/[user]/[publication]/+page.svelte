@@ -1,15 +1,16 @@
 <script lang="ts">
     import type {LayoutServerData} from './$types';
-    import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment} from '$lib';
+    import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore } from '$lib';
     import {onMount} from "svelte";
     import Icon from "@iconify/svelte";
     import {enhance} from "$app/forms"
-
-    /**
-     * Preface: load the data from the server
-     */
-    export let data: LayoutServerData;
     import type { PublicationViewLoad } from './+layout.server';
+    import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
+    import { goto } from '$app/navigation';
+
+    const toastStore = getToastStore();
+    const modalStore = getModalStore();
+    export let data: LayoutServerData;
     let serverData:PublicationViewLoad = data.loadedPublication;
 
     function createFileList(files: File[]): FileList {
@@ -146,12 +147,41 @@
         created = getDateDifference(serverData.material.publication.createdAt, new Date())
     });
 
+    async function deletePublication(){
+        const url = '/api/material/' + serverData.material.publicationId;
+        console.log(url);
+        try {
+            await fetch(url, {
+                method: 'DELETE',
+            }).then(() => {
+                toastStore.trigger({
+                    message: 'Publication deleted successfully',
+                    background: 'bg-success-200'
+                });
+                goto('/browse')
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function promptForDeletion() {
+        modalStore.trigger({
+            type: 'confirm',
+            title: 'Delete Publication',
+            body: 'Are you sure you want to delete this publication?',
+            response: (r: boolean) => {
+                if (r) deletePublication();
+            },
+        });
+    }
 </script>
 
 <Meta title={serverData.material.publication.title} description="CAIT" type="site"/>
 
-<div class="col-span-full flex flex-col items-start my-20">
+<div class="col-span-full flex flex-col items-start mt-20">
     <h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
+    <p>{serverData.material.publication.publisher.firstName}</p>
     <div class="flex gap-2">
         <p class="text-sm text-surface-500">{created}</p>
         <Icon icon="mdi:presentation" class="text-xl text-surface-500"/>
@@ -180,9 +210,15 @@
             <Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark"/>
         </button>
     </div>
-    <div class="min-h-96 w-full flex flex-col-reverse lg:grid gap-8 grid-cols-2 mt-4">
+    <div class="min-h-96 w-full">
         <FileTable download={true} {files}/>
     </div>
+    {#if serverData.material.publication.publisherId === $authStore.user?.id}
+        <div class="flex gap-2 mt-4">
+            <button class="btn rounded-lg variant-filled-primary">Edit</button>
+            <button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">Delete</button>
+        </div>
+    {/if}
 </div>
 
 <div class="col-span-full flex flex-col mb-1 gap-1">
