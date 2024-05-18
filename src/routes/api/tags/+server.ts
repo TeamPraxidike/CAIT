@@ -19,9 +19,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		const addTagTransaction = await prisma.$transaction(
 			async (prismaTransaction) => {
 				const body = await request.json();
-				const tags = await getTagByContent(body.content);
+				const tagDB = await getTagByContent(body.content);
 
-				if (!(tags.length === 0)) {
+				if (tagDB) {
 					return new Response('Tag already exists', { status: 403 });
 				}
 
@@ -46,6 +46,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
+			//		body: error?.message || ""
 		});
 	}
 };

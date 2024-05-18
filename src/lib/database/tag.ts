@@ -19,7 +19,7 @@ export async function addTag(
 }
 
 export async function getTagByContent(content: string) {
-	return prisma.tag.findMany({
+	return prisma.tag.findUnique({
 		where: { content: content.toLowerCase() },
 	});
 }
