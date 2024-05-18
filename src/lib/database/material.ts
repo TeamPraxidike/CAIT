@@ -1,18 +1,28 @@
-import { prisma } from '$lib/database';
-import { Difficulty, PublicationType } from '@prisma/client';
+import { deleteFile, prisma } from '$lib/database';
+import {
+	Difficulty,
+	type Material,
+	PublicationType,
+	type File as PrismaFile,
+} from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
 
 /**
  * [GET] Returns a publication of type Material with the given id.
  * @param publicationId - id of publication linked to material
+ * @param prismaContext
  */
-export async function getMaterialByPublicationId(publicationId: number) {
-	return prisma.material.findUnique({
+export async function getMaterialByPublicationId(
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	return prismaContext.material.findUnique({
 		where: { publicationId: publicationId },
 		include: {
 			publication: {
 				include: {
 					tags: true,
+					publisher: true,
 				},
 			},
 			files: true,
@@ -61,8 +71,16 @@ export async function getAllMaterials(
 	});
 }
 
-export async function deleteMaterialByPublicationId(publicationId: number) {
-	return prisma.material.delete({
+export async function deleteMaterialByPublicationId(
+	publicationId: number,
+	material: Material & { files: PrismaFile[] },
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	for (const file of material!.files) {
+		await deleteFile(file.path);
+	}
+
+	return prismaContext.material.delete({
 		where: { publicationId: publicationId },
 	});
 }

@@ -80,6 +80,8 @@ export async function PUT({ request, params }) {
 	const metaData = material.metaData;
 	// const userId = material.userId;
 	const fileInfo: FileDiffActions = material.fileDiff;
+	const tags = metaData.tags;
+	const maintainers = metaData.maintainers;
 
 	const publicationId = parseInt(params.publicationId);
 
@@ -95,11 +97,12 @@ export async function PUT({ request, params }) {
 	try {
 		const updatedMaterial = await prisma.$transaction(
 			async (prismaTransaction) => {
-				// await handleConnections(
-				// 	request,
-				// 	publicationId,
-				// 	prismaTransaction,
-				// );
+				await handleConnections(
+					tags,
+					maintainers,
+					publicationId,
+					prismaTransaction,
+				);
 
 				// add files
 				for (const file of fileInfo.add) {
@@ -171,17 +174,26 @@ export async function DELETE({ params }) {
 		);
 	}
 	try {
-		const material = await getMaterialByPublicationId(id);
-		if (!material) {
-			return new Response(
-				JSON.stringify({ error: 'Material Not Found' }),
-				{
-					status: 404,
-				},
+		await prisma.$transaction(async (prismaTransaction) => {
+			const material = await getMaterialByPublicationId(
+				id,
+				prismaTransaction,
 			);
-		}
-		await deleteMaterialByPublicationId(id);
-		return new Response(JSON.stringify(material), { status: 200 });
+			if (!material) {
+				return new Response(
+					JSON.stringify({ error: 'Material Not Found' }),
+					{
+						status: 404,
+					},
+				);
+			}
+			await deleteMaterialByPublicationId(
+				id,
+				material,
+				prismaTransaction,
+			);
+			return new Response(JSON.stringify(material), { status: 200 });
+		});
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
