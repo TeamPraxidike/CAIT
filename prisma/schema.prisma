@@ -19,6 +19,16 @@ enum Difficulty {
   hard
 }
 
+enum MaterialType {
+  video
+  presentation
+  assignment
+  dataset
+  exam
+  code
+
+}
+
 enum PublicationType {
   Material
   Circuit
@@ -88,6 +98,7 @@ model Material {
   id             Int     @id @default(autoincrement())
   coverPic       String?
   copyright      Boolean
+  encapsulatingType MaterialType @default(presentation)
   timeEstimate   Int?
   theoryPractice Float?
   files          File[]
@@ -99,7 +110,7 @@ model Material {
 model File {
   path       String   @id
   title      String
-  type       String   @default("filetypeguz")
+  type       String
   materialId Int
   material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
 }
@@ -126,8 +137,7 @@ model Node {
 }
 
 model Tag {
-  id          Int           @id @default(autoincrement())
-  content     String
+  content     String @id
   publication Publication[]
 }
 
