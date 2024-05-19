@@ -154,11 +154,43 @@ paths:
         '500':
           description: Server Error
 
+  /user/{userId}/saved:
+    get:
+      tags:
+        - User
+      summary: Return saved publications of a user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user
+
+      responses:
+        '200':
+          description: Successfully saved publication
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Publication'
+        '204':
+          description: Successful request but there are no saved publications
+        '400':
+          description: Bad request
+        '404':
+          description: User/Publication not found
+        '500':
+          description: Server Error
+
   /user/{userId}/saved/{publicationId}:
     post:
       tags:
         - User
-      summary: Save a publication
+      summary: Save or unsave a publication
       parameters:
         - in: path
           name: userId
@@ -181,42 +213,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Bad request
-        '401':
-          description: User cannot save this publication
-        '404':
-          description: User/Publication not found
-        '500':
-          description: Server Error
-    delete:
-      tags:
-        - User
-      summary: Unsave a publication
-      parameters:
-        - in: path
-          name: userId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the user
-        - in: path
-          name: publicationId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the publication (could be material or circuit)
-
-      responses:
-        '200':
-          description: Successfully unsaved publication
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
+                oneOf:
+                  - type: string
+                    example: "Publication saved successfully"
+                  - type: string
+                    example: "Publication unsaved successfully"
         '400':
           description: Bad request
         '401':
