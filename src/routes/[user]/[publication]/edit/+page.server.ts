@@ -1,5 +1,6 @@
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import type { MaterialForm } from '$lib/database';
+import type { Difficulty, Tag } from '@prisma/client';
 
 export const actions = {
 	edit: async ({ request, fetch, params }) => {
@@ -42,7 +43,9 @@ export const actions = {
 			metaData: {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',
-				difficulty: 'easy',
+				difficulty:
+					(data.get('difficulty')?.toString() as Difficulty) ||
+					'easy',
 				learningObjectives: data
 					.get('learningObjectives')
 					?.toString()
@@ -66,9 +69,11 @@ export const actions = {
 			},
 		};
 
-		fetch('/api/material/' + params.publication, {
+		const res = await fetch('/api/material/' + params.publication, {
 			method: 'PUT',
 			body: JSON.stringify(material),
 		});
+
+		return { status: res.status };
 	},
 } satisfies Actions;

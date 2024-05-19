@@ -122,7 +122,7 @@
 
                     {/if}
                     <div class="self-center">
-                        <DiffBar diff={"hard"}></DiffBar>
+                        <DiffBar diff={publication.difficulty}></DiffBar>
                     </div>
                 </div>
             </div>

@@ -72,11 +72,11 @@ export async function PUT({ request, params }) {
 	// Authentication step
 	// return 401 if user not authenticated
 
-	const body: {
-		material: MaterialForm;
+	const body: MaterialForm & {
 		materialId: number;
 	} = await request.json();
-	const material: MaterialForm = body.material;
+	console.log(body);
+	const material: MaterialForm = body;
 	const metaData = material.metaData;
 	// const userId = material.userId;
 	const fileInfo: FileDiffActions = material.fileDiff;

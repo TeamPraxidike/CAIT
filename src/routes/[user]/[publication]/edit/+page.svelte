@@ -1,11 +1,12 @@
 <script lang="ts">
-	import type { LayoutServerData } from '../$types';
-	import type { Publication, Tag as PrismaTag } from '@prisma/client';
-	import { DifficultySelection, FileTable, lorem, Meta, Render, Tag } from '$lib';
-	import { FileDropzone } from '@skeletonlabs/skeleton';
+	import type { LayoutServerData, ActionData } from '../$types';
+	import type { Difficulty, Publication, Tag as PrismaTag } from '@prisma/client';
+	import { authStore, DifficultySelection, FileTable, Meta, Tag } from '$lib';
+	import { FileDropzone, getToastStore } from '@skeletonlabs/skeleton';
 	import { createFileList } from '$lib/util/file';
 	import type { PublicationViewLoad } from '../+layout.server';
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 
 	export let data: LayoutServerData;
 	let serverData: PublicationViewLoad = data.loadedPublication;
@@ -16,6 +17,7 @@
 	let oldFiles: FileList = files;
 
 	let LOs: string[] = [];
+	let difficulty: Difficulty = serverData.material.publication.difficulty;
 
 	let loInput: HTMLInputElement;
 	let tagInput: HTMLInputElement;
@@ -32,15 +34,44 @@
 		} else {
 			formData.append(key, file);
 		}
+
+		formData.append('difficulty', difficulty);
+		// formData.append('estimate', estimate);
+		// formData.append('copyright', copyright);
+		formData.append('tags', tags.map(t => t.content).join(';'));
+		// formData.append('maintainers', uid.toString());
+		// formData.append('learning_objectives', LOs.join(';'));
+	}
+
+	export let form: ActionData;
+	const toastStore = getToastStore();
+
+	$: if (form?.status === 200) {
+		toastStore.trigger({
+			message: 'Publication Edited successfully',
+			background: 'bg-success-200'
+		});
+		goto(`/${publication.publisherId}/${publication.id}`);
+	} else if (form?.status === 400) {
+		toastStore.trigger({
+			message: 'Malformed information, please check your inputs',
+			background: 'bg-warning-200'
+		});
+	} else if (form?.status === 500) {
+		toastStore.trigger({
+			message: 'An error occurred, please try again later or contact support',
+			background: 'bg-error-200'
+		});
 	}
 </script>
+
 
 <Meta title={publication.title} description="CAIT" type="site" />
 
 <form action="?/edit" method="POST" enctype="multipart/form-data"
 	  class="col-span-full flex flex-col items-start my-20"
 	  use:enhance={({ formData }) => {
-        Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+        // Array.from(files).forEach(file => appendFile(formData, file, 'file'));
         Array.from(oldFiles).forEach(file => appendFile(formData, file, 'oldFiles'));
 
 		serverData.material.files.forEach(file => {
@@ -48,6 +79,8 @@
 			formData.append('oldFilesPath', file.path);
 			formData.append('oldFilesType', file.type);
 		});
+
+		formData.append('userId', $authStore.user?.id.toString() || '');
     }}>
 
 	<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">Edit a publication</h2>
@@ -60,21 +93,20 @@
 		<div class="flex flex-col w-full gap-8">
 			<div class="flex gap-4 items-center">
 				<label for="title">Title:</label>
-				<input type="text" id="title"
+				<input type="text" id="title" name="title" value={publication.title}
 					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 			</div>
 
 			<div class="flex flex-col gap-2">
 				<label for="description">Description:</label>
-				<textarea id="description"
-						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
-                    {lorem + lorem}
-                </textarea>
+				<textarea id="description" name="description"
+						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400"
+				>{publication.description}</textarea>
 			</div>
 
 			<div class="flex gap-4 items-center">
 				<label for="description">Difficulty:</label>
-				<DifficultySelection difficulty="easy" />
+				<DifficultySelection bind:difficulty={difficulty} />
 			</div>
 
 			<div class="flex gap-2">
@@ -108,18 +140,18 @@
 			<div class="flex gap-2">
 				<div class="w-1/2">
 					<label for="estimate">Time Estimate:</label>
-					<input type="text" id="estimate"
+					<input type="text" id="estimate" name="estimate"
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 				</div>
 				<div class="w-1/2">
 					<label for="copyright">Copyright:</label>
-					<input type="text" id="copyright"
+					<input type="text" id="copyright" name="copyright"
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 				</div>
 			</div>
 			<div class="flex flex-col gap-4">
 				<hr />
-				<FileDropzone multiple name="files" bind:files={files} />
+				<FileDropzone multiple name="file" bind:files={files} />
 				<FileTable operation="edit" {files} />
 			</div>
 			<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50">Edit</button>
