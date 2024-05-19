@@ -1,9 +1,12 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar} from '$lib';
+    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
+    import {page} from '$app/stores';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
+    import type { Material, Publication, User, Tag } from '@prisma/client';
     import type { PageServerData } from './$types';
+    import type { Tag } from '@prisma/client';
 
     export let data:PageServerData;
     let searchWord: string = '';
@@ -27,29 +30,30 @@
     let sortByActive = false
     let sortByText = 'Most Recent'
 
-    let selectedDiff: {id:number, val:string }[] = []
-    let diffOptions: { id: number, val: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, val: x }));
+    let selectedDiff: {id:number, content:string }[] = []
+    let diffOptions: { id: number, content: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, content: x }));
     let diffActive = false
 
     //Variables needed to deal with Tags
-    let selectedTags: {id:number, val:string }[] = []; //keeps track of selected tags
-    let allTags: {id:number, val:string }[] = tags.map( (x : {content: string}) => ({id : 0, val : x.content}));  //array with all the tags MOCK
-    let displayTags: {id:number, val:string }[] = allTags; //
+    let selectedTags: {id:number, content:string }[] = []; //keeps track of selected tags
+    let allTags: {id: number, content:string }[] = data.tags.map((x: Tag) => ({ id: 0, content: x.content }));
+    let displayTags: {id:number, content:string }[] = allTags;
     let tagActive = false
 
 
     //Variables needed to deal with Publishers
-    let selectedPublishers: {id:number, val:string }[] = [];//keeps track of selected tags
-    let allPublisherNames: {id:number, val:string }[] = users.map( (x:any) => ({id : x.id, val:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
-    let displayPublishers: {id:number, val:string }[] = allPublisherNames; //
+    let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
+    let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
+    let displayPublishers: {id:number, content:string }[] = allPublisherNames; //
     let publisherActive = false
 
     //Variables needed to deal with Types
-    let selectedTypes: {id:number, val:string }[] = []; //keeps track of selected tags
-    let allTypes: {id:number, val:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, val : x})); //array with all the tags MOCK
-    let displayTypes: {id:number, val:string }[] = allTypes; //
+    let selectedTypes: {id:number, content:string }[] = []; //keeps track of selected tags
+    let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+    let displayTypes: {id:number, content:string }[] = allTypes; //
     let typeActive = false
 
+    $:console.log(selectedTypes, selectedTags, selectedPublishers, selectedDiff)
 
 
 
@@ -74,7 +78,7 @@
         //Take the selected option
         const target = event.target as HTMLButtonElement
         // change the text of the dropdown button
-        sortByText = target.textContent ?? "Most Recent"
+        sortByText = target.textContent ?? "Sort By"
         //close the dropdown upon selection
         sortByActive = false;
     }
@@ -85,19 +89,19 @@
      *
      */
     const removeTag = (event: CustomEvent) => {
-        selectedTags = selectedTags.filter(item => item.val !== event.detail.text)
+        selectedTags = selectedTags.filter(item => item.content !== event.detail.text)
     }
 
-    const removePublisher = (name: {id:number, val:string }) => {
-        selectedPublishers = selectedPublishers.filter(publisher => publisher.val !== name.val);
+    const removePublisher = (name: {id:number, content:string }) => {
+        selectedPublishers = selectedPublishers.filter(publisher => publisher.content !== name.content);
     };
 
-    const removeDiff = (name:{id:number, val:string }) => {
-        selectedDiff = selectedDiff.filter(diff => diff.val !== name.val);
+    const removeDiff = (name:{id:number, content:string }) => {
+        selectedDiff = selectedDiff.filter(diff => diff.content !== name.content);
     };
 
-    const removeType = (name: {id:number, val:string }) => {
-        selectedTypes = selectedTypes.filter(diff => diff.val !== name.val);
+    const removeType = (name: {id:number, content:string }) => {
+        selectedTypes = selectedTypes.filter(diff => diff.content !== name.content);
     };
 
     /**
@@ -111,15 +115,13 @@
         typeActive = false;
     };
 
-
     const sendFiltersToAPI = async () => {
-        console.log("Here")
         // Construct the URL with query parameters based on selected filters
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
-            difficulty: selectedDiff.map(x => x.val).join(','),
-            types: selectedTypes.map(x => x.val).join(','),
-            tags: selectedTags.map(x => x.val).join(',')
+            difficulty: selectedDiff.map(x => x.content).join(','),
+            types: selectedTypes.map(x => x.content).join(','),
+            tags: selectedTags.map(x => x.content).join(',')
         });
         const url = `/api/material?${queryParams.toString()}`;
 
@@ -134,13 +136,12 @@
           .then(data => {
               // Handle the response data from the API
               materials = data
+              console.log(materials)
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);
           });
     };
-
-    $: sendFiltersToAPI()
 
 </script>
 <div class="flex justify-between col-span-full mt-32">
@@ -162,14 +163,13 @@
     </div>
 </div>
 
-<div class="col-span-full flex justify-between">
-    <div class="w-1/2 flex justify-between">
+<div class="col-span-full lg:col-span-8 flex justify-between gap-8 mt-32">
+    <div class="flex gap-2">
 
-        <div class = "flex gap-2">
-            <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}/>
-            <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll}/>
-            <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}/>
-            <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
+        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}/>
+        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll}/>
+        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}/>
+        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
 
         </div>
 
@@ -206,7 +206,7 @@
             <p class="text-xs text-surface-600 dark:text-surface-200">Tags:</p>
             {#each selectedTags as tag}
                 <div>
-                    <TagComponent tagText="{tag.val}" width="{0}" removable="{true}" on:Remove={removeTag}/>
+                    <TagComponent tagText="{tag.content}" width="{0}" removable="{true}" on:Remove={removeTag}/>
                 </div>
             {/each}
         </div>
@@ -218,7 +218,7 @@
             {#each selectedPublishers as sp}
                 <div class="flex gap-1 items-center">
                     <Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile"/>
-                    <p class="text-xs">{sp.val}</p>
+                    <p class="text-xs">{sp.content}</p>
                     <button class="h-full" on:click={() => removePublisher(sp)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
@@ -233,7 +233,7 @@
             <p class="text-xs text-surface-600 dark:text-surface-200">Difficulty:</p>
             {#each selectedDiff as sd}
                 <div class="flex gap-1 items-center">
-                    <p class="text-xs">{sd.val}</p>
+                    <p class="text-xs">{sd.content}</p>
                     <button class="h-full" on:click={() => removeDiff(sd)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
@@ -247,7 +247,7 @@
         <p class="text-xs text-surface-600 dark:text-surface-200">Type:</p>
         {#each selectedTypes as sd}
             <div class="flex gap-1 items-center">
-                <p class="text-xs">{sd.val}</p>
+                <p class="text-xs">{sd.content}</p>
                 <button class="h-full" on:click={() => removeType(sd)}>
                     <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                 </button>

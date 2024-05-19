@@ -1,8 +1,9 @@
 <script lang="ts">
     import { DiffBar } from '$lib';
     import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+    import type { Difficulty } from '@prisma/client';
 
-    export let difficulty: '' | 'easy' | 'intermediate' | 'advanced';
+    export let difficulty: Difficulty;
 </script>
 
 
@@ -11,10 +12,10 @@
     <RadioItem bind:group={difficulty} name="justify" value={"easy"}>
         <DiffBar diff="easy" />
     </RadioItem>
-    <RadioItem bind:group={difficulty} name="justify" value={"intermediate"}>
+    <RadioItem bind:group={difficulty} name="justify" value={"medium"}>
         <DiffBar diff="medium" />
     </RadioItem>
-    <RadioItem bind:group={difficulty} name="justify" value={"advanced"}>
+    <RadioItem bind:group={difficulty} name="justify" value={"hard"}>
         <DiffBar diff="hard" />
     </RadioItem>
 </RadioGroup>

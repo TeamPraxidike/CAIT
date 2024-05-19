@@ -4,26 +4,27 @@
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
 	import 'highlight.js/styles/github-dark.css';
-	import { storeHighlightJs } from '@skeletonlabs/skeleton';
+	import { initializeStores, Modal, storeHighlightJs, Toast } from '@skeletonlabs/skeleton';
 
-	/* DO NOT DELETE THOSE COMMENTS */
+	initializeStores();
+
 	import xml from 'highlight.js/lib/languages/xml';
 	import css from 'highlight.js/lib/languages/css';
 	import javascript from 'highlight.js/lib/languages/javascript';
 	import typescript from 'highlight.js/lib/languages/typescript';
 	import python from 'highlight.js/lib/languages/python';
 	import rust from 'highlight.js/lib/languages/rust'
+	import scala from 'highlight.js/lib/languages/scala'
 	import plaintext from 'highlight.js/lib/languages/plaintext'
 
-	hljs.registerLanguage('xml', xml); // for HTML
+	hljs.registerLanguage('xml', xml);
 	hljs.registerLanguage('css', css);
 	hljs.registerLanguage('javascript', javascript);
 	hljs.registerLanguage('typescript', typescript);
 	hljs.registerLanguage('python', python);
 	hljs.registerLanguage('rust', rust);
+	hljs.registerLanguage('scala', scala);
 	hljs.registerLanguage('plaintext', plaintext);
-
-
 
 	import { Footer, Grid, Header } from '$lib';
 
@@ -36,6 +37,9 @@
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 </script>
 
+
+<Modal />
+<Toast />
 
 <svelte:head>
 	<meta charset="utf-8">

@@ -39,15 +39,6 @@ describe('Difficulty Components', () => {
 		expect(host.innerHTML).not.toContain('bg-amber-400');
 		expect(host.innerHTML).toContain('bg-error-400');
 	});
-	it('should render difficulty selection component', () => {
-		const instance = new DifficultySelection({
-			target: host,
-			props: { difficulty: '' },
-		});
-		expect(instance).toBeTruthy();
-		expect(host.innerHTML).not.toContain('aria-checked="true"');
-		expect(host.innerHTML).toContain('<!--<DiffBar>-->');
-	});
 	it('should render difficulty selection component and check one of them', () => {
 		const instance = new DifficultySelection({
 			target: host,

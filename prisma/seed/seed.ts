@@ -14,7 +14,6 @@ const main = async () => {
 
 	const names = ['Winston', 'Franklin', 'Boris', 'Otto'];
 	const lastNames = ['Churchill', 'Roosevelt', 'Johnson', 'von Bismarck'];
-
 	const titles = [
 		'ANN',
 		'Convolutional neural networks',
@@ -35,6 +34,9 @@ const main = async () => {
 			},
 		})),
 	);
+
+	await seed.tag((x) => x(20, ({ index }) => ({ content: `tag ${index}` })));
+
 	// seed.projects((x) => x(3, { name: 'Project Name' }));
 	process.exit();
 };
