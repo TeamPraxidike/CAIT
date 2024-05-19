@@ -2,6 +2,8 @@
 	import type { LayoutServerData } from './$types';
 	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore } from '$lib';
 	import { onMount } from 'svelte';
+	import JSZip from 'jszip';
+	import { saveAs } from 'file-saver';
 	import Icon from '@iconify/svelte';
 	import { enhance } from '$app/forms';
 	import type { PublicationViewLoad } from './+layout.server';
@@ -144,6 +146,19 @@
 			}
 		});
 	}
+
+	async function downloadFiles() {
+		const zip = new JSZip();
+
+		for (let i = 0; i < files.length; i++) {
+			const file = files[i];
+			const blob = await file.arrayBuffer();
+			zip.file(file.name, blob);
+		}
+
+		const content = await zip.generateAsync({ type: "blob" });
+		saveAs(content, "files.zip");
+	}
 </script>
 
 <Meta title={serverData.material.publication.title} description="CAIT" type="site" />
@@ -170,7 +185,8 @@
 			<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
 			<span>{serverData.material.publication.likes}</span>
 		</button>
-		<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg">
+		<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+				on:click={downloadFiles}>
 			<Icon class="xl:text-2xl" icon="material-symbols:download" />
 		</button>
 		<button type="button"
