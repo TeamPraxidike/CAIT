@@ -70,34 +70,59 @@ import { Difficulty } from '@prisma/client';
 
 const fileSystem = new LocalFileSystem();
 
-export type MaterialForm = {
+/**
+ * MaterialForm is the type of the form data that is sent to the server when creating a new material.
+ * It is used in the `MaterialForm.svelte` component and on the server side on the POST request to `/api/materials`.
+ */
+type MaterialForm = {
 	userId: number;
-	title: string;
-	description: string;
-	difficulty: Difficulty;
-	learningObjectives: string[];
-	prerequisites: string[];
-	coverPic: string;
-	copyright: boolean;
-	timeEstimate: number;
-	theoryPractice: 34;
-	fileInfo: FileInfo;
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		coverPic: string;
+		copyright: boolean;
+		timeEstimate: number;
+		theoryPractice: number;
+		tags: string[];
+		maintainers: number[];
+	};
+	fileDiff: FileDiffActions;
 };
 
-export type FileInfo = {
+/**
+ * Information about the difference between the files in the current material and the files in the new material.
+ * This type holds arrays for files that are added, deleted, and edited in the new material.
+ *
+ * @note These changes are evaluated on the server in `+page.server.ts` and then sent like this
+ * to the server in the POST request to `/api/materials`
+ * @todo may be much better to use an object with keys `add`, `delete`, and `edit` instead of arrays
+ */
+type FileDiffActions = {
 	add: { title: string; type: string; info: string }[];
 	delete: { path: string }[];
 	edit: { path: string; title: string; info: string }[];
 };
 
-export type FetchedFileItem = {
+/**
+ * Fetched file item with the id and the data in the form of a base64 string.
+ */
+type FetchedFileItem = {
 	fileId: string;
 	data: string;
 };
 
-export type FetchedFileArray = FetchedFileItem[];
+/**
+ * Array of fetched file items.
+ */
+type FetchedFileArray = FetchedFileItem[];
 
-export type NodeInfo = {
+/**
+ * Information about the nodes in the circuit in arrays of operations to add, delete, and edit nodes.
+ */
+type NodeInfo = {
 	add: { circuitId: number; publicationId: number }[];
 	delete: { nodeId: number }[];
 	edit: { nodeId: number; publicationId: number }[];
@@ -107,6 +132,11 @@ export type NodeInfo = {
 export {
 	prisma,
 	fileSystem,
+	type MaterialForm,
+	type FileDiffActions,
+	type FetchedFileItem,
+	type FetchedFileArray,
+	type NodeInfo,
 	addFile,
 	editFile,
 	deleteFile,
@@ -146,7 +176,7 @@ export {
 	updateReply,
 	createReply,
 	likePublication,
-	getLikedPublications
+	getLikedPublications,
 };
 
 export type {
