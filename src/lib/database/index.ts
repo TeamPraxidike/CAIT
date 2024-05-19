@@ -38,6 +38,11 @@ import {
 } from './node';
 
 import {
+	savePublication,
+	getSavedPublications
+} from "$lib/database/save";
+
+import {
 	getUserById,
 	createUser,
 	deleteUser,
@@ -153,6 +158,8 @@ export {
 	editUser,
 	likePublication,
 	getLikedPublications,
+	savePublication,
+	getSavedPublications
 };
 
 export type { userEditData };
