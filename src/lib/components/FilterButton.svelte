@@ -2,7 +2,7 @@
 	import Icon from '@iconify/svelte';
 	import { createEventDispatcher } from 'svelte';
 
-	export let idValue : {id:number, val:string} ;
+	export let idValue : {id:number, content:string} ;
 	export let row:number;
 
 
@@ -15,15 +15,15 @@
 
 
 
-	export let display: {id:number, val:string } [];
+	export let display: {id:number, content:string } [];
 
 
 
-	$: background = (t: {id:number, val:string}) => {
+	$: background = (t: {id:number, content:string}) => {
 		if (label === "Publisher")
 			return selectedIds.includes(t.id) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50';
 		else
-			return selectedVals.includes(t.val) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50';
+			return selectedVals.includes(t.content) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50';
 	} //colors in light blue if the tag is already selected in the dropdown
 
 
@@ -45,10 +45,11 @@
 
 
 <button
+	type="button"
 	class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-600 {roundingMenuItem(row, display.length)} {background(idValue)}"
 	on:click={update}>
 	{#if profilePic}
 		<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />
 	{/if}
-	<span class="w-full h-full">{idValue.val}</span>
+	<span class="w-full h-full">{idValue.content}</span>
 </button>
