@@ -164,18 +164,18 @@
 	<p class="text-surface-700 dark:text-surface-400">{serverData.material.publication.description}</p>
 
 	<div class="flex items-center text-3xl rounded-lg border mt-4">
-		<button
-			class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
-			on:click={() => toggleLike()}>
+		<button type="button"
+				class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
+				on:click={() => toggleLike()}>
 			<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
 			<span>{serverData.material.publication.likes}</span>
 		</button>
-		<button class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg">
+		<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg">
 			<Icon class="xl:text-2xl" icon="material-symbols:download" />
 		</button>
-		<button
-			class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-			on:click={() => toggleSave()}>
+		<button type="button"
+				class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+				on:click={() => toggleSave()}>
 			<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
 		</button>
 	</div>

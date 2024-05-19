@@ -2,6 +2,14 @@ import type { Actions, PageServerLoad } from './$types';
 import type { MaterialForm } from '$lib/database';
 import type { Difficulty, Tag } from '@prisma/client';
 
+export const load: PageServerLoad = async ({ fetch }) => {
+	const tagRes = await fetch('/api/tags');
+
+	const tags: Tag[] = await tagRes.json();
+
+	return { tags };
+};
+
 export const actions = {
 	edit: async ({ request, fetch, params }) => {
 		const data = await request.formData();
