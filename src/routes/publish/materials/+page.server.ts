@@ -4,9 +4,7 @@ import type { Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const tagRes = await fetch('/api/tags');
-
 	const tags: Tag[] = await tagRes.json();
-
 	return { tags };
 };
 

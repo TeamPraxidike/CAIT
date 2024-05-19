@@ -27,6 +27,7 @@ describe('Filter Component', () => {
 					publisherId: 3,
 					reports: 2,
 					type: 'Material',
+					tags: [{ content: 'tag1' }],
 				},
 			},
 		});

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { LayoutServerData, ActionData, PageServerData } from '../$types';
+	import type { LayoutServerData } from '../$types';
+	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Publication, Tag as PrismaTag } from '@prisma/client';
-	import { authStore, DiffBar, DifficultySelection, FileTable, Meta, Tag } from '$lib';
+	import { authStore, FileTable, Meta } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption,
-		FileDropzone,
 		getToastStore,
 		InputChip
 	} from '@skeletonlabs/skeleton';
@@ -13,7 +13,6 @@
 	import type { PublicationViewLoad } from '../+layout.server';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import Icon from '@iconify/svelte';
 
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationViewLoad = data.loadedPublication;
