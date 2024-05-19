@@ -40,7 +40,6 @@ export const actions = {
 	 * @param fetch the fetch function to send requests to the server, *provided by SvelteKit*
 	 */
 	publish: async ({ request, fetch }) => {
-		console.log('PUBLISHING!');
 		const data = await request.formData();
 
 		const fileList: FileList = data.getAll('file') as unknown as FileList;

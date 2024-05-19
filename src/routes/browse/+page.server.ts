@@ -6,11 +6,5 @@ export async function load({ url, fetch }) {
 	const users = await (await fetch(`/api/user`)).json();
 	const tags = await (await fetch(`/api/tags`)).json();
 
-	console.log(tags);
-
 	return { type, publications, users, tags };
 }
-
-export const actions = {
-	search: async ({ request }) => {},
-};

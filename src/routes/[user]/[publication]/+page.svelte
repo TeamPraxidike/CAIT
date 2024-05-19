@@ -119,7 +119,6 @@
 
 	async function deletePublication() {
 		const url = '/api/material/' + serverData.material.publicationId;
-		console.log(url);
 		try {
 			await fetch(url, {
 				method: 'DELETE'

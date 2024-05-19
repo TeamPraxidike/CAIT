@@ -2,7 +2,7 @@
 	import Icon from '@iconify/svelte';
 	import { IconMap } from '$lib/util/file';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { Render } from '$lib';
+	import { Download, Render } from '$lib';
 
 	export let files: FileList;
 
@@ -31,9 +31,9 @@
 					<button type="button"
 							class="hover:text-surface-700 underline cursor-pointer text-surface-500">{file.name}</button>
 					{#if operation === 'download'}
-						<a type="button" href={URL.createObjectURL(file)} download="{file.name}" class="ml-auto" on:click|stopPropagation>
+						<Download file={file} className="ml-auto">
 							<Icon class="xl:text-2xl" icon="material-symbols:download" />
-						</a>
+						</Download>
 					{:else if operation === 'edit'}
 						<div class="ml-auto flex gap-2 items-center">
 							<Icon class="xl:text-2xl" icon="mdi:pencil" />

@@ -20,6 +20,7 @@ import Comment from '$lib/components/Comment.svelte';
 import Filter from '$lib/components/Filter.svelte';
 import Circuit from '$lib/components/circuits/Circuit.svelte';
 import CircuitPureHTML from '$lib/components/circuits/CircuitPureHTML.svelte';
+import Download from '$lib/components/generic/Download.svelte';
 
 import type { AuthStore, AuthStruct } from '$lib/stores/auth';
 import FileTable from '$lib/components/FileTable.svelte';
@@ -35,6 +36,7 @@ const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
 
 export {
+	Download,
 	getDateDifference,
 	Render,
 	FileTable,
