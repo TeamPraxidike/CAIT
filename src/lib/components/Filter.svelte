@@ -76,7 +76,7 @@
 
 <div class="space-y-1 relative">
 	<button
-		class=" text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
+		class="text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
 		on:click={toggle}>
 		<span class="flex-grow text-surface-700 dark:text-surface-300">{label}</span>
 		{#if active}

@@ -7,7 +7,7 @@ import {
 	prisma,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
-import { Difficulty } from '@prisma/client';
+import { Difficulty, MaterialType } from '@prisma/client';
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -25,6 +25,31 @@ function mapToDifficulty(difficulty: string): Difficulty {
 	}
 }
 
+// video
+//   presentation
+//   assignment
+//   dataset
+//   exam
+//   code
+function mapToType(mt: string): MaterialType {
+	switch (mt.toLowerCase()) {
+		case 'video':
+			return MaterialType.video;
+		case 'presentation':
+			return MaterialType.presentation;
+		case 'assignment':
+			return MaterialType.assignment;
+		case 'dataset':
+			return MaterialType.dataset;
+		case 'exam':
+			return MaterialType.exam;
+		case 'code':
+			return MaterialType.code;
+		default:
+			throw new Error(`Invalid material type: ${mt}`);
+	}
+}
+
 /**
  * Get all materials
  */
@@ -33,24 +58,20 @@ export const GET: RequestHandler = async ({ url }) => {
 	// return 401 if user not authenticated
 
 	try {
-		console.log('Here');
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
-		console.log(tags);
+
 		const d = url.searchParams.get('difficulty');
 		const diff = d ? d.split(',').map(mapToDifficulty) : [];
 
-		console.log(diff);
 		const p = url.searchParams.get('publishers');
 		const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
-		console.log(publishers);
+
 		const ty = url.searchParams.get('types');
-		const type = ty ? ty.split(',') : [];
-		console.log(type);
+		const type = ty ? ty.split(',').map(mapToType) : [];
 
 		const materials = await getAllMaterials(tags, publishers, diff, type);
-		console.log('DB return');
-		console.log(materials);
+
 		return new Response(JSON.stringify(materials), { status: 200 });
 	} catch (error) {
 		console.log('There was an Error');

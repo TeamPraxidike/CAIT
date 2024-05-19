@@ -1,6 +1,6 @@
 import { prisma } from '$lib/database';
-import {Difficulty, PublicationType} from "@prisma/client";
-import {Prisma} from "@prisma/client/extension";
+import { Difficulty, type MaterialType, PublicationType } from '@prisma/client';
+import { Prisma } from '@prisma/client/extension';
 
 /**
  * [GET] Returns a publication of type Material with the given id.
@@ -23,7 +23,7 @@ export async function getAllMaterials(
 	tags: string[],
 	publishers: number[],
 	diff: Difficulty[],
-	type: string[],
+	type: MaterialType[],
 ) {
 	const where: any = { AND: [] };
 	if (publishers.length > 0) {
@@ -39,7 +39,7 @@ export async function getAllMaterials(
 	}
 
 	if (type.length > 0) {
-		where.AND.push({ type: { in: type } });
+		where.AND.push({ encapsulatingType: { in: type } });
 	}
 
 	console.log('WhereClause');
@@ -89,7 +89,7 @@ export async function createMaterialPublication(
 	copyright: boolean,
 	timeEstimate: number,
 	theoryPractice: number,
-	prismaContext: Prisma.TransactionClient = prisma
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.material.create({
 		data: {
@@ -105,13 +105,13 @@ export async function createMaterialPublication(
 					learningObjectives: learningObjectives,
 					prerequisites: prerequisites,
 					type: PublicationType.Material,
-					publisherId: userId
-				}
-			}
+					publisherId: userId,
+				},
+			},
 		},
 		include: {
-			publication: true
-		}
+			publication: true,
+		},
 	});
 }
 
@@ -140,7 +140,7 @@ export async function updateMaterialByPublicationId(
 	copyright: boolean,
 	timeEstimate: number,
 	theoryPractice: number,
-	prismaContext: Prisma.TransactionClient = prisma
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.material.update({
 		where: { publicationId: publicationId },
@@ -151,7 +151,7 @@ export async function updateMaterialByPublicationId(
 			theoryPractice: theoryPractice,
 			publication: {
 				update: {
-					where:{
+					where: {
 						id: publicationId,
 					},
 					data: {
@@ -159,14 +159,14 @@ export async function updateMaterialByPublicationId(
 						description: description,
 						difficulty: difficulty,
 						learningObjectives: learningObjectives,
-						prerequisites: prerequisites
-					}
-				}
-			}
+						prerequisites: prerequisites,
+					},
+				},
+			},
 		},
 		include: {
 			publication: true,
 			files: true,
-		}
+		},
 	});
 }

@@ -15,20 +15,26 @@ const main = async () => {
 	const names = ['Winston', 'Franklin', 'Boris', 'Otto'];
 	const lastNames = ['Churchill', 'Roosevelt', 'Johnson', 'von Bismarck'];
 
-	const titles = ['ANN', 'Convolutional neural networks', 'SVM', 'Reinforcment learning']
-
+	const titles = [
+		'ANN',
+		'Convolutional neural networks',
+		'SVM',
+		'Reinforcment learning',
+	];
 
 	// Seed the database with 10 user
-	await seed.material((x) => x(titles.length, ({index}) => ({
-		publication: {
-			title: titles[index]
-		},
-		user: {
-			userId: index,
-			firstName: names[index],
-			lastName: lastNames[index]
-		}
-	})));
+	await seed.material((x) =>
+		x(titles.length, ({ index }) => ({
+			publication: {
+				title: titles[index],
+			},
+			user: {
+				userId: index,
+				firstName: names[index],
+				lastName: lastNames[index],
+			},
+		})),
+	);
 	// seed.projects((x) => x(3, { name: 'Project Name' }));
 	process.exit();
 };

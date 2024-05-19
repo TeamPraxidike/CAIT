@@ -1,17 +1,15 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import { Filter, PublicationCard, SearchBar} from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
-    import {page} from '$app/stores';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
-    import type { Material, Publication, User, Tag } from '@prisma/client';
     import type { PageServerData } from './$types';
 
     export let data:PageServerData;
     let searchWord: string = '';
     let materials = data.publications;
     let users = data.users
-    console.log(users)
+    let tags = data.tags
 
 
 
@@ -27,7 +25,7 @@
     //Variables needed to deal with Sort and Difficulty
     let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
     let sortByActive = false
-    let sortByText = 'Sort By'
+    let sortByText = 'Most Recent'
 
     let selectedDiff: {id:number, val:string }[] = []
     let diffOptions: { id: number, val: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, val: x }));
@@ -35,7 +33,7 @@
 
     //Variables needed to deal with Tags
     let selectedTags: {id:number, val:string }[] = []; //keeps track of selected tags
-    let allTags: {id:number, val:string }[] = ["Mini", "ANN", "CNN", "Something Else", "A very Long tag", "Another One", "Vasko", "is", "the", "best", "I"].map(x => ({id : 0, val : x}));  //array with all the tags MOCK
+    let allTags: {id:number, val:string }[] = tags.map( (x : {content: string}) => ({id : 0, val : x.content}));  //array with all the tags MOCK
     let displayTags: {id:number, val:string }[] = allTags; //
     let tagActive = false
 
@@ -52,7 +50,6 @@
     let displayTypes: {id:number, val:string }[] = allTypes; //
     let typeActive = false
 
-    $:console.log(selectedTypes, selectedTags, selectedPublishers, selectedDiff)
 
 
 
@@ -77,7 +74,7 @@
         //Take the selected option
         const target = event.target as HTMLButtonElement
         // change the text of the dropdown button
-        sortByText = target.textContent ?? "Sort By"
+        sortByText = target.textContent ?? "Most Recent"
         //close the dropdown upon selection
         sortByActive = false;
     }
@@ -114,7 +111,9 @@
         typeActive = false;
     };
 
+
     const sendFiltersToAPI = async () => {
+        console.log("Here")
         // Construct the URL with query parameters based on selected filters
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
@@ -135,55 +134,24 @@
           .then(data => {
               // Handle the response data from the API
               materials = data
-              console.log(materials)
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);
           });
     };
 
+    $: sendFiltersToAPI()
+
 </script>
-
-<div class="col-span-4 mt-32">
-    <SearchBar searchType="materials" bind:inputKeywords={searchWord}/>
-</div>
-
-<div class="col-span-full lg:col-span-8 flex justify-between gap-8 mt-32">
-    <div class="flex gap-2">
-
-        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}/>
-        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll}/>
-        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}/>
-        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
-
-
-        <form action=""><button on:click={sendFiltersToAPI}>Apply</button></form>
+<div class="flex justify-between col-span-full mt-32">
+    <div class = "flex gap-2 w-1/2">
+        <SearchBar searchType="materials" bind:inputKeywords={searchWord}/>
         <!-------SortBy-------->
-        <div class="space-y-1 relative">
-            <button class=" text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
-                    on:click={toggleSortBy}>
-                <span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
-                {#if sortByActive}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text"/>
-                {:else}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5"/>
-                {/if}
-            </button>
-            {#if sortByActive}
-                <div class="absolute left-0 right-0 flex flex-col rounded-lg border border-surface-400 bg-surface-50 min-w-32"
-                     transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
-                    {#each sortOptions as sopt}
-                        <button class="text-xs p-1 rounded-lg hover:bg-primary-50 text-left text-surface-600"
-                                on:click={updateSortBy}>{sopt}</button>
-                    {/each}
-                </div>
-            {/if}
-        </div>
-
     </div>
 
 
-    <div class="rounded-lg flex w-1/3">
+
+    <div class="rounded-lg flex w-1/4">
         <a href="/browse/?type=materials"
            class="rounded-l-lg text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600   {materialsText} {materialsBg}">Materials</a>
         <a href="/browse/?type=people"
@@ -191,6 +159,44 @@
         <a href="/browse/?type=circuits"
            class="rounded-r-lg text-xs lg:text-sm w-1/3 flex justify-center items-center border-y border-r border-primary-500 dark:border-primary-600  {circuitsText} {circuitsBg}">Circuits</a>
 
+    </div>
+</div>
+
+<div class="col-span-full flex justify-between">
+    <div class="w-1/2 flex justify-between">
+
+        <div class = "flex gap-2">
+            <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}/>
+            <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll}/>
+            <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}/>
+            <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
+
+        </div>
+
+        <button class="rounded-lg bg-primary-500 text-xs py-1 px-2 hover:bg-opacity-75 text-surface-100" on:click={sendFiltersToAPI}>Apply</button>
+
+
+    </div>
+
+    <div class="space-y-1 relative">
+        <button class="text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
+                on:click={toggleSortBy}>
+            <span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
+            {#if sortByActive}
+                <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text"/>
+            {:else}
+                <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5"/>
+            {/if}
+        </button>
+        {#if sortByActive}
+            <div class="absolute left-0 right-0 flex flex-col rounded-lg border border-surface-400 bg-surface-50 min-w-32"
+                 transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
+                {#each sortOptions as sopt}
+                    <button class="text-xs p-1 rounded-lg hover:bg-primary-50 text-left text-surface-600"
+                            on:click={updateSortBy}>{sopt}</button>
+                {/each}
+            </div>
+        {/if}
     </div>
 </div>
 
