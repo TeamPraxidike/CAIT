@@ -1,16 +1,30 @@
-import { prisma } from '$lib/database';
-import {Difficulty, PublicationType} from "@prisma/client";
-import {Prisma} from "@prisma/client/extension";
+import { deleteFile, prisma } from '$lib/database';
+import {
+	Difficulty,
+	type Material,
+	PublicationType,
+	type File as PrismaFile,
+} from '@prisma/client';
+import { Prisma } from '@prisma/client/extension';
 
 /**
  * [GET] Returns a publication of type Material with the given id.
  * @param publicationId - id of publication linked to material
+ * @param prismaContext
  */
-export async function getMaterialByPublicationId(publicationId: number) {
-	return prisma.material.findUnique({
+export async function getMaterialByPublicationId(
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	return prismaContext.material.findUnique({
 		where: { publicationId: publicationId },
 		include: {
-			publication: true,
+			publication: {
+				include: {
+					tags: true,
+					publisher: true,
+				},
+			},
 			files: true,
 		},
 	});
@@ -35,15 +49,14 @@ export async function getAllMaterials(
 	}
 
 	if (tags.length > 0) {
-		where.AND.push({ tags: { some: { content: { in: tags } } } });
+		where.AND.push({
+			publication: { tags: { some: { content: { in: tags } } } },
+		});
 	}
 
 	if (type.length > 0) {
 		where.AND.push({ type: { in: type } });
 	}
-
-	console.log('WhereClause');
-	console.log(where);
 
 	return prisma.material.findMany({
 		where,
@@ -58,8 +71,16 @@ export async function getAllMaterials(
 	});
 }
 
-export async function deleteMaterialByPublicationId(publicationId: number) {
-	return prisma.material.delete({
+export async function deleteMaterialByPublicationId(
+	publicationId: number,
+	material: Material & { files: PrismaFile[] },
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	for (const file of material!.files) {
+		await deleteFile(file.path);
+	}
+
+	return prismaContext.material.delete({
 		where: { publicationId: publicationId },
 	});
 }
@@ -67,106 +88,94 @@ export async function deleteMaterialByPublicationId(publicationId: number) {
 /**
  * [POST] Returns a created publication of type Material
  * @param userId
- * @param title
- * @param description
- * @param difficulty
- * @param learningObjectives
- * @param prerequisites
- * @param coverPic
- * @param copyright
- * @param timeEstimate
- * @param theoryPractice
+ * @param metaData
  * @param prismaContext
  */
 export async function createMaterialPublication(
 	userId: number,
-	title: string,
-	description: string,
-	difficulty: Difficulty,
-	learningObjectives: string[],
-	prerequisites: string[],
-	coverPic: string,
-	copyright: boolean,
-	timeEstimate: number,
-	theoryPractice: number,
-	prismaContext: Prisma.TransactionClient = prisma
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		coverPic: string;
+		copyright: boolean;
+		timeEstimate: number;
+		theoryPractice: number;
+	},
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.material.create({
 		data: {
-			coverPic: coverPic,
-			copyright: copyright,
-			timeEstimate: timeEstimate,
-			theoryPractice: theoryPractice,
+			coverPic: metaData.coverPic,
+			copyright: metaData.copyright,
+			timeEstimate: metaData.timeEstimate,
+			theoryPractice: metaData.theoryPractice,
 			publication: {
 				create: {
-					title: title,
-					description: description,
-					difficulty: difficulty,
-					learningObjectives: learningObjectives,
-					prerequisites: prerequisites,
+					title: metaData.title,
+					description: metaData.description,
+					difficulty: metaData.difficulty,
+					learningObjectives: metaData.learningObjectives,
+					prerequisites: metaData.prerequisites,
 					type: PublicationType.Material,
-					publisherId: userId
-				}
-			}
+					publisherId: userId,
+				},
+			},
 		},
 		include: {
-			publication: true
-		}
+			publication: true,
+		},
 	});
 }
 
 /**
  * [PUT] Returns an updated publication of type Material with the given id.
  * @param publicationId
- * @param title
- * @param description
- * @param difficulty
- * @param learningObjectives
- * @param prerequisites
- * @param coverPic
- * @param copyright
- * @param timeEstimate
- * @param theoryPractice
+ * @param metaData
  * @param prismaContext
  */
 export async function updateMaterialByPublicationId(
 	publicationId: number,
-	title: string,
-	description: string,
-	difficulty: Difficulty,
-	learningObjectives: string[],
-	prerequisites: string[],
-	coverPic: string,
-	copyright: boolean,
-	timeEstimate: number,
-	theoryPractice: number,
-	prismaContext: Prisma.TransactionClient = prisma
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		coverPic: string;
+		copyright: boolean;
+		timeEstimate: number;
+		theoryPractice: number;
+	},
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.material.update({
 		where: { publicationId: publicationId },
 		data: {
-			coverPic: coverPic,
-			copyright: copyright,
-			timeEstimate: timeEstimate,
-			theoryPractice: theoryPractice,
+			coverPic: metaData.coverPic,
+			copyright: metaData.copyright,
+			timeEstimate: metaData.timeEstimate,
+			theoryPractice: metaData.theoryPractice,
 			publication: {
 				update: {
-					where:{
+					where: {
 						id: publicationId,
 					},
 					data: {
-						title: title,
-						description: description,
-						difficulty: difficulty,
-						learningObjectives: learningObjectives,
-						prerequisites: prerequisites
-					}
-				}
-			}
+						title: metaData.title,
+						description: metaData.description,
+						difficulty: metaData.difficulty,
+						learningObjectives: metaData.learningObjectives,
+						prerequisites: metaData.prerequisites,
+					},
+				},
+			},
 		},
 		include: {
 			publication: true,
 			files: true,
-		}
+		},
 	});
 }

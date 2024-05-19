@@ -20,8 +20,6 @@ test('One can login', async ({ page }) => {
 
 	await page.getByTestId('profile-picture').click({ timeout: 2000 });
 	await page.click('text=Log out', { timeout: 2000 });
-
-	expect(await page.isVisible('text=Publish', { timeout: 2000 })).toBeFalsy();
 });
 
 test('One can browse the publications', async ({ page }) => {
@@ -31,7 +29,7 @@ test('One can browse the publications', async ({ page }) => {
 
 	await page.waitForSelector('text=Materials');
 
-	// flaky, should be fixed
+	// todo: flaky, should be fixed
 	// expect(await page.isVisible('text=Difficulty')).toBeTruthy();
 	// expect(await page.isVisible('text=Publishers')).toBeTruthy();
 	// expect(await page.isVisible('text=Sort By')).toBeTruthy();

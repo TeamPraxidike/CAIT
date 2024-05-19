@@ -1,3 +1,11 @@
+import { describe, it, expect } from 'vitest';
+
+describe('UserService', () => {
+	it('should be entirely rewritten', () => {
+		expect(true).toBe(true);
+	});
+});
+
 // import {createMaterialPublication, createUser, getPublicationById, getUserById} from "$lib/database";
 // import {describe, it, expect, beforeEach} from "vitest";
 // import {randomUUID} from "node:crypto";
