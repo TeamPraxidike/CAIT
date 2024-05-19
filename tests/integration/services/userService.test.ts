@@ -1,5 +1,5 @@
 // import {createMaterialPublication, createUser, getPublicationById, getUserById} from "$lib/database";
-// import {describe, it, expect, beforeEach} from "vitest";
+import {it, expect} from "vitest";
 // import {randomUUID} from "node:crypto";
 // import {editUser, getLikedPublications, likePublication} from "$lib/database/user";
 // import {resetUserTable} from "../setup";
@@ -101,8 +101,7 @@
 //     });
 // });
 //
-//
-//
-//
-//
-//
+
+it("cry", () => {
+    expect(1).toBe(1);
+})
