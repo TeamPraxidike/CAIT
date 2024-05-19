@@ -1,5 +1,13 @@
 import { type File as PrismaFile } from '@prisma/client';
+import { Buffer } from 'buffer';
 
+/**
+ * A FileList object that is created from a list of fetched files and a list of prisma files
+ * @param fetchedFiles the list of fetched files
+ * @param prismaFiles the list of prisma files
+ * @returns a FileList object that can be easily displayed in the FileTable component
+ * @see fetchedArrayToFileArray
+ */
 export function createFileList(
 	fetchedFiles: {
 		fileId: string;
@@ -29,11 +37,17 @@ export function createFileList(
 	);
 }
 
+/**
+ * Converts a list of fetched files and a list of prisma files to a list of File objects
+ *
+ * @param fetchedFiles the fetched files to convert. They contain the file id and the base64 data
+ * @param prismaFiles the prisma files to convert. They contain the file path, title, and type
+ * @return a list of File objects
+ *
+ * @see base64ToFile
+ */
 export function fetchedArrayToFileArray(
-	fetchedFiles: {
-		fileId: string;
-		data: string;
-	}[],
+	fetchedFiles: { fileId: string; data: string }[],
 	prismaFiles: PrismaFile[],
 ): File[] {
 	return fetchedFiles.map((fetchedFile) => {
@@ -50,6 +64,14 @@ export function fetchedArrayToFileArray(
 	});
 }
 
+/**
+ * Converts a base64 string to a File object with the given filename and type
+ *
+ * @param base64String the base64 string to convert.
+ * @param filename the filename to be used after conversion
+ * @param type the type of the file
+ * @returns a File object with the given filename and type and the data parsed as a blob
+ */
 export function base64ToFile(
 	base64String: string,
 	filename: string,
@@ -66,6 +88,10 @@ export function base64ToFile(
 	return new File([u8arr], filename, { type });
 }
 
+/**
+ * A map of file types to their respective icons.
+ * @note the code below is bloated, but it is necessary to maintain the map.
+ */
 export const IconMap: Map<string, string> = new Map([
 	['application/pdf', 'vscode-icons:file-type-pdf2'],
 	['application/msword', 'vscode-icons:file-type-word'],

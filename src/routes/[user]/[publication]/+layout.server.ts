@@ -23,6 +23,10 @@ export const load: LayoutServerLoad = async ({ params, fetch }) => {
 	};
 };
 
+/**
+ * The data that is loaded for the publication view layout.
+ * Only to be used in the publication view layout or child pages.
+ */
 export type PublicationViewLoad = {
 	fileData: FetchedFileArray;
 	material: Material & {

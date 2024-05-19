@@ -19,6 +19,20 @@
 
 	let loInput: HTMLInputElement;
 	let tagInput: HTMLInputElement;
+
+	/**
+	 * Appends a file to a FormData object
+	 * @param formData FormData object
+	 * @param file File to append
+	 * @param key Key to use for the file
+	 */
+	function appendFile(formData: FormData, file: File, key:string = 'file'): void {
+		if (file.size > 1024 * 1024 * 100) {
+			alert('File size exceeds 100MB');
+		} else {
+			formData.append(key, file);
+		}
+	}
 </script>
 
 <Meta title={publication.title} description="CAIT" type="site" />
@@ -26,21 +40,8 @@
 <form action="?/edit" method="POST" enctype="multipart/form-data"
 	  class="col-span-full flex flex-col items-start my-20"
 	  use:enhance={({ formData }) => {
-        Array.from(files).forEach(file => {
-          if (file.size > 1024 * 1024 * 100) {
-            alert('File size exceeds 100MB');
-          } else {
-            formData.append('file', file);
-          }
-        });
-
-        Array.from(oldFiles).forEach(file => {
-          if (file.size > 1024 * 1024 * 100) {
-            alert('File size exceeds 100MB');
-          } else {
-            formData.append('oldFile', file);
-          }
-        });
+        Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+        Array.from(oldFiles).forEach(file => appendFile(formData, file, 'oldFiles'));
 
 		serverData.material.files.forEach(file => {
 			formData.append('oldFilesTitle', file.type);
