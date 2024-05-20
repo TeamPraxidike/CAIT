@@ -3,8 +3,6 @@ import {Difficulty, type Material, type User} from "@prisma/client";
 import {
     createMaterialPublication,
     createUser,
-    getSavedPublications,
-    savePublication
 } from "$lib/database";
 import {addPublicationToUsedInCourse, coursesUsingPublication, publicationsAUserUses} from "$lib/database/usedInCourse";
 
