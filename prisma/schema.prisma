@@ -26,7 +26,6 @@ enum MaterialType {
   dataset
   exam
   code
-
 }
 
 enum PublicationType {
@@ -60,9 +59,9 @@ model PublicationUsedInCourse {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int
-  course        String[]
+  course        String
 
-  @@id([publicationId, userId])
+  @@id([publicationId, course])
 }
 
 model Publication {
@@ -95,13 +94,13 @@ model Publication {
 }
 
 model Material {
-  id             Int     @id @default(autoincrement())
-  coverPic       String?
-  copyright      Boolean
+  id                Int          @id @default(autoincrement())
+  coverPic          String?
+  copyright         Boolean
   encapsulatingType MaterialType @default(presentation)
-  timeEstimate   Int?
-  theoryPractice Float?
-  files          File[]
+  timeEstimate      Int?
+  theoryPractice    Float?
+  files             File[]
 
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
@@ -137,7 +136,7 @@ model Node {
 }
 
 model Tag {
-  content     String @id
+  content     String        @id
   publication Publication[]
 }
 
