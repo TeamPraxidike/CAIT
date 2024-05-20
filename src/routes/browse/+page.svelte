@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar} from '$lib';
+    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
@@ -51,11 +51,6 @@
         let displayTypes: {id:number, content:string }[] = allTypes; //
         let typeActive = false
 
-
-
-
-
-    //SORT BY Functionality
 
     //Used to make the dropdown appear/disappear
     const toggleSortBy = () => {
@@ -112,6 +107,24 @@
         typeActive = false;
     };
 
+    const resetAll = () => {
+        searchWord = ""
+        resetFilters()
+    }
+
+    const resetFilterButton = () => {
+        resetFilters()
+        sendFiltersToAPI()
+    }
+
+    const resetFilters = () => {
+        selectedTags = []
+        selectedTypes = []
+        selectedPublishers = []
+        selectedDiff = []
+
+    }
+
     const onSearch = (event : CustomEvent) => {
         searchWord = event.detail.value.inputKeywords
         sendFiltersToAPI()
@@ -121,6 +134,8 @@
 
     const sendFiltersToAPI = async () => {
         // Construct the URL with query parameters based on selected filters
+
+        applyActive = false
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
             difficulty: selectedDiff.map(x => x.content).join(','),
@@ -149,6 +164,12 @@
           });
     };
 
+
+
+    let applyActive = false
+    $:applyBackground = applyActive ? "bg-primary-600  hover:bg-opacity-75" : "bg-surface-400"
+
+
 </script>
 <div class="flex justify-between col-span-full mt-32">
     <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
@@ -158,11 +179,11 @@
 
 
     <div class="hidden rounded-lg lg:flex w-1/4">
-        <a href="/browse/?type=materials"
+        <a href="/browse/?type=materials" on:click={resetAll}
            class="rounded-l-lg text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600   {materialsText} {materialsBg}">Materials</a>
-        <a href="/browse/?type=people"
+        <a href="/browse/?type=people" on:click={resetAll}
            class="text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-primary-500 dark:border-primary-600   {peopleText} {peopleBg}">People</a>
-        <a href="/browse/?type=circuits"
+        <a href="/browse/?type=circuits" on:click={resetAll}
            class="rounded-r-lg text-xs lg:text-sm w-1/3 flex justify-center items-center border-y border-r border-primary-500 dark:border-primary-600  {circuitsText} {circuitsBg}">Circuits</a>
 
     </div>
@@ -171,10 +192,10 @@
 <div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
     <div class="flex gap-1 items-center">
 
-        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}/>
-        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll}/>
-        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}/>
-        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
+        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll} on:filterSelected ={() => {applyActive = true}} />
+        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll} on:filterSelected ={() => {applyActive = true}}/>
+        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll} on:filterSelected ={() => {applyActive = true}}/>
+        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll} on:filterSelected ={() => {applyActive = true}}/>
         <div class = "w-px h-4/5 bg-surface-600" ></div>
         <div class="space-y-1 relative">
             <button class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
@@ -197,11 +218,11 @@
             {/if}
         </div>
     </div>
-    <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 bg-primary-600  hover:bg-opacity-75"
-             on:click={sendFiltersToAPI}>Apply</button>
+    <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 {applyBackground}"
+             on:click={sendFiltersToAPI} disabled="{!applyActive}">Apply</button>
 </div>
 
-<div class="col-span-full flex gap-2">
+<div class="col-span-full flex flex-wrap gap-2">
     {#if (selectedTags.length !== 0)}
         <div class=" flex gap-2 items-center">
             <p class="text-xs text-surface-600 dark:text-surface-200">Tags:</p>
@@ -223,7 +244,6 @@
                     <button class="h-full" on:click={() => removePublisher(sp)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
-
                 </div>
             {/each}
         </div>
@@ -256,15 +276,33 @@
         {/each}
     </div>
 {/if}
+
+
+{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
+    <button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75" on:click={resetFilterButton}>
+        Reset Filters
+    </button>
+{/if}
 </div>
 
-{#each materials as material}
-    <PublicationCard publication={material.publication} />
-{/each}
+{#if pageType === "materials"}
+    {#each materials as material}
+        <PublicationCard publication={material.publication} />
+    {/each}
+{:else if pageType === "people"}
+    {#each users as person}
+        <UserProp view="search" posts="{5}" userPhotoUrl="" role="Maintainer"  user={person} />
+    {/each}
+{/if}
 
 
-<!--{#await }-->
-<!--	-->
-<!--{:then } -->
-<!--	-->
+
+<!--{#await sendFiltersToAPI()}-->
+<!--    <p>Loading...</p>-->
+<!--{:then a}-->
+<!--    {#each materials as material}-->
+<!--        <PublicationCard publication={material.publication} />-->
+<!--    {/each}-->
+<!--{:catch error}-->
+<!--    <p>Error loading materials: {error.message}</p>-->
 <!--{/await}-->

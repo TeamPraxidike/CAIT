@@ -20,6 +20,17 @@
 	//TODO: Change the profile pic to actual href later when we set up functionality
 	export let profilePic: boolean;
 	//export let text: string;
+	let targetDiv : HTMLDivElement
+	onMount(() => {
+		document.addEventListener('click', (event:MouseEvent) => {
+			if (!(event.target instanceof HTMLElement)) {
+				return; // Ignore if the target is not an HTMLElement
+			}
+			const isClickedInsideDiv = targetDiv.contains(event.target);
+			if(!isClickedInsideDiv)
+				active = false
+		})
+	})
 
 	const dispatch = createEventDispatcher();
 
@@ -57,6 +68,8 @@
 		else {
 			selected = [...selected, {id : event.detail.idval.id, content:text}]; //if we are selecting a tag add it to the selected tags
 		}
+
+		dispatch("filterSelected")
 	};
 
 
@@ -74,7 +87,7 @@
 
 </script>
 
-<div class="space-y-1 relative">
+<div bind:this={targetDiv} class="space-y-1 relative">
 	<button
 		class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
 		on:click={toggle}>
