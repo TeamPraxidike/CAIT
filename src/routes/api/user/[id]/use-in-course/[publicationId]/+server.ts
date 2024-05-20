@@ -1,14 +1,23 @@
-import {getSavedPublications, getUserById, publicationsAUserUses} from "$lib/database";
+import {
+    addPublicationToUsedInCourse,
+    getPublicationById,
+    getUserById,
+} from "$lib/database";
 
-export async function POST({params}) {
+export async function POST({params, request}) {
     const {id, publicationId} = params;
     const user = await getUserById(parseInt(id));
     if(!user) return new Response(JSON.stringify({error: 'User not found'}), {status: 404});
 
-    const used = await publicationsAUserUses(parseInt(id));
-    if(used === null) return new Response(JSON.stringify({error: 'Server error'}), {status: 500});
-    if(used.length === 0) return new Response(null, {status: 204});
+    const publication = await getPublicationById(parseInt(publicationId));
+    if(!publication) return new Response(JSON.stringify({error: 'Publication not found'}), {status: 404});
 
-    return new Response(JSON.stringify(used), {status: 200});
+    const body = await request.json();
+    try{
+        await addPublicationToUsedInCourse(parseInt(id), parseInt(publicationId), body.courses);
+        return new Response("Successfully marked usage of publication", {status: 200});
+    } catch (error) {
+        return new Response("Server error", {status: 500});
+    }
 }
 
