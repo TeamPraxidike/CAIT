@@ -7,6 +7,8 @@ import type {
 	Publication,
 	Tag,
 	User,
+	Comment,
+	Reply,
 } from '@prisma/client';
 
 export const load: LayoutServerLoad = async ({ params, fetch }) => {
@@ -34,6 +36,12 @@ export type PublicationViewLoad = {
 		publication: Publication & {
 			tags: Tag[];
 			publisher: User;
+			comments: (Comment & {
+				replies: (Reply & {
+					user: User;
+				})[];
+				user: User;
+			})[];
 		};
 	};
 };
