@@ -3,9 +3,30 @@ import {
 	Difficulty,
 	type Material,
 	PublicationType,
+	MaterialType,
 	type File as PrismaFile,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
+
+const sortSwitch = (sort: string) => {
+	let orderBy: any = {};
+	switch (sort) {
+		case 'Most Liked':
+			orderBy = { publication: { likes: 'desc' } };
+			break;
+		case 'Most Used':
+			orderBy = { publication: { usageCount: 'desc' } };
+			break;
+		case 'Oldest':
+			orderBy = { publication: { createdAt: 'asc' } };
+			break;
+		default:
+			orderBy = { publication: { createdAt: 'desc' } }; // Default to 'Most Recent'
+			break;
+	}
+
+	return orderBy;
+};
 
 /**
  * [GET] Returns a publication of type Material with the given id.
@@ -38,6 +59,7 @@ export async function getAllMaterials(
 	publishers: number[],
 	diff: Difficulty[],
 	type: MaterialType[],
+	sort: string,
 ) {
 	const where: any = { AND: [] };
 	if (publishers.length > 0) {
@@ -57,9 +79,10 @@ export async function getAllMaterials(
 	if (type.length > 0) {
 		where.AND.push({ encapsulatingType: { in: type } });
 	}
-
+	const sortBy = sortSwitch(sort);
 	return prisma.material.findMany({
 		where,
+		orderBy: sortBy,
 		include: {
 			publication: {
 				include: {

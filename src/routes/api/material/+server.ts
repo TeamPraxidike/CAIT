@@ -59,21 +59,27 @@ export const GET: RequestHandler = async ({ url }) => {
 	// return 401 if user not authenticated
 
 	try {
-		console.log('Here');
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
 
 		const d = url.searchParams.get('difficulty');
 		const diff = d ? d.split(',').map(mapToDifficulty) : [];
 
-		console.log(diff);
 		const p = url.searchParams.get('publishers');
 		const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
 
 		const ty = url.searchParams.get('types');
 		const type = ty ? ty.split(',').map(mapToType) : [];
 
-		const materials = await getAllMaterials(tags, publishers, diff, type);
+		const sort = url.searchParams.get('sort') || 'Most Recent';
+
+		const materials = await getAllMaterials(
+			tags,
+			publishers,
+			diff,
+			type,
+			sort,
+		);
 
 		return new Response(JSON.stringify(materials), { status: 200 });
 	} catch (error) {

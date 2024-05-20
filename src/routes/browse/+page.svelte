@@ -1,12 +1,10 @@
 <script lang="ts">
     import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
-    import {page} from '$app/stores';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
-    import type { Material, Publication, User, Tag } from '@prisma/client';
-    import type { PageServerData } from './$types';
     import type { Tag } from '@prisma/client';
+    import type { PageServerData } from './$types';
 
     export let data:PageServerData;
     let searchWord: string = '';
@@ -26,34 +24,33 @@
     $: circuitsBg = pageType === 'circuits' ? 'bg-primary-500 dark:bg-primary-600 hover:bg-primary-500 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900 ' : 'hover:bg-primary-50 dark:hover:bg-primary-800'
 
     //Variables needed to deal with Sort and Difficulty
-    let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
-    let sortByActive = false
-    let sortByText = 'Most Recent'
+        let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
+        let sortByActive = false
+        let sortByText = 'Most Recent'
 
-    let selectedDiff: {id:number, content:string }[] = []
-    let diffOptions: { id: number, content: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, content: x }));
-    let diffActive = false
+        let selectedDiff: {id:number, content:string }[] = []
+        let diffOptions: { id: number, content: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, content: x }));
+        let diffActive = false
 
-    //Variables needed to deal with Tags
-    let selectedTags: {id:number, content:string }[] = []; //keeps track of selected tags
-    let allTags: {id: number, content:string }[] = data.tags.map((x: Tag) => ({ id: 0, content: x.content }));
-    let displayTags: {id:number, content:string }[] = allTags;
-    let tagActive = false
+        //Variables needed to deal with Tags
+        let selectedTags: {id:number, content:string }[] = []; //keeps track of selected tags
+        let allTags: {id: number, content:string }[] = tags.map((x: Tag) => ({ id: 0, content: x.content }));
+        let displayTags: {id:number, content:string }[] = allTags;
+        let tagActive = false
 
 
-    //Variables needed to deal with Publishers
-    let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
-    let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
-    let displayPublishers: {id:number, content:string }[] = allPublisherNames; //
-    let publisherActive = false
+        //Variables needed to deal with Publishers
+        let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
+        let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
+        let displayPublishers: {id:number, content:string }[] = allPublisherNames; //
+        let publisherActive = false
 
-    //Variables needed to deal with Types
-    let selectedTypes: {id:number, content:string }[] = []; //keeps track of selected tags
-    let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
-    let displayTypes: {id:number, content:string }[] = allTypes; //
-    let typeActive = false
+        //Variables needed to deal with Types
+        let selectedTypes: {id:number, content:string }[] = []; //keeps track of selected tags
+        let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+        let displayTypes: {id:number, content:string }[] = allTypes; //
+        let typeActive = false
 
-    $:console.log(selectedTypes, selectedTags, selectedPublishers, selectedDiff)
 
 
 
@@ -115,13 +112,17 @@
         typeActive = false;
     };
 
+
+
     const sendFiltersToAPI = async () => {
         // Construct the URL with query parameters based on selected filters
+        console.log("Here")
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
             difficulty: selectedDiff.map(x => x.content).join(','),
             types: selectedTypes.map(x => x.content).join(','),
-            tags: selectedTags.map(x => x.content).join(',')
+            tags: selectedTags.map(x => x.content).join(','),
+            sort: sortByText
         });
         const url = `/api/material?${queryParams.toString()}`;
 
@@ -145,14 +146,13 @@
 
 </script>
 <div class="flex justify-between col-span-full mt-32">
-    <div class = "flex gap-2 w-1/2">
+    <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
         <SearchBar searchType="materials" bind:inputKeywords={searchWord}/>
-        <!-------SortBy-------->
     </div>
 
 
 
-    <div class="rounded-lg flex w-1/4">
+    <div class="hidden rounded-lg lg:flex w-1/4">
         <a href="/browse/?type=materials"
            class="rounded-l-lg text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600   {materialsText} {materialsBg}">Materials</a>
         <a href="/browse/?type=people"
@@ -163,41 +163,37 @@
     </div>
 </div>
 
-<div class="col-span-full lg:col-span-8 flex justify-between gap-8 mt-32">
-    <div class="flex gap-2">
+<div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
+    <div class="flex gap-1 items-center">
 
         <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}/>
         <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll}/>
         <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}/>
         <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
-
-        </div>
-
-        <button class="rounded-lg bg-primary-500 text-xs py-1 px-2 hover:bg-opacity-75 text-surface-100" on:click={sendFiltersToAPI}>Apply</button>
-
-
-    </div>
-
-    <div class="space-y-1 relative">
-        <button class="text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
-                on:click={toggleSortBy}>
-            <span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
+        <div class = "w-px h-4/5 bg-surface-600" ></div>
+        <div class="space-y-1 relative">
+            <button class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
+                    on:click={toggleSortBy}>
+                <span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
+                {#if sortByActive}
+                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text"/>
+                {:else}
+                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5"/>
+                {/if}
+            </button>
             {#if sortByActive}
-                <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text"/>
-            {:else}
-                <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5"/>
+                <div class="absolute left-0 right-0 flex flex-col rounded-lg border border-surface-400 bg-surface-50 min-w-32"
+                     transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
+                    {#each sortOptions as sopt}
+                        <button class="text-xs p-1 rounded-lg hover:bg-primary-50 text-left text-surface-600"
+                                on:click={updateSortBy}>{sopt}</button>
+                    {/each}
+                </div>
             {/if}
-        </button>
-        {#if sortByActive}
-            <div class="absolute left-0 right-0 flex flex-col rounded-lg border border-surface-400 bg-surface-50 min-w-32"
-                 transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
-                {#each sortOptions as sopt}
-                    <button class="text-xs p-1 rounded-lg hover:bg-primary-50 text-left text-surface-600"
-                            on:click={updateSortBy}>{sopt}</button>
-                {/each}
-            </div>
-        {/if}
+        </div>
     </div>
+    <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 bg-primary-600  hover:bg-opacity-75"
+             on:click={sendFiltersToAPI}>Apply</button>
 </div>
 
 <div class="col-span-full flex gap-2">

@@ -1,19 +1,19 @@
 <script lang="ts">
 
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 
 	export let label: string;
-	export let selected: { id: number, content: string } [];
+	export let selected: {id:number, content:string } [];
 
-	$: selectedIds = selected.map(x => x.id);
-	$: selectedVals = selected.map(x => x.content);
+	$: selectedIds = selected.map(x => x.id)
+	$: selectedVals = selected.map(x => x.content)
 
 	//export let selectedIds: number[];
-	export let all: { id: number, content: string } [];
-	export let display: { id: number, content: string } [] = all;
+	export let all: {id:number, content:string } [];
+	export let display: {id:number, content:string } [] = all;
 	export let active = false;
 	let input: HTMLInputElement;
 
@@ -39,21 +39,23 @@
 
 		let text = event.detail.idval.content;
 
-		if (text.startsWith(' ')) {
-			text = text.substring(1);
+		if (text.startsWith(" ")) {
+			text = text.substring(1)
 		}
 
-		if (text.endsWith(' ')) {
-			text = text.slice(0, -1);
+		if (text.endsWith(" ")) {
+			text = text.slice(0, -1)
 		}
 
 
-		if (label === 'Publisher' && selectedIds.includes(event.detail.idval.id)) {
+		if (label === "Publisher" && selectedIds.includes(event.detail.idval.id)) {
 			selected = selected.filter(item => item.id !== event.detail.idval.id); //if we are removing a tag remove it from selected tags
-		} else if (selectedVals.includes(event.detail.idval.content)) {
+		}
+		else if (selectedVals.includes(event.detail.idval.content)){
 			selected = selected.filter(item => item.content !== event.detail.idval.content); //if we are removing a tag remove it from selected tags
-		} else {
-			selected.push({ id: event.detail.idval.id, content: text }); //if we are selecting a tag add it to the selected tags
+		}
+		else {
+			selected = [...selected, {id : event.detail.idval.id, content:text}]; //if we are selecting a tag add it to the selected tags
 		}
 	};
 
@@ -74,8 +76,7 @@
 
 <div class="space-y-1 relative">
 	<button
-		type="button"
-		class=" text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
+		class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
 		on:click={toggle}>
 		<span class="flex-grow text-surface-700 dark:text-surface-300">{label}</span>
 		{#if active}
@@ -86,7 +87,7 @@
 	</button>
 	{#if active}
 		<div class="absolute  min-w-32 flex flex-col rounded-lg border border-surface-400 bg-surface-50"
-			 transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
+				 transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
 			{#if all.length > 3}
 				<input bind:this={input} class="text-xs dark:text-surface-600 border-none rounded-lg focus:ring-0"
 							 on:input={updateFilter} placeholder="Search for {label.toLowerCase()}" />
@@ -96,9 +97,8 @@
 				<p class="p-2 text-xs text-left text-surface-600">No Matching {label.toLowerCase()}</p>
 			{:else}
 				{#each display as dis, i}
-					<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals}
-								  bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display}
-								  on:update={update} />
+
+					<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display} on:update={update}/>
 				{/each}
 			{/if}
 		</div>
