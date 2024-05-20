@@ -2,7 +2,7 @@
     import type {Comment, Reply} from "@prisma/client";
     import {createEventDispatcher, onMount} from 'svelte';
     import Icon from '@iconify/svelte';
-    import { getModalStore, getToastStore, initializeStores, type PopupSettings } from '@skeletonlabs/skeleton';
+    import { getModalStore, getToastStore, type PopupSettings } from '@skeletonlabs/skeleton';
     import {popup} from '@skeletonlabs/skeleton';
     import { authStore, getDateDifference, AddInteractionForm } from '$lib';
 
@@ -153,7 +153,6 @@
     $:console.log(display);
 
     onMount(() => {
-        initializeStores();
         created = getDateDifference(interaction.createdAt, new Date())
 
         if ((new Date(interaction.updatedAt).getTime() - new Date(interaction.createdAt).getTime() > 10))

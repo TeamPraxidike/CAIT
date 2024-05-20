@@ -64,9 +64,11 @@
 	<enhanced:img class="w-10 md:w-14 rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo" />
 	<form method="POST" class="flex-grow" use:enhance={({ formData }) => {
         formData.append('userId',userId.toString());
-				console.log(userId)
 				formData.append('isComment', addComment.toString());
 				formData.append('commentId', commentId.toString());
+				 setTimeout(() => {
+                     window.location.reload();
+                 }, 10);
       }}>
 		<div class="flex-grow pt-2 items-center">
         <textarea
