@@ -50,6 +50,13 @@ import {
 	likePublication,
 	getLikedPublications,
 } from '$lib/database/user';
+
+import {
+	addPublicationToUsedInCourse,
+	coursesUsingPublication,
+	publicationsAUserUses
+} from "$lib/database/usedInCourse";
+
 import type { userEditData } from '$lib/database/user';
 
 import { addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
@@ -159,7 +166,10 @@ export {
 	likePublication,
 	getLikedPublications,
 	savePublication,
-	getSavedPublications
+	getSavedPublications,
+	addPublicationToUsedInCourse,
+	coursesUsingPublication,
+	publicationsAUserUses
 };
 
 export type { userEditData };
