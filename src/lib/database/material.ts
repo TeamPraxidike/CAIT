@@ -60,8 +60,35 @@ export async function getAllMaterials(
 	diff: Difficulty[],
 	type: MaterialType[],
 	sort: string,
+	q: string,
 ) {
 	const where: any = { AND: [] };
+
+	if (q !== '') {
+		where.AND.push({
+			OR: [
+				{
+					publication: {
+						title: { contains: q, mode: 'insensitive' },
+					},
+				},
+				{
+					publication: {
+						description: { contains: q, mode: 'insensitive' },
+					},
+				},
+
+				{
+					publication: {
+						learningObjectives: {
+							hasSome: [q],
+						},
+					},
+				},
+			],
+		});
+	}
+
 	if (publishers.length > 0) {
 		where.AND.push({ publication: { publisherId: { in: publishers } } });
 	}
@@ -79,6 +106,7 @@ export async function getAllMaterials(
 	if (type.length > 0) {
 		where.AND.push({ encapsulatingType: { in: type } });
 	}
+
 	const sortBy = sortSwitch(sort);
 	return prisma.material.findMany({
 		where,

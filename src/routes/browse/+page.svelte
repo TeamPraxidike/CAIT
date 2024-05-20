@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import { Filter, PublicationCard, SearchBar} from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
@@ -112,17 +112,22 @@
         typeActive = false;
     };
 
+    const onSearch = (event : CustomEvent) => {
+        searchWord = event.detail.value.inputKeywords
+        sendFiltersToAPI()
+    }
+
 
 
     const sendFiltersToAPI = async () => {
         // Construct the URL with query parameters based on selected filters
-        console.log("Here")
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
             difficulty: selectedDiff.map(x => x.content).join(','),
             types: selectedTypes.map(x => x.content).join(','),
             tags: selectedTags.map(x => x.content).join(','),
-            sort: sortByText
+            sort: sortByText,
+            q: searchWord
         });
         const url = `/api/material?${queryParams.toString()}`;
 
@@ -147,7 +152,7 @@
 </script>
 <div class="flex justify-between col-span-full mt-32">
     <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
-        <SearchBar searchType="materials" bind:inputKeywords={searchWord}/>
+        <SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
     </div>
 
 

@@ -26,12 +26,6 @@ function mapToDifficulty(difficulty: string): Difficulty {
 	}
 }
 
-// video
-//   presentation
-//   assignment
-//   dataset
-//   exam
-//   code
 function mapToType(mt: string): MaterialType {
 	switch (mt.toLowerCase()) {
 		case 'video':
@@ -72,6 +66,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		const type = ty ? ty.split(',').map(mapToType) : [];
 
 		const sort = url.searchParams.get('sort') || 'Most Recent';
+		const q: string = url.searchParams.get('q') || '';
 
 		const materials = await getAllMaterials(
 			tags,
@@ -79,6 +74,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			diff,
 			type,
 			sort,
+			q,
 		);
 
 		return new Response(JSON.stringify(materials), { status: 200 });
