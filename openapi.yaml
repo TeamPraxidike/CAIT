@@ -5,6 +5,8 @@ info:
   version: 1.0.1
 
 tags:
+  - name: Publication
+    description: End-points for operations on/with publications
   - name: User
     description: End-points for operations on/with users
   - name: Material
@@ -26,6 +28,39 @@ servers:
   - url: http://localhost:5143
 
 paths:
+
+  /publication/{publicationId}/use-in-course:
+    get:
+      tags:
+        - Publication
+      summary: Get a user with a given id
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication
+
+      responses:
+        '200':
+          description: Successfully retrieved courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: "ACC"
+
+        '400':
+          description: Bad request
+        '404':
+          description: This publication does not exist
+        '500':
+          description: Server Error
+
   /user:
     post:
       tags:
@@ -320,14 +355,21 @@ paths:
             format: long
           required: true
           description: Numeric ID of the publication (could be material or circuit)
-
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                courses:
+                  type: array
+                  items:
+                    type: string
+                  description: List of course names
       responses:
         '200':
           description: Successfully marked usage of publication
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
         '400':
           description: Bad request
         '401':
