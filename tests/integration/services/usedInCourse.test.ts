@@ -71,26 +71,25 @@ describe("Using in a course", () => {
 
     it("should add to the list of what users use", async () => {
         await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
-        const courses = await publicationsAUserUses(user.id);
-        expect(courses).toHaveLength(1);
-        expect(courses).toContain("ADS");
+        const publications = (await publicationsAUserUses(user.id)).map(x => x.id);
+        expect(publications).toHaveLength(1);
+        expect(publications).toContain(publication.id);
     });
 
     it("should add to the list of what users use across multiple publications", async () => {
         await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
         await addPublicationToUsedInCourse(user.id, publication2.id, ["CPL"]);
         await addPublicationToUsedInCourse(user.id, publication.id, ["CG"]);
-        const courses = await publicationsAUserUses(user.id);
-        expect(courses).toHaveLength(3);
-        expect(courses).toContain("ADS");
-        expect(courses).toContain("CPL");
-        expect(courses).toContain("CG");
+        const publications = (await publicationsAUserUses(user.id)).map(x => x.id);
+        expect(publications).toHaveLength(2);
+        expect(publications).toContain(publication.id);
+        expect(publications).toContain(publication2.id);
     });
 
     it("should remove stuff from the list", async () => {
         await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
         const removed = await removeFromUsedInCourse(publication.id, ['ADS'])
-        const courses = await publicationsAUserUses(user.id);
+        const courses = await coursesUsingPublication(publication.id);
         expect(courses).toHaveLength(0);
         expect(removed.count).toBe(1);
     });
@@ -100,7 +99,7 @@ describe("Using in a course", () => {
         await addPublicationToUsedInCourse(user.id, publication.id, ["SP"]);
         await addPublicationToUsedInCourse(user.id, publication.id, ["OS"]);
         const removed = await removeFromUsedInCourse(publication.id, ['ADS', 'SP', 'OS']);
-        const courses = await publicationsAUserUses(user.id);
+        const courses = await coursesUsingPublication(publication.id);
         expect(courses).toHaveLength(0);
         expect(removed.count).toBe(3);
     });
@@ -110,7 +109,7 @@ describe("Using in a course", () => {
         await addPublicationToUsedInCourse(user.id, publication.id, ["SP"]);
         await addPublicationToUsedInCourse(user.id, publication.id, ["OS"]);
         const removed = await removeFromUsedInCourse(publication.id, ['ADS', 'SP']);
-        const courses = await publicationsAUserUses(user.id);
+        const courses = await coursesUsingPublication(publication.id);
         expect(courses).toHaveLength(1);
         expect(courses).toContain("OS");
         expect(removed.count).toBe(2);

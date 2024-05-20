@@ -37,13 +37,20 @@ export async function coursesUsingPublication(publicationId: number) {
 }
 
 export async function publicationsAUserUses(userId: number) {
-    const courses = await prisma.publicationUsedInCourse.findMany({
+    const publications = await prisma.publicationUsedInCourse.findMany({
         where: {
             userId: userId
         },
         select: {
-            course: true
+            publicationId: true
         }
     });
-    return courses.map(x => x.course);
+    const publId = publications.map(x => x.publicationId);
+    return prisma.publication.findMany({
+        where: {
+            id: {
+                in: publId
+            }
+        }
+    });
 }
