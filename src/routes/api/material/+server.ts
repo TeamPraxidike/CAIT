@@ -1,9 +1,9 @@
 import {
-	getAllMaterials,
+	addFile,
 	createMaterialPublication,
 	type FileDiffActions,
+	getAllMaterials,
 	handleConnections,
-	addFile,
 	type MaterialForm,
 	prisma,
 } from '$lib/database';

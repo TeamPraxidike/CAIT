@@ -1,10 +1,10 @@
 import { deleteFile, prisma } from '$lib/database';
 import {
 	Difficulty,
-	type Material,
-	PublicationType,
-	MaterialType,
 	type File as PrismaFile,
+	type Material,
+	MaterialType,
+	PublicationType,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
 

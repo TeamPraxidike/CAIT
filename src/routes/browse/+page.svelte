@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
-    import {fly} from 'svelte/transition';
+    import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { Tag } from '@prisma/client';
     import type { PageServerData } from './$types';
@@ -108,22 +108,22 @@
     };
 
     const resetAll = () => {
-        searchWord = ""
-        resetFilters()
-    }
+        searchWord = '';
+        resetFilters();
+    };
 
     const resetFilterButton = () => {
-        resetFilters()
-        sendFiltersToAPI()
-    }
+        resetFilters();
+        sendFiltersToAPI();
+    };
 
     const resetFilters = () => {
-        selectedTags = []
-        selectedTypes = []
-        selectedPublishers = []
-        selectedDiff = []
+        selectedTags = [];
+        selectedTypes = [];
+        selectedPublishers = [];
+        selectedDiff = [];
 
-    }
+    };
 
     const onSearch = (event : CustomEvent) => {
         searchWord = event.detail.value.inputKeywords
@@ -135,7 +135,7 @@
     const sendFiltersToAPI = async () => {
         // Construct the URL with query parameters based on selected filters
 
-        applyActive = false
+        applyActive = false;
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
             difficulty: selectedDiff.map(x => x.content).join(','),
@@ -165,9 +165,8 @@
     };
 
 
-
-    let applyActive = false
-    $:applyBackground = applyActive ? "bg-primary-600  hover:bg-opacity-75" : "bg-surface-400"
+    let applyActive = false;
+    $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
 
 
 </script>
@@ -192,10 +191,18 @@
 <div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
     <div class="flex gap-1 items-center">
 
-        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll} on:filterSelected ={() => {applyActive = true}} />
-        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll} on:filterSelected ={() => {applyActive = true}}/>
-        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll} on:filterSelected ={() => {applyActive = true}}/>
-        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll} on:filterSelected ={() => {applyActive = true}}/>
+        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
+                profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
+                on:filterSelected={() => {applyActive = true}} />
+        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
+                bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}"
+                on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} />
+        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
+                profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
+                on:filterSelected={() => {applyActive = true}} />
+        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
+                profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
+                on:filterSelected={() => {applyActive = true}} />
         <div class = "w-px h-4/5 bg-surface-600" ></div>
         <div class="space-y-1 relative">
             <button class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
@@ -219,7 +226,8 @@
         </div>
     </div>
     <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 {applyBackground}"
-             on:click={sendFiltersToAPI} disabled="{!applyActive}">Apply</button>
+            on:click={sendFiltersToAPI} disabled="{!applyActive}">Apply
+    </button>
 </div>
 
 <div class="col-span-full flex flex-wrap gap-2">
@@ -278,11 +286,12 @@
 {/if}
 
 
-{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
-    <button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75" on:click={resetFilterButton}>
-        Reset Filters
-    </button>
-{/if}
+    {#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
+        <button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
+                on:click={resetFilterButton}>
+            Reset Filters
+        </button>
+    {/if}
 </div>
 
 {#if pageType === "materials"}
@@ -291,10 +300,9 @@
     {/each}
 {:else if pageType === "people"}
     {#each users as person}
-        <UserProp view="search" posts="{5}" userPhotoUrl="" role="Maintainer"  user={person} />
+        <UserProp view="search" posts="{5}" userPhotoUrl="" role="Maintainer" user={person} />
     {/each}
 {/if}
-
 
 
 <!--{#await sendFiltersToAPI()}-->

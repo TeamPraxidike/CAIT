@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {createEventDispatcher} from "svelte";
+    import { createEventDispatcher } from 'svelte';
     import Icon from '@iconify/svelte';
 
     export let searchType:"materials"| "users" | "circuits" | "my publications" | "saved"

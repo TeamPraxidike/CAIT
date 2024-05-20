@@ -20,17 +20,17 @@
 	//TODO: Change the profile pic to actual href later when we set up functionality
 	export let profilePic: boolean;
 	//export let text: string;
-	let targetDiv : HTMLDivElement
+	let targetDiv: HTMLDivElement;
 	onMount(() => {
-		document.addEventListener('click', (event:MouseEvent) => {
+		document.addEventListener('click', (event: MouseEvent) => {
 			if (!(event.target instanceof HTMLElement)) {
 				return; // Ignore if the target is not an HTMLElement
 			}
 			const isClickedInsideDiv = targetDiv.contains(event.target);
-			if(!isClickedInsideDiv)
-				active = false
-		})
-	})
+			if (!isClickedInsideDiv)
+				active = false;
+		});
+	});
 
 	const dispatch = createEventDispatcher();
 
@@ -69,7 +69,7 @@
 			selected = [...selected, {id : event.detail.idval.id, content:text}]; //if we are selecting a tag add it to the selected tags
 		}
 
-		dispatch("filterSelected")
+		dispatch('filterSelected');
 	};
 
 
