@@ -73,6 +73,7 @@
         sortByText = target.textContent ?? "Sort By"
         //close the dropdown upon selection
         sortByActive = false;
+        applyActive = true;
     }
 
 
@@ -109,6 +110,7 @@
 
     const resetAll = () => {
         searchWord = '';
+        applyActive = false
         resetFilters();
     };
 
