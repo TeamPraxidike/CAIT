@@ -23,6 +23,7 @@ export async function getMaterialByPublicationId(
 				include: {
 					tags: true,
 					publisher: true,
+					maintainers: true,
 				},
 			},
 			files: true,

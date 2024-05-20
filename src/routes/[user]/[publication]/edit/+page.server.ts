@@ -91,9 +91,9 @@ export const actions = {
 					.map(Number) || [Number(data.get('userId')?.toString())],
 			},
 			fileDiff: {
-				add: [],
+				add: addInfo,
 				edit: [],
-				delete: [],
+				delete: deleteInfo,
 			},
 		};
 
