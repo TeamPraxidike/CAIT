@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { LayoutServerData } from './$types';
-	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore } from '$lib';
+	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore, UserProp } from '$lib';
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
-	import { saveAs } from 'file-saver';
 	import Icon from '@iconify/svelte';
 	import { enhance } from '$app/forms';
 	import type { PublicationViewLoad } from './+layout.server';
@@ -155,28 +154,35 @@
 			const blob = await file.arrayBuffer();
 			zip.file(file.name, blob);
 		}
-
-		const content = await zip.generateAsync({ type: "blob" });
-		saveAs(content, "files.zip");
 	}
 </script>
 
 <Meta title={serverData.material.publication.title} description="CAIT" type="site" />
 
 <div class="col-span-full flex flex-col items-start mt-20">
-	<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
-	<p>{serverData.material.publication.publisher.firstName}</p>
-	<div class="flex gap-2">
-		<p class="text-sm text-surface-500">{created}</p>
-		<Icon icon="mdi:presentation" class="text-xl text-surface-500" />
-		<DiffBar diff="easy" className="w-4 h-4" />
+	<div class="flex justify-between w-full">
+		<div>
+			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
+			<p>{serverData.material.publication.publisher.firstName}</p>
+			<div class="flex gap-2">
+				<p class="text-sm text-surface-500">{created}</p>
+				<Icon icon="mdi:presentation" class="text-xl text-surface-500" />
+				<DiffBar diff="easy" className="w-4 h-4" />
+			</div>
+			<div class="flex flex-wrap gap-2 my-2">
+				{#each tags as tag}
+					<Tag tagText={tag} removable={false} />
+				{/each}
+			</div>
+			<p class="text-surface-700 dark:text-surface-400">{serverData.material.publication.description}</p>
+		</div>
+		<div class="flex gap-2">
+			<UserProp role="Publisher" userPhotoUrl="" view="material" user={serverData.material.publication.publisher} />
+			{#each serverData.material.publication.maintainers as maintainer}
+				<UserProp role="Maintainer" userPhotoUrl="" view="material" user={maintainer} />
+			{/each}
+		</div>
 	</div>
-	<div class="flex flex-wrap gap-2 my-2">
-		{#each tags as tag}
-			<Tag tagText={tag} removable={false} />
-		{/each}
-	</div>
-	<p class="text-surface-700 dark:text-surface-400">{serverData.material.publication.description}</p>
 
 	<div class="flex items-center text-3xl rounded-lg border mt-4">
 		<button type="button"

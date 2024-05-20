@@ -1,25 +1,29 @@
 <script lang="ts">
-	import { DifficultySelection, FileTable, authStore, Meta, Tag, Filter } from '$lib';
+	import { DifficultySelection, FileTable, authStore, Meta, Tag } from '$lib';
 	import {
 		FileDropzone,
 		Stepper,
 		Step,
 		Autocomplete,
 		type AutocompleteOption,
-		InputChip
+		InputChip, getToastStore
 	} from '@skeletonlabs/skeleton';
 	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
-
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Tag as PrismaTag } from '@prisma/client';
+	import { concatFileList } from '$lib/util/file';
+	import { goto } from '$app/navigation';
+
+	export let form: ActionData;
+	export let data: PageServerData;
 
 	let tags: string[] = [];
-
 	$: tags = tags;
+	let allTags: PrismaTag[] = data.tags;
 
-	let maintainers: string[] = [];
-	let files: FileList;
+	let maintainers: number[] = [];
+	let files: FileList = [] as unknown as FileList;
 
 	let title: string = '';
 	let description: string = '';
@@ -33,12 +37,6 @@
 	let inputChip: InputChip;
 
 	$: uid = $authStore.user?.id || 0;
-
-	// eslint-disable-next-line svelte/valid-compile
-	export let form: ActionData;
-	export let data: PageServerData;
-
-	let allTags: PrismaTag[] = data.tags;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 
@@ -58,15 +56,44 @@
 			tagInput = '';
 		}
 	}
+
+	export function changeFilezone(e: Event) {
+		const eventFiles = (e.target as HTMLInputElement).files;
+		if (eventFiles) {
+			files = concatFileList(files, eventFiles);
+		}
+	}
+
+	/* LOCK = TRUE => LOCKED */
+	const locks:boolean[] = [true, true, true]
+
+	$: locks[0] = files ? files.length === 0 : true;
+	$: locks[1] = title.length < 2 || description.length < 10;
+	$: locks[2] = tags.length < 2;
+
+
+	const toastStore = getToastStore();
+
+	$: if (form?.status === 200) {
+		toastStore.trigger({
+			message: 'Publication Edited successfully',
+			background: 'bg-success-200'
+		});
+		goto(`/${$authStore.user?.id}/${form?.id}`);
+	} else if (form?.status === 400) {
+		toastStore.trigger({
+			message: `Malformed information, please check your inputs: ${form?.message}`,
+			background: 'bg-warning-200'
+		});
+	} else if (form?.status === 500) {
+		toastStore.trigger({
+			message: 'An error occurred, please try again later or contact support',
+			background: 'bg-error-200'
+		});
+	}
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
-
-{#if form?.status === 200}
-	<p class="absolute col-span-full p-4 variant-soft-success">Successfully submitted!</p>
-{:else if form?.status === 400}
-	<p class="absolute col-span-full p-4 variant-soft-error">Error: {form.message}</p>
-{/if}
 
 <form method="POST"
 	  enctype="multipart/form-data"
@@ -87,17 +114,17 @@
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
-        formData.append('tags', tags.join(';'));
-        formData.append('maintainers', uid.toString());
-        formData.append('learning_objectives', LOs.join(';'));
+        formData.append('tags', JSON.stringify(tags));
+        formData.append('maintainers', JSON.stringify(maintainers));
+        formData.append('learningObjectives', JSON.stringify(LOs));
       }}>
 	<Stepper buttonCompleteType="submit">
-		<Step>
+		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files</svelte:fragment>
-			<FileDropzone multiple name="file" bind:files={files} />
-			<FileTable {files} />
+			<FileDropzone on:change={changeFilezone} multiple name="file" />
+			<FileTable operation="edit" bind:files={files} />
 		</Step>
-		<Step>
+		<Step locked={locks[1]}>
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
 			<div class="flex flex-col gap-2">
 				<input type="text" name="title" placeholder="Title" bind:value={title}
@@ -106,7 +133,7 @@
 						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>
 		</Step>
-		<Step>
+		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
 			<DifficultySelection bind:difficulty={difficulty} />
 			<div class="w-full">
@@ -138,13 +165,13 @@
 					<input type="text" name="maintainers_input" id="maintainers_input" bind:this={maintainersInput}
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
 					<button type="button" name="add_tag"
-							on:click={() => { maintainers.push(maintainersInput.value); maintainersInput.value = ""; }}
+							on:click={() => { maintainers.push(Number(maintainersInput.value)); maintainersInput.value = ''; }}
 							class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
 					</button>
 				</div>
 				<div class="flex flex-wrap gap-2">
 					{#each maintainers as maintainer}
-						<Tag tagText={maintainer} removable={false} />
+						<Tag tagText={maintainer.toString()} removable={false} />
 					{/each}
 				</div>
 
@@ -173,7 +200,7 @@
 				<p class="text-lg">Time Estimate: {estimate}</p>
 				<p class="text-lg">Copyright: {copyright}</p>
 			</div>
-			<FileTable {files} />
+			<FileTable bind:files={files} />
 		</Step>
 	</Stepper>
 </form>

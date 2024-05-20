@@ -1,5 +1,9 @@
 import type { Actions, PageServerLoad } from './$types';
-import type { MaterialForm } from '$lib/database';
+import type {
+	FetchedFileArray,
+	FetchedFileItem,
+	MaterialForm,
+} from '$lib/database';
 import type { Difficulty, Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch }) => {
@@ -14,34 +18,50 @@ export const actions = {
 	edit: async ({ request, fetch, params }) => {
 		const data = await request.formData();
 
-		// const fileList: FileList = data.getAll('file') as unknown as FileList;
-		// const oldFileList: FileList = data.getAll(
-		// 	'oldFile',
-		// ) as unknown as FileList;
-		//
-		// const oldFilesPaths: string[] = data.getAll(
-		// 	'oldFilePath',
-		// ) as unknown as string[];
-		// const oldFilesTypes: string[] = data.getAll(
-		// 	'oldFilesType',
-		// ) as unknown as string[];
-		// const oldFilesTitles: string[] = data.getAll(
-		// 	'oldFilesTitle',
-		// ) as unknown as string[];
-		//
-		// const fileInfos: {
-		// 	type: string;
-		// 	path: string;
-		// 	title: string;
-		// }[] = [];
-		//
-		// for (let i = 0; i < oldFilesPaths.length; i++) {
-		// 	fileInfos.push({
-		// 		type: oldFilesTypes[i],
-		// 		path: oldFilesPaths[i],
-		// 		title: oldFilesTitles[i],
-		// 	});
-		// }
+		/**
+		 * New file DATA (File list)
+		 */
+		const fileList: FileList = data.getAll('file') as unknown as FileList;
+
+		const oldFilesDataFormData = data.get('oldFilesData');
+		if (oldFilesDataFormData === null) {
+			return { status: 400, message: 'No old files provided' };
+		}
+
+		const oldFileData: FetchedFileArray = JSON.parse(
+			oldFilesDataFormData.toString(),
+		);
+
+		const fileArray: File[] =
+			fileList.length === 0 ? [] : Array.from(fileList);
+
+		const addInfo: { title: string; type: string; info: string }[] = [];
+
+		for (const file of fileArray) {
+			if (file.size === 0) continue;
+
+			const arBuf = await file.arrayBuffer();
+			const buffer = Buffer.from(arBuf);
+			const base64String = buffer.toString('base64');
+			const index = oldFileData.findIndex(
+				(fData: FetchedFileItem) => fData.data === base64String,
+			);
+			if (index === -1) {
+				addInfo.push({
+					title: file.name,
+					type: file.type,
+					info: base64String,
+				});
+			} else {
+				oldFileData.splice(index, 1);
+			}
+		}
+
+		const deleteInfo = oldFileData.map((data: FetchedFileItem) => {
+			return {
+				path: data.fileId,
+			};
+		});
 
 		const material: MaterialForm & {
 			materialId: number;
@@ -76,6 +96,10 @@ export const actions = {
 				delete: [],
 			},
 		};
+
+		console.log('PREPARING TO SEND TO BACK-END: ' + material);
+		console.log(material);
+		console.log(`ADD INFO LENGTH: ` + addInfo.length);
 
 		const res = await fetch('/api/material/' + params.publication, {
 			method: 'PUT',

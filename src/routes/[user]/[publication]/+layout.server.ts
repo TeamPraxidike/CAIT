@@ -11,13 +11,12 @@ import type {
 
 export const load: LayoutServerLoad = async ({ params, fetch }) => {
 	const pRes = await fetch(`/api/material/${params.publication}`);
+	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
 
-	if (pRes.status !== 200) {
-		error(pRes.status, pRes.statusText);
-	}
+	const loadedPublication: PublicationViewLoad = await pRes.json();
 
 	return {
-		loadedPublication: await pRes.json(),
+		loadedPublication,
 	} satisfies {
 		loadedPublication: PublicationViewLoad;
 	};
@@ -34,6 +33,7 @@ export type PublicationViewLoad = {
 		publication: Publication & {
 			tags: Tag[];
 			publisher: User;
+			maintainers: User[];
 		};
 	};
 };

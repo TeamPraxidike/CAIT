@@ -77,7 +77,11 @@ export async function getUserById(id: number) {
 	return prisma.user.findUnique({
 		where: { id },
 		include: {
-			posts: true,
+			posts: {
+				include: {
+					tags: true,
+				},
+			},
 		},
 	});
 }

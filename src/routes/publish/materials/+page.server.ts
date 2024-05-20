@@ -39,12 +39,15 @@ export const actions = {
 	 */
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
-
 		const fileList: FileList = data.getAll('file') as unknown as FileList;
-
 		if (!fileList) return { status: 400, message: 'No files provided' };
-
 		const add = await filesToAddOperation(fileList);
+
+		const tagsDataEntry = data.get('tags');
+		if (!tagsDataEntry) return { status: 400, message: 'No tags provided' };
+
+		const losDataEntry = data.get('learningObjectives');
+		const maintainersDataEntry = data.get('maintainers');
 
 		const material: MaterialForm = {
 			userId: Number(data.get('userId')?.toString()),
@@ -52,21 +55,14 @@ export const actions = {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',
 				difficulty: 'easy',
-				learningObjectives: data
-					.get('learningObjectives')
-					?.toString()
-					.split(';') || [''],
+				learningObjectives: JSON.parse(losDataEntry?.toString() || ''),
 				prerequisites: [data.get('prerequisites')?.toString() || ''],
 				coverPic: data.get('coverPic')?.toString() || '',
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: 34,
-				tags: data.get('tags')?.toString().split(';') || [''],
-				maintainers: data
-					.get('maintainers')
-					?.toString()
-					.split(';')
-					.map(Number) || [Number(data.get('userId')?.toString())],
+				tags: JSON.parse(tagsDataEntry.toString()),
+				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 			},
 			fileDiff: {
 				add: add,
@@ -75,11 +71,13 @@ export const actions = {
 			},
 		};
 
+		console.log(material);
+
 		const res = await fetch('/api/material', {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
 
-		return { status: res.status };
+		return { status: res.status, id: (await res.json()).id };
 	},
 } satisfies Actions;
