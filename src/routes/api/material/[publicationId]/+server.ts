@@ -157,6 +157,7 @@ export async function PUT({ request, params }) {
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
+		console.error(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});

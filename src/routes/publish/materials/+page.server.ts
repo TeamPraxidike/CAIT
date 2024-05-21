@@ -3,9 +3,9 @@ import type { MaterialForm } from '$lib/database';
 import type { Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const tagRes = await fetch('/api/tags');
-	const tags: Tag[] = await tagRes.json();
-	return { tags };
+	const tags: Tag[] = await (await fetch('/api/tags')).json();
+	const users = await (await fetch(`/api/user`)).json();
+	return { tags, users };
 };
 
 /**
@@ -57,13 +57,18 @@ export const actions = {
 				difficulty: 'easy',
 				learningObjectives: JSON.parse(losDataEntry?.toString() || ''),
 				prerequisites: [data.get('prerequisites')?.toString() || ''],
-				coverPic: data.get('coverPic')?.toString() || '',
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: 34,
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
+				materialType: 'video',
 			},
+			// coverPic: {
+			// 	type: 'image/jpeg',
+			// 	info: data.get('coverPic')?.toString() || '',
+			// },
+			coverPic: null,
 			fileDiff: {
 				add: add,
 				delete: [],

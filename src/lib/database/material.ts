@@ -113,6 +113,7 @@ export async function createMaterialPublication(
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,
+			encapsulatingType: metaData.materialType,
 			publication: {
 				create: {
 					title: metaData.title,

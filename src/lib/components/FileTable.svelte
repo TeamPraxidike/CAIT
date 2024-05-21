@@ -4,6 +4,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { Download, Render } from '$lib';
 	import { slide } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
 
 	export let files: FileList;
 
@@ -27,8 +28,8 @@
 	<h4>Uploaded files</h4>
 	{#if files}
 		<div class="flex flex-col gap-2">
-			{#each files as file}
-				<button type="button"
+			{#each files as file (file.name)}
+				<button type="button" animate:flip={{ delay: 0, duration: 200 }}
 						class="hover:bg-gray-200 transition-colors duration-75 flex items-center rounded-lg gap-2 p-3 bg-gray-100"
 						on:click={() => activateModal(file)}
 						transition:slide={{ delay: 0, duration: 200, axis: 'x' }}>

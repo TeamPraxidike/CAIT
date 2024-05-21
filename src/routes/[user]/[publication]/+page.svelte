@@ -177,9 +177,9 @@
 			<p class="text-surface-700 dark:text-surface-400">{serverData.material.publication.description}</p>
 		</div>
 		<div class="flex gap-2">
-			<UserProp role="Publisher" userPhotoUrl="" view="material" user={serverData.material.publication.publisher} />
+			<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={serverData.material.publication.publisher} />
 			{#each serverData.material.publication.maintainers as maintainer}
-				<UserProp role="Maintainer" userPhotoUrl="" view="material" user={maintainer} />
+				<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
 			{/each}
 		</div>
 	</div>

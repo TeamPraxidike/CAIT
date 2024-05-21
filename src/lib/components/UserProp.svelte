@@ -39,7 +39,7 @@
 	};
 	const dispatch = createEventDispatcher();
 	export const removeMaintainer = () => {
-		dispatch('removeMaintainer', { value: name });
+		dispatch('removeMaintainer', { value: userId });
 	};
 </script>
 <span
@@ -94,7 +94,7 @@
 {:else if view === "publish"}
 	<div style="height:fit-content"
 		 class="col-span-1 w-[80] group flex relative flex-col text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 rounded-lg hover:shadow-lg shadow">
-		<button on:click={removeMaintainer} class="absolute top-0 right-0 rounded-lg hidden group-hover:block">
+		<button type="button" on:click={removeMaintainer} class="absolute top-0 right-0 rounded-lg hidden group-hover:block">
 			<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 36 36" {...$$props}>
 				<path fill="#EB0000"
 					  d="m19.61 18l4.86-4.86a1 1 0 0 0-1.41-1.41l-4.86 4.81l-4.89-4.89a1 1 0 0 0-1.41 1.41L16.78 18L12 22.72a1 1 0 1 0 1.41 1.41l4.77-4.77l4.74 4.74a1 1 0 0 0 1.41-1.41Z"
@@ -109,7 +109,7 @@
 			{#if userPhotoUrl !== ''}
 				<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
 			{:else}
-				<div class=" w-10 h-10 md:w-28 md:h-28 bg-surface-500 placeholder-circle" />
+				<div class=" w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
 			{/if}
 			<div class="max-w-full items-center">
 				<div class="dark:text-surface-50 text-surface-900 max-w-full truncate">{name}</div>

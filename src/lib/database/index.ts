@@ -43,7 +43,7 @@ import {
 	deleteUser,
 	editUser,
 	likePublication,
-	getLikedPublications
+	getLikedPublications,
 } from '$lib/database/user';
 
 import {
@@ -66,7 +66,8 @@ import type { createCommentData, editCommentData } from '$lib/database/comment';
 import { addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
 import { prisma } from './prisma';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
-import { Difficulty } from '@prisma/client';
+import { Difficulty, MaterialType } from '@prisma/client';
+import path from 'path';
 
 const fileSystem = new LocalFileSystem();
 
@@ -82,13 +83,14 @@ type MaterialForm = {
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		coverPic: string;
+		materialType: MaterialType;
 		copyright: boolean;
 		timeEstimate: number;
 		theoryPractice: number;
 		tags: string[];
 		maintainers: number[];
 	};
+	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;
 };
 
@@ -128,6 +130,8 @@ type NodeInfo = {
 	edit: { nodeId: number; publicationId: number }[];
 	next: { fromId: number; toId: number[] }[];
 };
+
+export const basePath = path.join('static', 'uploadedFiles');
 
 export {
 	prisma,

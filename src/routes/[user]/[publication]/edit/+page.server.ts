@@ -89,7 +89,9 @@ export const actions = {
 					?.toString()
 					.split(';')
 					.map(Number) || [Number(data.get('userId')?.toString())],
+				materialType: data.get('materialType')?.toString() || 'video',
 			},
+			coverPic: null,
 			fileDiff: {
 				add: addInfo,
 				edit: [],
@@ -105,6 +107,8 @@ export const actions = {
 			method: 'PUT',
 			body: JSON.stringify(material),
 		});
+
+		console.log(res);
 
 		return { status: res.status };
 	},

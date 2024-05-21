@@ -1,40 +1,46 @@
 <script lang="ts">
-	import { DifficultySelection, FileTable, authStore, Meta, Tag } from '$lib';
+	import { authStore, DifficultySelection, FileTable, Meta, UserProp } from '$lib';
 	import {
-		FileDropzone,
-		Stepper,
-		Step,
 		Autocomplete,
 		type AutocompleteOption,
-		InputChip, getToastStore
+		FileDropzone,
+		getToastStore,
+		InputChip,
+		Step,
+		Stepper
 	} from '@skeletonlabs/skeleton';
 	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
-	import type { Difficulty, Tag as PrismaTag } from '@prisma/client';
+	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
 
 	export let form: ActionData;
 	export let data: PageServerData;
 
+	// tags
 	let tags: string[] = [];
 	$: tags = tags;
 	let allTags: PrismaTag[] = data.tags;
+	let inputChip: InputChip;
+	let tagInput = '';
 
-	let maintainers: number[] = [];
+	// maintainerIds
+	let maintainersInput: HTMLInputElement;
 	let files: FileList = [] as unknown as FileList;
+	let maintainers: User[] = [];
 
 	let title: string = '';
 	let description: string = '';
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
-	let LOs: string[] = [];
 
 	let loInput: HTMLInputElement;
-	let maintainersInput: HTMLInputElement;
-	let inputChip: InputChip;
+	let LOs: string[] = [];
+	$: LOs = LOs;
+
 
 	$: uid = $authStore.user?.id || 0;
 
@@ -47,7 +53,6 @@
 		};
 	});
 
-	let tagInput = '';
 
 	function onInputChipSelect(e: CustomEvent<TagOption>): void {
 		console.log('onInputChipSelect', e.detail);
@@ -57,15 +62,58 @@
 		}
 	}
 
-	export function changeFilezone(e: Event) {
+	function changeFilezone(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
 		if (eventFiles) {
 			files = concatFileList(files, eventFiles);
 		}
 	}
 
+	async function fetchMaintainer() {
+		const input = maintainersInput.value;
+
+
+		let res: User | undefined = undefined;
+
+		if (isNaN(Number(input))) {
+			data.users.find((user: User) => {
+				if (user.firstName === input || user.lastName === input) {
+					res = user;
+				}
+			});
+		} else {
+			data.users.find((user: User) => {
+				if (user.id === Number(input)) {
+					res = user;
+				}
+			});
+		}
+
+		if (res === undefined) {
+			toastStore.trigger({
+				message: 'User not found',
+				background: 'bg-warning-200'
+			});
+		} else if (maintainers.find((m: User) => {
+			if (res !== undefined) m.id === res.id;
+		})) {
+			toastStore.trigger({
+				message: 'User already added',
+				background: 'bg-warning-200'
+			});
+			return;
+		} else {
+			maintainers = [...maintainers, res];
+			maintainersInput.value = '';
+		}
+	}
+
+	function handleRemoveMaintainer(index: number) {
+		maintainers = maintainers.filter((_, i) => i !== index);
+	}
+
 	/* LOCK = TRUE => LOCKED */
-	const locks:boolean[] = [true, true, true]
+	const locks: boolean[] = [true, true, true];
 
 	$: locks[0] = files ? files.length === 0 : true;
 	$: locks[1] = title.length < 2 || description.length < 10;
@@ -115,7 +163,7 @@
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
         formData.append('tags', JSON.stringify(tags));
-        formData.append('maintainers', JSON.stringify(maintainers));
+        formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
       }}>
 	<Stepper buttonCompleteType="submit">
@@ -135,47 +183,12 @@
 		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-			<DifficultySelection bind:difficulty={difficulty} />
-			<div class="w-full">
-				<label for="learning_objective_input">Learning Objectives:</label>
-				<div class="flex gap-2">
-					<input type="text" name="learning_objective_input" id="learning_objective_input" bind:this={loInput}
-						   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
-					<button type="button" name="add_lo"
-							on:click={() => { LOs.push(loInput.value); loInput.value = ""; }}
-							class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
-					</button>
-				</div>
-				<ol class="list-decimal bg-surface-100 list-inside gap-2 max-h-40 overflow-y-auto">
-					{#each LOs as LO}
-						<li transition:fade={{ duration: 200 }}>{LO}</li>
-					{/each}
-				</ol>
-
-				<label for="tags_input">Tags:</label>
-				<div class="text-token w-1/2 space-y-2">
-					<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)} bind:input={tagInput} bind:value={tags} name="chips" />
-					<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-						<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags} on:selection={onInputChipSelect} />
-					</div>
-				</div>
-
-				<label for="maintainers_input">Maintainers:</label>
-				<div class="flex gap-2">
-					<input type="text" name="maintainers_input" id="maintainers_input" bind:this={maintainersInput}
-						   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">
-					<button type="button" name="add_tag"
-							on:click={() => { maintainers.push(Number(maintainersInput.value)); maintainersInput.value = ''; }}
-							class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
-					</button>
-				</div>
-				<div class="flex flex-wrap gap-2">
-					{#each maintainers as maintainer}
-						<Tag tagText={maintainer.toString()} removable={false} />
-					{/each}
-				</div>
-
-				<div class="flex gap-2">
+			<div class="flex gap-4 items-center">
+				<label for="difficulty">Difficulty:</label>
+				<DifficultySelection bind:difficulty={difficulty} />
+			</div>
+			<div class="grid grid-cols-2 gap-4">
+				<div class="flex col-span-2 items-center gap-4">
 					<div class="w-1/2">
 						<label for="estimate">Time Estimate:</label>
 						<input type="text" name="estimate" bind:value={estimate}
@@ -186,6 +199,56 @@
 						<input type="text" name="copyright" bind:value={copyright}
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 					</div>
+				</div>
+				<div class="col-span-2">
+					<label for="maintainers">Maintainers:</label>
+					<div class="flex gap-2">
+						<input type="text" name="maintainers" id="maintainers" bind:this={maintainersInput}
+							   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 flex-grow">
+						<button type="button" name="add_maintainer" inputmode="decimal"
+								on:click={fetchMaintainer}
+								class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
+						</button>
+					</div>
+					<div class="flex my-2">
+						{#if $authStore.user}
+							<UserProp
+								user={$authStore.user} view="publish" role="Publisher" userPhotoUrl="/fdr.jpg" />
+							{#each maintainers as maintainer, key (maintainer.id)}
+								<UserProp on:removeMaintainer={() => handleRemoveMaintainer(key)} user={maintainer}
+										  view="publish"
+										  role="Maintainer" userPhotoUrl="/fdr.jpg" />
+							{/each}
+						{/if}
+					</div>
+				</div>
+				<div>
+					<label for="tags_input">Tags:</label>
+					<div class="text-token space-y-2">
+						<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
+								   bind:input={tagInput} bind:value={tags} name="chips" />
+						<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+							<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
+										  on:selection={onInputChipSelect} />
+						</div>
+					</div>
+				</div>
+				<div>
+					<label for="learning_objective_input">Learning Objectives:</label>
+					<div class="flex gap-2">
+						<input type="text" name="learning_objective_input" id="learning_objective_input"
+							   bind:this={loInput}
+							   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 flex-grow">
+						<button type="button" name="add_lo"
+								on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""; }}
+								class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
+						</button>
+					</div>
+					<ol class="list-decimal bg-surface-100 list-inside gap-2 max-h-40 overflow-y-auto">
+						{#each LOs as LO}
+							<li transition:fade={{ duration: 200 }}>{LO}</li>
+						{/each}
+					</ol>
 				</div>
 			</div>
 		</Step>

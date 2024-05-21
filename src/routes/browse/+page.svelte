@@ -5,10 +5,12 @@
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import type { Tag } from '@prisma/client';
+    import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
     let searchWord: string = '';
-    let materials = data.publications;
+    let materials = data.materials;
+    let fileData:FetchedFileArray = data.fileData;
     let users = data.users
 
     $:pageType = data.type;
@@ -34,7 +36,6 @@
     let allTags: {id: number, content:string }[] = data.tags.map((x: Tag) => ({ id: 0, content: x.content }));
     let displayTags: {id:number, content:string }[] = allTags;
     let tagActive = false
-
 
     //Variables needed to deal with Publishers
     let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
@@ -247,6 +248,7 @@
 {/if}
 </div>
 
-{#each materials as material}
+{#each materials as material, i}
+<!--    <p>{fileData[i].data}</p>-->
     <PublicationCard publication={material.publication} />
 {/each}

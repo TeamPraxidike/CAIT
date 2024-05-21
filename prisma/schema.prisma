@@ -26,7 +26,6 @@ enum MaterialType {
   dataset
   exam
   code
-
 }
 
 enum PublicationType {
@@ -95,24 +94,30 @@ model Publication {
 }
 
 model Material {
-  id             Int     @id @default(autoincrement())
-  coverPic       String?
-  copyright      Boolean
+  id                Int          @id @default(autoincrement())
+  copyright         Boolean
   encapsulatingType MaterialType @default(presentation)
-  timeEstimate   Int?
-  theoryPractice Float?
-  files          File[]
+  timeEstimate      Int?
+  theoryPractice    Float?
+  files             File[]       @relation("Files")
+
+  coverPicId String? @unique
+  coverPic   File?   @relation("CoverPic", fields: [coverPicId], references: [path], onDelete: Cascade)
 
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 }
 
 model File {
-  path       String   @id
-  title      String
-  type       String
+  path  String @id
+  title String
+  type  String
+
+  coverPicId String?   @unique
+  coverPic   Material? @relation("CoverPic")
+
   materialId Int
-  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  material   Material @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)
 }
 
 model Circuit {
@@ -137,7 +142,7 @@ model Node {
 }
 
 model Tag {
-  content     String @id
+  content     String        @id
   publication Publication[]
 }
 
