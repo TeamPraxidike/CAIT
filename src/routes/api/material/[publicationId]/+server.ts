@@ -11,7 +11,9 @@ import {
 	deleteFile,
 	editFile,
 	type MaterialForm,
+	basePath,
 } from '$lib/database';
+import path from 'path';
 
 export async function GET({ params }) {
 	// Authentication step
@@ -75,14 +77,13 @@ export async function PUT({ request, params }) {
 	const body: MaterialForm & {
 		materialId: number;
 	} = await request.json();
-	console.log('RECEIVED BODY: ');
-	console.log(body);
 	const material: MaterialForm = body;
 	const metaData = material.metaData;
 	// const userId = material.userId;
 	const fileInfo: FileDiffActions = material.fileDiff;
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
+	const coverPic = material.coverPic;
 
 	const publicationId = parseInt(params.publicationId);
 
@@ -104,6 +105,17 @@ export async function PUT({ request, params }) {
 					publicationId,
 					prismaTransaction,
 				);
+
+				if (coverPic) {
+					const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
+					await addFile(
+						'cover.jpg',
+						coverPic.type,
+						buffer,
+						body.materialId,
+						prismaTransaction,
+					);
+				}
 
 				// add files
 				for (const file of fileInfo.add) {

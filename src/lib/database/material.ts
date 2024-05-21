@@ -4,6 +4,7 @@ import {
 	type Material,
 	PublicationType,
 	type File as PrismaFile,
+	MaterialType,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
 
@@ -67,6 +68,7 @@ export async function getAllMaterials(
 					tags: true,
 				},
 			},
+			coverPic: true,
 			files: false,
 		},
 	});
@@ -100,7 +102,7 @@ export async function createMaterialPublication(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		coverPic: string;
+		materialType: MaterialType;
 		copyright: boolean;
 		timeEstimate: number;
 		theoryPractice: number;
@@ -109,7 +111,6 @@ export async function createMaterialPublication(
 ) {
 	return prismaContext.material.create({
 		data: {
-			coverPic: metaData.coverPic,
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,
@@ -146,7 +147,7 @@ export async function updateMaterialByPublicationId(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		coverPic: string;
+		materialType: MaterialType;
 		copyright: boolean;
 		timeEstimate: number;
 		theoryPractice: number;
@@ -156,7 +157,7 @@ export async function updateMaterialByPublicationId(
 	return prismaContext.material.update({
 		where: { publicationId: publicationId },
 		data: {
-			coverPic: metaData.coverPic,
+			encapsulatingType: metaData.materialType,
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,

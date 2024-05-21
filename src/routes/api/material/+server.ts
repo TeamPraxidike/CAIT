@@ -6,9 +6,13 @@ import {
 	addFile,
 	type MaterialForm,
 	prisma,
+	basePath,
+	type FetchedFileArray,
+	fileSystem,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty } from '@prisma/client';
+import path from 'path';
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -47,7 +51,31 @@ export const GET: RequestHandler = async ({ url }) => {
 		const type = ty ? ty.split(',') : [];
 
 		const materials = await getAllMaterials(tags, publishers, diff, type);
-		return new Response(JSON.stringify(materials), { status: 200 });
+
+		// coverPic return
+		const fileData: FetchedFileArray = [];
+
+		for (const material of materials) {
+			// coverPic
+			console.log('------');
+			console.log(material);
+			console.log(material.coverPic);
+			console.log('------');
+			if (!material.coverPic) continue;
+
+			const currentFileData = fileSystem.readFile(material.coverPic.path);
+			fileData.push({
+				fileId: material.coverPic.path,
+				data: currentFileData.toString('base64'),
+			});
+		}
+
+		console.log('backend filedata');
+		console.log(fileData);
+
+		return new Response(JSON.stringify({ materials, fileData }), {
+			status: 200,
+		});
 	} catch (error) {
 		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
@@ -71,6 +99,7 @@ export async function POST({ request }) {
 	const metaData = body.metaData;
 	const userId = body.userId;
 	const fileInfo: FileDiffActions = body.fileDiff;
+	const coverPic = body.coverPic;
 
 	try {
 		const createdMaterial = await prisma.$transaction(
@@ -96,6 +125,34 @@ export async function POST({ request }) {
 					material.publicationId,
 					prismaTransaction,
 				);
+
+				if (coverPic) {
+					const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
+					await addFile(
+						'cover.jpg',
+						coverPic.type,
+						buffer,
+						material.id,
+						prismaTransaction,
+					);
+				} else {
+					console.log('\n\nIN POST IN PUBLICATION');
+					const filePath = path.join(
+						'static',
+						'defaultCoverMaterial',
+						metaData.materialType.toString() + '.jpg',
+					);
+					console.log(filePath);
+
+					prismaTransaction.file.create({
+						data: {
+							path: filePath,
+							title: 'cover',
+							type: 'jpg',
+							materialId: material.id,
+						},
+					});
+				}
 
 				// add files
 				for (const file of fileInfo.add) {
