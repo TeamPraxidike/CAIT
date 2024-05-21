@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import type { FetchedFileArray } from '$lib/database';
+import type { FetchedFileArray, FetchedFileItem } from '$lib/database';
 import type {
 	File as PrismaFile,
 	Material,
@@ -36,4 +36,5 @@ export type PublicationViewLoad = {
 			maintainers: User[];
 		};
 	};
+	coverFileData: FetchedFileItem;
 };

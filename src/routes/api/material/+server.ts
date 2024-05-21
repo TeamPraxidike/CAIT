@@ -75,9 +75,6 @@ export const GET: RequestHandler = async ({ url }) => {
 			});
 		}
 
-		console.log('backend filedata');
-		console.log(fileData);
-
 		return new Response(JSON.stringify({ materials, fileData }), {
 			status: 200,
 		});

@@ -5,8 +5,5 @@ export async function load({ url, fetch }) {
 	const { materials, fileData } = await (await fetch(`/api/material`)).json();
 	const users = await (await fetch(`/api/user`)).json();
 	const tags = await (await fetch(`/api/tags`)).json();
-
-	console.log('file data: ' + fileData + 'aa');
-
 	return { type, materials, fileData, users, tags };
 }

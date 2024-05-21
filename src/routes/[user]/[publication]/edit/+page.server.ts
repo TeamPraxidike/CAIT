@@ -4,13 +4,11 @@ import type {
 	FetchedFileItem,
 	MaterialForm,
 } from '$lib/database';
-import type { Difficulty, Tag } from '@prisma/client';
+import type { Difficulty, MaterialType, Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const tagRes = await fetch('/api/tags');
-
 	const tags: Tag[] = await tagRes.json();
-
 	return { tags };
 };
 
@@ -63,6 +61,20 @@ export const actions = {
 			};
 		});
 
+		const coverPicFile = data.get('coverPic');
+		let coverPic = null;
+
+		console.log(coverPicFile);
+
+		if (coverPicFile instanceof File) {
+			const buffer = await coverPicFile.arrayBuffer();
+			const info = Buffer.from(buffer).toString('base64');
+			coverPic = {
+				type: coverPicFile.type,
+				info,
+			};
+		}
+
 		const material: MaterialForm & {
 			materialId: number;
 		} = {
@@ -79,7 +91,6 @@ export const actions = {
 					?.toString()
 					.split(';') || [''],
 				prerequisites: [data.get('prerequisites')?.toString() || ''],
-				coverPic: data.get('coverPic')?.toString() || '',
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: 34,
@@ -89,9 +100,11 @@ export const actions = {
 					?.toString()
 					.split(';')
 					.map(Number) || [Number(data.get('userId')?.toString())],
-				materialType: data.get('materialType')?.toString() || 'video',
+				materialType:
+					(data.get('materialType')?.toString() as MaterialType) ||
+					'video',
 			},
-			coverPic: null,
+			coverPic,
 			fileDiff: {
 				add: addInfo,
 				edit: [],
@@ -99,16 +112,10 @@ export const actions = {
 			},
 		};
 
-		console.log('PREPARING TO SEND TO BACK-END: ' + material);
-		console.log(material);
-		console.log(`ADD INFO LENGTH: ` + addInfo.length);
-
 		const res = await fetch('/api/material/' + params.publication, {
 			method: 'PUT',
 			body: JSON.stringify(material),
 		});
-
-		console.log(res);
 
 		return { status: res.status };
 	},

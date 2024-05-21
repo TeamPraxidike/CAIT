@@ -4,12 +4,16 @@
     import {fly} from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
-    import type { Tag } from '@prisma/client';
+    import type { Material, Publication, Tag } from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
     let searchWord: string = '';
-    let materials = data.materials;
+    let materials:Material & {
+        publication: Publication & {
+            tags: Tag[];
+        }
+    }[] = data.materials;
     let fileData:FetchedFileArray = data.fileData;
     let users = data.users
 
@@ -50,9 +54,6 @@
     let typeActive = false
 
     $:console.log(selectedTypes, selectedTags, selectedPublishers, selectedDiff)
-
-
-
 
     //SORT BY Functionality
 
@@ -249,6 +250,5 @@
 </div>
 
 {#each materials as material, i}
-<!--    <p>{fileData[i].data}</p>-->
-    <PublicationCard publication={material.publication} />
+    <PublicationCard imgSrc={'data:image;base64,' +fileData[i].data} publication={material.publication} />
 {/each}

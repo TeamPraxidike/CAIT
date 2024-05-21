@@ -17,7 +17,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
  */
 async function filesToAddOperation(fileList: FileList) {
 	const addPromises = Array.from(fileList).map(async (file) => {
-		console.log(typeof file);
 		const buffer = await file.arrayBuffer();
 		const info = Buffer.from(buffer).toString('base64');
 
@@ -48,6 +47,19 @@ export const actions = {
 
 		const losDataEntry = data.get('learningObjectives');
 		const maintainersDataEntry = data.get('maintainers');
+		const coverPicFile = data.get('coverPic');
+		let coverPic = null;
+
+		console.log(coverPicFile);
+
+		if (coverPicFile instanceof File) {
+			const buffer = await coverPicFile.arrayBuffer();
+			const info = Buffer.from(buffer).toString('base64');
+			coverPic = {
+				type: coverPicFile.type,
+				info,
+			};
+		}
 
 		const material: MaterialForm = {
 			userId: Number(data.get('userId')?.toString()),
@@ -68,9 +80,9 @@ export const actions = {
 			// 	type: 'image/jpeg',
 			// 	info: data.get('coverPic')?.toString() || '',
 			// },
-			coverPic: null,
+			coverPic,
 			fileDiff: {
-				add: add,
+				add,
 				delete: [],
 				edit: [],
 			},

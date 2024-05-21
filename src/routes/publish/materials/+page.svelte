@@ -2,7 +2,7 @@
 	import { authStore, DifficultySelection, FileTable, Meta, UserProp } from '$lib';
 	import {
 		Autocomplete,
-		type AutocompleteOption,
+		type AutocompleteOption, FileButton,
 		FileDropzone,
 		getToastStore,
 		InputChip,
@@ -31,21 +31,36 @@
 	let files: FileList = [] as unknown as FileList;
 	let maintainers: User[] = [];
 
+	// learning objectives
+	let loInput: HTMLInputElement;
+	let LOs: string[] = [];
+	$: LOs = LOs;
+
+	// input data
 	let title: string = '';
 	let description: string = '';
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
 
-	let loInput: HTMLInputElement;
-	let LOs: string[] = [];
-	$: LOs = LOs;
-
+	// cover
+	let coverPic: File | undefined = undefined;
+	function chooseCover(e: Event) {
+		const eventFiles = (e.target as HTMLInputElement).files;
+		if (eventFiles) {
+			if (eventFiles[0].type === 'image/jpeg' || eventFiles[0].type === 'image/png')
+				coverPic = eventFiles[0];
+			else
+				toastStore.trigger({
+					message: 'Invalid file type, please upload a .jpg or .png file',
+					background: 'bg-warning-200'
+				});
+		}
+	}
 
 	$: uid = $authStore.user?.id || 0;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
-
 	let flavorOptions: TagOption[] = allTags.map(tag => {
 		return {
 			value: tag.content,
@@ -62,7 +77,7 @@
 		}
 	}
 
-	function changeFilezone(e: Event) {
+	function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
 		if (eventFiles) {
 			files = concatFileList(files, eventFiles);
@@ -165,11 +180,12 @@
         formData.append('tags', JSON.stringify(tags));
         formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
+        formData.append('coverPic', coverPic || '');
       }}>
 	<Stepper buttonCompleteType="submit">
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files</svelte:fragment>
-			<FileDropzone on:change={changeFilezone} multiple name="file" />
+			<FileDropzone on:change={appendToFileList} multiple name="file" />
 			<FileTable operation="edit" bind:files={files} />
 		</Step>
 		<Step locked={locks[1]}>
@@ -180,6 +196,12 @@
 				<textarea name="description" placeholder="Description..." bind:value={description}
 						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>
+			<label for="coverPhoto">Cover Picture:</label>
+			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>
+			{#if coverPic}
+				<button on:click={() => coverPic = undefined} type="button" class="btn">Remove</button>
+				<img src={URL.createObjectURL(coverPic)} alt="sss">
+			{/if}
 		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>

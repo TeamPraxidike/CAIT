@@ -11,9 +11,12 @@ import {
 	deleteFile,
 	editFile,
 	type MaterialForm,
-	basePath, addCover,
+	basePath,
+	addCover,
+	type FetchedFileItem,
 } from '$lib/database';
 import path from 'path';
+import fs from 'fs';
 
 export async function GET({ params }) {
 	// Authentication step
@@ -52,12 +55,46 @@ export async function GET({ params }) {
 			});
 		}
 
+		// coverPic return
+		let coverFileData: FetchedFileItem;
+
+		let filePath;
+
+		console.log('\n\nMATERIAL COVER PIC ' + material.coverPic + '\n\n');
+
+		// coverPic
+		if (!material.coverPic) {
+			filePath = path.join(
+				'static',
+				'defaultCoverMaterial',
+				material.encapsulatingType.toString() + '.jpg',
+			);
+
+			const currentFileData = fs.readFileSync(filePath);
+
+			coverFileData = {
+				fileId: filePath,
+				data: currentFileData.toString('base64'),
+			};
+		} else {
+			filePath = material.coverPic.path;
+
+			const currentFileData = fileSystem.readFile(filePath);
+			coverFileData = {
+				fileId: filePath,
+				data: currentFileData.toString('base64'),
+			};
+		}
+
 		// If JSON stringify cannot handle raw Buffer, use this:
 		//const transformedFileData = await bufToBase64(fileData);
 
-		return new Response(JSON.stringify({ material, fileData }), {
-			status: 200,
-		});
+		return new Response(
+			JSON.stringify({ material, fileData, coverFileData }),
+			{
+				status: 200,
+			},
+		);
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
