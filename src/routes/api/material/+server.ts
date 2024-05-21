@@ -3,18 +3,15 @@ import {
 	createMaterialPublication,
 	type FileDiffActions,
 	handleConnections,
-	addFile,
 	type MaterialForm,
 	prisma,
-	basePath,
 	type FetchedFileArray,
-	fileSystem,
-	addCover,
+	updateCoverPic,
+	updateFiles,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty } from '@prisma/client';
-import path from 'path';
-import fs from 'fs';
+import { coverPicFetcher } from '$lib/database/file';
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -58,31 +55,9 @@ export const GET: RequestHandler = async ({ url }) => {
 		const fileData: FetchedFileArray = [];
 
 		for (const material of materials) {
-			let filePath;
-
-			// coverPic
-			if (!material.coverPic) {
-				filePath = path.join(
-					'static',
-					'defaultCoverMaterial',
-					material.encapsulatingType.toString() + '.jpg',
-				);
-
-				const currentFileData = fs.readFileSync(filePath);
-
-				fileData.push({
-					fileId: filePath,
-					data: currentFileData.toString('base64'),
-				});
-			} else {
-				filePath = material.coverPic.path;
-
-				const currentFileData = fileSystem.readFile(filePath);
-				fileData.push({
-					fileId: filePath,
-					data: currentFileData.toString('base64'),
-				});
-			}
+			fileData.push(
+				coverPicFetcher(material.encapsulatingType, material.coverPic),
+			);
 		}
 
 		return new Response(JSON.stringify({ materials, fileData }), {
@@ -138,44 +113,9 @@ export async function POST({ request }) {
 					prismaTransaction,
 				);
 
-				if (coverPic) {
-					const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
-					await addCover(
-						'cover.jpg',
-						coverPic.type,
-						buffer,
-						material.id,
-						prismaTransaction,
-					);
-				} else {
-					// const filePath = path.join(
-					// 	'static',
-					// 	'defaultCoverMaterial',
-					// 	metaData.materialType.toString() + '.jpg',
-					// );
-					//
-					// return prismaContext.file.create({
-					// 	data: {
-					// 		path: filePath,
-					// 		title: 'cover.jpg',
-					// 		type: coverPic.type,
-					// 		materialCoverId: materialId, // Associate the cover with Material
-					// 	},
-					// });
-				}
+				await updateCoverPic(coverPic, material.id, prismaTransaction);
 
-				// add files
-				for (const file of fileInfo.add) {
-					const buffer: Buffer = Buffer.from(file.info, 'base64');
-
-					await addFile(
-						file.title,
-						file.type,
-						buffer,
-						material.id,
-						prismaTransaction,
-					);
-				}
+				await updateFiles(fileInfo, material.id, prismaTransaction);
 
 				return material;
 			},

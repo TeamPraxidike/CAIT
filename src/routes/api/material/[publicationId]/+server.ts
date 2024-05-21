@@ -7,16 +7,13 @@ import {
 	fileSystem,
 	deleteMaterialByPublicationId,
 	type FetchedFileArray,
-	addFile,
-	deleteFile,
-	editFile,
 	type MaterialForm,
-	basePath,
-	addCover,
 	type FetchedFileItem,
+	updateCoverPic,
+	updateFiles,
 } from '$lib/database';
-import path from 'path';
-import fs from 'fs';
+
+import { coverPicFetcher } from '$lib/database';
 
 export async function GET({ params }) {
 	// Authentication step
@@ -56,38 +53,10 @@ export async function GET({ params }) {
 		}
 
 		// coverPic return
-		let coverFileData: FetchedFileItem;
-
-		let filePath;
-
-		console.log('\n\nMATERIAL COVER PIC ' + material.coverPic + '\n\n');
-
-		// coverPic
-		if (!material.coverPic) {
-			filePath = path.join(
-				'static',
-				'defaultCoverMaterial',
-				material.encapsulatingType.toString() + '.jpg',
-			);
-
-			const currentFileData = fs.readFileSync(filePath);
-
-			coverFileData = {
-				fileId: filePath,
-				data: currentFileData.toString('base64'),
-			};
-		} else {
-			filePath = material.coverPic.path;
-
-			const currentFileData = fileSystem.readFile(filePath);
-			coverFileData = {
-				fileId: filePath,
-				data: currentFileData.toString('base64'),
-			};
-		}
-
-		// If JSON stringify cannot handle raw Buffer, use this:
-		//const transformedFileData = await bufToBase64(fileData);
+		let coverFileData: FetchedFileItem = coverPicFetcher(
+			material.encapsulatingType,
+			material.coverPic,
+		);
 
 		return new Response(
 			JSON.stringify({ material, fileData, coverFileData }),
@@ -143,70 +112,13 @@ export async function PUT({ request, params }) {
 					prismaTransaction,
 				);
 
-				// if coverPic is not null (chosen cover pic)
-				if (coverPic) {
-					const coverFile = await prismaTransaction.file.findUnique({
-						where: {
-							materialCoverId: body.materialId,
-						},
-					});
-					if (coverFile) {
-						await deleteFile(coverFile.path, prismaTransaction);
-						// await prismaTransaction.file.delete({
-						// 	where: {
-						// 		materialCoverId: body.materialId,
-						// 	},
-						// });
-					}
+				await updateCoverPic(
+					coverPic,
+					body.materialId,
+					prismaTransaction,
+				);
 
-					const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
-					await addCover(
-						'cover.jpg',
-						coverPic.type,
-						buffer,
-						body.materialId,
-						prismaTransaction,
-					);
-				} else {
-					const coverFile = await prismaTransaction.file.findUnique({
-						where: {
-							materialCoverId: body.materialId,
-						},
-					});
-					if (coverFile) {
-						await deleteFile(coverFile.path, prismaTransaction);
-					}
-				}
-
-				// add files
-				for (const file of fileInfo.add) {
-					const buffer: Buffer = Buffer.from(file.info, 'base64');
-
-					await addFile(
-						file.title,
-						file.type,
-						buffer,
-						body.materialId,
-						prismaTransaction,
-					);
-				}
-
-				// delete files
-				for (const file of fileInfo.delete) {
-					await deleteFile(file.path, prismaTransaction);
-				}
-
-				// edit existing files
-				for (const file of fileInfo.edit) {
-					const buffer: Buffer = Buffer.from(file.info, 'base64');
-
-					await editFile(
-						file.path,
-						file.title,
-						buffer,
-						prismaTransaction,
-					);
-				}
+				await updateFiles(fileInfo, body.materialId, prismaTransaction);
 
 				const material = await updateMaterialByPublicationId(
 					publicationId,

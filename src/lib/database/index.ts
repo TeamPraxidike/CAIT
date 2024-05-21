@@ -63,7 +63,16 @@ import type { userEditData } from '$lib/database/user';
 import type { editReplyData, createReplyData } from '$lib/database/reply';
 import type { createCommentData, editCommentData } from '$lib/database/comment';
 
-import { addFile, deleteFile, editFile, bufToBase64, addCover } from '$lib/database/file';
+import {
+	addFile,
+	deleteFile,
+	editFile,
+	bufToBase64,
+	addCover,
+	coverPicFetcher,
+	updateCoverPic,
+	updateFiles,
+} from '$lib/database/file';
 import { prisma } from './prisma';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { Difficulty, MaterialType } from '@prisma/client';
@@ -141,6 +150,9 @@ export {
 	type FetchedFileItem,
 	type FetchedFileArray,
 	type NodeInfo,
+	updateFiles,
+	coverPicFetcher,
+	updateCoverPic,
 	addCover,
 	addFile,
 	editFile,
