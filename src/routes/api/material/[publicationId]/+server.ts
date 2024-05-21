@@ -53,7 +53,7 @@ export async function GET({ params }) {
 		}
 
 		// coverPic return
-		let coverFileData: FetchedFileItem = coverPicFetcher(
+		const coverFileData: FetchedFileItem = coverPicFetcher(
 			material.encapsulatingType,
 			material.coverPic,
 		);
