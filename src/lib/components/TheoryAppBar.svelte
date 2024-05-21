@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Icon from "@iconify/svelte";
+    import Icon from '@iconify/svelte';
 
     export let value: number = 0.5;
     export let editable: boolean = true;
