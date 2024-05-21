@@ -221,7 +221,7 @@
 </div>
 
 <div class="flex mb-2 gap-2 col-span-full items-center">
-	<enhanced:img class="w-10 md:w-16 rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo" />
+	<enhanced:img class="w-10 md:w-16 rounded-full my-4 border" src="/static/omni.jpg" alt="CAIT Logo" />
 	<form use:enhance method="POST" class="flex-grow ">
 		<div class="flex-grow pt-2 items-center">
         <textarea
