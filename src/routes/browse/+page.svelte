@@ -83,18 +83,25 @@
      */
     const removeTag = (event: CustomEvent) => {
         selectedTags = selectedTags.filter(item => item.content !== event.detail.text)
+        applyActive = true;
     }
 
     const removePublisher = (name: {id:number, content:string }) => {
         selectedPublishers = selectedPublishers.filter(publisher => publisher.content !== name.content);
+        applyActive = true;
+
     };
 
     const removeDiff = (name:{id:number, content:string }) => {
         selectedDiff = selectedDiff.filter(diff => diff.content !== name.content);
+        applyActive = true;
+
     };
 
     const removeType = (name: {id:number, content:string }) => {
         selectedTypes = selectedTypes.filter(diff => diff.content !== name.content);
+        applyActive = true;
+
     };
 
     /**
