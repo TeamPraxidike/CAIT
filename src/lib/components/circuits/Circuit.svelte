@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
+	import type {Node} from '@prisma/client';
+	//	import cytoscapeNodeHtmlLabel from 'cytoscape-node-html-label';
 
 
-
+	//cytoscapeNodeHtmlLabel(cytoscape);
 
 	interface Edge {
 		id:string
@@ -13,7 +15,9 @@
 
 	//export let dbNodes : Node[];
 
-	 let idNodes : string[];
+	export let publishing: boolean;
+
+	 let idNodes : Node[];
 	 let edges : Edge[];
 	 let cy;
 
@@ -24,11 +28,11 @@
 		cy = cytoscape({
 			container: document.getElementById('cy'),
 			elements: [
-				{ data: { id: 'a' } },
-				{ data: { id: 'b' } },
-				{ data: { id: 'c' } },
-				{ data: { id: 'd' } },
-				{ data: { id: 'e' } },
+				{ data: { id: 'a', label: "Presentation"}, position: { x: 0, y: 0 } },
+				{ data: { id: 'b', label: "Video"}, position: { x: 1000, y: 700 } },
+				{ data: { id: 'c', label: "Something Else" }, position: { x: 100, y: 200 } },
+				{ data: { id: 'd', label: "Intro into artificial neural network" }, position: { x: 100, y: 400 } },
+				{ data: { id: 'e', label: "Assignment" }, position: { x: 150, y: 200 } },
 				{ data: { id: 'ab', source: 'a', target: 'b' } },
 				{ data: { id: 'bc', source: 'b', target: 'c' } },
 				{ data: { id: 'cd', source: 'c', target: 'd' } },
@@ -44,11 +48,11 @@
 						'background-color': '#F9F9FA',
 						'border-width' : '1px',
 						'border-color' : '#0088AD',
-						'color': '#646478',
-						'font-size': '12px',
+						'color': '#4C4C5C',
+						'font-size': '10px',
 						'text-valign': 'center',
 						'text-halign': 'center',
-						'label': 'data(id)',
+						'label': 'data(label)',
 					},
 				},
 
@@ -66,7 +70,7 @@
 				},
 			],
 			layout: {
-				name: 'grid',
+				name: 'preset'
 			},
 		});
 
@@ -76,35 +80,62 @@
 		// 		query: 'node',
 		// 		tpl: function(data : any) {
 		// 			return `<div class="node-content">
-    //                 <div class="node-title">${data.id}</div>
-    //                 <div class="node-icons">
-    //                   <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
-    //                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
-    //                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
-    //                 </div>
-    //               </div>`;
+		//                 <div class="node-title">${data.id}</div>
+		//                 <div class="node-icons">
+		//                   <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
+		//                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
+		//                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
+		//                 </div>
+		//               </div>`;
 		// 		}
 		// 	}
 		// ]);
 
-		cy.on('click', 'node', (event) => {
+		// cy.nodeHtmlLabel([
+		// 	{
+		// 		query: 'node',
+		// 		tpl: function (data : any) {
+		// 			const nodeId = `node-${data.id}`;
+		// 			return `<div id="${nodeId}" class="node-content"></div>`;
+		// 		}
+		// 	}
+		// ]);
+		//
+		// cy.nodes().forEach((node: any) => {
+		// 	const nodeId = `node-${node.id()}`;
+		// 	new Node({
+		// 		target: document.getElementById(nodeId),
+		// 		props: {
+		// 			data: node.data()
+		// 		}
+		// 	});
+		// });
+
+
+		cy.on('click', 'node', (event: any) => {
 			alert("node clicked" + event.target.id())
 		});
 
-		cy.on('mouseenter', (event) => {
+		cy.on('mouseover', 'node', (event: any) => {
 			const node = event.target;
-			console.log("Here")
-			console.log(node.id)
-			node.style('background-color', 'blue'); // Change color to blue
+			node.style({
+				'background-color': '#4C4C5C',
+				'color': '#F9F9FA',
+				'cursor': 'pointer'
+			});
 		});
 
-		// Add event listener to change color back on mouse leave
-		cy.on('mouseleave', 'node', (event) => {
+		cy.on('mouseout', 'node', (event: any) => {
 			const node = event.target;
-			console.log("Here")
-			console.log(node.id)
-			node.style('background-color', '#666'); // Change color back to default
+			node.style('background-color', '#FCFCFD');
+			node.style('color', '#4C4C5C');
 		});
+
+		if (!publishing)
+			cy.nodes().forEach(node => {
+					if (node)
+						node.lock()
+			});
 	});
 </script>
 
