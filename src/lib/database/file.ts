@@ -9,6 +9,33 @@ export async function bufToBase64(files: FetchedFileArray) {
 	}));
 }
 
+export async function addCover(
+	title: string,
+	type: string,
+	info: Buffer,
+	materialId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	try {
+		const path = await fileSystem.saveFile(info, title);
+		try {
+			return prismaContext.file.create({
+				data: {
+					path: path,
+					title: title,
+					type,
+					materialCoverId: materialId, // Associate the cover with Material
+				},
+			});
+		} catch (errorDatabase) {
+			fileSystem.deleteFile(path);
+			throw new Error('Rollback');
+		}
+	} catch (errorFileSystem) {
+		throw new Error('Rollback');
+	}
+}
+
 export async function addFile(
 	title: string,
 	type: string,

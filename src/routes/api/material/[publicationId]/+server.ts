@@ -11,7 +11,7 @@ import {
 	deleteFile,
 	editFile,
 	type MaterialForm,
-	basePath,
+	basePath, addCover,
 } from '$lib/database';
 import path from 'path';
 
@@ -106,9 +106,10 @@ export async function PUT({ request, params }) {
 					prismaTransaction,
 				);
 
+				// no else case needed since POST takes care of that
 				if (coverPic) {
 					const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
-					await addFile(
+					await addCover(
 						'cover.jpg',
 						coverPic.type,
 						buffer,

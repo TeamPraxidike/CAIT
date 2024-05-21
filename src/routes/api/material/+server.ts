@@ -8,7 +8,7 @@ import {
 	prisma,
 	basePath,
 	type FetchedFileArray,
-	fileSystem,
+	fileSystem, addCover,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty } from '@prisma/client';
@@ -56,16 +56,21 @@ export const GET: RequestHandler = async ({ url }) => {
 		const fileData: FetchedFileArray = [];
 
 		for (const material of materials) {
-			// coverPic
-			console.log('------');
-			console.log(material);
-			console.log(material.coverPic);
-			console.log('------');
-			if (!material.coverPic) continue;
+			let filePath;
 
-			const currentFileData = fileSystem.readFile(material.coverPic.path);
+			// coverPic
+			if (!material.coverPic) {
+				filePath = path.join(
+					'static',
+					'defaultCoverMaterial',
+					material.encapsulatingType.toString() + '.jpg',
+				);
+			}
+			else filePath = material.coverPic.path;
+
+			const currentFileData = fileSystem.readFile(filePath);
 			fileData.push({
-				fileId: material.coverPic.path,
+				fileId: filePath,
 				data: currentFileData.toString('base64'),
 			});
 		}
@@ -128,7 +133,7 @@ export async function POST({ request }) {
 
 				if (coverPic) {
 					const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
-					await addFile(
+					await addCover(
 						'cover.jpg',
 						coverPic.type,
 						buffer,
@@ -136,22 +141,20 @@ export async function POST({ request }) {
 						prismaTransaction,
 					);
 				} else {
-					console.log('\n\nIN POST IN PUBLICATION');
-					const filePath = path.join(
-						'static',
-						'defaultCoverMaterial',
-						metaData.materialType.toString() + '.jpg',
-					);
-					console.log(filePath);
-
-					prismaTransaction.file.create({
-						data: {
-							path: filePath,
-							title: 'cover',
-							type: 'jpg',
-							materialId: material.id,
-						},
-					});
+					// const filePath = path.join(
+					// 	'static',
+					// 	'defaultCoverMaterial',
+					// 	metaData.materialType.toString() + '.jpg',
+					// );
+					//
+					// return prismaContext.file.create({
+					// 	data: {
+					// 		path: filePath,
+					// 		title: 'cover.jpg',
+					// 		type: coverPic.type,
+					// 		materialCoverId: materialId, // Associate the cover with Material
+					// 	},
+					// });
 				}
 
 				// add files
