@@ -8,11 +8,13 @@ import {
 	prisma,
 	basePath,
 	type FetchedFileArray,
-	fileSystem, addCover,
+	fileSystem,
+	addCover,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty } from '@prisma/client';
 import path from 'path';
+import fs from 'fs';
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -65,14 +67,22 @@ export const GET: RequestHandler = async ({ url }) => {
 					'defaultCoverMaterial',
 					material.encapsulatingType.toString() + '.jpg',
 				);
-			}
-			else filePath = material.coverPic.path;
 
-			const currentFileData = fileSystem.readFile(filePath);
-			fileData.push({
-				fileId: filePath,
-				data: currentFileData.toString('base64'),
-			});
+				const currentFileData = fs.readFileSync(filePath);
+
+				fileData.push({
+					fileId: filePath,
+					data: currentFileData.toString('base64'),
+				});
+			} else {
+				filePath = material.coverPic.path;
+
+				const currentFileData = fileSystem.readFile(filePath);
+				fileData.push({
+					fileId: filePath,
+					data: currentFileData.toString('base64'),
+				});
+			}
 		}
 
 		return new Response(JSON.stringify({ materials, fileData }), {

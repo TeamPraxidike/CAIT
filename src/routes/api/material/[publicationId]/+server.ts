@@ -143,8 +143,22 @@ export async function PUT({ request, params }) {
 					prismaTransaction,
 				);
 
-				// no else case needed since POST takes care of that
+				// if coverPic is not null (chosen cover pic)
 				if (coverPic) {
+					const coverFile = await prismaTransaction.file.findUnique({
+						where: {
+							materialCoverId: body.materialId,
+						},
+					});
+					if (coverFile) {
+						await deleteFile(coverFile.path, prismaTransaction);
+						// await prismaTransaction.file.delete({
+						// 	where: {
+						// 		materialCoverId: body.materialId,
+						// 	},
+						// });
+					}
+
 					const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
 					await addCover(
 						'cover.jpg',
@@ -153,6 +167,15 @@ export async function PUT({ request, params }) {
 						body.materialId,
 						prismaTransaction,
 					);
+				} else {
+					const coverFile = await prismaTransaction.file.findUnique({
+						where: {
+							materialCoverId: body.materialId,
+						},
+					});
+					if (coverFile) {
+						await deleteFile(coverFile.path, prismaTransaction);
+					}
 				}
 
 				// add files

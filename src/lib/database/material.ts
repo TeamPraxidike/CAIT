@@ -28,6 +28,7 @@ export async function getMaterialByPublicationId(
 				},
 			},
 			files: true,
+			coverPic: true,
 		},
 	});
 }
