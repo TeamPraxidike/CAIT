@@ -1,5 +1,9 @@
 import {getSavedPublications, getUserById} from "$lib/database";
 
+/**
+ * Returns all saved publications of a user
+ * @param params
+ */
 export async function GET({params}) {
     const {id} = params;
     const user = await getUserById(parseInt(id));

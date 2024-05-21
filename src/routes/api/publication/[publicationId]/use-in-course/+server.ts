@@ -1,5 +1,9 @@
 import {coursesUsingPublication, getPublicationById} from "$lib/database";
 
+/**
+ * Get all courses that use a publication
+ * @param params
+ */
 export async function GET({params}) {
     const {publicationId} = params;
 

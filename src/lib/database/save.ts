@@ -1,5 +1,11 @@
 import {prisma} from "$lib/database/prisma";
 
+/**
+ * Saves a publication for a user or unsaves it if it is already saved.
+ * You dont need to expliitely check which one it is, the function does it for you
+ * @param userId
+ * @param publicationId
+ */
 export async function savePublication(userId: number, publicationId: number) {
     const saved = await getSavedPublications(userId);
     if (saved === null) throw Error("Saved publications were not found");
@@ -13,6 +19,11 @@ export async function savePublication(userId: number, publicationId: number) {
     }
 }
 
+/**
+ * Saves a publication for a user
+ * @param userId
+ * @param publicationId
+ */
 async function save(userId: number, publicationId: number) {
     await prisma.$transaction(async (prismaTransaction) => {
         await prismaTransaction.user.update({
@@ -30,7 +41,11 @@ async function save(userId: number, publicationId: number) {
     });
 }
 
-
+/**
+ * Unsaves a publication for a user
+ * @param userId
+ * @param publicationId
+ */
 async function unsave(userId: number, publicationId: number) {
     await prisma.$transaction(async (prismaTransaction) => {
         await prismaTransaction.user.update({

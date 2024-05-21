@@ -1,8 +1,8 @@
 <script lang="ts">
-    import {createEventDispatcher} from "svelte";
-    import {popup} from "@skeletonlabs/skeleton";
-    import type {User} from "@prisma/client";
-    import type {PopupSettings} from "@skeletonlabs/skeleton";
+    import { createEventDispatcher } from 'svelte';
+    import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import { popup } from '@skeletonlabs/skeleton';
+    import type { User } from '@prisma/client';
 
 
     export let view: "home"|"publish"|"material"|"search"

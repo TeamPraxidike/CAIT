@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			async (prismaTransaction) => {
 				const body = await request.json();
 				const tagDB = await getTagByContent(body.content);
-
+				console.log(tagDB);
 				if (tagDB) {
 					return new Response('Tag already exists', { status: 403 });
 				}

@@ -1,16 +1,16 @@
 import {
-	getMaterialByPublicationId,
-	updateMaterialByPublicationId,
-	prisma,
-	handleConnections,
-	type FileDiffActions,
-	fileSystem,
-	deleteMaterialByPublicationId,
-	type FetchedFileArray,
 	addFile,
 	deleteFile,
+	deleteMaterialByPublicationId,
 	editFile,
+	type FetchedFileArray,
+	type FileDiffActions,
+	fileSystem,
+	getMaterialByPublicationId,
+	handleConnections,
 	type MaterialForm,
+	prisma,
+	updateMaterialByPublicationId,
 } from '$lib/database';
 
 export async function GET({ params }) {

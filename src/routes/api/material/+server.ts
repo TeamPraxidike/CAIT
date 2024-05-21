@@ -1,14 +1,14 @@
 import {
-	getAllMaterials,
+	addFile,
 	createMaterialPublication,
 	type FileDiffActions,
+	getAllMaterials,
 	handleConnections,
-	addFile,
 	type MaterialForm,
 	prisma,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
-import { Difficulty } from '@prisma/client';
+import { Difficulty, MaterialType } from '@prisma/client';
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -23,6 +23,25 @@ function mapToDifficulty(difficulty: string): Difficulty {
 			return Difficulty.hard;
 		default:
 			throw new Error(`Invalid difficulty: ${difficulty}`);
+	}
+}
+
+function mapToType(mt: string): MaterialType {
+	switch (mt.toLowerCase()) {
+		case 'video':
+			return MaterialType.video;
+		case 'presentation':
+			return MaterialType.presentation;
+		case 'assignment':
+			return MaterialType.assignment;
+		case 'dataset':
+			return MaterialType.dataset;
+		case 'exam':
+			return MaterialType.exam;
+		case 'code':
+			return MaterialType.code;
+		default:
+			throw new Error(`Invalid material type: ${mt}`);
 	}
 }
 
@@ -44,9 +63,20 @@ export const GET: RequestHandler = async ({ url }) => {
 		const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
 
 		const ty = url.searchParams.get('types');
-		const type = ty ? ty.split(',') : [];
+		const type = ty ? ty.split(',').map(mapToType) : [];
 
-		const materials = await getAllMaterials(tags, publishers, diff, type);
+		const sort = url.searchParams.get('sort') || 'Most Recent';
+		const q: string = url.searchParams.get('q') || '';
+
+		const materials = await getAllMaterials(
+			tags,
+			publishers,
+			diff,
+			type,
+			sort,
+			q,
+		);
+
 		return new Response(JSON.stringify(materials), { status: 200 });
 	} catch (error) {
 		console.log(error);

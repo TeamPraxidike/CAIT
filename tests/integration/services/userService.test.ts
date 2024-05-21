@@ -7,7 +7,6 @@ describe('UserService', () => {
 });
 
 // import {createMaterialPublication, createUser, getPublicationById, getUserById} from "$lib/database";
-// import {describe, it, expect, beforeEach} from "vitest";
 // import {randomUUID} from "node:crypto";
 // import {editUser, getLikedPublications, likePublication} from "$lib/database/user";
 // import {resetUserTable} from "../setup";
@@ -108,9 +107,4 @@ describe('UserService', () => {
 //        expect(liked.liked.length).toBe(1);
 //     });
 // });
-//
-//
-//
-//
-//
 //

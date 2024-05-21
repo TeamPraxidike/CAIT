@@ -1,6 +1,9 @@
 import {getPublicationById, getUserById, savePublication} from "$lib/database";
 
-
+/**
+ * Saves a publication to a user's saved list
+ * @param params
+ */
 export async function POST({params}) {
     const {id, publicationId} = params;
     const user = await getUserById(parseInt(id));

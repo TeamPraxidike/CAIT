@@ -4,6 +4,11 @@ import {
     getUserById,
 } from "$lib/database";
 
+/**
+ * Marks a publication as used in a course
+ * @param params
+ * @param request
+ */
 export async function POST({params, request}) {
     const {id, publicationId} = params;
     const user = await getUserById(parseInt(id));

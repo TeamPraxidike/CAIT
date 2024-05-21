@@ -5,7 +5,7 @@
     export let tagText: string
     export let width: number = 0;
 
-    export let removable: boolean = false;
+    export let removable: boolean;
 
     let dispatch = createEventDispatcher()
 
