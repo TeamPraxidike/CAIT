@@ -38,6 +38,11 @@ import {
 } from './node';
 
 import {
+	savePublication,
+	getSavedPublications
+} from "$lib/database/save";
+
+import {
 	getUserById,
 	createUser,
 	deleteUser,
@@ -59,6 +64,13 @@ import {
 	updateReply,
 	createReply,
 } from '$lib/database/reply';
+
+import {
+	addPublicationToUsedInCourse,
+	coursesUsingPublication,
+	publicationsAUserUses
+} from "$lib/database/usedInCourse";
+
 import type { userEditData } from '$lib/database/user';
 import type { editReplyData, createReplyData } from '$lib/database/reply';
 import type { createCommentData, editCommentData } from '$lib/database/comment';
@@ -177,6 +189,11 @@ export {
 	createReply,
 	likePublication,
 	getLikedPublications,
+	savePublication,
+	getSavedPublications,
+	addPublicationToUsedInCourse,
+	coursesUsingPublication,
+	publicationsAUserUses
 };
 
 export type {
