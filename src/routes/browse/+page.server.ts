@@ -1,5 +1,5 @@
-export async function load({ url, fetch }) {
-	const userId = 1;
+export async function load({ url, fetch, cookies}) {
+	const userId = cookies.get("userId");
 
 	const type = url.searchParams.get('type') || 'materials';
 
