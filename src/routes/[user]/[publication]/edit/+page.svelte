@@ -4,12 +4,9 @@
 	import type { Difficulty, Publication, Tag as PrismaTag } from '@prisma/client';
 	import { authStore, FileTable, Meta } from '$lib';
 	import {
-		Autocomplete,
-		type AutocompleteOption,
-		getToastStore,
-		InputChip
+		Autocomplete, type AutocompleteOption, FileButton, FileDropzone, getToastStore, InputChip
 	} from '@skeletonlabs/skeleton';
-	import { createFileList } from '$lib/util/file';
+	import { appendFile, base64ToFile, concatFileList, createFileList } from '$lib/util/file';
 	import type { PublicationViewLoad } from '../+layout.server';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -20,10 +17,24 @@
 
 	let tags: string[] = serverData.material.publication.tags.map(tag => tag.content);
 	let files: FileList = createFileList(serverData.fileData, serverData.material.files);
-	let oldFiles: FileList = files;
+
 	let LOs: string[] = serverData.material.publication.learningObjectives;
 	let difficulty: Difficulty = serverData.material.publication.difficulty;
 	let maintainers: number[] = [$authStore.user?.id || 1];
+	let coverPic: File | undefined = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
+
+	function chooseCover(e: Event) {
+		const eventFiles = (e.target as HTMLInputElement).files;
+		if (eventFiles) {
+			if (eventFiles[0].type === 'image/jpeg' || eventFiles[0].type === 'image/png')
+				coverPic = eventFiles[0];
+			else
+				toastStore.trigger({
+					message: 'Invalid file type, please upload a .jpg or .png file',
+					background: 'bg-warning-200'
+				});
+		}
+	}
 
 
 	let inputChip: InputChip;
@@ -39,25 +50,11 @@
 	});
 
 	let tagInput = '';
+
 	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		console.log('onInputChipSelect', e.detail);
 		if (!tags.includes(e.detail.value)) {
 			inputChip.addChip(e.detail.value);
 			tagInput = '';
-		}
-	}
-
-	/**
-	 * Appends a file to a FormData object
-	 * @param formData FormData object
-	 * @param file File to append
-	 * @param key Key to use for the file
-	 */
-	function appendFile(formData: FormData, file: File, key:string = 'file'): void {
-		if (file.size > 1024 * 1024 * 100) {
-			alert('File size exceeds 100MB');
-		} else {
-			formData.append(key, file);
 		}
 	}
 
@@ -72,7 +69,7 @@
 		goto(`/${publication.publisherId}/${publication.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
-			message: 'Malformed information, please check your inputs',
+			message: `Malformed information, please check your inputs: ${form?.message}`,
 			background: 'bg-warning-200'
 		});
 	} else if (form?.status === 500) {
@@ -80,6 +77,13 @@
 			message: 'An error occurred, please try again later or contact support',
 			background: 'bg-error-200'
 		});
+	}
+
+	export function changeFilezone(e: Event) {
+		const eventFiles = (e.target as HTMLInputElement).files;
+		if (eventFiles) {
+			files = concatFileList(files, eventFiles);
+		}
 	}
 </script>
 
@@ -89,20 +93,16 @@
 <form action="?/edit" method="POST" enctype="multipart/form-data"
 	  class="col-span-full my-20"
 	  use:enhance={({ formData }) => {
-        // Array.from(files).forEach(file => appendFile(formData, file, 'file'));
-        Array.from(oldFiles).forEach(file => appendFile(formData, file, 'oldFiles'));
-
-		serverData.material.files.forEach(file => {
-			formData.append('oldFilesTitle', file.type);
-			formData.append('oldFilesPath', file.path);
-			formData.append('oldFilesType', file.type);
-		});
+        Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+		formData.append('oldFiles', JSON.stringify(serverData.material.files));
+		formData.append('oldFilesData', JSON.stringify(serverData.fileData));
 
 		formData.append('userId', $authStore.user?.id.toString() || '');
 		formData.append('tags', tags.join(';'));
 		formData.append('difficulty', difficulty);
 		formData.append('maintainers', maintainers.join(';'));
 		formData.append('learning_objectives', LOs.join(';'));
+		formData.append('coverPic', coverPic || '');
     }}>
 
 	<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">Edit Publication</h2>
@@ -120,78 +120,27 @@
 	</div>
 
 	<div class="mt-10 mb-20 w-full">
-		<FileTable operation="download" {files} />
+		<FileDropzone on:change={changeFilezone} multiple name="fileInputBind" />
+		<FileTable operation="edit" bind:files={files} />
+	</div>
+
+	<div>
+		<label for="coverPhoto">Cover Picture:</label>
+		<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>
+		{#if coverPic}
+			<button on:click={() => coverPic = undefined} type="button" class="btn">Remove</button>
+			<img src={URL.createObjectURL(coverPic)} alt="sss">
+		{/if}
 	</div>
 
 	<div class="text-token w-1/2 space-y-2">
-		<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)} bind:input={tagInput} bind:value={tags} name="chips" />
+		<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)} bind:input={tagInput} bind:value={tags}
+				   name="chips" />
 		<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-			<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags} on:selection={onInputChipSelect} />
+			<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
+						  on:selection={onInputChipSelect} />
 		</div>
 	</div>
 
 	<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50">Edit</button>
-<!--	<div class="flex flex-wrap gap-2 my-2">-->
-<!--		{#each tags as tag}-->
-<!--			<Tag tagText={tag.content} removable={false} />-->
-<!--		{/each}-->
-<!--	</div>-->
-
-
-
-<!--	<div class="w-full flex flex-col lg:grid gap-8 mt-12">-->
-<!--		<div class="flex flex-col w-full gap-8">-->
-
-<!--			<div class="flex gap-4 items-center">-->
-<!--				<label for="description">Difficulty:</label>-->
-<!--				<DifficultySelection bind:difficulty={difficulty} />-->
-<!--			</div>-->
-
-<!--			<div class="flex gap-2">-->
-<!--				<div class="w-1/2">-->
-<!--					<label for="learning-objectives">Learning Objectives:</label>-->
-<!--					<div class="flex gap-2">-->
-<!--						<input type="text" id="learning-objectives" bind:this={loInput}-->
-<!--							   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">-->
-<!--						<button on:click={() => { LOs.push(loInput.value); loInput.value = ""}}-->
-<!--								class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+-->
-<!--						</button>-->
-<!--					</div>-->
-<!--					<div class="flex flex-wrap gap-2">-->
-<!--						{#each LOs as LO}-->
-<!--							<Tag tagText={LO} removable={true} />-->
-<!--						{/each}-->
-<!--					</div>-->
-<!--				</div>-->
-<!--				<div class="w-1/2">-->
-<!--					<label for="tags">Tags:</label>-->
-<!--					<div class="flex gap-2">-->
-<!--						<input type="text" id="tags" bind:this={tagInput}-->
-<!--							   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400">-->
-<!--						<button on:click={() => { tags.push({content: tagInput.value}); tagInput.value = ""}}-->
-<!--								class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+-->
-<!--						</button>-->
-<!--					</div>-->
-<!--				</div>-->
-<!--			</div>-->
-
-<!--			<div class="flex gap-2">-->
-<!--				<div class="w-1/2">-->
-<!--					<label for="estimate">Time Estimate:</label>-->
-<!--					<input type="text" id="estimate" name="estimate"-->
-<!--						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">-->
-<!--				</div>-->
-<!--				<div class="w-1/2">-->
-<!--					<label for="copyright">Copyright:</label>-->
-<!--					<input type="text" id="copyright" name="copyright"-->
-<!--						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">-->
-<!--				</div>-->
-<!--			</div>-->
-<!--			<div class="flex flex-col gap-4">-->
-<!--				<hr />-->
-<!--				<FileDropzone multiple name="file" bind:files={files} />-->
-<!--				<FileTable operation="edit" {files} />-->
-<!--			</div>-->
-<!--		</div>-->
-<!--	</div>-->
 </form>

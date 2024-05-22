@@ -3,7 +3,8 @@
 	export let className: string = '';
 </script>
 
-<a	type="button"
+<a	on:click|stopPropagation
+	type="button"
 	href={URL.createObjectURL(file)}
 	download={file.name}
 	class={className}>

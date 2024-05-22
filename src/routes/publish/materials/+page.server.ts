@@ -3,9 +3,9 @@ import type { MaterialForm } from '$lib/database';
 import type { Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const tagRes = await fetch('/api/tags');
-	const tags: Tag[] = await tagRes.json();
-	return { tags };
+	const tags: Tag[] = await (await fetch('/api/tags')).json();
+	const users = await (await fetch(`/api/user`)).json();
+	return { tags, users };
 };
 
 /**
@@ -17,7 +17,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
  */
 async function filesToAddOperation(fileList: FileList) {
 	const addPromises = Array.from(fileList).map(async (file) => {
-		console.log(typeof file);
 		const buffer = await file.arrayBuffer();
 		const info = Buffer.from(buffer).toString('base64');
 
@@ -39,12 +38,28 @@ export const actions = {
 	 */
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
-
 		const fileList: FileList = data.getAll('file') as unknown as FileList;
-
 		if (!fileList) return { status: 400, message: 'No files provided' };
-
 		const add = await filesToAddOperation(fileList);
+
+		const tagsDataEntry = data.get('tags');
+		if (!tagsDataEntry) return { status: 400, message: 'No tags provided' };
+
+		const losDataEntry = data.get('learningObjectives');
+		const maintainersDataEntry = data.get('maintainers');
+		const coverPicFile = data.get('coverPic');
+		let coverPic = null;
+
+		console.log(coverPicFile);
+
+		if (coverPicFile instanceof File) {
+			const buffer = await coverPicFile.arrayBuffer();
+			const info = Buffer.from(buffer).toString('base64');
+			coverPic = {
+				type: coverPicFile.type,
+				info,
+			};
+		}
 
 		const material: MaterialForm = {
 			userId: Number(data.get('userId')?.toString()),
@@ -52,34 +67,34 @@ export const actions = {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',
 				difficulty: 'easy',
-				learningObjectives: data
-					.get('learningObjectives')
-					?.toString()
-					.split(';') || [''],
+				learningObjectives: JSON.parse(losDataEntry?.toString() || ''),
 				prerequisites: [data.get('prerequisites')?.toString() || ''],
-				coverPic: data.get('coverPic')?.toString() || '',
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: 34,
-				tags: data.get('tags')?.toString().split(';') || [''],
-				maintainers: data
-					.get('maintainers')
-					?.toString()
-					.split(';')
-					.map(Number) || [Number(data.get('userId')?.toString())],
+				tags: JSON.parse(tagsDataEntry.toString()),
+				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
+				materialType: 'video',
 			},
+			// coverPic: {
+			// 	type: 'image/jpeg',
+			// 	info: data.get('coverPic')?.toString() || '',
+			// },
+			coverPic,
 			fileDiff: {
-				add: add,
+				add,
 				delete: [],
 				edit: [],
 			},
 		};
+
+		console.log(material);
 
 		const res = await fetch('/api/material', {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
 
-		return { status: res.status };
+		return { status: res.status, id: (await res.json()).id };
 	},
 } satisfies Actions;

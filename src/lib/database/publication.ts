@@ -6,7 +6,7 @@ import { prisma } from '$lib/database/prisma';
 ////////////////////////////////////////////////
 
 /**
- * Main method that handles linking/unlinking of tags and maintainers to publications
+ * Main method that handles linking/unlinking of tags and maintainerIds to publications
  * @param tags
  * @param maintainers
  * @param publicationId
@@ -27,7 +27,7 @@ export async function handleConnections(
 }
 
 /**
- * Checks list for correctness in maintainers
+ * Checks list for correctness in maintainerIds
  * @param list
  */
 export async function checkMaintainerList(list: number[]) {
@@ -51,7 +51,7 @@ export async function checkTagList(list: string[]) {
 }
 
 /**
- * Connects maintainers to a publication
+ * Connects maintainerIds to a publication
  * @param publicationId
  * @param maintainerConnect
  * @param prismaContext
@@ -62,7 +62,7 @@ export async function connectMaintainers(
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<void> {
 	try {
-		// ids of users to connect as maintainers
+		// ids of users to connect as maintainerIds
 		await checkMaintainerList(maintainerConnect);
 		await updatePublicationConnectMaintainers(
 			publicationId,
@@ -95,11 +95,11 @@ export async function connectTags(
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Updates the maintainers of a publication
+ * Updates the maintainerIds of a publication
  *
  * @note this will first wipe all connections and then establish new ones
  * @param publicationId - id of publication
- * @param maintainerConnect - list of user ids to connect as maintainers
+ * @param maintainerConnect - list of user ids to connect as maintainerIds
  * @param prismaContext - prisma transaction client
  */
 export async function updatePublicationConnectMaintainers(

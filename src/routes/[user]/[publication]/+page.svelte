@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { LayoutServerData } from './$types';
-	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore, AddInteractionForm } from '$lib';
+	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore, AddInteractionForm, UserProp } from '$lib';
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
@@ -69,30 +69,35 @@
 			const blob = await file.arrayBuffer();
 			zip.file(file.name, blob);
 		}
-
-		//this is for zipping that gave error before, comment out to test my implementation
-		//const content = await zip.generateAsync({ type: "blob" });
-		//saveAs(content, "files.zip");
-		console.log(serverData.material.publication.comments);
 	}
 </script>
 
 <Meta title={serverData.material.publication.title} description="CAIT" type="site" />
 
 <div class="col-span-full flex flex-col items-start mt-20">
-	<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
-	<p>{serverData.material.publication.publisher.firstName}</p>
-	<div class="flex gap-2">
-		<p class="text-sm text-surface-500">{created}</p>
-		<Icon icon="mdi:presentation" class="text-xl text-surface-500" />
-		<DiffBar diff="easy" className="w-4 h-4" />
+	<div class="flex justify-between w-full">
+		<div>
+			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
+			<p>{serverData.material.publication.publisher.firstName}</p>
+			<div class="flex gap-2">
+				<p class="text-sm text-surface-500">{created}</p>
+				<Icon icon="mdi:presentation" class="text-xl text-surface-500" />
+				<DiffBar diff="easy" className="w-4 h-4" />
+			</div>
+			<div class="flex flex-wrap gap-2 my-2">
+				{#each tags as tag}
+					<Tag tagText={tag} removable={false} />
+				{/each}
+			</div>
+			<p class="text-surface-700 dark:text-surface-400">{serverData.material.publication.description}</p>
+		</div>
+		<div class="flex gap-2">
+			<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={serverData.material.publication.publisher} />
+			{#each serverData.material.publication.maintainers as maintainer}
+				<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
+			{/each}
+		</div>
 	</div>
-	<div class="flex flex-wrap gap-2 my-2">
-		{#each tags as tag}
-			<Tag tagText={tag} removable={false} />
-		{/each}
-	</div>
-	<p class="text-surface-700 dark:text-surface-400">{serverData.material.publication.description}</p>
 
 	<div class="flex items-center text-3xl rounded-lg border mt-4">
 		<button type="button"
@@ -131,11 +136,13 @@
 	<hr>
 </div>
 
-<AddInteractionForm addComment='{true}' commentId="{1}"/>
+{#if $authStore.user}
+	<AddInteractionForm addComment='{true}' commentId="{1}"/>
+{/if}
 
 {#each serverData.material.publication.comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
 	<Comment interaction={comment}
-			 popupName="comment + {comment.id} + {new Date(comment.createdAt).toDateString()}" isReply={false} userName="{comment.user.firstName} + {comment.user.lastName}" />
+			 popupName="comment + {comment.id} + {new Date(comment.createdAt).toDateString()}" isReply={false} userName="{comment.user.firstName} {comment.user.lastName}" />
 	{#each comment.replies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) as reply (reply.id)}
 		<Comment interaction={reply} popupName="reply + {reply.id} + {new Date(reply.createdAt).toDateString()}" isReply={true} userName="{reply.user.firstName} + {reply.user.lastName}"/>
 	{/each}

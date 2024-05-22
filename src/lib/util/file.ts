@@ -1,5 +1,4 @@
 import { type File as PrismaFile } from '@prisma/client';
-import { Buffer } from 'buffer';
 
 /**
  * A FileList object that is created from a list of fetched files and a list of prisma files
@@ -86,6 +85,41 @@ export function base64ToFile(
 	}
 
 	return new File([u8arr], filename, { type });
+}
+
+/**
+ * Appends a file to a FormData object
+ * @param formData FormData object
+ * @param file File to append
+ * @param key Key to use for the file
+ */
+export function appendFile(
+	formData: FormData,
+	file: File,
+	key: string = 'file',
+): void {
+	if (file.size > 1024 * 1024 * 100) {
+		alert('File size exceeds 100MB');
+	} else {
+		formData.append(key, file);
+	}
+}
+
+/**
+ * Concatenates two FileList objects
+ * @param fileList1 the first FileList object
+ * @param fileList2 the second FileList object
+ */
+export function concatFileList(
+	fileList1: FileList,
+	fileList2: FileList,
+): FileList {
+	const arr1 = Array.from(fileList1);
+	const arr2 = Array.from(fileList2).filter((file) => {
+		return !arr1.some((f) => f.name === file.name);
+	});
+
+	return arr1.concat(arr2) as unknown as FileList;
 }
 
 /**
