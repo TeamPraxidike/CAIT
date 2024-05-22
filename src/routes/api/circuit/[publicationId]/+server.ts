@@ -2,13 +2,14 @@ import {
 	getCircuitByPublicationId,
 	prisma,
 	handleConnections,
-	type NodeInfo,
+	type NodeDiffActions,
 	deleteCircuitByPublicationId,
 	addNode,
 	deleteNode,
 	editNode,
 	handleEdges,
 	updateCircuitByPublicationId,
+	type CircuitForm,
 } from '$lib/database';
 
 export async function GET({ params }) {
@@ -53,6 +54,16 @@ export async function PUT({ request, params }) {
 	// Authentication step
 	// return 401 if user not authenticated
 
+	const body: CircuitForm & {
+		circuitId: number;
+	} = await request.json();
+	const circuit: CircuitForm = body;
+	const metaData = circuit.metaData;
+	// const userId = circuit.userId;
+	const nodeInfo: NodeDiffActions = circuit.nodeDiff;
+	const tags = metaData.tags;
+	const maintainers = metaData.maintainers;
+
 	const publicationId = parseInt(params.publicationId);
 
 	if (isNaN(publicationId) || publicationId <= 0) {
@@ -69,18 +80,19 @@ export async function PUT({ request, params }) {
 			const body = await request.json();
 
 			await handleConnections(
-				body.metaData.tags,
-				body.metaData.maintainers,
-				publicationId,
+				tags,
+				maintainers,
+				body.circuitId,
 				prismaTransaction,
 			);
-			const nodeInfo: NodeInfo = body.NodeInfo;
 
 			// add nodes
 			for (const node of nodeInfo.add) {
 				await addNode(
 					node.circuitId,
 					node.publicationId,
+					node.x,
+					node.y,
 					prismaTransaction,
 				);
 			}
@@ -95,6 +107,8 @@ export async function PUT({ request, params }) {
 				await editNode(
 					node.nodeId,
 					node.publicationId,
+					node.x,
+					node.y,
 					prismaTransaction,
 				);
 			}
@@ -103,11 +117,7 @@ export async function PUT({ request, params }) {
 
 			const circuit = await updateCircuitByPublicationId(
 				publicationId,
-				body.title,
-				body.description,
-				body.difficulty,
-				body.learningObjectives,
-				body.prerequisites,
+				metaData,
 				prismaTransaction,
 			);
 			if (!circuit) {
@@ -122,7 +132,9 @@ export async function PUT({ request, params }) {
 			return circuit;
 		});
 
-		return new Response(JSON.stringify({ circuit }), { status: 200 });
+		const id = circuit.id;
+
+		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
