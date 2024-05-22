@@ -57,6 +57,14 @@ export async function resetUserTable() {
     }
 }
 
+export async function resetTagsTable() {
+    try {
+        await prisma.tag.deleteMany({});
+    } catch (error) {
+        console.error('Failed to reset Tag table:', error);
+    }
+}
+
 
 // // reset all tables before each test
 // beforeEach(async () => {

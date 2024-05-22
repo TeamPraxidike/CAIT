@@ -322,7 +322,7 @@ describe('Users', () => {
 			const responseBody = await response.json();
 
 			expect(responseBody).toHaveLength(1);
-			expect(responseBody[0].id).toBe(publication.publicationId);
+			expect(responseBody[0]).toBe(publication.publicationId);
 
 			const publication2 = await createMaterialPublication(
 				user.id,
@@ -345,8 +345,8 @@ describe('Users', () => {
 			const response2 = await fetch(`${testingUrl}/user/${user.id}/saved`);
 			const responseBody2 = await response2.json();
 			expect(responseBody2).toHaveLength(2);
-			expect(responseBody2[0].id).toBe(publication.publicationId);
-			expect(responseBody2[1].id).toBe(publication2.publicationId);
+			expect(responseBody2[0]).toBe(publication.publicationId);
+			expect(responseBody2[1]).toBe(publication2.publicationId);
 		});
 	});
 
