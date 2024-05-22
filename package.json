@@ -75,6 +75,7 @@
 		"file-saver": "^2.0.5",
 		"highlight.js": "11.9.0",
 		"interactjs": "^1.10.27",
-		"jszip": "^3.10.1"
+		"jszip": "^3.10.1",
+		"svelte-routing": "^2.13.0"
 	}
 }

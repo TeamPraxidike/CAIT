@@ -1,6 +1,6 @@
 <script lang="ts">
 
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import FilterButton from '$lib/components/FilterButton.svelte';
@@ -21,16 +21,23 @@
 	export let profilePic: boolean;
 	//export let text: string;
 	let targetDiv: HTMLDivElement;
+
+	const removePopup = (event: MouseEvent) => {
+		if (!(event.target instanceof HTMLElement)) {
+			return; // Ignore if the target is not an HTMLElement
+		}
+		const isClickedInsideDiv = targetDiv.contains(event.target);
+		if (!isClickedInsideDiv)
+			active = false;
+	}
 	onMount(() => {
-		document.addEventListener('click', (event: MouseEvent) => {
-			if (!(event.target instanceof HTMLElement)) {
-				return; // Ignore if the target is not an HTMLElement
-			}
-			const isClickedInsideDiv = targetDiv.contains(event.target);
-			if (!isClickedInsideDiv)
-				active = false;
-		});
+		document.addEventListener('click', removePopup);
 	});
+
+	onDestroy(() => {
+		if (typeof document !== 'undefined') {
+			document.removeEventListener('click', removePopup);
+		}	} )
 
 	const dispatch = createEventDispatcher();
 

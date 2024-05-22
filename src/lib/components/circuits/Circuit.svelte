@@ -1,26 +1,52 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
-	import type {Node} from '@prisma/client';
+	import type { Node as PrismaNode, Publication } from '@prisma/client';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { popup } from '@skeletonlabs/skeleton';
+	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
+
 	//	import cytoscapeNodeHtmlLabel from 'cytoscape-node-html-label';
+
+	const popupClick: PopupSettings = {
+		event: 'click',
+		target: 'popupClick',
+		placement : 'bottom'
+	};
 
 
 	//cytoscapeNodeHtmlLabel(cytoscape);
 
 	interface Edge {
-		id:string
-		source:string
-		target:string
+		data: { id: string, source: string, target: string };
 	}
 
 	//export let dbNodes : Node[];
 
 	export let publishing: boolean;
 
-	 let idNodes : Node[];
+
+	export let nodes: (PrismaNode & {
+		publication: Publication
+		next: PrismaNode[]
+	})[]; //GET all nodes in the circuit
 	 let edges : Edge[];
 	 let cy;
 
+	let mappedNodes = nodes.map(node => ({
+		data: { id: node.id.toString(), title: node.publication.title },
+		position: { x: node.posX, y: node.posY }
+	}));
+	nodes.forEach(node => {
+		let curNext = node.next.map(nextNode => ({
+			data: {
+				id: node.id.toString().concat(nextNode.id.toString()),
+				source: node.id.toString(),
+				target: nextNode.id.toString()
+			}
+		}));
+		edges.push(...curNext);
+	});
 
 
 	onMount(() => {
@@ -28,15 +54,8 @@
 		cy = cytoscape({
 			container: document.getElementById('cy'),
 			elements: [
-				{ data: { id: 'a', label: "Presentation"}, position: { x: 0, y: 0 } },
-				{ data: { id: 'b', label: "Video"}, position: { x: 1000, y: 700 } },
-				{ data: { id: 'c', label: "Something Else" }, position: { x: 100, y: 200 } },
-				{ data: { id: 'd', label: "Intro into artificial neural network" }, position: { x: 100, y: 400 } },
-				{ data: { id: 'e', label: "Assignment" }, position: { x: 150, y: 200 } },
-				{ data: { id: 'ab', source: 'a', target: 'b' } },
-				{ data: { id: 'bc', source: 'b', target: 'c' } },
-				{ data: { id: 'cd', source: 'c', target: 'd' } },
-				{ data: { id: 'de', source: 'd', target: 'e' } },
+				...mappedNodes
+				//	...edges
 			],
 			style: [
 				{
@@ -137,6 +156,26 @@
 						node.lock()
 			});
 	});
+
+
+	let displayedMaterials: any = [];
+	//const addElements = () => addingActive = !addingActive
+	const addElements = async () => {
+		await fetch('/api/material')
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				// Handle the response data from the API
+				displayedMaterials = data;
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
+	};
 </script>
 
 <style>
@@ -180,5 +219,14 @@
         fill: #7ee787;
     }
 </style>
+<button class="btn variant-filled h-1/2" use:popup={popupClick} on:click={addElements}>Add</button>
 
 <div id="cy"></div>
+
+<div data-popup="popupClick">
+	<SearchElems bind:materials={displayedMaterials} />
+</div>
+
+
+
+

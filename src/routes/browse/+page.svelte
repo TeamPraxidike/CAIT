@@ -166,7 +166,6 @@
           .then(data => {
               // Handle the response data from the API
               materials = data
-              console.log(materials)
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);

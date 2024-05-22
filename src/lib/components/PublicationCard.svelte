@@ -9,6 +9,9 @@
     export let publication:Publication & {
         tags: { content: string }[]
     };
+
+    console.log(publication)
+    console.log(publication.tags)
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
     export let saved: boolean = true;

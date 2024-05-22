@@ -134,6 +134,9 @@ model Node {
 
   prerequisites Node[] @relation("edge")
   next          Node[] @relation("edge")
+
+  posX Int
+  posY Int
 }
 
 model Tag {
