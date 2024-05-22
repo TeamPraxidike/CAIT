@@ -1,20 +1,21 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import {authStore, Filter, PublicationCard, SearchBar, UserProp} from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { Tag } from '@prisma/client';
     import type { PageServerData } from './$types';
+    import {onMount} from "svelte";
 
     export let data:PageServerData;
     let searchWord: string = '';
     let materials = data.publications;
     let users = data.users
     let tags = data.tags
+    let liked = data.liked as number[];
 
 
-
-    $:pageType = data.type;
+    $: pageType = data.type;
     $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
     $: peopleText = pageType === 'people' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
     $: circuitsText = pageType === 'circuits' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
@@ -50,7 +51,6 @@
         let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
         let displayTypes: {id:number, content:string }[] = allTypes; //
         let typeActive = false
-
 
     //Used to make the dropdown appear/disappear
     const toggleSortBy = () => {
@@ -305,7 +305,7 @@
 
 {#if pageType === "materials"}
     {#each materials as material}
-        <PublicationCard publication={material.publication} />
+        <PublicationCard publication={material.publication} liked={liked.includes(material.publicationId)}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person}

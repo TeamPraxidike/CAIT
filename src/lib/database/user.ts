@@ -220,6 +220,6 @@ export async function getLikedPublications(userId: number) {
 		},
 		select: {
 			liked: true,
-		},
+		}
 	});
 }
