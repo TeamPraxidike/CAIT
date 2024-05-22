@@ -1,11 +1,21 @@
 <script lang="ts">
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
-    import type {LayoutData} from './$types';
+    import type {LayoutData, PageServerData} from './$types';
+    import type { Material, Publication, Tag, User } from '@prisma/client';
+    import type { FetchedFileArray } from '$lib/database';
 
     /* This is the data that was returned from the server */
-    export let data: LayoutData;
+    export let data: LayoutData & PageServerData;
 
-    let user = data.user;
+    let user:User & {
+        posts: Publication & {
+            tags: Tag[];
+        }[]
+    } = data.user;
+
+    let fileData:FetchedFileArray = data.fileData;
+
+
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -17,14 +27,14 @@
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         Saved Publications
     </h3>
-    {#each data.user.posts as publication}
-        <PublicationCard {publication} />
+    {#each data.user.posts as publication, i}
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} />
     {/each}
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         Franklin's Publications
     </h3>
-    {#each data.user.posts as publication}
-        <PublicationCard {publication} />
+    {#each data.user.posts as publication, i}
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} />
     {/each}
 </div>
 

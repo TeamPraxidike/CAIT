@@ -250,5 +250,5 @@
 </div>
 
 {#each materials as material, i}
-    <PublicationCard imgSrc={'data:image;base64,' +fileData[i].data} publication={material.publication} />
+    <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} />
 {/each}
