@@ -44,6 +44,16 @@ export async function getMaterialByPublicationId(
 				include: {
 					tags: true,
 					publisher: true,
+					comments: {
+						include: {
+							replies: {
+								include: {
+									user: true,
+								},
+							},
+							user: true,
+						},
+					},
 				},
 			},
 			files: true,

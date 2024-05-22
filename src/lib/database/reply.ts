@@ -40,7 +40,7 @@ export async function getReply(replyId: number) {
  * @param replyId
  */
 export async function deleteReply(replyId: number) {
-	return prisma.reply.findUnique({
+	return prisma.reply.delete({
 		where: {
 			id: replyId,
 		},
@@ -48,8 +48,8 @@ export async function deleteReply(replyId: number) {
 }
 
 /**
- * [PUT] updates the content of a comment wth the id from the param to the content of the param
- * @param reply -  a custom data comment data to update the comment content
+ * [PUT] updates the content of a reply wth the id from the param to the content of the param
+ * @param reply -  a custom data reply data to update the reply content
  */
 export async function updateReply(reply: editReplyData) {
 	return prisma.reply.update({

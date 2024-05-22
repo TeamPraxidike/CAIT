@@ -21,6 +21,7 @@ export async function createComment(comment: createCommentData) {
 			content: comment.content,
 			userId: comment.userId,
 			publicationId: comment.publicationId,
+			updatedAt: new Date(),
 		},
 	});
 }
@@ -43,7 +44,7 @@ export async function getComment(commentId: number) {
  * @param commentId
  */
 export async function deleteComment(commentId: number) {
-	return prisma.comment.findUnique({
+	return prisma.comment.delete({
 		where: {
 			id: commentId,
 		},
