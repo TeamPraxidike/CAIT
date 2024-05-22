@@ -1,10 +1,4 @@
-import {authStore} from "$lib";
-import { get } from 'svelte/store';
-import {createUser} from "$lib/database";
-
 export async function load({ url, fetch }) {
-	const auth = get(authStore);
-	// console.log(auth);
 	const userId = 1;
 
 	const type = url.searchParams.get('type') || 'materials';
@@ -13,6 +7,7 @@ export async function load({ url, fetch }) {
 	const publications = await (await fetch(`/api/material`)).json();
 	const users = await (await fetch(`/api/user`)).json();
 	const tags = await (await fetch(`/api/tags`)).json();
+
 	const likedResponse = await fetch(`/api/user/${userId}/liked`);
 	const liked = likedResponse.status === 200 ? await likedResponse.json() : [];
 

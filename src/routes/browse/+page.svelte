@@ -1,11 +1,10 @@
 <script lang="ts">
-    import {authStore, Filter, PublicationCard, SearchBar, UserProp} from '$lib';
+    import {Filter, PublicationCard, SearchBar, UserProp} from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { Tag } from '@prisma/client';
     import type { PageServerData } from './$types';
-    import {onMount} from "svelte";
 
     export let data:PageServerData;
     let searchWord: string = '';
