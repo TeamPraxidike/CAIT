@@ -2,7 +2,6 @@ import fs from 'fs';
 import { randomUUID } from 'node:crypto';
 import type FileSystem from '$lib/FileSystemPort/FileSystem';
 import path from 'path';
-import { basePath } from '$lib/database';
 
 /**
  * Adapter interface for the FileSystem Port that deals with file management locally.
@@ -13,13 +12,18 @@ import { basePath } from '$lib/database';
 export class LocalFileSystem implements FileSystem {
 	//readonly basePath = 'static\\uploadedFiles\\';
 	// readonly basePath = path.join('static', 'uploadedFiles');
+	private readonly basePath: string;
+
+	constructor(basePath: string) {
+		this.basePath = basePath;
+	}
 
 	/**
 	 * Delete a file from the local file system (the server)
 	 * @param pathArg the path to the file
 	 */
 	deleteFile(pathArg: string) {
-		fs.unlink(path.join(basePath, pathArg), (err) => {
+		fs.unlink(path.join(this.basePath, pathArg), (err) => {
 			if (err) throw err;
 			console.log(pathArg + ' deleted!');
 		});
@@ -31,7 +35,7 @@ export class LocalFileSystem implements FileSystem {
 	 * @param file the binary data of the file
 	 */
 	async editFile(pathArg: string, file: Buffer) {
-		fs.writeFileSync(path.join(basePath, pathArg), file);
+		fs.writeFileSync(path.join(this.basePath, pathArg), file);
 		return pathArg;
 	}
 
@@ -42,8 +46,8 @@ export class LocalFileSystem implements FileSystem {
 	 */
 	readFile(pathArg: string): Buffer {
 		try {
-			console.log('Reading file ' + path.join(basePath, pathArg));
-			return fs.readFileSync(path.join(basePath, pathArg));
+			console.log('Reading file ' + path.join(this.basePath, pathArg));
+			return fs.readFileSync(path.join(this.basePath, pathArg));
 		} catch (error) {
 			throw error;
 		}
@@ -65,12 +69,15 @@ export class LocalFileSystem implements FileSystem {
 			throw new Error('No file provided');
 		}
 		try {
-			if (!fs.existsSync(basePath)) fs.mkdirSync(basePath);
+			if (!fs.existsSync(this.basePath)) fs.mkdirSync(this.basePath);
 
 			const pathFileNameGenerated =
 				`${randomUUID()}` + `.${(name + '').split('.').pop()}`;
 
-			fs.writeFileSync(path.join(basePath, pathFileNameGenerated), file);
+			fs.writeFileSync(
+				path.join(this.basePath, pathFileNameGenerated),
+				file,
+			);
 			console.log(name + ' saved as ' + pathFileNameGenerated);
 			return pathFileNameGenerated;
 		} catch (error) {
@@ -79,6 +86,6 @@ export class LocalFileSystem implements FileSystem {
 	}
 
 	getBasePath() {
-		return basePath;
+		return this.basePath;
 	}
 }

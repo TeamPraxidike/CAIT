@@ -138,8 +138,8 @@ type NodeInfo = {
 	next: { fromId: number; toId: number[] }[];
 };
 
-export const fileSystem = new LocalFileSystem();
 export const basePath = path.join('static', 'uploadedFiles');
+export const fileSystem = new LocalFileSystem(basePath);
 
 export {
 	prisma,
