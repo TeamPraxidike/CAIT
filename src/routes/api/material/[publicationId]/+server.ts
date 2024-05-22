@@ -13,6 +13,7 @@ import {
 	updateFiles,
 } from '$lib/database';
 
+
 import { coverPicFetcher } from '$lib/database';
 
 export async function GET({ params }) {
@@ -174,6 +175,7 @@ export async function DELETE({ params }) {
 					},
 				);
 			}
+
 			await deleteMaterialByPublicationId(
 				id,
 				material,

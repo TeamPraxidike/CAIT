@@ -77,11 +77,18 @@ export async function getAllMaterials(
 
 export async function deleteMaterialByPublicationId(
 	publicationId: number,
-	material: Material & { files: PrismaFile[] },
+	material: Material & { files: PrismaFile[], coverPic: PrismaFile },
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	for (const file of material!.files) {
-		await deleteFile(file.path);
+		await deleteFile(file.path, prismaContext);
+	}
+
+	const coverPic: PrismaFile = material.coverPic;
+
+	// if there is a coverPic
+	if (coverPic) {
+		await deleteFile(coverPic.path, prismaContext);
 	}
 
 	return prismaContext.material.delete({
