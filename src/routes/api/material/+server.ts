@@ -1,5 +1,4 @@
 import {
-	addFile,
 	createMaterialPublication,
 	type FileDiffActions,
 	getAllMaterials,
@@ -80,8 +79,6 @@ export const GET: RequestHandler = async ({ url }) => {
 			sort,
 			query,
 		);
-
-		const materials = await getAllMaterials(tags, publishers, diff, type);
 
 		// coverPic return
 		const fileData: FetchedFileArray = [];
