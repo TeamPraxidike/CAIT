@@ -32,7 +32,12 @@
         liked = !liked;
     }
 
-    const toggleSave = () => saved = !saved;
+    const toggleSave = async () => {
+        await fetch(`/api/user/${userId}/saved/${publication.id}`, {
+            method: 'POST',
+        });
+        saved = !saved;
+    }
 
     let hoverDiv: HTMLDivElement;
     let container: HTMLDivElement;

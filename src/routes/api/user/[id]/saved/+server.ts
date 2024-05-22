@@ -9,10 +9,11 @@ export async function GET({params}) {
     const user = await getUserById(parseInt(id));
     if(!user) return new Response(JSON.stringify({error: 'User not found'}), {status: 404});
 
-    const saved = await getSavedPublications(parseInt(id));
-    if(saved === null) return new Response(JSON.stringify({error: 'Server error'}), {status: 500});
-    if(saved.saved.length === 0) return new Response(null, {status: 204});
+    const savedResponse = await getSavedPublications(parseInt(id));
+    if(savedResponse === null) return new Response(JSON.stringify({error: 'Server error'}), {status: 500});
+    const saved = savedResponse.saved.map((x) => x.id);
+    if(saved.length === 0) return new Response(null, {status: 204});
 
-    return new Response(JSON.stringify(saved.saved), {status: 200});
+    return new Response(JSON.stringify(saved), {status: 200});
 }
 

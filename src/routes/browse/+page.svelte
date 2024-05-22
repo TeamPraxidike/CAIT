@@ -13,6 +13,7 @@
     let users = data.users
     let tags = data.tags
     let liked = data.liked as number[];
+    let saved = data.saved as number[];
 
 
     $: pageType = data.type;
@@ -305,7 +306,7 @@
 
 {#if pageType === "materials"}
     {#each materials as material}
-        <PublicationCard publication={material.publication} liked={liked.includes(material.publicationId)}/>
+        <PublicationCard publication={material.publication} liked={liked.includes(material.publicationId)} saved={saved.includes(material.publicationId)}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person}
