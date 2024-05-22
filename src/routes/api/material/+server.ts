@@ -10,7 +10,7 @@ import {
 	updateFiles,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
-import { Difficulty } from '@prisma/client';
+import {Difficulty} from '@prisma/client';
 import { coverPicFetcher } from '$lib/database/file';
 
 /**
@@ -56,7 +56,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		for (const material of materials) {
 			fileData.push(
-				coverPicFetcher(material.encapsulatingType, material.coverPic),
+				coverPicFetcher(material.encapsulatingType, material.publication.coverPic),
 			);
 		}
 
@@ -113,7 +113,7 @@ export async function POST({ request }) {
 					prismaTransaction,
 				);
 
-				await updateCoverPic(coverPic, material.id, prismaTransaction);
+				await updateCoverPic(coverPic, material.publicationId, prismaTransaction);
 
 				await updateFiles(fileInfo, material.id, prismaTransaction);
 

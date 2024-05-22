@@ -78,8 +78,6 @@ import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { Difficulty, MaterialType } from '@prisma/client';
 import path from 'path';
 
-const fileSystem = new LocalFileSystem();
-
 /**
  * MaterialForm is the type of the form data that is sent to the server when creating a new material.
  * It is used in the `MaterialForm.svelte` component and on the server side on the POST request to `/api/materials`.
@@ -140,11 +138,11 @@ type NodeInfo = {
 	next: { fromId: number; toId: number[] }[];
 };
 
+export const fileSystem = new LocalFileSystem();
 export const basePath = path.join('static', 'uploadedFiles');
 
 export {
 	prisma,
-	fileSystem,
 	type MaterialForm,
 	type FileDiffActions,
 	type FetchedFileItem,

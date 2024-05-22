@@ -89,6 +89,8 @@ model Publication {
 
   node Node[]
 
+  coverPic   File?   @relation("CoverPic")
+
   materials Material?
   circuit   Circuit?
 }
@@ -101,8 +103,6 @@ model Material {
   theoryPractice    Float?
   files             File[]       @relation("Files")
 
-  coverPic   File?   @relation("CoverPic")
-
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 }
@@ -112,8 +112,8 @@ model File {
   title String
   type  String
 
-  materialCoverId Int?  @unique
-  coverPic   Material? @relation("CoverPic", fields: [materialCoverId], references: [id], onDelete: Cascade)
+  coverId    Int?  @unique
+  coverPic   Publication? @relation("CoverPic", fields: [coverId], references: [id], onDelete: Cascade)
 
   materialId Int?
   material   Material? @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)

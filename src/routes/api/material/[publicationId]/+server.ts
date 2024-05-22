@@ -10,11 +10,12 @@ import {
 	type MaterialForm,
 	type FetchedFileItem,
 	updateCoverPic,
-	updateFiles,
+	updateFiles, deleteFile,
 } from '$lib/database';
 
 
 import { coverPicFetcher } from '$lib/database';
+import type {File as PrismaFile} from "@prisma/client"
 
 export async function GET({ params }) {
 	// Authentication step
@@ -56,7 +57,7 @@ export async function GET({ params }) {
 		// coverPic return
 		const coverFileData: FetchedFileItem = coverPicFetcher(
 			material.encapsulatingType,
-			material.coverPic,
+			material.publication.coverPic,
 		);
 
 		return new Response(
@@ -115,7 +116,7 @@ export async function PUT({ request, params }) {
 
 				await updateCoverPic(
 					coverPic,
-					body.materialId,
+					publicationId,
 					prismaTransaction,
 				);
 
@@ -174,6 +175,13 @@ export async function DELETE({ params }) {
 						status: 404,
 					},
 				);
+			}
+
+			const coverPic: PrismaFile = material.publication.coverPic;
+
+			// if there is a coverPic
+			if (coverPic) {
+				await deleteFile(coverPic.path, prismaTransaction);
 			}
 
 			await deleteMaterialByPublicationId(

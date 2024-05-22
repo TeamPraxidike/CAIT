@@ -58,7 +58,7 @@ export async function addCover(
 	title: string,
 	type: string,
 	info: Buffer,
-	materialId: number,
+	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
@@ -69,7 +69,7 @@ export async function addCover(
 					path: path,
 					title: title,
 					type,
-					materialCoverId: materialId, // Associate the cover with Material
+					coverId: publicationId, // Associate the cover with Material
 				},
 			});
 		} catch (errorDatabase) {
@@ -83,13 +83,13 @@ export async function addCover(
 
 export async function updateCoverPic(
 	coverPic: { type: string; info: string } | null,
-	materialId: number,
+	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// check if the material already has a coverPic
 	const coverFile = await prismaContext.file.findUnique({
 		where: {
-			materialCoverId: materialId,
+			coverId: publicationId,
 		},
 	});
 
@@ -106,7 +106,7 @@ export async function updateCoverPic(
 			'cover.jpg',
 			coverPic.type,
 			buffer,
-			materialId,
+			publicationId,
 			prismaContext,
 		);
 	}

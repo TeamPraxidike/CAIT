@@ -25,10 +25,10 @@ export async function getMaterialByPublicationId(
 					tags: true,
 					publisher: true,
 					maintainers: true,
+					coverPic: true
 				},
 			},
 			files: true,
-			coverPic: true,
 		},
 	});
 }
@@ -67,9 +67,9 @@ export async function getAllMaterials(
 			publication: {
 				include: {
 					tags: true,
+					coverPic: true
 				},
 			},
-			coverPic: true,
 			files: false,
 		},
 	});
@@ -82,13 +82,6 @@ export async function deleteMaterialByPublicationId(
 ) {
 	for (const file of material!.files) {
 		await deleteFile(file.path, prismaContext);
-	}
-
-	const coverPic: PrismaFile = material.coverPic;
-
-	// if there is a coverPic
-	if (coverPic) {
-		await deleteFile(coverPic.path, prismaContext);
 	}
 
 	return prismaContext.material.delete({
