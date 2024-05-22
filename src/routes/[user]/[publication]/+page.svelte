@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { LayoutServerData } from './$types';
-	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore, UserProp } from '$lib';
+	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore, AddInteractionForm, UserProp } from '$lib';
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
-	import { enhance } from '$app/forms';
 	import type { PublicationViewLoad } from './+layout.server';
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
@@ -29,93 +28,9 @@
 	let created: string;
 	$:created = getDateDifference(serverData.material.publication.createdAt, new Date());
 
-	let isFocused = false;
-	let originalHeight: string;
-
-	let maxCommentId = 3;
-
-	let replies = [
-		{
-			id: 1,
-			content: 'This is a reply',
-			publicationId: 1,
-			userId: 1,
-			likes: 0,
-			updatedAt: new Date(),
-			createdAt: new Date()
-		}
-	];
-
-	let comments = [
-		{
-			id: 1,
-			content: 'This is a comment',
-			publicationId: 1,
-			userId: 1,
-			likes: 0,
-			updatedAt: new Date(),
-			createdAt: new Date(),
-			replies: replies
-		}
-	];
-
-	let commentText = '';
-	let textarea: HTMLTextAreaElement;
-
-	function adjustHeight() {
-		textarea.style.height = 'auto';
-		textarea.style.height = textarea.scrollHeight + 'px';
-	}
-
-	function handleFocus() {
-		isFocused = true;
-	}
-
-	function handleBlur() {
-		if (commentText === '') {
-			isFocused = false;
-		}
-	}
-
-	function handleCancel() {
-		commentText = '';
-		isFocused = false;
-		textarea.style.height = originalHeight;
-	}
-
-	/*
-	adding this method to test for demo mainly, most likely would be a form with post that happens when you click the comment button
-	 */
-	function addComment() {
-		let newComment = {
-			id: maxCommentId,
-			content: commentText,
-			publicationId: 1,
-			userId: 1,
-			likes: 0,
-			updatedAt: new Date(),
-			createdAt: new Date(),
-			replies: []
-		};
-		maxCommentId++;
-		isFocused = false;
-		textarea.style.height = originalHeight;
-		comments = [newComment, ...comments];
-	}
-
-	function handleDelete(event: CustomEvent) {
-		const value = event.detail.value;
-		if (value.reply) {
-			comments;
-		} else {
-			comments = comments.filter(comment => comment.id !== value.interaction.id);
-		}
-
-	}
-
 	onMount(() => {
-		originalHeight = getComputedStyle(textarea).height;
 		created = getDateDifference(serverData.material.publication.createdAt, new Date());
+
 	});
 
 	async function deletePublication() {
@@ -217,41 +132,16 @@
 </div>
 
 <div class="col-span-full flex flex-col mb-1 gap-1">
-	<h2 class="text-3xl">Discussion Forum</h2>
+	<h2 class="text-2xl">Discussion Forum</h2>
+	<hr>
 </div>
 
-<div class="flex mb-2 gap-2 col-span-full items-center">
-	<enhanced:img class="w-10 md:w-16 rounded-full my-4 border" src="/static/omni.jpg" alt="CAIT Logo" />
-	<form use:enhance method="POST" class="flex-grow ">
-		<div class="flex-grow pt-2 items-center">
-        <textarea
-			name="comment"
-			bind:this={textarea}
-			class="w-full border-0 border-b border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm"
-			placeholder="Start a discussion..."
-			rows="1"
-			bind:value={commentText}
-			on:input={adjustHeight}
-			on:focus={handleFocus}
-			on:blur={handleBlur}></textarea>
-			<div class="flex justify-end mt-2 gap-2">
-				<button
-					class="variant-soft-surface px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-surface"
-					type="button" on:click={handleCancel}>Cancel
-				</button>
-				<button
-					class="variant-soft-primary px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-primary mr-2"
-					type="submit" formaction="?/comment" on:click={addComment}>Comment
-				</button>
-			</div>
-		</div>
-	</form>
-</div>
+<AddInteractionForm addComment='{true}' commentId="{1}"/>
 
-{#each comments as comment (comment.id)}
-	<Comment on:deleteInteraction={handleDelete} interaction={comment}
-			 popupName="comment + {comment.id} + {comment.updatedAt.toDateString()}" isReply={false} />
-	{#each comment.replies as reply (reply.id)}
-		<Comment interaction={reply} popupName="reply + {reply.id} + {reply.updatedAt.toDateString()}" isReply={true} />
+{#each serverData.material.publication.comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
+	<Comment interaction={comment}
+			 popupName="comment + {comment.id} + {new Date(comment.createdAt).toDateString()}" isReply={false} userName="{comment.user.firstName} + {comment.user.lastName}" />
+	{#each comment.replies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) as reply (reply.id)}
+		<Comment interaction={reply} popupName="reply + {reply.id} + {new Date(reply.createdAt).toDateString()}" isReply={true} userName="{reply.user.firstName} + {reply.user.lastName}"/>
 	{/each}
 {/each}

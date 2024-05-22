@@ -1,5 +1,9 @@
 import {getLikedPublications, getUserById} from "$lib/database";
 
+/**
+ * Gets the liked publications of a user
+ * @param params
+ */
 export async function GET({params}) {
     const {id} = params;
     const user = await getUserById(parseInt(id));

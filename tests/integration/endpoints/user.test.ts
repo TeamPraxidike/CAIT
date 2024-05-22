@@ -280,4 +280,144 @@ describe('Users', () => {
 			expect(responseBody.error).toBe("Publication not found");
 		});
 	});
+
+	describe('[GET] /user/:id/saved', () => {
+		it("should return an empty list for a newly created user", async () => {
+			const user =
+				await createUser("Ivan", "uisnfgkfvm", "email@gmail", "picture.picture");
+
+			const response = await fetch(`${testingUrl}/user/${user.id}/saved`);
+			expect(response.status).toBe(204);
+		});
+
+		it("should return 404 when user does not exist", async () => {
+			const response = await fetch(`${testingUrl}/user/${9848906}/saved`);
+			expect(response.status).toBe(404);
+		});
+
+		it("should return a list with liked posts as content", async () => {
+			const user =
+				await createUser("Halil", "uisnfgkfvm", "email@gmail", "picture.picture");
+			const publication = await createMaterialPublication(
+				user.id,
+				{
+					title: "cool publication",
+					description: "This publication has description",
+					difficulty: Difficulty.easy,
+					coverPic: 'cover',
+					copyright: true,
+					timeEstimate: 4,
+					theoryPractice: 9,
+					learningObjectives: [],
+					prerequisites: []
+				}
+			);
+
+			await fetch(`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`, {
+				method: 'POST',
+			});
+
+			const response = await fetch(`${testingUrl}/user/${user.id}/saved`);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveLength(1);
+			expect(responseBody[0].id).toBe(publication.publicationId);
+
+			const publication2 = await createMaterialPublication(
+				user.id,
+				{
+					title: "cool publication",
+					description: "This publication has description",
+					difficulty: Difficulty.easy,
+					coverPic: 'cover',
+					copyright: true,
+					timeEstimate: 4,
+					theoryPractice: 9,
+					learningObjectives: [],
+					prerequisites: []
+				}
+			);
+
+			await fetch(`${testingUrl}/user/${user.id}/saved/${publication2.publicationId}`, {
+				method: 'POST',
+			});
+			const response2 = await fetch(`${testingUrl}/user/${user.id}/saved`);
+			const responseBody2 = await response2.json();
+			expect(responseBody2).toHaveLength(2);
+			expect(responseBody2[0].id).toBe(publication.publicationId);
+			expect(responseBody2[1].id).toBe(publication2.publicationId);
+		});
+	});
+
+	describe('[POST] /user/:id/saved/:publicationId', () => {
+		it('should successfully save a publication', async () => {
+			const body = {
+				firstName: 'Kirilcho',
+				lastName: 'Panayotov',
+				email: 'email@student.tudelft.nl',
+				profilePic: 'image.jpg'
+			};
+			const user =
+				await createUser(body.firstName, body.lastName, body.email, body.profilePic);
+
+			const publication = await createMaterialPublication(
+				user.id,
+				{
+					title: "cool publication",
+					description: "This publication has description",
+					difficulty: Difficulty.easy,
+					coverPic: 'cover',
+					copyright: true,
+					timeEstimate: 4,
+					theoryPractice: 9,
+					learningObjectives: [],
+					prerequisites: []
+				}
+			);
+
+			const response = await fetch(`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`, {
+				method: 'POST',
+			});
+
+			const responseBody = await response.json();
+			expect(response.status).toBe(200);
+			expect(responseBody.message).toBe("Publication saved successfully");
+
+			const response2 = await fetch(`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`, {
+				method: 'POST',
+			});
+
+			const responseBody2 = await response2.json();
+			expect(response2.status).toBe(200);
+			expect(responseBody2.message).toBe("Publication unsaved successfully");
+		});
+
+		it('should return 404 when user does not exist', async () => {
+			const response = await fetch(`${testingUrl}/user/${830957945}/saved/${34567890}`, {
+				method: 'POST',
+			});
+			expect(response.status).toBe(404);
+			const responseBody = await response.json();
+			expect(responseBody.error).toBe("User not found");
+		});
+
+		it('should return 404 when publication does not exist', async () => {
+			const body = {
+				firstName: 'Kirilcho',
+				lastName: 'Panayotov',
+				email: 'email@student.tudelft.nl',
+				profilePic: 'image.jpg'
+			};
+			const user =
+				await createUser(body.firstName, body.lastName, body.email, body.profilePic);
+
+			const response = await fetch(`${testingUrl}/user/${user.id}/saved/${34567890}`, {
+				method: 'POST',
+			});
+			expect(response.status).toBe(404);
+			const responseBody = await response.json();
+			expect(responseBody.error).toBe("Publication not found");
+		});
+	});
 });

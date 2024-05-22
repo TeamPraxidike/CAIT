@@ -21,7 +21,10 @@ describe('Tag Component', () => {
 	});
 
 	it('should not display tag if tagText is empty', () => {
-		const instance = new Tag({ target: host, props: { tagText: '' } });
+		const instance = new Tag({
+			target: host,
+			props: { tagText: '', removable: false },
+		});
 		expect(instance).toBeTruthy();
 
 		// should not render anything besides the comment that the tag is there

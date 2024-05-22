@@ -1,12 +1,32 @@
 import { deleteFile, prisma } from '$lib/database';
 import {
 	Difficulty,
-	type Material,
-	PublicationType,
 	type File as PrismaFile,
+	type Material,
 	MaterialType,
+	PublicationType,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
+
+const sortSwitch = (sort: string) => {
+	let orderBy: any = {};
+	switch (sort) {
+		case 'Most Liked':
+			orderBy = { publication: { likes: 'desc' } };
+			break;
+		case 'Most Used':
+			orderBy = { publication: { usageCount: 'desc' } };
+			break;
+		case 'Oldest':
+			orderBy = { publication: { createdAt: 'asc' } };
+			break;
+		default:
+			orderBy = { publication: { createdAt: 'desc' } }; // Default to 'Most Recent'
+			break;
+	}
+
+	return orderBy;
+};
 
 /**
  * [GET] Returns a publication of type Material with the given id.
@@ -25,7 +45,17 @@ export async function getMaterialByPublicationId(
 					tags: true,
 					publisher: true,
 					maintainers: true,
-					coverPic: true
+					coverPic: true,
+					comments: {
+						include: {
+							replies: {
+								include: {
+									user: true,
+								},
+							},
+							user: true,
+						},
+					},
 				},
 			},
 			files: true,
@@ -40,9 +70,37 @@ export async function getAllMaterials(
 	tags: string[],
 	publishers: number[],
 	diff: Difficulty[],
-	type: string[],
+	type: MaterialType[],
+	sort: string,
+	q: string,
 ) {
 	const where: any = { AND: [] };
+
+	if (q !== '') {
+		where.AND.push({
+			OR: [
+				{
+					publication: {
+						title: { contains: q, mode: 'insensitive' },
+					},
+				},
+				{
+					publication: {
+						description: { contains: q, mode: 'insensitive' },
+					},
+				},
+
+				{
+					publication: {
+						learningObjectives: {
+							hasSome: [q],
+						},
+					},
+				},
+			],
+		});
+	}
+
 	if (publishers.length > 0) {
 		where.AND.push({ publication: { publisherId: { in: publishers } } });
 	}
@@ -58,11 +116,13 @@ export async function getAllMaterials(
 	}
 
 	if (type.length > 0) {
-		where.AND.push({ type: { in: type } });
+		where.AND.push({ encapsulatingType: { in: type } });
 	}
 
+	const sortBy = sortSwitch(sort);
 	return prisma.material.findMany({
 		where,
+		orderBy: sortBy,
 		include: {
 			publication: {
 				include: {

@@ -59,9 +59,9 @@ model PublicationUsedInCourse {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int
-  course        String[]
+  course        String
 
-  @@id([publicationId, userId])
+  @@id([publicationId, course])
 }
 
 model Publication {

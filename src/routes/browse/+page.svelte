@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar } from '$lib';
+    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
-    import {fly} from 'svelte/transition';
+    import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import type { Material, Publication, Tag } from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
+    import type { Tag } from '@prisma/client';
 
     export let data:PageServerData;
     let searchWord: string = '';
@@ -16,6 +17,9 @@
     }[] = data.materials;
     let fileData:FetchedFileArray = data.fileData;
     let users = data.users
+    let tags = data.tags
+
+
 
     $:pageType = data.type;
     $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
@@ -27,35 +31,31 @@
     $: circuitsBg = pageType === 'circuits' ? 'bg-primary-500 dark:bg-primary-600 hover:bg-primary-500 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900 ' : 'hover:bg-primary-50 dark:hover:bg-primary-800'
 
     //Variables needed to deal with Sort and Difficulty
-    let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
-    let sortByActive = false
-    let sortByText = 'Sort By'
+        let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
+        let sortByActive = false
+        let sortByText = 'Most Recent'
 
-    let selectedDiff: {id:number, content:string }[] = []
-    let diffOptions: { id: number, content: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, content: x }));
-    let diffActive = false
+        let selectedDiff: {id:number, content:string }[] = []
+        let diffOptions: { id: number, content: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, content: x }));
+        let diffActive = false
 
-    //Variables needed to deal with Tags
-    let selectedTags: {id:number, content:string }[] = []; //keeps track of selected tags
-    let allTags: {id: number, content:string }[] = data.tags.map((x: Tag) => ({ id: 0, content: x.content }));
-    let displayTags: {id:number, content:string }[] = allTags;
-    let tagActive = false
+        //Variables needed to deal with Tags
+        let selectedTags: {id:number, content:string }[] = []; //keeps track of selected tags
+        let allTags: {id: number, content:string }[] = tags.map((x: Tag) => ({ id: 0, content: x.content }));
+        let displayTags: {id:number, content:string }[] = allTags;
+        let tagActive = false
 
-    //Variables needed to deal with Publishers
-    let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
-    let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
-    let displayPublishers: {id:number, content:string }[] = allPublisherNames; //
-    let publisherActive = false
+        //Variables needed to deal with Publishers
+        let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
+        let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
+        let displayPublishers: {id:number, content:string }[] = allPublisherNames; //
+        let publisherActive = false
 
-    //Variables needed to deal with Types
-    let selectedTypes: {id:number, content:string }[] = []; //keeps track of selected tags
-    let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
-    let displayTypes: {id:number, content:string }[] = allTypes; //
-    let typeActive = false
-
-    $:console.log(selectedTypes, selectedTags, selectedPublishers, selectedDiff)
-
-    //SORT BY Functionality
+        //Variables needed to deal with Types
+        let selectedTypes: {id:number, content:string }[] = []; //keeps track of selected tags
+        let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+        let displayTypes: {id:number, content:string }[] = allTypes; //
+        let typeActive = false
 
     //Used to make the dropdown appear/disappear
     const toggleSortBy = () => {
@@ -78,6 +78,7 @@
         sortByText = target.textContent ?? "Sort By"
         //close the dropdown upon selection
         sortByActive = false;
+        applyActive = true;
     }
 
 
@@ -87,18 +88,25 @@
      */
     const removeTag = (event: CustomEvent) => {
         selectedTags = selectedTags.filter(item => item.content !== event.detail.text)
+        applyActive = true;
     }
 
     const removePublisher = (name: {id:number, content:string }) => {
         selectedPublishers = selectedPublishers.filter(publisher => publisher.content !== name.content);
+        applyActive = true;
+
     };
 
     const removeDiff = (name:{id:number, content:string }) => {
         selectedDiff = selectedDiff.filter(diff => diff.content !== name.content);
+        applyActive = true;
+
     };
 
     const removeType = (name: {id:number, content:string }) => {
         selectedTypes = selectedTypes.filter(diff => diff.content !== name.content);
+        applyActive = true;
+
     };
 
     /**
@@ -112,20 +120,49 @@
         typeActive = false;
     };
 
+    const resetAll = () => {
+        searchWord = '';
+        applyActive = false
+        resetFilters();
+    };
+
+    const resetFilterButton = () => {
+        resetFilters();
+        sendFiltersToAPI();
+    };
+
+    const resetFilters = () => {
+        selectedTags = [];
+        selectedTypes = [];
+        selectedPublishers = [];
+        selectedDiff = [];
+
+    };
+
+    const onSearch = (event : CustomEvent) => {
+        searchWord = event.detail.value.inputKeywords
+        sendFiltersToAPI()
+    }
+
+
+
     const sendFiltersToAPI = async () => {
         // Construct the URL with query parameters based on selected filters
+
+        applyActive = false;
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
             difficulty: selectedDiff.map(x => x.content).join(','),
             types: selectedTypes.map(x => x.content).join(','),
-            tags: selectedTags.map(x => x.content).join(',')
+            tags: selectedTags.map(x => x.content).join(','),
+            sort: sortByText,
+            q: searchWord
         });
         const url = `/api/material?${queryParams.toString()}`;
 
         // Make a GET request to the API
         await fetch(url)
           .then(response => {
-              console.log(response);
               if (!response.ok) {
                   throw new Error('Network response was not ok');
               }
@@ -134,31 +171,55 @@
           .then(data => {
               // Handle the response data from the API
               materials = data
+              console.log(materials)
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);
           });
     };
 
-</script>
 
-<div class="col-span-4 mt-32">
-    <SearchBar searchType="materials" bind:inputKeywords={searchWord}/>
+    let applyActive = false;
+    $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
+
+
+</script>
+<div class="flex justify-between col-span-full mt-32">
+    <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
+        <SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
+    </div>
+
+
+
+    <div class="hidden rounded-lg lg:flex w-1/4">
+        <a href="/browse/?type=materials" on:click={resetAll}
+           class="rounded-l-lg text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600   {materialsText} {materialsBg}">Materials</a>
+        <a href="/browse/?type=people" on:click={resetAll}
+           class="text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-primary-500 dark:border-primary-600   {peopleText} {peopleBg}">People</a>
+        <a href="/browse/?type=circuits" on:click={resetAll}
+           class="rounded-r-lg text-xs lg:text-sm w-1/3 flex justify-center items-center border-y border-r border-primary-500 dark:border-primary-600  {circuitsText} {circuitsBg}">Circuits</a>
+
+    </div>
 </div>
 
-<div class="col-span-full lg:col-span-8 flex justify-between gap-8 mt-32">
-    <div class="flex gap-2">
+<div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
+    <div class="flex gap-1 items-center">
 
-        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}" profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}/>
-        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}" bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}" on:clearSettings={clearAll}/>
-        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}" profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}/>
-        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}" profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}/>
-
-
-        <form action=""><button on:click={sendFiltersToAPI}>Apply</button></form>
-        <!-------SortBy-------->
+        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
+                profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
+                on:filterSelected={() => {applyActive = true}} />
+        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
+                bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}"
+                on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} />
+        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
+                profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
+                on:filterSelected={() => {applyActive = true}} />
+        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
+                profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
+                on:filterSelected={() => {applyActive = true}} />
+        <div class = "w-px h-4/5 bg-surface-600" ></div>
         <div class="space-y-1 relative">
-            <button class=" text-xs rounded-lg border px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
+            <button class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
                     on:click={toggleSortBy}>
                 <span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
                 {#if sortByActive}
@@ -177,22 +238,13 @@
                 </div>
             {/if}
         </div>
-
     </div>
-
-
-    <div class="rounded-lg flex w-1/3">
-        <a href="/browse/?type=materials"
-           class="rounded-l-lg text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600   {materialsText} {materialsBg}">Materials</a>
-        <a href="/browse/?type=people"
-           class="text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-primary-500 dark:border-primary-600   {peopleText} {peopleBg}">People</a>
-        <a href="/browse/?type=circuits"
-           class="rounded-r-lg text-xs lg:text-sm w-1/3 flex justify-center items-center border-y border-r border-primary-500 dark:border-primary-600  {circuitsText} {circuitsBg}">Circuits</a>
-
-    </div>
+    <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 {applyBackground}"
+            on:click={sendFiltersToAPI} disabled="{!applyActive}">Apply
+    </button>
 </div>
 
-<div class="col-span-full flex gap-2">
+<div class="col-span-full flex flex-wrap gap-2">
     {#if (selectedTags.length !== 0)}
         <div class=" flex gap-2 items-center">
             <p class="text-xs text-surface-600 dark:text-surface-200">Tags:</p>
@@ -214,7 +266,6 @@
                     <button class="h-full" on:click={() => removePublisher(sp)}>
                         <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
                     </button>
-
                 </div>
             {/each}
         </div>
@@ -247,8 +298,22 @@
         {/each}
     </div>
 {/if}
+
+
+    {#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
+        <button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
+                on:click={resetFilterButton}>
+            Reset Filters
+        </button>
+    {/if}
 </div>
 
-{#each materials as material, i}
-    <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} />
-{/each}
+{#if pageType === "materials"}
+    {#each materials as material}
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} />
+    {/each}
+{:else if pageType === "people"}
+    {#each users as person}
+        <UserProp view="search" posts="{5}" userPhotoUrl="" role="Maintainer" user={person} />
+    {/each}
+{/if}
