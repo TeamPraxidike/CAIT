@@ -70,7 +70,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		const type = ty ? ty.split(',').map(mapToType) : [];
 
 		const sort = url.searchParams.get('sort') || 'Most Recent';
-		const q: string = url.searchParams.get('q') || '';
+		const query: string = url.searchParams.get('q') || '';
 
 		const materials = await getAllMaterials(
 			tags,
@@ -78,7 +78,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			diff,
 			type,
 			sort,
-			q,
+			query,
 		);
 
 		const materials = await getAllMaterials(tags, publishers, diff, type);
@@ -88,7 +88,10 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		for (const material of materials) {
 			fileData.push(
-				coverPicFetcher(material.encapsulatingType, material.publication.coverPic),
+				coverPicFetcher(
+					material.encapsulatingType,
+					material.publication.coverPic,
+				),
 			);
 		}
 
@@ -145,7 +148,11 @@ export async function POST({ request }) {
 					prismaTransaction,
 				);
 
-				await updateCoverPic(coverPic, material.publicationId, prismaTransaction);
+				await updateCoverPic(
+					coverPic,
+					material.publicationId,
+					prismaTransaction,
+				);
 
 				await updateFiles(fileInfo, material.id, prismaTransaction);
 

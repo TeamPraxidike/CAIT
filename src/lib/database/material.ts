@@ -72,28 +72,28 @@ export async function getAllMaterials(
 	diff: Difficulty[],
 	type: MaterialType[],
 	sort: string,
-	q: string,
+	query: string,
 ) {
 	const where: any = { AND: [] };
 
-	if (q !== '') {
+	if (query !== '') {
 		where.AND.push({
 			OR: [
 				{
 					publication: {
-						title: { contains: q, mode: 'insensitive' },
+						title: { contains: query, mode: 'insensitive' },
 					},
 				},
 				{
 					publication: {
-						description: { contains: q, mode: 'insensitive' },
+						description: { contains: query, mode: 'insensitive' },
 					},
 				},
 
 				{
 					publication: {
 						learningObjectives: {
-							hasSome: [q],
+							hasSome: [query],
 						},
 					},
 				},
@@ -127,7 +127,7 @@ export async function getAllMaterials(
 			publication: {
 				include: {
 					tags: true,
-					coverPic: true
+					coverPic: true,
 				},
 			},
 			files: false,
@@ -137,7 +137,7 @@ export async function getAllMaterials(
 
 export async function deleteMaterialByPublicationId(
 	publicationId: number,
-	material: Material & { files: PrismaFile[], coverPic: PrismaFile },
+	material: Material & { files: PrismaFile[]; coverPic: PrismaFile },
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	for (const file of material!.files) {

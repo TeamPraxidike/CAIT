@@ -6,7 +6,6 @@
     import type { PageServerData } from './$types';
     import type { Material, Publication, Tag } from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
-    import type { Tag } from '@prisma/client';
 
     export let data:PageServerData;
     let searchWord: string = '';
@@ -309,7 +308,7 @@
 </div>
 
 {#if pageType === "materials"}
-    {#each materials as material}
+    {#each materials as material, i}
         <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} />
     {/each}
 {:else if pageType === "people"}
