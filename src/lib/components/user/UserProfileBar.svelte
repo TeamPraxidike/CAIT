@@ -3,6 +3,7 @@
     import {authStore} from "$lib";
 
     export let user:User;
+    export let userPhotoUrl: string;
     let about = "Franklin Delano Roosevelt[a] (January 30, 1882 – April 12, 1945), commonly known by his initials FDR, was an American statesman and politician who served as the 32nd president of the United States from 1933 until his death in 1945. He was a member of the Democratic Party and is the only U.S. president to have served more than two terms."
 
 
@@ -18,7 +19,12 @@
             lg:col-span-12 lg:px-4
             xl:col-span-3
             dark:bg-surface-800 dark:text-surface-50 dark:border-none">
-    <enhanced:img class="w-40 md:w-64 xl:w-full rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>
+<!--    <enhanced:img class="w-40 md:w-64 xl:w-full rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>-->
+    {#if userPhotoUrl !== ''}
+        <img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
+    {:else}
+        <div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
+    {/if}
     <div class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
                 sm:flex-col sm:items-start
                 md:w-7/12 md:justify-start

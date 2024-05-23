@@ -2,7 +2,7 @@
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
     import type {LayoutData, PageServerData} from './$types';
     import type { Material, Publication, Tag, User } from '@prisma/client';
-    import type { FetchedFileArray } from '$lib/database';
+    import type {FetchedFileArray, FetchedFileItem} from '$lib/database';
 
     /* This is the data that was returned from the server */
     export let data: LayoutData & PageServerData;
@@ -13,6 +13,8 @@
         }[]
     } = data.user;
 
+    let profilePic: FetchedFileItem = data.profilePic;
+
     let fileData:FetchedFileArray = data.fileData;
 
 
@@ -20,7 +22,7 @@
 
 <Meta title="Profile" description="CAIT" type="site"/>
 
-<UserProfileBar {user}/>
+<UserProfileBar user={user} userPhotoUrl={'data:image;base64,' + profilePic.data}/>
 
 <div class="grid grid-cols-3 gap-4 mb-20
             md:col-span-8 lg:col-span-12 xl:col-span-8">
