@@ -2,17 +2,10 @@
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
 	import type { Node as PrismaNode, Publication } from '@prisma/client';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
-	import { popup } from '@skeletonlabs/skeleton';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
 
 	//	import cytoscapeNodeHtmlLabel from 'cytoscape-node-html-label';
 
-	const popupClick: PopupSettings = {
-		event: 'click',
-		target: 'popupClick',
-		placement : 'bottom'
-	};
 
 
 	//cytoscapeNodeHtmlLabel(cytoscape);
@@ -20,8 +13,6 @@
 	interface Edge {
 		data: { id: string, source: string, target: string };
 	}
-
-	//export let dbNodes : Node[];
 
 	export let publishing: boolean;
 
@@ -31,7 +22,7 @@
 		next: PrismaNode[]
 	})[]; //GET all nodes in the circuit
 	 let edges : Edge[];
-	 let cy;
+	let cy: any;
 
 	let mappedNodes = nodes.map(node => ({
 		data: { id: node.id.toString(), title: node.publication.title },
@@ -50,6 +41,7 @@
 
 
 	onMount(() => {
+
 		// Initialize Cytoscape
 		cy = cytoscape({
 			container: document.getElementById('cy'),
@@ -151,16 +143,19 @@
 		});
 
 		if (!publishing)
-			cy.nodes().forEach(node => {
+			cy.nodes().forEach((node: any) => {
 					if (node)
 						node.lock()
 			});
 	});
 
 
+	let addActive: boolean = false;
 	let displayedMaterials: any = [];
+	let selectedIds: Set<number> = new Set();
 	//const addElements = () => addingActive = !addingActive
-	const addElements = async () => {
+	const fetchElements = async () => {
+
 		await fetch('/api/material')
 			.then(response => {
 				if (!response.ok) {
@@ -171,11 +166,40 @@
 			.then(data => {
 				// Handle the response data from the API
 				displayedMaterials = data;
+				addActive = true;
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
 			});
 	};
+
+	const addNode = async (event: CustomEvent) => {
+		let pubId = event.detail.id;
+
+		await fetch(`/api/material/${pubId}`)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				cy.add({
+					group: 'nodes',
+					data: { id: data.material.publication.id, label: data.material.publication.title },
+					position: { x: 100, y: 100 }
+				});
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
+	};
+
+	const removeNode = (event: CustomEvent) => {
+		cy.remove(cy.$(`#${event.detail.id}`));
+	};
+
+
 </script>
 
 <style>
@@ -219,13 +243,17 @@
         fill: #7ee787;
     }
 </style>
-<button class="btn variant-filled h-1/2" use:popup={popupClick} on:click={addElements}>Add</button>
+<button class="btn variant-filled h-1/2" on:click={fetchElements}>Add</button>
 
 <div id="cy"></div>
 
-<div data-popup="popupClick">
-	<SearchElems bind:materials={displayedMaterials} />
-</div>
+
+{#if addActive}
+	<div>
+		<SearchElems bind:addActive={addActive} bind:selectedIds={selectedIds} bind:materials={displayedMaterials}
+								 on:selFurther={addNode} on:remFurther={removeNode} />
+	</div>
+{/if}
 
 
 

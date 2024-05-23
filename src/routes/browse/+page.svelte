@@ -187,7 +187,7 @@
 
     <div class="hidden rounded-lg lg:flex w-1/4">
         <a href="/browse/?type=materials" on:click={resetAll}
-           class="rounded-l-lg text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600   {materialsText} {materialsBg}">Materials</a>
+           class="rounded-l-lg text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600 {materialsText} {materialsBg}">Materials</a>
         <a href="/browse/?type=people" on:click={resetAll}
            class="text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-primary-500 dark:border-primary-600   {peopleText} {peopleBg}">People</a>
         <a href="/browse/?type=circuits" on:click={resetAll}

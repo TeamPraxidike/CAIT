@@ -1,23 +1,38 @@
 <script lang="ts">
 
-    import {DiffBar, getDateDifference, Tag} from '$lib';
+    import { DiffBar, getDateDifference, Tag } from '$lib';
 
     import Icon from '@iconify/svelte';
-    import {fly} from 'svelte/transition';
-    import {onMount} from 'svelte';
+    import { fly } from 'svelte/transition';
+    import { createEventDispatcher, onMount } from 'svelte';
     import type { Publication } from '@prisma/client';
+    import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import { popup } from '@skeletonlabs/skeleton';
+
     export let publication:Publication & {
         tags: { content: string }[]
     };
 
-    console.log(publication)
-    console.log(publication.tags)
+    let popupName = publication.id.toString().concat(publication.title);
+    const popupClick: PopupSettings = {
+        event: 'click',
+        target: popupName,
+        placement: 'bottom',
+        closeQuery: '#close, #remove'
+    };
+
+
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let numMaterials: number = 1;
     export let used: number = 1;
     export let tags: string[] = publication.tags.map(tag => tag.content);
+
+    //used to differentiate if its used in a normal browse or in the circuit browse
+    export let inCircuits: boolean = false;
+    //Used to see if its used in circuit whether it is selected for the circuit
+    export let selected: boolean = false;
 
     let lastUpdated: string = getDateDifference(publication.updatedAt, new Date());
 
@@ -86,10 +101,23 @@
         }
     });
 
+    const dispatch = createEventDispatcher();
+    const select = () => {
+        selected = true;
+        dispatch('selected', { id: publication.id });
+    };
+    const remove = () => {
+        selected = false;
+        dispatch('removed', { id: publication.id });
+    };
+
+    $:ring = selected ? 'ring-2 ring-primary-600' : '';
+
 </script>
 
 
-<div class="{className} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
+<div
+  class="{className} {ring} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
     <div class="w-full relative h-2/5 rounded-t-lg">
         {#if used > 5}
             <p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
@@ -154,7 +182,25 @@
         <div class="w-full space-y-2">
             <hr class="opacity-50">
             <div class="w-full flex justify-between">
-                <a href="{publication.publisherId}/{publication.id}" class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+                {#if !inCircuits}
+                    <a href="{publication.publisherId}/{publication.id}"
+                       class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+                {:else if !selected}
+                    <button class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
+                            on:click="{select}">Select
+                    </button>
+                {:else}
+                    <button class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
+                            use:popup={popupClick}>Remove
+                    </button>
+                    <div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
+                        <div class="flex gap-2">
+                            <button id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
+                            <button id="close" class="btn variant-filled bg-surface-600">Go Back</button>
+                        </div>
+                        <div class="arrow bg-surface-100-token" />
+                    </div>
+                {/if}
                 <div class="flex gap-2">
                     <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
                         <button

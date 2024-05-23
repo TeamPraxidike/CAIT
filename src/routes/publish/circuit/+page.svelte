@@ -1,8 +1,5 @@
 <script>
-	import { Meta, Circuit, CircuitPureHTML } from '$lib';
-	import Node from '$lib/components/circuits/Node.svelte';
-
-
+	import { Circuit, Meta } from '$lib';
 </script>
 
 <!--<Node></Node>-->
