@@ -14,6 +14,7 @@ describe('Filter Component', () => {
 			target: host,
 			props: {
 				used: 6,
+				imgSrc: 'some_image',
 				publication: {
 					id: 1,
 					title: 'aaa',

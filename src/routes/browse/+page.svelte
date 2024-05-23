@@ -3,17 +3,25 @@
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
-    import type { Tag } from '@prisma/client';
     import type { PageServerData } from './$types';
+    import type { Material, Publication, Tag } from '@prisma/client';
+    import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
     let searchWord: string = '';
-    let materials = data.publications;
+    let materials:Material & {
+        publication: Publication & {
+            tags: Tag[];
+        }
+    }[] = data.materials;
+    let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
     let liked = data.liked as number[];
     let saved = data.saved as number[];
 
+    console.log("liked: " + liked)
+    console.log("saved: " + saved)
 
     $: pageType = data.type;
     $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
@@ -38,7 +46,6 @@
         let allTags: {id: number, content:string }[] = tags.map((x: Tag) => ({ id: 0, content: x.content }));
         let displayTags: {id:number, content:string }[] = allTags;
         let tagActive = false
-
 
         //Variables needed to deal with Publishers
         let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
@@ -304,22 +311,11 @@
 </div>
 
 {#if pageType === "materials"}
-    {#each materials as material}
-        <PublicationCard publication={material.publication} liked={liked.includes(material.publicationId)} saved={saved.includes(material.publicationId)}/>
+    {#each materials as material, i}
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person}
         <UserProp view="search" posts="{5}" userPhotoUrl="" role="Maintainer" user={person} />
     {/each}
 {/if}
-
-
-<!--{#await sendFiltersToAPI()}-->
-<!--    <p>Loading...</p>-->
-<!--{:then a}-->
-<!--    {#each materials as material}-->
-<!--        <PublicationCard publication={material.publication} />-->
-<!--    {/each}-->
-<!--{:catch error}-->
-<!--    <p>Error loading materials: {error.message}</p>-->
-<!--{/await}-->

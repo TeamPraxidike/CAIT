@@ -1,117 +1,132 @@
-import {it, expect, describe, beforeEach} from "vitest";
-import {Difficulty, type Material, type User} from "@prisma/client";
+import { it, expect, describe, beforeEach } from 'vitest';
+import { Difficulty, type Material, type User } from '@prisma/client';
+import { createMaterialPublication, createUser } from '$lib/database';
 import {
-    createMaterialPublication,
-    createUser,
-} from "$lib/database";
-import {addPublicationToUsedInCourse, coursesUsingPublication, publicationsAUserUses} from "$lib/database";
-import {removeFromUsedInCourse} from "$lib/database/usedInCourse";
+	addPublicationToUsedInCourse,
+	coursesUsingPublication,
+	publicationsAUserUses,
+} from '$lib/database';
+import { removeFromUsedInCourse } from '$lib/database/usedInCourse';
 
-describe("Using in a course", () => {
-    let user : User;
-    let publication : Material;
-    let publication2 : Material;
+describe('Using in a course', () => {
+	let user: User;
+	let publication: Material;
+	let publication2: Material;
 
-    beforeEach(async () => {
-        user = await createUser("Vasil", "Levski", "poDobriqVasko@gmail.com", "apostola.png");
-        publication = await createMaterialPublication(
-            user.id,
-            {
-                title: "cool publication",
-                description: "This publication has description",
-                difficulty: Difficulty.easy,
-                coverPic: 'cover',
-                copyright: true,
-                timeEstimate: 4,
-                theoryPractice: 9,
-                learningObjectives: [],
-                prerequisites: []
-            }
-        );
-        publication2 = await createMaterialPublication(
-            user.id,
-            {
-                title: "cool publication",
-                description: "This publication has description",
-                difficulty: Difficulty.easy,
-                coverPic: 'cover',
-                copyright: true,
-                timeEstimate: 4,
-                theoryPractice: 9,
-                learningObjectives: [],
-                prerequisites: []
-            }
-        );
-    });
+	beforeEach(async () => {
+		user = await createUser(
+			'Vasil',
+			'Levski',
+			'poDobriqVasko@gmail.com',
+			'apostola.png',
+		);
+		publication = await createMaterialPublication(user.id, {
+			title: 'cool publication',
+			description: 'This publication has description',
+			difficulty: Difficulty.easy,
+			materialType: 'video',
+			copyright: true,
+			timeEstimate: 4,
+			theoryPractice: 9,
+			learningObjectives: [],
+			prerequisites: [],
+		});
+		publication2 = await createMaterialPublication(user.id, {
+			title: 'cool publication',
+			description: 'This publication has description',
+			difficulty: Difficulty.easy,
+			materialType: 'video',
+			copyright: true,
+			timeEstimate: 4,
+			theoryPractice: 9,
+			learningObjectives: [],
+			prerequisites: [],
+		});
+	});
 
-    it("should add to the list of used in course", async () => {
-        await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
-        const courses = await coursesUsingPublication(publication.id);
-        expect(courses).toHaveLength(1);
-        expect(courses).toContain("ADS");
-    });
+	it('should add to the list of used in course', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		const courses = await coursesUsingPublication(publication.id);
+		expect(courses).toHaveLength(1);
+		expect(courses).toContain('ADS');
+	});
 
-    it("should add multiple records to the list", async () => {
-        await addPublicationToUsedInCourse(user.id, publication.id, ["ADS", "CPL", "ACC"]);
-        const courses = await coursesUsingPublication(publication.id);
-        expect(courses).toHaveLength(3);
-        expect(courses).toContain("ADS");
-        expect(courses).toContain("CPL");
-        expect(courses).toContain("ACC");
-    });
+	it('should add multiple records to the list', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.id, [
+			'ADS',
+			'CPL',
+			'ACC',
+		]);
+		const courses = await coursesUsingPublication(publication.id);
+		expect(courses).toHaveLength(3);
+		expect(courses).toContain('ADS');
+		expect(courses).toContain('CPL');
+		expect(courses).toContain('ACC');
+	});
 
-    it("should add multiple records to the list in separate calls", async () => {
-        await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
-        await addPublicationToUsedInCourse(user.id, publication.id, ["CPL"]);
-        const courses = await coursesUsingPublication(publication.id);
-        expect(courses).toHaveLength(2);
-        expect(courses).toContain("ADS");
-        expect(courses).toContain("CPL");
-    });
+	it('should add multiple records to the list in separate calls', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		await addPublicationToUsedInCourse(user.id, publication.id, ['CPL']);
+		const courses = await coursesUsingPublication(publication.id);
+		expect(courses).toHaveLength(2);
+		expect(courses).toContain('ADS');
+		expect(courses).toContain('CPL');
+	});
 
-    it("should add to the list of what users use", async () => {
-        await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
-        const publications = (await publicationsAUserUses(user.id)).map(x => x.id);
-        expect(publications).toHaveLength(1);
-        expect(publications).toContain(publication.id);
-    });
+	it('should add to the list of what users use', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		const publications = (await publicationsAUserUses(user.id)).map(
+			(x) => x.id,
+		);
+		expect(publications).toHaveLength(1);
+		expect(publications).toContain(publication.id);
+	});
 
-    it("should add to the list of what users use across multiple publications", async () => {
-        await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
-        await addPublicationToUsedInCourse(user.id, publication2.id, ["CPL"]);
-        await addPublicationToUsedInCourse(user.id, publication.id, ["CG"]);
-        const publications = (await publicationsAUserUses(user.id)).map(x => x.id);
-        expect(publications).toHaveLength(2);
-        expect(publications).toContain(publication.id);
-        expect(publications).toContain(publication2.id);
-    });
+	it('should add to the list of what users use across multiple publications', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		await addPublicationToUsedInCourse(user.id, publication2.id, ['CPL']);
+		await addPublicationToUsedInCourse(user.id, publication.id, ['CG']);
+		const publications = (await publicationsAUserUses(user.id)).map(
+			(x) => x.id,
+		);
+		expect(publications).toHaveLength(2);
+		expect(publications).toContain(publication.id);
+		expect(publications).toContain(publication2.id);
+	});
 
-    it("should remove stuff from the list", async () => {
-        await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
-        const removed = await removeFromUsedInCourse(publication.id, ['ADS'])
-        const courses = await coursesUsingPublication(publication.id);
-        expect(courses).toHaveLength(0);
-        expect(removed.count).toBe(1);
-    });
+	it('should remove stuff from the list', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		const removed = await removeFromUsedInCourse(publication.id, ['ADS']);
+		const courses = await coursesUsingPublication(publication.id);
+		expect(courses).toHaveLength(0);
+		expect(removed.count).toBe(1);
+	});
 
-    it("should remove multiple stuff from the list", async () => {
-        await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
-        await addPublicationToUsedInCourse(user.id, publication.id, ["SP"]);
-        await addPublicationToUsedInCourse(user.id, publication.id, ["OS"]);
-        const removed = await removeFromUsedInCourse(publication.id, ['ADS', 'SP', 'OS']);
-        const courses = await coursesUsingPublication(publication.id);
-        expect(courses).toHaveLength(0);
-        expect(removed.count).toBe(3);
-    });
+	it('should remove multiple stuff from the list', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		await addPublicationToUsedInCourse(user.id, publication.id, ['SP']);
+		await addPublicationToUsedInCourse(user.id, publication.id, ['OS']);
+		const removed = await removeFromUsedInCourse(publication.id, [
+			'ADS',
+			'SP',
+			'OS',
+		]);
+		const courses = await coursesUsingPublication(publication.id);
+		expect(courses).toHaveLength(0);
+		expect(removed.count).toBe(3);
+	});
 
-    it("should remove only some stuff from the list", async () => {
-        await addPublicationToUsedInCourse(user.id, publication.id, ["ADS"]);
-        await addPublicationToUsedInCourse(user.id, publication.id, ["SP"]);
-        await addPublicationToUsedInCourse(user.id, publication.id, ["OS"]);
-        const removed = await removeFromUsedInCourse(publication.id, ['ADS', 'SP']);
-        const courses = await coursesUsingPublication(publication.id);
-        expect(courses).toHaveLength(1);
-        expect(courses).toContain("OS");
-        expect(removed.count).toBe(2);
-    });
+	it('should remove only some stuff from the list', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		await addPublicationToUsedInCourse(user.id, publication.id, ['SP']);
+		await addPublicationToUsedInCourse(user.id, publication.id, ['OS']);
+		const removed = await removeFromUsedInCourse(publication.id, [
+			'ADS',
+			'SP',
+		]);
+		const courses = await coursesUsingPublication(publication.id);
+		expect(courses).toHaveLength(1);
+		expect(courses).toContain('OS');
+		expect(removed.count).toBe(2);
+	});
 });
