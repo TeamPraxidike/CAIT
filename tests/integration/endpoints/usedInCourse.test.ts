@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createMaterialPublication, createUser } from '$lib/database';
-import { Difficulty } from '@prisma/client';
+import {createMaterialPublication, createUser, prisma} from '$lib/database';
+import {Difficulty} from '@prisma/client';
 import { testingUrl } from '../setup';
 
 describe('[POST] /user/:id/use-in-course/:publicationId', () => {
@@ -11,37 +11,45 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 			email: 'email@student.tudelft.nl',
 			profilePic: 'image.jpg',
 		};
-		const user = await createUser(
-			body.firstName,
-			body.lastName,
-			body.email,
-			body.profilePic,
-		);
 
-		const publication = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			copyright: true,
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-			materialType: 'video',
-		});
+		const res = await prisma.$transaction(async () => {
+			const user = await createUser(
+				body.firstName,
+				body.lastName,
+				body.email,
+				body.profilePic,
+			);
 
-		const response = await fetch(
-			`${testingUrl}/user/${user.id}/use-in-course/${publication.publicationId}`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
+			const publication = await createMaterialPublication(user.id, {
+				title: 'cool publication',
+				description: 'This publication has description',
+				difficulty: Difficulty.easy,
+				copyright: true,
+				timeEstimate: 4,
+				theoryPractice: 9,
+				learningObjectives: [],
+				prerequisites: [],
+				materialType: 'video',
+			});
+
+			const response = await fetch(
+				`${testingUrl}/user/${user.id}/use-in-course/${publication.publicationId}`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						courses: ['ADS', 'ML'],
+					}),
 				},
-				body: JSON.stringify({
-					courses: ['ADS', 'ML'],
-				}),
-			},
-		);
+			);
+
+			return { user, publication, response };
+		});
+		const publication = res.publication;
+		const response = res.response;
+
 		expect(response.status).toBe(200);
 
 		const response2 = await fetch(

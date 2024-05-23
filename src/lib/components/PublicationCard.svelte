@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import { DiffBar, getDateDifference, Tag } from '$lib';
+    import {authStore, DiffBar, getDateDifference, Tag} from '$lib';
 
     import Icon from '@iconify/svelte';
     import {fly} from 'svelte/transition';
@@ -17,13 +17,28 @@
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
 
+    const userId = $authStore.user?.id;
+
     let lastUpdated: string = getDateDifference(publication.updatedAt, new Date());
 
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
     $:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
-    const toggleLike = () => liked = !liked;
-    const toggleSave = () => saved = !saved;
+    let likes = publication.likes;
+    const toggleLike = async () => {
+        likes = liked ? likes - 1 : likes + 1;
+        await fetch(`/api/user/${userId}/liked/${publication.id}`, {
+            method: 'POST',
+        });
+        liked = !liked;
+    }
+
+    const toggleSave = async () => {
+        await fetch(`/api/user/${userId}/saved/${publication.id}`, {
+            method: 'POST',
+        });
+        saved = !saved;
+    }
 
     let hoverDiv: HTMLDivElement;
     let container: HTMLDivElement;
@@ -160,7 +175,7 @@
                                 class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
                                 on:click={() => toggleLike()}>
                             <Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
-                            <span>{publication.likes}</span>
+                            <span>{likes}</span>
                         </button>
 
                         <div class="h-2/3 w-px bg-surface-200"></div>

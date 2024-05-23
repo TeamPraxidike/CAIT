@@ -1,7 +1,7 @@
 <script lang="ts">
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
     import type {LayoutData, PageServerData} from './$types';
-    import type { Material, Publication, Tag, User } from '@prisma/client';
+    import type { Publication, Tag, User } from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
 
     /* This is the data that was returned from the server */

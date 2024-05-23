@@ -9,7 +9,7 @@ import {
 import { Prisma } from '@prisma/client/extension';
 
 const sortSwitch = (sort: string) => {
-	let orderBy: any = {};
+	let orderBy: any;
 	switch (sort) {
 		case 'Most Liked':
 			orderBy = { publication: { likes: 'desc' } };

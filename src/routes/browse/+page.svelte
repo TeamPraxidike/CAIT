@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import {Filter, PublicationCard, SearchBar, UserProp} from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
@@ -17,10 +17,13 @@
     let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
+    let liked = data.liked as number[];
+    let saved = data.saved as number[];
 
+    console.log("liked: " + liked)
+    console.log("saved: " + saved)
 
-
-    $:pageType = data.type;
+    $: pageType = data.type;
     $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
     $: peopleText = pageType === 'people' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
     $: circuitsText = pageType === 'circuits' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
@@ -309,7 +312,7 @@
 
 {#if pageType === "materials"}
     {#each materials as material, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} />
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person}

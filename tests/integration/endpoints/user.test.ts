@@ -197,45 +197,53 @@ describe('Users', () => {
 			expect(response.status).toBe(404);
 		});
 
-		// it("should return a list with liked posts as content", async () => {
-		// 	const user =
-		// 		await createUser("Halil", "uisnfgkfvm", "email@gmail", "picture.picture");
-		// 	const publication = await createMaterialPublication({
-		// 		userId: user.id,
-		// 		title: "cool publication 2",
-		// 		description: "This publication has description",
-		// 		copyright: true,
-		// 		difficulty: Difficulty.easy
-		// 	});
-		//
-		// 	await fetch(`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`, {
-		// 		method: 'POST',
-		// 	});
-		//
-		// 	const response = await fetch(`${testingUrl}/user/${user.id}/liked`);
-		//
-		// 	const responseBody = await response.json();
-		//
-		// 	expect(responseBody).toHaveLength(1);
-		// 	expect(responseBody[0].id).toBe(publication.publicationId);
-		//
-		// 	const publication2 = await createMaterialPublication({
-		// 		userId: user.id,
-		// 		title: "cool publication 2",
-		// 		description: "This publication has description",
-		// 		copyright: true,
-		// 		difficulty: Difficulty.easy
-		// 	});
-		//
-		// 	await fetch(`${testingUrl}/user/${user.id}/liked/${publication2.publicationId}`, {
-		// 		method: 'POST',
-		// 	});
-		// 	const response2 = await fetch(`${testingUrl}/user/${user.id}/liked`);
-		// 	const responseBody2 = await response2.json();
-		// 	expect(responseBody2).toHaveLength(2);
-		// 	expect(responseBody2[0].id).toBe(publication.publicationId);
-		// 	expect(responseBody2[1].id).toBe(publication2.publicationId);
-		// });
+		it("should return a list with liked posts as content", async () => {
+			const user =
+				await createUser("Halil", "uisnfgkfvm", "email@gmail", "picture.picture");
+			const publication = await createMaterialPublication(user.id,{
+				title: "cool publication 2",
+				description: "This publication has description",
+				copyright: true,
+				difficulty: Difficulty.easy,
+				learningObjectives: [],
+				prerequisites: [],
+				materialType: 'video',
+				timeEstimate: 4,
+				theoryPractice: 9
+			});
+
+			await fetch(`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`, {
+				method: 'POST',
+			});
+
+			const response = await fetch(`${testingUrl}/user/${user.id}/liked`);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveLength(1);
+			expect(responseBody[0]).toBe(publication.publicationId);
+
+			const publication2 = await createMaterialPublication(user.id, {
+				title: "cool publication 2",
+				description: "This publication has description",
+				copyright: true,
+				difficulty: Difficulty.easy,
+				learningObjectives: [],
+				prerequisites: [],
+				materialType: 'video',
+				timeEstimate: 4,
+				theoryPractice: 9
+			});
+
+			await fetch(`${testingUrl}/user/${user.id}/liked/${publication2.publicationId}`, {
+				method: 'POST',
+			});
+			const response2 = await fetch(`${testingUrl}/user/${user.id}/liked`);
+			const responseBody2 = await response2.json();
+			expect(responseBody2).toHaveLength(2);
+			expect(responseBody2[0]).toBe(publication.publicationId);
+			expect(responseBody2[1]).toBe(publication2.publicationId);
+		});
 	});
 
 	describe('[POST] /user/:id/liked/:publicationId', () => {
@@ -361,7 +369,7 @@ describe('Users', () => {
 			const responseBody = await response.json();
 
 			expect(responseBody).toHaveLength(1);
-			expect(responseBody[0].id).toBe(publication.publicationId);
+			expect(responseBody[0]).toBe(publication.publicationId);
 
 			const publication2 = await createMaterialPublication(user.id, {
 				title: 'cool publication',
@@ -386,8 +394,8 @@ describe('Users', () => {
 			);
 			const responseBody2 = await response2.json();
 			expect(responseBody2).toHaveLength(2);
-			expect(responseBody2[0].id).toBe(publication.publicationId);
-			expect(responseBody2[1].id).toBe(publication2.publicationId);
+			expect(responseBody2).toContain(publication.publicationId);
+			expect(responseBody2).toContain(publication2.publicationId);
 		});
 	});
 
