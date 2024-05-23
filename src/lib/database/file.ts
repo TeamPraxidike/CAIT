@@ -17,6 +17,37 @@ export async function bufToBase64(files: FetchedFileArray) {
 	}));
 }
 
+export function profilePicFetcher(
+	profilePic: PrismaFile | null,
+) {
+	let filePath;
+
+	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
+	if (!profilePic) {
+		filePath = path.join(
+			'static',
+			'defaultProfilePic',
+			'profile.jpg',
+		);
+
+		const currentFileData = fs.readFileSync(filePath);
+
+		return {
+			fileId: filePath,
+			data: currentFileData.toString('base64'),
+		};
+	} else {
+		// since photo is defined, read the file based on the path (just like a File)
+		filePath = profilePic.path;
+
+		const currentFileData = fileSystem.readFile(filePath);
+		return {
+			fileId: filePath,
+			data: currentFileData.toString('base64'),
+		};
+	}
+}
+
 /**
  * Fetches cover pic for corresponding publication of type material
  * @param encapsulatingType
@@ -32,7 +63,7 @@ export function coverPicFetcher(
 	if (!coverPic) {
 		filePath = path.join(
 			'static',
-			'defaultCoverMaterial',
+			'defaultCoverPic',
 			encapsulatingType + '.jpg',
 		);
 
@@ -54,7 +85,65 @@ export function coverPicFetcher(
 	}
 }
 
-export async function addCover(
+export async function addProfilePic(
+	title: string,
+	type: string,
+	info: Buffer,
+	userId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	try {
+		const path = await fileSystem.saveFile(info, title);
+		try {
+			return prismaContext.file.create({
+				data: {
+					path: path,
+					title: title,
+					type,
+					userId: userId, // Associate the pic with User
+				},
+			});
+		} catch (errorDatabase) {
+			fileSystem.deleteFile(path);
+			throw new Error('Rollback');
+		}
+	} catch (errorFileSystem) {
+		throw new Error('Rollback');
+	}
+}
+
+export async function updateProfilePic(
+	profilePic: { type: string; info: string } | null,
+	userId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	// check if the material already has a coverPic
+	const profilePicFile = await prismaContext.file.findUnique({
+		where: {
+			userId: userId,
+		},
+	});
+
+	// remove if it does
+	if (profilePicFile) {
+		await deleteFile(profilePicFile.path, prismaContext);
+	}
+
+	// if received info about coverPic (so not default)
+	if (profilePic) {
+		// upload new coverPic
+		const buffer: Buffer = Buffer.from(profilePic.info, 'base64');
+		await addProfilePic(
+			'cover.jpg',
+			profilePic.type,
+			buffer,
+			userId,
+			prismaContext,
+		);
+	}
+}
+
+export async function addCoverPic(
 	title: string,
 	type: string,
 	info: Buffer,
@@ -69,7 +158,7 @@ export async function addCover(
 					path: path,
 					title: title,
 					type,
-					coverId: publicationId, // Associate the cover with Material
+					publicationId: publicationId, // Associate the cover with Publication
 				},
 			});
 		} catch (errorDatabase) {
@@ -86,10 +175,10 @@ export async function updateCoverPic(
 	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	// check if the material already has a coverPic
+	// check if the publication already has a coverPic
 	const coverFile = await prismaContext.file.findUnique({
 		where: {
-			coverId: publicationId,
+			publicationId: publicationId,
 		},
 	});
 
@@ -102,7 +191,7 @@ export async function updateCoverPic(
 	if (coverPic) {
 		// upload new coverPic
 		const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
-		await addCover(
+		await addCoverPic(
 			'cover.jpg',
 			coverPic.type,
 			buffer,

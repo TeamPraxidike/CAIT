@@ -80,7 +80,7 @@ import {
 	deleteFile,
 	editFile,
 	bufToBase64,
-	addCover,
+	addCoverPic,
 	coverPicFetcher,
 	updateCoverPic,
 	updateFiles,
@@ -111,6 +111,15 @@ type MaterialForm = {
 	};
 	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;
+};
+
+type UserForm = {
+	metaData: {
+		firstName: string,
+		lastName: string
+		email: string
+	};
+	profilePic: { type: string; info: string } | null;
 };
 
 /**
@@ -156,6 +165,7 @@ export const fileSystem = new LocalFileSystem(basePath);
 export {
 	prisma,
 	type MaterialForm,
+	type UserForm,
 	type FileDiffActions,
 	type FetchedFileItem,
 	type FetchedFileArray,
@@ -163,7 +173,7 @@ export {
 	updateFiles,
 	coverPicFetcher,
 	updateCoverPic,
-	addCover,
+	addCoverPic,
 	addFile,
 	editFile,
 	deleteFile,
