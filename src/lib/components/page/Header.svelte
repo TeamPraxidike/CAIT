@@ -57,8 +57,8 @@
             {#if loggedIn}
                 <a href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Publish</a>
             {:else}
-                <form action="/" method="post">
-                    <button on:click={login} class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Sign In</button>
+                <form action="/" method="post" >
+                    <button on:click={login} type="button" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Sign In</button>
                 </form>
             {/if}
             <div class="border-l border-surface-300 h-8"/>
@@ -111,7 +111,9 @@
                             <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
                         </div>
                     {:else}
-                        <button on:click={login} class="btn rounded-lg variant-ghost-primary">Sign In</button>
+                        <form action="/" method="post">
+                        <button on:click={login} type="button" class="btn rounded-lg variant-ghost-primary">Sign In</button>
+                        </form>
                     {/if}
                 </div>
             </div>

@@ -17,7 +17,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
         const publication = await createMaterialPublication(
             user.id,
             {
-                title: "cool publication",
+                title: "cool publication3345",
                 description: "This publication has description",
                 difficulty: Difficulty.easy,
                 coverPic: 'cover',

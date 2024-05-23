@@ -16,7 +16,7 @@ describe("Liking publications", () => {
         publication = await createMaterialPublication(
             user.id,
             {
-                title: "cool publication",
+                title: "cool publication676",
                 description: "This publication has description",
                 difficulty: Difficulty.easy,
                 learningObjectives: ['lo1'],
@@ -39,7 +39,7 @@ describe("Liking publications", () => {
         }
         expect(saved.saved).toHaveLength(1);
         expect(saved.saved[0].id).toBe(publication.publicationId);
-        expect(saved.saved[0].title).toBe("cool publication");
+        expect(saved.saved[0].title).toBe("cool publication676");
     });
 
     it("should remove it from the saved list when unliked", async () => {
