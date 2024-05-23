@@ -1,15 +1,9 @@
-import { deleteFile, prisma } from '$lib/database';
-import {
-	Difficulty,
-	type File as PrismaFile,
-	type Material,
-	MaterialType,
-	PublicationType,
-} from '@prisma/client';
+import { prisma } from '$lib/database';
+import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
 
 const sortSwitch = (sort: string) => {
-	let orderBy: any = {};
+	let orderBy: any;
 	switch (sort) {
 		case 'Most Liked':
 			orderBy = { publication: { likes: 'desc' } };
@@ -145,16 +139,16 @@ export async function deleteMaterialByPublicationId(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.publication.delete({
-			where: { id: publicationId },
-			include: {
-				material: {
-					include: {
-						files: true
-					}
+		where: { id: publicationId },
+		include: {
+			material: {
+				include: {
+					files: true,
 				},
-				coverPic: true
-			}
-		});
+			},
+			coverPic: true,
+		},
+	});
 }
 
 /**

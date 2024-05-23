@@ -21,9 +21,9 @@
             dark:bg-surface-800 dark:text-surface-50 dark:border-none">
 <!--    <enhanced:img class="w-40 md:w-64 xl:w-full rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>-->
     {#if userPhotoUrl !== ''}
-        <img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
+        <img src={userPhotoUrl} alt="User Profile" class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full" />
     {:else}
-        <div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
+        <div class="w-20 h-20 md:w-40 md:h-40 rounded-full bg-surface-500 placeholder-circle" />
     {/if}
     <div class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
                 sm:flex-col sm:items-start

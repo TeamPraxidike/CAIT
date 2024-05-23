@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {authStore, Grid, UserMenu, userPhotoUrl} from '$lib';
+    import {authStore, Grid, UserMenu} from '$lib';
     import { LightSwitch, popup, type PopupSettings } from '@skeletonlabs/skeleton';
     import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
@@ -25,7 +25,6 @@
 
     let dropDown: boolean = false;
     let loggedIn: boolean;
-    let profilePicture: FetchedFileItem;
     $: loggedIn = $authStore.user !== null;
 
     const toggleDropDown = () => dropDown = !dropDown;
@@ -33,11 +32,8 @@
     // TODO: THIS WOULD ACTUALLY BE A CALL TO THE AUTH SERVICE. CURRENTLY IT'S A MOCK CALL TO THE API TO GET FDR
     const login = () => {
         fetch('/api/user/1').then(res => res.json()).then(data => {
-            const { user, profilePic } = data;
-
-            authStore.setAuth(user, 'token');
-
-            profilePicture = profilePic;
+            const { user, profilePicData } = data;
+            authStore.setAuth(user, profilePicData.data, 'token');
         }).catch(err => console.error(err));
     };
 </script>
@@ -73,11 +69,10 @@
             {#if loggedIn}
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-<!--                    <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>-->
-                    {#if profilePicture.data !== ''}
-                        <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + profilePicture.data} alt="Ani"/>
+                    {#if $authStore.user && $authStore.user.profilePicData !== ''}
+                        <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $authStore.user.profilePicData} alt={$authStore.user?.firstName}/>
                     {:else}
-                        <img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Ani"/>
+                        <div class="w-8 h-8 placeholder-circle" />
                     {/if}
                 </div>
                 <div data-popup="popupHover">

@@ -29,7 +29,8 @@
 	// maintainerIds
 	let maintainersInput: HTMLInputElement;
 	let files: FileList = [] as unknown as FileList;
-	let maintainers: User[] = [];
+	type UserWithProfilePic = User & { profilePicData: string };
+	let maintainers: UserWithProfilePic[] = [];
 
 	// learning objectives
 	let loInput: HTMLInputElement;
@@ -58,7 +59,7 @@
 		}
 	}
 
-	$: uid = $authStore.user?.id || 0;
+	$: uid = $authStore.user?.id;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 	let flavorOptions: TagOption[] = allTags.map(tag => {
@@ -67,7 +68,6 @@
 			label: tag.content
 		};
 	});
-
 
 	function onInputChipSelect(e: CustomEvent<TagOption>): void {
 		console.log('onInputChipSelect', e.detail);
@@ -84,20 +84,22 @@
 		}
 	}
 
+	console.log(data);
+
 	async function fetchMaintainer() {
 		const input = maintainersInput.value;
 
 
-		let res: User | undefined = undefined;
+		let res: UserWithProfilePic | undefined = undefined;
 
 		if (isNaN(Number(input))) {
-			data.users.find((user: User) => {
+			data.users.find((user: UserWithProfilePic) => {
 				if (user.firstName === input || user.lastName === input) {
 					res = user;
 				}
 			});
 		} else {
-			data.users.find((user: User) => {
+			data.users.find((user: UserWithProfilePic) => {
 				if (user.id === Number(input)) {
 					res = user;
 				}
@@ -171,7 +173,7 @@
           }
         });
 
-        formData.append('userId', uid.toString());
+        formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
         formData.append('difficulty', difficulty);
@@ -235,11 +237,11 @@
 					<div class="flex my-2">
 						{#if $authStore.user}
 							<UserProp
-								user={$authStore.user} view="publish" role="Publisher" userPhotoUrl="/fdr.jpg" />
+								user={$authStore.user} view="publish" role="Publisher" userPhotoUrl={'data:image;base64,' + $authStore.user.profilePicData} />
 							{#each maintainers as maintainer, key (maintainer.id)}
 								<UserProp on:removeMaintainer={() => handleRemoveMaintainer(key)} user={maintainer}
 										  view="publish"
-										  role="Maintainer" userPhotoUrl="/fdr.jpg" />
+										  role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
 							{/each}
 						{/if}
 					</div>
