@@ -16,6 +16,9 @@
     let fileData:FetchedFileArray = data.fileData;
     let saved = data.saved;
     let savedFileData = data.savedFileData;
+    let liked = data.liked;
+
+    console.log("liked: " + liked);
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -33,7 +36,7 @@
         </p>
     {:else}
         {#each saved as publication, i}
-            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} />
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)}/>
         {/each}
     {/if}
 
@@ -41,7 +44,7 @@
         Franklin's Publications
     </h3>
     {#each data.user.posts as publication, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} />
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)}/>
     {/each}
 </div>
 
