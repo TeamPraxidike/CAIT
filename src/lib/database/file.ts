@@ -268,7 +268,6 @@ export async function deleteFile(
 ) {
 	try {
 		await prismaContext.file.delete({ where: { path: path } });
-
 		try {
 			fileSystem.deleteFile(path);
 		} catch (errorFileSystem) {
