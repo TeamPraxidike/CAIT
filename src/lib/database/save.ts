@@ -69,7 +69,13 @@ export async function getSavedPublications(userId: number) {
             id: userId
         },
         select: {
-            saved: true
-        }
+            saved: {
+                include: {
+                    tags: true,
+                    materials: true,
+                    coverPic: true
+                },
+            },
+        },
     });
 }

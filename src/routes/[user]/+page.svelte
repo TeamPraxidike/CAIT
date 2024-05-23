@@ -14,8 +14,8 @@
     } = data.user;
 
     let fileData:FetchedFileArray = data.fileData;
-
-
+    let saved = data.saved;
+    let savedFileData = data.savedFileData;
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -27,9 +27,16 @@
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         Saved Publications
     </h3>
-    {#each data.user.posts as publication, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} />
-    {/each}
+    {#if saved.length === 0}
+        <p class="text-center col-span-3 text-surface-900 dark:text-surface-50">
+            No saved publications
+        </p>
+    {:else}
+        {#each saved as publication, i}
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} />
+        {/each}
+    {/if}
+
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         Franklin's Publications
     </h3>

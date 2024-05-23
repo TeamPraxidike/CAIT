@@ -9,7 +9,15 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			error: materialsRes.statusText,
 		};
 	}
+
+	const savedRes = await fetch(`/api/user/${params.user}/saved?fullPublications=true`);
+
+	if (![200, 204].includes(savedRes.status)) {
+		throw new Error('Failed to fetch saved materials');
+	}
+	const {saved, savedFileData} = savedRes.status === 204 ? {saved: [], savedFileData: []} : await savedRes.json();
+	console.log('saved', savedFileData);
 	const { materials, fileData } = await materialsRes.json();
 	console.log('materialsRes', materials);
-	return { materials, fileData };
+	return { materials, fileData, saved, savedFileData }
 };

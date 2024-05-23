@@ -18,10 +18,7 @@
     let users = data.users
     let tags = data.tags
     let liked = data.liked as number[];
-    let saved = data.saved as number[];
-
-    console.log("liked: " + liked)
-    console.log("saved: " + saved)
+    let saved = data.saved.saved as number[];
 
     $: pageType = data.type;
     $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
@@ -183,8 +180,6 @@
 
     let applyActive = false;
     $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
-
-
 </script>
 <div class="flex justify-between col-span-full mt-32">
     <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
