@@ -25,8 +25,10 @@
 	};
 
 	const dispatch = createEventDispatcher();
-	const resetAll = (option: string) => {
-		dispatch('reset', {option: option});
+	const resetAll = (i: number) => {
+		if(!page)
+			pageType = labels[i]
+		dispatch('reset', {option: i});
 	};
 
 </script>
@@ -35,10 +37,10 @@
 {#each options as opt,i}
 
 	{#if page}
-		<a href="/browse/?type={opt}" on:click={() => resetAll(opt)}
+		<a href="/browse/?type={opt}" on:click={() => resetAll(i)}
 			 class="{rounding(i)} text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600 {text(opt)} {bg(opt)}">{labels[i]}</a>
 	{:else}
-		<button on:click={() => resetAll(opt)}
+		<button on:click={() => resetAll(i)}
 			 class="{rounding(i)} text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600 {text(opt)} {bg(opt)}">{labels[i]}</button>
 	{/if}
 	{/each}
