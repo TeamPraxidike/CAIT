@@ -19,8 +19,11 @@ export const load: PageServerLoad = async ({ params, fetch , cookies}) => {
 	const likedResponse = await fetch(`/api/user/${cookies.get("userId")}/liked`);
 	const liked = likedResponse.status === 200 ? await likedResponse.json() : [];
 
+	const usedResponse = await fetch(`/api/user/${cookies.get("userId")}/use-in-course`);
+	const used = usedResponse.status === 200 ? await usedResponse.json() : [];
+
 	const {saved, savedFileData} = savedRes.status === 204 ? {saved: [], savedFileData: []} : await savedRes.json();
 	const { materials, fileData } = await materialsRes.json();
 
-	return { materials, fileData, saved, savedFileData, liked }
+	return { materials, fileData, saved, savedFileData, liked, used }
 };

@@ -17,6 +17,7 @@
     let saved = data.saved;
     let savedFileData = data.savedFileData;
     let liked = data.liked;
+    let used = data.used as number[];
 
     console.log("liked: " + liked);
 </script>
@@ -36,7 +37,7 @@
         </p>
     {:else}
         {#each saved as publication, i}
-            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true}/>
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)}/>
         {/each}
     {/if}
 

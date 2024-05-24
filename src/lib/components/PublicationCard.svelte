@@ -45,16 +45,17 @@
     const toggleUsedInCourse = async () => {
         if (isChecked) {
             used++;
+            await fetch(`/api/user/${userId}/use-in-course/${publication.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ courses: ['a'] }),
+            });
         } else {
             used--;
+            await fetch(`/api/user/${userId}/use-in-course/${publication.id}?courses=["a"]`, {method: "DELETE"});
         }
-        await fetch(`/api/user/${userId}/use-in-course/${publication.id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ courses: ['FAAAA'] }),
-        });
     }
 
     let hoverDiv: HTMLDivElement;
