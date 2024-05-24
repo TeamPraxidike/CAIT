@@ -21,6 +21,6 @@ export const load: PageServerLoad = async ({ params, fetch , cookies}) => {
 
 	const {saved, savedFileData} = savedRes.status === 204 ? {saved: [], savedFileData: []} : await savedRes.json();
 	const { materials, fileData } = await materialsRes.json();
-	// console.log('materialsRes', materials);
+
 	return { materials, fileData, saved, savedFileData, liked }
 };

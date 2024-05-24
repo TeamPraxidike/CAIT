@@ -36,12 +36,12 @@
         </p>
     {:else}
         {#each saved as publication, i}
-            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)}/>
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true}/>
         {/each}
     {/if}
 
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
-        Franklin's Publications
+        {user.firstName}'s Publications
     </h3>
     {#each data.user.posts as publication, i}
         <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)}/>
