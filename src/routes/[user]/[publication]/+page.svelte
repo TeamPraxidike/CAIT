@@ -8,6 +8,7 @@
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { createFileList } from '$lib/util/file';
+	import type { Reply, User } from '@prisma/client';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -70,6 +71,71 @@
 			zip.file(file.name, blob);
 		}
 	}
+
+	let comments = serverData.material.publication.comments
+	let commentMap: Map<number, (Reply & {user: User})[]> = new Map<number,  (Reply & {user: User})[]>();
+	for (const comment of comments) {
+		commentMap.set(comment.id, comment.replies);
+	}
+	const emptyListReplies: (Reply & {user: User})[] = []
+
+	const addComment = (event: CustomEvent) => {
+		const maxId = (comments.length>0 ? Math.max(...comments.map(a => a.id)): 0) + 1;
+		const comment = {
+			id: maxId,
+			userId: $authStore.user?.id || 0,
+			publicationId: serverData.material.publicationId,
+			likes: 0,
+			content: event.detail.text,
+			createdAt: new Date(),
+			updatedAt:new Date(),
+			replies: emptyListReplies,
+			user: $authStore.user ? $authStore.user :{
+				id: 0,
+				firstName: "John",
+				lastName: "Doe",
+				username: "johndoe",
+				email: "johndoe@example.com",
+				profilePic: "johnDoe",
+				reputation: 0,
+				isAdmin: false,
+			} ,
+		}
+		comments = [...comments,comment];
+		commentMap.set(maxId, emptyListReplies);
+	}
+
+	const addReply = (event: CustomEvent) => {
+		let replies = getReplies(event.detail.comment)
+		replies.push({
+			id: (replies.length>0 ? Math.max(...replies.map(a => a.id)): 0) + 1,
+			userId: $authStore.user?.id || 0,
+			commentId: event.detail.comment,
+			likes: 0,
+			content: event.detail.text,
+			createdAt: new Date(),
+			updatedAt:new Date(),
+			user: $authStore.user ? $authStore.user :{
+				id: 0,
+				firstName: "John",
+				lastName: "Doe",
+				username: "johndoe",
+				email: "johndoe@example.com",
+				profilePic: "johnDoe",
+				reputation: 0,
+				isAdmin: false,
+			} ,
+		});
+		comments = comments;
+		commentMap.set(event.detail.comment, replies);
+		console.log(replies);
+	}
+	const getReplies = (commentId: number): (Reply & {user: User})[] => {
+		return commentMap.has(commentId) ? commentMap.get(commentId)||[] : []
+	}
+
+
+
 </script>
 
 <Meta title={serverData.material.publication.title} description="CAIT" type="site" />
@@ -137,13 +203,15 @@
 </div>
 
 {#if $authStore.user}
-	<AddInteractionForm addComment='{true}' commentId="{1}"/>
+	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{serverData.material.publicationId}"/>
 {/if}
 
-{#each serverData.material.publication.comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
-	<Comment interaction={comment}
-			 popupName="comment + {comment.id} + {new Date(comment.createdAt).toDateString()}" isReply={false} userName="{comment.user.firstName} {comment.user.lastName}" />
-	{#each comment.replies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) as reply (reply.id)}
-		<Comment interaction={reply} popupName="reply + {reply.id} + {new Date(reply.createdAt).toDateString()}" isReply={true} userName="{reply.user.firstName} + {reply.user.lastName}"/>
-	{/each}
+{#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
+	<Comment on:ReplyAction={addReply} interaction={comment}
+			  isReply={false} userName="{comment.user.firstName} {comment.user.lastName}"
+	/>
+		{#each getReplies(comment.id).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())  as reply (reply.id)}
+			<Comment interaction={reply} isReply={true} userName="{reply.user.firstName} {reply.user.lastName}"/>
+		{/each}
+
 {/each}

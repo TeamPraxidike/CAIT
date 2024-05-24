@@ -1,6 +1,6 @@
 import type { Actions } from './$types';
 export const actions = {
-	comment: async ({ request, url, fetch }) => {
+	comment: async ({ request, fetch }) => {
 		const data = await request.formData();
 
 		const isComment = JSON.parse(
@@ -8,13 +8,13 @@ export const actions = {
 		);
 		let res: Response;
 
-		console.log(data);
-
 		if (isComment) {
 			const comment = {
 				content: data.get('comment'),
 				userId: parseInt(data.get('userId')?.toString() || ''),
-				publicationId: parseInt(url.pathname.split('/').pop() || ''),
+				publicationId: parseInt(
+					data.get('publicationId')?.toString() || '',
+				),
 			};
 			res = await fetch('/api/comment', {
 				method: 'POST',

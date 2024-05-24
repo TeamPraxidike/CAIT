@@ -14,7 +14,7 @@
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = ""
     export let browsingUser = $authStore.user?.id || 0
-    export let popupName: string;
+    let popupName = isReply ? 'reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}' : 'comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}';
     let user = interaction.userId
     let text = interaction.content
     let likes = interaction.likes
@@ -57,7 +57,6 @@
     const copyToClipboard = () => {
         navigator.clipboard.writeText(text)
             .then(() => {
-                console.log('Text copied to clipboard:', text);
                 toastStore.trigger({
                     message: 'Copied to clipboard',
                     background: 'bg-surface-200'
@@ -75,6 +74,7 @@
             type: 'confirm',
             title: 'Delete Comment',
             body: 'Are you sure you want to delete this comment?',
+            buttonTextSubmit: 'Delete',
             response: (r: boolean) => {
                 if (r) confirmDelete();
             }
@@ -89,8 +89,9 @@
                 const res = await fetch(`/api/reply/${interaction.id}`, {
                     method: 'DELETE'
                 });
-                console.log(res.status);
-                location.reload();
+                if (res.ok){
+                    location.reload();
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -100,8 +101,9 @@
                 const res = await fetch(`/api/comment/${interaction.id}`, {
                     method: 'DELETE'
                 });
-                console.log(res.status);
-                location.reload();
+                if (res.ok){
+                    location.reload();
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -144,13 +146,17 @@
         isDisplayedAdded = true;
     }
     const handleReplyCancel = ()=>{
-        console.log("cancel comment")
         isDisplayedAdded = false;
+    }
+    const sendReplyEvent = (event: CustomEvent) =>{
+        console.log(event.detail);
+        dispatch("ReplyAction", event.detail);
+        isDisplayedAdded = false;
+
     }
 
     let display = 'hidden';
     $:display = isDisplayedAdded ? 'flex':'hidden'
-    $:console.log(display);
 
     onMount(() => {
         created = getDateDifference(interaction.createdAt, new Date())
@@ -185,7 +191,7 @@
 
             <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-200 dark:hover:bg-surface-800"
                     use:popup={popupMenu}>
-                <Icon icon="ph:dots-three-vertical" height="20" style="color: #19191F"/>
+                <Icon icon="ph:dots-three-vertical" height="20" style="color: #646478"/>
             </button>
         </div>
 
@@ -233,7 +239,7 @@
     </div>
 </div>
 
-<AddInteractionForm on:addedReply={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
+<AddInteractionForm on:addedReply={sendReplyEvent}  on:cancelEventForum={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
 
 <div data-popup="{popupName}">
     <div class="flex flex-col w-12 gap-2 bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">
