@@ -84,8 +84,6 @@
 		}
 	}
 
-	console.log(data);
-
 	async function fetchMaintainer() {
 		const input = maintainersInput.value;
 

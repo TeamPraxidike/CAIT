@@ -33,7 +33,7 @@
         <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} />
     {/each}
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
-        Franklin's Publications
+        {user.firstName}'s Publications
     </h3>
     {#each data.user.posts as publication, i}
         <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} />
