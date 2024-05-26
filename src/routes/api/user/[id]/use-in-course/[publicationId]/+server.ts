@@ -21,7 +21,6 @@ export async function POST({params, request}) {
     const body = await request.json();
     try{
         await addPublicationToUsedInCourse(parseInt(id), parseInt(publicationId), body.courses);
-        console.log("added " + body.courses)
         return new Response("Successfully marked usage of publication", {status: 200});
     } catch (error) {
         return new Response("Server error", {status: 500});
@@ -46,7 +45,6 @@ export async function DELETE({params, url}){
     }
     await removeFromUsedInCourse(parseInt(publicationId), courses);
 
-    console.log("deleted " + courses)
     return new Response("Successful deletion", {status: 200});
 }
 
