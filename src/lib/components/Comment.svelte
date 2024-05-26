@@ -13,8 +13,8 @@
 
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = ""
-    export let browsingUser = $authStore.user?.id || 0
-    let popupName = isReply ? 'reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}' : 'comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}';
+    let browsingUser = $authStore.user?.id || 0
+    let popupName = isReply ? `reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}` : `comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}`;
     let user = interaction.userId
     let text = interaction.content
     let likes = interaction.likes
@@ -33,14 +33,7 @@
     $:created = getDateDifference(interaction.createdAt, new Date())
 
     const dispatch = createEventDispatcher()
-    const handleLike = () => {
-        liked = !liked
-        likes = liked ? likes + 1 : likes - 1
-        dispatch("LikeAction", {
-            message: liked ? "User added like" : "User removed like",
-            value: {action: likes, userId: user}
-        })
-    }
+
     const startEditing = () => {
         editing = true;
         newText = text;
@@ -149,9 +142,23 @@
         isDisplayedAdded = false;
     }
     const sendReplyEvent = (event: CustomEvent) =>{
-        console.log(event.detail);
         dispatch("ReplyAction", event.detail);
         isDisplayedAdded = false;
+
+    }
+
+    const handleLike = async () => {
+        liked = !liked
+        likes = liked ? likes + 1 : likes - 1
+        if (isReply){
+            await fetch(`/api/user/${browsingUser}/liked/reply/${interaction.id}`,{
+                method: 'POST',
+            })
+        }else{
+            await fetch(`/api/user/${browsingUser}/liked/comment/${interaction.id}`, {
+                method: 'POST',
+            })
+        }
 
     }
 

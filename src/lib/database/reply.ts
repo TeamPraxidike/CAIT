@@ -33,8 +33,24 @@ export async function getReply(replyId: number) {
 		where: {
 			id: replyId,
 		},
+		include: {
+			likedBy: true,
+		},
 	});
 }
+
+/**
+ * [GET] gets the reply with the comment id
+ * @param commentId
+ */
+export async function getRepliesByCommentId(commentId: number) {
+	return prisma.reply.findMany({
+		where: {
+			commentId: commentId,
+		},
+	});
+}
+
 /**
  * [DELETE] deletes the reply with the given id
  * @param replyId
