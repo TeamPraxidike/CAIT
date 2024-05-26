@@ -85,6 +85,7 @@ export async function updateComment(comment: editCommentData) {
 		},
 		data: {
 			content: comment.content,
+			updatedAt: new Date(),
 		},
 	});
 }

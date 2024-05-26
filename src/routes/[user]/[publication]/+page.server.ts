@@ -26,6 +26,7 @@ export const actions = {
 				userId: parseInt(data.get('userId')?.toString() || ''),
 				commentId: parseInt(data.get('commentId')?.toString() || ''),
 			};
+			console.log(reply);
 			res = await fetch('/api/reply', {
 				method: 'POST',
 				body: JSON.stringify(reply),

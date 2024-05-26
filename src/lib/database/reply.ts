@@ -74,6 +74,7 @@ export async function updateReply(reply: editReplyData) {
 		},
 		data: {
 			content: reply.content,
+			updatedAt: new Date(),
 		},
 	});
 }

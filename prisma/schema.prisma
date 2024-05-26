@@ -161,7 +161,7 @@ model Comment {
   likedBy   User[] @relation("likedComments")
   content   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 }
 
 model Reply {
@@ -178,5 +178,5 @@ model Reply {
 
   content   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 }
