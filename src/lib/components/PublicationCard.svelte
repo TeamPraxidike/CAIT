@@ -13,7 +13,7 @@
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let numMaterials: number = 1;
-    export let used: number = 1;
+    export let used: number = 5;
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
     export let markAsUsed: boolean = false;

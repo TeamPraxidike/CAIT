@@ -37,7 +37,7 @@
         </p>
     {:else}
         {#each saved as publication, i}
-            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)}/>
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)} used={publication.usedInCourse.length}/>
         {/each}
     {/if}
 

@@ -73,7 +73,12 @@ export async function getSavedPublications(userId: number) {
                 include: {
                     tags: true,
                     materials: true,
-                    coverPic: true
+                    coverPic: true,
+                    usedInCourse: {
+                        select: {
+                            course: true,
+                        },
+                    },
                 },
             },
         },

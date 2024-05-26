@@ -59,7 +59,9 @@ model PublicationUsedInCourse {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int
-  course        String
+  publication   Publication @relation(fields: [publicationId], references: [id])
+
+  course String
 
   @@id([publicationId, course])
 }
@@ -89,10 +91,11 @@ model Publication {
 
   node Node[]
 
-  coverPic   File?   @relation("CoverPic")
+  coverPic File? @relation("CoverPic")
 
-  materials Material?
-  circuit   Circuit?
+  materials    Material?
+  circuit      Circuit?
+  usedInCourse PublicationUsedInCourse[]
 }
 
 model Material {
@@ -112,8 +115,8 @@ model File {
   title String
   type  String
 
-  coverId    Int?  @unique
-  coverPic   Publication? @relation("CoverPic", fields: [coverId], references: [id], onDelete: Cascade)
+  coverId  Int?         @unique
+  coverPic Publication? @relation("CoverPic", fields: [coverId], references: [id], onDelete: Cascade)
 
   materialId Int?
   material   Material? @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)
