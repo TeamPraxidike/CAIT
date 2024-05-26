@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LayoutServerData } from './$types';
+	import type { LayoutServerData, PageServerData } from './$types';
 	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore, AddInteractionForm, UserProp } from '$lib';
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
@@ -14,6 +14,9 @@
 	const modalStore = getModalStore();
 	export let data: LayoutServerData;
 	let serverData: PublicationViewLoad = data.loadedPublication;
+
+	let likedComments = data.likedComments;
+	let likedReplies = data.likedReplies;
 
 	let files: FileList = createFileList(serverData.fileData, serverData.material.files);
 
@@ -31,7 +34,6 @@
 
 	onMount(() => {
 		created = getDateDifference(serverData.material.publication.createdAt, new Date());
-
 	});
 
 	async function deletePublication() {
@@ -72,6 +74,7 @@
 		}
 	}
 
+
 	let comments = serverData.material.publication.comments
 	let commentMap: Map<number, (Reply & {user: User})[]> = new Map<number,  (Reply & {user: User})[]>();
 	for (const comment of comments) {
@@ -79,8 +82,13 @@
 	}
 	const emptyListReplies: (Reply & {user: User})[] = []
 
-	const addComment = (event: CustomEvent) => {
-		const maxId = (comments.length>0 ? Math.max(...comments.map(a => a.id)): 0) + 1;
+	/*
+	add placeholder comment to make it smoother
+	 */
+	const addComment = async (event: CustomEvent) => {
+		//comment = await (await fetch(`/api/comment/publication/${serverData.material.publicationId}`)).json()
+
+		const maxId = (comments.length > 0 ? Math.max(...comments.map(a => a.id)) : 0) + 1;
 		const comment = {
 			id: maxId,
 			userId: $authStore.user?.id || 0,
@@ -88,9 +96,9 @@
 			likes: 0,
 			content: event.detail.text,
 			createdAt: new Date(),
-			updatedAt:new Date(),
+			updatedAt: new Date(),
 			replies: emptyListReplies,
-			user: $authStore.user ? $authStore.user :{
+			user: $authStore.user ? $authStore.user : {
 				id: 0,
 				firstName: "John",
 				lastName: "Doe",
@@ -99,13 +107,18 @@
 				profilePic: "johnDoe",
 				reputation: 0,
 				isAdmin: false,
-			} ,
+			},
 		}
-		comments = [...comments,comment];
+		comments = [...comments, comment];
 		commentMap.set(maxId, emptyListReplies);
 	}
 
+	/*
+	add placeholder reply
+	 */
 	const addReply = (event: CustomEvent) => {
+		// comment = await (await fetch(`/api/comment/publication/${serverData.material.publicationId}`)).json()
+
 		let replies = getReplies(event.detail.comment)
 		replies.push({
 			id: (replies.length>0 ? Math.max(...replies.map(a => a.id)): 0) + 1,
@@ -128,8 +141,8 @@
 		});
 		comments = comments;
 		commentMap.set(event.detail.comment, replies);
-		console.log(replies);
 	}
+
 	const getReplies = (commentId: number): (Reply & {user: User})[] => {
 		return commentMap.has(commentId) ? commentMap.get(commentId)||[] : []
 	}
@@ -208,10 +221,10 @@
 
 {#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
 	<Comment on:ReplyAction={addReply} interaction={comment}
-			  isReply={false} userName="{comment.user.firstName} {comment.user.lastName}"
+			  isReply={false} userName="{comment.user.firstName} {comment.user.lastName}" liked='{likedComments.includes(comment.id)}'
 	/>
 		{#each getReplies(comment.id).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())  as reply (reply.id)}
-			<Comment interaction={reply} isReply={true} userName="{reply.user.firstName} {reply.user.lastName}"/>
+			<Comment interaction={reply} isReply={true} userName="{reply.user.firstName} {reply.user.lastName}" liked='{likedReplies.includes(reply.id)}'/>
 		{/each}
 
 {/each}

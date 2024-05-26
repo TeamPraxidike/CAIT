@@ -31,7 +31,6 @@ export const actions = {
 				body: JSON.stringify(reply),
 			});
 		}
-		console.log(res);
 		return { status: res.status };
 	},
 } satisfies Actions;

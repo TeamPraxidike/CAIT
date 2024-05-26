@@ -36,7 +36,6 @@
 		commentText = '';
 		isFocused = false;
 		textarea.style.height = originalHeight;
-		console.log('cancel form');
 		dispatch('cancelEventForum');
 
 	}
@@ -44,7 +43,7 @@
 	const dispatch = createEventDispatcher();
 
 	/*
-	adding this method to test for demo mainly, most likely would be a form with post that happens when you click the comment button
+		dispatch an event with info needed to create a placeholder comment and save comment in the database
 	 */
 	function addCommentHandle() {
 		if(addComment){
@@ -55,7 +54,6 @@
 		commentText = '';
 		isFocused = false;
 		textarea.style.height = originalHeight;
-
 	}
 
 	onMount(() => {
@@ -105,7 +103,7 @@
 				</button>
 				<button
 					class="variant-soft-primary px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-primary mr-2"
-					type="submit" formaction="?/comment">Comment
+					type="submit" formaction="?/comment"> Comment
 				</button>
 			</div>
 		</div>
