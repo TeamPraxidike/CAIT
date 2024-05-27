@@ -5,6 +5,10 @@ import {
 	type userEditData,
 } from '$lib/database';
 
+/**
+ * Returns a user by id
+ * @param params
+ */
 export async function GET({ params }) {
 	const { id } = params;
 	try {
@@ -19,6 +23,10 @@ export async function GET({ params }) {
 	}
 }
 
+/**
+ * Deletes a user by id
+ * @param params
+ */
 export async function DELETE({ params }) {
 	const { id } = params;
 
@@ -32,6 +40,11 @@ export async function DELETE({ params }) {
 	}
 }
 
+/**
+ * Edits a user by id
+ * @param params
+ * @param request
+ */
 export async function PUT({ params, request }) {
 	try {
 		const body = await request.json();

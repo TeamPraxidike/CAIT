@@ -26,7 +26,6 @@ enum MaterialType {
   dataset
   exam
   code
-
 }
 
 enum PublicationType {
@@ -48,6 +47,9 @@ model User {
   liked            Publication[]             @relation("liked")
   usedPublications PublicationUsedInCourse[]
 
+  likedComments    Comment[] @relation("likedComments")
+  likedReplies     Reply[] @relation("likedReplies")
+
   maintaining Publication[] @relation("maintainers")
   comments    Comment[]
   replies     Reply[]
@@ -60,9 +62,11 @@ model PublicationUsedInCourse {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int
-  course        String[]
+  publication   Publication @relation(fields: [publicationId], references: [id])
 
-  @@id([publicationId, userId])
+  course String
+
+  @@id([publicationId, course])
 }
 
 model Publication {
@@ -90,29 +94,35 @@ model Publication {
 
   node Node[]
 
-  materials Material?
-  circuit   Circuit?
+  coverPic File? @relation("CoverPic")
+
+  materials    Material?
+  circuit      Circuit?
+  usedInCourse PublicationUsedInCourse[]
 }
 
 model Material {
-  id             Int     @id @default(autoincrement())
-  coverPic       String?
-  copyright      Boolean
+  id                Int          @id @default(autoincrement())
+  copyright         Boolean
   encapsulatingType MaterialType @default(presentation)
-  timeEstimate   Int?
-  theoryPractice Float?
-  files          File[]
+  timeEstimate      Int?
+  theoryPractice    Float?
+  files             File[]       @relation("Files")
 
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 }
 
 model File {
-  path       String   @id
-  title      String
-  type       String
-  materialId Int
-  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  path  String @id
+  title String
+  type  String
+
+  coverId  Int?         @unique
+  coverPic Publication? @relation("CoverPic", fields: [coverId], references: [id], onDelete: Cascade)
+
+  materialId Int?
+  material   Material? @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)
 }
 
 model Circuit {
@@ -156,7 +166,7 @@ model Edge {
 
 
 model Tag {
-  content     String @id
+  content     String        @id
   publication Publication[]
 }
 
@@ -170,9 +180,10 @@ model Comment {
 
   replies   Reply[]
   likes     Int      @default(0)
+  likedBy   User[] @relation("likedComments")
   content   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 }
 
 model Reply {
@@ -185,7 +196,9 @@ model Reply {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   likes     Int      @default(0)
+  likedBy   User[] @relation("likedReplies")
+
   content   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 }

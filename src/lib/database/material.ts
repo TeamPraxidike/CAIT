@@ -9,7 +9,7 @@ import {
 import { Prisma } from '@prisma/client/extension';
 
 const sortSwitch = (sort: string) => {
-	let orderBy: any = {};
+	let orderBy: any;
 	switch (sort) {
 		case 'Most Liked':
 			orderBy = { publication: { likes: 'desc' } };
@@ -44,6 +44,18 @@ export async function getMaterialByPublicationId(
 				include: {
 					tags: true,
 					publisher: true,
+					maintainers: true,
+					coverPic: true,
+					comments: {
+						include: {
+							replies: {
+								include: {
+									user: true,
+								},
+							},
+							user: true,
+						},
+					},
 				},
 			},
 			files: true,
@@ -60,28 +72,28 @@ export async function getAllMaterials(
 	diff: Difficulty[],
 	type: MaterialType[],
 	sort: string,
-	q: string,
+	query: string,
 ) {
 	const where: any = { AND: [] };
 
-	if (q !== '') {
+	if (query !== '') {
 		where.AND.push({
 			OR: [
 				{
 					publication: {
-						title: { contains: q, mode: 'insensitive' },
+						title: { contains: query, mode: 'insensitive' },
 					},
 				},
 				{
 					publication: {
-						description: { contains: q, mode: 'insensitive' },
+						description: { contains: query, mode: 'insensitive' },
 					},
 				},
 
 				{
 					publication: {
 						learningObjectives: {
-							hasSome: [q],
+							hasSome: [query],
 						},
 					},
 				},
@@ -115,6 +127,7 @@ export async function getAllMaterials(
 			publication: {
 				include: {
 					tags: true,
+					coverPic: true,
 				},
 			},
 			files: false,
@@ -124,11 +137,11 @@ export async function getAllMaterials(
 
 export async function deleteMaterialByPublicationId(
 	publicationId: number,
-	material: Material & { files: PrismaFile[] },
+	material: Material & { files: PrismaFile[]; coverPic: PrismaFile },
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	for (const file of material!.files) {
-		await deleteFile(file.path);
+		await deleteFile(file.path, prismaContext);
 	}
 
 	return prismaContext.material.delete({
@@ -150,7 +163,7 @@ export async function createMaterialPublication(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		coverPic: string;
+		materialType: MaterialType;
 		copyright: boolean;
 		timeEstimate: number;
 		theoryPractice: number;
@@ -159,10 +172,10 @@ export async function createMaterialPublication(
 ) {
 	return prismaContext.material.create({
 		data: {
-			coverPic: metaData.coverPic,
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,
+			encapsulatingType: metaData.materialType,
 			publication: {
 				create: {
 					title: metaData.title,
@@ -195,7 +208,7 @@ export async function updateMaterialByPublicationId(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		coverPic: string;
+		materialType: MaterialType;
 		copyright: boolean;
 		timeEstimate: number;
 		theoryPractice: number;
@@ -205,7 +218,7 @@ export async function updateMaterialByPublicationId(
 	return prismaContext.material.update({
 		where: { publicationId: publicationId },
 		data: {
-			coverPic: metaData.coverPic,
+			encapsulatingType: metaData.materialType,
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,

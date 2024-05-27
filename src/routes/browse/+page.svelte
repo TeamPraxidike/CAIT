@@ -1,21 +1,36 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import {Filter, PublicationCard, SearchBar, UserProp} from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
-    import type { Tag } from '@prisma/client';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
+    import type { Material, Publication, Tag } from '@prisma/client';
+    import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
     let searchWord: string = '';
-    let materials = data.publications;
+    let materials:Material & {
+        publication: Publication & {
+            tags: Tag[];
+        }
+    }[] = data.materials;
+    let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
+    let liked = data.liked as number[];
+    let saved = data.saved.saved as number[];
 
 
+    $: pageType = data.type;
+    $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
+    $: peopleText = pageType === 'people' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
+    $: circuitsText = pageType === 'circuits' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
 
-    $:pageType = data.type;
+    $: materialsBg = pageType === 'materials' ? 'bg-primary-500 dark:bg-primary-600 hover:bg-primary-500 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900' : 'hover:bg-primary-50 dark:hover:bg-primary-800'
+    $: peopleBg = pageType === 'people' ? 'bg-primary-500 dark:bg-primary-600 hover:bg-primary-500 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900' : 'hover:bg-primary-50 dark:hover:bg-primary-800'
+    $: circuitsBg = pageType === 'circuits' ? 'bg-primary-500 dark:bg-primary-600 hover:bg-primary-500 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900 ' : 'hover:bg-primary-50 dark:hover:bg-primary-800'
+
     //Variables needed to deal with Sort and Difficulty
         let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
         let sortByActive = false
@@ -31,7 +46,6 @@
         let displayTags: {id:number, content:string }[] = allTags;
         let tagActive = false
 
-
         //Variables needed to deal with Publishers
         let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
         let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
@@ -43,7 +57,6 @@
         let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
         let displayTypes: {id:number, content:string }[] = allTypes; //
         let typeActive = false
-
 
     //Used to make the dropdown appear/disappear
     const toggleSortBy = () => {
@@ -167,8 +180,6 @@
 
     let applyActive = false;
     $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
-
-
 </script>
 <div class="flex justify-between col-span-full mt-32">
     <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
@@ -295,22 +306,11 @@
 </div>
 
 {#if pageType === "materials"}
-    {#each materials as material}
-        <PublicationCard publication={material.publication} />
+    {#each materials as material, i}
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person}
         <UserProp view="search" posts="{5}" userPhotoUrl="" role="Maintainer" user={person} />
     {/each}
 {/if}
-
-
-<!--{#await sendFiltersToAPI()}-->
-<!--    <p>Loading...</p>-->
-<!--{:then a}-->
-<!--    {#each materials as material}-->
-<!--        <PublicationCard publication={material.publication} />-->
-<!--    {/each}-->
-<!--{:catch error}-->
-<!--    <p>Error loading materials: {error.message}</p>-->
-<!--{/await}-->

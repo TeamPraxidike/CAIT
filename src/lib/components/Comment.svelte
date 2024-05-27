@@ -2,19 +2,19 @@
     import type {Comment, Reply} from "@prisma/client";
     import {createEventDispatcher, onMount} from 'svelte';
     import Icon from '@iconify/svelte';
-    import type {PopupSettings} from '@skeletonlabs/skeleton';
+    import { getModalStore, getToastStore, type PopupSettings } from '@skeletonlabs/skeleton';
     import {popup} from '@skeletonlabs/skeleton';
-    import { getDateDifference } from '$lib';
+    import { authStore, getDateDifference, AddInteractionForm } from '$lib';
 
     //assuming that you create the comment object prior to creating the components when adding a new comment, having all info available in it
     export let interaction: Comment | Reply;
     export let isReply: boolean;
-    export let liked = false;
+    export let liked:boolean;
 
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
-    export let userName = "Tom Viering"
-    export let browsingUser = 1
-    export let popupName: string;
+    export let userName = ""
+    let browsingUser = $authStore.user?.id || 0
+    let popupName = isReply ? `reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}` : `comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}`;
     let user = interaction.userId
     let text = interaction.content
     let likes = interaction.likes
@@ -28,42 +28,32 @@
 
     let editing = false;
     let newText = '';
-    let showConfirmation = false;
-
-
-
 
     $:lineClamp = isExpanded ? "line-clamp-none" : isReply ? "line-clamp-2":"line-clamp-3"
     $:created = getDateDifference(interaction.createdAt, new Date())
 
     const dispatch = createEventDispatcher()
-    const handleLike = () => {
-        liked = !liked
-        likes = liked ? likes + 1 : likes - 1
-        dispatch("LikeAction", {
-            message: liked ? "User added like" : "User removed like",
-            value: {action: likes, userId: user}
-        })
-    }
+
     const startEditing = () => {
         editing = true;
         newText = text;
     }
 
-    const saveChanges = () => {
-        text = newText;
-        editing = false;
-        dispatch("EditComment", {value: text})
 
-    }
+    const toastStore = getToastStore();
+    const modalStore = getModalStore();
+
+
     const expandAction = () => {
         isExpanded = !isExpanded
     }
     const copyToClipboard = () => {
         navigator.clipboard.writeText(text)
             .then(() => {
-                console.log('Text copied to clipboard:', text);
-                alert("Successfully copied to clipboard")
+                toastStore.trigger({
+                    message: 'Copied to clipboard',
+                    background: 'bg-surface-200'
+                });
                 // You can optionally show a success message or perform other actions here
             })
             .catch(err => {
@@ -73,24 +63,125 @@
         commentDiv.ariaPressed = "false"
     }
     const handleDelete = () => {
-        showConfirmation = true;
-    };
+        modalStore.trigger({
+            type: 'confirm',
+            title: 'Delete Comment',
+            body: 'Are you sure you want to delete this comment?',
+            buttonTextSubmit: 'Delete',
+            response: (r: boolean) => {
+                if (r) confirmDelete();
+            }
+        });
+    }
 
-    const confirmDelete = () => {
-        dispatch('deleteInteraction', {value: {interaction: interaction, reply:isReply}});
-        //console.log('delete')
-        showConfirmation = false;
-    };
+    async function confirmDelete () {
+        //I could try to do this with dispatching here and handling this on the page, but it does work from here for now
 
-    const cancelDelete = () => {
-        showConfirmation = false;
-    };
+        if (isReply){
+            try {
+                const res = await fetch(`/api/reply/${interaction.id}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok){
+                    location.reload();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        else{
+            try {
+                const res = await fetch(`/api/comment/${interaction.id}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok){
+                    location.reload();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
+
+    async function saveChanges() {
+        //same as above method for this one
+        text = newText;
+        editing = false;
+        if (isReply){
+            try {
+                 await fetch(`/api/reply/${interaction.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({content:text})
+                })
+                //not sure if this should be here
+                // setTimeout(() => {
+                //     window.location.reload();
+                // }, 50);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        else{
+            try {
+                await fetch(`/api/comment/${interaction.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({content:text})
+                })
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
+
+    let isDisplayedAdded = false;
+
+    const handleReply = ()=>{
+        isDisplayedAdded = true;
+    }
+    const handleReplyCancel = ()=>{
+        isDisplayedAdded = false;
+    }
+    const sendReplyEvent = (event: CustomEvent) =>{
+        dispatch("ReplyAction", event.detail);
+        isDisplayedAdded = false;
+
+    }
+
+    /*
+    dispatch event to say whether user liked or disliked a comment or reply and save in database
+     */
+    const handleLike = async () => {
+        liked = !liked
+        likes = liked ? likes + 1 : likes - 1
+        let res: Response;
+        if (isReply){
+            res = await fetch(`/api/user/${browsingUser}/liked/reply/${interaction.id}`,{
+                method: 'POST',
+            })
+            if (res.ok){
+                dispatch('likeUpdate', {like: liked, reply: isReply, id: interaction.id})
+            }
+        }else{
+            res = await fetch(`/api/user/${browsingUser}/liked/comment/${interaction.id}`, {
+                method: 'POST',
+            })
+            if (res.ok){
+                dispatch('likeUpdate', {like:liked, reply: isReply, id: interaction.id})
+            }
+        }
+
+    }
+
+    let display = 'hidden';
+    $:display = isDisplayedAdded ? 'flex':'hidden'
 
     onMount(() => {
         created = getDateDifference(interaction.createdAt, new Date())
-        if (interaction.updatedAt.getTime() !== interaction.createdAt.getTime())
+
+        if ((new Date(interaction.updatedAt).getTime() - new Date(interaction.createdAt).getTime() > 10))
             edited = "Edited " + getDateDifference(interaction.updatedAt, new Date())
     })
+
     const popupMenu: PopupSettings = {
         event: 'click',
         target: popupName,
@@ -104,7 +195,7 @@
 </script>
 
 
-<div bind:this={commentDiv}
+    <div bind:this={commentDiv}
      class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full relative rounded-lg flex gap-2 p-1 ">
     <div class="w-12 h-12 placeholder-circle">
     </div>
@@ -117,7 +208,7 @@
 
             <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-200 dark:hover:bg-surface-800"
                     use:popup={popupMenu}>
-                <Icon icon="ph:dots-three-vertical" height="20" style="color: #19191F"/>
+                <Icon icon="ph:dots-three-vertical" height="20" style="color: #646478"/>
             </button>
         </div>
 
@@ -134,13 +225,14 @@
                 </div>
             {:else }
                 <p
-                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full">{text}</p>
+                  id="commentText"
+                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full break-words">{text}</p>
                 <!--{#if truncated}-->
-                <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
-                    {isExpanded ? 'Show Less' : 'Show More'}
-                </button>
+                    <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
+                        {isExpanded ? 'Show Less' : 'Show More'}
+                    </button>
+                <!--{/if}-->
             {/if}
-            <!--{/if}-->
         </div>
 
         <div class="flex items-center gap-5">
@@ -156,7 +248,7 @@
             </div>
 
             {#if !isReply}
-                <button class="hover:underline text-primary-500">Reply</button>
+                <button class="hover:underline text-primary-500" on:click={handleReply}>Reply</button>
             {/if}
 
             <div class="ml-10 text-surface-400 text-sm">{edited}</div>
@@ -164,6 +256,8 @@
 
     </div>
 </div>
+
+<AddInteractionForm on:addedReply={sendReplyEvent}  on:cancelEventForum={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
 
 <div data-popup="{popupName}">
     <div class="flex flex-col w-12 gap-2 bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">
@@ -184,17 +278,3 @@
         {/if}
     </div>
 </div>
-
-{#if showConfirmation}
-    <div class="z-[9999] fixed inset-0 bg-surface-800 bg-opacity-50 flex justify-center items-center">
-        <div class="bg-surface-50 dark:bg-surface-700 dark:text-surface-00 p-8 rounded-lg shadow-lg">
-            <p>Are you sure you want to delete this comment?</p>
-            <div class="flex justify-center mt-4">
-                <button class="mr-4 px-4 py-2 bg-error-500 text-surface-50 rounded-lg" on:click={confirmDelete}>Delete
-                </button>
-                <button class="px-4 py-2 bg-surface-500 text-surface-200 rounded-lg" on:click={cancelDelete}>Cancel
-                </button>
-            </div>
-        </div>
-    </div>
-{/if}

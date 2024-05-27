@@ -1,17 +1,21 @@
 import {
-	addFile,
-	deleteFile,
-	deleteMaterialByPublicationId,
-	editFile,
-	type FetchedFileArray,
+	getMaterialByPublicationId,
+	updateMaterialByPublicationId,
+	prisma,
+	handleConnections,
 	type FileDiffActions,
 	fileSystem,
-	getMaterialByPublicationId,
-	handleConnections,
+	deleteMaterialByPublicationId,
+	type FetchedFileArray,
 	type MaterialForm,
-	prisma,
-	updateMaterialByPublicationId,
+	type FetchedFileItem,
+	updateCoverPic,
+	updateFiles, deleteFile,
 } from '$lib/database';
+
+
+import { coverPicFetcher } from '$lib/database';
+import type {File as PrismaFile} from "@prisma/client"
 
 export async function GET({ params }) {
 	// Authentication step
@@ -50,12 +54,18 @@ export async function GET({ params }) {
 			});
 		}
 
-		// If JSON stringify cannot handle raw Buffer, use this:
-		//const transformedFileData = await bufToBase64(fileData);
+		// coverPic return
+		const coverFileData: FetchedFileItem = coverPicFetcher(
+			material.encapsulatingType,
+			material.publication.coverPic,
+		);
 
-		return new Response(JSON.stringify({ material, fileData }), {
-			status: 200,
-		});
+		return new Response(
+			JSON.stringify({ material, fileData, coverFileData }),
+			{
+				status: 200,
+			},
+		);
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
@@ -75,13 +85,13 @@ export async function PUT({ request, params }) {
 	const body: MaterialForm & {
 		materialId: number;
 	} = await request.json();
-	console.log(body);
 	const material: MaterialForm = body;
 	const metaData = material.metaData;
 	// const userId = material.userId;
 	const fileInfo: FileDiffActions = material.fileDiff;
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
+	const coverPic = material.coverPic;
 
 	const publicationId = parseInt(params.publicationId);
 
@@ -104,35 +114,13 @@ export async function PUT({ request, params }) {
 					prismaTransaction,
 				);
 
-				// add files
-				for (const file of fileInfo.add) {
-					const buffer: Buffer = Buffer.from(file.info, 'base64');
+				await updateCoverPic(
+					coverPic,
+					publicationId,
+					prismaTransaction,
+				);
 
-					await addFile(
-						file.title,
-						file.type,
-						buffer,
-						body.materialId,
-						prismaTransaction,
-					);
-				}
-
-				// delete files
-				for (const file of fileInfo.delete) {
-					await deleteFile(file.path, prismaTransaction);
-				}
-
-				// edit existing files
-				for (const file of fileInfo.edit) {
-					const buffer: Buffer = Buffer.from(file.info, 'base64');
-
-					await editFile(
-						file.path,
-						file.title,
-						buffer,
-						prismaTransaction,
-					);
-				}
+				await updateFiles(fileInfo, body.materialId, prismaTransaction);
 
 				const material = await updateMaterialByPublicationId(
 					publicationId,
@@ -156,6 +144,7 @@ export async function PUT({ request, params }) {
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
+		console.error(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
@@ -187,6 +176,14 @@ export async function DELETE({ params }) {
 					},
 				);
 			}
+
+			const coverPic: PrismaFile = material.publication.coverPic;
+
+			// if there is a coverPic
+			if (coverPic) {
+				await deleteFile(coverPic.path, prismaTransaction);
+			}
+
 			await deleteMaterialByPublicationId(
 				id,
 				material,

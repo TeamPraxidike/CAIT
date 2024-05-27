@@ -1,6 +1,7 @@
 <script lang="ts">
 
-    import { DiffBar, getDateDifference, Tag } from '$lib';
+
+    import {authStore, DiffBar, getDateDifference, Tag} from '$lib';
 
     import Icon from '@iconify/svelte';
     import { fly } from 'svelte/transition';
@@ -26,8 +27,13 @@
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let numMaterials: number = 1;
-    export let used: number = 1;
+    export let used: number = 5;
     export let tags: string[] = publication.tags.map(tag => tag.content);
+    export let imgSrc: string;
+    export let markAsUsed: boolean = false;
+    export let isChecked = false;
+
+    const userId = $authStore.user?.id;
 
     //used to differentiate if its used in a normal browse or in the circuit browse
     export let inCircuits: boolean = false;
@@ -39,8 +45,37 @@
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
     $:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
-    const toggleLike = () => liked = !liked;
-    const toggleSave = () => saved = !saved;
+    let likes = publication.likes;
+    const toggleLike = async () => {
+        likes = liked ? likes - 1 : likes + 1;
+        await fetch(`/api/user/${userId}/liked/${publication.id}`, {
+            method: 'POST',
+        });
+        liked = !liked;
+    }
+
+    const toggleSave = async () => {
+        await fetch(`/api/user/${userId}/saved/${publication.id}`, {
+            method: 'POST',
+        });
+        saved = !saved;
+    }
+
+    const toggleUsedInCourse = async () => {
+        if (isChecked) {
+            used++;
+            await fetch(`/api/user/${userId}/use-in-course/${publication.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ courses: ['a'] }),
+            });
+        } else {
+            used--;
+            await fetch(`/api/user/${userId}/use-in-course/${publication.id}?courses=["a"]`, {method: "DELETE"});
+        }
+    }
 
     let hoverDiv: HTMLDivElement;
     let container: HTMLDivElement;
@@ -116,9 +151,9 @@
 </script>
 
 
-<div
-  class="{className} {ring} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
-    <div class="w-full relative h-2/5 rounded-t-lg">
+
+<div class="{className} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
+    <div class="w-full relative h-3/6 rounded-t-lg">
         {#if used > 5}
             <p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
                 Used in {used} courses</p>
@@ -126,8 +161,9 @@
             <p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface">
                 Used in {used} courses</p>
         {/if}
+        <img class="w-full h-full object-cover" src={imgSrc} alt="" />
     </div>
-    <div class="flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
+    <div class="flex flex-col justify-between px-2 py-2 w-full h-3/6 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
         <!-- Title and difficulty -->
         <div class="w-full">
             <div class="flex justify-between">
@@ -182,6 +218,7 @@
         <div class="w-full space-y-2">
             <hr class="opacity-50">
             <div class="w-full flex justify-between">
+                <div class="w-full flex justify-left space-x-4">
                 {#if !inCircuits}
                     <a href="{publication.publisherId}/{publication.id}"
                        class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
@@ -201,13 +238,22 @@
                         <div class="arrow bg-surface-100-token" />
                     </div>
                 {/if}
+
+                    {#if markAsUsed}
+                        <div class="w-full flex justify-center space-x-2">
+                            <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>
+                            <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
+                        </div>
+                    {/if}
+                </div>
+
                 <div class="flex gap-2">
                     <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
                         <button
                                 class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
                                 on:click={() => toggleLike()}>
                             <Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
-                            <span>{publication.likes}</span>
+                            <span>{likes}</span>
                         </button>
 
                         <div class="h-2/3 w-px bg-surface-200"></div>

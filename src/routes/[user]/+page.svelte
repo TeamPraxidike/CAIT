@@ -1,11 +1,25 @@
 <script lang="ts">
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
-    import type {LayoutData} from './$types';
+    import type {LayoutData, PageServerData} from './$types';
+    import type { Publication, Tag, User } from '@prisma/client';
+    import type { FetchedFileArray } from '$lib/database';
 
     /* This is the data that was returned from the server */
-    export let data: LayoutData;
+    export let data: LayoutData & PageServerData;
 
-    let user = data.user;
+    let user:User & {
+        posts: Publication & {
+            tags: Tag[];
+        }[]
+    } = data.user;
+
+    let fileData:FetchedFileArray = data.fileData;
+    let saved = data.saved;
+    let savedFileData = data.savedFileData;
+    let liked = data.liked;
+    let used = data.used as number[];
+
+    console.log("liked: " + liked);
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -17,14 +31,21 @@
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         Saved Publications
     </h3>
-    {#each data.user.posts as publication}
-        <PublicationCard {publication} />
-    {/each}
+    {#if saved.length === 0}
+        <p class="text-center col-span-3 text-surface-900 dark:text-surface-50">
+            No saved publications
+        </p>
+    {:else}
+        {#each saved as publication, i}
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)} used={publication.usedInCourse.length}/>
+        {/each}
+    {/if}
+
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
-        Franklin's Publications
+        {user.firstName}'s Publications
     </h3>
-    {#each data.user.posts as publication}
-        <PublicationCard {publication} />
+    {#each data.user.posts as publication, i}
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)}/>
     {/each}
 </div>
 

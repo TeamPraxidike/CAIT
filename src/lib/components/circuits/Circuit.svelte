@@ -23,6 +23,10 @@
 	})[]; //GET all nodes in the circuit
 	 let edges : Edge[];
 	let cy: any;
+	let selected: boolean = false;
+	let selectedId: string = '';
+	let prereqActive: boolean = false;
+	let nodeClicked: boolean = false;
 
 	let mappedNodes = nodes.map(node => ({
 		data: { id: node.id.toString(), title: node.publication.title },
@@ -66,15 +70,12 @@
 						'label': 'data(label)',
 					},
 				},
-
-
 				{
 					selector: 'edge',
 					style: {
-
+						'curve-style': 'bezier',
 						'width': 2,
 						'line-color': '#646478',
-						'curve-style' : 'bezier',
 						'target-arrow-color': '#646478',
 						'target-arrow-shape': 'triangle',
 					},
@@ -85,63 +86,129 @@
 			},
 		});
 
-		// Apply HTML labels to nodes
-		// cy.nodeHtmlLabel([
-		// 	{
-		// 		query: 'node',
-		// 		tpl: function(data : any) {
-		// 			return `<div class="node-content">
-		//                 <div class="node-title">${data.id}</div>
-		//                 <div class="node-icons">
-		//                   <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
-		//                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
-		//                   <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
-		//                 </div>
-		//               </div>`;
-		// 		}
-		// 	}
-		// ]);
 
-		// cy.nodeHtmlLabel([
-		// 	{
-		// 		query: 'node',
-		// 		tpl: function (data : any) {
-		// 			const nodeId = `node-${data.id}`;
-		// 			return `<div id="${nodeId}" class="node-content"></div>`;
-		// 		}
-		// 	}
-		// ]);
-		//
-		// cy.nodes().forEach((node: any) => {
-		// 	const nodeId = `node-${node.id()}`;
-		// 	new Node({
-		// 		target: document.getElementById(nodeId),
-		// 		props: {
-		// 			data: node.data()
-		// 		}
-		// 	});
-		// });
-
-
-		cy.on('click', 'node', (event: any) => {
-			alert("node clicked" + event.target.id())
-		});
-
-		cy.on('mouseover', 'node', (event: any) => {
-			const node = event.target;
+		cy.on('select', 'node', (event: any) => {
+			console.log('Selected: ' + event.target.data().label);
+			let node = event.target;
 			node.style({
 				'background-color': '#4C4C5C',
-				'color': '#F9F9FA',
-				'cursor': 'pointer'
+				'color': '#F9F9FA'
 			});
+
+
+			if (selected && prereqActive) {
+				let edgeId = 'e'.concat(node.id().toString().concat(selectedId.toString()));
+				if (cy.getElementById(edgeId).length > 0) {
+					cy.remove(cy.$(`#${edgeId}`));
+				} else {
+					const edge = cy.add({
+						group: 'edges',
+						data: { id: `${edgeId}`, source: `${node.id()}`, target: `${selectedId}` }
+					});
+				}
+
+				cy.$(`#${node.id()}`).unselect();
+				selected = false;
+				cy.$(`#${selectedId}`).select();
+			} else {
+
+				if (prereqActive) {
+					cy.edges().forEach((edge: any) => {
+						if (edge.target().id() === selectedId) {
+							edge.source().style({
+								'background-color': '#9E9EAE',
+								'color': '#F9F9FA'
+							});
+						}
+					});
+
+				}
+				selected = true;
+				selectedId = node.id();
+
+			}
+			nodeClicked = false;
 		});
+
+		/**
+		 * Deals with the unselecting of nodes. Restores the background
+		 * of every node in case more have been coloured
+		 */
+		cy.on('unselect', 'node', (event: any) => {
+			console.log('Unselected: ' + event.target.data().label);
+			//let node = event.target;
+			cy.nodes().forEach((n: any) => {
+				n.style({
+					'background-color': '#FCFCFD',
+					'color': '#4C4C5C'
+				});
+			});
+
+
+			if (!nodeClicked) {
+				prereqActive = false;
+			}
+			if (!prereqActive) {
+				selected = false;
+				selectedId = '';
+			}
+
+		});
+
+		/**
+		 * Updates that a node has been clicked as the order in which events are executed
+		 * is Click -> Unselect -> Selected. This is needed to make sure that node is properly unselected.
+		 */
+		cy.on('click', 'node', (event: any) => {
+			const nodeId = event.target.id();
+			const node = event.target;
+			console.log('clicked');
+			if (selectedId !== nodeId) {
+				nodeClicked = true;
+			}
+		});
+
+
+		/**
+		 * Same as the above but activated on tap for mobile
+		 */
+		cy.on('tap', 'node', (event: any) => {
+			const nodeId = event.target.id();
+			const node = event.target;
+			console.log('clicked');
+			if (selectedId !== nodeId) {
+				nodeClicked = true;
+			}
+		});
+
+		/**
+		 * The two methods below are used to simulate hover effect on a node
+		 */
+		cy.on('mouseover', 'node', (event: any) => {
+			const node = event.target;
+			if (!node.selected() && !prereqActive) {
+				console.log("Here")
+				node.style({
+					'background-color': '#4C4C5C',
+					'color': '#F9F9FA'
+				});
+			}
+		});
+
 
 		cy.on('mouseout', 'node', (event: any) => {
 			const node = event.target;
-			node.style('background-color', '#FCFCFD');
-			node.style('color', '#4C4C5C');
+			if (!node.selected() && !prereqActive) {
+				node.style({
+					'background-color': '#FCFCFD',
+					'color': '#4C4C5C'
+				});
+			}
 		});
 
+		/**
+		 * Locks all nodes if not in editing mode making it impossible to move them
+		 */
 		if (!publishing)
 			cy.nodes().forEach((node: any) => {
 					if (node)
@@ -153,7 +220,10 @@
 	let addActive: boolean = false;
 	let displayedMaterials: any = [];
 	let selectedIds: Set<number> = new Set();
-	//const addElements = () => addingActive = !addingActive
+
+	/**
+	 * Fetches all materials
+	 */
 	const fetchElements = async () => {
 
 		await fetch('/api/material')
@@ -173,6 +243,10 @@
 			});
 	};
 
+	/**
+	 * Adds a node selected from the browsing page
+	 * @param event -> Custom event dispatched from the browsing page containing the publication's id
+	 */
 	const addNode = async (event: CustomEvent) => {
 		let pubId = event.detail.id;
 
@@ -195,10 +269,50 @@
 			});
 	};
 
+	/**
+	 * Removes a node through the browsing page
+	 * @param event -> event activated from the browsing page
+	 */
 	const removeNode = (event: CustomEvent) => {
 		cy.remove(cy.$(`#${event.detail.id}`));
+		selectedId = '';
+		selected = false;
+		selectedIds.delete(event.detail.id);
 	};
 
+	/**
+	 * Removes the selected node
+	 */
+	const removeSelected = () => {
+		cy.remove(cy.$(`#${selectedId}`));
+		selectedIds.delete(Number(selectedId));
+		selectedId = '';
+		selected = false;
+
+	};
+
+	/**
+	 * Highlights all prerequisites of the selected node and activates the ability to add edges
+	 */
+	const addPrereq = () => {
+		cy.edges().forEach((edge: any) => {
+			if (edge.target().id() === selectedId) {
+				edge.source().style({
+					'background-color': '#9E9EAE',
+					'color': '#F9F9FA'
+				});
+			}
+		});
+		prereqActive = true;
+	};
+
+	/**
+	 * Saves the progress so far and unselects the node
+	 */
+	const savePrereq = () => {
+		prereqActive = false;
+		cy.$(`#${selectedId}`).unselect();
+	};
 
 </script>
 
@@ -208,44 +322,25 @@
         height: 600px;
         border: 1px solid black;
     }
-    :global(.node-content) {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        width: 90px;
-        height: 90px;
-        text-align: center;
-        background-color: #666;
-        color: white;
-        border-radius: 5px;
-        padding: 5px;
-        box-sizing: border-box;
-        overflow: hidden;
-    }
-
-    :global(.node):hover{
-        background-color: #770000;
-        color: white;
-    }
-    :global(.node-title) {
-        font-size: 14px;
-        font-weight: bold;
-    }
-    :global(.node-icons) {
-        display: flex;
-        justify-content: center;
-    }
-    :global(.node-icons svg) {
-        width: 15px;
-        height: 15px;
-        margin: 0 2px;
-        fill: #7ee787;
-    }
 </style>
-<button class="btn variant-filled h-1/2" on:click={fetchElements}>Add</button>
+<div class="flex-col gap-4">
+	<div class="flex gap-2">
+		{#if !selected}
+			<button class="btn variant-filled" on:click={fetchElements}>Add</button>
+		{/if}
+		{#if selected}
+			{#if prereqActive}
+				<button class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes</button>
+			{:else}
+				<button class="btn variant-filled bg-surface-600" on:click={addPrereq}>Select Prerequisites</button>
+			{/if}
+			<button class="btn variant-filled bg-error-400" on:click={removeSelected}>Remove From Circuit</button>
+		{/if}
+	</div>
 
-<div id="cy"></div>
+
+	<div id="cy"></div>
+</div>
 
 
 {#if addActive}

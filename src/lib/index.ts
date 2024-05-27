@@ -35,6 +35,8 @@ import { getDateDifference } from '$lib/util/date';
 const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
 
+import AddInteractionForm from '$lib/components/AddInteractionForm.svelte';
+
 export {
 	Download,
 	getDateDifference,
@@ -63,4 +65,5 @@ export {
 	CircuitPureHTML,
 	type AuthStruct,
 	type AuthStore,
+	AddInteractionForm,
 };

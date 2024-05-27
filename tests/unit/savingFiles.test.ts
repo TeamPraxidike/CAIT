@@ -2,18 +2,19 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import fs from 'fs';
 import path from 'path';
+import type FileSystem from '$lib/FileSystemPort/FileSystem';
 
 const basePath = path.join('static', 'uploadedFiles');
 
 describe('Local File Handling', () => {
-	let fileSystem: LocalFileSystem;
+	let fileSystem: FileSystem;
 	const createdFiles: string[] = [];
 
 	beforeEach(() => {
 		if (!fs.existsSync(basePath)) {
 			fs.mkdirSync(basePath);
 		}
-		fileSystem = new LocalFileSystem();
+		fileSystem = new LocalFileSystem(basePath);
 	});
 
 	afterEach(() => {

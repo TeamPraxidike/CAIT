@@ -12,32 +12,85 @@ const main = async () => {
 	// Truncate all tables in the database
 	await seed.$resetDatabase();
 
-	const names = ['Winston', 'Franklin', 'Boris', 'Otto'];
-	const lastNames = ['Churchill', 'Roosevelt', 'Johnson', 'von Bismarck'];
+	const users = [
+		{
+			first: 'Omni-man',
+			last: '',
+			email: 'omniman@viltrum.org',
+		},
+		{
+			first: 'Winston',
+			last: 'Churchill',
+			email: 'winchurch@parl.gov.uk',
+		},
+		{
+			first: 'Franklin',
+			last: 'Roosevelt',
+			email: 'fdr@usa.gov',
+		},
+		{
+			first: 'Boris',
+			last: 'Johnson',
+			email: 'borjon@parl.gov.uk',
+		},
+		{
+			first: 'Otto',
+			last: 'von Bismarck',
+			email: 'ottogermany5@prussia.org',
+		},
+	];
+
 	const titles = [
 		'ANN',
 		'Convolutional neural networks',
 		'SVM',
 		'Reinforcment learning',
 	];
+	const tags = [
+		'ai',
+		'ml',
+		'dl',
+		'rl',
+		'cv',
+		'nlp',
+		'ann',
+		'gbm',
+		'xgboost',
+		'lightgbm',
+		'catboost',
+		'neural networks',
+	];
 
-	// Seed the database with 10 user
-	await seed.material((x) =>
-		x(titles.length, ({ index }) => ({
-			publication: {
-				title: titles[index],
-			},
-			user: {
-				userId: index,
-				firstName: names[index],
-				lastName: lastNames[index],
-			},
+	await seed.tag((x) =>
+		x(tags.length, ({ index }) => ({ content: tags[index] })),
+	);
+
+	await seed.user((x) =>
+		x(users.length, ({ index }) => ({
+			firstName: users[index].first,
+			lastName: users[index].last,
+			email: users[index].email,
+			id: index + 1,
 		})),
 	);
 
-	await seed.tag((x) => x(20, ({ index }) => ({ content: `tag ${index}` })));
+	await seed.publication((x) =>
+		x(titles.length, ({ index }) => ({
+			title: titles[index],
+			tags: { connect: { content: tags[index] } },
+			publisherId: index + 1,
+			publicationId: index + 1,
+		})),
+	);
 
-	// seed.projects((x) => x(3, { name: 'Project Name' }));
+	await seed.material((x) =>
+		x(titles.length, ({ index }) => ({
+			title: titles[index],
+			publicationId: index + 1,
+			userId: index + 1,
+		})),
+	);
+
 	process.exit();
 };
 

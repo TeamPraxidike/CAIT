@@ -1,5 +1,13 @@
-import { type FetchedFileArray, fileSystem, prisma } from '$lib/database';
+import {
+	type FetchedFileArray,
+	type FileDiffActions,
+	fileSystem,
+	prisma,
+} from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
+import type { File as PrismaFile } from '@prisma/client';
+import path from 'path';
+import fs from 'fs';
 
 export async function bufToBase64(files: FetchedFileArray) {
 	// If JSON stringify cannot handle raw Buffer, use this:
@@ -7,6 +15,101 @@ export async function bufToBase64(files: FetchedFileArray) {
 		...file,
 		data: file.data.toString(),
 	}));
+}
+
+/**
+ * Fetches cover pic for corresponding publication of type material
+ * @param encapsulatingType
+ * @param coverPic
+ */
+export function coverPicFetcher(
+	encapsulatingType: string,
+	coverPic: PrismaFile | null,
+) {
+	let filePath;
+
+	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
+	if (!coverPic) {
+		filePath = path.join(
+			'static',
+			'defaultCoverMaterial',
+			encapsulatingType + '.jpg',
+		);
+
+		const currentFileData = fs.readFileSync(filePath);
+
+		return {
+			fileId: filePath,
+			data: currentFileData.toString('base64'),
+		};
+	} else {
+		// since photo is defined, read the file based on the path (just like a File)
+		filePath = coverPic.path;
+
+		const currentFileData = fileSystem.readFile(filePath);
+		return {
+			fileId: filePath,
+			data: currentFileData.toString('base64'),
+		};
+	}
+}
+
+export async function addCover(
+	title: string,
+	type: string,
+	info: Buffer,
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	try {
+		const path = await fileSystem.saveFile(info, title);
+		try {
+			return prismaContext.file.create({
+				data: {
+					path: path,
+					title: title,
+					type,
+					coverId: publicationId, // Associate the cover with Material
+				},
+			});
+		} catch (errorDatabase) {
+			fileSystem.deleteFile(path);
+			throw new Error('Rollback');
+		}
+	} catch (errorFileSystem) {
+		throw new Error('Rollback');
+	}
+}
+
+export async function updateCoverPic(
+	coverPic: { type: string; info: string } | null,
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	// check if the material already has a coverPic
+	const coverFile = await prismaContext.file.findUnique({
+		where: {
+			coverId: publicationId,
+		},
+	});
+
+	// remove if it does
+	if (coverFile) {
+		await deleteFile(coverFile.path, prismaContext);
+	}
+
+	// if received info about coverPic (so not default)
+	if (coverPic) {
+		// upload new coverPic
+		const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
+		await addCover(
+			'cover.jpg',
+			coverPic.type,
+			buffer,
+			publicationId,
+			prismaContext,
+		);
+	}
 }
 
 export async function addFile(
@@ -84,5 +187,30 @@ export async function deleteFile(
 		}
 	} catch (errorDatabase) {
 		throw new Error('Rollback');
+	}
+}
+
+export async function updateFiles(
+	fileInfo: FileDiffActions,
+	materialId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	// add files
+	for (const file of fileInfo.add) {
+		const buffer: Buffer = Buffer.from(file.info, 'base64');
+
+		await addFile(file.title, file.type, buffer, materialId, prismaContext);
+	}
+
+	// delete files
+	for (const file of fileInfo.delete) {
+		await deleteFile(file.path, prismaContext);
+	}
+
+	// edit existing files
+	for (const file of fileInfo.edit) {
+		const buffer: Buffer = Buffer.from(file.info, 'base64');
+
+		await editFile(file.path, file.title, buffer, prismaContext);
 	}
 }

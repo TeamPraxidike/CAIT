@@ -1,6 +1,9 @@
 import {getPublicationById, getUserById, likePublication} from "$lib/database";
 
-
+/**
+ * Likes a publication
+ * @param params
+ */
 export async function POST({params}) {
     const {id, publicationId} = params;
     const user = await getUserById(parseInt(id));

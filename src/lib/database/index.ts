@@ -37,6 +37,8 @@ import {
 	deleteNode,
 } from './node';
 
+import { savePublication, getSavedPublications } from '$lib/database/save';
+
 import {
 	getUserById,
 	createUser,
@@ -44,15 +46,52 @@ import {
 	editUser,
 	likePublication,
 	getLikedPublications,
+	likesReplyUpdate,
+	likesCommentUpdate,
+	getLikedReplies,
+	getLikedComments,
 } from '$lib/database/user';
-import type { userEditData } from '$lib/database/user';
 
-import { addFile, deleteFile, editFile, bufToBase64 } from '$lib/database/file';
+import {
+	createComment,
+	deleteComment,
+	getComment,
+	updateComment,
+	getCommentsByPublicationId,
+} from '$lib/database/comment';
+
+import {
+	getReply,
+	deleteReply,
+	updateReply,
+	createReply,
+	getRepliesByCommentId,
+} from '$lib/database/reply';
+
+import {
+	addPublicationToUsedInCourse,
+	coursesUsingPublication,
+	publicationsAUserUses,
+} from '$lib/database/usedInCourse';
+
+import type { userEditData } from '$lib/database/user';
+import type { editReplyData, createReplyData } from '$lib/database/reply';
+import type { createCommentData, editCommentData } from '$lib/database/comment';
+
+import {
+	addFile,
+	deleteFile,
+	editFile,
+	bufToBase64,
+	addCover,
+	coverPicFetcher,
+	updateCoverPic,
+	updateFiles,
+} from '$lib/database/file';
 import { prisma } from './prisma';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
-import { Difficulty } from '@prisma/client';
-
-const fileSystem = new LocalFileSystem();
+import { Difficulty, MaterialType } from '@prisma/client';
+import path from 'path';
 
 /**
  * MaterialForm is the type of the form data that is sent to the server when creating a new material.
@@ -66,13 +105,14 @@ type MaterialForm = {
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		coverPic: string;
+		materialType: MaterialType;
 		copyright: boolean;
 		timeEstimate: number;
 		theoryPractice: number;
 		tags: string[];
 		maintainers: number[];
 	};
+	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;
 };
 
@@ -148,9 +188,11 @@ type NodePostActions = {
 	next: { fromId: number; toId: number[] }[];
 };
 
+export const basePath = path.join('static', 'uploadedFiles');
+export const fileSystem = new LocalFileSystem(basePath);
+
 export {
 	prisma,
-	fileSystem,
 	type MaterialForm,
 	type CircuitEditForm,
 	type CircuitPostForm,
@@ -159,6 +201,12 @@ export {
 	type FetchedFileItem,
 	type FetchedFileArray,
 	type NodeDiffActions,
+
+	type NodeInfo,
+	updateFiles,
+	coverPicFetcher,
+	updateCoverPic,
+	addCover,
 	addFile,
 	editFile,
 	deleteFile,
@@ -189,8 +237,33 @@ export {
 	deleteMaterialByPublicationId,
 	deleteUser,
 	editUser,
+	updateComment,
+	createComment,
+	deleteComment,
+	getComment,
+	deleteReply,
+	getReply,
+	updateReply,
+	createReply,
 	likePublication,
 	getLikedPublications,
+	savePublication,
+	getSavedPublications,
+	addPublicationToUsedInCourse,
+	coursesUsingPublication,
+	publicationsAUserUses,
+	getRepliesByCommentId,
+	getCommentsByPublicationId,
+	getLikedReplies,
+	getLikedComments,
+	likesCommentUpdate,
+	likesReplyUpdate,
 };
 
-export type { userEditData };
+export type {
+	userEditData,
+	createReplyData,
+	createCommentData,
+	editCommentData,
+	editReplyData,
+};
