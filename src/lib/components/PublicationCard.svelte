@@ -13,9 +13,11 @@
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let numMaterials: number = 1;
-    export let used: number = 1;
+    export let used: number = 5;
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
+    export let markAsUsed: boolean = false;
+    export let isChecked = false;
 
     const userId = $authStore.user?.id;
 
@@ -38,6 +40,22 @@
             method: 'POST',
         });
         saved = !saved;
+    }
+
+    const toggleUsedInCourse = async () => {
+        if (isChecked) {
+            used++;
+            await fetch(`/api/user/${userId}/use-in-course/${publication.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ courses: ['a'] }),
+            });
+        } else {
+            used--;
+            await fetch(`/api/user/${userId}/use-in-course/${publication.id}?courses=["a"]`, {method: "DELETE"});
+        }
     }
 
     let hoverDiv: HTMLDivElement;
@@ -168,7 +186,17 @@
         <div class="w-full space-y-2">
             <hr class="opacity-50">
             <div class="w-full flex justify-between">
-                <a href="{publication.publisherId}/{publication.id}" class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+
+                <div class="w-full flex justify-left space-x-4">
+                    <a href="{publication.publisherId}/{publication.id}" class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+                    {#if markAsUsed}
+                        <div class="w-full flex justify-center space-x-2">
+                            <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>
+                            <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
+                        </div>
+                    {/if}
+                </div>
+
                 <div class="flex gap-2">
                     <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
                         <button
