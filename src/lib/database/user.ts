@@ -227,3 +227,21 @@ export async function getLikedPublications(userId: number) {
 		}
 	});
 }
+
+export async function isPublicationLiked(userId: number, publicationId: number) {
+	const liked = await prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			liked: {
+				where: {
+					id: publicationId
+				}
+			}
+		}
+	});
+
+	if(liked === null) return false;
+	return liked.liked.length > 0;
+}
