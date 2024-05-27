@@ -9,7 +9,7 @@
     //assuming that you create the comment object prior to creating the components when adding a new comment, having all info available in it
     export let interaction: Comment | Reply;
     export let isReply: boolean;
-    export let liked = false;
+    export let liked:boolean;
 
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = ""
@@ -109,7 +109,7 @@
         editing = false;
         if (isReply){
             try {
-                await fetch(`/api/reply/${interaction.id}`, {
+                 await fetch(`/api/reply/${interaction.id}`, {
                     method: 'PUT',
                     body: JSON.stringify({content:text})
                 })
@@ -147,17 +147,27 @@
 
     }
 
+    /*
+    dispatch event to say whether user liked or disliked a comment or reply and save in database
+     */
     const handleLike = async () => {
         liked = !liked
         likes = liked ? likes + 1 : likes - 1
+        let res: Response;
         if (isReply){
-            await fetch(`/api/user/${browsingUser}/liked/reply/${interaction.id}`,{
+            res = await fetch(`/api/user/${browsingUser}/liked/reply/${interaction.id}`,{
                 method: 'POST',
             })
+            if (res.ok){
+                dispatch('likeUpdate', {like: liked, reply: isReply, id: interaction.id})
+            }
         }else{
-            await fetch(`/api/user/${browsingUser}/liked/comment/${interaction.id}`, {
+            res = await fetch(`/api/user/${browsingUser}/liked/comment/${interaction.id}`, {
                 method: 'POST',
             })
+            if (res.ok){
+                dispatch('likeUpdate', {like:liked, reply: isReply, id: interaction.id})
+            }
         }
 
     }
@@ -215,13 +225,14 @@
                 </div>
             {:else }
                 <p
-                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full">{text}</p>
+                  id="commentText"
+                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full break-words">{text}</p>
                 <!--{#if truncated}-->
-                <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
-                    {isExpanded ? 'Show Less' : 'Show More'}
-                </button>
+                    <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
+                        {isExpanded ? 'Show Less' : 'Show More'}
+                    </button>
+                <!--{/if}-->
             {/if}
-            <!--{/if}-->
         </div>
 
         <div class="flex items-center gap-5">

@@ -16,8 +16,8 @@
 
 	let serverData: PublicationViewLoad = data.loadedPublication;
 
-	let likedComments = data.likedComments;
-	let likedReplies = data.likedReplies;
+	let likedComments = data.likedComments as number[];
+	let likedReplies = data.likedReplies as number[];
 
 	let files: FileList = createFileList(serverData.fileData, serverData.material.files);
 
@@ -77,11 +77,6 @@
 
 
 	let comments = serverData.material.publication.comments
-	let commentMap: Map<number, (Reply & {user: User})[]> = new Map<number,  (Reply & {user: User})[]>();
-	for (const comment of comments) {
-		commentMap.set(comment.id, comment.replies);
-	}
-	const emptyListReplies: (Reply & {user: User})[] = []
 
 	/*
 	add placeholder comment to make it smoother
@@ -103,7 +98,6 @@
 			user: content.user,
 		}
 		comments = [...comments, comment];
-		commentMap.set(content.id, emptyListReplies);
 	}
 
 	/*
@@ -124,11 +118,34 @@
 			user: event.detail.content.user,
 		});
 		comments = comments;
-		commentMap.set(event.detail.content.commentId, replies);
+		// commentMap.set(event.detail.content.commentId, replies);
 	}
 
 	const getReplies = (commentId: number): (Reply & {user: User})[] => {
-		return commentMap.has(commentId) ? commentMap.get(commentId)||[] : []
+		return comments.filter(x=> x.id == commentId).map(x=>x.replies)[0];
+	}
+
+	/*
+	method to update likes and dislikes prior to reloading the page to deal with updating issues from the backend
+	 */
+	const updateLikes = (event: CustomEvent) =>{
+		const liked = event.detail.like;
+		const reply = event.detail.reply;
+		const id = event.detail.id;
+
+		if(reply){
+			if(liked){
+				likedReplies.push(id);
+			}else{
+				likedReplies = likedReplies.filter(x=>x!==id)
+			}
+		}else{
+			if(liked){
+				likedComments.push(id);
+			}else{
+				likedComments = likedComments.filter(x=>x!==id)
+			}
+		}
 	}
 
 </script>
@@ -202,11 +219,11 @@
 {/if}
 
 {#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
-	<Comment on:ReplyAction={addReply} interaction={comment}
+	<Comment on:likeUpdate={updateLikes} on:ReplyAction={addReply} interaction={comment}
 			  isReply={false} userName="{comment.user.firstName} {comment.user.lastName}" liked='{likedComments.includes(comment.id)}'
 	/>
-		{#each getReplies(comment.id).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())  as reply (reply.id)}
-			<Comment interaction={reply} isReply={true} userName="{reply.user.firstName} {reply.user.lastName}" liked='{likedReplies.includes(reply.id)}'/>
+		{#each comment.replies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())  as reply (reply.id)}
+			<Comment on:likeUpdate={updateLikes} interaction={reply} isReply={true} userName="{reply.user.firstName} {reply.user.lastName}" liked='{likedReplies.includes(reply.id)}'/>
 		{/each}
 
 {/each}
