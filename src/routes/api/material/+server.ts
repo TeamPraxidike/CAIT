@@ -1,14 +1,17 @@
 import {
-	addFile,
 	createMaterialPublication,
 	type FileDiffActions,
 	getAllMaterials,
 	handleConnections,
 	type MaterialForm,
 	prisma,
+	type FetchedFileArray,
+	updateCoverPic,
+	updateFiles,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty, MaterialType } from '@prisma/client';
+import { coverPicFetcher } from '$lib/database/file';
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -66,7 +69,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		const type = ty ? ty.split(',').map(mapToType) : [];
 
 		const sort = url.searchParams.get('sort') || 'Most Recent';
-		const q: string = url.searchParams.get('q') || '';
+		const query: string = url.searchParams.get('q') || '';
 
 		const materials = await getAllMaterials(
 			tags,
@@ -74,10 +77,24 @@ export const GET: RequestHandler = async ({ url }) => {
 			diff,
 			type,
 			sort,
-			q,
+			query,
 		);
 
-		return new Response(JSON.stringify(materials), { status: 200 });
+		// coverPic return
+		const fileData: FetchedFileArray = [];
+
+		for (const material of materials) {
+			fileData.push(
+				coverPicFetcher(
+					material.encapsulatingType,
+					material.publication.coverPic,
+				),
+			);
+		}
+
+		return new Response(JSON.stringify({ materials, fileData }), {
+			status: 200,
+		});
 	} catch (error) {
 		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
@@ -101,6 +118,7 @@ export async function POST({ request }) {
 	const metaData = body.metaData;
 	const userId = body.userId;
 	const fileInfo: FileDiffActions = body.fileDiff;
+	const coverPic = body.coverPic;
 
 	try {
 		const createdMaterial = await prisma.$transaction(
@@ -127,18 +145,13 @@ export async function POST({ request }) {
 					prismaTransaction,
 				);
 
-				// add files
-				for (const file of fileInfo.add) {
-					const buffer: Buffer = Buffer.from(file.info, 'base64');
+				await updateCoverPic(
+					coverPic,
+					material.publicationId,
+					prismaTransaction,
+				);
 
-					await addFile(
-						file.title,
-						file.type,
-						buffer,
-						material.id,
-						prismaTransaction,
-					);
-				}
+				await updateFiles(fileInfo, material.id, prismaTransaction);
 
 				return material;
 			},

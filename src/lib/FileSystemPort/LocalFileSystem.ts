@@ -11,7 +11,12 @@ import path from 'path';
  */
 export class LocalFileSystem implements FileSystem {
 	//readonly basePath = 'static\\uploadedFiles\\';
-	readonly basePath = path.join('static', 'uploadedFiles');
+	// readonly basePath = path.join('static', 'uploadedFiles');
+	private readonly basePath: string;
+
+	constructor(basePath: string) {
+		this.basePath = basePath;
+	}
 
 	/**
 	 * Delete a file from the local file system (the server)

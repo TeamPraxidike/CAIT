@@ -7,8 +7,8 @@
 </script>
 
 
-<RadioGroup class="flex gap-1 col-span-3 w-9/12 h-8 items-center px-3 py-0" active="variant-filled-primary"
-            hover="hover:variant-soft-primary">
+<RadioGroup class="rounded-lg h-8 items-center" background="" border="white" active="variant-soft-primary"
+            hover="hover:variant-soft-surface">
     <RadioItem bind:group={difficulty} name="justify" value={"easy"}>
         <DiffBar diff="easy" />
     </RadioItem>

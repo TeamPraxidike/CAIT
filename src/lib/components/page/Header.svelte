@@ -29,11 +29,28 @@
     const toggleDropDown = () => dropDown = !dropDown;
 
     // TODO: THIS WOULD ACTUALLY BE A CALL TO THE AUTH SERVICE. CURRENTLY IT'S A MOCK CALL TO THE API TO GET FDR
-    const login = () => {
+    async function login(event: MouseEvent) {
+
         fetch('/api/user/1').then(res => res.json()).then(data => {
             authStore.setAuth(data, 'token');
         }).catch(err => console.error(err));
-    };
+
+        // Find the closest form element
+        const form = (event.target as HTMLElement).closest('form');
+        if (!form) throw new Error('No form found');
+
+        const formData = new FormData(form);
+
+        try {
+            await fetch(form.action, {
+                method: form.method,
+                body: formData
+            });
+        } catch (error) {
+            console.error('Error submitting form', error);
+        }
+    }
+
 </script>
 
 <header class="w-screen shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none">
@@ -57,7 +74,9 @@
             {#if loggedIn}
                 <a href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Publish</a>
             {:else}
-                <button on:click={login} class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Sign In</button>
+                <form action="/" method="post" >
+                    <button on:click={login} type="button" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Sign In</button>
+                </form>
             {/if}
             <div class="border-l border-surface-300 h-8"/>
             <div>
@@ -109,7 +128,9 @@
                             <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
                         </div>
                     {:else}
-                        <button on:click={login} class="btn rounded-lg variant-ghost-primary">Sign In</button>
+                        <form action="/" method="post">
+                        <button on:click={login} type="button" class="btn rounded-lg variant-ghost-primary">Sign In</button>
+                        </form>
                     {/if}
                 </div>
             </div>
