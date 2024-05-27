@@ -11,24 +11,35 @@ import type {
 	Reply,
 } from '@prisma/client';
 
-export const load: LayoutServerLoad = async ({ params, fetch }) => {
+export const load: LayoutServerLoad = async ({ params, fetch , cookies}) => {
 	const pRes = await fetch(`/api/material/${params.publication}`);
 	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
 
-	const loadedPublication: PublicationViewLoad = await pRes.json();
+	console.log("current user is: " + cookies.get("userId"));
+
+	const likedRes = await fetch(`/api/user/${cookies.get("userId")}/liked/${params.publication}`);
+	if(likedRes.status !== 200) error(likedRes.status, likedRes.statusText);
+
+	const liked = await likedRes.json();
+	const loadedPublication = {loadedPublication: await pRes.json(), liked: liked};
 
 	return {
-		loadedPublication,
+		loadedPublication
 	} satisfies {
 		loadedPublication: PublicationViewLoad;
 	};
 };
 
+
+export type PublicationViewLoad = {
+	loadedPublication: PublicationView,
+	liked: boolean
+}
 /**
  * The data that is loaded for the publication view layout.
  * Only to be used in the publication view layout or child pages.
  */
-export type PublicationViewLoad = {
+export type PublicationView = {
 	fileData: FetchedFileArray;
 	material: Material & {
 		files: PrismaFile[];

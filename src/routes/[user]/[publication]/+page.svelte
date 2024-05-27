@@ -1,10 +1,20 @@
 <script lang="ts">
 	import type { LayoutServerData } from './$types';
-	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore, AddInteractionForm, UserProp } from '$lib';
+	import {
+		DiffBar,
+		getDateDifference,
+		Meta,
+		Tag,
+		FileTable,
+		Comment,
+		authStore,
+		AddInteractionForm,
+		UserProp
+	} from '$lib';
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
-	import type { PublicationViewLoad } from './+layout.server';
+	import type { PublicationViewLoad, PublicationView } from './+layout.server';
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { createFileList } from '$lib/util/file';
@@ -12,15 +22,28 @@
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
 	export let data: LayoutServerData;
-	let serverData: PublicationViewLoad = data.loadedPublication;
+	const userId = $authStore.user?.id;
+
+	let serverData: PublicationView = data.loadedPublication.loadedPublication;
 
 	let files: FileList = createFileList(serverData.fileData, serverData.material.files);
 
-	let liked: boolean = true;
+	let liked: boolean = data.loadedPublication.liked;
+	let likes = serverData.material.publication.likes;
+
+	console.log("liked: " + liked);
+	console.log("likes: " + likes);
+
 	let saved: boolean = true;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
-	const toggleLike = () => liked = !liked;
+	const toggleLike = async () => {
+		likes = liked ? likes - 1 : likes + 1;
+		await fetch(`/api/user/${userId}/liked/${serverData.material.publicationId}`, {
+			method: 'POST',
+		});
+		liked = !liked;
+	}
 	const toggleSave = () => saved = !saved;
 
 	let tags: string[] = serverData.material.publication.tags.map(tag => tag.content);
@@ -104,7 +127,7 @@
 				class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
 				on:click={() => toggleLike()}>
 			<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
-			<span>{serverData.material.publication.likes}</span>
+			<span>{likes}</span>
 		</button>
 		<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
 				on:click={downloadFiles}>
