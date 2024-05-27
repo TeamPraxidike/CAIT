@@ -76,7 +76,7 @@ type MaterialForm = {
 	fileDiff: FileDiffActions;
 };
 
-type CircuitForm = {
+type CircuitEditForm = {
 	userId: number;
 	metaData: {
 		title: string;
@@ -88,6 +88,20 @@ type CircuitForm = {
 		maintainers: number[];
 	};
 	nodeDiff: NodeDiffActions;
+};
+
+type CircuitPostForm = {
+	userId: number;
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		tags: string[];
+		maintainers: number[];
+	};
+	nodeDiff: NodePostActions;
 };
 
 /**
@@ -124,6 +138,13 @@ type NodeDiffActions = {
 	add: { circuitId: number; publicationId: number; x: number; y: number }[];
 	delete: { nodeId: number }[];
 	edit: { nodeId: number; publicationId: number; x: number; y: number }[];
+	// from publicationId, to (many) other publicationIds
+	next: { fromId: number; toId: number[] }[];
+};
+
+type NodePostActions = {
+	add: { publicationId: number; x: number; y: number }[];
+	// from publicationId, to (many) other publicationIds
 	next: { fromId: number; toId: number[] }[];
 };
 
@@ -131,7 +152,9 @@ export {
 	prisma,
 	fileSystem,
 	type MaterialForm,
-	type CircuitForm,
+	type CircuitEditForm,
+	type CircuitPostForm,
+	type NodePostActions,
 	type FileDiffActions,
 	type FetchedFileItem,
 	type FetchedFileArray,

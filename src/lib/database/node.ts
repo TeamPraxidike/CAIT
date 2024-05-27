@@ -28,35 +28,63 @@ export async function fetchExtensions(publicationId: number) {
 }
 
 export async function handleEdges(
+	circuitId: number,
 	next: { fromId: number; toId: number[] }[],
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	for (const edge of next) {
-		if (edge.fromId <= 0 || isNaN(edge.fromId)) {
-			throw new Error('Invalid id found');
-		}
-		await prismaContext.node.update({
-			where: { id: edge.fromId },
-			data: {
-				next: {
-					connect: edge.toId.map((id) => ({ id })),
-				},
-			},
-		});
+	//TODO: check if node is connected to itself (improper behaviour)
 
-		for (const to of edge.toId) {
-			await prismaContext.node.update({
-				where: { id: to },
-				data: {
-					prerequisites: {
-						connect: {
-							id: edge.fromId,
-						},
-					},
-				},
-			});
-		}
-	}
+	const edgeData = next.flatMap(({ fromId, toId }) =>
+		toId.map(toIdValue => ({
+			circuitId: circuitId,
+			fromPublicationId: fromId,
+			toPublicationId: toIdValue,
+		}))
+	);
+
+	await prismaContext.edge.createMany({
+		data: edgeData,
+		skipDuplicates: true
+	});
+
+	// for (const edge of next) {
+	// 	if (edge.fromId <= 0 || isNaN(edge.fromId)) {
+	// 		throw new Error('Invalid id found');
+	// 	}
+	//
+	//
+	// 	for (const toId of edge.toId) {
+	// 		await prismaContext.edge.create({
+	// 			data: {
+	// 				circuitId: circuitId,
+	// 				fromPublicationId: edge.fromId,
+	// 				toPublicationId: toId
+	// 			}
+	// 		});
+	// 	}
+	// }
+
+		// await prismaContext.node.update({
+		// 	where: { id: edge.fromId },
+		// 	data: {
+		// 		next: {
+		// 			connect: edge.toId.map((id) => ({ id })),
+		// 		},
+		// 	},
+		// });
+
+		// for (const to of edge.toId) {
+		// 	await prismaContext.node.update({
+		// 		where: { id: to },
+		// 		data: {
+		// 			prerequisites: {
+		// 				connect: {
+		// 					id: edge.fromId,
+		// 				},
+		// 			},
+		// 		},
+		// 	});
+		// }
 }
 
 export async function addNode(
