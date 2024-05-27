@@ -17,11 +17,11 @@ export const load: LayoutServerLoad = async ({ params, fetch , cookies}) => {
 
 	console.log("current user is: " + cookies.get("userId"));
 
-	const likedRes = await fetch(`/api/user/${cookies.get("userId")}/liked/${params.publication}`);
-	if(likedRes.status !== 200) error(likedRes.status, likedRes.statusText);
+	const userRes = await fetch(`/api/user/${cookies.get("userId")}/publicationInfo/${params.publication}`);
+	if(userRes.status !== 200) error(userRes.status, userRes.statusText);
 
-	const liked = await likedRes.json();
-	const loadedPublication = {loadedPublication: await pRes.json(), liked: liked};
+	const userSpecificInfo = await userRes.json();
+	const loadedPublication = {loadedPublication: await pRes.json(), userSpecificInfo: userSpecificInfo};
 
 	return {
 		loadedPublication
@@ -33,7 +33,7 @@ export const load: LayoutServerLoad = async ({ params, fetch , cookies}) => {
 
 export type PublicationViewLoad = {
 	loadedPublication: PublicationView,
-	liked: boolean
+	userSpecificInfo: {liked: boolean, saved: boolean}
 }
 /**
  * The data that is loaded for the publication view layout.

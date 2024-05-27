@@ -3,11 +3,11 @@ import { testingUrl } from '../setup';
 import {
 	createMaterialPublication,
 	createUser,
-	getUserById,
-	prisma,
+	getUserById, likePublication,
+	prisma, savePublication,
 	type userEditData,
 } from '$lib/database';
-import { Difficulty } from '@prisma/client';
+import {Difficulty} from '@prisma/client';
 
 //await resetUserTable();
 
@@ -531,6 +531,61 @@ describe('Users', () => {
 			expect(responseBody.error).toBe('Publication not found');
 		});
 	});
+
+	describe("[GET] user/[id]/publicationInfo/[publicationId]", async () => {
+
+		it("should correctly return saved and liked", async () => {
+			const user = await createUser(
+				'Marti',
+				'Parti',
+				'email@gmail',
+				'picture.picture',
+			);
+			const publication = await createMaterialPublication(user.id, {
+				title: 'cool publication',
+				description: 'This publication has description',
+				difficulty: Difficulty.easy,
+				materialType: 'video',
+				copyright: true,
+				timeEstimate: 4,
+				theoryPractice: 9,
+				learningObjectives: [],
+				prerequisites: [],
+			});
+
+			const response1 = await fetch(`${testingUrl}/user/${user.id}/publicationInfo/${publication.publicationId}`);
+			const info1 = await response1.json();
+
+			expect(info1.saved).toBe(false);
+			expect(info1.liked).toBe(false);
+
+			await likePublication(user.id, publication.publicationId);
+			await savePublication(user.id, publication.publicationId);
+
+			const response2 = await fetch(`${testingUrl}/user/${user.id}/publicationInfo/${publication.publicationId}`);
+			const info2 = await response2.json();
+
+			expect(info2.saved).toBe(true);
+			expect(info2.liked).toBe(true);
+		});
+
+		it("should return 404 when user does not exist", async () => {
+			const response1 = await fetch(`${testingUrl}/user/${7239857}/publicationInfo/${7747474}`);
+			expect(response1.status).toBe(404)
+		});
+
+		it("should return 404 when publication does not exist", async () => {
+			const user = await createUser(
+				'Marti',
+				'Parti',
+				'email@gmail',
+				'picture.picture',
+			);
+
+			const response1 = await fetch(`${testingUrl}/user/${user.id}/publicationInfo/${7747474}`);
+			expect(response1.status).toBe(404)
+		});
+	})
 
 
 });

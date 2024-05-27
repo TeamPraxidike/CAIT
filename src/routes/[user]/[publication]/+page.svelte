@@ -14,7 +14,7 @@
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
-	import type { PublicationViewLoad, PublicationView } from './+layout.server';
+	import type { PublicationView } from './+layout.server';
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { createFileList } from '$lib/util/file';
@@ -28,13 +28,13 @@
 
 	let files: FileList = createFileList(serverData.fileData, serverData.material.files);
 
-	let liked: boolean = data.loadedPublication.liked;
+	let liked: boolean = data.loadedPublication.userSpecificInfo.liked;
 	let likes = serverData.material.publication.likes;
 
 	console.log("liked: " + liked);
 	console.log("likes: " + likes);
 
-	let saved: boolean = true;
+	let saved: boolean = data.loadedPublication.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 	const toggleLike = async () => {
@@ -44,7 +44,12 @@
 		});
 		liked = !liked;
 	}
-	const toggleSave = () => saved = !saved;
+	const toggleSave = async () => {
+		await fetch(`/api/user/${userId}/saved/${serverData.material.publicationId}`, {
+			method: 'POST',
+		});
+		saved = !saved;
+	}
 
 	let tags: string[] = serverData.material.publication.tags.map(tag => tag.content);
 
