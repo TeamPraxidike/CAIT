@@ -37,10 +37,7 @@ import {
 	deleteNode,
 } from './node';
 
-import {
-	savePublication,
-	getSavedPublications
-} from "$lib/database/save";
+import { savePublication, getSavedPublications } from '$lib/database/save';
 
 import {
 	getUserById,
@@ -49,6 +46,10 @@ import {
 	editUser,
 	likePublication,
 	getLikedPublications,
+	likesReplyUpdate,
+	likesCommentUpdate,
+	getLikedReplies,
+	getLikedComments,
 } from '$lib/database/user';
 
 import {
@@ -56,6 +57,7 @@ import {
 	deleteComment,
 	getComment,
 	updateComment,
+	getCommentsByPublicationId,
 } from '$lib/database/comment';
 
 import {
@@ -63,13 +65,14 @@ import {
 	deleteReply,
 	updateReply,
 	createReply,
+	getRepliesByCommentId,
 } from '$lib/database/reply';
 
 import {
 	addPublicationToUsedInCourse,
 	coursesUsingPublication,
-	publicationsAUserUses
-} from "$lib/database/usedInCourse";
+	publicationsAUserUses,
+} from '$lib/database/usedInCourse';
 
 import type { userEditData } from '$lib/database/user';
 import type { editReplyData, createReplyData } from '$lib/database/reply';
@@ -208,7 +211,13 @@ export {
 	getSavedPublications,
 	addPublicationToUsedInCourse,
 	coursesUsingPublication,
-	publicationsAUserUses
+	publicationsAUserUses,
+	getRepliesByCommentId,
+	getCommentsByPublicationId,
+	getLikedReplies,
+	getLikedComments,
+	likesCommentUpdate,
+	likesReplyUpdate,
 };
 
 export type {
