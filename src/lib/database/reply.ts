@@ -22,6 +22,9 @@ export async function createReply(reply: createReplyData) {
 			userId: reply.userId,
 			commentId: reply.commentId,
 		},
+		include: {
+			user: true,
+		},
 	});
 }
 /**

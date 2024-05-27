@@ -45,12 +45,9 @@
 	/*
 		dispatch an event with info needed to create a placeholder comment and save comment in the database
 	 */
-	function addCommentHandle() {
-		if(addComment){
-			dispatch('addedReply', {text: commentText});
-		}else{
-			dispatch('addedReply',{comment: commentId, text:commentText})
-		}
+	function addCommentHandle(content: any) {
+		dispatch('addedReply', {content:content});
+
 		commentText = '';
 		isFocused = false;
 		textarea.style.height = originalHeight;
@@ -72,10 +69,12 @@
 				formData.append('commentId', commentId.toString());
 				formData.append('publicationId', publicationId.toString());
 
-				return async ({ result }) => {
+				return async ({ result}) => {
 					// `result` is an `ActionResult` object
-						if (result.status === 200) {
-								addCommentHandle();
+						if (result.type === 'success') {
+							let content = result.data?.content;
+							//console.log(typeof content)
+							addCommentHandle(content);
 						} else {
 							alert('Failed to submit form')
 							await applyAction(result);

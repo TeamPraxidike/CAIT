@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LayoutServerData, PageServerData } from './$types';
+	import type { LayoutServerData } from './$types';
 	import { DiffBar, getDateDifference, Meta, Tag, FileTable, Comment, authStore, AddInteractionForm, UserProp } from '$lib';
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
@@ -13,6 +13,7 @@
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
 	export let data: LayoutServerData;
+
 	let serverData: PublicationViewLoad = data.loadedPublication;
 
 	let likedComments = data.likedComments;
@@ -87,30 +88,22 @@
 	 */
 	const addComment = async (event: CustomEvent) => {
 		//comment = await (await fetch(`/api/comment/publication/${serverData.material.publicationId}`)).json()
-
-		const maxId = (comments.length > 0 ? Math.max(...comments.map(a => a.id)) : 0) + 1;
+		//console.log(event.detail.content)
+		// const maxId = (comments.length > 0 ? Math.max(...comments.map(a => a.id)) : 0) + 1;
+		const content = event.detail.content
 		const comment = {
-			id: maxId,
-			userId: $authStore.user?.id || 0,
-			publicationId: serverData.material.publicationId,
+			id: content.id,
+			userId: content.userId,
+			publicationId: content.publicationId,
 			likes: 0,
-			content: event.detail.text,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-			replies: emptyListReplies,
-			user: $authStore.user ? $authStore.user : {
-				id: 0,
-				firstName: "John",
-				lastName: "Doe",
-				username: "johndoe",
-				email: "johndoe@example.com",
-				profilePic: "johnDoe",
-				reputation: 0,
-				isAdmin: false,
-			},
+			content: content.content,
+			createdAt: content.createdAt,
+			updatedAt: content.updatedAt,
+			replies: content.replies,
+			user: content.user,
 		}
 		comments = [...comments, comment];
-		commentMap.set(maxId, emptyListReplies);
+		commentMap.set(content.id, emptyListReplies);
 	}
 
 	/*
@@ -119,35 +112,24 @@
 	const addReply = (event: CustomEvent) => {
 		// comment = await (await fetch(`/api/comment/publication/${serverData.material.publicationId}`)).json()
 
-		let replies = getReplies(event.detail.comment)
+		let replies = getReplies(event.detail.content.commentId)
 		replies.push({
-			id: (replies.length>0 ? Math.max(...replies.map(a => a.id)): 0) + 1,
-			userId: $authStore.user?.id || 0,
-			commentId: event.detail.comment,
+			id: event.detail.content.id,
+			userId: event.detail.content.userId,
+			commentId: event.detail.content.commentId,
 			likes: 0,
-			content: event.detail.text,
-			createdAt: new Date(),
-			updatedAt:new Date(),
-			user: $authStore.user ? $authStore.user :{
-				id: 0,
-				firstName: "John",
-				lastName: "Doe",
-				username: "johndoe",
-				email: "johndoe@example.com",
-				profilePic: "johnDoe",
-				reputation: 0,
-				isAdmin: false,
-			} ,
+			content: event.detail.content.content,
+			createdAt: event.detail.content.createdAt,
+			updatedAt: event.detail.content.updatedAt,
+			user: event.detail.content.user,
 		});
 		comments = comments;
-		commentMap.set(event.detail.comment, replies);
+		commentMap.set(event.detail.content.commentId, replies);
 	}
 
 	const getReplies = (commentId: number): (Reply & {user: User})[] => {
 		return commentMap.has(commentId) ? commentMap.get(commentId)||[] : []
 	}
-
-
 
 </script>
 

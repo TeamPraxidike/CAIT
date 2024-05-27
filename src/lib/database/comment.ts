@@ -23,6 +23,14 @@ export async function createComment(comment: createCommentData) {
 			publicationId: comment.publicationId,
 			updatedAt: new Date(),
 		},
+		include: {
+			user: true,
+			replies: {
+				include: {
+					user: true,
+				},
+			},
+		},
 	});
 }
 /**

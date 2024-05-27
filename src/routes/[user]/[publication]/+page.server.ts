@@ -1,4 +1,5 @@
 import type { Actions } from './$types';
+
 export const actions = {
 	comment: async ({ request, fetch }) => {
 		const data = await request.formData();
@@ -32,6 +33,7 @@ export const actions = {
 				body: JSON.stringify(reply),
 			});
 		}
-		return { status: res.status };
+		const content = await res.json();
+		return { status: res.status, content: content };
 	},
 } satisfies Actions;
