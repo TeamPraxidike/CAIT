@@ -312,6 +312,42 @@ paths:
           description: Server Error
 
   /user/{userId}/liked/{publicationId}:
+    get:
+      tags:
+        - User
+      summary: See whether a singular publication is liked or disliked
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication (could be material or circuit)
+
+      responses:
+        '200':
+          description: Successfully returned response
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot get this information
+        '404':
+          description: User/Publication not found
+        '500':
+          description: Server Error
+
     post:
       tags:
         - User
