@@ -128,6 +128,11 @@ export async function getAllMaterials(
 				include: {
 					tags: true,
 					coverPic: true,
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+					},
 				},
 			},
 			files: false,

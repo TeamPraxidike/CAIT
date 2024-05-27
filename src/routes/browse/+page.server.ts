@@ -13,5 +13,8 @@ export async function load({ url, fetch, cookies}) {
 	const savedResponse = await fetch(`/api/user/${userId}/saved?fullPublications=false`);
 	const saved = savedResponse.status === 200 ? await savedResponse.json() : {saved: []};
 
-	return { type, materials, fileData, users, tags, liked, saved};
+	const usedResponse = await fetch(`/api/user/${cookies.get("userId")}/use-in-course`);
+	const used = usedResponse.status === 200 ? await usedResponse.json() : [];
+
+	return { type, materials, fileData, users, tags, liked, saved, used};
 }
