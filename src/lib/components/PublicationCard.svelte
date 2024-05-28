@@ -104,7 +104,7 @@
         let currentWidth = 0;
 
         for (let i = 0; i < tagWidths.length; i++) {
-            let checkLast = i === tagWidths.length - 1 ? tagWidths[i] : tagWidths[i] + 24;
+                let checkLast = i === tagWidths.length - 1 ? tagWidths[i] : tagWidths[i] + 24;
 
 
             if (!(currentWidth + checkLast <= containerWidth)) {
@@ -146,7 +146,6 @@
         dispatch('removed', { id: publication.id });
     };
 
-    $:ring = selected ? 'ring-2 ring-primary-600' : '';
 
 </script>
 

@@ -3,6 +3,7 @@
 	import cytoscape from 'cytoscape';
 	import type { Node as PrismaNode, Publication } from '@prisma/client';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
+	import type { FetchedFileArray } from '$lib/database';
 
 	//	import cytoscapeNodeHtmlLabel from 'cytoscape-node-html-label';
 
@@ -219,6 +220,7 @@
 
 	let addActive: boolean = false;
 	let displayedMaterials: any = [];
+	let fileData : FetchedFileArray = []
 	let selectedIds: Set<number> = new Set();
 
 	/**
@@ -235,7 +237,8 @@
 			})
 			.then(data => {
 				// Handle the response data from the API
-				displayedMaterials = data;
+				displayedMaterials = data.materials;
+				fileData = data.fileData
 				addActive = true;
 			})
 			.catch(error => {
@@ -346,6 +349,7 @@
 {#if addActive}
 	<div>
 		<SearchElems bind:addActive={addActive} bind:selectedIds={selectedIds} bind:materials={displayedMaterials}
+								 bind:fileData={fileData}
 								 on:selFurther={addNode} on:remFurther={removeNode} />
 	</div>
 {/if}

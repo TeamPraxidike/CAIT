@@ -4,8 +4,10 @@
 	import { authStore, Grid, PublicationCard, SearchBar } from '$lib';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import ToggleComponent from '$lib/components/ToggleComponent.svelte';
+	import type { FetchedFileArray } from '$lib/database';
 
 	export let materials : any = [];
+	export let fileData : FetchedFileArray = []
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
@@ -62,7 +64,6 @@
 
 	const newMaterials = (event : CustomEvent) => {
 
-		console.log(event.detail.id)
 		if (event.detail.option === 0)
 			userIds = []
 		if (event.detail.option === 2){
@@ -78,9 +79,6 @@
 			publishers: userIds.join(','),
 			q: searchWord
 		});
-
-		console.log(userIds.join(','))
-		console.log(searchWord)
 		const url = `/api/material?${queryParams.toString()}`;
 
 		// Make a GET request to the API
@@ -92,9 +90,11 @@
 				return response.json();
 			})
 			.then(data => {
-				// Handle the response data from the API
-				materials = data
+				console.log(data)
+			// Handle the response data from the API
+				materials = data.materials
 				console.log(materials)
+				fileData = data.fileData
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -112,7 +112,10 @@
 		<Grid pageGrid="{false}">
 
 			<div class="flex-col col-span-full mt-8">
+				<div class="flex justify-between w-full">
 				<h2 class="text-surface-700 font-bold mb-4">Select Publications to Add to Your Circuit</h2>
+				<button class="rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
+				</div>
 				<div class = "w-full lg:w-7/12 xl:w-1/2 mb-2">
 					<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
 				</div>
@@ -123,10 +126,10 @@
 			</div>
 
 
-			{#each materials as m}
-				<PublicationCard publication="{m.publication}" inCircuits="{true}"
-												 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-												 on:removed={removeCard} />
-			{/each}
+				{#each materials as m, i}
+					<PublicationCard publication="{m.publication}" inCircuits="{true}"
+													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
+													 on:removed={removeCard} imgSrc={'data:image;base64,' + fileData[i].data}/>
+				{/each}
 		</Grid>
 </div>
