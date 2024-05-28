@@ -1,16 +1,16 @@
 import {
-	getCircuitByPublicationId,
-	prisma,
-	handleConnections,
-	type NodeDiffActions,
-	deleteCircuitByPublicationId,
 	addNode,
-	deleteNode,
-	editNode,
-	handleEdges,
-	updateCircuitByPublicationId,
 	type CircuitForm,
+	deleteCircuitByPublicationId,
+	deleteNode,
+	getCircuitByPublicationId,
+	handleConnections,
+	handleEdges,
+	type NodeDiffActions,
+	prisma,
+	updateCircuitByPublicationId,
 } from '$lib/database';
+import {Prisma} from '@prisma/client';
 
 export async function GET({ params }) {
 	// Authentication step
@@ -77,7 +77,6 @@ export async function PUT({ request, params }) {
 
 	try {
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {
-			const body = await request.json();
 
 			await handleConnections(
 				tags,
@@ -89,7 +88,7 @@ export async function PUT({ request, params }) {
 			// add nodes
 			for (const node of nodeInfo.add) {
 				await addNode(
-					node.circuitId,
+					body.circuitId,
 					node.publicationId,
 					node.x,
 					node.y,
@@ -99,43 +98,40 @@ export async function PUT({ request, params }) {
 
 			// delete nodes
 			for (const node of nodeInfo.delete) {
-				await deleteNode(node.nodeId, prismaTransaction);
+				await deleteNode(body.circuitId, node.publicationId, prismaTransaction);
 			}
 
-			// edit existing nodes
-			for (const node of nodeInfo.edit) {
-				await editNode(
-					node.nodeId,
-					node.publicationId,
-					node.x,
-					node.y,
-					prismaTransaction,
-				);
-			}
+			// // edit existing nodes
+			// for (const node of nodeInfo.edit) {
+			// 	await editNode(
+			// 		node.nodeId,
+			// 		node.publicationId,
+			// 		node.x,
+			// 		node.y,
+			// 		prismaTransaction,
+			// 	);
+			// }
 
-			await handleEdges(nodeInfo.next);
+			await handleEdges(body.circuitId, nodeInfo.next, prismaTransaction);
 
-			const circuit = await updateCircuitByPublicationId(
+			return await updateCircuitByPublicationId(
 				publicationId,
 				metaData,
 				prismaTransaction,
 			);
-			if (!circuit) {
-				return new Response(
-					JSON.stringify({ error: 'Circuit Not Found' }),
-					{
-						status: 404,
-					},
-				);
-			}
-
-			return circuit;
 		});
 
 		const id = circuit.id;
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
+		console.error(error);
+		// TODO: documentation on this is atrocious, verify with tests!!!
+		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
+			return new Response(JSON.stringify({ error: 'Circuit not found' }), {
+				status: 404,
+			});
+		}
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
@@ -153,18 +149,26 @@ export async function DELETE({ params }) {
 		);
 	}
 	try {
-		const circuit = await getCircuitByPublicationId(id);
-		if (!circuit) {
-			return new Response(
-				JSON.stringify({ error: 'Circuit Not Found' }),
-				{
-					status: 404,
-				},
-			);
-		}
-		await deleteCircuitByPublicationId(id);
+		const circuit = await prisma.$transaction(async (prismaTransaction) => {
+			const publication =
+				await deleteCircuitByPublicationId(
+					id,
+					prismaTransaction,
+				);
+
+			return publication.circuit;
+		});
+
 		return new Response(JSON.stringify(circuit), { status: 200 });
+
 	} catch (error) {
+		console.error(error);
+		// TODO: documentation on this is atrocious, verify with tests!!!
+		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
+			return new Response(JSON.stringify({ error: 'Circuit not found' }), {
+				status: 404,
+			});
+		}
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});

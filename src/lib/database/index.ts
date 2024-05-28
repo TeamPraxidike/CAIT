@@ -130,6 +130,7 @@ type CircuitForm = {
 	nodeDiff: NodeDiffActions;
 };
 
+
 /**
  * Information about the difference between the files in the current material and the files in the new material.
  * This type holds arrays for files that are added, deleted, and edited in the new material.
@@ -160,10 +161,12 @@ type FetchedFileArray = FetchedFileItem[];
 /**
  * Information about the nodes in the circuit in arrays of operations to add, delete, and edit nodes.
  */
+
 type NodeDiffActions = {
-	add: { circuitId: number; publicationId: number; x: number; y: number }[];
-	delete: { nodeId: number }[];
-	edit: { nodeId: number; publicationId: number; x: number; y: number }[];
+	add: { publicationId: number; x: number; y: number }[];
+	delete: { publicationId: number }[];
+	edit: { publicationId: number; x: number; y: number }[];
+	// from publicationId, to (many) other publicationIds
 	next: { fromId: number; toId: number[] }[];
 };
 

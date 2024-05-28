@@ -33,9 +33,14 @@ export async function getAllCircuits() {
 		},
 	});
 }
-export async function deleteCircuitByPublicationId(publicationId: number) {
-	return prisma.material.delete({
-		where: { publicationId: publicationId },
+export async function deleteCircuitByPublicationId(
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,) {
+	return prismaContext.publication.delete({
+		where: { id: publicationId },
+		include: {
+			circuit: true
+		}
 	});
 }
 
@@ -60,15 +65,13 @@ export async function createCircuitPublication(
 		data: {
 			publication: {
 				create: {
-					data: {
-						publisherId: userId,
-						title: metaData.title,
-						description: metaData.description,
-						difficulty: metaData.difficulty,
-						learningObjectives: metaData.learningObjectives,
-						prerequisites: metaData.prerequisites,
-						type: PublicationType.Circuit,
-					},
+					publisherId: userId,
+					title: metaData.title,
+					description: metaData.description,
+					difficulty: metaData.difficulty,
+					learningObjectives: metaData.learningObjectives,
+					prerequisites: metaData.prerequisites,
+					type: PublicationType.Circuit,
 				},
 			},
 		},

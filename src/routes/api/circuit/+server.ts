@@ -1,8 +1,6 @@
 import {
-	getAllCircuits,
-	getCircuitByPublicationId,
+	getAllCircuits
 } from '$lib/database/circuit';
-import type { RequestHandler } from '@sveltejs/kit';
 import {
 	addNode,
 	type CircuitForm,
@@ -12,7 +10,6 @@ import {
 	type NodeDiffActions,
 	prisma,
 } from '$lib/database';
-import { create } from 'node:domain';
 
 export async function GET() {
 	// Authentication step
@@ -36,6 +33,7 @@ export async function GET() {
 export async function POST({ request }) {
 	// Authentication step
 	// return 401 if user not authenticated
+	// TODO: Add 400 Bad request check
 
 	const body: CircuitForm = await request.json();
 	const tags = body.metaData.tags;
@@ -52,14 +50,6 @@ export async function POST({ request }) {
 					metaData,
 					prismaTransaction,
 				);
-				if (!circuit) {
-					return new Response(
-						JSON.stringify({ error: 'Bad request' }),
-						{
-							status: 400,
-						},
-					);
-				}
 
 				await handleConnections(
 					tags,
@@ -71,7 +61,7 @@ export async function POST({ request }) {
 				// add nodes
 				for (const node of nodeInfo.add) {
 					await addNode(
-						node.circuitId,
+						circuit.id,
 						node.publicationId,
 						node.x,
 						node.y,
@@ -79,7 +69,7 @@ export async function POST({ request }) {
 					);
 				}
 
-				await handleEdges(nodeInfo.next);
+				await handleEdges(circuit.id, nodeInfo.next, prismaTransaction);
 
 				return circuit;
 			},
