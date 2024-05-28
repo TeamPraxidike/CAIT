@@ -1,6 +1,6 @@
 import { prisma } from '$lib/database';
-import {Prisma} from "@prisma/client/extension";
-import {Difficulty, PublicationType} from "@prisma/client";
+import { Prisma } from '@prisma/client/extension';
+import { Difficulty, PublicationType } from '@prisma/client';
 
 /**
  * [GET] Returns a publication of type Circuit with the given id.
@@ -15,8 +15,8 @@ export async function getCircuitByPublicationId(publicationId: number) {
 				include: {
 					publication: true,
 					prerequisites: true,
-					next: true
-				}
+					next: true,
+				},
 			},
 		},
 	});
@@ -33,90 +33,92 @@ export async function getAllCircuits() {
 		},
 	});
 }
-export async function deleteCircuitByPublicationId(publicationId: number) {
-	return prisma.material.delete({
-		where: { publicationId: publicationId },
+export async function deleteCircuitByPublicationId(
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,) {
+	return prismaContext.publication.delete({
+		where: { id: publicationId },
+		include: {
+			circuit: true
+		}
 	});
 }
 
 /**
  * [POST] Returns a created publication of type Circuit
- * @param title
- * @param description
- * @param difficulty
- * @param learningObjectives
- * @param prerequisites
+ * @param userId
+ * @param metaData
  * @param prismaContext
  */
 export async function createCircuitPublication(
-	title: string,
-	description: string,
-	difficulty: Difficulty,
-	learningObjectives: string[],
-	prerequisites: string[],
-	prismaContext: Prisma.TransactionClient = prisma
+	userId: number,
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+	},
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.circuit.create({
 		data: {
 			publication: {
 				create: {
-					data: {
-						title: title,
-						description: description,
-						difficulty: difficulty,
-						learningObjectives: learningObjectives,
-						prerequisites: prerequisites,
-						type: PublicationType.Circuit
-					}
-				}
-			}
+					publisherId: userId,
+					title: metaData.title,
+					description: metaData.description,
+					difficulty: metaData.difficulty,
+					learningObjectives: metaData.learningObjectives,
+					prerequisites: metaData.prerequisites,
+					type: PublicationType.Circuit,
+				},
+			},
 		},
 		include: {
-			publication: true
-		}
+			publication: true,
+		},
 	});
 }
 
 /**
  * [PUT] Returns an updated publication of type Circuit with the given id.
  * @param publicationId
- * @param title
- * @param description
- * @param difficulty
- * @param learningObjectives
- * @param prerequisites
+ * @param metaData
  * @param prismaContext
  */
 export async function updateCircuitByPublicationId(
 	publicationId: number,
-	title: string,
-	description: string,
-	difficulty: Difficulty,
-	learningObjectives: string[],
-	prerequisites: string[],
-	prismaContext: Prisma.TransactionClient = prisma
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+	},
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.circuit.update({
 		where: { publicationId: publicationId },
 		data: {
 			publication: {
 				update: {
-					where:{
+					where: {
 						id: publicationId,
 					},
 					data: {
-						title: title,
-						description: description,
-						difficulty: difficulty,
-						learningObjectives: learningObjectives,
-						prerequisites: prerequisites
-					}
-				}
-			}
+						title: metaData.title,
+						description: metaData.description,
+						difficulty: metaData.difficulty,
+						learningObjectives: metaData.learningObjectives,
+						prerequisites: metaData.prerequisites,
+					},
+				},
+			},
 		},
 		include: {
 			publication: true,
 			nodes: true,
-		}
+		},
 	});
 }

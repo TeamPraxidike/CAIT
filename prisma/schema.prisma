@@ -133,18 +133,37 @@ model Circuit {
 }
 
 model Node {
-  id        Int     @id @default(autoincrement())
-  circuitId Int
-  circuit   Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  circuitId     Int
+  circuit       Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
 
-  extensions String[]
+  extensions    String[]
 
   publicationId Int
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
-  prerequisites Node[] @relation("edge")
-  next          Node[] @relation("edge")
+  posX          Int
+  posY          Int
+
+  prerequisites Edge[] @relation("Prereq")
+  next          Edge[] @relation("Next")
+
+  @@id([circuitId, publicationId])
 }
+
+model Edge {
+  circuitId         Int
+  fromPublicationId     Int
+  //toCircuitId Int
+  toPublicationId Int
+
+  // for this relation, the "from" node needs to have its "next" relation updated
+  from           Node @relation("Next", fields: [circuitId, fromPublicationId], references: [circuitId, publicationId], onDelete: Cascade)
+  // for this relation, the "to" node needs to have its "prereq" relation updated
+  to   Node @relation("Prereq", fields: [circuitId, toPublicationId], references: [circuitId, publicationId], onDelete: Cascade)
+
+  @@id([circuitId, fromPublicationId, toPublicationId])
+}
+
 
 model Tag {
   content     String        @id

@@ -1,14 +1,28 @@
 <script lang="ts">
 
+
     import {authStore, DiffBar, getDateDifference, Tag} from '$lib';
 
     import Icon from '@iconify/svelte';
-    import {fly} from 'svelte/transition';
-    import {onMount} from 'svelte';
+    import { fly } from 'svelte/transition';
+    import { createEventDispatcher, onMount } from 'svelte';
     import type { Publication } from '@prisma/client';
+    import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import { popup } from '@skeletonlabs/skeleton';
+
     export let publication:Publication & {
         tags: { content: string }[]
     };
+
+    let popupName = publication.id.toString().concat(publication.title);
+    const popupClick: PopupSettings = {
+        event: 'click',
+        target: popupName,
+        placement: 'bottom',
+        closeQuery: '#close, #remove'
+    };
+
+
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
     export let saved: boolean = true;
@@ -20,6 +34,11 @@
     export let isChecked = false;
 
     const userId = $authStore.user?.id;
+
+    //used to differentiate if its used in a normal browse or in the circuit browse
+    export let inCircuits: boolean = false;
+    //Used to see if its used in circuit whether it is selected for the circuit
+    export let selected: boolean = false;
 
     let lastUpdated: string = getDateDifference(publication.updatedAt, new Date());
 
@@ -83,7 +102,7 @@
         let currentWidth = 0;
 
         for (let i = 0; i < tagWidths.length; i++) {
-            let checkLast = i === tagWidths.length - 1 ? tagWidths[i] : tagWidths[i] + 24;
+                let checkLast = i === tagWidths.length - 1 ? tagWidths[i] : tagWidths[i] + 24;
 
 
             if (!(currentWidth + checkLast <= containerWidth)) {
@@ -115,7 +134,19 @@
         }
     });
 
+    const dispatch = createEventDispatcher();
+    const select = () => {
+        selected = true;
+        dispatch('selected', { id: publication.id });
+    };
+    const remove = () => {
+        selected = false;
+        dispatch('removed', { id: publication.id });
+    };
+
+
 </script>
+
 
 
 <div class="{className} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
@@ -184,9 +215,27 @@
         <div class="w-full space-y-2">
             <hr class="opacity-50">
             <div class="w-full flex justify-between">
-
                 <div class="w-full flex justify-left space-x-4">
-                    <a href="{publication.publisherId}/{publication.id}" class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+                {#if !inCircuits}
+                    <a href="{publication.publisherId}/{publication.id}"
+                       class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+                {:else if !selected}
+                    <button class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
+                            on:click="{select}">Select
+                    </button>
+                {:else}
+                    <button class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
+                            use:popup={popupClick}>Remove
+                    </button>
+                    <div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
+                        <div class="flex gap-2">
+                            <button id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
+                            <button id="close" class="btn variant-filled bg-surface-600">Go Back</button>
+                        </div>
+                        <div class="arrow bg-surface-100-token" />
+                    </div>
+                {/if}
+
                     {#if markAsUsed}
                         <div class="w-full flex justify-center space-x-2">
                             <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>

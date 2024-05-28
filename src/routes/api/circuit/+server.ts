@@ -1,14 +1,13 @@
 import {
-	getAllCircuits,
-	getCircuitByPublicationId,
+	getAllCircuits
 } from '$lib/database/circuit';
-import type { RequestHandler } from '@sveltejs/kit';
 import {
 	addNode,
+	type CircuitForm,
 	createCircuitPublication,
 	handleConnections,
 	handleEdges,
-	type NodeInfo,
+	type NodeDiffActions,
 	prisma,
 } from '$lib/database';
 
@@ -34,52 +33,51 @@ export async function GET() {
 export async function POST({ request }) {
 	// Authentication step
 	// return 401 if user not authenticated
+	// TODO: Add 400 Bad request check
+
+	const body: CircuitForm = await request.json();
+	const tags = body.metaData.tags;
+	const maintainers = body.metaData.maintainers;
+	const metaData = body.metaData;
+	const userId = body.userId;
+	const nodeInfo: NodeDiffActions = body.nodeDiff;
+
 	try {
 		const createdCircuit = await prisma.$transaction(
 			async (prismaTransaction) => {
-				const body = await request.json();
-
 				const circuit = await createCircuitPublication(
-					body.title,
-					body.description,
-					body.difficulty,
-					body.learningObjectives,
-					body.prerequisites,
+					userId,
+					metaData,
 					prismaTransaction,
 				);
-				if (!circuit) {
-					return new Response(
-						JSON.stringify({ error: 'Bad request' }),
-						{
-							status: 400,
-						},
-					);
-				}
 
-				// await handleConnections(request, circuit.publicationId, prismaTransaction);
-
-				const nodeInfo: NodeInfo = body.NodeInfo;
+				await handleConnections(
+					tags,
+					maintainers,
+					circuit.publicationId,
+					prismaTransaction,
+				);
 
 				// add nodes
 				for (const node of nodeInfo.add) {
 					await addNode(
-						node.circuitId,
+						circuit.id,
 						node.publicationId,
+						node.x,
+						node.y,
 						prismaTransaction,
 					);
 				}
 
-				await handleEdges(nodeInfo.next);
+				await handleEdges(circuit.id, nodeInfo.next, prismaTransaction);
 
 				return circuit;
 			},
 		);
 
-		const actualCircuit = getCircuitByPublicationId(
-			createdCircuit.publicationId,
-		);
+		const id = createdCircuit.id;
 
-		return new Response(JSON.stringify({ actualCircuit }), { status: 200 });
+		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
