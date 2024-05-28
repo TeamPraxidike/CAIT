@@ -311,11 +311,11 @@ paths:
         '500':
           description: Server Error
 
-  /user/{userId}/liked/{publicationId}:
+  /user/{userId}/publicationInfo/{publicationId}:
     get:
       tags:
         - User
-      summary: See whether a singular publication is liked or disliked
+      summary: Get all user specific information that a publication contains (whether it is liked or not, saved)
       parameters:
         - in: path
           name: userId
@@ -338,7 +338,15 @@ paths:
           content:
             application/json:
               schema:
-                type: boolean
+                type: object
+                properties:
+                  saved:
+                    type: boolean
+                  liked:
+                    type: boolean
+                required:
+                  - saved
+                  - liked
         '400':
           description: Bad request
         '401':
@@ -348,6 +356,7 @@ paths:
         '500':
           description: Server Error
 
+  /user/{userId}/liked/{publicationId}:
     post:
       tags:
         - User
