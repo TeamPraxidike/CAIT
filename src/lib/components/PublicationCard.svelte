@@ -31,15 +31,13 @@
         likes = liked ? likes - 1 : likes + 1;
         await fetch(`/api/user/${userId}/liked/${publication.id}`, {
             method: 'POST',
-        });
-        liked = !liked;
+        }).then(() => liked = !liked);
     }
 
     const toggleSave = async () => {
         await fetch(`/api/user/${userId}/saved/${publication.id}`, {
             method: 'POST',
-        });
-        saved = !saved;
+        }).then(() => saved = !saved);
     }
 
     const toggleUsedInCourse = async () => {

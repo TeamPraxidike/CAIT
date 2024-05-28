@@ -15,8 +15,6 @@ export const load: LayoutServerLoad = async ({ params, fetch , cookies}) => {
 	const pRes = await fetch(`/api/material/${params.publication}`);
 	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
 
-	console.log("current user is: " + cookies.get("userId"));
-
 	const userRes = await fetch(`/api/user/${cookies.get("userId")}/publicationInfo/${params.publication}`);
 	if(userRes.status !== 200) error(userRes.status, userRes.statusText);
 

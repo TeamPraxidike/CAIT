@@ -35,9 +35,6 @@
 	let liked: boolean = data.loadedPublication.userSpecificInfo.liked;
 	let likes = serverData.material.publication.likes;
 
-	console.log("liked: " + liked);
-	console.log("likes: " + likes);
-
 	let saved: boolean = data.loadedPublication.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
@@ -45,14 +42,12 @@
 		likes = liked ? likes - 1 : likes + 1;
 		await fetch(`/api/user/${userId}/liked/${serverData.material.publicationId}`, {
 			method: 'POST',
-		});
-		liked = !liked;
+		}).then(() => liked = !liked);
 	}
 	const toggleSave = async () => {
 		await fetch(`/api/user/${userId}/saved/${serverData.material.publicationId}`, {
 			method: 'POST',
-		});
-		saved = !saved;
+		}).then(() => saved = !saved);
 	}
 
 	let tags: string[] = serverData.material.publication.tags.map(tag => tag.content);
