@@ -12,6 +12,7 @@
     let materials:Material & {
         publication: Publication & {
             tags: Tag[];
+            usedInCourse: string[]
         }
     }[] = data.materials;
     let fileData:FetchedFileArray = data.fileData;
