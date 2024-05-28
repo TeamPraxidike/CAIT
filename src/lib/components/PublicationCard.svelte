@@ -1,7 +1,7 @@
 <script lang="ts">
 
 
-    import {authStore, DiffBar, getDateDifference, Tag} from '$lib';
+    import {authStore, DiffBar, getDateDifference, Tag, UsedInCourse} from '$lib';
 
     import Icon from '@iconify/svelte';
     import { fly } from 'svelte/transition';
@@ -21,7 +21,17 @@
         placement: 'bottom',
         closeQuery: '#close, #remove'
     };
+    import {
+        initializeStores,
+        getModalStore,
+        Modal,
+        type ModalSettings,
+        type ModalComponent
+    } from '@skeletonlabs/skeleton';
 
+    initializeStores();
+
+    const modalStore = getModalStore();
 
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
@@ -144,9 +154,22 @@
         dispatch('removed', { id: publication.id });
     };
 
+    const modalRegistry: Record<string, ModalComponent> = {
+        // Set a unique modal ID, then pass the component reference
+        useInCourseComponent: {
+            ref: UsedInCourse,
+            props: {
+                courses: ['bar']
+            }
+        },
+    };
+    const modal: ModalSettings = {
+        type: 'component',
+        component: 'useInCourseComponent',
+        meta: {courses: ["aaa", "aaaaaa"]}
+    };
 
 </script>
-
 
 
 <div class="{className} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
@@ -237,10 +260,14 @@
                 {/if}
 
                     {#if markAsUsed}
-                        <div class="w-full flex justify-center space-x-2">
-                            <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>
+<!--                        <div class="w-full flex justify-center space-x-2">-->
+<!--                            <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>-->
+<!--                            <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>-->
+<!--                        </div>-->
+
+                        <button on:click={() => modalStore.trigger(modal)}>
                             <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
-                        </div>
+                        </button>
                     {/if}
                 </div>
 
@@ -268,3 +295,5 @@
         </div>
     </div>
 </div>
+
+<Modal components={modalRegistry}/>

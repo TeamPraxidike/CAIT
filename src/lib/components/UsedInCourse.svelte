@@ -38,7 +38,16 @@
 
 </script>
 
+
 <div class="flex items-center flex-col rounded-lg p-4 space-y-3 shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none w-80">
+    {#if courses.length === 0}
+        <h4>Add a course you are using this in</h4>
+    {:else if courses.length === 1}
+        <h4>You are using this in 1 course</h4>
+    {:else}
+        <h4>You are using this in {courses.length} courses</h4>
+    {/if}
+
     {#each courses as course, i}
         {#if editing === i}
             <input type="text" on:keydown={submit} class="rounded-lg bg-surface-100 w-full" bind:value={inputValue}>
