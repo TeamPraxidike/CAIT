@@ -9,12 +9,12 @@
     //assuming that you create the comment object prior to creating the components when adding a new comment, having all info available in it
     export let interaction: Comment | Reply;
     export let isReply: boolean;
-    export let liked = false;
+    export let liked:boolean;
 
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = ""
-    export let browsingUser = $authStore.user?.id || 0
-    export let popupName: string;
+    let browsingUser = $authStore.user?.id || 0
+    let popupName = isReply ? `reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}` : `comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}`;
     let user = interaction.userId
     let text = interaction.content
     let likes = interaction.likes
@@ -33,14 +33,7 @@
     $:created = getDateDifference(interaction.createdAt, new Date())
 
     const dispatch = createEventDispatcher()
-    const handleLike = () => {
-        liked = !liked
-        likes = liked ? likes + 1 : likes - 1
-        dispatch("LikeAction", {
-            message: liked ? "User added like" : "User removed like",
-            value: {action: likes, userId: user}
-        })
-    }
+
     const startEditing = () => {
         editing = true;
         newText = text;
@@ -57,7 +50,6 @@
     const copyToClipboard = () => {
         navigator.clipboard.writeText(text)
             .then(() => {
-                console.log('Text copied to clipboard:', text);
                 toastStore.trigger({
                     message: 'Copied to clipboard',
                     background: 'bg-surface-200'
@@ -75,6 +67,7 @@
             type: 'confirm',
             title: 'Delete Comment',
             body: 'Are you sure you want to delete this comment?',
+            buttonTextSubmit: 'Delete',
             response: (r: boolean) => {
                 if (r) confirmDelete();
             }
@@ -89,8 +82,9 @@
                 const res = await fetch(`/api/reply/${interaction.id}`, {
                     method: 'DELETE'
                 });
-                console.log(res.status);
-                location.reload();
+                if (res.ok){
+                    location.reload();
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -100,8 +94,9 @@
                 const res = await fetch(`/api/comment/${interaction.id}`, {
                     method: 'DELETE'
                 });
-                console.log(res.status);
-                location.reload();
+                if (res.ok){
+                    location.reload();
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -114,7 +109,7 @@
         editing = false;
         if (isReply){
             try {
-                await fetch(`/api/reply/${interaction.id}`, {
+                 await fetch(`/api/reply/${interaction.id}`, {
                     method: 'PUT',
                     body: JSON.stringify({content:text})
                 })
@@ -144,13 +139,41 @@
         isDisplayedAdded = true;
     }
     const handleReplyCancel = ()=>{
-        console.log("cancel comment")
         isDisplayedAdded = false;
+    }
+    const sendReplyEvent = (event: CustomEvent) =>{
+        dispatch("ReplyAction", event.detail);
+        isDisplayedAdded = false;
+
+    }
+
+    /*
+    dispatch event to say whether user liked or disliked a comment or reply and save in database
+     */
+    const handleLike = async () => {
+        liked = !liked
+        likes = liked ? likes + 1 : likes - 1
+        let res: Response;
+        if (isReply){
+            res = await fetch(`/api/user/${browsingUser}/liked/reply/${interaction.id}`,{
+                method: 'POST',
+            })
+            if (res.ok){
+                dispatch('likeUpdate', {like: liked, reply: isReply, id: interaction.id})
+            }
+        }else{
+            res = await fetch(`/api/user/${browsingUser}/liked/comment/${interaction.id}`, {
+                method: 'POST',
+            })
+            if (res.ok){
+                dispatch('likeUpdate', {like:liked, reply: isReply, id: interaction.id})
+            }
+        }
+
     }
 
     let display = 'hidden';
     $:display = isDisplayedAdded ? 'flex':'hidden'
-    $:console.log(display);
 
     onMount(() => {
         created = getDateDifference(interaction.createdAt, new Date())
@@ -185,7 +208,7 @@
 
             <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-200 dark:hover:bg-surface-800"
                     use:popup={popupMenu}>
-                <Icon icon="ph:dots-three-vertical" height="20" style="color: #19191F"/>
+                <Icon icon="ph:dots-three-vertical" height="20" style="color: #646478"/>
             </button>
         </div>
 
@@ -202,13 +225,14 @@
                 </div>
             {:else }
                 <p
-                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full">{text}</p>
+                  id="commentText"
+                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full break-words">{text}</p>
                 <!--{#if truncated}-->
-                <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
-                    {isExpanded ? 'Show Less' : 'Show More'}
-                </button>
+                    <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
+                        {isExpanded ? 'Show Less' : 'Show More'}
+                    </button>
+                <!--{/if}-->
             {/if}
-            <!--{/if}-->
         </div>
 
         <div class="flex items-center gap-5">
@@ -233,7 +257,7 @@
     </div>
 </div>
 
-<AddInteractionForm on:addedReply={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
+<AddInteractionForm on:addedReply={sendReplyEvent}  on:cancelEventForum={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
 
 <div data-popup="{popupName}">
     <div class="flex flex-col w-12 gap-2 bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">

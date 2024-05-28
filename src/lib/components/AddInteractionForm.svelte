@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { authStore } from '$lib';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { enhance } from '$app/forms';
+	import { enhance, applyAction } from '$app/forms';
 
 	let isFocused = false;
 	let originalHeight: string;
@@ -10,6 +10,7 @@
 	export let addComment: boolean;
 	export let commentId = 0;
 	export let display = 'flex';
+	export let publicationId = 0;
 
 	let userId = $authStore.user?.id || 0;
 
@@ -35,27 +36,27 @@
 		commentText = '';
 		isFocused = false;
 		textarea.style.height = originalHeight;
-		console.log("cancel form")
-		dispatch('addedReply');
+		dispatch('cancelEventForum');
 
 	}
 
 	const dispatch = createEventDispatcher();
 
 	/*
-	adding this method to test for demo mainly, most likely would be a form with post that happens when you click the comment button
+		dispatch an event with info needed to create a placeholder comment and save comment in the database
 	 */
-	function addCommentHandle() {
+	function addCommentHandle(content: any) {
+		dispatch('addedReply', {content:content});
+
+		commentText = '';
 		isFocused = false;
 		textarea.style.height = originalHeight;
-		dispatch('addedReply');
-
 	}
-
 
 	onMount(() => {
 		originalHeight = getComputedStyle(textarea).height;
-	});
+	})
+	;
 
 </script>
 
@@ -66,15 +67,28 @@
         formData.append('userId',userId.toString());
 				formData.append('isComment', addComment.toString());
 				formData.append('commentId', commentId.toString());
-				 setTimeout(() => {
-                     window.location.reload();
-                 }, 10);
+				formData.append('publicationId', publicationId.toString());
+
+				return async ({ result}) => {
+					// `result` is an `ActionResult` object
+						if (result.type === 'success') {
+							let content = result.data?.content;
+							//console.log(typeof content)
+							addCommentHandle(content);
+						} else {
+							alert('Failed to submit form')
+							await applyAction(result);
+						}
+				};
+				// setTimeout(() => {
+        //              window.location.reload();
+        //          }, 50);
       }}>
 		<div class="flex-grow pt-2 items-center">
         <textarea
 					name="comment"
 					bind:this={textarea}
-					class="w-full border-0 border-b border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm"
+					class="w-full border-0 border-b border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm dark:text-surface-800"
 					placeholder="{addComment ? 'Start a discussion...' : 'Write a response...'}  "
 					rows="1"
 					bind:value={commentText}
@@ -88,7 +102,7 @@
 				</button>
 				<button
 					class="variant-soft-primary px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-primary mr-2"
-					type="submit" formaction="?/comment" on:click={addCommentHandle}>Comment
+					type="submit" formaction="?/comment"> Comment
 				</button>
 			</div>
 		</div>

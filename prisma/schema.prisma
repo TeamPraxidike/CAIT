@@ -47,6 +47,9 @@ model User {
   liked            Publication[]             @relation("liked")
   usedPublications PublicationUsedInCourse[]
 
+  likedComments    Comment[] @relation("likedComments")
+  likedReplies     Reply[] @relation("likedReplies")
+
   maintaining Publication[] @relation("maintainers")
   comments    Comment[]
   replies     Reply[]
@@ -158,9 +161,10 @@ model Comment {
 
   replies   Reply[]
   likes     Int      @default(0)
+  likedBy   User[] @relation("likedComments")
   content   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 }
 
 model Reply {
@@ -173,7 +177,9 @@ model Reply {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   likes     Int      @default(0)
+  likedBy   User[] @relation("likedReplies")
+
   content   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 }

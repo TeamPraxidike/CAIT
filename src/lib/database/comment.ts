@@ -23,6 +23,14 @@ export async function createComment(comment: createCommentData) {
 			publicationId: comment.publicationId,
 			updatedAt: new Date(),
 		},
+		include: {
+			user: true,
+			replies: {
+				include: {
+					user: true,
+				},
+			},
+		},
 	});
 }
 /**
@@ -36,9 +44,32 @@ export async function getComment(commentId: number) {
 		},
 		include: {
 			replies: true,
+			likedBy: true,
 		},
 	});
 }
+
+/**
+ * [GET] gets the comment with the given publication id
+ * @param publicationId
+ */
+export async function getCommentsByPublicationId(publicationId: number) {
+	return prisma.comment.findMany({
+		where: {
+			publicationId: publicationId,
+		},
+		include: {
+			replies: {
+				include: {
+					user: true,
+				},
+			},
+			user: true,
+			likedBy: true,
+		},
+	});
+}
+
 /**
  * [DELETE] deletes the comment with the given id
  * @param commentId
@@ -62,6 +93,7 @@ export async function updateComment(comment: editCommentData) {
 		},
 		data: {
 			content: comment.content,
+			updatedAt: new Date(),
 		},
 	});
 }

@@ -23,10 +23,23 @@ export const load: LayoutServerLoad = async ({ params, fetch , cookies}) => {
 	const userSpecificInfo = await userRes.json();
 	const loadedPublication = {loadedPublication: await pRes.json(), userSpecificInfo: userSpecificInfo};
 
+	//const userId = cookies.get('browsingUser');
+	//const cRes = await fetch(`/api/user/${userId}/liked/comment`);
+	const cRes = await fetch(`/api/user/1/liked/comment`);
+	//const rRes = await fetch(`/api/user/${userId}/liked/comment`);
+	const rRes = await fetch(`/api/user/1/liked/reply`);
+
+	const likedComments = cRes.status === 200 ? await cRes.json() : [];
+	const likedReplies = rRes.status === 200 ? await rRes.json() : [];
+
 	return {
-		loadedPublication
+		loadedPublication,
+		likedComments,
+		likedReplies,
 	} satisfies {
 		loadedPublication: PublicationViewLoad;
+		likedComments: number[];
+		likedReplies: number[];
 	};
 };
 
