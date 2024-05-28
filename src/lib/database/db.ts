@@ -126,30 +126,3 @@ export async function getPublicationById(id: number) {
 		},
 	});
 }
-
-// TODO I dont know if this replaces the whole array of nodes or just adds the new one
-/**
- * Adds a node to the circuit with the given publicationId.
- * Throws an error if the publication is not found or if it is not a circuit.
- * @param publicationId
- * @param nodeId
- */
-export async function addNodeToCircuit(publicationId: number, nodeId: number) {
-	const publication = await getPublicationById(publicationId);
-	if (publication === null) throw new Error('Publication not found');
-	if (publication.type !== PublicationType.Circuit)
-		throw new Error('Publication is not a circuit');
-
-	return prisma.circuit.update({
-		where: {
-			publicationId: publication.id,
-		},
-		data: {
-			nodes: {
-				connect: {
-					id: nodeId,
-				},
-			},
-		},
-	});
-}

@@ -18,10 +18,10 @@
 	export let publishing: boolean;
 
 
-	export let nodes: (PrismaNode & {
-		publication: Publication
-		next: PrismaNode[]
-	})[]; //GET all nodes in the circuit
+	// export let nodes: (PrismaNode & {
+	// 	publication: Publication
+	// 	next: PrismaNode[]
+	// })[]; //GET all nodes in the circuit
 	 let edges : Edge[];
 	let cy: any;
 	let selected: boolean = false;
@@ -29,20 +29,20 @@
 	let prereqActive: boolean = false;
 	let nodeClicked: boolean = false;
 
-	let mappedNodes = nodes.map(node => ({
-		data: { id: node.id.toString(), title: node.publication.title },
-		position: { x: node.posX, y: node.posY }
-	}));
-	nodes.forEach(node => {
-		let curNext = node.next.map(nextNode => ({
-			data: {
-				id: node.id.toString().concat(nextNode.id.toString()),
-				source: node.id.toString(),
-				target: nextNode.id.toString()
-			}
-		}));
-		edges.push(...curNext);
-	});
+	// let mappedNodes = nodes.map(node => ({
+	// 	data: { id: node.id.toString(), title: node.publication.title },
+	// 	position: { x: node.posX, y: node.posY }
+	// }));
+	// nodes.forEach(node => {
+	// 	let curNext = node.next.map(nextNode => ({
+	// 		data: {
+	// 			id: node.id.toString().concat(nextNode.id.toString()),
+	// 			source: node.id.toString(),
+	// 			target: nextNode.id.toString()
+	// 		}
+	// 	}));
+	// 	edges.push(...curNext);
+	// });
 
 
 	onMount(() => {
@@ -51,7 +51,7 @@
 		cy = cytoscape({
 			container: document.getElementById('cy'),
 			elements: [
-				...mappedNodes
+				//  ...mappedNodes
 				//	...edges
 			],
 			style: [

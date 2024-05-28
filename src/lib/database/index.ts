@@ -2,7 +2,6 @@ import {
 	getPublicationById,
 	//createCircuitPublication,
 	//createMaterialPublication,
-	addNodeToCircuit,
 } from './db';
 
 import {
@@ -130,7 +129,6 @@ type CircuitForm = {
 	nodeDiff: NodeDiffActions;
 };
 
-
 /**
  * Information about the difference between the files in the current material and the files in the new material.
  * This type holds arrays for files that are added, deleted, and edited in the new material.
@@ -194,7 +192,6 @@ export {
 	getPublicationById,
 	createCircuitPublication,
 	createMaterialPublication,
-	addNodeToCircuit,
 	updateMaterialByPublicationId,
 	getMaterialByPublicationId,
 	getAllMaterials,
