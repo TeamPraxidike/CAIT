@@ -69,7 +69,7 @@ export async function POST({ request }) {
 					);
 				}
 
-				await handleEdges(circuit.id, nodeInfo.next);
+				await handleEdges(circuit.id, nodeInfo.next, prismaTransaction);
 
 				return circuit;
 			},

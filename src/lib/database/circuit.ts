@@ -65,15 +65,13 @@ export async function createCircuitPublication(
 		data: {
 			publication: {
 				create: {
-					data: {
-						publisherId: userId,
-						title: metaData.title,
-						description: metaData.description,
-						difficulty: metaData.difficulty,
-						learningObjectives: metaData.learningObjectives,
-						prerequisites: metaData.prerequisites,
-						type: PublicationType.Circuit,
-					},
+					publisherId: userId,
+					title: metaData.title,
+					description: metaData.description,
+					difficulty: metaData.difficulty,
+					learningObjectives: metaData.learningObjectives,
+					prerequisites: metaData.prerequisites,
+					type: PublicationType.Circuit,
 				},
 			},
 		},

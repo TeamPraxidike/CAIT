@@ -201,8 +201,6 @@ export {
 	type FetchedFileItem,
 	type FetchedFileArray,
 	type NodeDiffActions,
-
-	type NodeInfo,
 	updateFiles,
 	coverPicFetcher,
 	updateCoverPic,
