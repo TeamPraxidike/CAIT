@@ -7,6 +7,8 @@ export async function load({ url, fetch, cookies}) {
 	const users = await (await fetch(`/api/user`)).json();
 	const tags = await (await fetch(`/api/tags`)).json();
 
+	console.log(materials);
+
 	const likedResponse = await fetch(`/api/user/${userId}/liked`);
 	const liked = likedResponse.status === 200 ? await likedResponse.json() : [];
 
@@ -15,3 +17,21 @@ export async function load({ url, fetch, cookies}) {
 
 	return { type, materials, fileData, users, tags, liked, saved};
 }
+
+export type material = {
+	publication:
+		{
+			tags:
+				{
+					content: string
+				}[],
+			coverPic: {
+				path: string,
+				title: string,
+				type: string,
+				coverId: number | null,
+				materialId: number | null
+			} | null,
+			usedInCourse: string[]
+		}
+	}

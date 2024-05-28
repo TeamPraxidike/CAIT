@@ -27,3 +27,21 @@ export const load: PageServerLoad = async ({ params, fetch , cookies}) => {
 
 	return { materials, fileData, saved, savedFileData, liked, used }
 };
+
+export type PublicationInfo = {
+	publication: {
+		tags: {
+			content: string
+		}[]
+	},
+	coverPic: {
+		path: string,
+		title: string,
+		type: string,
+		coverId: number | null,
+		materialId: number | null
+	} | null,
+	usedInCourse: {
+		course: string
+	}[]
+}

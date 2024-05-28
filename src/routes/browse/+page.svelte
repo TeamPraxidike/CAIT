@@ -12,6 +12,7 @@
     let materials:Material & {
         publication: Publication & {
             tags: Tag[];
+            usedInCourse: string[]
         }
     }[] = data.materials;
     let fileData:FetchedFileArray = data.fileData;
@@ -307,7 +308,7 @@
 
 {#if pageType === "materials"}
     {#each materials as material, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} used={material.publication.usedInCourse.length}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person}

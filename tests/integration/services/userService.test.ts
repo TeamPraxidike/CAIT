@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach} from 'vitest';
 
 import {createMaterialPublication, createUser, getPublicationById, getUserById} from "$lib/database";
 import {randomUUID} from "node:crypto";
-import {editUser, getLikedPublications, likePublication} from "$lib/database/user";
+import {editUser, getLikedPublications, isPublicationLiked, likePublication} from "$lib/database/user";
 import {resetUserTable} from "../setup";
 import {Difficulty, type Material, type User} from "@prisma/client";
 
@@ -104,6 +104,22 @@ describe("Liking publications", () => {
        const liked = await getLikedPublications(user.id);
        if(liked === null) throw new Error("Could not get liked publications list");
        expect(liked.liked.length).toBe(1);
+    });
+
+    it("should correctly a single publication as liked", async () => {
+        const liked = await isPublicationLiked(user.id, publication.publicationId);
+        if(liked === null){
+            throw Error("liked was null");
+        }
+        expect(liked).toBe(true);
+
+        await likePublication(user.id, publication.publicationId);
+
+        const liked2 = await isPublicationLiked(user.id, publication.publicationId);
+        if(liked2 === null){
+            throw Error("liked was null");
+        }
+        expect(liked2).toBe(false);
     });
 });
 

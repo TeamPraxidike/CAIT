@@ -7,12 +7,12 @@
 		Autocomplete, type AutocompleteOption, FileButton, FileDropzone, getToastStore, InputChip
 	} from '@skeletonlabs/skeleton';
 	import { appendFile, base64ToFile, concatFileList, createFileList } from '$lib/util/file';
-	import type { PublicationViewLoad } from '../+layout.server';
+	import type { PublicationView } from '../+layout.server';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 
 	export let data: LayoutServerData & PageServerData;
-	let serverData: PublicationViewLoad = data.loadedPublication;
+	let serverData: PublicationView = data.loadedPublication.loadedPublication;
 	let publication: Publication = serverData.material.publication;
 
 	let tags: string[] = serverData.material.publication.tags.map(tag => tag.content);

@@ -1,5 +1,4 @@
 import { prisma } from '$lib/database';
-import { comment } from 'postcss';
 
 // @ts-ignore
 /**
@@ -227,6 +226,24 @@ export async function getLikedPublications(userId: number) {
 			liked: true,
 		}
 	});
+}
+
+export async function isPublicationLiked(userId: number, publicationId: number) {
+	const liked = await prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			liked: {
+				where: {
+					id: publicationId
+				}
+			}
+		}
+	});
+
+	if(liked === null) return false;
+	return liked.liked.length > 0;
 }
 
 /**
