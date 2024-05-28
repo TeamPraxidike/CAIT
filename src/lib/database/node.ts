@@ -138,13 +138,17 @@ export async function editNode(
 }
 
 export async function deleteNode(
-	nodeId: number,
+	circuitId: number,
+	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
 		return prismaContext.node.delete({
 			where: {
-				id: nodeId,
+				circuitId_publicationId: {
+					circuitId: circuitId,
+					publicationId: publicationId
+				}
 			},
 		});
 	} catch (error) {

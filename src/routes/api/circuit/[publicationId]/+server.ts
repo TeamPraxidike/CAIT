@@ -1,9 +1,8 @@
 import {
 	addNode,
-	type CircuitEditForm,
+	type CircuitForm,
 	deleteCircuitByPublicationId,
 	deleteNode,
-	editNode,
 	getCircuitByPublicationId,
 	handleConnections,
 	handleEdges,
@@ -55,10 +54,10 @@ export async function PUT({ request, params }) {
 	// Authentication step
 	// return 401 if user not authenticated
 
-	const body: CircuitEditForm & {
+	const body: CircuitForm & {
 		circuitId: number;
 	} = await request.json();
-	const circuit: CircuitEditForm = body;
+	const circuit: CircuitForm = body;
 	const metaData = circuit.metaData;
 	// const userId = circuit.userId;
 	const nodeInfo: NodeDiffActions = circuit.nodeDiff;
@@ -78,7 +77,6 @@ export async function PUT({ request, params }) {
 
 	try {
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {
-			const body = await request.json();
 
 			await handleConnections(
 				tags,
@@ -100,7 +98,7 @@ export async function PUT({ request, params }) {
 
 			// delete nodes
 			for (const node of nodeInfo.delete) {
-				await deleteNode(node.nodeId, prismaTransaction);
+				await deleteNode(body.circuitId, node.publicationId, prismaTransaction);
 			}
 
 			// // edit existing nodes
@@ -114,7 +112,7 @@ export async function PUT({ request, params }) {
 			// 	);
 			// }
 
-			await handleEdges(body.circuitId, nodeInfo.next);
+			await handleEdges(body.circuitId, nodeInfo.next, prismaTransaction);
 
 			return await updateCircuitByPublicationId(
 				publicationId,

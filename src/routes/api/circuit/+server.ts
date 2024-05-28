@@ -3,11 +3,11 @@ import {
 } from '$lib/database/circuit';
 import {
 	addNode,
-	type CircuitPostForm,
+	type CircuitForm,
 	createCircuitPublication,
 	handleConnections,
 	handleEdges,
-	type NodeDiffActions, type NodePostActions,
+	type NodeDiffActions,
 	prisma,
 } from '$lib/database';
 
@@ -35,12 +35,12 @@ export async function POST({ request }) {
 	// return 401 if user not authenticated
 	// TODO: Add 400 Bad request check
 
-	const body: CircuitPostForm = await request.json();
+	const body: CircuitForm = await request.json();
 	const tags = body.metaData.tags;
 	const maintainers = body.metaData.maintainers;
 	const metaData = body.metaData;
 	const userId = body.userId;
-	const nodeInfo: NodePostActions = body.nodeDiff;
+	const nodeInfo: NodeDiffActions = body.nodeDiff;
 
 	try {
 		const createdCircuit = await prisma.$transaction(

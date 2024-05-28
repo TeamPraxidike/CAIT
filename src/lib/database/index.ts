@@ -116,7 +116,7 @@ type MaterialForm = {
 	fileDiff: FileDiffActions;
 };
 
-type CircuitEditForm = {
+type CircuitForm = {
 	userId: number;
 	metaData: {
 		title: string;
@@ -130,19 +130,6 @@ type CircuitEditForm = {
 	nodeDiff: NodeDiffActions;
 };
 
-type CircuitPostForm = {
-	userId: number;
-	metaData: {
-		title: string;
-		description: string;
-		difficulty: Difficulty;
-		learningObjectives: string[];
-		prerequisites: string[];
-		tags: string[];
-		maintainers: number[];
-	};
-	nodeDiff: NodePostActions;
-};
 
 /**
  * Information about the difference between the files in the current material and the files in the new material.
@@ -174,16 +161,11 @@ type FetchedFileArray = FetchedFileItem[];
 /**
  * Information about the nodes in the circuit in arrays of operations to add, delete, and edit nodes.
  */
-type NodeDiffActions = {
-	add: { circuitId: number; publicationId: number; x: number; y: number }[];
-	delete: { nodeId: number }[];
-	edit: { nodeId: number; publicationId: number; x: number; y: number }[];
-	// from publicationId, to (many) other publicationIds
-	next: { fromId: number; toId: number[] }[];
-};
 
-type NodePostActions = {
+type NodeDiffActions = {
 	add: { publicationId: number; x: number; y: number }[];
+	delete: { publicationId: number }[];
+	edit: { publicationId: number; x: number; y: number }[];
 	// from publicationId, to (many) other publicationIds
 	next: { fromId: number; toId: number[] }[];
 };
@@ -194,9 +176,7 @@ export const fileSystem = new LocalFileSystem(basePath);
 export {
 	prisma,
 	type MaterialForm,
-	type CircuitEditForm,
-	type CircuitPostForm,
-	type NodePostActions,
+	type CircuitForm,
 	type FileDiffActions,
 	type FetchedFileItem,
 	type FetchedFileArray,
