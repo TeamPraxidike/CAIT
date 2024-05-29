@@ -1,20 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
-	import type { Node as PrismaNode, Publication } from '@prisma/client';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
-	import type { FetchedFileArray } from '$lib/database';
+	import type { FetchedFileArray, NodeDiffActions } from '$lib/database';
+	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 
+	const modalStore = getModalStore();
 	//	import cytoscapeNodeHtmlLabel from 'cytoscape-node-html-label';
 
 
 
 	//cytoscapeNodeHtmlLabel(cytoscape);
-
-	interface Edge {
-		data: { id: string, source: string, target: string };
-	}
-
 	export let publishing: boolean;
 
 
@@ -22,12 +19,12 @@
 	// 	publication: Publication
 	// 	next: PrismaNode[]
 	// })[]; //GET all nodes in the circuit
-	 let edges : Edge[];
 	let cy: any;
 	let selected: boolean = false;
 	let selectedId: string = '';
 	let prereqActive: boolean = false;
 	let nodeClicked: boolean = false;
+	let numSelected: number = 0;
 
 	// let mappedNodes = nodes.map(node => ({
 	// 	data: { id: node.id.toString(), title: node.publication.title },
@@ -90,6 +87,7 @@
 
 		cy.on('select', 'node', (event: any) => {
 			console.log('Selected: ' + event.target.data().label);
+			numSelected++;
 			let node = event.target;
 			node.style({
 				'background-color': '#4C4C5C',
@@ -102,7 +100,7 @@
 				if (cy.getElementById(edgeId).length > 0) {
 					cy.remove(cy.$(`#${edgeId}`));
 				} else {
-					const edge = cy.add({
+					cy.add({
 						group: 'edges',
 						data: { id: `${edgeId}`, source: `${node.id()}`, target: `${selectedId}` }
 					});
@@ -135,8 +133,8 @@
 		 * Deals with the unselecting of nodes. Restores the background
 		 * of every node in case more have been coloured
 		 */
-		cy.on('unselect', 'node', (event: any) => {
-			console.log('Unselected: ' + event.target.data().label);
+		cy.on('unselect', 'node', () => {
+			numSelected--;
 			//let node = event.target;
 			cy.nodes().forEach((n: any) => {
 				n.style({
@@ -162,8 +160,6 @@
 		 */
 		cy.on('click', 'node', (event: any) => {
 			const nodeId = event.target.id();
-			const node = event.target;
-			console.log('clicked');
 			if (selectedId !== nodeId) {
 				nodeClicked = true;
 			}
@@ -175,8 +171,6 @@
 		 */
 		cy.on('tap', 'node', (event: any) => {
 			const nodeId = event.target.id();
-			const node = event.target;
-			console.log('clicked');
 			if (selectedId !== nodeId) {
 				nodeClicked = true;
 			}
@@ -221,7 +215,7 @@
 	let addActive: boolean = false;
 	let displayedMaterials: any = [];
 	let fileData : FetchedFileArray = []
-	let selectedIds: Set<number> = new Set();
+	let pubIds: Set<number> = new Set();
 
 	/**
 	 * Fetches all materials
@@ -280,19 +274,54 @@
 		cy.remove(cy.$(`#${event.detail.id}`));
 		selectedId = '';
 		selected = false;
-		selectedIds.delete(event.detail.id);
+		pubIds.delete(event.detail.id);
 	};
+
 
 	/**
-	 * Removes the selected node
+	 * Removes all selected nodes
 	 */
-	const removeSelected = () => {
-		cy.remove(cy.$(`#${selectedId}`));
-		selectedIds.delete(Number(selectedId));
-		selectedId = '';
-		selected = false;
-
+	const modal: ModalSettings = {
+		type: 'confirm',
+		// Data
+		title: 'Please Confirm',
+		body: 'Are you sure you wish to proceed?',
+		// TRUE if confirm pressed, FALSE if cancel pressed
+		response: (r: boolean) => {
+			if (r) {
+				cy.nodes().forEach((node: any) => {
+					if (node.selected()) {
+						cy.remove(cy.$(`#${node.id()}`));
+						pubIds.delete(Number(node.id()));
+					}
+				});
+				selectedId = '';
+				selected = false;
+			}
+		}
 	};
+
+	export const publishCircuit = () => {
+
+	 	let result: NodeDiffActions;
+
+		const add: ({ publicationId: number; x: number; y: number }[]) = [];
+		const del: ({ publicationId: number }[]) = [];
+		const edit: ({ publicationId: number; x: number; y: number }[]) = [];
+		const next: { fromId: number; toId: number[] }[] = [];
+	//
+	 	cy.nodes().forEach((node: any) => {
+			add.push(({ publicationId: node.id(), x: node.position().x, y: node.position().y }));
+			del.push(({ publicationId: node.id() }));
+			edit.push(({ publicationId: node.id(), x: node.position().x, y: node.position().y }));
+			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => edge.target().id());
+			next.push(({ fromId: node.id(), toId: toID }));
+	 	})
+			result = { add: add, delete: del, edit: edit, next: next };
+			return result;
+
+	}
+
 
 	/**
 	 * Highlights all prerequisites of the selected node and activates the ability to add edges
@@ -321,34 +350,41 @@
 
 <style>
     #cy {
-        width: 800px;
+        width: 850px;
         height: 600px;
         border: 1px solid black;
     }
 </style>
-<div class="flex-col gap-4">
-	<div class="flex gap-2">
-		{#if !selected}
-			<button class="btn variant-filled" on:click={fetchElements}>Add</button>
-		{/if}
-		{#if selected}
-			{#if prereqActive}
-				<button class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes</button>
-			{:else}
-				<button class="btn variant-filled bg-surface-600" on:click={addPrereq}>Select Prerequisites</button>
+<div class="flex-col mt-10 col-span-7">
+	<div class="flex justify justify-between">
+		<div class="flex gap-2">
+			{#if !selected}
+				<button type="button" class="btn variant-filled" on:click={fetchElements}>Add</button>
 			{/if}
-			<button class="btn variant-filled bg-error-400" on:click={removeSelected}>Remove From Circuit</button>
-		{/if}
+			{#if selected}
+				{#if (numSelected < 2)}
+					{#if prereqActive}
+						<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes</button>
+					{:else}
+						<button type="button" class="btn variant-filled bg-surface-600" on:click={addPrereq}>Select Prerequisites</button>
+					{/if}
+				{/if}
+				<button type="button" class="btn variant-filled bg-error-400" on:click={() => {	modalStore.trigger(modal);}}>Remove From
+					Circuit
+				</button>
+			{/if}
+		</div>
+
 	</div>
 
 
-	<div id="cy"></div>
+	<div class="mt-2" id="cy"></div>
 </div>
 
 
 {#if addActive}
 	<div>
-		<SearchElems bind:addActive={addActive} bind:selectedIds={selectedIds} bind:materials={displayedMaterials}
+		<SearchElems bind:addActive={addActive} bind:selectedIds={pubIds} bind:materials={displayedMaterials}
 								 bind:fileData={fileData}
 								 on:selFurther={addNode} on:remFurther={removeNode} />
 	</div>
