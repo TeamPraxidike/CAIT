@@ -117,12 +117,38 @@ export async function getPublicationById(id: number) {
 			id: id,
 		},
 		include: {
+			tags: true,
+			publisher: true,
+			maintainers: true,
+			coverPic: true,
+			comments: {
+				include: {
+					replies: {
+						include: {
+							user: true,
+						},
+					},
+					user: true,
+				},
+			},
 			materials: {
 				include: {
+					publication: true,
 					files: true,
 				},
 			},
-			circuit: true,
+			circuit: {
+				include: {
+					publication: true,
+					nodes: {
+						include: {
+							publication: true,
+							prerequisites: true,
+							next: true,
+						},
+					},
+				},
+			},
 		},
 	});
 }

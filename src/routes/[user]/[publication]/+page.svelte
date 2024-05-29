@@ -9,7 +9,7 @@
 		Comment,
 		authStore,
 		AddInteractionForm,
-		UserProp
+		UserProp, Circuit
 	} from '$lib';
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
@@ -26,41 +26,51 @@
 	const userId = $authStore.user?.id;
 
 	let serverData: PublicationView = data.loadedPublication.loadedPublication;
+	const isMaterial : boolean = serverData.isMaterial
+
+	// console.log(isMaterial)
+	 	console.log("Yep")
+	 console.log(serverData)
 
 	let likedComments = data.likedComments as number[];
 	let likedReplies = data.likedReplies as number[];
 
-	let files: FileList = createFileList(serverData.fileData, serverData.material.files);
+	let files: FileList;
+
+		if (isMaterial)
+		{
+			files = createFileList(serverData.fileData, serverData.publication.materials.files)
+		}
 
 	let liked: boolean = data.loadedPublication.userSpecificInfo.liked;
-	let likes = serverData.material.publication.likes;
+	let likes = serverData.publication.likes;
 
 	let saved: boolean = data.loadedPublication.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 	const toggleLike = async () => {
 		likes = liked ? likes - 1 : likes + 1;
-		await fetch(`/api/user/${userId}/liked/${serverData.material.publicationId}`, {
+		await fetch(`/api/user/${userId}/liked/${serverData.publication.id}`, {
 			method: 'POST',
 		}).then(() => liked = !liked);
 	}
 	const toggleSave = async () => {
-		await fetch(`/api/user/${userId}/saved/${serverData.material.publicationId}`, {
+		await fetch(`/api/user/${userId}/saved/${serverData.publication.id}`, {
 			method: 'POST',
 		}).then(() => saved = !saved);
 	}
 
-	let tags: string[] = serverData.material.publication.tags.map(tag => tag.content);
+	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
 
 	let created: string;
-	$:created = getDateDifference(serverData.material.publication.createdAt, new Date());
+	$:created = getDateDifference(serverData.publication.createdAt, new Date());
 
 	onMount(() => {
-		created = getDateDifference(serverData.material.publication.createdAt, new Date());
+		created = getDateDifference(serverData.publication.createdAt, new Date());
 	});
 
 	async function deletePublication() {
-		const url = '/api/material/' + serverData.material.publicationId;
+		const url = '/api/material/' + serverData.publication.id;
 		try {
 			await fetch(url, {
 				method: 'DELETE'
@@ -88,6 +98,7 @@
 	}
 
 	async function downloadFiles() {
+
 		const zip = new JSZip();
 
 		for (let i = 0; i < files.length; i++) {
@@ -98,7 +109,7 @@
 	}
 
 
-	let comments = serverData.material.publication.comments
+	let comments = serverData.publication.comments
 
 	/*
 	add placeholder comment to make it smoother
@@ -172,28 +183,33 @@
 
 </script>
 
-<Meta title={serverData.material.publication.title} description="CAIT" type="site" />
+<Meta title={serverData.publication.title} description="CAIT" type="site" />
 
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex justify-between w-full">
 		<div>
-			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
-			<p>{serverData.material.publication.publisher.firstName}</p>
+			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.publication.title}</h2>
+			<p>By {serverData.publication.publisher.firstName}</p>
 			<div class="flex gap-2">
 				<p class="text-sm text-surface-500">{created}</p>
-				<Icon icon="mdi:presentation" class="text-xl text-surface-500" />
-				<DiffBar diff="easy" className="w-4 h-4" />
+				{#if isMaterial}
+					<Icon icon="mdi:presentation" class="text-xl text-surface-500" />
+					<DiffBar diff="easy" className="w-4 h-4" />
+				{:else}
+					<Icon icon="mdi:graph" class="text-xl text-surface-500" />
+				{/if}
+
 			</div>
 			<div class="flex flex-wrap gap-2 my-2">
 				{#each tags as tag}
 					<Tag tagText={tag} removable={false} />
 				{/each}
 			</div>
-			<p class="text-surface-700 dark:text-surface-400">{serverData.material.publication.description}</p>
+			<p class="text-surface-700 dark:text-surface-400">{serverData.publication.description}</p>
 		</div>
 		<div class="flex gap-2">
-			<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={serverData.material.publication.publisher} />
-			{#each serverData.material.publication.maintainers as maintainer}
+			<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={serverData.publication.publisher} />
+			{#each serverData.publication.maintainers as maintainer}
 				<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
 			{/each}
 		</div>
@@ -206,23 +222,32 @@
 			<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
 			<span>{likes}</span>
 		</button>
-		<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-				on:click={downloadFiles}>
-			<Icon class="xl:text-2xl" icon="material-symbols:download" />
-		</button>
+		{#if isMaterial}
+			<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+							on:click={downloadFiles}>
+				<Icon class="xl:text-2xl" icon="material-symbols:download" />
+			</button>
+		{/if}
 		<button type="button"
 				class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
 				on:click={() => toggleSave()}>
 			<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
 		</button>
 	</div>
-	<div class="min-h-96 w-full">
-		<FileTable operation="download" {files} />
-	</div>
-	{#if serverData.material.publication.publisherId === $authStore.user?.id}
+
+	{#if isMaterial}
+		<div class="min-h-96 w-full">
+			<FileTable operation="download" {files} />
+		</div>
+	{:else}
+		<div class="min-h-96 w-full">
+			<Circuit publishing="{false}" nodes="{serverData.publication.circuit.nodes}"/>
+		</div>
+	{/if}
+	{#if serverData.publication.publisherId === $authStore.user?.id}
 		<div class="flex gap-2 mt-4">
 			<button
-				on:click={() => goto(`/${serverData.material.publication.publisherId}/${serverData.material.publicationId}/edit`)}
+				on:click={() => goto(`/${serverData.publication.publisherId}/${serverData.publication.id}/edit`)}
 				type="button" class="btn rounded-lg variant-filled-primary">Edit
 			</button>
 			<button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">Delete
@@ -237,7 +262,7 @@
 </div>
 
 {#if $authStore.user}
-	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{serverData.material.publicationId}"/>
+	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{serverData.publication.id}"/>
 {/if}
 
 {#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}

@@ -1,6 +1,4 @@
-import {
-	getAllCircuits
-} from '$lib/database/circuit';
+import { getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
 	type CircuitForm,
@@ -75,7 +73,7 @@ export async function POST({ request }) {
 			},
 		);
 
-		const id = createdCircuit.id;
+		const id = createdCircuit.publication.id;
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

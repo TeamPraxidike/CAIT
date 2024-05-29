@@ -5,20 +5,33 @@
 	import type { FetchedFileArray, NodeDiffActions } from '$lib/database';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { Node as PrismaNode, Publication } from '@prisma/client';
 
 	const modalStore = getModalStore();
 	//	import cytoscapeNodeHtmlLabel from 'cytoscape-node-html-label';
 
-
+	type Edge = {
+		data: {
+			id: string,
+			source: string,
+			target: string
+		}
+	}
 
 	//cytoscapeNodeHtmlLabel(cytoscape);
 	export let publishing: boolean;
 
 
-	// export let nodes: (PrismaNode & {
-	// 	publication: Publication
-	// 	next: PrismaNode[]
-	// })[]; //GET all nodes in the circuit
+	export let nodes: (PrismaNode & {
+		publication: Publication
+		next: {
+			circuitId: number,
+			fromPublicationId: number,
+			toPublicationId: number
+		}[]
+	})[] = [];
+
+	let edges: Edge[] = [];
 	let cy: any;
 	let selected: boolean = false;
 	let selectedId: string = '';
@@ -26,21 +39,26 @@
 	let nodeClicked: boolean = false;
 	let numSelected: number = 0;
 
-	// let mappedNodes = nodes.map(node => ({
-	// 	data: { id: node.id.toString(), title: node.publication.title },
-	// 	position: { x: node.posX, y: node.posY }
-	// }));
-	// nodes.forEach(node => {
-	// 	let curNext = node.next.map(nextNode => ({
-	// 		data: {
-	// 			id: node.id.toString().concat(nextNode.id.toString()),
-	// 			source: node.id.toString(),
-	// 			target: nextNode.id.toString()
-	// 		}
-	// 	}));
-	// 	edges.push(...curNext);
-	// });
+	let mappedNodes = nodes.map(node => ({
+		data: { id: node.publicationId.toString(), label: node.publication.title },
+		position: { x: node.posX, y: node.posY }
+	}));
 
+	nodes.forEach(node => {
+		let curNext = node.next.map(nextNode =>
+			({
+
+
+				data: {
+					id: String(node.publicationId).concat(String(nextNode.toPublicationId)),
+					source: String(node.publicationId),
+					target: String(nextNode.toPublicationId)
+				}
+			}));
+		console.log(curNext);
+		edges.push(...curNext);
+	});
+	console.log(edges);
 
 	onMount(() => {
 
@@ -48,8 +66,8 @@
 		cy = cytoscape({
 			container: document.getElementById('cy'),
 			elements: [
-				//  ...mappedNodes
-				//	...edges
+				...mappedNodes,
+				...edges
 			],
 			style: [
 				{
@@ -82,13 +100,18 @@
 			layout: {
 				name: 'preset'
 			},
+
 		});
 
 
 		cy.on('select', 'node', (event: any) => {
+
 			console.log('Selected: ' + event.target.data().label);
 			numSelected++;
 			let node = event.target;
+			if (!publishing) {
+				cy.$(`#${node.id()}`).unselect();
+			}
 			node.style({
 				'background-color': '#4C4C5C',
 				'color': '#F9F9FA'
@@ -159,9 +182,23 @@
 		 * is Click -> Unselect -> Selected. This is needed to make sure that node is properly unselected.
 		 */
 		cy.on('click', 'node', (event: any) => {
-			const nodeId = event.target.id();
-			if (selectedId !== nodeId) {
-				nodeClicked = true;
+			if (publishing) {
+				const nodeId = event.target.id();
+				if (selectedId !== nodeId) {
+					nodeClicked = true;
+				}
+			} else {
+
+				let cur = nodes.find(node => node.publicationId === Number(event.target.id()));
+
+				if (cur) {
+					// Assuming cur is an object and you want to navigate to the publisherId
+					const url = `/${cur.publication.publisherId}/${event.target.id()}`;
+					console.log(url);
+					window.open(url, '_blank'); // Open the URL in a new tab
+				} else {
+					console.error('No matching node found for publicationId:', event.target.id());
+				}
 			}
 		});
 
@@ -170,10 +207,24 @@
 		 * Same as the above but activated on tap for mobile
 		 */
 		cy.on('tap', 'node', (event: any) => {
-			const nodeId = event.target.id();
-			if (selectedId !== nodeId) {
-				nodeClicked = true;
+			if (publishing) {
+				const nodeId = event.target.id();
+				if (selectedId !== nodeId) {
+					nodeClicked = true;
+				}
+			} else {
+
+				let cur = nodes.find(node => node.publicationId === Number(event.target.id()));
+				if (cur) {
+					// Assuming cur is an object and you want to navigate to the publisherId
+					const url = `/${cur.publication.publisherId}/${event.target.id()}`;
+					console.log(url);
+					window.open(url, '_blank'); // Open the URL in a new tab
+				} else {
+					console.error('No matching node found for publicationId:', event.target.id());
+				}
 			}
+
 		});
 
 		/**
@@ -356,26 +407,31 @@
     }
 </style>
 <div class="flex-col mt-10 col-span-7">
-	<div class="flex justify justify-between">
-		<div class="flex gap-2">
-			{#if !selected}
-				<button type="button" class="btn variant-filled" on:click={fetchElements}>Add</button>
-			{/if}
-			{#if selected}
-				{#if (numSelected < 2)}
-					{#if prereqActive}
-						<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes</button>
-					{:else}
-						<button type="button" class="btn variant-filled bg-surface-600" on:click={addPrereq}>Select Prerequisites</button>
-					{/if}
+	{#if publishing}
+		<div class="flex justify justify-between">
+			<div class="flex gap-2">
+				{#if !selected}
+					<button type="button" class="btn variant-filled" on:click={fetchElements}>Add</button>
 				{/if}
-				<button type="button" class="btn variant-filled bg-error-400" on:click={() => {	modalStore.trigger(modal);}}>Remove From
-					Circuit
-				</button>
-			{/if}
+				{#if selected}
+					{#if (numSelected < 2)}
+						{#if prereqActive}
+							<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes
+							</button>
+						{:else}
+							<button type="button" class="btn variant-filled bg-surface-600" on:click={addPrereq}>Select
+								Prerequisites
+							</button>
+						{/if}
+					{/if}
+					<button type="button" class="btn variant-filled bg-error-400" on:click={() => {	modalStore.trigger(modal);}}>
+						Remove From
+						Circuit
+					</button>
+				{/if}
+			</div>
 		</div>
-
-	</div>
+	{/if}
 
 
 	<div class="mt-2" id="cy"></div>
@@ -389,6 +445,7 @@
 								 on:selFurther={addNode} on:remFurther={removeNode} />
 	</div>
 {/if}
+
 
 
 
