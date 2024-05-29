@@ -219,7 +219,7 @@
                               class="border-b border-surface-200 border-opacity-50 dark:border-surface-100 dark:border-opacity-50 text-surface-800 text-opacity-90 dark:text-opacity-90 dark:bg-surface-800 dark:text-surface-50 w-full"
                               bind:value={newText} />
                     <button
-                      class="float-right rounded-lg dark:bg-surface-800 hover:variant-filled-primary dark:hover:bg-surface-700 text-surface:700 variant-soft-primary"
+                      class="btn float-right rounded-lg dark:bg-surface-800 hover:variant-filled-primary dark:hover:bg-surface-700 text-surface:700 variant-soft-primary"
                       on:click={saveChanges}>Save
                     </button>
                 </div>
