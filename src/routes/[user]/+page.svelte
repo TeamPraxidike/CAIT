@@ -49,7 +49,7 @@
         {user.firstName}'s Publications
     </h3>
     {#each data.user.posts as publication, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)}/>
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)} courses={saved[i].usedInCourse.map(x => x.course)}/>
     {/each}
 </div>
 
