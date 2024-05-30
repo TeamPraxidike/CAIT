@@ -13,6 +13,8 @@
 		Stepper
 	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
+	import type { NodeDiffActions } from '$lib/database';
+	import Icon from '@iconify/svelte';
 
 	export let data: PageServerData;
 
@@ -27,6 +29,13 @@
 
 	let userName:HTMLInputElement;
 
+
+	let editingPK = false;
+	let editingLO = false;
+	let editingIndexPK: number;
+	let editingIndexLO: number;
+	let editingPKText:string;
+	let editingLOText:string;
 
 	let inputChip: InputChip;
 	let tagInput = '';
@@ -63,14 +72,14 @@
 	$: LOs = LOs;
 
 	const handleLOPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter'){
+		if (event.key === 'Enter' && loInput.value!==''){
 			LOs = [...LOs, loInput.value];
 			loInput.value = "";
 			event.preventDefault();
 		}
 	}
 	const handlePriorPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter'){
+		if (event.key === 'Enter' && priorInput.value!==''){
 			priorKnowledge = [...priorKnowledge, priorInput.value];
 			priorInput.value = "";
 			event.preventDefault();
@@ -106,59 +115,63 @@
 		}
 	}
 
+	//handle edit of PK
+	const handlePKEdit = (event: KeyboardEvent) => {
+		if(event.key === 'Enter'){
+			if(editingPKText === ''){
+				priorKnowledge = priorKnowledge.filter((_,i) => i !== editingIndexPK);
+			}else{
+				priorKnowledge[editingIndexPK] = editingPKText;
+			}
+			editingPK = false;
+			editingPKText='';
+			editingIndexPK = -1;
+		}
+	}
+
+	//handle edit of LO
+	const handleLOEdit = (event: KeyboardEvent) => {
+		if(event.key === 'Enter'){
+			if(editingLOText === ''){
+				LOs = LOs.filter((_,i) => i !==editingIndexLO);
+			}else{
+				LOs[editingIndexLO] = editingLOText;
+			}
+			editingLO = false;
+			editingLOText='';
+			editingIndexLO = -1;
+		}
+	}
 	const locks: boolean[] = [true, true];
 
 	$: locks[0] = title.length < 2 || description.length < 10;
 	$: locks[1] = addedTags.length < 2 || LOs.length < 1;
+	$: priorKnowledge = priorKnowledge;
+	$: LOs = LOs;
 
-	// const removePopup = (event: MouseEvent) => {
-	// 	if (!(event.target instanceof HTMLElement)) {
-	// 		return; // Ignore if the target is not an HTMLElement
-	// 	}
-	// 	if(typeof userPopUp !== undefined){
-	// 		let rect = userPopUp.getBoundingClientRect();
-	// 		const isClickedInsideDiv = (
-	// 			rect.left <= event.clientX &&
-	// 			rect.right >= event.clientX &&
-	// 			rect.top <= event.clientY &&
-	// 			rect.bottom >= event.clientY
-	// 		);
-	// 		if (!isClickedInsideDiv) {
-	// 			display = 'hidden';
-	// 		}
-	// 	}
-	//
-	//
-	//
-	// };
-	//
-	// onMount(() => {
-	// 	if (typeof document !== 'undefined') {
-	// 		document.addEventListener('click', removePopup);
-	// 	}
-	// });
-	//
-	// onDestroy(() => {
-	// 	if (typeof document !== 'undefined') {
-	// 		document.removeEventListener('click', removePopup);
-	// 	}
-	// });
+	let nodeActions: NodeDiffActions;
+
+
 	export let form: ActionData;
 	const toastStore = getToastStore();
 
 	$: if (form?.status === 200) {
 		toastStore.trigger({
-			message: 'Publication Edited successfully',
+			message: 'Publication Added successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/${$authStore.user?.id}/${form?.id}`);
+		goto(`/browse`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-warning-200'
+			background: 'bg-error-200'
 		});
 	}
-
+	const onNextHandler = (event:CustomEvent) =>{
+		if(event.detail.step === 0){
+			nodeActions = circuitRef.publishCircuit();
+		}
+	}
 </script>
 
 <!--<Node></Node>-->
@@ -173,15 +186,13 @@
         formData.append('difficulty', 'easy');
         formData.append('selectedTags', JSON.stringify(addedTags));
 				formData.append('newTags', JSON.stringify(newTags))
-        formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
+        formData.append('additionalMaintainers', JSON.stringify([...additionalMaintainers.map(m => m.id), uid]));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
-				if(circuitRef){
-						formData.append('circuitData',JSON.stringify(circuitRef.publishCircuit()));
-				}
+				console.log(nodeActions);
+				formData.append('circuitData', JSON.stringify(nodeActions));
       }}>
-
-	<Stepper buttonCompleteType="submit">
+	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
 			<Circuit bind:this={circuitRef} publishing="{true}"/>
@@ -203,20 +214,33 @@
 		<Step locked="{locks[1]}">
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between col-span-full">
-				<div class="flex gap-5">
-
 					<div class="flex flex-col space-y-1 w-full">
 						<label for="learningObjective" >Learning Objectives<span class="text-error-300">*</span>:</label>
 						<div>
-							<input on:keydown={handleLOPress} bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4"/>
-							<button on:click={()=>{LOs = [...LOs, loInput.value]; loInput.value = "";}} type="button" name="add_LO" inputmode="decimal"
+							<input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4"/>
+							<button on:click={()=>{if(loInput.value!==''){LOs = [...LOs, loInput.value]; loInput.value = "";}}} type="button" name="add_LO" inputmode="decimal"
 											class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
 							</button>
-							<ol class="list-decimal  bg-surface-100 dark:bg-transparent list-inside gap-2 max-h-40 overflow-y-auto w-3/4">
-								{#each LOs as LO}
+							<ol class="bg-surface-100 dark:bg-transparent list-inside space-y-1 max-h-40 overflow-y-auto w-3/4 mt-1">
+								{#each LOs as LO, index}
 									<li transition:fade={{ duration: 200 }} class="dark:bg-transparent rounded-lg">
-										<span class="max-w-6/7">{LO}</span>
-										<button class="float-right w-1/7 hover:bg-surface-200 self-center" on:click={() => {LOs = LOs.filter(x=>x!==LO)}}>x</button>
+										<div class="flex rounded-lg bg-surface-300 relative items-center">
+											{#if editingLO && index === editingIndexLO}
+												<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full" bind:value={editingLOText} on:keypress={handleLOEdit}/>
+											{:else }
+												<span>{LO}</span>
+											{/if}
+											{#if !editingLO}
+												<div class="absolute right-0 flex gap-2">
+													<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
+														<Icon icon="ic:outline-edit" style="color: #7F7F94" />
+													</button>
+													<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {LOs = LOs.filter(x=>x!==LO)}}>
+														<Icon icon="material-symbols:delete"  style="color: #a30000" />
+													</button>
+												</div>
+											{/if}
+										</div>
 									</li>
 								{/each}
 							</ol>
@@ -225,21 +249,34 @@
 
 					<div class="w-full">
 						<label for="priorKnowledge" class="mb-1" >Prior Knowledge:</label>
-						<input bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4"/>
-						<button on:click={()=>{priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}} type="button" name="add_prior" inputmode="decimal"
+						<input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4"/>
+						<button on:click={()=>{if(priorInput.value!=='') {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
 										class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
 						</button>
-						<ol class="list-decimal bg-surface-100 dark:bg-transparent list-inside gap-2 max-h-40 overflow-y-auto w-3/4">
-							{#each priorKnowledge as pk}
+						<ol class="bg-surface-100 dark:bg-transparent list-inside space-y-1 max-h-40 overflow-y-auto w-3/4 mt-1">
+							{#each priorKnowledge as pk, index}
 								<li transition:fade={{ duration: 200 }}>
-									<span>{pk}</span>
-									<button class="float-right w-1/7 hover:bg-surface-200 self-center" on:click={() => {priorKnowledge = priorKnowledge.filter(x=>x!==pk)}}>x</button>
+									<div class="flex rounded-lg bg-surface-300 gap-10 relative items-center w-full">
+										{#if editingPK && index === editingIndexPK}
+											<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full" bind:value={editingPKText} on:keypress={handlePKEdit}/>
+											{:else }
+											<p class="max-w-full line-clamp-3 truncate">{pk}</p>
+										{/if}
+										{#if !editingPK}
+										<div class="absolute right-0 flex gap-2">
+											<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {editingPK=true; editingIndexPK=index; editingPKText=pk;}}>
+												<Icon icon="ic:outline-edit" style="color: #7F7F94" />
+											</button>
+											<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {priorKnowledge = priorKnowledge.filter(x=>x!==pk)}}>
+												<Icon icon="material-symbols:delete"  style="color: #a30000" />
+											</button>
+										</div>
+											{/if}
+									</div>
 								</li>
 							{/each}
 						</ol>
 					</div>
-				</div>
-
 
 				<div class="flex flex-col w-full">
 					<div class="flex flex-col gap-2 w-full">
@@ -262,12 +299,12 @@
 								<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user" class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm"/>
 								{#each searchableUsers as user}
 									{#if user.id !== uid}
-										<button class="dark:hover:text-surface-600  hover:bg-primary-100 text-start" on:click={()=>{addMaintainer(user)}}>
+										<button type="button" class="dark:hover:text-surface-600  hover:bg-primary-100 text-start" on:click={()=>{addMaintainer(user)}}>
 											{user.firstName} {user.lastName}
 										</button>
 									{/if}
 								{/each}
-								<button on:click={()=>{display='hidden'}} class="hover:underline text-error-500">Cancel</button>
+								<button type="button" on:click={()=>{display='hidden'}} class="hover:underline text-error-500">Cancel</button>
 
 							</div>
 						</div>
@@ -277,10 +314,10 @@
 						<span>Tags<span class="text-error-300">*</span>:</span>
 						<div class="text-token space-y-2">
 							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content)}
-												 bind:input={tagInput} bind:value={addedTags} name="chips" class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700" on:invalid={() => {addedTags=[...addedTags,tagInput]; newTags=[...newTags,tagInput]; tagInput=''; }}  />
+												 bind:input={tagInput} bind:value={addedTags} name="chips" class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700" on:invalid={() => { if(tagInput.length>0) {addedTags=[...addedTags,tagInput]; newTags=[...newTags,tagInput]; tagInput=''; }}}  />
 							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
 								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
-															on:selection={onInputChipSelect} />
+															on:selection={onInputChipSelect}  />
 							</div>
 						</div>
 					</div>
