@@ -36,6 +36,8 @@
 	let editingIndexLO: number;
 	let editingPKText:string;
 	let editingLOText:string;
+	let hoverIndexPK:number;
+	let hoverIndexLO: number;
 
 	let inputChip: InputChip;
 	let tagInput = '';
@@ -172,6 +174,8 @@
 			nodeActions = circuitRef.publishCircuit();
 		}
 	}
+	let displayButton = false;
+	let displayButtonLO = false;
 </script>
 
 <!--<Node></Node>-->
@@ -202,11 +206,11 @@
 			<div class="flex flex-col gap-5 col-span-full">
 				<div class="w-full space-y-1">
 					<label for="circuitTitle" >Title<span class="text-error-300">*</span></label>
-					<input bind:value={title} id="circuitTitle" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400" placeholder="Enter title" required/>
+					<input bind:value={title} id="circuitTitle" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Enter title" required/>
 				</div>
 				<div class="w-full space-y-1">
 					<label for="circuitDescription">Description<span class="text-error-300">*</span></label>
-					<textarea bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400" placeholder="Explain your circuit" required />
+					<textarea bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Explain your circuit" required />
 				</div>
 			</div>
 
@@ -217,21 +221,21 @@
 					<div class="flex flex-col space-y-1 w-full">
 						<label for="learningObjective" >Learning Objectives<span class="text-error-300">*</span>:</label>
 						<div>
-							<input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4"/>
+							<input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4 focus:ring-primary-500 focus:ring-1 "/>
 							<button on:click={()=>{if(loInput.value!==''){LOs = [...LOs, loInput.value]; loInput.value = "";}}} type="button" name="add_LO" inputmode="decimal"
 											class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
 							</button>
 							<ol class="bg-surface-100 dark:bg-transparent list-inside space-y-1 max-h-40 overflow-y-auto w-3/4 mt-1">
 								{#each LOs as LO, index}
 									<li transition:fade={{ duration: 200 }} class="dark:bg-transparent rounded-lg">
-										<div class="flex rounded-lg bg-surface-300 relative items-center">
+										<div role="button" tabindex="0" class="pl-0.5 flex rounded-lg bg-surface-300 relative items-center" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
 											{#if editingLO && index === editingIndexLO}
-												<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full" bind:value={editingLOText} on:keypress={handleLOEdit}/>
+												<input class="bg-surface-200 focus:ring-primary-500 focus:ring-1 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingLOText} on:keypress={handleLOEdit}/>
 											{:else }
-												<span>{LO}</span>
+												<span class="text-md">{LO}</span>
 											{/if}
-											{#if !editingLO}
-												<div class="absolute right-0 flex gap-2">
+											{#if !editingLO && displayButtonLO && hoverIndexLO ===index}
+												<div class="absolute right-0 flex gap-2" transition:fade = {{ duration: 200 }}>
 													<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
 														<Icon icon="ic:outline-edit" style="color: #7F7F94" />
 													</button>
@@ -249,21 +253,21 @@
 
 					<div class="w-full">
 						<label for="priorKnowledge" class="mb-1" >Prior Knowledge:</label>
-						<input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4"/>
+						<input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4 focus:ring-primary-500"/>
 						<button on:click={()=>{if(priorInput.value!=='') {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
 										class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
 						</button>
 						<ol class="bg-surface-100 dark:bg-transparent list-inside space-y-1 max-h-40 overflow-y-auto w-3/4 mt-1">
 							{#each priorKnowledge as pk, index}
 								<li transition:fade={{ duration: 200 }}>
-									<div class="flex rounded-lg bg-surface-300 gap-10 relative items-center w-full">
+									<div role="button" tabindex="0" class="flex rounded-lg bg-surface-300 gap-10 relative items-center w-full role" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
 										{#if editingPK && index === editingIndexPK}
-											<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full" bind:value={editingPKText} on:keypress={handlePKEdit}/>
+											<input class="bg-surface-200 focus:ring-primary-500 focus:ring-1 ring-0 rounded-lg max-h-1/2 w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
 											{:else }
-											<p class="max-w-full line-clamp-3 truncate">{pk}</p>
+											<p class="text-md">{pk}</p>
 										{/if}
-										{#if !editingPK}
-										<div class="absolute right-0 flex gap-2">
+										{#if !editingPK && displayButton && hoverIndexPK === index }
+										<div class="absolute right-0 flex gap-2" transition:fade={{ duration: 200 }}>
 											<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {editingPK=true; editingIndexPK=index; editingPKText=pk;}}>
 												<Icon icon="ic:outline-edit" style="color: #7F7F94" />
 											</button>
