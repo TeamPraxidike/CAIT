@@ -1,7 +1,7 @@
 <script lang="ts">
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
     import type {LayoutData, PageServerData} from './$types';
-    import type { Publication, Tag, User } from '@prisma/client';
+    import type {Publication, Tag, User} from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
 
     /* This is the data that was returned from the server */
@@ -14,10 +14,16 @@
     } = data.user;
 
     let fileData:FetchedFileArray = data.fileData;
-    let saved = data.saved;
+    // let saved = data.saved;
     let savedFileData = data.savedFileData;
     let liked = data.liked;
-    let used = data.used as number[];
+
+    let saved:Publication & {
+            tags: Tag[];
+            usedInCourse: {course: string}[]
+        }[] = data.saved;
+
+    // console.log(usedInCourse);
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -34,8 +40,8 @@
             No saved publications
         </p>
     {:else}
-        {#each saved as publication, i}
-            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)} used={publication.usedInCourse.length} courses={publication.usedInCourse.map(x  => x.course)}/>
+        {#each data.saved as publication, i}
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} courses={saved[i].usedInCourse.map(x => x.course)}/>
         {/each}
     {/if}
 

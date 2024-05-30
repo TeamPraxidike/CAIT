@@ -38,7 +38,6 @@
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let numMaterials: number = 1;
-    export let used: number = 5;
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
     export let markAsUsed: boolean = false;
@@ -55,6 +54,7 @@
 
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
     $:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
+    $:used = courses.length;
 
     let likes = publication.likes;
     const toggleLike = async () => {
