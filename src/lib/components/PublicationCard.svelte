@@ -149,6 +149,7 @@
             }
         },
     };
+
     const modal: ModalSettings = {
         type: 'component',
         component: 'useInCourseComponent',

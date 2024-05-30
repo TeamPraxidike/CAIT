@@ -1,10 +1,9 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
     import {authStore} from "$lib";
-    import {createEventDispatcher} from "svelte";
     import {coursesStore} from "$lib/stores/courses";
 
-    export let courses = ["Machine learning", "CSE 2430"];
+    export let courses: string[];
     export let publicationId: number;
 
     const updateStore = () => coursesStore.update((entries) => {
@@ -17,23 +16,24 @@
         return entries;
     });
 
+    const deleteFromStore = (i: number) => {
+        courses = courses.filter((_, index) => index !== i);
+        sendCourses();
+        updateStore();
+    }
+
     let addingCourse = false;
     let editing = -1;
     let inputValue = "";
     let hoveredIndex: number = -1;
-
-    const dispatch = createEventDispatcher();
 
     function submit(event: KeyboardEvent) {
         if (event.key === 'Enter') {
             add();
         }
     }
-    const add = async () => {
-        if(inputValue !== ""){
-            courses = [...courses, inputValue];
-        }
-        dispatch('updateUsedInCourse', courses);
+
+    async function sendCourses() {
         await fetch(`/api/user/${$authStore.user?.id}/use-in-course/${publicationId}`, {
             method: 'POST',
             headers: {
@@ -41,6 +41,13 @@
             },
             body: JSON.stringify({courses: courses})
         });
+    }
+
+    const add = async () => {
+        if(inputValue !== ""){
+            courses = [...courses, inputValue];
+        }
+        await sendCourses();
         updateStore();
         addingCourse = false;
         inputValue = "";
@@ -58,13 +65,8 @@
     }
     const confirmEdit = async () => {
         courses[editing] = inputValue;
-        await fetch(`/api/user/${$authStore.user?.id}/use-in-course/${publicationId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({courses: courses})
-        });
+
+        await sendCourses();
         updateStore();
         inputValue = "";
         editing = -1;
@@ -98,7 +100,7 @@
                             <Icon icon="mdi:pencil" width="24" height="24"  class="text-surface-700 ml-auto hover:text-opacity-85" />
                         </button>
 
-                        <button class="flex flex-row justify-center cursor-pointer self-center" on:click={() => {courses = courses.filter((_, index) => index !== i)}}>
+                        <button class="flex flex-row justify-center cursor-pointer self-center" on:click={() => deleteFromStore(i)}>
                             <Icon icon="mdi:trash-can" width="24" height="24" class="text-error-300 ml-auto hover:text-opacity-85" />
                         </button>
                     </div>
