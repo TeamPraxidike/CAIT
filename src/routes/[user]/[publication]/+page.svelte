@@ -170,6 +170,23 @@
 		}
 	}
 
+	const generateCourses = (courses: string[]): string => {
+		let out = `Material is used in `
+		console.log(courses.length)
+		for(let i = 0; i < Math.min(courses.length, 2); i++) {
+			if(courses.length === i + 1){
+				out += ' and '
+			}
+			out += "'" + courses[i] + "' ";
+			if(!(courses.length === i+2 || courses.length === i+1)){
+				out += ', '
+			}
+		}
+		if(courses.length > 2){
+			out += ' and ' + (courses.length - 2) + ' more';
+		}
+		return out + '!';
+	}
 </script>
 
 <Meta title={serverData.material.publication.title} description="CAIT" type="site" />
@@ -177,7 +194,12 @@
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex justify-between w-full">
 		<div>
-			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
+
+			<div class="flex flex-row items-center">
+				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
+				<p class="text-sm opacity-85 pl-5">{generateCourses(serverData.material.publication.usedInCourse.map(x => x.course))}</p>
+			</div>
+
 			<p>{serverData.material.publication.publisher.firstName}</p>
 			<div class="flex gap-2">
 				<p class="text-sm text-surface-500">{created}</p>

@@ -258,11 +258,6 @@
                 {/if}
 
                     {#if markAsUsed}
-<!--                        <div class="w-full flex justify-center space-x-2">-->
-<!--                            <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>-->
-<!--                            <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>-->
-<!--                        </div>-->
-
                         <button on:click={() => modalStore.trigger(modal)}>
                             <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
                         </button>
