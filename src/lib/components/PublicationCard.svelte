@@ -11,7 +11,7 @@
     import { popup } from '@skeletonlabs/skeleton';
 
     export let publication:Publication & {
-        tags: { content: string }[]
+        tags: { content: string }[],
     };
 
     let popupName = publication.id.toString().concat(publication.title);
@@ -28,6 +28,7 @@
         type ModalSettings,
         type ModalComponent
     } from '@skeletonlabs/skeleton';
+    import {coursesStore} from "$lib/stores/courses";
 
     initializeStores();
 
@@ -42,6 +43,7 @@
     export let imgSrc: string;
     export let markAsUsed: boolean = false;
     export let isChecked = false;
+    export let courses: string[] = ["no courses found"]
 
     const userId = $authStore.user?.id;
 
@@ -154,19 +156,31 @@
         dispatch('removed', { id: publication.id });
     };
 
-    const modalRegistry: Record<string, ModalComponent> = {
+    let modalRegistry: Record<string, ModalComponent> = {
         // Set a unique modal ID, then pass the component reference
         useInCourseComponent: {
             ref: UsedInCourse,
             props: {
-                courses: ['bar']
+                courses: courses,
+                publicationId: publication.id,
             }
         },
     };
     const modal: ModalSettings = {
         type: 'component',
         component: 'useInCourseComponent',
-        meta: {courses: ["aaa", "aaaaaa"]}
+        response: () => {
+            courses = $coursesStore.filter(x => x.publicationId === publication.id)[0].courses;
+            modalRegistry = {
+                useInCourseComponent: {
+                    ref: UsedInCourse,
+                    props: {
+                        courses: courses,
+                        publicationId: publication.id,
+                    }
+                },
+            };
+        }
     };
 
 </script>

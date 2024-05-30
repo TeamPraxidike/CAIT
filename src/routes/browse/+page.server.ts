@@ -7,8 +7,6 @@ export async function load({ url, fetch, cookies}) {
 	const users = await (await fetch(`/api/user`)).json();
 	const tags = await (await fetch(`/api/tags`)).json();
 
-	console.log(materials);
-
 	const likedResponse = await fetch(`/api/user/${userId}/liked`);
 	const liked = likedResponse.status === 200 ? await likedResponse.json() : [];
 

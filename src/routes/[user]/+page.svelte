@@ -18,8 +18,6 @@
     let savedFileData = data.savedFileData;
     let liked = data.liked;
     let used = data.used as number[];
-
-    console.log("liked: " + liked);
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -37,7 +35,7 @@
         </p>
     {:else}
         {#each saved as publication, i}
-            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)} used={publication.usedInCourse.length}/>
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)} used={publication.usedInCourse.length} courses={publication.usedInCourse.map(x  => x.course)}/>
         {/each}
     {/if}
 

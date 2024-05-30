@@ -1,25 +1,51 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
+    import {authStore} from "$lib";
+    import {createEventDispatcher} from "svelte";
+    import {coursesStore} from "$lib/stores/courses";
 
     export let courses = ["Machine learning", "CSE 2430"];
+    export let publicationId: number;
+
+    const updateStore = () => coursesStore.update((entries) => {
+        const index = entries.findIndex(entry => entry.publicationId === publicationId);
+        if (index !== -1) {
+            entries[index].courses = courses;
+        } else {
+            entries.push({ publicationId: publicationId, courses: courses });
+        }
+        return entries;
+    });
 
     let addingCourse = false;
     let editing = -1;
     let inputValue = "";
     let hoveredIndex: number = -1;
 
+    const dispatch = createEventDispatcher();
+
     function submit(event: KeyboardEvent) {
         if (event.key === 'Enter') {
             add();
         }
     }
-    const add = () => {
+    const add = async () => {
         if(inputValue !== ""){
             courses = [...courses, inputValue];
         }
+        dispatch('updateUsedInCourse', courses);
+        await fetch(`/api/user/${$authStore.user?.id}/use-in-course/${publicationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({courses: [inputValue]})
+        });
+        updateStore();
         addingCourse = false;
         inputValue = "";
     };
+
     const cancel = () => {
         addingCourse = false;
         editing = -1;
@@ -58,7 +84,7 @@
                  role="table">
 
                 <p class="relative mt-2 right-1 text-base p-1 rounded-md" >{course}</p>
-                {#if i === hoveredIndex}
+                {#if i === hoveredIndex && editing < 0}
                     <div class="flex items-end">
                         <button class="flex flex-row justify-center cursor-pointer self-center" on:click={() => toggleEdit(i)}>
                             <Icon icon="mdi:pencil" width="24" height="24"  class="text-surface-700 ml-auto hover:text-opacity-85" />
