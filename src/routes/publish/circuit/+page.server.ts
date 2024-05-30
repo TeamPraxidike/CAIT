@@ -58,7 +58,6 @@ export const actions = {
 			},
 			nodeDiff: JSON.parse(circuitData),
 		};
-
 		const res = await fetch('/api/circuit', {
 			method: 'POST',
 			body: JSON.stringify(circuit),

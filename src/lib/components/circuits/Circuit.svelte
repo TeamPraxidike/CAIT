@@ -82,6 +82,8 @@
 			layout: {
 				name: 'preset'
 			},
+			minZoom: 0.5,
+			maxZoom: 2
 		});
 
 
@@ -311,11 +313,11 @@
 		const next: { fromId: number; toId: number[] }[] = [];
 	//
 	 	cy.nodes().forEach((node: any) => {
-			add.push(({ publicationId: node.id(), x: node.position().x, y: node.position().y }));
-			del.push(({ publicationId: node.id() }));
-			edit.push(({ publicationId: node.id(), x: node.position().x, y: node.position().y }));
-			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => edge.target().id());
-			next.push(({ fromId: node.id(), toId: toID }));
+			add.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
+			del.push(({ publicationId: Number(node.id()) }));
+			edit.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
+			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => Number(edge.target().id()));
+			next.push(({ fromId: Number(node.id()), toId: toID }));
 	 	})
 			result = { add: add, delete: del, edit: edit, next: next };
 			return result;
