@@ -39,7 +39,7 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({courses: [inputValue]})
+            body: JSON.stringify({courses: courses})
         });
         updateStore();
         addingCourse = false;
@@ -56,8 +56,16 @@
         editing = index;
         inputValue = courses[index]
     }
-    const confirmEdit = () => {
+    const confirmEdit = async () => {
         courses[editing] = inputValue;
+        await fetch(`/api/user/${$authStore.user?.id}/use-in-course/${publicationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({courses: courses})
+        });
+        updateStore();
         inputValue = "";
         editing = -1;
     }

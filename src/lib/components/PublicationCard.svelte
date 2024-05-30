@@ -42,7 +42,6 @@
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
     export let markAsUsed: boolean = false;
-    export let isChecked = false;
     export let courses: string[] = ["no courses found"]
 
     const userId = $authStore.user?.id;
@@ -69,22 +68,6 @@
         await fetch(`/api/user/${userId}/saved/${publication.id}`, {
             method: 'POST',
         }).then(() => saved = !saved);
-    }
-
-    const toggleUsedInCourse = async () => {
-        if (isChecked) {
-            used++;
-            await fetch(`/api/user/${userId}/use-in-course/${publication.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ courses: ['a'] }),
-            });
-        } else {
-            used--;
-            await fetch(`/api/user/${userId}/use-in-course/${publication.id}?courses=["a"]`, {method: "DELETE"});
-        }
     }
 
     let hoverDiv: HTMLDivElement;
