@@ -5,8 +5,9 @@
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import ToggleComponent from '$lib/components/ToggleComponent.svelte';
 	import type { FetchedFileArray } from '$lib/database';
-
-	export let materials : any = [];
+	import { quartOut } from 'svelte/easing';
+	import { scale } from 'svelte/transition';
+		export let materials : any = [];
 	export let fileData : FetchedFileArray = []
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
@@ -106,15 +107,15 @@
 
 </script>
 
-
-<div bind:this={targetDiv}
-		 class="fixed top-1/2 left-1/2 w-4/5 h-4/5 bg-surface-100 shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex overflow-auto items-start">
+<div class="fixed top-0 left-0 w-full h-full bg-surface-800 bg-opacity-70"/>
+	<div bind:this={targetDiv}
+			 class="fixed top-1/2 left-1/2 w-4/5 h-4/5 bg-surface-100 rounded-lg shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex overflow-auto items-start"  transition:scale={{ delay: 0, duration: 200, start:0.9}}>
 		<Grid pageGrid="{false}">
 
 			<div class="flex-col col-span-full mt-8">
 				<div class="flex justify-between w-full">
-				<h2 class="text-surface-700 font-bold mb-4">Select Publications to Add to Your Circuit</h2>
-				<button class="rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
+					<h2 class="text-surface-700 font-bold mb-4">Select Publications to Add to Your Circuit</h2>
+					<button class="rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
 				</div>
 				<div class = "w-full lg:w-7/12 xl:w-1/2 mb-2">
 					<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
@@ -126,10 +127,11 @@
 			</div>
 
 
-				{#each materials as m, i}
-					<PublicationCard publication="{m.publication}" inCircuits="{true}"
-													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + fileData[i].data}/>
-				{/each}
+			{#each materials as m, i}
+				<PublicationCard publication="{m.publication}" inCircuits="{true}"
+												 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
+												 on:removed={removeCard} imgSrc={'data:image;base64,' + fileData[i].data}/>
+			{/each}
 		</Grid>
-</div>
+	</div>
+

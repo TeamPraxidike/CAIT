@@ -3,10 +3,21 @@
 	import cytoscape from 'cytoscape';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
 	import type { FetchedFileArray, NodeDiffActions } from '$lib/database';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { Node as PrismaNode, Publication } from '@prisma/client';
+	import nodeHtmlLabel from 'cytoscape-node-html-label'
+	//import cytoscapeHTML from 'cytoscape-html';
+	import { popup } from '@skeletonlabs/skeleton';
+	import Node from './Node.svelte';
 
+	nodeHtmlLabel(cytoscape)
+
+	const popupHoverPub: PopupSettings = {
+		event: 'hover',
+		target: 'popupHoverPub',
+		placement: 'top'
+	};
 	const modalStore = getModalStore();
 	//	import cytoscapeNodeHtmlLabel from 'cytoscape-node-html-label';
 
@@ -31,6 +42,16 @@
 		}[]
 	})[] = [];
 
+	const htmlRender = (publication : Publication) => {
+		return `<div class="node-content"><div use:popup="{${popupHoverPub}" class="{display} bg-surface-50 border border-primary-500 w-[100px] h-[60px] rounded-lg flex flex-col items-center justify-center gap-1">
+	<p class="text-surface-700 self-center"> ${publication.title}</p>
+	<div class="flex gap-2">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><path fill="#00A6D6" d="M200 152a31.84 31.84 0 0 0-19.53 6.68l-23.11-18A31.65 31.65 0 0 0 160 128c0-.74 0-1.48-.08-2.21l13.23-4.41A32 32 0 1 0 168 104c0 .74 0 1.48.08 2.21l-13.23 4.41A32 32 0 0 0 128 96a32.6 32.6 0 0 0-5.27.44L115.89 81A32 32 0 1 0 96 88a32.6 32.6 0 0 0 5.27-.44l6.84 15.4a31.92 31.92 0 0 0-8.57 39.64l-25.71 22.84a32.06 32.06 0 1 0 10.63 12l25.71-22.84a31.91 31.91 0 0 0 37.36-1.24l23.11 18A31.65 31.65 0 0 0 168 184a32 32 0 1 0 32-32m0-64a16 16 0 1 1-16 16a16 16 0 0 1 16-16M80 56a16 16 0 1 1 16 16a16 16 0 0 1-16-16M56 208a16 16 0 1 1 16-16a16 16 0 0 1-16 16m56-80a16 16 0 1 1 16 16a16 16 0 0 1-16-16m88 72a16 16 0 1 1 16-16a16 16 0 0 1-16 16"/></svg>	</div>
+</div><div/>`
+	}
+
+	const isBrowser = typeof window !== 'undefined';
+
 	let edges: Edge[] = [];
 	let cy: any;
 	let selected: boolean = false;
@@ -38,9 +59,14 @@
 	let prereqActive: boolean = false;
 	let nodeClicked: boolean = false;
 	let numSelected: number = 0;
+	// let nodeHovered: boolean = false
+	// let hoveredPublication : Publication & {
+	// 	tags: { content: string }[]
+	// };
 
 	let mappedNodes = nodes.map(node => ({
-		data: { id: node.publicationId.toString(), label: node.publication.title },
+		data: { id: node.publicationId.toString(), label: node.publication.title,
+	},
 		position: { x: node.posX, y: node.posY }
 	}));
 
@@ -55,12 +81,20 @@
 					target: String(nextNode.toPublicationId)
 				}
 			}));
-		console.log(curNext);
 		edges.push(...curNext);
 	});
-	console.log(edges);
 
-	onMount(() => {
+	onMount(async () => {
+		// let cytoscapeHTML
+		// if (isBrowser)
+		// {
+		// 	cytoscapeHTML = await import('cytoscape-html').then(module => module.default);
+		// }
+		// if(cytoscapeHTML)
+		// {
+		// 	cytoscape.use(cytoscapeHTML);
+		// }
+
 
 		// Initialize Cytoscape
 		cy = cytoscape({
@@ -70,7 +104,7 @@
 				...edges
 			],
 			style: [
-				{
+				 {
 					selector: 'node',
 					style: {
 						'width': '100px',
@@ -86,6 +120,22 @@
 						'label': 'data(label)',
 					},
 				},
+				// {
+				// 	selector: 'node:active',
+				// 	style: {
+				// 		'width': '100px',
+				// 		'height': '60px',
+				// 		'shape': 'round-rectangle',
+				// 		'background-color': '#F9F9FA',
+				// 		'border-width' : '1px',
+				// 		'border-color' : '#0088AD',
+				// 		'color': '#4C4C5C',
+				// 		'font-size': '10px',
+				// 		'text-valign': 'center',
+				// 		'text-halign': 'center',
+				// 		'label': 'data(label)',
+				// 	},
+				// },
 				{
 					selector: 'edge',
 					style: {
@@ -104,9 +154,23 @@
 		});
 
 
+		cy.nodeHtmlLabel([
+			{
+				query: 'node',
+				tpl: function(data : any) {
+					return `<div class="node-content">
+                      <button class="node-title bg-surface-600" use:popup="{popupHoverPub}" onclick='() => {alert("Haha")}'>${data.label}</button>
+                      <div class="node-icons flex gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path d="M2 3h8a2 2 0 0 1 2-2a2 2 0 0 1 2 2h8v2h-1v11h-5.75L17 22h-2l-1.75-6h-2.5L9 22H7l1.75-6H3V5H2zm3 2v9h14V5z"/></svg>
+                      </div>
+                    </div>`;
+				}
+			}
+		]);
+
 		cy.on('select', 'node', (event: any) => {
 
-			console.log('Selected: ' + event.target.data().label);
 			numSelected++;
 			let node = event.target;
 			if (!publishing) {
@@ -194,7 +258,6 @@
 				if (cur) {
 					// Assuming cur is an object and you want to navigate to the publisherId
 					const url = `/${cur.publication.publisherId}/${event.target.id()}`;
-					console.log(url);
 					window.open(url, '_blank'); // Open the URL in a new tab
 				} else {
 					console.error('No matching node found for publicationId:', event.target.id());
@@ -218,7 +281,6 @@
 				if (cur) {
 					// Assuming cur is an object and you want to navigate to the publisherId
 					const url = `/${cur.publication.publisherId}/${event.target.id()}`;
-					console.log(url);
 					window.open(url, '_blank'); // Open the URL in a new tab
 				} else {
 					console.error('No matching node found for publicationId:', event.target.id());
@@ -233,7 +295,6 @@
 		cy.on('mouseover', 'node', (event: any) => {
 			const node = event.target;
 			if (!node.selected() && !prereqActive) {
-				console.log("Here")
 				node.style({
 					'background-color': '#4C4C5C',
 					'color': '#F9F9FA'
@@ -260,6 +321,9 @@
 					if (node)
 						node.lock()
 			});
+
+		cy.fit();
+		//cy.nodes().renderHTMLNodes({ hideOriginal: true });
 	});
 
 
@@ -308,7 +372,7 @@
 			.then(data => {
 				cy.add({
 					group: 'nodes',
-					data: { id: data.material.publication.id, label: data.material.publication.title },
+					data: { id: data.material.publication.id, label: data.material.publication.title,},
 					position: { x: 100, y: 100 }
 				});
 			})
@@ -329,6 +393,8 @@
 	};
 
 
+
+
 	/**
 	 * Removes all selected nodes
 	 */
@@ -344,6 +410,7 @@
 					if (node.selected()) {
 						cy.remove(cy.$(`#${node.id()}`));
 						pubIds.delete(Number(node.id()));
+						console.log(cy.nodes())
 					}
 				});
 				selectedId = '';
@@ -397,11 +464,12 @@
 		cy.$(`#${selectedId}`).unselect();
 	};
 
+
 </script>
 
 <style>
     #cy {
-        width: 850px;
+        width: 100%;
         height: 600px;
         border: 1px solid black;
     }
@@ -434,7 +502,7 @@
 	{/if}
 
 
-	<div class="mt-2" id="cy"></div>
+	<div class="mt-2 w-full" id="cy"></div>
 </div>
 
 
@@ -445,6 +513,13 @@
 								 on:selFurther={addNode} on:remFurther={removeNode} />
 	</div>
 {/if}
+<button class="btn variant-filled">Click</button>
+
+
+<div class="card p-4 variant-filled-secondary" data-popup="popupHoverPub">
+	<p>Hover Content</p>
+	<div class="arrow variant-filled-secondary" />
+</div>
 
 
 

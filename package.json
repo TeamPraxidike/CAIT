@@ -23,6 +23,7 @@
 	"devDependencies": {
 		"@eslint/js": "^9.1.1",
 		"@iconify/svelte": "^4.0.2",
+		"@iconify/tailwind": "^1.1.1",
 		"@playwright/test": "^1.28.1",
 		"@prisma/client": "^5.14.0",
 		"@skeletonlabs/skeleton": "2.9.2",
@@ -70,6 +71,7 @@
 	"dependencies": {
 		"@floating-ui/dom": "1.6.4",
 		"cytoscape": "^3.29.2",
+		"cytoscape-html": "^0.1.2",
 		"cytoscape-node-html-label": "^1.2.2",
 		"date-fns": "^3.6.0",
 		"file-saver": "^2.0.5",
