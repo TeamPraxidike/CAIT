@@ -75,11 +75,13 @@ export const actions = {
 			};
 		}
 
+		const userId = data.get('userId')?.toString();
+		if (userId === undefined) throw new Error('user id is undefined');
 		const material: MaterialForm & {
 			materialId: number;
 		} = {
 			materialId: parseInt(params.publication),
-			userId: Number(data.get('userId')?.toString()),
+			userId: userId,
 			metaData: {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',
@@ -95,11 +97,9 @@ export const actions = {
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: 34,
 				tags: data.get('tags')?.toString().split(';') || [''],
-				maintainers: data
-					.get('maintainers')
-					?.toString()
-					.split(';')
-					.map(Number) || [Number(data.get('userId')?.toString())],
+				maintainers: data.get('maintainers')?.toString().split(';') || [
+					data.get('userId')?.toString() || '',
+				],
 				materialType:
 					(data.get('materialType')?.toString() as MaterialType) ||
 					'video',

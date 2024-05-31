@@ -17,18 +17,12 @@ export async function bufToBase64(files: FetchedFileArray) {
 	}));
 }
 
-export function profilePicFetcher(
-	profilePic: PrismaFile | null,
-) {
+export function profilePicFetcher(profilePic: PrismaFile | null) {
 	let filePath;
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
 	if (!profilePic) {
-		filePath = path.join(
-			'static',
-			'defaultProfilePic',
-			'profile.jpg',
-		);
+		filePath = path.join('static', 'defaultProfilePic', 'profile.jpg');
 
 		const currentFileData = fs.readFileSync(filePath);
 

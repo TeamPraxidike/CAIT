@@ -1,5 +1,6 @@
 <script lang="ts">
     import {lorem, Meta, Section} from "$lib";
+    import { page } from '$app/stores';
 </script>
 
 <Meta title="Home" description="CAIT" type="site"/>
@@ -35,6 +36,8 @@
 </div>
 
 <main class="col-span-full flex flex-col gap-10 my-20">
+
+    {console.log($page.data.session?.user)}
     <Section title="Circuits" description={lorem} subtitle="Define your learning flow"/>
     <Section title="Circuits" description={lorem} subtitle="Define your workflow"/>
 </main>

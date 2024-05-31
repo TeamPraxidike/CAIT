@@ -38,6 +38,7 @@ export interface AuthStore {
  *
  * @link https://svelte.dev/docs/svelte-store#writable
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+ * @deprecated DEPRECATED: USE $page.data.session INSTEAD
  */
 const createAuthStore = (): AuthStore => {
 	let initialData: AuthStruct = { user: null, session: null };

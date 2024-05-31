@@ -1,5 +1,5 @@
-import {prisma} from '$lib/database';
-import {Prisma} from "@prisma/client/extension";
+import { prisma } from '$lib/database';
+import { Prisma } from '@prisma/client/extension';
 
 /**
  * Adds a new user to the database. Generates a unique username based on the user's first and last name.
@@ -8,12 +8,13 @@ import {Prisma} from "@prisma/client/extension";
  * @param prismaContext
  */
 export async function createUser(
-	data:{
-		firstName: string,
-		lastName: string,
-		email: string,
+	data: {
+		firstName: string;
+		lastName: string;
+		email: string;
+		password: string;
 	},
-	prismaContext: Prisma.TransactionClient = prisma
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	const username = await generateUsername(data.firstName, data.lastName);
 
@@ -24,6 +25,7 @@ export async function createUser(
 			username: username,
 			email: data.email,
 			isAdmin: false,
+			password: data.password,
 		},
 	});
 }
@@ -74,8 +76,8 @@ async function generateUsername(firstName: string, lastName: string) {
  * @param prismaContext
  */
 export async function getUserById(
-	id: number,
-	prismaContext: Prisma.TransactionClient = prisma
+	id: string,
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.user.findUnique({
 		where: { id },
@@ -85,7 +87,24 @@ export async function getUserById(
 					tags: true,
 				},
 			},
-			profilePic: true
+			profilePic: true,
+		},
+	});
+}
+
+export async function getUserByEmail(
+	email: string,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	return prismaContext.user.findUnique({
+		where: { email },
+		include: {
+			posts: {
+				include: {
+					tags: true,
+				},
+			},
+			profilePic: true,
 		},
 	});
 }
@@ -96,8 +115,8 @@ export async function getUserById(
  * @param prismaContext
  */
 export async function deleteUser(
-	userId: number,
-	prismaContext: Prisma.TransactionClient = prisma
+	userId: string,
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return await prismaContext.user.delete({
 		where: {
@@ -105,12 +124,12 @@ export async function deleteUser(
 		},
 		include: {
 			profilePic: true,
-		}
+		},
 	});
 }
 
 export type userEditData = {
-	id: number;
+	id: string;
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -123,7 +142,7 @@ export type userEditData = {
  */
 export async function editUser(
 	user: userEditData,
-	prismaContext: Prisma.TransactionClient = prisma
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.user.update({
 		where: {
@@ -145,7 +164,7 @@ export async function editUser(
  * @param userId
  * @param publicationId
  */
-export async function likePublication(userId: number, publicationId: number) {
+export async function likePublication(userId: string, publicationId: number) {
 	const liked = await getLikedPublications(userId);
 	if (liked === null) throw Error('Liked publications were not found');
 	if (liked.liked.map((x) => x.id).includes(publicationId)) {
@@ -165,7 +184,7 @@ export async function likePublication(userId: number, publicationId: number) {
  * @param userId
  * @param publicationId
  */
-async function like(userId: number, publicationId: number) {
+async function like(userId: string, publicationId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
@@ -199,7 +218,7 @@ async function like(userId: number, publicationId: number) {
  * @param userId
  * @param publicationId
  */
-async function unlike(userId: number, publicationId: number) {
+async function unlike(userId: string, publicationId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
@@ -230,32 +249,35 @@ async function unlike(userId: number, publicationId: number) {
  * returns a list with all liked publications of a user
  * @param userId
  */
-export async function getLikedPublications(userId: number) {
+export async function getLikedPublications(userId: string) {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,
 		},
 		select: {
 			liked: true,
-		}
+		},
 	});
 }
 
-export async function isPublicationLiked(userId: number, publicationId: number) {
+export async function isPublicationLiked(
+	userId: string,
+	publicationId: number,
+) {
 	const liked = await prisma.user.findUnique({
 		where: {
-			id: userId
+			id: userId,
 		},
 		select: {
 			liked: {
 				where: {
-					id: publicationId
-				}
-			}
-		}
+					id: publicationId,
+				},
+			},
+		},
 	});
 
-	if(liked === null) return false;
+	if (liked === null) return false;
 	return liked.liked.length > 0;
 }
 
