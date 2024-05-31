@@ -117,12 +117,12 @@ type MaterialForm = {
 
 type UserForm = {
 	metaData: {
-		firstName: string,
-		lastName: string
-		email: string
+		firstName: string;
+		lastName: string;
+		email: string;
 	};
 	profilePic: { type: string; info: string } | null;
-}
+};
 
 type CircuitForm = {
 	userId: number;
@@ -183,11 +183,8 @@ export const fileSystem = new LocalFileSystem(basePath);
 export {
 	prisma,
 	type MaterialForm,
-<<<<<<< src/lib/database/index.ts
 	type UserForm,
-=======
 	type CircuitForm,
->>>>>>> src/lib/database/index.ts
 	type FileDiffActions,
 	type FetchedFileItem,
 	type FetchedFileArray,

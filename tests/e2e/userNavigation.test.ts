@@ -19,7 +19,6 @@ test('One can login', async ({ page }) => {
 	expect(await page.isVisible('text=Saved Publications')).toBeTruthy();
 
 	await page.getByTestId('profile-picture').click({ timeout: 2000 });
-	await page.click('text=Log out', { timeout: 2000 });
 });
 
 test('One can browse the publications', async ({ page }) => {

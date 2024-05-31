@@ -13,12 +13,11 @@ describe('Liking publications', () => {
 	let savedMessage: string;
 
 	beforeEach(async () => {
-		user = await createUser(
-			'Bobera',
-			'Damyanov',
-			'email2@email',
-			'vasko.pdf',
-		);
+		user = await createUser({
+			firstName: 'Marti',
+			lastName: 'Parti',
+			email: 'email@gmail',
+		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',
 			description: 'This publication has description',

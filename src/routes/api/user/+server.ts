@@ -1,9 +1,4 @@
-import {
-	createUser,
-	type FetchedFileArray,
-	prisma,
-	type UserForm,
-} from '$lib/database';
+import { createUser, prisma, type UserForm } from '$lib/database';
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 
 export async function POST({ request }) {
@@ -20,6 +15,7 @@ export async function POST({ request }) {
 
 		return new Response(JSON.stringify({ user }), { status: 200 });
 	} catch (error) {
+		console.error(error);
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
 }
