@@ -2,7 +2,7 @@
     import Icon from "@iconify/svelte";
     import {getToastStore} from "@skeletonlabs/skeleton";
     let loInput: HTMLInputElement;
-    let LOs: string[] = [];
+    export let LOs: string[] = [];
     $: LOs = LOs;
 
     let editingPK = false;
@@ -16,7 +16,7 @@
     let displayButton = false;
     let displayButtonLO = false;
     let priorInput: HTMLInputElement;
-    let priorKnowledge:string[] = [];
+    export let priorKnowledge:string[] = [];
     $: priorKnowledge = priorKnowledge;
 
     const toastStore = getToastStore();
@@ -103,7 +103,7 @@
                         <input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingLOText} on:keypress={handleLOEdit}/>
                     {:else }
                         <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center text-wrap" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
-                            <span class="relative right-1 text-base p-1 rounded-md">{LO}</span>
+                            <span class="relative right-1 text-base p-1 rounded-md text-wrap">{LO}</span>
                             {#if !editingLO && displayButtonLO && hoverIndexLO ===index}
                                 <div class=" items-end flex gap-2" >
                                     <button type="button" class="self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
@@ -118,7 +118,6 @@
                     {/if}
                 {/each}
             </div>
-
         </div>
     </div>
 
@@ -139,7 +138,7 @@
                 {#if editingPK && index === editingIndexPK}
                     <input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
                 {:else }
-                    <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center text-wrap" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
+                    <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center text-wrap shrink break-words" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
                         <p class="relative right-1 text-base p-1 rounded-md">{pk}</p>
                         {#if !editingPK && displayButton && hoverIndexPK === index }
                             <div class=" items-end flex gap-2" >

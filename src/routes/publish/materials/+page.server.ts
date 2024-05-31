@@ -85,7 +85,7 @@ export const actions = {
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: Number(data.get('theoryToApplication')),
-				tags: JSON.parse(tagsDataEntry.toString()),
+				tags: JSON.parse(tagsDataEntry.toString())?.toString(),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 				materialType: 'video',
 			},

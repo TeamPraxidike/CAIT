@@ -36,6 +36,9 @@
 	let LOs: string[] = [];
 	$: LOs = LOs;
 
+	let PKs: string[] = [];
+	$: PKs = PKs;
+
 	// input data
 	let title: string = '';
 	let description: string = '';
@@ -157,6 +160,7 @@
         formData.append('tags', JSON.stringify(tags));
         formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
+		formData.append('prerequisites', JSON.stringify(PKs));
         formData.append('coverPic', coverPic || '');
 		formData.append('newTags', JSON.stringify(newTags));
 		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
@@ -186,7 +190,6 @@
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
 			<div class="flex flex-row p-6 justify-between">
 				<div class="flex gap-4 items-center">
-					<label for="difficulty">Difficulty:</label>
 					<DifficultySelection bind:difficulty={difficulty} />
 				</div>
 				<TheoryAppBar bind:value={theoryApplicationRatio}/>
@@ -206,7 +209,7 @@
 					</div>
 				</div>
 				<div class="col-span-2">
-					<MetadataLOandPK />
+					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}/>
 				</div>
 				<div class="flex flex-col w-full">
 					<MantainersEditBar users={data.users}/>
