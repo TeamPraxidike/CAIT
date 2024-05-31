@@ -49,7 +49,14 @@ describe('Header Component', () => {
 			session: 'aa',
 		});
 
-		storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+		storePopup.set({
+			computePosition,
+			autoUpdate,
+			flip,
+			shift,
+			offset,
+			arrow,
+		});
 
 		const instance = new Header({
 			target: host,
@@ -71,7 +78,14 @@ describe('Header Component', () => {
 			session: 'aa',
 		});
 
-		storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+		storePopup.set({
+			computePosition,
+			autoUpdate,
+			flip,
+			shift,
+			offset,
+			arrow,
+		});
 
 		const instance = new Header({
 			target: host,

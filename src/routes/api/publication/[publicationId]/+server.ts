@@ -63,11 +63,9 @@ export async function GET({ params }) {
 				},
 			);
 		} else {
-			console.log('We got here');
 			return new Response(
 				JSON.stringify({
 					isMaterial: false,
-					material: {},
 					publication: publication,
 					fileData: {},
 					coverFileData: {},

@@ -19,6 +19,7 @@
 	import { goto } from '$app/navigation';
 	import { createFileList } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
+	import PoppyPop from '$lib/components/circuits/PoppyPop.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -29,7 +30,6 @@
 	const isMaterial : boolean = serverData.isMaterial
 
 	// console.log(isMaterial)
-	 	console.log("Yep")
 	 console.log(serverData)
 
 	let likedComments = data.likedComments as number[];
@@ -240,8 +240,8 @@
 			<FileTable operation="download" {files} />
 		</div>
 	{:else}
-		<div class="min-h-96 w-full">
-			<Circuit publishing="{false}" nodes="{serverData.publication.circuit.nodes}"/>
+		<div  class="min-h-96 w-full">
+				<Circuit publishing="{false}" nodes="{serverData.publication.circuit.nodes}"/>
 		</div>
 	{/if}
 	{#if serverData.publication.publisherId === $authStore.user?.id}

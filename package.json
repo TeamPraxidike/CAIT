@@ -69,15 +69,17 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@floating-ui/dom": "1.6.4",
+		"@floating-ui/dom": "^1.6.4",
 		"cytoscape": "^3.29.2",
 		"cytoscape-html": "^0.1.2",
 		"cytoscape-node-html-label": "^1.2.2",
+		"cytoscape-popper": "^4.0.0",
 		"date-fns": "^3.6.0",
 		"file-saver": "^2.0.5",
 		"highlight.js": "11.9.0",
 		"interactjs": "^1.10.27",
 		"jszip": "^3.10.1",
-		"svelte-routing": "^2.13.0"
+		"svelte-routing": "^2.13.0",
+		"tippy.js": "^6.3.7"
 	}
 }

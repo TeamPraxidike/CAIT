@@ -139,11 +139,19 @@ export async function getPublicationById(id: number) {
 			},
 			circuit: {
 				include: {
-					publication: true,
+					publication: {
+						include: {
+							tags: true,
+						},
+					},
 					nodes: {
 						include: {
-							publication: true,
-							prerequisites: true,
+							publication: {
+								include: {
+									tags: true,
+									coverPic: true,
+								},
+							},
 							next: true,
 						},
 					},
