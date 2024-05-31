@@ -319,7 +319,8 @@
 			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => Number(edge.target().id()));
 			next.push(({ fromId: Number(node.id()), toId: toID }));
 	 	})
-			nodeDiffActions = { add: add, delete: del, edit: edit, next: next };
+		nodeDiffActions = { add: add, delete: del, edit: edit, next: next };
+
 		cy.fit();
 		// generate a png, could also use cy.jpg
 		// base64uri by default, using base64 for now

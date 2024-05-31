@@ -85,6 +85,7 @@ import {
 	addCoverPic,
 	coverPicFetcher,
 	updateCoverPic,
+	updateCircuitCoverPic,
 	updateFiles,
 } from '$lib/database/file';
 import { prisma } from './prisma';
@@ -115,15 +116,6 @@ type MaterialForm = {
 	fileDiff: FileDiffActions;
 };
 
-type UserForm = {
-	metaData: {
-		firstName: string;
-		lastName: string;
-		email: string;
-	};
-	profilePic: { type: string; info: string } | null;
-};
-
 type CircuitForm = {
 	userId: number;
 	metaData: {
@@ -135,7 +127,17 @@ type CircuitForm = {
 		tags: string[];
 		maintainers: number[];
 	};
+	coverPic: { type: string; info: string } | null;
 	nodeDiff: NodeDiffActions;
+};
+
+type UserForm = {
+	metaData: {
+		firstName: string;
+		lastName: string;
+		email: string;
+	};
+	profilePic: { type: string; info: string } | null;
 };
 
 /**
@@ -182,13 +184,14 @@ export const fileSystem = new LocalFileSystem(basePath);
 
 export {
 	prisma,
-	type MaterialForm,
 	type UserForm,
+	type MaterialForm,
 	type CircuitForm,
 	type FileDiffActions,
 	type FetchedFileItem,
 	type FetchedFileArray,
 	type NodeDiffActions,
+	updateCircuitCoverPic,
 	updateFiles,
 	coverPicFetcher,
 	updateCoverPic,
