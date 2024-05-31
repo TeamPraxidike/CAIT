@@ -3,6 +3,7 @@
     import {authStore} from "$lib";
 
     export let user:User;
+    export let userPhotoUrl: string;
     let about = "Franklin Delano Roosevelt[a] (January 30, 1882 – April 12, 1945), commonly known by his initials FDR, was an American statesman and politician who served as the 32nd president of the United States from 1933 until his death in 1945. He was a member of the Democratic Party and is the only U.S. president to have served more than two terms."
 
 
@@ -18,7 +19,12 @@
             lg:col-span-12 lg:px-4
             xl:col-span-3
             dark:bg-surface-800 dark:text-surface-50 dark:border-none">
-    <enhanced:img class="w-40 md:w-64 xl:w-full rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>
+<!--    <enhanced:img class="w-40 md:w-64 xl:w-full rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo"/>-->
+    {#if userPhotoUrl !== ''}
+        <img src={userPhotoUrl} alt="User Profile" class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full" />
+    {:else}
+        <div class="w-20 h-20 md:w-40 md:h-40 rounded-full bg-surface-500 placeholder-circle" />
+    {/if}
     <div class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
                 sm:flex-col sm:items-start
                 md:w-7/12 md:justify-start
@@ -36,8 +42,8 @@
                 <p class="variant-soft-primary hidden md:block p-2 rounded-lg">Reputation: {user.reputation}</p>
                 {#if currentlyAuth()}
                     <div class="flex gap-2">
-                        <button class="btn bg-surface-800 text-surface-50 rounded-lg
-                           dark:bg-surface-700">Edit Profile</button>
+                        <a type="button" href="/{user.id}/edit"  class="btn bg-surface-800 text-surface-50 rounded-lg
+                           dark:bg-surface-700">Edit Profile</a>
                         <button class="btn bg-surface-800 text-surface-50 rounded-lg
                            dark:bg-surface-700">Settings</button>
                     </div>
@@ -56,8 +62,8 @@
         </p>
         {#if currentlyAuth()}
             <div class="flex gap-4">
-                <button class="btn bg-surface-800 text-surface-50 rounded-lg
-                               dark:bg-surface-700">Edit Profile</button>
+                <a type="button" href="./edit" class="btn bg-surface-800 text-surface-50 rounded-lg
+                               dark:bg-surface-700">Edit Profile</a>
                 <button class="btn bg-surface-800 text-surface-50 rounded-lg
                                dark:bg-surface-700">Settings</button>
             </div>
