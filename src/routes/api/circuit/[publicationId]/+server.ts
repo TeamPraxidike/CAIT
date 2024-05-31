@@ -11,6 +11,7 @@ import {
 	updateCircuitByPublicationId, updateCircuitCoverPic,
 } from '$lib/database';
 import {Prisma} from '@prisma/client';
+import type {File as PrismaFile} from '@prisma/client';
 
 export async function GET({ params }) {
 	// Authentication step
@@ -176,6 +177,13 @@ export async function DELETE({ params }) {
 					id,
 					prismaTransaction,
 				);
+
+			const coverPic: PrismaFile = publication.coverPic;
+
+			// if there is a coverPic, delete
+			if (coverPic) {
+				fileSystem.deleteFile(coverPic.path);
+			}
 
 			return publication.circuit;
 		});
