@@ -1,11 +1,5 @@
-import { deleteFile, prisma } from '$lib/database';
-import {
-	Difficulty,
-	type File as PrismaFile,
-	type Material,
-	MaterialType,
-	PublicationType,
-} from '@prisma/client';
+import { prisma } from '$lib/database';
+import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
 
 const sortSwitch = (sort: string) => {
@@ -145,17 +139,25 @@ export async function getAllMaterials(
 	});
 }
 
+/**
+ * Deletes Publication, cascades to Material
+ * @param publicationId
+ * @param prismaContext
+ */
 export async function deleteMaterialByPublicationId(
 	publicationId: number,
-	material: Material & { files: PrismaFile[]; coverPic: PrismaFile },
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	for (const file of material!.files) {
-		await deleteFile(file.path, prismaContext);
-	}
-
-	return prismaContext.material.delete({
-		where: { publicationId: publicationId },
+	return prismaContext.publication.delete({
+		where: { id: publicationId },
+		include: {
+			material: {
+				include: {
+					files: true,
+				},
+			},
+			coverPic: true,
+		},
 	});
 }
 

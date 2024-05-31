@@ -19,6 +19,7 @@
     let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
+    let profilePics:FetchedFileArray = data.profilePics;
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
 
@@ -164,7 +165,8 @@
           })
           .then(data => {
               // Handle the response data from the API
-              materials = data
+              materials = data.materials;
+              fileData = data.fileData;
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);
@@ -304,7 +306,7 @@
         <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} courses={material.publication.usedInCourse.map(x  => x.course)}/>
     {/each}
 {:else if pageType === "people"}
-    {#each users as person}
-        <UserProp view="search" posts="{5}" userPhotoUrl="" role="Maintainer" user={person} />
+    {#each users as person, i}
+        <UserProp view="search" posts="{5}" userPhotoUrl={'data:image;base64,' + profilePics[i].data} role="Maintainer" user={person} />
     {/each}
 {/if}

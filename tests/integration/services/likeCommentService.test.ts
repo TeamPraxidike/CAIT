@@ -15,12 +15,11 @@ describe('Comments Liking', () => {
 	let comment: any;
 	let message: string;
 	beforeEach(async () => {
-		user = await createUser(
-			'Bober',
-			'Damyanov',
-			'email2@email',
-			'vasko.pdf',
-		);
+		user = await createUser({
+			firstName: 'Marti12345431143',
+			lastName: 'Parti',
+			email: 'email@gmail',
+		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',
 			description: 'This publication has description',

@@ -1,6 +1,4 @@
-import {
-	getAllCircuits
-} from '$lib/database/circuit';
+import { getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
 	type CircuitForm,
@@ -79,6 +77,7 @@ export async function POST({ request }) {
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
+		console.error(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});

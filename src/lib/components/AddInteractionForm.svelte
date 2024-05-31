@@ -14,6 +14,7 @@
 
 	let userId = $authStore.user?.id || 0;
 
+	let text = addComment ? 'Comment':'Reply'
 	let commentText = '';
 	let textarea: HTMLTextAreaElement;
 
@@ -61,7 +62,7 @@
 </script>
 
 
-<div class="{addComment ? 'col-start-1':'col-start-2'} {display} mb-2 gap-2 col-span-full items-center">
+<div class="{addComment ? 'col-start-1':'col-start-2'} {display} mb-2 gap-2 col-span-full items-top">
 	<enhanced:img class="w-10 md:w-14 rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo" />
 	<form method="POST" class="flex-grow" use:enhance={({ formData }) => {
         formData.append('userId',userId.toString());
@@ -84,27 +85,27 @@
         //              window.location.reload();
         //          }, 50);
       }}>
-		<div class="flex-grow pt-2 items-center">
-        <textarea
-					name="comment"
-					bind:this={textarea}
-					class="w-full border-0 border-b border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm dark:text-surface-800"
-					placeholder="{addComment ? 'Start a discussion...' : 'Write a response...'}  "
-					rows="1"
-					bind:value={commentText}
-					on:input={adjustHeight}
-					on:focus={handleFocus}
-					on:blur={handleBlur}></textarea>
-			<div class="flex justify-end mt-2 gap-2">
-				<button
-					class="variant-soft-surface px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-surface"
-					type="button" on:click={handleCancel}>Cancel
-				</button>
-				<button
-					class="variant-soft-primary px-4 py-2 rounded-lg {isFocused ? 'flex' : 'hidden'} hover:variant-filled-primary mr-2"
-					type="submit" formaction="?/comment"> Comment
-				</button>
-			</div>
+			<textarea
+				name="comment"
+				bind:this={textarea}
+				class="w-full border-0 border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm dark:text-surface-800 ring-0
+				 focus:border-b focus:border-primary-500 focus:ring-0 "
+				placeholder="{addComment ? 'Start a discussion...' : 'Write a response...'}  "
+				rows="1"
+				bind:value={commentText}
+				on:input={adjustHeight}
+				on:focus={handleFocus}
+				on:blur={handleBlur}></textarea>
+
+		<div class="flex justify-end mt-2 gap-2 {isFocused ? 'flex' : 'hidden'}">
+			<button
+				class="variant-soft-surface px-4 py-2 rounded-lg  hover:variant-filled-surface"
+				type="button" on:click={handleCancel}>Cancel
+			</button>
+			<button
+				class="variant-soft-primary px-4 py-2 rounded-lg  hover:variant-filled-primary mr-2"
+				type="submit" formaction="?/comment"> {text}
+			</button>
 		</div>
 	</form>
 </div>

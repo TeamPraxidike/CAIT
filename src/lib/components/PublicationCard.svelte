@@ -241,17 +241,17 @@
                     <a href="{publication.publisherId}/{publication.id}"
                        class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
                 {:else if !selected}
-                    <button class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
+                    <button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
                             on:click="{select}">Select
                     </button>
                 {:else}
-                    <button class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
+                    <button type="button" class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
                             use:popup={popupClick}>Remove
                     </button>
                     <div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
                         <div class="flex gap-2">
-                            <button id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
-                            <button id="close" class="btn variant-filled bg-surface-600">Go Back</button>
+                            <button type="button" id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
+                            <button type="button" id="close" class="btn variant-filled bg-surface-600">Go Back</button>
                         </div>
                         <div class="arrow bg-surface-100-token" />
                     </div>
@@ -267,6 +267,7 @@
                 <div class="flex gap-2">
                     <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
                         <button
+                                type="button"
                                 class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
                                 on:click={() => toggleLike()}>
                             <Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
@@ -276,6 +277,7 @@
                         <div class="h-2/3 w-px bg-surface-200"></div>
 
                         <button
+                                type="button"
                                 class="flex items-center text-xl text-surface-500 h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
                                 on:click={() => toggleSave()}>
                             <Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>

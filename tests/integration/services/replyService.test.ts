@@ -11,6 +11,7 @@ import {
 	updateReply,
 } from '$lib/database';
 
+
 describe('Reply CRUD', () => {
 	let user: User;
 	let publication: Material;
@@ -18,12 +19,11 @@ describe('Reply CRUD', () => {
 	let reply: any;
 
 	beforeEach(async () => {
-		user = await createUser(
-			'Boberi',
-			'Damyanov',
-			'email2@email',
-			'vasko.pdf',
-		);
+		user = await createUser({
+			firstName: 'Marti232',
+			lastName: 'Parti232323',
+			email: 'email@gmail',
+		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication1',
 			description: 'This publication has description',

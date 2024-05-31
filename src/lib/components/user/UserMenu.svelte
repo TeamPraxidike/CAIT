@@ -10,7 +10,11 @@
     <div class="grid grid-cols-2">
         <a href="/{$authStore.user?.id}"
            class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
-            <enhanced:img class="h-16 w-16 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
+            {#if $authStore.user && $authStore.user.profilePicData !== ''}
+                <img class="h-16 w-16 rounded-full" src={'data:image;base64,' + $authStore.user.profilePicData} alt={$authStore.user?.firstName}/>
+            {:else}
+                <div class="h-16 w-16 placeholder-circle" />
+            {/if}
             <div class="flex flex-col">
                 <span>{$authStore.user?.firstName}</span>
                 <span class="text-sm">Go to profile</span>
@@ -28,7 +32,11 @@
             <a href="/{$authStore.user?.id}"
                class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1
                   dark:hover:bg-surface-700">
-                <enhanced:img class="h-16 w-16 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
+                {#if $authStore.user && $authStore.user.profilePicData !== ''}
+                    <img class="h-16 w-16 rounded-full" src={'data:image;base64,' + $authStore.user.profilePicData} alt={$authStore.user?.firstName}/>
+                {:else}
+                    <div class="h-16 w-16 placeholder-circle" />
+                {/if}
                 <div class="flex flex-col">
                     <span>{$authStore.user?.firstName}</span>
                     <span class="text-sm">Go to profile</span>

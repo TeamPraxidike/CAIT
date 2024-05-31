@@ -16,12 +16,11 @@ describe('Comments CRUD', () => {
 	let comment: any;
 
 	beforeEach(async () => {
-		user = await createUser(
-			'Bobere',
-			'Damyanov',
-			'email2@email',
-			'vasko.pdf',
-		);
+		user = await createUser({
+			firstName: 'Marti23',
+			lastName: 'Parti',
+			email: 'email@gmail',
+		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',
 			description: 'This publication has description',

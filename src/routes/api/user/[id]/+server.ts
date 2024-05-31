@@ -1,9 +1,12 @@
 import {
 	deleteUser,
-	editUser,
-	getUserById,
-	type userEditData,
+	editUser, type FetchedFileItem, fileSystem,
+	getUserById, prisma,
+	type userEditData, type UserForm,
 } from '$lib/database';
+import {profilePicFetcher, updateProfilePic} from "$lib/database/file";
+import type {File as PrismaFile} from "@prisma/client";
+import {Prisma} from "@prisma/client";
 
 /**
  * Returns a user by id
@@ -17,7 +20,11 @@ export async function GET({ params }) {
 			return new Response(JSON.stringify({ error: 'User not found' }), {
 				status: 404,
 			});
-		return new Response(JSON.stringify(user), { status: 200 });
+
+		// profilePic return
+		const profilePicData: FetchedFileItem = profilePicFetcher(user.profilePic);
+
+		return new Response(JSON.stringify({user, profilePicData}), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
@@ -30,12 +37,41 @@ export async function GET({ params }) {
 export async function DELETE({ params }) {
 	const { id } = params;
 
+	const userId = parseInt(id);
+
 	try {
-		const user = await deleteUser(parseInt(id));
+		const user = await prisma.$transaction(
+			async (prismaTransaction) => {
+
+				const user = await deleteUser(userId, prismaTransaction);
+
+				// check if user has profilePic
+				const profilePic: PrismaFile | null = user.profilePic;
+
+				// remove if they do
+				if (profilePic) {
+					try {
+						fileSystem.deleteFile(profilePic.path);
+					} catch (errorFileSystem) {
+						throw new Error('Error while deleting profile picture');
+					}
+				}
+
+				return user;
+			}
+		)
+
 		return new Response(JSON.stringify(user), { status: 200 });
-	} catch (RecordNotFound) {
-		return new Response(JSON.stringify({ error: 'User not found' }), {
-			status: 404,
+
+	} catch (error) {
+		// TODO: documentation on this is atrocious, verify with tests!!!
+		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
+			return new Response(JSON.stringify({ error: 'User not found' }), {
+				status: 404,
+			});
+		}
+		return new Response(JSON.stringify({ error: 'Server Error' }), {
+			status: 500,
 		});
 	}
 }
@@ -46,23 +82,34 @@ export async function DELETE({ params }) {
  * @param request
  */
 export async function PUT({ params, request }) {
-	try {
-		const body = await request.json();
-		const userData: userEditData = {
-			id: parseInt(params.id),
-			firstName: body.firstName,
-			lastName: body.lastName,
-			email: body.email,
-			profilePic: body.profile,
-		};
 
-		const user = await editUser(userData);
-		if (!user)
-			return new Response(JSON.stringify({ error: 'Publication not found' }), {
-				status: 404,
-			});
+	const body: UserForm = await request.json();
+	try {
+		const user = await prisma.$transaction(
+			async (prismaTransaction) => {
+				const userData: userEditData = {
+					id: parseInt(params.id),
+					firstName: body.metaData.firstName,
+					lastName: body.metaData.lastName,
+					email: body.metaData.email,
+				};
+
+				const user = await editUser(userData, prismaTransaction);
+
+				await updateProfilePic(body.profilePic, user.id, prismaTransaction)
+
+				return user;
+			}
+		)
+
 		return new Response(JSON.stringify(user), { status: 200 });
 	} catch (error) {
+		// TODO: documentation on this is atrocious, verify with tests!!!
+		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
+			return new Response(JSON.stringify({ error: 'User not found' }), {
+				status: 404,
+			});
+		}
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
 }

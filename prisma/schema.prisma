@@ -39,7 +39,6 @@ model User {
   lastName   String
   username   String  @unique @default(uuid())
   email      String
-  profilePic String?
   reputation Int     @default(0)
 
   saved            Publication[]             @relation("saved")
@@ -54,6 +53,8 @@ model User {
   comments    Comment[]
   replies     Reply[]
   isAdmin     Boolean       @default(false)
+
+  profilePic   File?   @relation("ProfilePic")
 }
 
 model PublicationUsedInCourse {
@@ -117,9 +118,12 @@ model File {
   path  String @id
   title String
   type  String
+  
+  userId    Int?  @unique
+  profilePic   User? @relation("ProfilePic", fields: [userId], references: [id], onDelete: Cascade)
 
-  coverId  Int?         @unique
-  coverPic Publication? @relation("CoverPic", fields: [coverId], references: [id], onDelete: Cascade)
+  publicationId    Int?  @unique
+  coverPic   Publication? @relation("CoverPic", fields: [publicationId], references: [id], onDelete: Cascade)
 
   materialId Int?
   material   Material? @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)

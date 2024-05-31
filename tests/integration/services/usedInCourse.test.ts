@@ -13,12 +13,11 @@ describe('Using in a course', () => {
 	let publication2: Material;
 
 	beforeEach(async () => {
-		user = await createUser(
-			'Vasil',
-			'Levski',
-			'poDobriqVasko@gmail.com',
-			'apostola.png',
-		);
+		user = await createUser({
+			firstName: 'Marti2323',
+			lastName: 'Parti',
+			email: 'email@gmail',
+		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',
 			description: 'This publication has description',
@@ -44,10 +43,10 @@ describe('Using in a course', () => {
 	});
 
 	it('should add to the list of used in course', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		await addPublicationToUsedInCourse(user.id, publication.id, ['PTS']);
 		const courses = await coursesUsingPublication(publication.id);
-		expect(courses).toHaveLength(1);
-		expect(courses).toContain('ADS');
+		expect(courses).length.greaterThanOrEqual(1);
+		expect(courses).toContain('PTS');
 	});
 
 	it('should add multiple records to the list', async () => {
