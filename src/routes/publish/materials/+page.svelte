@@ -15,6 +15,8 @@
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
+	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
+	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 
 	export let form: ActionData;
 	export let data: PageServerData;
@@ -205,12 +207,12 @@
 <!--		</Step>-->
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-			<div class="flex gap-4 items-center">
+			<div class="flex gap-4 items-center p-6 ">
 				<label for="difficulty">Difficulty:</label>
 				<DifficultySelection bind:difficulty={difficulty} />
 			</div>
-			<div class="grid grid-cols-2 gap-4">
-				<div class="flex col-span-2 items-center gap-4">
+			<div class="grid grid-cols-2 gap-4 p-3">
+				<div class="flex col-span-2 items-center gap-4 p-3">
 					<div class="w-1/2">
 						<label for="estimate">Time Estimate:</label>
 						<input type="number" name="estimate" bind:value={estimate}
@@ -223,55 +225,23 @@
 					</div>
 				</div>
 				<div class="col-span-2">
-					<label for="maintainers">Maintainers:</label>
-					<div class="flex gap-2">
-						<input type="text" name="maintainers" id="maintainers" bind:this={maintainersInput}
-							   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 flex-grow">
-						<button type="button" name="add_maintainer" inputmode="decimal"
-								on:click={fetchMaintainer}
-								class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
-						</button>
-					</div>
-					<div class="flex my-2">
-						{#if $authStore.user}
-							<UserProp
-								user={$authStore.user} view="publish" role="Publisher" userPhotoUrl="/fdr.jpg" />
-							{#each maintainers as maintainer, key (maintainer.id)}
-								<UserProp on:removeMaintainer={() => handleRemoveMaintainer(key)} user={maintainer}
-										  view="publish"
-										  role="Maintainer" userPhotoUrl="/fdr.jpg" />
-							{/each}
-						{/if}
-					</div>
+					<MetadataLOandPK />
 				</div>
-				<div>
-					<label for="tags_input">Tags:</label>
-					<div class="text-token space-y-2">
-						<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
-								   bind:input={tagInput} bind:value={tags} name="chips" />
-						<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-							<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
-										  on:selection={onInputChipSelect} />
+				<div class="flex flex-col w-full">
+					<MantainersEditBar />
+					<div>
+						<label for="tags_input">Tags:</label>
+						<div class="text-token space-y-2">
+							<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
+									   bind:input={tagInput} bind:value={tags} name="chips" />
+							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
+											  on:selection={onInputChipSelect} />
+							</div>
 						</div>
 					</div>
 				</div>
-				<div>
-					<label for="learning_objective_input">Learning Objectives:</label>
-					<div class="flex gap-2">
-						<input type="text" name="learning_objective_input" id="learning_objective_input"
-							   bind:this={loInput}
-							   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 flex-grow">
-						<button type="button" name="add_lo"
-								on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""; }}
-								class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
-						</button>
-					</div>
-					<ol class="list-decimal bg-surface-100 list-inside gap-2 max-h-40 overflow-y-auto">
-						{#each LOs as LO}
-							<li transition:fade={{ duration: 200 }}>{LO}</li>
-						{/each}
-					</ol>
-				</div>
+
 			</div>
 		</Step>
 		<Step>
