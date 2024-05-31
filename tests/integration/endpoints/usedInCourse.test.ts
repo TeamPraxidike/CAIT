@@ -12,9 +12,9 @@ import { testingUrl } from '../setup';
 describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 	it('should successfully use a publication in a course', async () => {
 		const body = {
-			firstName: 'Kirilcho',
+			firstName: 'Kirilcho' + Math.random(),
 			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl',
+			email: 'email@student.tudelft.nl' + Math.random() * Math.random(),
 			profilePic: 'image.jpg',
 		};
 
@@ -83,9 +83,9 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 
 	it('should return 404 when publication does not exist', async () => {
 		const body = {
-			firstName: 'Kirilcho',
+			firstName: 'Kirilcho' + Math.random(),
 			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl',
+			email: 'email@student.tudelft.nl' + Math.random(),
 			profilePic: 'image.jpg',
 		};
 		const user = await createUser({
@@ -109,9 +109,9 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 describe('[GET] /publication/{publicationId}/used-in-course', () => {
 	it('should return 204 when no content', async () => {
 		const body = {
-			firstName: 'Kirilcho',
+			firstName: 'Kirilcho' + Math.random(),
 			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl',
+			email: 'email@student.tudelft.nl' + Math.random(),
 			profilePic: 'image.jpg',
 		};
 		const user = await createUser({
@@ -148,9 +148,9 @@ describe('[GET] /publication/{publicationId}/used-in-course', () => {
 describe('[GET] /user/[id]/use-in-course', () => {
 	it('should return 204 when no content', async () => {
 		const body = {
-			firstName: 'Kirilcho',
+			firstName: 'Kirilcho' + Math.random(),
 			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl',
+			email: 'email@student.tudelft.nl' + Math.random(),
 			profilePic: 'image.jpg',
 		};
 		const user = await createUser({
@@ -173,9 +173,10 @@ describe('[GET] /user/[id]/use-in-course', () => {
 
 	it('should add courses to the list', async () => {
 		const user = await createUser({
-			firstName: 'body.firstName',
+			firstName: 'body.firstName' + Math.random(),
 			lastName: 'body.lastName',
-			email: 'body.email',
+			email: 'body.email' + Math.random(),
+			password: 'password',
 		});
 		const publication1 = await createMaterialPublication(user.id, {
 			title: 'cool publication',
@@ -226,9 +227,10 @@ describe('[GET] /user/[id]/use-in-course', () => {
 describe('[DELETE] /user/[id]/use-in-course/[publicationId]', () => {
 	it('should delete only the courses passed', async () => {
 		const user = await createUser({
-			firstName: 'body.firstName',
+			firstName: 'body.firstName' + Math.random(),
 			lastName: 'body.lastName',
-			email: 'body.email',
+			email: 'body.email' + Math.random(),
+			password: 'password',
 		});
 		const publication1 = await createMaterialPublication(user.id, {
 			title: 'cool publicationa',

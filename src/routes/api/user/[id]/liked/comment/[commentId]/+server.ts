@@ -6,7 +6,7 @@ import { getComment, getUserById, likesCommentUpdate } from '$lib/database';
  */
 export async function POST({ params }) {
 	const { id, commentId } = params;
-	const user = await getUserById(parseInt(id));
+	const user = await getUserById(id);
 	if (!user)
 		return new Response(JSON.stringify({ error: 'User not found' }), {
 			status: 404,
@@ -19,10 +19,7 @@ export async function POST({ params }) {
 		});
 
 	try {
-		const response = await likesCommentUpdate(
-			parseInt(id),
-			parseInt(commentId),
-		);
+		const response = await likesCommentUpdate(id, parseInt(commentId));
 		return new Response(JSON.stringify({ message: response }), {
 			status: 200,
 		});

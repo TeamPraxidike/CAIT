@@ -6,7 +6,7 @@ export type editReplyData = {
 };
 
 export type createReplyData = {
-	userId: number;
+	userId: string;
 	commentId: number;
 	content: string;
 };

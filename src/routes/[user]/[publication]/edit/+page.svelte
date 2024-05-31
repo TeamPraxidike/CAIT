@@ -20,7 +20,7 @@
 
 	let LOs: string[] = serverData.material.publication.learningObjectives;
 	let difficulty: Difficulty = serverData.material.publication.difficulty;
-	let maintainers: number[] = [$authStore.user?.id || 1];
+	let maintainers: string[] = [$authStore.user?.id || "kur"];
 	let coverPic: File | undefined = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 
 	function chooseCover(e: Event) {

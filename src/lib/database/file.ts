@@ -83,7 +83,7 @@ export async function addProfilePic(
 	title: string,
 	type: string,
 	info: Buffer,
-	userId: number,
+	userId: string,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
@@ -108,7 +108,7 @@ export async function addProfilePic(
 
 export async function updateProfilePic(
 	profilePic: { type: string; info: string } | null,
-	userId: number,
+	userId: string,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// check if the material already has a coverPic

@@ -20,18 +20,14 @@ async function getExistingUserIDs() {
 	return users.map((user) => user.id);
 }
 
-function generateRandomID() {
-	return Math.floor(Math.random() * 1000000); // Adjust the range as needed
-}
-
 describe('Users', () => {
 	describe('[GET] /user/:id', () => {
 		it('should respond with 404 if the user does not exist', async () => {
-			const userIds: number[] = await getExistingUserIDs();
+			const userIds: string[] = await getExistingUserIDs();
 
 			let randomID;
 			do {
-				randomID = generateRandomID();
+				randomID = 'kur';
 			} while (userIds.includes(randomID));
 
 			const response = await fetch(`${testingUrl}/user/${randomID}`, {
@@ -45,9 +41,10 @@ describe('Users', () => {
 
 		it('should respond with 200 and the user if it exists', async () => {
 			const newUser = await createUser({
-				firstName: 'ivan',
+				firstName: 'ivan' + Math.random(),
 				lastName: 'shishman',
-				email: 'ivanshishman@pliska.bg',
+				email: 'ivanshishman@pliska.bg' + Math.random(),
+				password: 'password',
 			});
 
 			const response = await fetch(`${testingUrl}/user/${newUser.id}`, {
@@ -63,9 +60,9 @@ describe('Users', () => {
 		let response: Response;
 		beforeEach(async () => {
 			const body = {
-				firstName: 'Paisiifewaafwe',
+				firstName: 'Paisiifewaafwe' + Math.random(),
 				lastName: 'Hilendarskiafw',
-				email: 'paiskataH@yahoomail.com',
+				email: 'paiskataH@yahoomail.com' + Math.random(),
 			};
 
 			response = await fetch(`${testingUrl}/user`, {
@@ -89,9 +86,9 @@ describe('Users', () => {
 
 		it('should respond with 500 if body is malformed', async () => {
 			const body = {
-				name: 'Paisii',
+				name: 'Paisii' + Math.random(),
 				lastName: 'Hilendarski',
-				email: 'paiskataH@yahoomail.com',
+				email: 'paiskataH@yahoomail.com' + Math.random(),
 				profilePic: 'paiskata.jpg',
 			};
 
@@ -179,9 +176,10 @@ describe('Users', () => {
 	describe('[GET] /user/:id/liked', () => {
 		it('should return an empty list for a newly created user', async () => {
 			const user = await createUser({
-				firstName: 'Mar342423423243ti',
+				firstName: 'Mar342423423243ti' + Math.random(),
 				lastName: 'Parti',
-				email: 'email@gmail',
+				email: 'email@gmail' + Math.random(),
+				password: 'password',
 			});
 
 			const response = await fetch(`${testingUrl}/user/${user.id}/liked`);
@@ -189,15 +187,18 @@ describe('Users', () => {
 		});
 
 		it('should return 404 when user does not exist', async () => {
-			const response = await fetch(`${testingUrl}/user/${9848906}/liked`);
+			const response = await fetch(
+				`${testingUrl}/user/thisIdDoesNotExist/liked`,
+			);
 			expect(response.status).toBe(404);
 		});
 
 		it('should return a list with liked posts as content', async () => {
 			const user = await createUser({
-				firstName: 'Marti',
+				firstName: 'Marti' + Math.random(),
 				lastName: 'Parti',
-				email: 'email@gmail',
+				email: 'email@gmail' + Math.random(),
+				password: 'password',
 			});
 			const publication = await createMaterialPublication(user.id, {
 				title: 'cool publication 2',
@@ -256,9 +257,9 @@ describe('Users', () => {
 	describe('[POST] /user/:id/liked/:publicationId', () => {
 		it('should successfully like a publication', async () => {
 			const body = {
-				firstName: 'Kirilcho',
+				firstName: 'Kirilcho' + Math.random(),
 				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl',
+				email: 'email@student.tudelft.nl' + Math.random(),
 				profilePic: 'image.jpg',
 			};
 			const user = await createUser({
@@ -328,9 +329,9 @@ describe('Users', () => {
 
 		it('should return 404 when publication does not exist', async () => {
 			const body = {
-				firstName: 'Kirilcho',
+				firstName: 'Kirilcho' + Math.random(),
 				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl',
+				email: 'email@student.tudelft.nl' + Math.random(),
 				profilePic: 'image.jpg',
 			};
 			const user = await createUser({
@@ -363,9 +364,9 @@ describe('Users', () => {
 
 		it('should return 404 when publication does not exist', async () => {
 			const body = {
-				firstName: 'Kirilcho',
+				firstName: 'Kirilcho' + Math.random(),
 				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl',
+				email: 'email@student.tudelft.nl' + Math.random(),
 				profilePic: 'image.jpg',
 			};
 			const user = await createUser({
@@ -386,9 +387,10 @@ describe('Users', () => {
 	describe('[GET] /user/:id/saved', () => {
 		it('should return an empty list for a newly created user', async () => {
 			const user = await createUser({
-				firstName: 'Marti',
+				firstName: 'Marti' + Math.random(),
 				lastName: 'Parti',
-				email: 'email@gmail',
+				email: 'email@gmail' + Math.random(),
+				password: 'password',
 			});
 
 			const response = await fetch(`${testingUrl}/user/${user.id}/saved`);
@@ -402,9 +404,10 @@ describe('Users', () => {
 
 		it('should return a list with liked posts as content', async () => {
 			const user = await createUser({
-				firstName: 'Marti',
+				firstName: 'Marti' + Math.random(),
 				lastName: 'Parti',
-				email: 'email@gmail',
+				email: 'email@gmail' + Math.random(),
+				password: 'password',
 			});
 			const publication = await createMaterialPublication(user.id, {
 				title: 'cool publication',
@@ -463,9 +466,9 @@ describe('Users', () => {
 	describe('[POST] /user/:id/saved/:publicationId', () => {
 		it('should successfully save a publication', async () => {
 			const body = {
-				firstName: 'Kirilcho',
+				firstName: 'Kirilcho' + Math.random(),
 				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl',
+				email: 'email@student.tudelft.nl' + Math.random(),
 				profilePic: 'image.jpg',
 			};
 			const user = await createUser({
@@ -525,9 +528,9 @@ describe('Users', () => {
 
 		it('should return 404 when publication does not exist', async () => {
 			const body = {
-				firstName: 'Kirilcho',
+				firstName: 'Kirilcho' + Math.random(),
 				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl',
+				email: 'email@student.tudelft.nl' + Math.random(),
 				profilePic: 'image.jpg',
 			};
 			const user = await createUser({
@@ -551,9 +554,10 @@ describe('Users', () => {
 	describe('[GET] user/[id]/publicationInfo/[publicationId]', async () => {
 		it('should correctly return saved and liked', async () => {
 			const user = await createUser({
-				firstName: 'Marti',
+				firstName: 'Marti' + Math.random(),
 				lastName: 'Parti',
-				email: 'email@gmail',
+				email: 'email@gmail' + Math.random(),
+				password: 'password',
 			});
 			const publication = await createMaterialPublication(user.id, {
 				title: 'cool publication',
@@ -596,9 +600,10 @@ describe('Users', () => {
 
 		it('should return 404 when publication does not exist', async () => {
 			const user = await createUser({
-				firstName: 'Marti',
+				firstName: 'Marti' + Math.random(),
 				lastName: 'Parti',
-				email: 'email@gmail',
+				email: 'email@gmail' + Math.random(),
+				password: 'password',
 			});
 
 			const response1 = await fetch(

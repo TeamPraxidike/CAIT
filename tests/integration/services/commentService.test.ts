@@ -19,7 +19,8 @@ describe('Comments CRUD', () => {
 		user = await createUser({
 			firstName: 'Marti',
 			lastName: 'Parti',
-			email: 'email@gmail',
+			email: 'email@gmail' + Math.random(),
+			password: 'password',
 		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',

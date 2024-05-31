@@ -90,7 +90,7 @@
 
 		let res: UserWithProfilePic | undefined = undefined;
 
-		if (isNaN(Number(input))) {
+		if (input) {
 			data.users.find((user: UserWithProfilePic) => {
 				if (user.firstName === input || user.lastName === input) {
 					res = user;
@@ -98,7 +98,7 @@
 			});
 		} else {
 			data.users.find((user: UserWithProfilePic) => {
-				if (user.id === Number(input)) {
+				if (user.id === input) {
 					res = user;
 				}
 			});

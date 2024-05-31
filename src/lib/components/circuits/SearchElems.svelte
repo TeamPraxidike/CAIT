@@ -11,7 +11,7 @@
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
-	let userIds : number[] = []
+	let userIds : string[] = []
 	let targetDiv: HTMLDivElement;
 	let searchWord : string = ""
 

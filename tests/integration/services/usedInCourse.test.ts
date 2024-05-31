@@ -17,7 +17,8 @@ describe('Using in a course', () => {
 		user = await createUser({
 			firstName: 'Marti2323',
 			lastName: 'Parti',
-			email: 'email@gmail',
+			email: 'email@gmail' + Math.random(),
+			password: 'password',
 		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',

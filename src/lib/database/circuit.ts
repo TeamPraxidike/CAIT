@@ -52,7 +52,7 @@ export async function deleteCircuitByPublicationId(
  * @param prismaContext
  */
 export async function createCircuitPublication(
-	userId: number,
+	userId: string,
 	metaData: {
 		title: string;
 		description: string;

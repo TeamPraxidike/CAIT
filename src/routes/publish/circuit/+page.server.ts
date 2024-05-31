@@ -46,8 +46,11 @@ export const actions = {
 			}
 		}
 
+		if (pid === undefined) {
+			throw new Error('User Id was undefined');
+		}
 		const circuit: CircuitForm = {
-			userId: Number(pid),
+			userId: pid,
 			metaData: {
 				title: title,
 				description: description,

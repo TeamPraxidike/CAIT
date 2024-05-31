@@ -59,8 +59,11 @@ export const actions = {
 			};
 		}
 
+		const userId = data.get('userId')?.toString();
+		if (userId === undefined) throw new Error('User id is undefined');
+
 		const material: MaterialForm = {
-			userId: Number(data.get('userId')?.toString()),
+			userId: userId,
 			metaData: {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',
