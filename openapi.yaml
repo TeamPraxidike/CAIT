@@ -202,6 +202,11 @@ paths:
             format: long
           required: true
           description: Numeric ID of the user
+        - in: query
+          name: fullPublications
+          schema:
+            type: boolean
+          description: a parameter that if set to true, returns all of the information for the publication. Otherwise it returns only the id's of all the saved publications
 
       responses:
         '200':
@@ -209,9 +214,21 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Publication'
+                oneOf:
+                  - type: object
+                    properties:
+                      saved:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Publication'
+                      savedFileData:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FileData'
+                  - type: array
+                    items:
+                      type: number
+                      description: The id's of the publications
         '204':
           description: Successful request but there are no saved publications
         '400':
@@ -294,6 +311,51 @@ paths:
         '500':
           description: Server Error
 
+  /user/{userId}/publicationInfo/{publicationId}:
+    get:
+      tags:
+        - User
+      summary: Get all user specific information that a publication contains (whether it is liked or not, saved)
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication (could be material or circuit)
+
+      responses:
+        '200':
+          description: Successfully returned response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  saved:
+                    type: boolean
+                  liked:
+                    type: boolean
+                required:
+                  - saved
+                  - liked
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot get this information
+        '404':
+          description: User/Publication not found
+        '500':
+          description: Server Error
+
   /user/{userId}/liked/{publicationId}:
     post:
       tags:
@@ -332,6 +394,38 @@ paths:
           description: User cannot like this publication
         '404':
           description: User/Publication not found
+        '500':
+          description: Server Error
+
+  /user/{userId}/use-in-course:
+    get:
+      tags:
+        - User
+      summary: Return publications of a user that he has marked as used in course
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the user
+
+      responses:
+        '200':
+          description: Successfully returned publications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Publication'
+        '204':
+          description: Successful request but there are no used publications
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
         '500':
           description: Server Error
 
@@ -378,6 +472,8 @@ paths:
           description: User/Publication not found
         '500':
           description: Server Error
+
+
     delete:
       tags:
         - User
@@ -401,10 +497,6 @@ paths:
       responses:
         '200':
           description: Successfully unmarked usage of publication
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
         '400':
           description: Bad request
         '401':
@@ -1624,10 +1716,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
-        usedBy:
+        usedInCourse:
           type: array
           items:
-            $ref: '#/components/schemas/User'
+            type: string
+            example: Calculus
         reports:
           type: number
           description: How many reports does this publication have
@@ -1682,6 +1775,16 @@ components:
           type: integer
           format: int64
           description: 'ID of the material to which the file is linked'
+
+    FileData:
+      type: object
+      properties:
+        fileId:
+          type: string
+          example: text.txt
+        data:
+          type: string
+          example: I am the contents of this file
 
     Circuit:
       type: object

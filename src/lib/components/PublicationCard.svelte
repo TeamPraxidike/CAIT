@@ -1,29 +1,79 @@
 <script lang="ts">
 
-    import { DiffBar, getDateDifference, Tag } from '$lib';
+
+    import {authStore, DiffBar, getDateDifference, Tag} from '$lib';
 
     import Icon from '@iconify/svelte';
-    import {fly} from 'svelte/transition';
-    import {onMount} from 'svelte';
+    import { fly } from 'svelte/transition';
+    import { createEventDispatcher, onMount } from 'svelte';
     import type { Publication } from '@prisma/client';
+    import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import { popup } from '@skeletonlabs/skeleton';
+
     export let publication:Publication & {
         tags: { content: string }[]
     };
+
+    let popupName = publication.id.toString().concat(publication.title);
+    const popupClick: PopupSettings = {
+        event: 'click',
+        target: popupName,
+        placement: 'bottom',
+        closeQuery: '#close, #remove'
+    };
+
+
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let numMaterials: number = 1;
-    export let used: number = 1;
+    export let used: number = 5;
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
+    export let markAsUsed: boolean = false;
+    export let isChecked = false;
+
+    const userId = $authStore.user?.id;
+
+    //used to differentiate if its used in a normal browse or in the circuit browse
+    export let inCircuits: boolean = false;
+    //Used to see if its used in circuit whether it is selected for the circuit
+    export let selected: boolean = false;
 
     let lastUpdated: string = getDateDifference(publication.updatedAt, new Date());
 
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
     $:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
-    const toggleLike = () => liked = !liked;
-    const toggleSave = () => saved = !saved;
+    let likes = publication.likes;
+    const toggleLike = async () => {
+        likes = liked ? likes - 1 : likes + 1;
+        await fetch(`/api/user/${userId}/liked/${publication.id}`, {
+            method: 'POST',
+        }).then(() => liked = !liked);
+    }
+
+    const toggleSave = async () => {
+        await fetch(`/api/user/${userId}/saved/${publication.id}`, {
+            method: 'POST',
+        }).then(() => saved = !saved);
+    }
+
+    const toggleUsedInCourse = async () => {
+        if (isChecked) {
+            used++;
+            await fetch(`/api/user/${userId}/use-in-course/${publication.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ courses: ['a'] }),
+            });
+        } else {
+            used--;
+            await fetch(`/api/user/${userId}/use-in-course/${publication.id}?courses=["a"]`, {method: "DELETE"});
+        }
+    }
 
     let hoverDiv: HTMLDivElement;
     let container: HTMLDivElement;
@@ -52,7 +102,7 @@
         let currentWidth = 0;
 
         for (let i = 0; i < tagWidths.length; i++) {
-            let checkLast = i === tagWidths.length - 1 ? tagWidths[i] : tagWidths[i] + 24;
+                let checkLast = i === tagWidths.length - 1 ? tagWidths[i] : tagWidths[i] + 24;
 
 
             if (!(currentWidth + checkLast <= containerWidth)) {
@@ -84,7 +134,19 @@
         }
     });
 
+    const dispatch = createEventDispatcher();
+    const select = () => {
+        selected = true;
+        dispatch('selected', { id: publication.id });
+    };
+    const remove = () => {
+        selected = false;
+        dispatch('removed', { id: publication.id });
+    };
+
+
 </script>
+
 
 
 <div class="{className} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
@@ -153,14 +215,42 @@
         <div class="w-full space-y-2">
             <hr class="opacity-50">
             <div class="w-full flex justify-between">
-                <a href="{publication.publisherId}/{publication.id}" class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+                <div class="w-full flex justify-left space-x-4">
+                {#if !inCircuits}
+                    <a href="{publication.publisherId}/{publication.id}"
+                       class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+                {:else if !selected}
+                    <button class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
+                            on:click="{select}">Select
+                    </button>
+                {:else}
+                    <button class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
+                            use:popup={popupClick}>Remove
+                    </button>
+                    <div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
+                        <div class="flex gap-2">
+                            <button id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
+                            <button id="close" class="btn variant-filled bg-surface-600">Go Back</button>
+                        </div>
+                        <div class="arrow bg-surface-100-token" />
+                    </div>
+                {/if}
+
+                    {#if markAsUsed}
+                        <div class="w-full flex justify-center space-x-2">
+                            <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>
+                            <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
+                        </div>
+                    {/if}
+                </div>
+
                 <div class="flex gap-2">
                     <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
                         <button
                                 class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
                                 on:click={() => toggleLike()}>
                             <Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
-                            <span>{publication.likes}</span>
+                            <span>{likes}</span>
                         </button>
 
                         <div class="h-2/3 w-px bg-surface-200"></div>

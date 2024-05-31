@@ -237,6 +237,230 @@ export async function getLikedPublications(userId: number) {
 		},
 		select: {
 			liked: true,
+		}
+	});
+}
+
+export async function isPublicationLiked(userId: number, publicationId: number) {
+	const liked = await prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			liked: {
+				where: {
+					id: publicationId
+				}
+			}
+		}
+	});
+
+	if(liked === null) return false;
+	return liked.liked.length > 0;
+}
+
+/**
+ * Used to like/unlike a comment
+ * Checks whether the user has already liked it and does the right action based on that (like or unlike)
+ *
+ * @param userId
+ * @param commentId
+ */
+export async function likesCommentUpdate(userId: number, commentId: number) {
+	const liked = await getLikedComments(userId);
+	if (liked === null) throw Error('Liked comment were not found');
+	if (liked.likedComments.map((x) => x.id).includes(commentId)) {
+		await unlikeComment(userId, commentId);
+		return 'Comment unliked successfully';
+		// return liked.liked
+	} else {
+		await likeComment(userId, commentId);
+		return 'Comment liked successfully';
+	}
+}
+
+/**
+ * Method for liking a comment, adds it to the user's likedComments and increases the counter in the comment atomically
+ * Does not check whether the user has already liked it, so should not be used just by itself
+ *
+ * @param userId
+ * @param commentId
+ */
+async function likeComment(userId: number, commentId: number) {
+	await prisma.$transaction(async (prismaTransaction) => {
+		await prismaTransaction.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				likedComments: {
+					connect: {
+						id: commentId,
+					},
+				},
+			},
+		});
+		await prismaTransaction.comment.update({
+			where: {
+				id: commentId,
+			},
+			data: {
+				likes: {
+					increment: 1,
+				},
+			},
+		});
+	});
+}
+
+/**
+ * Method for unliking a comment, removes it from the user's likedComments and decreases the counter in the comment atomically
+ * Does not check whether the user has already liked it, so should not be used just by itself
+ *
+ * @param userId
+ * @param commentId
+ */
+async function unlikeComment(userId: number, commentId: number) {
+	await prisma.$transaction(async (prismaTransaction) => {
+		await prismaTransaction.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				likedComments: {
+					disconnect: {
+						id: commentId,
+					},
+				},
+			},
+		});
+		await prismaTransaction.comment.update({
+			where: {
+				id: commentId,
+			},
+			data: {
+				likes: {
+					decrement: 1,
+				},
+			},
+		});
+	});
+}
+
+/**
+ * returns a list with all liked comment of a user
+ * @param userId
+ */
+export async function getLikedComments(userId: number) {
+	return prisma.user.findUnique({
+		where: {
+			id: userId,
+		},
+		select: {
+			likedComments: true,
+		},
+	});
+}
+
+/**
+ * Used to like/unlike a reply
+ * Checks whether the user has already liked it and does the right action based on that (like or unlike)
+ *
+ * @param userId
+ * @param replyId
+ */
+export async function likesReplyUpdate(userId: number, replyId: number) {
+	const liked = await getLikedReplies(userId);
+	if (liked === null) throw Error('Liked reply were not found');
+	if (liked.likedReplies.map((x) => x.id).includes(replyId)) {
+		await unlikeReply(userId, replyId);
+		return 'Reply unliked successfully';
+		// return liked.liked
+	} else {
+		await likeReply(userId, replyId);
+		return 'Reply liked successfully';
+	}
+}
+
+/**
+ * Method for liking a reply, adds it to the user's likedReplies and increases the counter in the reply atomically
+ * Does not check whether the user has already liked it, so should not be used just by itself
+ *
+ * @param userId
+ * @param replyId
+ */
+async function likeReply(userId: number, replyId: number) {
+	await prisma.$transaction(async (prismaTransaction) => {
+		await prismaTransaction.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				likedReplies: {
+					connect: {
+						id: replyId,
+					},
+				},
+			},
+		});
+		await prismaTransaction.reply.update({
+			where: {
+				id: replyId,
+			},
+			data: {
+				likes: {
+					increment: 1,
+				},
+			},
+		});
+	});
+}
+
+/**
+ * Method for unliking a reply, removes it from the user's likedReplies and decreases the counter in the reply atomically
+ * Does not check whether the user has already liked it, so should not be used just by itself
+ *
+ * @param userId
+ * @param replyId
+ */
+async function unlikeReply(userId: number, replyId: number) {
+	await prisma.$transaction(async (prismaTransaction) => {
+		await prismaTransaction.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				likedReplies: {
+					disconnect: {
+						id: replyId,
+					},
+				},
+			},
+		});
+		await prismaTransaction.reply.update({
+			where: {
+				id: replyId,
+			},
+			data: {
+				likes: {
+					decrement: 1,
+				},
+			},
+		});
+	});
+}
+
+/**
+ * returns a list with all liked reply of a user
+ * @param userId
+ */
+export async function getLikedReplies(userId: number) {
+	return prisma.user.findUnique({
+		where: {
+			id: userId,
+		},
+		select: {
+			likedReplies: true,
 		},
 	});
 }

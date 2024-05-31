@@ -1,7 +1,7 @@
 import { it, expect, describe, beforeEach } from 'vitest';
 import { Difficulty, type Material, type User } from '@prisma/client';
-import { createMaterialPublication, createUser } from '$lib/database';
-import { getSavedPublications, savePublication } from '$lib/database/save';
+import {addPublicationToUsedInCourse, createMaterialPublication, createUser} from '$lib/database';
+import {getSavedPublications, isPublicationSaved, savePublication} from '$lib/database/save';
 
 describe('Liking publications', () => {
 	let user: User;
@@ -65,5 +65,34 @@ describe('Liking publications', () => {
 		if (saved === null)
 			throw new Error('Could not get saved publications list');
 		expect(saved.saved.length).toBe(1);
+	});
+
+	it('correctly returns used courses', async () => {
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, ["ADS", "Calculus"]);
+		const saved = await getSavedPublications(user.id);
+		if (saved === null)
+			throw new Error('Could not get saved publications list');
+
+		expect(saved.saved.length).toBe(1);
+		expect(saved.saved[0].usedInCourse).toHaveLength(2);
+		const used = saved.saved[0].usedInCourse.map(x => x.course)
+		expect(used).toContain('ADS');
+		expect(used).toContain('Calculus');
+	});
+
+	it("should get whether a publication was saved", async () => {
+		const saved = await isPublicationSaved(user.id, publication.publicationId);
+		if(saved === null){
+			throw Error("saved was null");
+		}
+		expect(saved).toBe(true);
+
+		await savePublication(user.id, publication.publicationId);
+
+		const saved2 = await isPublicationSaved(user.id, publication.publicationId);
+		if(saved2 === null){
+			throw Error("liked was null");
+		}
+		expect(saved2).toBe(false);
 	});
 });

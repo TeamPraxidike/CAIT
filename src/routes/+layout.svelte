@@ -70,7 +70,7 @@
 <Header />
 
 <div class="w-screen dark:text-surface-50 text-surface-900">
-	<Grid>
+	<Grid pageGrid="{true}">
 		<slot />
 	</Grid>
 </div>

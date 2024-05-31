@@ -46,6 +46,9 @@ model User {
   liked            Publication[]             @relation("liked")
   usedPublications PublicationUsedInCourse[]
 
+  likedComments    Comment[] @relation("likedComments")
+  likedReplies     Reply[] @relation("likedReplies")
+
   maintaining Publication[] @relation("maintainers")
   comments    Comment[]
   replies     Reply[]
@@ -60,7 +63,9 @@ model PublicationUsedInCourse {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int
-  course        String
+  publication   Publication @relation(fields: [publicationId], references: [id])
+
+  course String
 
   @@id([publicationId, course])
 }
@@ -90,10 +95,11 @@ model Publication {
 
   node Node[]
 
-  coverPic   File?   @relation("CoverPic")
+  coverPic File? @relation("CoverPic")
 
-  materials Material?
-  circuit   Circuit?
+  materials    Material?
+  circuit      Circuit?
+  usedInCourse PublicationUsedInCourse[]
 }
 
 model Material {
@@ -112,7 +118,7 @@ model File {
   path  String @id
   title String
   type  String
-
+  
   userId    Int?  @unique
   profilePic   User? @relation("ProfilePic", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -131,18 +137,37 @@ model Circuit {
 }
 
 model Node {
-  id        Int     @id @default(autoincrement())
-  circuitId Int
-  circuit   Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  circuitId     Int
+  circuit       Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
 
-  extensions String[]
+  extensions    String[]
 
   publicationId Int
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
-  prerequisites Node[] @relation("edge")
-  next          Node[] @relation("edge")
+  posX          Int
+  posY          Int
+
+  prerequisites Edge[] @relation("Prereq")
+  next          Edge[] @relation("Next")
+
+  @@id([circuitId, publicationId])
 }
+
+model Edge {
+  circuitId         Int
+  fromPublicationId     Int
+  //toCircuitId Int
+  toPublicationId Int
+
+  // for this relation, the "from" node needs to have its "next" relation updated
+  from           Node @relation("Next", fields: [circuitId, fromPublicationId], references: [circuitId, publicationId], onDelete: Cascade)
+  // for this relation, the "to" node needs to have its "prereq" relation updated
+  to   Node @relation("Prereq", fields: [circuitId, toPublicationId], references: [circuitId, publicationId], onDelete: Cascade)
+
+  @@id([circuitId, fromPublicationId, toPublicationId])
+}
+
 
 model Tag {
   content     String        @id
@@ -159,9 +184,10 @@ model Comment {
 
   replies   Reply[]
   likes     Int      @default(0)
+  likedBy   User[] @relation("likedComments")
   content   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 }
 
 model Reply {
@@ -174,7 +200,9 @@ model Reply {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   likes     Int      @default(0)
+  likedBy   User[] @relation("likedReplies")
+
   content   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 }

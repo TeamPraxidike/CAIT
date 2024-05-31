@@ -69,7 +69,36 @@ export async function getSavedPublications(userId: number) {
             id: userId
         },
         select: {
-            saved: true
+            saved: {
+                include: {
+                    tags: true,
+                    materials: true,
+                    coverPic: true,
+                    usedInCourse: {
+                        select: {
+                            course: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+}
+
+export async function isPublicationSaved(userId: number, publicationId: number) {
+    const saved = await prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        select: {
+            saved: {
+                where: {
+                    id: publicationId
+                }
+            }
         }
     });
+
+    if(saved === null) return false;
+    return saved.saved.length > 0;
 }

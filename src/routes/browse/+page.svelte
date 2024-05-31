@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import {Filter, PublicationCard, SearchBar, UserProp} from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
+    import ToggleComponent from '$lib/components/ToggleComponent.svelte';
     import type { Material, Publication, Tag } from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
 
@@ -12,23 +13,18 @@
     let materials:Material & {
         publication: Publication & {
             tags: Tag[];
+            usedInCourse: string[]
         }
     }[] = data.materials;
     let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
     let profilePics:FetchedFileArray = data.profilePics;
+    let liked = data.liked as number[];
+    let saved = data.saved.saved as number[];
 
 
-
-    $:pageType = data.type;
-    $: materialsText = pageType === 'materials' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
-    $: peopleText = pageType === 'people' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
-    $: circuitsText = pageType === 'circuits' ? 'text-surface-50 dark:text-surface-900' : 'text-primary-500'
-
-    $: materialsBg = pageType === 'materials' ? 'bg-primary-500 dark:bg-primary-600 hover:bg-primary-500 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900' : 'hover:bg-primary-50 dark:hover:bg-primary-800'
-    $: peopleBg = pageType === 'people' ? 'bg-primary-500 dark:bg-primary-600 hover:bg-primary-500 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900' : 'hover:bg-primary-50 dark:hover:bg-primary-800'
-    $: circuitsBg = pageType === 'circuits' ? 'bg-primary-500 dark:bg-primary-600 hover:bg-primary-500 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900 ' : 'hover:bg-primary-50 dark:hover:bg-primary-800'
+    $: pageType = data.type;
 
     //Variables needed to deal with Sort and Difficulty
         let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
@@ -61,11 +57,10 @@
     const toggleSortBy = () => {
         //If sort by is active just close all the dropdowns else we first need to close down every other dropdown and then dropdown the sort by
         if (!sortByActive) {
-            clearAll();
             sortByActive = true;
-        } else {
-            clearAll();
         }
+        clearAll();
+
     };
     //Make the border light blue showing the current toggle is active
     $: sortByBorder = sortByActive ? "border-primary-400" : "border-surface-400"
@@ -136,7 +131,7 @@
         selectedTypes = [];
         selectedPublishers = [];
         selectedDiff = [];
-
+        sendFiltersToAPI();
     };
 
     const onSearch = (event : CustomEvent) => {
@@ -171,7 +166,6 @@
           .then(data => {
               // Handle the response data from the API
               materials = data
-              console.log(materials)
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);
@@ -181,24 +175,15 @@
 
     let applyActive = false;
     $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
-
-
 </script>
 <div class="flex justify-between col-span-full mt-32">
     <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
         <SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
     </div>
 
-
-
     <div class="hidden rounded-lg lg:flex w-1/4">
-        <a href="/browse/?type=materials" on:click={resetAll}
-           class="rounded-l-lg text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600   {materialsText} {materialsBg}">Materials</a>
-        <a href="/browse/?type=people" on:click={resetAll}
-           class="text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-primary-500 dark:border-primary-600   {peopleText} {peopleBg}">People</a>
-        <a href="/browse/?type=circuits" on:click={resetAll}
-           class="rounded-r-lg text-xs lg:text-sm w-1/3 flex justify-center items-center border-y border-r border-primary-500 dark:border-primary-600  {circuitsText} {circuitsBg}">Circuits</a>
-
+        <ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
+                         labels={["Materials", "People", "Circuits"]} on:reset={resetAll} />
     </div>
 </div>
 
@@ -238,11 +223,18 @@
                 </div>
             {/if}
         </div>
+        <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 {applyBackground}"
+                on:click={sendFiltersToAPI} disabled="{!applyActive}">Apply
+        </button>
     </div>
-    <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 {applyBackground}"
-            on:click={sendFiltersToAPI} disabled="{!applyActive}">Apply
-    </button>
+
+
+    <div class="flex rounded-lg lg:hidden w-1/4">
+        <ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
+                         labels={["Materials", "People", "Circuits"]} on:reset={resetAll} />
+    </div>
 </div>
+
 
 <div class="col-span-full flex flex-wrap gap-2">
     {#if (selectedTags.length !== 0)}
@@ -310,7 +302,7 @@
 
 {#if pageType === "materials"}
     {#each materials as material, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} />
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} used={material.publication.usedInCourse.length}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person, i}

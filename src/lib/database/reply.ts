@@ -22,6 +22,9 @@ export async function createReply(reply: createReplyData) {
 			userId: reply.userId,
 			commentId: reply.commentId,
 		},
+		include: {
+			user: true,
+		},
 	});
 }
 /**
@@ -33,8 +36,24 @@ export async function getReply(replyId: number) {
 		where: {
 			id: replyId,
 		},
+		include: {
+			likedBy: true,
+		},
 	});
 }
+
+/**
+ * [GET] gets the reply with the comment id
+ * @param commentId
+ */
+export async function getRepliesByCommentId(commentId: number) {
+	return prisma.reply.findMany({
+		where: {
+			commentId: commentId,
+		},
+	});
+}
+
 /**
  * [DELETE] deletes the reply with the given id
  * @param replyId
@@ -58,6 +77,7 @@ export async function updateReply(reply: editReplyData) {
 		},
 		data: {
 			content: reply.content,
+			updatedAt: new Date(),
 		},
 	});
 }

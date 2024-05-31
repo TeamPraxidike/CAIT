@@ -2,7 +2,6 @@ import {
 	getPublicationById,
 	//createCircuitPublication,
 	//createMaterialPublication,
-	addNodeToCircuit,
 } from './db';
 
 import {
@@ -37,10 +36,7 @@ import {
 	deleteNode,
 } from './node';
 
-import {
-	savePublication,
-	getSavedPublications
-} from "$lib/database/save";
+import { savePublication, getSavedPublications } from '$lib/database/save';
 
 import {
 	getUserById,
@@ -49,6 +45,10 @@ import {
 	editUser,
 	likePublication,
 	getLikedPublications,
+	likesReplyUpdate,
+	likesCommentUpdate,
+	getLikedReplies,
+	getLikedComments,
 } from '$lib/database/user';
 
 import {
@@ -56,6 +56,7 @@ import {
 	deleteComment,
 	getComment,
 	updateComment,
+	getCommentsByPublicationId,
 } from '$lib/database/comment';
 
 import {
@@ -63,13 +64,14 @@ import {
 	deleteReply,
 	updateReply,
 	createReply,
+	getRepliesByCommentId,
 } from '$lib/database/reply';
 
 import {
 	addPublicationToUsedInCourse,
 	coursesUsingPublication,
-	publicationsAUserUses
-} from "$lib/database/usedInCourse";
+	publicationsAUserUses,
+} from '$lib/database/usedInCourse';
 
 import type { userEditData } from '$lib/database/user';
 import type { editReplyData, createReplyData } from '$lib/database/reply';
@@ -120,6 +122,20 @@ type UserForm = {
 		email: string
 	};
 	profilePic: { type: string; info: string } | null;
+}
+
+type CircuitForm = {
+	userId: number;
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		tags: string[];
+		maintainers: number[];
+	};
+	nodeDiff: NodeDiffActions;
 };
 
 /**
@@ -152,10 +168,12 @@ type FetchedFileArray = FetchedFileItem[];
 /**
  * Information about the nodes in the circuit in arrays of operations to add, delete, and edit nodes.
  */
-type NodeInfo = {
-	add: { circuitId: number; publicationId: number }[];
-	delete: { nodeId: number }[];
-	edit: { nodeId: number; publicationId: number }[];
+
+type NodeDiffActions = {
+	add: { publicationId: number; x: number; y: number }[];
+	delete: { publicationId: number }[];
+	edit: { publicationId: number; x: number; y: number }[];
+	// from publicationId, to (many) other publicationIds
 	next: { fromId: number; toId: number[] }[];
 };
 
@@ -165,11 +183,15 @@ export const fileSystem = new LocalFileSystem(basePath);
 export {
 	prisma,
 	type MaterialForm,
+<<<<<<< src/lib/database/index.ts
 	type UserForm,
+=======
+	type CircuitForm,
+>>>>>>> src/lib/database/index.ts
 	type FileDiffActions,
 	type FetchedFileItem,
 	type FetchedFileArray,
-	type NodeInfo,
+	type NodeDiffActions,
 	updateFiles,
 	coverPicFetcher,
 	updateCoverPic,
@@ -183,7 +205,6 @@ export {
 	getPublicationById,
 	createCircuitPublication,
 	createMaterialPublication,
-	addNodeToCircuit,
 	updateMaterialByPublicationId,
 	getMaterialByPublicationId,
 	getAllMaterials,
@@ -218,7 +239,13 @@ export {
 	getSavedPublications,
 	addPublicationToUsedInCourse,
 	coursesUsingPublication,
-	publicationsAUserUses
+	publicationsAUserUses,
+	getRepliesByCommentId,
+	getCommentsByPublicationId,
+	getLikedReplies,
+	getLikedComments,
+	likesCommentUpdate,
+	likesReplyUpdate,
 };
 
 export type {
