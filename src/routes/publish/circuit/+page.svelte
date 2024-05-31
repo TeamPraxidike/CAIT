@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { authStore, Circuit, Meta, UserProp } from '$lib';
-	import { fade,fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -74,17 +74,28 @@
 	$: LOs = LOs;
 
 	const handleLOPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter' && loInput.value!=='' && !LOs.includes(loInput.value)){
-			LOs = [...LOs, loInput.value];
-			loInput.value = "";
-			event.preventDefault();
+		if (event.key === 'Enter' && loInput.value!=='' ){
+			if(LOs.includes(loInput.value)){
+				triggerRepeatInput("Learning Objective",loInput.value);
+			}else{
+				LOs = [...LOs, loInput.value];
+				loInput.value = "";
+				event.preventDefault();
+			}
+
 		}
 	}
 	const handlePriorPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter' && priorInput.value!=='' && priorKnowledge.includes(priorInput.value)){
-			priorKnowledge = [...priorKnowledge, priorInput.value];
-			priorInput.value = "";
-			event.preventDefault();
+		if (event.key === 'Enter' && priorInput.value!=='' ){
+			if(priorKnowledge.includes(priorInput.value)){
+				triggerRepeatInput("Prior Knowledge",priorInput.value);
+
+			}else{
+				priorKnowledge = [...priorKnowledge, priorInput.value];
+				priorInput.value = "";
+				event.preventDefault();
+			}
+
 		}
 	}
 	const handleRemoveMaintainer = (index: number) => {
@@ -144,6 +155,25 @@
 			editingIndexLO = -1;
 		}
 	}
+
+	const handleInvalid = () => {
+		if(tagInput.length>0 && !addedTags.includes(tagInput)) {
+			addedTags=[...addedTags,tagInput];
+			newTags=[...newTags,tagInput];
+			tagInput='';
+		}
+		else {
+			triggerRepeatInput("Tag",tagInput);
+		}
+	}
+
+	const triggerRepeatInput = (type: string,input: string)=>{
+		toastStore.trigger({
+			message: `${type} ${input} Already Added`,
+			background: 'bg-warning-200'
+		});
+	}
+
 	const locks: boolean[] = [true, true];
 
 	$: locks[0] = title.length < 2 || description.length < 10;
@@ -222,69 +252,71 @@
 		</Step>
 		<Step locked="{locks[1]}">
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
-			<div class="flex flex-col justify-between col-span-full">
+			<div class="flex flex-col justify-between gap-3 col-span-full">
 					<div class="flex flex-col space-y-1 w-full">
 						<label for="learningObjective" >Learning Objectives<span class="text-error-300">*</span>:</label>
-						<div>
-							<input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4 focus:ring-primary-500 focus:ring-1 "/>
-							<button on:click={()=>{if(loInput.value!=='' && !LOs.includes(loInput.value)) {LOs = [...LOs, loInput.value]; loInput.value = "";}}} type="button" name="add_LO" inputmode="decimal"
-											class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
-							</button>
-							<ol class="bg-surface-100 dark:bg-transparent list-inside space-y-1 max-h-40 overflow-y-auto w-3/4 mt-1">
+						<div class="w-full">
+							<div class="w-full flex justify-between gap-2">
+								<input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:ring-primary-500 focus:ring-1 "/>
+								<button on:click={()=>{ if(LOs.includes(loInput.value)) { triggerRepeatInput("Learning Objective",loInput.value)} else { if(loInput.value!=='') {LOs = [...LOs, loInput.value]; loInput.value = "";}}}} type="button" name="add_LO" inputmode="decimal"
+												class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
+								</button>
+							</div>
+
+							<div class="overflow-y-auto max-h-56 mt-1 space-y-1 flex flex-col">
 								{#each LOs as LO, index}
-									<li transition:fade={{ duration: 200 }} class="dark:bg-transparent rounded-lg">
-										<div role="button" tabindex="0" class="pl-0.5 flex rounded-lg bg-surface-300 relative items-center" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
-											{#if editingLO && index === editingIndexLO}
-												<input class="bg-surface-200 focus:ring-primary-500 focus:ring-1 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingLOText} on:keypress={handleLOEdit}/>
-											{:else }
+									{#if editingLO && index === editingIndexLO}
+										<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingLOText} on:keypress={handleLOEdit}/>
+									{:else }
+									<div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
 												<span class="text-md">{LO}</span>
-											{/if}
 											{#if !editingLO && displayButtonLO && hoverIndexLO ===index}
-												<div class="absolute right-0 flex gap-2" transition:fade = {{ duration: 200 }}>
-													<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
-														<Icon icon="ic:outline-edit" style="color: #7F7F94" />
+												<div class=" items-end flex gap-2" >
+													<button type="button" class="self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
+														<Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 ml-auto hover:text-opacity-85" />
 													</button>
-													<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {LOs = LOs.filter(x=>x!==LO)}}>
-														<Icon icon="material-symbols:delete"  style="color: #a30000" />
+													<button type="button" class=" self-center rounded-lg" on:click={() => {LOs = LOs.filter(x=>x!==LO)}}>
+														<Icon icon="mdi:trash-can" width="20" height="20" class="text-error-300 ml-auto hover:text-opacity-85" />
 													</button>
 												</div>
 											{/if}
-										</div>
-									</li>
+									</div>{/if}
 								{/each}
-							</ol>
+							</div>
 						</div>
 					</div>
 
 					<div class="w-full">
 						<label for="priorKnowledge" class="mb-1" >Prior Knowledge:</label>
-						<input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4 focus:ring-primary-500"/>
-						<button on:click={()=>{if(priorInput.value!=='' && priorKnowledge.includes(priorInput.value)) {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
-										class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
-						</button>
-						<ol class="bg-surface-100 dark:bg-transparent list-inside space-y-1 max-h-40 overflow-y-auto w-3/4 mt-1">
+
+						<div class="flex w-full justify-between gap-2">
+							<input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:ring-primary-500"/>
+							<button on:click={()=>{if(priorKnowledge.includes(priorInput.value)) {triggerRepeatInput("Prior Knowledge",priorInput.value)}  if(priorInput.value!=='') {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
+											class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
+							</button>
+						</div>
+
+
+						<div class="overflow-y-auto max-h-56 mt-1 space-y-1 flex flex-col">
 							{#each priorKnowledge as pk, index}
-								<li transition:fade={{ duration: 200 }}>
-									<div role="button" tabindex="0" class="flex rounded-lg bg-surface-300 gap-10 relative items-center w-full role" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
-										{#if editingPK && index === editingIndexPK}
-											<input class="bg-surface-200 focus:ring-primary-500 focus:ring-1 ring-0 rounded-lg max-h-1/2 w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
-											{:else }
-											<p class="text-md">{pk}</p>
-										{/if}
+								{#if editingPK && index === editingIndexPK}
+									<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
+								{:else }
+									<div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
+										<span class="text-md">{pk}</span>
 										{#if !editingPK && displayButton && hoverIndexPK === index }
-										<div class="absolute right-0 flex gap-2" transition:fade={{ duration: 200 }}>
-											<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {editingPK=true; editingIndexPK=index; editingPKText=pk;}}>
-												<Icon icon="ic:outline-edit" style="color: #7F7F94" />
-											</button>
-											<button type="button" class="bg-surface-300 hover:bg-surface-200 self-center rounded-lg" on:click={() => {priorKnowledge = priorKnowledge.filter(x=>x!==pk)}}>
-												<Icon icon="material-symbols:delete"  style="color: #a30000" />
-											</button>
-										</div>
-											{/if}
-									</div>
-								</li>
+											<div class=" items-end flex gap-2" >
+												<button type="button" class="self-center rounded-lg" on:click={() => {editingPK=true; editingIndexPK=index; editingPKText=pk;}}>
+													<Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 ml-auto hover:text-opacity-85" />
+												</button>
+												<button type="button" class=" self-center rounded-lg" on:click={() => {priorKnowledge = priorKnowledge.filter(x=>x!==pk)}}>
+													<Icon icon="mdi:trash-can" width="16" height="16" class="text-error-300 ml-auto hover:text-opacity-85" />
+												</button>
+											</div>
+										{/if}
+									</div>{/if}
 							{/each}
-						</ol>
+						</div>
 					</div>
 
 				<div class="flex flex-col w-full">
@@ -323,8 +355,8 @@
 						<span>Tags<span class="text-error-300">*</span>:</span>
 						<div class="text-token space-y-2">
 							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content)}
-												 bind:input={tagInput} bind:value={addedTags} name="chips" class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700" on:invalid={() => { if(tagInput.length>0 && !addedTags.includes(tagInput)) {addedTags=[...addedTags,tagInput]; newTags=[...newTags,tagInput]; tagInput=''; }}}  />
-							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+												 bind:input={tagInput} bind:value={addedTags} name="chips" class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700 w-1/2" on:invalid={handleInvalid}  />
+							<div class="card max-h-48 p-4 overflow-y-auto w-1/2" tabindex="-1">
 								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
 															on:selection={onInputChipSelect}  />
 							</div>
