@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore, DifficultySelection, FileTable, Meta, UserProp } from '$lib';
+	import {authStore, DifficultySelection, FileTable, Meta, TheoryAppBar, UserProp} from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -207,9 +207,12 @@
 <!--		</Step>-->
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-			<div class="flex gap-4 items-center p-6 ">
-				<label for="difficulty">Difficulty:</label>
-				<DifficultySelection bind:difficulty={difficulty} />
+			<div class="flex flex-row p-6 justify-between">
+				<div class="flex gap-4 items-center">
+					<label for="difficulty">Difficulty:</label>
+					<DifficultySelection bind:difficulty={difficulty} />
+				</div>
+				<TheoryAppBar />
 			</div>
 			<div class="grid grid-cols-2 gap-4 p-3">
 				<div class="flex col-span-2 items-center gap-4 p-3">
@@ -230,16 +233,20 @@
 				<div class="flex flex-col w-full">
 					<MantainersEditBar />
 					<div>
-						<label for="tags_input">Tags:</label>
-						<div class="text-token space-y-2">
-							<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
-									   bind:input={tagInput} bind:value={tags} name="chips" />
-							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
-											  on:selection={onInputChipSelect} />
+						<div>
+							<label for="tags_input">Tags:</label>
+							<div class="text-token space-y-2">
+								<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
+										   bind:input={tagInput} bind:value={tags} name="chips" />
+								<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+									<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
+												  on:selection={onInputChipSelect} />
+								</div>
 							</div>
 						</div>
 					</div>
+
+
 				</div>
 
 			</div>
