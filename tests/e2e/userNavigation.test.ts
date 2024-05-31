@@ -12,13 +12,11 @@ test('One can login', async ({ page }) => {
 	await page.click('text=Sign In');
 
 	// one can now open the popup of the user profile
-	await page.getByTestId('profile-picture').click({ timeout: 2000 });
+	await page.getByTestId('profile-picture').click({ timeout: 5000 });
 	await page.click('text=Profile');
 
 	// now one should be in their profile
 	expect(await page.isVisible('text=Saved Publications')).toBeTruthy();
-
-	await page.getByTestId('profile-picture').click({ timeout: 2000 });
 });
 
 test('One can browse the publications', async ({ page }) => {

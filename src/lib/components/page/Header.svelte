@@ -4,7 +4,6 @@
     import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
-    import type {FetchedFileItem} from "$lib/database";
 
     type NavOption = {
         text: string;
@@ -131,7 +130,11 @@
 
                     {#if loggedIn}
                         <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                            <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
+                            {#if $authStore.user && $authStore.user.profilePicData !== ''}
+                                <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $authStore.user.profilePicData} alt={$authStore.user?.firstName}/>
+                            {:else}
+                                <div class="w-8 h-8 placeholder-circle" />
+                            {/if}
                         </div>
                     {:else}
                         <form action="/" method="post">
