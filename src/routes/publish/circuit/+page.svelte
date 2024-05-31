@@ -74,14 +74,14 @@
 	$: LOs = LOs;
 
 	const handleLOPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter' && loInput.value!==''){
+		if (event.key === 'Enter' && loInput.value!=='' && !LOs.includes(loInput.value)){
 			LOs = [...LOs, loInput.value];
 			loInput.value = "";
 			event.preventDefault();
 		}
 	}
 	const handlePriorPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter' && priorInput.value!==''){
+		if (event.key === 'Enter' && priorInput.value!=='' && priorKnowledge.includes(priorInput.value)){
 			priorKnowledge = [...priorKnowledge, priorInput.value];
 			priorInput.value = "";
 			event.preventDefault();
@@ -222,7 +222,7 @@
 						<label for="learningObjective" >Learning Objectives<span class="text-error-300">*</span>:</label>
 						<div>
 							<input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4 focus:ring-primary-500 focus:ring-1 "/>
-							<button on:click={()=>{if(loInput.value!==''){LOs = [...LOs, loInput.value]; loInput.value = "";}}} type="button" name="add_LO" inputmode="decimal"
+							<button on:click={()=>{if(loInput.value!=='' && !LOs.includes(loInput.value)) {LOs = [...LOs, loInput.value]; loInput.value = "";}}} type="button" name="add_LO" inputmode="decimal"
 											class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
 							</button>
 							<ol class="bg-surface-100 dark:bg-transparent list-inside space-y-1 max-h-40 overflow-y-auto w-3/4 mt-1">
@@ -254,7 +254,7 @@
 					<div class="w-full">
 						<label for="priorKnowledge" class="mb-1" >Prior Knowledge:</label>
 						<input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-3/4 focus:ring-primary-500"/>
-						<button on:click={()=>{if(priorInput.value!=='') {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
+						<button on:click={()=>{if(priorInput.value!=='' && priorKnowledge.includes(priorInput.value)) {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
 										class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
 						</button>
 						<ol class="bg-surface-100 dark:bg-transparent list-inside space-y-1 max-h-40 overflow-y-auto w-3/4 mt-1">
@@ -318,7 +318,7 @@
 						<span>Tags<span class="text-error-300">*</span>:</span>
 						<div class="text-token space-y-2">
 							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content)}
-												 bind:input={tagInput} bind:value={addedTags} name="chips" class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700" on:invalid={() => { if(tagInput.length>0) {addedTags=[...addedTags,tagInput]; newTags=[...newTags,tagInput]; tagInput=''; }}}  />
+												 bind:input={tagInput} bind:value={addedTags} name="chips" class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700" on:invalid={() => { if(tagInput.length>0 && !addedTags.includes(tagInput)) {addedTags=[...addedTags,tagInput]; newTags=[...newTags,tagInput]; tagInput=''; }}}  />
 							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
 								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
 															on:selection={onInputChipSelect}  />

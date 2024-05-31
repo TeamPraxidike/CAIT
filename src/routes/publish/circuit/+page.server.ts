@@ -32,16 +32,17 @@ export const actions = {
 		//circuit data does not get carried over to the submission of the form, don't know why
 		const circuitData = data.get('circuitData')?.toString() || '';
 
-		if (newTags.toString() !== '[]') {
-			for (const tagEntry of newTags) {
-				const tag = tagEntry.toString();
-				const res = await fetch('/api/tags', {
-					method: 'POST',
-					body: JSON.stringify({ content: tag }),
-				});
-				if (res.status !== 200) {
-					return { status: 500, message: 'Tag Failed' };
-				}
+		const newTagsJ = JSON.stringify(newTags);
+		const outerArray = JSON.parse(newTagsJ);
+		const newTagsArray = JSON.parse(outerArray[0]);
+
+		for (const tag of newTagsArray) {
+			const res = await fetch('/api/tags', {
+				method: 'POST',
+				body: JSON.stringify({ content: tag }),
+			});
+			if (res.status !== 200) {
+				return { status: 500, message: 'Tag Failed' };
 			}
 		}
 
@@ -62,6 +63,6 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(circuit),
 		});
-		return { status: res.status };
+		return { status: res.status, id: (await res.json()).id };
 	},
 } satisfies Actions;
