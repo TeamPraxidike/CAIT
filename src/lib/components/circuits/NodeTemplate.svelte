@@ -13,11 +13,11 @@
 	};
 </script>
 
-<button use:popup="{popupHoverPub}" on:click={() => {alert("Haha")}} class="bg-surface-50 border border-primary-500 w-[100px] h-[60px] rounded-lg flex flex-col items-center justify-center gap-1">
-	<p class="text-surface-700">{data}</p>
+<button use:popup="{popupHoverPub}" on:click={() => {alert("Haha")}} class="text-surface-700 hover:text-surface-50 border border-primary-500 w-[100px] h-[60px] rounded-lg flex flex-col items-center justify-center gap-1">
+	<p class="text-xs">{data}</p>
 	<div class="flex gap-2">
-		<Icon icon="mdi:presentation" class="text-surface-700 text-lg self-center" />
-		<Icon icon="mdi:presentation" class="text-surface-700 text-lg self-center" />
+		<Icon icon="mdi:presentation" class="text-lg self-center" />
+		<Icon icon="mdi:presentation" class="text-lg self-center" />
 	</div>
 </button>
 

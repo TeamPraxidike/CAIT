@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
 	import type { FetchedFileArray, NodeDiffActions } from '$lib/database';
@@ -43,6 +43,28 @@
 		}[]
 	})[];
 
+	const removePopupDiv = (event: MouseEvent) => {
+		let rect = document.getElementById('cy')?.getBoundingClientRect()
+
+		let mouseX = event.clientX
+		let mouseY = event.clientY
+
+		if (rect) {
+			if (mouseX < rect.left || mouseX > rect.right || mouseY < rect.top || mouseY > rect.bottom)
+			{
+				const divToRemove = document.getElementById('PublicationCardDiv');
+				if(divToRemove)
+				{
+					const rectPopup = divToRemove?.getBoundingClientRect();
+					if ( mouseX < rectPopup.left || mouseX > rectPopup.right || mouseY < rectPopup.top || mouseY > rectPopup.bottom) {
+						document.body.removeChild(divToRemove);
+					}
+				}
+			}
+		}
+	}
+
+	//onDestroy(() => {document.removeEventListener('mousemove', removePopupDiv)})
 
 
 
@@ -99,7 +121,7 @@
 						'font-size': '10px',
 						'text-valign': 'center',
 						'text-halign': 'center',
-						'label': 'data(label)',
+						// 'label': 'data(label)',
 					},
 				},
 				// {
@@ -275,52 +297,53 @@
 
 		});
 
+		let cursorInsideNode: boolean = false;
 		/**
 		 * The two methods below are used to simulate hover effect on a node
 		 */
 		cy.on('mouseover', 'node', async (event: any) => {
 			const node = event.target;
-			// Set pubCardAppear to true
+			cursorInsideNode = true;
+			if(!publishing)
+			{
+				setTimeout(() => {
+					// Check if cursor is still inside the node
+					if (cursorInsideNode) {
+						const htmlElement = document.getElementById(node.id());
+						if (htmlElement) {
+							const divElement = document.createElement('div');
+							let publication = nodes.find(n => n.publicationId === Number(node.id()));
+							console.log(publication);
 
-			// Get node position
+							if (publication) {
+								new PublicationCard({
+									target: divElement,
+									props: {
+										publication: publication.publication,
+										inCircuits: false,
+										imgSrc: 'data:image;base64,',
+										forArrow: true
+									}
+								});
+							}
 
-			const htmlElement: HTMLElement | null = document.getElementById(node.id());
-
-			// Create the div element
-			const divElement = document.createElement('div');
-			divElement.id = 'PublicationCardDiv';
-			divElement.className = 'w-[100px] h-[100px] bg-surface-700';
-
-			// Set the style for the div
-			divElement.style.position = 'absolute';
+							divElement.id = 'PublicationCardDiv';
+							divElement.className = 'w-[300px]';
+							divElement.style.position = 'fixed';
+							divElement.style.transition = 'transform 0.5s';
 
 
-			// Append the div to the document body
-			document.body.appendChild(divElement);
 
+							document.body.appendChild(divElement);
 
-			if (htmlElement) {
-				divElement.style.left = `${htmlElement.getBoundingClientRect().left}px`;
-				divElement.style.top = `${htmlElement.getBoundingClientRect().top}px`;
-			}
+							divElement.style.left = `${htmlElement.getBoundingClientRect().left + htmlElement.getBoundingClientRect().width}px`;
+							divElement.style.top = `${htmlElement.getBoundingClientRect().top + htmlElement.getBoundingClientRect().height / 2 - divElement.getBoundingClientRect().height / 2}px`;
+						}
 
-			let publication = nodes.find(n => n.publicationId === Number(node.id()));
-			console.log(publication)
-
-			// <PublicationCard publication="{m.publication}" inCircuits="{true}"
-			// selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-			// on:removed={removeCard} imgSrc={'data:image;base64,' + fileData[i].data}/>
-
-			if(publication) {
-				new PublicationCard({
-					target: divElement,
-					props: {
-						publication: publication.publication,
-						inCircuits: false,
-						imgSrc: 'data:image;base64,',
 					}
-				})
+				}, 400);
 			}
+
 
 
 
@@ -336,9 +359,10 @@
 
 		cy.on('mouseout', 'node', (event: any) => {
 			const node = event.target;
+			cursorInsideNode = false;
 			const divToRemove = document.getElementById('PublicationCardDiv');
-			if (divToRemove && divToRemove.parentNode) {
-				divToRemove.parentNode.removeChild(divToRemove);
+			if (divToRemove) {
+				document.body.removeChild(divToRemove);
 			}
 
 			if (!node.selected() && !prereqActive) {
@@ -359,7 +383,10 @@
 			});
 
 		cy.fit();
-	});
+
+		document.addEventListener('mousemove', removePopupDiv)});
+
+
 
 
 	let addActive: boolean = false;
@@ -548,10 +575,6 @@
 								 on:selFurther={addNode} on:remFurther={removeNode} />
 	</div>
 {/if}
-<button class="btn variant-filled">Click</button>
-
-
-<NodeTemplate data="nODE" />
 <!--<PublicationCard publication="{nodes[0].publication}"/>-->
 
 <!--{#if pubCardAppear}-->
