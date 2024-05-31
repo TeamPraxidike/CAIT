@@ -43,12 +43,13 @@ export async function getAllCircuits() {
 }
 export async function deleteCircuitByPublicationId(
 	publicationId: number,
-	prismaContext: Prisma.TransactionClient = prisma,) {
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
 	return prismaContext.publication.delete({
 		where: { id: publicationId },
 		include: {
-			circuit: true
-		}
+			circuit: true,
+		},
 	});
 }
 

@@ -89,7 +89,7 @@ export async function createCircuitPublication(circuitData: {
 	copyright: boolean;
 	difficulty: Difficulty;
 }) {
-	return await prisma.$transaction(async (prismaTransaction) => {
+	return prisma.$transaction(async (prismaTransaction) => {
 		const publication = await createPublication(
 			circuitData.title,
 			circuitData.description,

@@ -1,8 +1,4 @@
-import {
-	getPublicationById,
-	//createCircuitPublication,
-	//createMaterialPublication,
-} from './db';
+import { getPublicationById } from './db';
 
 import {
 	getMaterialByPublicationId,

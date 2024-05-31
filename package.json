@@ -70,6 +70,11 @@
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.4",
+		"@auth/core": "^0.31.0",
+		"@auth/prisma-adapter": "^2.1.0",
+		"@auth/sveltekit": "^1.1.0",
+		"@floating-ui/dom": "1.6.4",
+		"@next-auth/prisma-adapter": "^1.0.7",
 		"cytoscape": "^3.29.2",
 		"cytoscape-html": "^0.1.2",
 		"cytoscape-node-html-label": "^1.2.2",
