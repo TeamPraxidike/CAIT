@@ -206,9 +206,9 @@
             <span class="text-surface-400 text-sm">{created}</span>
 
 
-            <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-200 dark:hover:bg-surface-800"
+            <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-300 dark:hover:bg-surface-800"
                     use:popup={popupMenu}>
-                <Icon icon="ph:dots-three-vertical" height="20" style="color: #646478"/>
+                <Icon icon="ph:dots-three-vertical" height="20" style="color: #7F7F94"/>
             </button>
         </div>
 
