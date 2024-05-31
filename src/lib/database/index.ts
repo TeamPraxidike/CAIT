@@ -94,7 +94,7 @@ import path from 'path';
  * It is used in the `MaterialForm.svelte` component and on the server side on the POST request to `/api/materials`.
  */
 type MaterialForm = {
-	userId: number;
+	userId: string;
 	metaData: {
 		title: string;
 		description: string;
@@ -106,14 +106,14 @@ type MaterialForm = {
 		timeEstimate: number;
 		theoryPractice: number;
 		tags: string[];
-		maintainers: number[];
+		maintainers: string[];
 	};
 	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;
 };
 
 type CircuitForm = {
-	userId: number;
+	userId: string;
 	metaData: {
 		title: string;
 		description: string;
@@ -121,7 +121,7 @@ type CircuitForm = {
 		learningObjectives: string[];
 		prerequisites: string[];
 		tags: string[];
-		maintainers: number[];
+		maintainers: string[];
 	};
 	coverPic: { type: string; info: string } | null;
 	nodeDiff: NodeDiffActions;

@@ -59,6 +59,9 @@ export const actions = {
 			};
 		}
 
+		const userId = data.get('userId')?.toString();
+		if (userId === undefined) throw new Error('User id is undefined');
+
 		const newTags = data.getAll('newTags') || '';
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
@@ -75,7 +78,7 @@ export const actions = {
 		}
 
 		const material: MaterialForm = {
-			userId: Number(data.get('userId')?.toString()),
+			userId,
 			metaData: {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',

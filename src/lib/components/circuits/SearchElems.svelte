@@ -5,15 +5,14 @@
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import ToggleComponent from '$lib/components/ToggleComponent.svelte';
 	import type { FetchedFileArray } from '$lib/database';
-	import { quartOut } from 'svelte/easing';
+
 	import { scale } from 'svelte/transition';
-		export let materials : any = [];
+	export let materials : any = [];
 	export let fileData : FetchedFileArray = []
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
-
-	let userIds : number[] = []
+	let userIds : string[] = []
 	let targetDiv: HTMLDivElement;
 	let searchWord : string = ""
 
@@ -140,4 +139,3 @@
 			{/each}
 		</Grid>
 	</div>
-

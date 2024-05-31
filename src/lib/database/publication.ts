@@ -14,7 +14,7 @@ import { prisma } from '$lib/database/prisma';
  */
 export async function handleConnections(
 	tags: string[],
-	maintainers: number[],
+	maintainers: string[],
 	publicationId: number,
 	prismaTransaction: Prisma.TransactionClient = prisma,
 ) {
@@ -30,10 +30,10 @@ export async function handleConnections(
  * Checks list for correctness in maintainerIds
  * @param list
  */
-export async function checkMaintainerList(list: number[]) {
-	for (const num of list) {
-		if (isNaN(num) || num <= 0) {
-			throw new Error(`Invalid number in list ${num}`);
+export async function checkMaintainerList(list: string[]) {
+	for (const id of list) {
+		if (id === undefined) {
+			throw new Error(`Invalid id in list ${id}`);
 		}
 	}
 }
@@ -58,7 +58,7 @@ export async function checkTagList(list: string[]) {
  */
 export async function connectMaintainers(
 	publicationId: number,
-	maintainerConnect: number[],
+	maintainerConnect: string[],
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<void> {
 	try {
@@ -104,7 +104,7 @@ export async function connectTags(
  */
 export async function updatePublicationConnectMaintainers(
 	publicationId: number,
-	maintainerConnect: number[],
+	maintainerConnect: string[],
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// wipe all connections

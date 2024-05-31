@@ -1,4 +1,4 @@
-import {prisma} from "$lib/database/prisma";
+import { prisma } from '$lib/database/prisma';
 
 /**
  * Replaces ALL courses that a user is using a publication in with the new courses send to this function
@@ -6,7 +6,7 @@ import {prisma} from "$lib/database/prisma";
  * @param publicationId
  * @param courses
  */
-export async function addPublicationToUsedInCourse(userId: number, publicationId: number, courses: string[]) {
+export async function addPublicationToUsedInCourse(userId: string, publicationId: number, courses: string[]) {
     await prisma.publicationUsedInCourse.deleteMany({
         where: {
             userId: userId,
@@ -30,37 +30,36 @@ export async function addPublicationToUsedInCourse(userId: number, publicationId
  * @param publicationId
  */
 export async function coursesUsingPublication(publicationId: number) {
-    const courses = await prisma.publicationUsedInCourse.findMany({
-        where: {
-            publicationId: publicationId
-        },
-        select: {
-            course: true
-        }
-    });
-    return courses.map(x => x.course);
+	const courses = await prisma.publicationUsedInCourse.findMany({
+		where: {
+			publicationId: publicationId,
+		},
+		select: {
+			course: true,
+		},
+	});
+	return courses.map((x) => x.course);
 }
 
 /**
  * Get all publications a user uses
  * @param userId
  */
-export async function publicationsAUserUses(userId: number) {
-    const publications = await prisma.publicationUsedInCourse.findMany({
-        where: {
-            userId: userId
-        },
-        select: {
-            publicationId: true
-        }
-    });
-    const publId = publications.map(x => x.publicationId);
-    return prisma.publication.findMany({
-        where: {
-            id: {
-                in: publId
-            }
-        }
-    });
+export async function publicationsAUserUses(userId: string) {
+	const publications = await prisma.publicationUsedInCourse.findMany({
+		where: {
+			userId: userId,
+		},
+		select: {
+			publicationId: true,
+		},
+	});
+	const publId = publications.map((x) => x.publicationId);
+	return prisma.publication.findMany({
+		where: {
+			id: {
+				in: publId,
+			},
+		},
+	});
 }
-

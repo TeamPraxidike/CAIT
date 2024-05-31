@@ -15,7 +15,8 @@ const { mockAuthStore } = await vi.hoisted(
 
 // Create a mock user
 const mockUser = {
-	id: 1,
+	id: 'aaa',
+	password: 'password',
 	username: 'Vasko Prasko',
 	firstName: 'John',
 	lastName: 'Doe',
@@ -24,6 +25,9 @@ const mockUser = {
 	reputation: 100,
 	isAdmin: false,
 	profilePicData: 'null',
+	createdAt: new Date(2),
+	updatedAt: new Date(2),
+	emailVerified: null,
 };
 
 describe('Header Component', () => {

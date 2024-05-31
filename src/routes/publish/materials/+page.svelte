@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {authStore, DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
+	import { authStore, DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -27,7 +27,6 @@
 	let inputChip: InputChip;
 	let tagInput = '';
 	let newTags: string[] = [];
-
 
 	let files: FileList = [] as unknown as FileList;
 	type UserWithProfilePic = User & { profilePicData: string };
@@ -215,7 +214,6 @@
 				<div class="flex flex-col w-full">
 					<MantainersEditBar users={data.users}/>
 					<div>
-
 						<label for="tags_input">Tags:</label>
 						<div class="text-token space-y-2">
 							<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
@@ -225,12 +223,8 @@
 											  on:selection={onInputChipSelect} />
 							</div>
 						</div>
-
 					</div>
-
-
 				</div>
-
 			</div>
 		</Step>
 		<Step>

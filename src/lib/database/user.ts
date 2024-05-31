@@ -293,7 +293,7 @@ export async function isPublicationLiked(
  * @param userId
  * @param commentId
  */
-export async function likesCommentUpdate(userId: number, commentId: number) {
+export async function likesCommentUpdate(userId: string, commentId: number) {
 	const liked = await getLikedComments(userId);
 	if (liked === null) throw Error('Liked comment were not found');
 	if (liked.likedComments.map((x) => x.id).includes(commentId)) {
@@ -313,7 +313,7 @@ export async function likesCommentUpdate(userId: number, commentId: number) {
  * @param userId
  * @param commentId
  */
-async function likeComment(userId: number, commentId: number) {
+async function likeComment(userId: string, commentId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
@@ -347,7 +347,7 @@ async function likeComment(userId: number, commentId: number) {
  * @param userId
  * @param commentId
  */
-async function unlikeComment(userId: number, commentId: number) {
+async function unlikeComment(userId: string, commentId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
@@ -378,7 +378,7 @@ async function unlikeComment(userId: number, commentId: number) {
  * returns a list with all liked comment of a user
  * @param userId
  */
-export async function getLikedComments(userId: number) {
+export async function getLikedComments(userId: string) {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,
@@ -396,7 +396,7 @@ export async function getLikedComments(userId: number) {
  * @param userId
  * @param replyId
  */
-export async function likesReplyUpdate(userId: number, replyId: number) {
+export async function likesReplyUpdate(userId: string, replyId: number) {
 	const liked = await getLikedReplies(userId);
 	if (liked === null) throw Error('Liked reply were not found');
 	if (liked.likedReplies.map((x) => x.id).includes(replyId)) {
@@ -416,7 +416,7 @@ export async function likesReplyUpdate(userId: number, replyId: number) {
  * @param userId
  * @param replyId
  */
-async function likeReply(userId: number, replyId: number) {
+async function likeReply(userId: string, replyId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
@@ -450,7 +450,7 @@ async function likeReply(userId: number, replyId: number) {
  * @param userId
  * @param replyId
  */
-async function unlikeReply(userId: number, replyId: number) {
+async function unlikeReply(userId: string, replyId: number) {
 	await prisma.$transaction(async (prismaTransaction) => {
 		await prismaTransaction.user.update({
 			where: {
@@ -481,7 +481,7 @@ async function unlikeReply(userId: number, replyId: number) {
  * returns a list with all liked reply of a user
  * @param userId
  */
-export async function getLikedReplies(userId: number) {
+export async function getLikedReplies(userId: string) {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,

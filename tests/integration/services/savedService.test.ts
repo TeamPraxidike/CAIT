@@ -14,9 +14,10 @@ describe('Liking publications', () => {
 
 	beforeEach(async () => {
 		user = await createUser({
-			firstName: 'Marti11',
+			firstName: 'Marti' + Math.random(),
 			lastName: 'Parti',
-			email: 'email@gmail',
+			email: 'email@gmail' + Math.random(),
+			password: 'password',
 		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',

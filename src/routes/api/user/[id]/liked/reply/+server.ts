@@ -6,13 +6,13 @@ import { getLikedReplies, getUserById } from '$lib/database';
  */
 export async function GET({ params }) {
 	const { id } = params;
-	const user = await getUserById(parseInt(id));
+	const user = await getUserById(id);
 	if (!user)
 		return new Response(JSON.stringify({ error: 'User not found' }), {
 			status: 404,
 		});
 
-	const liked = await getLikedReplies(parseInt(id));
+	const liked = await getLikedReplies(id);
 	if (liked === null)
 		return new Response(JSON.stringify({ error: 'Server error' }), {
 			status: 500,

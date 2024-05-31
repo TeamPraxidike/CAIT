@@ -20,7 +20,8 @@ describe('Liking publications', () => {
 		user = await createUser({
 			firstName: 'Martiqq',
 			lastName: 'Parti',
-			email: 'email@gmail',
+			email: 'email@gmail' + Math.random(),
+			password: 'password',
 		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',

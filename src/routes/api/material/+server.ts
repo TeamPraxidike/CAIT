@@ -63,7 +63,8 @@ export const GET: RequestHandler = async ({ url }) => {
 		const diff = d ? d.split(',').map(mapToDifficulty) : [];
 
 		const p = url.searchParams.get('publishers');
-		const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
+		const publishers = p ? p.split(',') : [];
+		// const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
 
 		const ty = url.searchParams.get('types');
 		const type = ty ? ty.split(',').map(mapToType) : [];
