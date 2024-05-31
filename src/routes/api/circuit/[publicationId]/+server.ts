@@ -2,7 +2,7 @@ import {
 	addNode,
 	type CircuitForm,
 	deleteCircuitByPublicationId,
-	deleteNode, editNode,
+	deleteNode, editNode, fileSystem,
 	getCircuitByPublicationId,
 	handleConnections,
 	handleEdges,
@@ -29,6 +29,7 @@ export async function GET({ params }) {
 
 	try {
 		const circuit = await getCircuitByPublicationId(publicationId);
+
 		if (!circuit) {
 			return new Response(
 				JSON.stringify({ error: 'Circuit Not Found' }),
@@ -37,7 +38,17 @@ export async function GET({ params }) {
 				},
 			);
 		}
-		return new Response(JSON.stringify(circuit), { status: 200 });
+
+		const filePath = circuit.publication.coverPic!.path;
+
+		const currentFileData = fileSystem.readFile(filePath);
+
+		const circuitInfo = {
+			...circuit,
+			coverPicData: currentFileData.toString('base64'),
+		}
+
+		return new Response(JSON.stringify(circuitInfo), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,

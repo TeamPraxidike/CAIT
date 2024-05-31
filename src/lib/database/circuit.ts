@@ -10,7 +10,11 @@ export async function getCircuitByPublicationId(publicationId: number) {
 	return prisma.circuit.findUnique({
 		where: { publicationId: publicationId },
 		include: {
-			publication: true,
+			publication: {
+				include: {
+					coverPic: true
+				}
+			},
 			nodes: {
 				include: {
 					publication: true,
@@ -28,7 +32,11 @@ export async function getCircuitByPublicationId(publicationId: number) {
 export async function getAllCircuits() {
 	return prisma.circuit.findMany({
 		include: {
-			publication: true,
+			publication: {
+				include:{
+					coverPic: true
+				}
+			},
 			nodes: false,
 		},
 	});

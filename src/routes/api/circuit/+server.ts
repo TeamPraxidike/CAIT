@@ -4,7 +4,7 @@ import {
 import {
 	addNode,
 	type CircuitForm,
-	createCircuitPublication,
+	createCircuitPublication, fileSystem,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
@@ -16,7 +16,18 @@ export async function GET() {
 	// return 401 if user not authenticated
 
 	try {
-		const circuits = await getAllCircuits();
+		let circuits = await getAllCircuits();
+
+		circuits = circuits.map((circuit) => {
+			const filePath = circuit.publication.coverPic!.path;
+
+			const currentFileData = fileSystem.readFile(filePath);
+
+			return {
+				...circuit,
+				coverPicData: currentFileData.toString('base64'),
+			}
+		})
 		return new Response(JSON.stringify(circuits), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {

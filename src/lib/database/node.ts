@@ -46,45 +46,6 @@ export async function handleEdges(
 		data: edgeData,
 		skipDuplicates: true
 	});
-
-	// for (const edge of next) {
-	// 	if (edge.fromId <= 0 || isNaN(edge.fromId)) {
-	// 		throw new Error('Invalid id found');
-	// 	}
-	//
-	//
-	// 	for (const toId of edge.toId) {
-	// 		await prismaContext.edge.create({
-	// 			data: {
-	// 				circuitId: circuitId,
-	// 				fromPublicationId: edge.fromId,
-	// 				toPublicationId: toId
-	// 			}
-	// 		});
-	// 	}
-	// }
-
-		// await prismaContext.node.update({
-		// 	where: { id: edge.fromId },
-		// 	data: {
-		// 		next: {
-		// 			connect: edge.toId.map((id) => ({ id })),
-		// 		},
-		// 	},
-		// });
-
-		// for (const to of edge.toId) {
-		// 	await prismaContext.node.update({
-		// 		where: { id: to },
-		// 		data: {
-		// 			prerequisites: {
-		// 				connect: {
-		// 					id: edge.fromId,
-		// 				},
-		// 			},
-		// 		},
-		// 	});
-		// }
 }
 
 export async function addNode(
