@@ -183,26 +183,26 @@
         formData.append('coverPic', coverPic || '');
       }}>
 	<Stepper buttonCompleteType="submit">
-		<Step locked={locks[0]}>
-			<svelte:fragment slot="header">Upload files</svelte:fragment>
-			<FileDropzone on:change={appendToFileList} multiple name="file" />
-			<FileTable operation="edit" bind:files={files} />
-		</Step>
-		<Step locked={locks[1]}>
-			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-			<div class="flex flex-col gap-2">
-				<input type="text" name="title" placeholder="Title" bind:value={title}
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
-				<textarea name="description" placeholder="Description..." bind:value={description}
-						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
-			</div>
-			<label for="coverPhoto">Cover Picture:</label>
-			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>
-			{#if coverPic}
-				<button on:click={() => coverPic = undefined} type="button" class="btn">Remove</button>
-				<img src={URL.createObjectURL(coverPic)} alt="sss">
-			{/if}
-		</Step>
+<!--		<Step locked={locks[0]}>-->
+<!--			<svelte:fragment slot="header">Upload files</svelte:fragment>-->
+<!--			<FileDropzone on:change={appendToFileList} multiple name="file" />-->
+<!--			<FileTable operation="edit" bind:files={files} />-->
+<!--		</Step>-->
+<!--		<Step locked={locks[1]}>-->
+<!--			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>-->
+<!--			<div class="flex flex-col gap-2">-->
+<!--				<input type="text" name="title" placeholder="Title" bind:value={title}-->
+<!--					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">-->
+<!--				<textarea name="description" placeholder="Description..." bind:value={description}-->
+<!--						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />-->
+<!--			</div>-->
+<!--			<label for="coverPhoto">Cover Picture:</label>-->
+<!--			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>-->
+<!--			{#if coverPic}-->
+<!--				<button on:click={() => coverPic = undefined} type="button" class="btn">Remove</button>-->
+<!--				<img src={URL.createObjectURL(coverPic)} alt="sss">-->
+<!--			{/if}-->
+<!--		</Step>-->
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
 			<div class="flex gap-4 items-center">
@@ -213,7 +213,7 @@
 				<div class="flex col-span-2 items-center gap-4">
 					<div class="w-1/2">
 						<label for="estimate">Time Estimate:</label>
-						<input type="text" name="estimate" bind:value={estimate}
+						<input type="number" name="estimate" bind:value={estimate}
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 					</div>
 					<div class="w-1/2">

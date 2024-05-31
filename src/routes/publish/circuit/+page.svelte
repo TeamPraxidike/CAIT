@@ -5,7 +5,7 @@
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
 	import {
-		Autocomplete,
+	 	Autocomplete,
 		type AutocompleteOption,
 		getToastStore,
 		InputChip,
@@ -210,6 +210,27 @@
 	}
 	let displayButton = false;
 	let displayButtonLO = false;
+
+	function clickOutside(node: HTMLElement): { destroy: () => void } {
+		const handleClick = (event: MouseEvent) => {
+			if (!node.contains(event.target as Node)) {
+				if(display === "flex"){
+					display = 'hidden'
+				}
+			}
+		};
+
+		document.addEventListener('click', handleClick, true);
+
+		return {
+			destroy() {
+				document.removeEventListener('click', handleClick, true);
+			}
+		};
+	}
+
+
+
 </script>
 
 <!--<Node></Node>-->
@@ -259,7 +280,8 @@
 							<div class="w-full flex justify-between gap-2">
 								<input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:ring-primary-500 focus:ring-1 "/>
 								<button on:click={()=>{ if(LOs.includes(loInput.value)) { triggerRepeatInput("Learning Objective",loInput.value)} else { if(loInput.value!=='') {LOs = [...LOs, loInput.value]; loInput.value = "";}}}} type="button" name="add_LO" inputmode="decimal"
-												class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
+												class="text-center">
+									<Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
 								</button>
 							</div>
 
@@ -268,8 +290,8 @@
 									{#if editingLO && index === editingIndexLO}
 										<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingLOText} on:keypress={handleLOEdit}/>
 									{:else }
-									<div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
-												<span class="text-md">{LO}</span>
+										<div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center w-1/2 text-wrap" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
+											<span class="relative right-1 text-base p-1 rounded-md">{LO}</span>
 											{#if !editingLO && displayButtonLO && hoverIndexLO ===index}
 												<div class=" items-end flex gap-2" >
 													<button type="button" class="self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
@@ -280,7 +302,8 @@
 													</button>
 												</div>
 											{/if}
-									</div>{/if}
+										</div>
+									{/if}
 								{/each}
 							</div>
 						</div>
@@ -292,7 +315,8 @@
 						<div class="flex w-full justify-between gap-2">
 							<input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:ring-primary-500"/>
 							<button on:click={()=>{if(priorKnowledge.includes(priorInput.value)) {triggerRepeatInput("Prior Knowledge",priorInput.value)}  if(priorInput.value!=='') {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
-											class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
+											class="text-center">
+								<Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
 							</button>
 						</div>
 
@@ -302,8 +326,8 @@
 								{#if editingPK && index === editingIndexPK}
 									<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
 								{:else }
-									<div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
-										<span class="text-md">{pk}</span>
+									<div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center w-1/2 text-wrap" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
+										<p class="relative right-1 text-base p-1 rounded-md">{pk}</p>
 										{#if !editingPK && displayButton && hoverIndexPK === index }
 											<div class=" items-end flex gap-2" >
 												<button type="button" class="self-center rounded-lg" on:click={() => {editingPK=true; editingIndexPK=index; editingPKText=pk;}}>
@@ -314,7 +338,8 @@
 												</button>
 											</div>
 										{/if}
-									</div>{/if}
+									</div>
+								{/if}
 							{/each}
 						</div>
 					</div>
@@ -333,20 +358,19 @@
 							{/each}
 
 							<button on:click={()=>{display='flex'}} type="button" name="add_maintainer" inputmode="decimal"
-											class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85 text-center">+
+											class="rounded-lg hover:bg-opacity-85 text-center">
+								<Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
 							</button>
 
-							<div transition:fly={{ x: -8, duration: 300 }} class="{display} flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700" >
+							<div transition:fly={{ x: -8, duration: 300 }} use:clickOutside class="{display} flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700" >
 								<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user" class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm"/>
 								{#each searchableUsers as user}
 									{#if user.id !== uid}
-										<button type="button" class="dark:hover:text-surface-600  hover:bg-primary-100 text-start" on:click={()=>{addMaintainer(user)}}>
+										<button type="button" class="dark:hover:text-surface-600  hover:bg-primary-100 text-start p-0.5 px-3" on:click={()=>{addMaintainer(user)}}>
 											{user.firstName} {user.lastName}
 										</button>
 									{/if}
 								{/each}
-								<button type="button" on:click={()=>{display='hidden'}} class="hover:underline text-error-500">Cancel</button>
-
 							</div>
 						</div>
 					</div>
