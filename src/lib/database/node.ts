@@ -112,28 +112,27 @@ export async function addNode(
 }
 
 export async function editNode(
-	nodeId: number,
+	circuitId: number,
 	publicationId: number,
 	x: number,
 	y: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	const extensions = await fetchExtensions(publicationId);
-
 	try {
 		return prismaContext.node.update({
 			where: {
-				id: nodeId,
+				circuitId_publicationId: {
+					circuitId: circuitId,
+					publicationId: publicationId
+				}
 			},
 			data: {
-				publicationId: publicationId,
-				extensions: extensions,
 				posX: x,
 				posY: y,
 			},
 		});
 	} catch (error) {
-		throw new Error('Error while updating node');
+		throw new Error('Error while updating node position');
 	}
 }
 

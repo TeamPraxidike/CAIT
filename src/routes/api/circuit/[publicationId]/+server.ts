@@ -2,13 +2,13 @@ import {
 	addNode,
 	type CircuitForm,
 	deleteCircuitByPublicationId,
-	deleteNode,
+	deleteNode, editNode,
 	getCircuitByPublicationId,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
 	prisma,
-	updateCircuitByPublicationId,
+	updateCircuitByPublicationId, updateCircuitCoverPic,
 } from '$lib/database';
 import {Prisma} from '@prisma/client';
 
@@ -63,6 +63,7 @@ export async function PUT({ request, params }) {
 	const nodeInfo: NodeDiffActions = circuit.nodeDiff;
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
+	const coverPic = body.coverPic;
 
 	const publicationId = parseInt(params.publicationId);
 
@@ -85,6 +86,15 @@ export async function PUT({ request, params }) {
 				prismaTransaction,
 			);
 
+			// if coverPic detected, change
+			if (coverPic){
+				await updateCircuitCoverPic(
+					coverPic,
+					circuit.publicationId,
+					prismaTransaction,
+				);
+			}
+
 			// add nodes
 			for (const node of nodeInfo.add) {
 				await addNode(
@@ -101,16 +111,16 @@ export async function PUT({ request, params }) {
 				await deleteNode(body.circuitId, node.publicationId, prismaTransaction);
 			}
 
-			// // edit existing nodes
-			// for (const node of nodeInfo.edit) {
-			// 	await editNode(
-			// 		node.nodeId,
-			// 		node.publicationId,
-			// 		node.x,
-			// 		node.y,
-			// 		prismaTransaction,
-			// 	);
-			// }
+			// edit existing nodes (currently editing positions only)
+			for (const node of nodeInfo.edit) {
+				await editNode(
+					body.circuitId,
+					node.publicationId,
+					node.x,
+					node.y,
+					prismaTransaction,
+				);
+			}
 
 			await handleEdges(body.circuitId, nodeInfo.next, prismaTransaction);
 
