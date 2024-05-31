@@ -93,7 +93,7 @@
                  on:mouseleave={() => {hoveredIndex = -1}}
                  role="table">
 
-                <p class="relative mt-2 right-1 text-base p-1 rounded-md" >{course}</p>
+                <p class="relative right-1 text-base p-1 rounded-md" >{course}</p>
                 {#if i === hoveredIndex && editing < 0}
                     <div class="flex items-end">
                         <button class="flex flex-row justify-center cursor-pointer self-center" on:click={() => toggleEdit(i)}>

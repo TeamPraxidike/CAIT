@@ -43,8 +43,8 @@ describe('Using in a course', () => {
 	});
 
 	it('should add to the list of used in course', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.id, ['PTS']);
-		const courses = await coursesUsingPublication(publication.id);
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, ['PTS']);
+		const courses = await coursesUsingPublication(publication.publicationId);
 		expect(courses).length.greaterThanOrEqual(1);
 		expect(courses).toContain('PTS');
 	});
@@ -63,12 +63,12 @@ describe('Using in a course', () => {
 	});
 
 	it('should add to the list of what users use', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, ['ADS']);
 		const publications = (await publicationsAUserUses(user.id)).map(
 			(x) => x.id,
 		);
 		expect(publications).toHaveLength(1);
-		expect(publications).toContain(publication.id);
+		expect(publications).toContain(publication.publicationId);
 	});
 
 	it('should add to the list of what users use across multiple publications', async () => {

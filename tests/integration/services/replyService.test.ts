@@ -37,7 +37,7 @@ describe('Reply CRUD', () => {
 		});
 		comment = await createComment({
 			userId: user.id,
-			publicationId: publication.id,
+			publicationId: publication.publicationId,
 			content: 'Ivan',
 		});
 		reply = await createReply({
