@@ -152,6 +152,7 @@
 	$: LOs = LOs;
 
 	let nodeActions: NodeDiffActions;
+	let circuitCoverPic: {type: string, info: string};
 
 
 	export let form: ActionData;
@@ -162,7 +163,7 @@
 			message: 'Publication Added successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/browse`);
+		goto(`/${$authStore.user?.id}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -171,8 +172,11 @@
 	}
 	const onNextHandler = (event:CustomEvent) =>{
 		if(event.detail.step === 0){
-			nodeActions = circuitRef.publishCircuit();
+			let {nodeDiffActions, coverPic} = circuitRef.publishCircuit();
+			nodeActions = nodeDiffActions;
+			circuitCoverPic = coverPic;
 		}
+
 	}
 	let displayButton = false;
 	let displayButtonLO = false;
@@ -195,6 +199,7 @@
 				formData.append('prior', JSON.stringify(priorKnowledge));
 				console.log(nodeActions);
 				formData.append('circuitData', JSON.stringify(nodeActions));
+				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >

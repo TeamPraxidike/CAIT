@@ -305,7 +305,7 @@
 
 	export const publishCircuit = () => {
 
-	 	let result: NodeDiffActions;
+	 	let nodeDiffActions: NodeDiffActions;
 
 		const add: ({ publicationId: number; x: number; y: number }[]) = [];
 		const del: ({ publicationId: number }[]) = [];
@@ -319,8 +319,16 @@
 			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => Number(edge.target().id()));
 			next.push(({ fromId: Number(node.id()), toId: toID }));
 	 	})
-			result = { add: add, delete: del, edit: edit, next: next };
-			return result;
+			nodeDiffActions = { add: add, delete: del, edit: edit, next: next };
+		cy.fit();
+		// generate a png, could also use cy.jpg
+		// base64uri by default, using base64 for now
+		const cover = cy.png({output: 'base64'});
+		const coverPic = {
+			type: 'image/png',
+			info: cover
+		}
+		return {nodeDiffActions, coverPic};
 
 	}
 
