@@ -1,29 +1,28 @@
-import { prisma } from '$lib/database';
+import {prisma} from '$lib/database';
+import {Prisma} from "@prisma/client/extension";
 
-// @ts-ignore
 /**
  * Adds a new user to the database. Generates a unique username based on the user's first and last name.
  *
- * @param firstName
- * @param lastName
- * @param email
- * @param profilePic
+ * @param data
+ * @param prismaContext
  */
 export async function createUser(
-	firstName: string,
-	lastName: string,
-	email: string,
-	profilePic: string,
+	data:{
+		firstName: string,
+		lastName: string,
+		email: string,
+	},
+	prismaContext: Prisma.TransactionClient = prisma
 ) {
-	const username = await generateUsername(firstName, lastName);
+	const username = await generateUsername(data.firstName, data.lastName);
 
-	return prisma.user.create({
+	return prismaContext.user.create({
 		data: {
-			firstName: firstName,
-			lastName: lastName,
+			firstName: data.firstName,
+			lastName: data.lastName,
 			username: username,
-			email: email,
-			profilePic: profilePic,
+			email: data.email,
 			isAdmin: false,
 		},
 	});
@@ -72,9 +71,13 @@ async function generateUsername(firstName: string, lastName: string) {
 /**
  * Returns the user with the given id.
  * @param id
+ * @param prismaContext
  */
-export async function getUserById(id: number) {
-	return prisma.user.findUnique({
+export async function getUserById(
+	id: number,
+	prismaContext: Prisma.TransactionClient = prisma
+) {
+	return prismaContext.user.findUnique({
 		where: { id },
 		include: {
 			posts: {
@@ -82,6 +85,7 @@ export async function getUserById(id: number) {
 					tags: true,
 				},
 			},
+			profilePic: true
 		},
 	});
 }
@@ -89,12 +93,19 @@ export async function getUserById(id: number) {
 /**
  * Deletes a user from the database
  * @param userId
+ * @param prismaContext
  */
-export async function deleteUser(userId: number) {
-	return prisma.user.delete({
+export async function deleteUser(
+	userId: number,
+	prismaContext: Prisma.TransactionClient = prisma
+) {
+	return await prismaContext.user.delete({
 		where: {
 			id: userId,
 		},
+		include: {
+			profilePic: true,
+		}
 	});
 }
 
@@ -103,15 +114,18 @@ export type userEditData = {
 	firstName: string;
 	lastName: string;
 	email: string;
-	profilePic: string;
 };
 
 /**
  * Edits user information
  * @param user
+ * @param prismaContext
  */
-export async function editUser(user: userEditData) {
-	return prisma.user.update({
+export async function editUser(
+	user: userEditData,
+	prismaContext: Prisma.TransactionClient = prisma
+) {
+	return prismaContext.user.update({
 		where: {
 			id: user.id,
 		},
@@ -119,7 +133,6 @@ export async function editUser(user: userEditData) {
 			firstName: user.firstName,
 			lastName: user.lastName,
 			email: user.email,
-			profilePic: user.profilePic,
 			username: await generateUsername(user.firstName, user.lastName),
 		},
 	});

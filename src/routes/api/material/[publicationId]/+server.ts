@@ -1,21 +1,20 @@
 import {
-	getMaterialByPublicationId,
-	updateMaterialByPublicationId,
-	prisma,
-	handleConnections,
-	type FileDiffActions,
-	fileSystem,
+	coverPicFetcher,
+	deleteFile,
 	deleteMaterialByPublicationId,
 	type FetchedFileArray,
-	type MaterialForm,
 	type FetchedFileItem,
+	type FileDiffActions,
+	fileSystem,
+	getMaterialByPublicationId,
+	handleConnections,
+	type MaterialForm,
+	prisma,
 	updateCoverPic,
-	updateFiles, deleteFile,
+	updateFiles,
+	updateMaterialByPublicationId,
 } from '$lib/database';
-
-
-import { coverPicFetcher } from '$lib/database';
-import type {File as PrismaFile} from "@prisma/client"
+import {type File as PrismaFile, Prisma} from "@prisma/client"
 
 export async function GET({ params }) {
 	// Authentication step
@@ -81,6 +80,7 @@ export async function GET({ params }) {
 export async function PUT({ request, params }) {
 	// Authentication step
 	// return 401 if user not authenticated
+	// Add 400 Bad Request check
 
 	const body: MaterialForm & {
 		materialId: number;
@@ -122,21 +122,11 @@ export async function PUT({ request, params }) {
 
 				await updateFiles(fileInfo, body.materialId, prismaTransaction);
 
-				const material = await updateMaterialByPublicationId(
+				return await updateMaterialByPublicationId(
 					publicationId,
 					metaData,
 					prismaTransaction,
 				);
-				if (!material) {
-					return new Response(
-						JSON.stringify({ error: 'Bad Request' }),
-						{
-							status: 400,
-						},
-					);
-				}
-
-				return material;
 			},
 		);
 
@@ -145,6 +135,12 @@ export async function PUT({ request, params }) {
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
 		console.error(error);
+		// TODO: documentation on this is atrocious, verify with tests!!!
+		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
+			return new Response(JSON.stringify({ error: 'Material not found' }), {
+				status: 404,
+			});
+		}
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
@@ -163,35 +159,36 @@ export async function DELETE({ params }) {
 		);
 	}
 	try {
-		await prisma.$transaction(async (prismaTransaction) => {
-			const material = await getMaterialByPublicationId(
-				id,
-				prismaTransaction,
-			);
-			if (!material) {
-				return new Response(
-					JSON.stringify({ error: 'Material Not Found' }),
-					{
-						status: 404,
-					},
+		const material = await prisma.$transaction(async (prismaTransaction) => {
+			const publication =
+				await deleteMaterialByPublicationId(
+					id,
+					prismaTransaction,
 				);
-			}
 
-			const coverPic: PrismaFile = material.publication.coverPic;
+			const coverPic: PrismaFile = publication.coverPic;
 
-			// if there is a coverPic
+			// if there is a coverPic, delete
 			if (coverPic) {
-				await deleteFile(coverPic.path, prismaTransaction);
+				fileSystem.deleteFile(coverPic.path);
 			}
 
-			await deleteMaterialByPublicationId(
-				id,
-				material,
-				prismaTransaction,
-			);
-			return new Response(JSON.stringify(material), { status: 200 });
+			// delete all files
+			for (const file of publication.material!.files) {
+				fileSystem.deleteFile(file.path);
+			}
+
+			return publication.material;
 		});
+
+		return new Response(JSON.stringify(material), { status: 200 });
 	} catch (error) {
+		// TODO: documentation on this is atrocious, verify with tests!!!
+		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
+			return new Response(JSON.stringify({ error: 'Material not found' }), {
+				status: 404,
+			});
+		}
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});

@@ -19,6 +19,7 @@
     let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
+    let profilePics:FetchedFileArray = data.profilePics;
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
 
@@ -305,7 +306,7 @@
         <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} used={material.publication.usedInCourse.length}/>
     {/each}
 {:else if pageType === "people"}
-    {#each users as person}
-        <UserProp view="search" posts="{5}" userPhotoUrl="" role="Maintainer" user={person} />
+    {#each users as person, i}
+        <UserProp view="search" posts="{5}" userPhotoUrl={'data:image;base64,' + profilePics[i].data} role="Maintainer" user={person} />
     {/each}
 {/if}

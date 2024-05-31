@@ -4,9 +4,9 @@ import {
 	coursesUsingPublication,
 	createMaterialPublication,
 	createUser,
-	prisma
+	prisma,
 } from '$lib/database';
-import {Difficulty} from '@prisma/client';
+import { Difficulty } from '@prisma/client';
 import { testingUrl } from '../setup';
 
 describe('[POST] /user/:id/use-in-course/:publicationId', () => {
@@ -19,12 +19,11 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 		};
 
 		const res = await prisma.$transaction(async () => {
-			const user = await createUser(
-				body.firstName,
-				body.lastName,
-				body.email,
-				body.profilePic,
-			);
+			const user = await createUser({
+				firstName: body.firstName,
+				lastName: body.lastName,
+				email: body.email,
+			});
 
 			const publication = await createMaterialPublication(user.id, {
 				title: 'cool publication',
@@ -89,12 +88,11 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 			email: 'email@student.tudelft.nl',
 			profilePic: 'image.jpg',
 		};
-		const user = await createUser(
-			body.firstName,
-			body.lastName,
-			body.email,
-			body.profilePic,
-		);
+		const user = await createUser({
+			firstName: body.firstName,
+			lastName: body.lastName,
+			email: body.email,
+		});
 
 		const response = await fetch(
 			`${testingUrl}/user/${user.id}/use-in-course/${34567890}`,
@@ -116,12 +114,11 @@ describe('[GET] /publication/{publicationId}/used-in-course', () => {
 			email: 'email@student.tudelft.nl',
 			profilePic: 'image.jpg',
 		};
-		const user = await createUser(
-			body.firstName,
-			body.lastName,
-			body.email,
-			body.profilePic,
-		);
+		const user = await createUser({
+			firstName: body.firstName,
+			lastName: body.lastName,
+			email: body.email,
+		});
 
 		const publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',
@@ -156,12 +153,11 @@ describe('[GET] /user/[id]/use-in-course', () => {
 			email: 'email@student.tudelft.nl',
 			profilePic: 'image.jpg',
 		};
-		const user = await createUser(
-			body.firstName,
-			body.lastName,
-			body.email,
-			body.profilePic,
-		);
+		const user = await createUser({
+			firstName: body.firstName,
+			lastName: body.lastName,
+			email: body.email,
+		});
 		const response = await fetch(
 			`${testingUrl}/user/${user.id}/use-in-course`,
 		);
@@ -176,12 +172,11 @@ describe('[GET] /user/[id]/use-in-course', () => {
 	});
 
 	it('should add courses to the list', async () => {
-		const user = await createUser(
-			"Marmalad",
-			"Filiika",
-			"aaaaaaaa",
-			"bbbbbbbbb",
-		);
+		const user = await createUser({
+			firstName: 'body.firstName',
+			lastName: 'body.lastName',
+			email: 'body.email',
+		});
 		const publication1 = await createMaterialPublication(user.id, {
 			title: 'cool publication',
 			description: 'This publication has description',
@@ -205,8 +200,16 @@ describe('[GET] /user/[id]/use-in-course', () => {
 			prerequisites: [],
 		});
 
-		await addPublicationToUsedInCourse(user.id, publication1.publicationId, ["A", "B"]);
-		await addPublicationToUsedInCourse(user.id, publication2.publicationId, ["C"]);
+		await addPublicationToUsedInCourse(
+			user.id,
+			publication1.publicationId,
+			['A', 'B'],
+		);
+		await addPublicationToUsedInCourse(
+			user.id,
+			publication2.publicationId,
+			['C'],
+		);
 
 		const response = await fetch(
 			`${testingUrl}/user/${user.id}/use-in-course`,
@@ -220,16 +223,13 @@ describe('[GET] /user/[id]/use-in-course', () => {
 	});
 });
 
-
 describe('[DELETE] /user/[id]/use-in-course/[publicationId]', () => {
-
 	it('should delete only the courses passed', async () => {
-		const user = await createUser(
-			"Marmalada",
-			"Filiiika",
-			"aaaaaaaa",
-			"bbbbbbbbb",
-		);
+		const user = await createUser({
+			firstName: 'body.firstName',
+			lastName: 'body.lastName',
+			email: 'body.email',
+		});
 		const publication1 = await createMaterialPublication(user.id, {
 			title: 'cool publicationa',
 			description: 'This publication has description',
@@ -253,14 +253,23 @@ describe('[DELETE] /user/[id]/use-in-course/[publicationId]', () => {
 			prerequisites: [],
 		});
 
-		await addPublicationToUsedInCourse(user.id, publication1.publicationId, ["A", "B"]);
-		await addPublicationToUsedInCourse(user.id, publication2.publicationId, ["C"]);
+		await addPublicationToUsedInCourse(
+			user.id,
+			publication1.publicationId,
+			['A', 'B'],
+		);
+		await addPublicationToUsedInCourse(
+			user.id,
+			publication2.publicationId,
+			['C'],
+		);
 
 		// console.log(JSON.stringify(['A']))
 		const response = await fetch(
-			`${testingUrl}/user/${user.id}/use-in-course/${publication1.publicationId}?courses=${JSON.stringify(["A"])}`, {
-				method: "DELETE"
-			}
+			`${testingUrl}/user/${user.id}/use-in-course/${publication1.publicationId}?courses=${JSON.stringify(['A'])}`,
+			{
+				method: 'DELETE',
+			},
 		);
 		expect(response.status).toBe(200);
 
