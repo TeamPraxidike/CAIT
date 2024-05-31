@@ -19,7 +19,6 @@
     // let saved = data.saved;
     let savedFileData = data.savedFileData;
     let liked = data.liked;
-    let used = data.used as number[];
 
     let saved:Publication & {
             tags: Tag[];
