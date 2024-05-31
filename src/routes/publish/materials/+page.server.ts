@@ -50,8 +50,6 @@ export const actions = {
 		const coverPicFile = data.get('coverPic');
 		let coverPic = null;
 
-		console.log(coverPicFile);
-
 		if (coverPicFile instanceof File) {
 			const buffer = await coverPicFile.arrayBuffer();
 			const info = Buffer.from(buffer).toString('base64');
@@ -59,6 +57,21 @@ export const actions = {
 				type: coverPicFile.type,
 				info,
 			};
+		}
+
+		const newTags = data.getAll('newTags') || '';
+		const newTagsJ = JSON.stringify(newTags);
+		const outerArray = JSON.parse(newTagsJ);
+		const newTagsArray = JSON.parse(outerArray[0]);
+
+		for (const tag of newTagsArray) {
+			const res = await fetch('/api/tags', {
+				method: 'POST',
+				body: JSON.stringify({ content: tag }),
+			});
+			if (res.status !== 200) {
+				return { status: 500, message: 'Tag Failed' };
+			}
 		}
 
 		const material: MaterialForm = {
@@ -71,7 +84,7 @@ export const actions = {
 				prerequisites: [data.get('prerequisites')?.toString() || ''],
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
-				theoryPractice: 34,
+				theoryPractice: Number(data.get('theoryToApplication')),
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 				materialType: 'video',

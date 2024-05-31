@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { authStore, Circuit, Meta, UserProp } from '$lib';
-	import { fly } from 'svelte/transition';
+	import { authStore, Circuit, Meta } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -14,14 +13,12 @@
 	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
-	import Icon from '@iconify/svelte';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 
 	export let data: PageServerData;
 
 	let circuitRef : InstanceType<typeof Circuit>;
-	let display = 'hidden';
 
 	let title = '';
 	let description = '';
@@ -29,24 +26,11 @@
 	let newTags: string[] = [];
 	let additionalMaintainers: User[] = [];
 
-	let userName:HTMLInputElement;
-
-
-	let editingPK = false;
-	let editingLO = false;
-	let editingIndexPK: number;
-	let editingIndexLO: number;
-	let editingPKText:string;
-	let editingLOText:string;
-	let hoverIndexPK:number;
-	let hoverIndexLO: number;
-
 	let inputChip: InputChip;
 	let tagInput = '';
 
 	let tagsDatabase = data.tags as PrismaTag[];
 	let users = data.users as User[];
-	let searchableUsers = users;
 
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
@@ -59,7 +43,6 @@
 
 	let uid = $authStore.user?.id || 0;
 
-	let priorInput: HTMLInputElement;
 	let priorKnowledge:string[] = [];
 	$: priorKnowledge = priorKnowledge;
 
@@ -71,92 +54,10 @@
 	}
 
 	// learning objectives
-	let loInput: HTMLInputElement;
 	let LOs: string[] = [];
 	$: LOs = LOs;
 
-	const handleLOPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter' && loInput.value!=='' ){
-			if(LOs.includes(loInput.value)){
-				triggerRepeatInput("Learning Objective",loInput.value);
-			}else{
-				LOs = [...LOs, loInput.value];
-				loInput.value = "";
-				event.preventDefault();
-			}
-
-		}
-	}
-	const handlePriorPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter' && priorInput.value!=='' ){
-			if(priorKnowledge.includes(priorInput.value)){
-				triggerRepeatInput("Prior Knowledge",priorInput.value);
-
-			}else{
-				priorKnowledge = [...priorKnowledge, priorInput.value];
-				priorInput.value = "";
-				event.preventDefault();
-			}
-
-		}
-	}
-	const handleRemoveMaintainer = (index: number) => {
-		const user = additionalMaintainers.filter((_,i)=> i===index)[0];
-		additionalMaintainers = additionalMaintainers.filter((_,i)=>i !== index);
-		searchableUsers = [...searchableUsers,user];
-	}
-
 	$: additionalMaintainers = additionalMaintainers
-	$: searchableUsers = searchableUsers
-
-	const addMaintainer = (user: User) =>{
-		if(!additionalMaintainers.map(x=>x.id).includes(user.id)){
-			additionalMaintainers = [...additionalMaintainers,user];
-			searchableUsers = users.filter(x=> !additionalMaintainers.map(y=>y.id).includes(x.id));
-			searchableUsers = searchableUsers.filter(x=>x.id!==user.id);
-			userName.value = '';
-			display='hidden';
-		}
-	}
-
-	const handleSearchUsers = () =>{
-		let text = userName.value.toLowerCase() ?? '';
-		if (text === ''){
-			searchableUsers = users.filter(x=> !additionalMaintainers.map(y=>y.id).includes(x.id));
-		}
-		else{
-			searchableUsers = users.filter(x=> !additionalMaintainers.map(y=>y.id).includes(x.id));
-			searchableUsers = searchableUsers.filter(x=>`${x.firstName} ${x.lastName}`.toLowerCase().includes(text ?? ''));
-		}
-	}
-
-	//handle edit of PK
-	const handlePKEdit = (event: KeyboardEvent) => {
-		if(event.key === 'Enter'){
-			if(editingPKText === ''){
-				priorKnowledge = priorKnowledge.filter((_,i) => i !== editingIndexPK);
-			}else{
-				priorKnowledge[editingIndexPK] = editingPKText;
-			}
-			editingPK = false;
-			editingPKText='';
-			editingIndexPK = -1;
-		}
-	}
-
-	//handle edit of LO
-	const handleLOEdit = (event: KeyboardEvent) => {
-		if(event.key === 'Enter'){
-			if(editingLOText === ''){
-				LOs = LOs.filter((_,i) => i !==editingIndexLO);
-			}else{
-				LOs[editingIndexLO] = editingLOText;
-			}
-			editingLO = false;
-			editingLOText='';
-			editingIndexLO = -1;
-		}
-	}
 
 	const handleInvalid = () => {
 		if(tagInput.length>0 && !addedTags.includes(tagInput)) {
@@ -210,29 +111,6 @@
 		}
 
 	}
-	let displayButton = false;
-	let displayButtonLO = false;
-
-	function clickOutside(node: HTMLElement): { destroy: () => void } {
-		const handleClick = (event: MouseEvent) => {
-			if (!node.contains(event.target as Node)) {
-				if(display === "flex"){
-					display = 'hidden'
-				}
-			}
-		};
-
-		document.addEventListener('click', handleClick, true);
-
-		return {
-			destroy() {
-				document.removeEventListener('click', handleClick, true);
-			}
-		};
-	}
-
-
-
 </script>
 
 <!--<Node></Node>-->
@@ -255,31 +133,31 @@
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
-<!--		<Step >-->
-<!--			<svelte:fragment slot="header">Create the circuit</svelte:fragment>-->
-<!--			<Circuit bind:this={circuitRef} publishing="{true}"/>-->
-<!--		</Step>-->
-<!--		<Step locked="{locks[0]}">-->
-<!--			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>-->
-<!--			<div class="flex flex-col gap-5 col-span-full">-->
-<!--				<div class="w-full space-y-1">-->
-<!--					<label for="circuitTitle" >Title<span class="text-error-300">*</span></label>-->
-<!--					<input bind:value={title} id="circuitTitle" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Enter title" required/>-->
-<!--				</div>-->
-<!--				<div class="w-full space-y-1">-->
-<!--					<label for="circuitDescription">Description<span class="text-error-300">*</span></label>-->
-<!--					<textarea bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Explain your circuit" required />-->
-<!--				</div>-->
-<!--			</div>-->
+		<Step >
+			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
+			<Circuit bind:this={circuitRef} publishing="{true}"/>
+		</Step>
+		<Step locked="{locks[0]}">
+			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
+			<div class="flex flex-col gap-5 col-span-full">
+				<div class="w-full space-y-1">
+					<label for="circuitTitle" >Title<span class="text-error-300">*</span></label>
+					<input bind:value={title} id="circuitTitle" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Enter title" required/>
+				</div>
+				<div class="w-full space-y-1">
+					<label for="circuitDescription">Description<span class="text-error-300">*</span></label>
+					<textarea bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Explain your circuit" required />
+				</div>
+			</div>
 
-<!--		</Step>-->
+		</Step>
 		<Step locked="{locks[1]}">
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between gap-3 col-span-full">
 
 				<MetadataLOandPK />
 
-				<div class="flex flex-col w-full">
+				<div class="flex flex-col w-full p-3">
 					<MantainersEditBar users={users}/>
 
 					<div class="flex flex-col gap-2">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {authStore, DifficultySelection, FileTable, Meta, TheoryAppBar, UserProp} from '$lib';
+	import {authStore, DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -9,7 +9,6 @@
 		Step,
 		Stepper
 	} from '@skeletonlabs/skeleton';
-	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
@@ -27,14 +26,13 @@
 	let allTags: PrismaTag[] = data.tags;
 	let inputChip: InputChip;
 	let tagInput = '';
+	let newTags: string[] = [];
 
-	// maintainerIds
-	let maintainersInput: HTMLInputElement;
+
 	let files: FileList = [] as unknown as FileList;
 	let maintainers: User[] = [];
 
 	// learning objectives
-	let loInput: HTMLInputElement;
 	let LOs: string[] = [];
 	$: LOs = LOs;
 
@@ -44,6 +42,7 @@
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
+	let theoryApplicationRatio = 0.5;
 
 	// cover
 	let coverPic: File | undefined = undefined;
@@ -70,6 +69,24 @@
 		};
 	});
 
+	const triggerRepeatInput = (type: string,input: string)=>{
+		toastStore.trigger({
+			message: `${type} ${input} Already Added`,
+			background: 'bg-warning-200'
+		});
+	}
+
+	const handleInvalid = () => {
+		if(tagInput.length>0 && !tags.includes(tagInput)) {
+			tags=[...tags,tagInput];
+			newTags=[...newTags,tagInput];
+			tagInput='';
+		}
+		else {
+			triggerRepeatInput("Tag",tagInput);
+		}
+	}
+
 
 	function onInputChipSelect(e: CustomEvent<TagOption>): void {
 		console.log('onInputChipSelect', e.detail);
@@ -86,48 +103,6 @@
 		}
 	}
 
-	async function fetchMaintainer() {
-		const input = maintainersInput.value;
-
-
-		let res: User | undefined = undefined;
-
-		if (isNaN(Number(input))) {
-			data.users.find((user: User) => {
-				if (user.firstName === input || user.lastName === input) {
-					res = user;
-				}
-			});
-		} else {
-			data.users.find((user: User) => {
-				if (user.id === Number(input)) {
-					res = user;
-				}
-			});
-		}
-
-		if (res === undefined) {
-			toastStore.trigger({
-				message: 'User not found',
-				background: 'bg-warning-200'
-			});
-		} else if (maintainers.find((m: User) => {
-			if (res !== undefined) m.id === res.id;
-		})) {
-			toastStore.trigger({
-				message: 'User already added',
-				background: 'bg-warning-200'
-			});
-			return;
-		} else {
-			maintainers = [...maintainers, res];
-			maintainersInput.value = '';
-		}
-	}
-
-	function handleRemoveMaintainer(index: number) {
-		maintainers = maintainers.filter((_, i) => i !== index);
-	}
 
 	/* LOCK = TRUE => LOCKED */
 	const locks: boolean[] = [true, true, true];
@@ -183,28 +158,30 @@
         formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
         formData.append('coverPic', coverPic || '');
+		formData.append('newTags', JSON.stringify(newTags));
+		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
 	<Stepper buttonCompleteType="submit">
-<!--		<Step locked={locks[0]}>-->
-<!--			<svelte:fragment slot="header">Upload files</svelte:fragment>-->
-<!--			<FileDropzone on:change={appendToFileList} multiple name="file" />-->
-<!--			<FileTable operation="edit" bind:files={files} />-->
-<!--		</Step>-->
-<!--		<Step locked={locks[1]}>-->
-<!--			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>-->
-<!--			<div class="flex flex-col gap-2">-->
-<!--				<input type="text" name="title" placeholder="Title" bind:value={title}-->
-<!--					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">-->
-<!--				<textarea name="description" placeholder="Description..." bind:value={description}-->
-<!--						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />-->
-<!--			</div>-->
-<!--			<label for="coverPhoto">Cover Picture:</label>-->
-<!--			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>-->
-<!--			{#if coverPic}-->
-<!--				<button on:click={() => coverPic = undefined} type="button" class="btn">Remove</button>-->
-<!--				<img src={URL.createObjectURL(coverPic)} alt="sss">-->
-<!--			{/if}-->
-<!--		</Step>-->
+		<Step locked={locks[0]}>
+			<svelte:fragment slot="header">Upload files</svelte:fragment>
+			<FileDropzone on:change={appendToFileList} multiple name="file" />
+			<FileTable operation="edit" bind:files={files} />
+		</Step>
+		<Step locked={locks[1]}>
+			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
+			<div class="flex flex-col gap-2">
+				<input type="text" name="title" placeholder="Title" bind:value={title}
+					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+				<textarea name="description" placeholder="Description..." bind:value={description}
+						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
+			</div>
+			<label for="coverPhoto">Cover Picture:</label>
+			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>
+			{#if coverPic}
+				<button on:click={() => coverPic = undefined} type="button" class="btn">Remove</button>
+				<img src={URL.createObjectURL(coverPic)} alt="sss">
+			{/if}
+		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
 			<div class="flex flex-row p-6 justify-between">
@@ -212,18 +189,19 @@
 					<label for="difficulty">Difficulty:</label>
 					<DifficultySelection bind:difficulty={difficulty} />
 				</div>
-				<TheoryAppBar />
+				<TheoryAppBar bind:value={theoryApplicationRatio}/>
 			</div>
 			<div class="grid grid-cols-2 gap-4 p-3">
 				<div class="flex col-span-2 items-center gap-4 p-3">
 					<div class="w-1/2">
-						<label for="estimate">Time Estimate:</label>
-						<input type="number" name="estimate" bind:value={estimate}
+						<label for="estimate">Time Estimate (in minutes):</label>
+						<input type="number" name="estimate" bind:value={estimate} placeholder="How much time do the materials take"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 					</div>
 					<div class="w-1/2">
-						<label for="copyright">Copyright:</label>
-						<input type="text" name="copyright" bind:value={copyright}
+						<label for="copyright">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
+						class="text-tertiary-700" > Check here how this applies to you</a>):</label>
+						<input type="text" name="copyright" bind:value={copyright} placeholder="Leave blank if material is your own"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 					</div>
 				</div>
@@ -231,19 +209,19 @@
 					<MetadataLOandPK />
 				</div>
 				<div class="flex flex-col w-full">
-					<MantainersEditBar />
+					<MantainersEditBar users={data.users}/>
 					<div>
-						<div>
-							<label for="tags_input">Tags:</label>
-							<div class="text-token space-y-2">
-								<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
-										   bind:input={tagInput} bind:value={tags} name="chips" />
-								<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-									<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
-												  on:selection={onInputChipSelect} />
-								</div>
+
+						<label for="tags_input">Tags:</label>
+						<div class="text-token space-y-2">
+							<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
+									   bind:input={tagInput} bind:value={tags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
+							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
+											  on:selection={onInputChipSelect} />
 							</div>
 						</div>
+
 					</div>
 
 
