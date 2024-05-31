@@ -86,9 +86,6 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 					include: { profilePic: true },
 				});
 
-				console.log('sadad:');
-				console.log(userAndPfp);
-
 				if (userAndPfp) {
 					const profilePic = profilePicFetcher(userAndPfp.profilePic);
 					session.user.profilePicData = profilePic.data;
