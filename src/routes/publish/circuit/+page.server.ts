@@ -32,6 +32,8 @@ export const actions = {
 		//circuit data does not get carried over to the submission of the form, don't know why
 		const circuitData = data.get('circuitData')?.toString() || '';
 
+		const circuitCoverPic = data.get('circuitCoverPic')?.toString() || '';
+
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
 		const newTagsArray = JSON.parse(outerArray[0]);
@@ -57,6 +59,7 @@ export const actions = {
 				tags: JSON.parse(selectedTags),
 				maintainers: JSON.parse(additionalMaintainers),
 			},
+			coverPic: JSON.parse(circuitCoverPic),
 			nodeDiff: JSON.parse(circuitData),
 		};
 		const res = await fetch('/api/circuit', {

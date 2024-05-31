@@ -85,6 +85,33 @@ export function coverPicFetcher(
 	}
 }
 
+export async function addCoverPic(
+	title: string,
+	type: string,
+	info: Buffer,
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	try {
+		const path = await fileSystem.saveFile(info, title);
+		try {
+			return prismaContext.file.create({
+				data: {
+					path: path,
+					title: title,
+					type,
+					publicationId: publicationId, // Associate the cover with Publication
+				},
+			});
+		} catch (errorDatabase) {
+			fileSystem.deleteFile(path);
+			throw new Error('Rollback');
+		}
+	} catch (errorFileSystem) {
+		throw new Error('Rollback');
+	}
+}
+
 export async function addProfilePic(
 	title: string,
 	type: string,
@@ -117,7 +144,7 @@ export async function updateProfilePic(
 	userId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	// check if the material already has a coverPic
+	// check if the user already has a coverPic
 	const profilePicFile = await prismaContext.file.findUnique({
 		where: {
 			userId: userId,
@@ -140,33 +167,6 @@ export async function updateProfilePic(
 			userId,
 			prismaContext,
 		);
-	}
-}
-
-export async function addCoverPic(
-	title: string,
-	type: string,
-	info: Buffer,
-	publicationId: number,
-	prismaContext: Prisma.TransactionClient = prisma,
-) {
-	try {
-		const path = await fileSystem.saveFile(info, title);
-		try {
-			return prismaContext.file.create({
-				data: {
-					path: path,
-					title: title,
-					type,
-					publicationId: publicationId, // Associate the cover with Publication
-				},
-			});
-		} catch (errorDatabase) {
-			fileSystem.deleteFile(path);
-			throw new Error('Rollback');
-		}
-	} catch (errorFileSystem) {
-		throw new Error('Rollback');
 	}
 }
 
@@ -199,6 +199,35 @@ export async function updateCoverPic(
 			prismaContext,
 		);
 	}
+}
+
+export async function updateCircuitCoverPic(
+	coverPic: { type: string; info: string },
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	// check if the circuit already has a coverPic
+	const coverFile = await prismaContext.file.findUnique({
+		where: {
+			coverId: publicationId,
+		},
+	});
+
+	// remove if it does
+	if (coverFile) {
+		await deleteFile(coverFile.path, prismaContext);
+	}
+
+	// upload new coverPic
+	const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
+	await addCoverPic(
+		'cover.jpg',
+		coverPic.type,
+		buffer,
+		publicationId,
+		prismaContext,
+	);
+
 }
 
 export async function addFile(
@@ -268,6 +297,7 @@ export async function deleteFile(
 ) {
 	try {
 		await prismaContext.file.delete({ where: { path: path } });
+
 		try {
 			fileSystem.deleteFile(path);
 		} catch (errorFileSystem) {
