@@ -53,8 +53,6 @@ const providers = [
 				});
 			}
 
-			console.log(user);
-
 			// return json object with the user data
 			return user;
 		},
