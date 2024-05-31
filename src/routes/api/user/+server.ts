@@ -1,11 +1,18 @@
 import { createUser, prisma, type UserForm } from '$lib/database';
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 
+/**
+ * Create a new user
+ * @deprecated This is a deprecated function.
+ * @param request
+ * @constructor
+ */
 export async function POST({ request }) {
 	// authentication step here
 	const body: UserForm = await request.json();
 	try {
 		const user = await prisma.$transaction(async (prismaTransaction) => {
+			// @ts-ignore
 			const user = await createUser(body.metaData, prismaTransaction);
 
 			await updateProfilePic(body.profilePic, user.id, prismaTransaction);

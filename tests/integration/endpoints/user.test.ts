@@ -266,6 +266,7 @@ describe('Users', () => {
 				firstName: body.firstName,
 				lastName: body.lastName,
 				email: body.email,
+				password: 'password',
 			});
 
 			const publication = await createMaterialPublication(user.id, {
@@ -338,6 +339,7 @@ describe('Users', () => {
 				firstName: body.firstName,
 				lastName: body.lastName,
 				email: body.email,
+				password: 'password',
 			});
 
 			const response = await fetch(
@@ -373,6 +375,7 @@ describe('Users', () => {
 				firstName: body.firstName,
 				lastName: body.lastName,
 				email: body.email,
+				password: 'password',
 			});
 
 			const response = await fetch(
@@ -475,6 +478,7 @@ describe('Users', () => {
 				firstName: body.firstName,
 				lastName: body.lastName,
 				email: body.email,
+				password: 'password',
 			});
 
 			const publication = await createMaterialPublication(user.id, {
@@ -537,6 +541,7 @@ describe('Users', () => {
 				firstName: body.firstName,
 				lastName: body.lastName,
 				email: body.email,
+				password: 'password',
 			});
 
 			const response = await fetch(

@@ -23,6 +23,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 				firstName: body.firstName,
 				lastName: body.lastName,
 				email: body.email,
+				password: 'password',
 			});
 
 			const publication = await createMaterialPublication(user.id, {
@@ -92,6 +93,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 			firstName: body.firstName,
 			lastName: body.lastName,
 			email: body.email,
+			password: 'password',
 		});
 
 		const response = await fetch(
@@ -118,6 +120,7 @@ describe('[GET] /publication/{publicationId}/used-in-course', () => {
 			firstName: body.firstName,
 			lastName: body.lastName,
 			email: body.email,
+			password: 'password',
 		});
 
 		const publication = await createMaterialPublication(user.id, {
@@ -157,6 +160,7 @@ describe('[GET] /user/[id]/use-in-course', () => {
 			firstName: body.firstName,
 			lastName: body.lastName,
 			email: body.email,
+			password: 'password',
 		});
 		const response = await fetch(
 			`${testingUrl}/user/${user.id}/use-in-course`,
