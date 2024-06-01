@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
 	import type { FetchedFileArray, NodeDiffActions } from '$lib/database';
@@ -8,7 +8,7 @@
 	import type { Node as PrismaNode, Publication } from '@prisma/client';
 	import nodeHtmlLabel from 'cytoscape-node-html-label';
 	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
-	import {PublicationCard } from '$lib';
+	import { PublicationCard } from '$lib';
 
 
 	function getFileExtension(filePath: string): string {

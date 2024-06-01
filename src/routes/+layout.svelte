@@ -4,18 +4,20 @@
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
 	import 'highlight.js/styles/github-dark.css';
-	import { initializeStores, Modal, storeHighlightJs, Toast } from '@skeletonlabs/skeleton';
-
-	initializeStores();
-
+	import { initializeStores, Modal, storeHighlightJs, storePopup, Toast } from '@skeletonlabs/skeleton';
 	import xml from 'highlight.js/lib/languages/xml';
 	import css from 'highlight.js/lib/languages/css';
 	import javascript from 'highlight.js/lib/languages/javascript';
 	import typescript from 'highlight.js/lib/languages/typescript';
 	import python from 'highlight.js/lib/languages/python';
-	import rust from 'highlight.js/lib/languages/rust'
-	import scala from 'highlight.js/lib/languages/scala'
-	import plaintext from 'highlight.js/lib/languages/plaintext'
+	import rust from 'highlight.js/lib/languages/rust';
+	import scala from 'highlight.js/lib/languages/scala';
+	import plaintext from 'highlight.js/lib/languages/plaintext';
+	import { Footer, Grid, Header } from '$lib';
+	// Floating UI for Popups
+	import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
+
+	initializeStores();
 
 	hljs.registerLanguage('xml', xml);
 	hljs.registerLanguage('css', css);
@@ -26,13 +28,7 @@
 	hljs.registerLanguage('scala', scala);
 	hljs.registerLanguage('plaintext', plaintext);
 
-	import { Footer, Grid, Header } from '$lib';
-
 	storeHighlightJs.set(hljs);
-
-	// Floating UI for Popups
-	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
-	import { storePopup } from '@skeletonlabs/skeleton';
 
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 </script>

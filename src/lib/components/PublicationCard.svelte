@@ -1,17 +1,25 @@
 <script lang="ts">
 
 
-    import {authStore, DiffBar, getDateDifference, Tag, UsedInCourse} from '$lib';
+	import { authStore, DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
 
-    import Icon from '@iconify/svelte';
-    import { fly } from 'svelte/transition';
-    import { createEventDispatcher, onMount } from 'svelte';
-    import type { Publication } from '@prisma/client';
-    import type { PopupSettings } from '@skeletonlabs/skeleton';
-    import { popup } from '@skeletonlabs/skeleton';
-    import { IconMapExtension } from '$lib/util/file';
+	import Icon from '@iconify/svelte';
+	import { fly } from 'svelte/transition';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import type { Publication } from '@prisma/client';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import {
+		getModalStore,
+		initializeStores,
+		Modal,
+		type ModalComponent,
+		type ModalSettings,
+		popup
+	} from '@skeletonlabs/skeleton';
+	import { IconMapExtension } from '$lib/util/file';
+	import { coursesStore } from '$lib/stores/courses';
 
-    export let publication:Publication & {
+	export let publication: Publication & {
         tags: { content: string }[],
     };
 
@@ -22,28 +30,18 @@
         placement: 'bottom',
         closeQuery: '#close, #remove'
     };
-    import {
-        initializeStores,
-        getModalStore,
-        Modal,
-        type ModalSettings,
-        type ModalComponent
-    } from '@skeletonlabs/skeleton';
-    import {coursesStore} from "$lib/stores/courses";
 
-    initializeStores();
+	initializeStores();
 
     const modalStore = getModalStore();
 
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
     export let saved: boolean = true;
-    export let numMaterials: number = 1;
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
     export let markAsUsed: boolean = false;
     export let courses: string[] = ["no courses found"]
-    export let isChecked = false;
 		export let extensions: string[] = [];
     export let forArrow: boolean = false;
 

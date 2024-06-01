@@ -2,11 +2,13 @@ import { getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
 	type CircuitForm,
-	createCircuitPublication, fileSystem,
+	createCircuitPublication,
+	fileSystem,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
-	prisma, updateCircuitCoverPic,
+	prisma,
+	updateCircuitCoverPic,
 } from '$lib/database';
 
 export async function GET() {
@@ -24,8 +26,8 @@ export async function GET() {
 			return {
 				...circuit,
 				coverPicData: currentFileData.toString('base64'),
-			}
-		})
+			};
+		});
 		return new Response(JSON.stringify(circuits), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
@@ -69,17 +71,17 @@ export async function POST({ request }) {
 				);
 
 				// if no cover pic detected in post, throw error
-				if (coverPic){
+				if (coverPic) {
 					await updateCircuitCoverPic(
 						coverPic,
 						circuit.publicationId,
 						prismaTransaction,
 					);
+				} else {
+					throw new Error(
+						'Circuit POST request needs a cover picture',
+					);
 				}
-				else {
-					throw new Error("Circuit POST request needs a cover picture");
-				}
-
 
 				// add nodes
 				for (const node of nodeInfo.add) {
@@ -98,14 +100,22 @@ export async function POST({ request }) {
 			},
 		);
 
-		const id = createdCircuit.publication.id;
+		const id = createdCircuit.publicationId;
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
-		if (error instanceof Error && error.message === "Circuit POST request needs a cover picture"){
-			return new Response(JSON.stringify({ error: 'Bad request - Circuit POST request needs a cover picture' }), {
-				status: 400,
-			});
+		if (
+			error instanceof Error &&
+			error.message === 'Circuit POST request needs a cover picture'
+		) {
+			return new Response(
+				JSON.stringify({
+					error: 'Bad request - Circuit POST request needs a cover picture',
+				}),
+				{
+					status: 400,
+				},
+			);
 		}
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,

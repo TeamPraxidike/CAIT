@@ -2,16 +2,16 @@ import type { LayoutServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import type { FetchedFileArray, FetchedFileItem } from '$lib/database';
 import type {
+	Circuit,
+	Comment,
+	Edge,
 	File as PrismaFile,
 	Material,
-	Publication,
-	Tag,
-	Circuit,
-	User,
-	Comment,
-	Reply,
 	Node as PrismaNode,
-	Edge,
+	Publication,
+	Reply,
+	Tag,
+	User,
 } from '@prisma/client';
 
 export const load: LayoutServerLoad = async ({ params, fetch, cookies }) => {
@@ -63,6 +63,7 @@ export type PublicationView = {
 	isMaterial: boolean;
 	fileData: FetchedFileArray;
 	publication: Publication & {
+		usedInCourse: { course: string }[];
 		tags: Tag[];
 		publisher: User;
 		maintainers: User[];
@@ -74,7 +75,6 @@ export type PublicationView = {
 		})[];
 		materials: Material & {
 			files: PrismaFile[];
-			usedInCourse: {course: string}[]
 		};
 
 		circuit: Circuit & {

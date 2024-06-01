@@ -1,15 +1,16 @@
 <script lang="ts">
 	import type { LayoutServerData } from './$types';
 	import {
+		AddInteractionForm,
+		authStore,
+		Circuit,
+		Comment,
 		DiffBar,
+		FileTable,
 		getDateDifference,
 		Meta,
 		Tag,
-		FileTable,
-		Comment,
-		authStore,
-		AddInteractionForm,
-		UserProp, Circuit
+		UserProp
 	} from '$lib';
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
@@ -204,15 +205,11 @@
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex justify-between w-full">
 		<div>
-			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.publication.title}</h2>
-			<p>By {serverData.publication.publisher.firstName}</p>
-
 			<div class="flex flex-row items-center">
-				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.material.publication.title}</h2>
-				<p class="text-sm opacity-85 pl-5">{generateCourses(serverData.material.publication.usedInCourse.map(x => x.course))}</p>
+				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{serverData.publication.title}</h2>
+				<p class="text-sm opacity-85 pl-5">{generateCourses(serverData.publication.usedInCourse.map(x => x.course))}</p>
 			</div>
-
-			<p>{serverData.publication.publisher.firstName}</p>
+			<p> By {serverData.publication.publisher.firstName}</p>
 			<div class="flex gap-2">
 				<p class="text-sm text-surface-500">{created}</p>
 				{#if isMaterial}

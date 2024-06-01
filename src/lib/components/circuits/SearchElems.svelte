@@ -121,7 +121,7 @@
 			<div class="flex-col col-span-full mt-8">
 				<div class="flex justify-between w-full">
 					<h2 class="text-surface-700 font-bold mb-4">Select Publications to Add to Your Circuit</h2>
-					<button class="rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
+					<button type="button" class="rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
 				</div>
 				<div class = "w-full lg:w-7/12 xl:w-1/2 mb-2">
 					<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>

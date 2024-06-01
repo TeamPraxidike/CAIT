@@ -117,6 +117,7 @@ export async function getPublicationById(id: number) {
 			id: id,
 		},
 		include: {
+			usedInCourse: true,
 			tags: true,
 			publisher: true,
 			maintainers: true,
