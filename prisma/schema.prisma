@@ -41,7 +41,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   reputation    Int       @default(0)
-  password      String // hashed password
+  password      String? // hashed password
 
   saved            Publication[]             @relation("saved")
   posts            Publication[]

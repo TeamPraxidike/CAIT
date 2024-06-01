@@ -2,6 +2,7 @@
 	import Icon from '@iconify/svelte';
 	import { signIn } from '@auth/sveltekit/client';
 	import { writable } from 'svelte/store';
+	import { SignIn } from '@auth/sveltekit/components';
 
 	let email = ""
 	let password = ""
@@ -41,10 +42,12 @@
 		</div>
 		<button class="btn rounded-lg mt-4 variant-soft-primary" type="submit">Log in</button>
 		<hr class="my-4 text-surface-200">
-		<button class="btn rounded-lg bg-surface-800 text-surface-50" on:click={handleSignIn}>
-			<Icon icon="mdi:github" class="text-2xl mr-2" />
-			Log in with GitHub
-		</button>
+		<SignIn provider="github" signInPage="signin">
+			<button slot="submitButton" class="btn rounded-lg bg-surface-800 text-surface-50">
+				<Icon icon="mdi:github" class="text-2xl mr-2" />
+				Log in with GitHub
+			</button>
+		</SignIn>
 		<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/register">Create one</a></p>
 		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
 			<span>{$errorMessage}</span>

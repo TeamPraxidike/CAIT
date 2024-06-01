@@ -3,11 +3,12 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import { goto } from '$app/navigation';
+	import { SignIn } from "@auth/sveltekit/components"
 
 	export let form: ActionData;
 
 	if (form && form.status === 200) {
-		goto('/login');
+		goto('/signin');
 	}
 
 	let email = '';
@@ -45,10 +46,12 @@
 		</div>
 		<button class="btn rounded-lg mt-4 variant-soft-primary">Register</button>
 		<hr class="my-4 text-surface-200">
-		<button class="btn rounded-lg bg-surface-800 text-surface-50">
-			<Icon icon="mdi:github" class="text-2xl mr-2" />
-			Register with GitHub
-		</button>
+		<SignIn provider="github" signInPage="signin">
+			<button slot="submitButton" class="btn rounded-lg bg-surface-800 text-surface-50">
+				<Icon icon="mdi:github" class="text-2xl mr-2" />
+				Register with GitHub
+			</button>
+		</SignIn>
 		<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/register">Create
 			one</a></p>
 		{#if form && form.status !== 200}
