@@ -117,12 +117,47 @@ export async function getPublicationById(id: number) {
 			id: id,
 		},
 		include: {
+			usedInCourse: true,
+			tags: true,
+			publisher: true,
+			maintainers: true,
+			coverPic: true,
+			comments: {
+				include: {
+					replies: {
+						include: {
+							user: true,
+						},
+					},
+					user: true,
+				},
+			},
 			materials: {
 				include: {
+					publication: true,
 					files: true,
 				},
 			},
-			circuit: true,
+			circuit: {
+				include: {
+					publication: {
+						include: {
+							tags: true,
+						},
+					},
+					nodes: {
+						include: {
+							publication: {
+								include: {
+									tags: true,
+									coverPic: true,
+								},
+							},
+							next: true,
+						},
+					},
+				},
+			},
 		},
 	});
 }

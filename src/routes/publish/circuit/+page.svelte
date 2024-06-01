@@ -43,7 +43,7 @@
 	let tagInput = '';
 
 	let tagsDatabase = data.tags as PrismaTag[];
-	let users = data.users as User[];
+	let users = data.users.users as User[];
 	let searchableUsers = users;
 
 
@@ -233,9 +233,8 @@
 
 </script>
 
-<!--<Node></Node>-->
 <Meta title="Publish Circuit" description="Organize publications into a circuits" type="site" />
-<!--<div class="col-span-9 h-[256px]"><CircuitManual isDraggable="{true}"/></div>-->
+
 <form method="POST" action="?/publish" class="col-start-2 col-span-10 my-20 pr-10 shadow p-4"
 			use:enhance={({ formData }) => {
 
@@ -255,7 +254,7 @@
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit bind:this={circuitRef} publishing="{true}"/>
+			<Circuit nodes="{[]}" publishing="{true}" bind:this={circuitRef}/>
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
