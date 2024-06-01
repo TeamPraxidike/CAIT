@@ -3,12 +3,35 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from './prisma';
 import { profilePicFetcher } from '$lib/database/file';
 import Credentials from '@auth/core/providers/credentials';
-import { getUserByEmail } from '$lib/database/user';
+import { createUser, getUserByEmail } from '$lib/database/user';
 import type { User as PrismaUser } from '@prisma/client';
 import { signInSchema } from '$lib/util/zod';
 import { verifyPassword } from '$lib/util/auth';
+import GitHub from '@auth/sveltekit/providers/github';
+import { AUTH_GITHUB_ID, AUTH_GITHUB_SECRET } from '$env/static/private';
+import type { AdapterUser } from '@auth/core/adapters';
+
+function ModifiedPrismaAdapter(p: typeof prisma) {
+	return {
+		...PrismaAdapter(p),
+		async createUser(user: Omit<AdapterUser, 'id'>) {
+			const created = await createUser({
+				email: user.email,
+				password: user.password || '',
+				firstName: user.firstName ?? user.name?.split(' ')[0] ?? '',
+				lastName: user.lastName ?? user.name?.split(' ')[1] ?? '',
+			});
+
+			return created as AdapterUser;
+		},
+	};
+}
 
 const providers = [
+	GitHub({
+		clientId: AUTH_GITHUB_ID,
+		clientSecret: AUTH_GITHUB_SECRET,
+	}),
 	Credentials({
 		credentials: {
 			email: { label: 'Email', type: 'email' },
@@ -36,18 +59,20 @@ const providers = [
 ];
 
 export const { handle, signIn, signOut } = SvelteKitAuth({
-	adapter: PrismaAdapter(prisma),
+	adapter: ModifiedPrismaAdapter(prisma),
 	providers,
 	session: {
 		strategy: 'jwt',
 	},
 	pages: {
-		signIn: '/login',
+		signIn: '/signin',
 	},
 	callbacks: {
 		async jwt({ token, user }) {
 			if (user) {
-				token.user = user as PrismaUser & { profilePicData: string };
+				token.user = user as PrismaUser & {
+					profilePicData: string;
+				};
 			}
 			return token;
 		},
