@@ -83,6 +83,11 @@ export async function getUserById(
 			posts: {
 				include: {
 					tags: true,
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+					},
 				},
 			},
 			profilePic: true
