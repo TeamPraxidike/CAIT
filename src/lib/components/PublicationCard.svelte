@@ -9,6 +9,7 @@
     import type { Publication } from '@prisma/client';
     import type { PopupSettings } from '@skeletonlabs/skeleton';
     import { popup } from '@skeletonlabs/skeleton';
+    import { IconMapExtension } from '$lib/util/file';
 
     export let publication:Publication & {
         tags: { content: string }[]
@@ -26,12 +27,13 @@
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean;
     export let saved: boolean;
-    export let numMaterials: number = 1;
+    export let extensions: string[] = [];
     export let used: number = 5;
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
     export let markAsUsed: boolean = false;
     export let isChecked = false;
+    console.log(publication)
 
     export let forArrow: boolean = false;
 
@@ -171,18 +173,18 @@
                     <h4
                       class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}</h4>
                     <div class="flex gap-2 self-center">
-                        {#if (numMaterials === 1)}
-                            <Icon icon="mdi:presentation" class="text-primary-600 text-lg"/>
-                        {:else}
+                        {#if (extensions.length === 1)}
+                            <Icon icon={IconMapExtension.get(extensions[0]) || 'vscode-icons:file-type-text'} class="text-primary-600 text-lg"/>
+                        {:else if (extensions.length > 1)}
                             <div class="py-1" bind:this={hoverDiv}>
                                 <Icon icon="clarity:file-group-solid" class="text-primary-600 text-lg"/>
                                 {#if isHovered}
                                     <div
                                       class="absolute  mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
                                       style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-                                        <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
-                                        <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
-                                        <Icon icon="mdi:presentation" class="text-primary-600 text-lg self-center"/>
+                                        {#each extensions as e}
+                                            <Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="text-lg self-center" />
+                                        {/each}
 
                                     </div>
                                 {/if}

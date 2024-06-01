@@ -12,9 +12,15 @@
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
+
 	let userIds : number[] = []
 	let targetDiv: HTMLDivElement;
 	let searchWord : string = ""
+
+	function getFileExtension(filePath: string): string {
+		const index = filePath.lastIndexOf('.');
+		return index !== -1 ? filePath.substring(index + 1) : '';
+	}
 
 
 	const removePopup = (event: MouseEvent) => {
@@ -130,7 +136,7 @@
 			{#each materials as m, i}
 				<PublicationCard publication="{m.publication}" inCircuits="{true}"
 												 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-												 on:removed={removeCard} imgSrc={'data:image;base64,' + fileData[i].data}/>
+												 on:removed={removeCard} imgSrc={'data:image;base64,' + fileData[i].data} liked="{false}" saved="{false}"/>
 			{/each}
 		</Grid>
 	</div>

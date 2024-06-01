@@ -63,7 +63,6 @@
 			toPublicationId: number
 		}[]
 	})[];
-	console.log(nodes)
 
 	const removePopupDiv = (event: MouseEvent) => {
 		let rect = document.getElementById('cy')?.getBoundingClientRect()
@@ -98,7 +97,14 @@
 	let nodeClicked: boolean = false;
 	let numSelected: number = 0;
 	let selectedNodePrereqs: Set<number> = new Set();
-
+	// const createBendPoints = (sourcePos: { posX: number; posY: number; publicationId: number; publication: { title: string } }, targetPos: { posX: number; posY: number; publicationId: number; publication: { title: string } }) =>{
+	// 	const midY = (sourcePos.posY + targetPos.posY) / 2;
+	//
+	// 	return [
+	// 		{ x: sourcePos.posX, y: midY },
+	// 		{ x: targetPos.posX, y: midY },
+	// 	];
+	// }
 
 	let mappedNodes = nodes.map(node => ({
 		data: { id: node.publicationId.toString(), label: node.publication.title, extensions : node.extensions
@@ -109,12 +115,11 @@
 	nodes.forEach(node => {
 		let curNext = node.next.map(nextNode =>
 			({
-
-
 				data: {
-					id: String(node.publicationId).concat(String(nextNode.toPublicationId)),
-					source: String(node.publicationId),
-					target: String(nextNode.toPublicationId)
+					id: (node.publicationId.toString()).concat(nextNode.toPublicationId.toString()),
+					source:node.publicationId.toString(),
+					target:nextNode.toPublicationId.toString(),
+				//	controlPoints: createBendPoints(node, nodes.find(node => node.publicationId === nextNode.toPublicationId)!)
 				}
 			}));
 		edges.push(...curNext);
@@ -223,7 +228,6 @@
 
 			}
 			nodeClicked = false;
-			console.log(selectedNodePrereqs)
 
 		});
 
@@ -322,7 +326,6 @@
 						if (htmlElement) {
 							const divElement = document.createElement('div');
 							let publication = nodes.find(n => n.publicationId === Number(node.id()));
-							console.log(publication);
 
 							if (publication) {
 								new PublicationCard({
@@ -331,7 +334,10 @@
 										publication: publication.publication,
 										inCircuits: false,
 										imgSrc: 'data:image;base64,',
-										forArrow: true
+										forArrow: true,
+										extensions: node.data().extensions,
+										liked: true,
+										saved: true
 									}
 								});
 							}
@@ -406,7 +412,26 @@
 
 		cy.fit();
 
-		document.addEventListener('mousemove', removePopupDiv)});
+		document.addEventListener('mousemove', removePopupDiv)
+		// cy.edges().forEach((edge:any) => {
+		// 		const controlPoints = edge.data('controlPoints');
+		// 		if (controlPoints) {
+		// 			edge.style({
+		// 				'segment-distances': controlPoints.map((point: { x: number; y: number; }) => {
+		// 					// Calculate the distance from the source to each control point
+		// 					const srcPos = edge.source().position();
+		// 					const dist = Math.sqrt(Math.pow(point.x - srcPos.x, 2) + Math.pow(point.y - srcPos.y, 2));
+		// 					return dist;
+		// 				}),
+		// 				'segment-weights': controlPoints.map((_: any, index: number) => (index + 1) / (controlPoints.length + 1)),
+		// 				'segment-endpoints': controlPoints
+		// 			});
+		// 		}
+		// 	});
+
+
+
+		});
 
 
 
@@ -454,7 +479,6 @@
 				return response.json();
 			})
 			.then(data => {
-				console.log(data);
 				let extensions = data.material.files.map((f: { title: string; }) => getFileExtension(f.title));
 				cy.add({
 					group: 'nodes',
@@ -541,7 +565,6 @@
 					'color': '#F9F9FA'
 				});
 				selectedNodePrereqs.add(Number(edge.source().id()));
-				console.log(selectedNodePrereqs)
 				addHtmlLabel(`#${edge.source().id()}`, true);
 			}
 		});
@@ -606,11 +629,7 @@
 								 on:selFurther={addNode} on:remFurther={removeNode} />
 	</div>
 {/if}
-<!--<PublicationCard publication="{nodes[0].publication}"/>-->
 
-<!--{#if pubCardAppear}-->
-<!--	<div class="fixed z-10 top-[{top}px] left-[{left}px] w-[100px] h-[100px] bg-surface-700"></div>-->
-<!--{/if}-->
 
 
 

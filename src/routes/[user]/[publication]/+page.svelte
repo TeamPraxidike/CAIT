@@ -19,7 +19,6 @@
 	import { goto } from '$app/navigation';
 	import { createFileList } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
-	import PoppyPop from '$lib/components/circuits/PoppyPop.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();

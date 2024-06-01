@@ -7,8 +7,6 @@
 	export let selected: boolean;
 	let text = selected ? 'text-surface-50' : 'text-surface-700 hover:text-surface-50';
 	export let extensions: string[];
-	console.log("Extensions for" + data)
-	console.log(extensions);
 </script>
 
 <div style="  overflow-wrap: break-word;"

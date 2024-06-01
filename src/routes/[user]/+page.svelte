@@ -37,7 +37,7 @@
         </p>
     {:else}
         {#each saved as publication, i}
-            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)} used={publication.usedInCourse.length}/>
+            <PublicationCard saved="{saved.includes(publication.id)}" imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)} used={publication.usedInCourse.length}/>
         {/each}
     {/if}
 
@@ -45,7 +45,7 @@
         {user.firstName}'s Publications
     </h3>
     {#each data.user.posts as publication, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)}/>
+        <PublicationCard saved="{saved.includes(publication.id)}" imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)}/>
     {/each}
 </div>
 
