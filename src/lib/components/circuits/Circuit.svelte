@@ -11,10 +11,31 @@
 	import {PublicationCard } from '$lib';
 
 
-	let pubCardAppear: boolean = false;
+	function getFileExtension(filePath: string): string {
+		const index = filePath.lastIndexOf('.');
+		return index !== -1 ? filePath.substring(index + 1) : '';
+	}
+	const addHtmlLabel = (selector:string, selected: boolean) => {
+		cy.nodeHtmlLabel([
+			{
+				query: selector,
+				tpl: function(data : any) {
+					const container = document.createElement('div');
+					container.id = data.id;
 
-	let left: string = '';
-	let top: string = '';
+					new NodeTemplate({
+						target: container,
+						props: {
+							data: data.label,
+							selected: selected,
+							extensions : data.extensions
+						}
+					});
+					return container.outerHTML;
+				}
+			}
+		]);
+	}
 
 	nodeHtmlLabel(cytoscape)
 	const modalStore = getModalStore();
@@ -42,6 +63,7 @@
 			toPublicationId: number
 		}[]
 	})[];
+	console.log(nodes)
 
 	const removePopupDiv = (event: MouseEvent) => {
 		let rect = document.getElementById('cy')?.getBoundingClientRect()
@@ -75,10 +97,11 @@
 	let prereqActive: boolean = false;
 	let nodeClicked: boolean = false;
 	let numSelected: number = 0;
+	let selectedNodePrereqs: Set<number> = new Set();
 
 
 	let mappedNodes = nodes.map(node => ({
-		data: { id: node.publicationId.toString(), label: node.publication.title,
+		data: { id: node.publicationId.toString(), label: node.publication.title, extensions : node.extensions
 	},
 		position: { x: node.posX, y: node.posY }
 	}));
@@ -111,8 +134,8 @@
 				 {
 					selector: 'node',
 					style: {
-						'width': '100px',
-						'height': '60px',
+						'width': '180px',
+						'height': '100px',
 						'shape': 'round-rectangle',
 						'background-color': '#F9F9FA',
 						'border-width' : '1px',
@@ -124,22 +147,6 @@
 						// 'label': 'data(label)',
 					},
 				},
-				// {
-				// 	selector: 'node:active',
-				// 	style: {
-				// 		'width': '100px',
-				// 		'height': '60px',
-				// 		'shape': 'round-rectangle',
-				// 		'background-color': '#F9F9FA',
-				// 		'border-width' : '1px',
-				// 		'border-color' : '#0088AD',
-				// 		'color': '#4C4C5C',
-				// 		'font-size': '10px',
-				// 		'text-valign': 'center',
-				// 		'text-halign': 'center',
-				// 		'label': 'data(label)',
-				// 	},
-				// },
 				{
 					selector: 'edge',
 					style: {
@@ -157,29 +164,17 @@
 
 		});
 
-		cy.nodeHtmlLabel([
-			{
-				query: 'node',
-				tpl: function(data : any) {
-					const container = document.createElement('div');
-					container.id = data.id;
-
-					new NodeTemplate({
-						target: container,
-						props: {
-							data: data.label
-						}
-					});
-					return container.outerHTML;
-				}
-			}
-		]);
+		addHtmlLabel("node", false);
 
 
 		cy.on('select', 'node', (event: any) => {
-
 			numSelected++;
 			let node = event.target;
+			if (!publishing) {
+				node.unselect()
+				return;
+			}
+
 			if (!publishing) {
 				cy.$(`#${node.id()}`).unselect();
 			}
@@ -188,16 +183,21 @@
 				'color': '#F9F9FA'
 			});
 
+			addHtmlLabel(`#${node.id()}`, true);
+
+
 
 			if (selected && prereqActive) {
 				let edgeId = 'e'.concat(node.id().toString().concat(selectedId.toString()));
 				if (cy.getElementById(edgeId).length > 0) {
 					cy.remove(cy.$(`#${edgeId}`));
+					selectedNodePrereqs.delete(Number(node.id()))
 				} else {
 					cy.add({
 						group: 'edges',
 						data: { id: `${edgeId}`, source: `${node.id()}`, target: `${selectedId}` }
 					});
+					selectedNodePrereqs.add(Number(node.id()))
 				}
 
 				cy.$(`#${node.id()}`).unselect();
@@ -212,6 +212,8 @@
 								'background-color': '#9E9EAE',
 								'color': '#F9F9FA'
 							});
+
+							addHtmlLabel(`#${edge.source().id()}`, true)
 						}
 					});
 
@@ -221,6 +223,8 @@
 
 			}
 			nodeClicked = false;
+			console.log(selectedNodePrereqs)
+
 		});
 
 
@@ -236,6 +240,8 @@
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
+
+				addHtmlLabel(`#${n.id()}`, false);
 			});
 
 
@@ -243,6 +249,7 @@
 				prereqActive = false;
 			}
 			if (!prereqActive) {
+				selectedNodePrereqs = new Set()
 				selected = false;
 				selectedId = '';
 			}
@@ -298,17 +305,19 @@
 		});
 
 		let cursorInsideNode: boolean = false;
+		let hoveredNodeId : number = -1;
 		/**
 		 * The two methods below are used to simulate hover effect on a node
 		 */
 		cy.on('mouseover', 'node', async (event: any) => {
 			const node = event.target;
 			cursorInsideNode = true;
+			hoveredNodeId = Number(node.id());
 			if(!publishing)
 			{
 				setTimeout(() => {
 					// Check if cursor is still inside the node
-					if (cursorInsideNode) {
+					if (cursorInsideNode && hoveredNodeId === Number(node.id())) {
 						const htmlElement = document.getElementById(node.id());
 						if (htmlElement) {
 							const divElement = document.createElement('div');
@@ -341,7 +350,7 @@
 						}
 
 					}
-				}, 400);
+				}, 700);
 			}
 
 
@@ -352,6 +361,13 @@
 					'background-color': '#4C4C5C',
 					'color': '#F9F9FA',
 					'border': '1px solid #F9F9FA'
+				});
+			}
+
+			else if(!node.selected()){
+				node.style({
+					'background-color': '#9E9EAE',
+					'color': '#F9F9FA'
 				});
 			}
 		});
@@ -366,6 +382,12 @@
 			}
 
 			if (!node.selected() && !prereqActive) {
+				node.style({
+					'background-color': '#FCFCFD',
+					'color': '#4C4C5C'
+				});
+			}
+			else if (!node.selected() && !selectedNodePrereqs.has(Number(node.id()))) {
 				node.style({
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
@@ -432,9 +454,11 @@
 				return response.json();
 			})
 			.then(data => {
+				console.log(data);
+				let extensions = data.material.files.map((f: { title: string; }) => getFileExtension(f.title));
 				cy.add({
 					group: 'nodes',
-					data: { id: data.material.publication.id, label: data.material.publication.title,},
+					data: { id: data.material.publication.id, label: data.material.publication.title, extensions : extensions},
 					position: { x: 100, y: 100 }
 				});
 			})
@@ -470,13 +494,16 @@
 			if (r) {
 				cy.nodes().forEach((node: any) => {
 					if (node.selected()) {
+						node.unselect()
 						cy.remove(cy.$(`#${node.id()}`));
 						pubIds.delete(Number(node.id()));
-						console.log(cy.nodes())
+						numSelected--
 					}
 				});
 				selectedId = '';
 				selected = false;
+				prereqActive = false;
+
 			}
 		}
 	};
@@ -513,9 +540,13 @@
 					'background-color': '#9E9EAE',
 					'color': '#F9F9FA'
 				});
+				selectedNodePrereqs.add(Number(edge.source().id()));
+				console.log(selectedNodePrereqs)
+				addHtmlLabel(`#${edge.source().id()}`, true);
 			}
 		});
 		prereqActive = true;
+
 	};
 
 	/**

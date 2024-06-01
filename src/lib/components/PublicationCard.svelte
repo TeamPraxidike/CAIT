@@ -151,7 +151,7 @@
 
 <div class="{className} flex items-center">
 {#if forArrow}
-    <div class="arrow shadow-lg"/>
+    <div class="carrow shadow-lg"/>
 {/if}
     <div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
         <div class="w-full relative h-3/6 rounded-t-lg">
@@ -277,7 +277,7 @@
 </div>
 
 <style>
-    .arrow {
+    .carrow {
 
         border-top: 12px solid transparent;
         border-bottom: 12px solid transparent;
