@@ -5,7 +5,7 @@
     import { fly } from 'svelte/transition';
 
     let userName:HTMLInputElement;
-    export let users: User[] = [];
+    export let users: UserWithProfilePic[] = [];
     let additionalMaintainers: UserWithProfilePic[] = [];
     let searchableUsers = users;
     let display = 'hidden';

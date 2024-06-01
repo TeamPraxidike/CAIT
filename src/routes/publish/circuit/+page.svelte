@@ -19,6 +19,7 @@
 	export let data: PageServerData;
 
 	let circuitRef : InstanceType<typeof Circuit>;
+	type UserWithProfilePic = User & { profilePicData: string };
 
 	let title = '';
 	let description = '';
@@ -30,7 +31,7 @@
 	let tagInput = '';
 
 	let tagsDatabase = data.tags as PrismaTag[];
-	let users = data.users as User[];
+	let users = data.users as UserWithProfilePic[];
 
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
