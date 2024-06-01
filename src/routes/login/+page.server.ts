@@ -1,4 +1,8 @@
-import { signIn } from '$lib/database/auth';
-import type { Actions } from './$types';
+import type { PageServerLoad } from './$types';
+import { redirect } from '@sveltejs/kit';
 
-export const actions = { default: signIn } satisfies Actions;
+export const load: PageServerLoad = async (event) => {
+	const session = await event.locals.auth();
+	if (session?.user) throw redirect(303, '/browse');
+	return { session };
+};
