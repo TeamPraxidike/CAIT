@@ -11,6 +11,7 @@ import {
 	updateReply,
 } from '$lib/database';
 
+
 describe('Reply CRUD', () => {
 	let user: User;
 	let publication: Material;
@@ -36,7 +37,7 @@ describe('Reply CRUD', () => {
 		});
 		comment = await createComment({
 			userId: user.id,
-			publicationId: publication.id,
+			publicationId: publication.publicationId,
 			content: 'Ivan',
 		});
 		reply = await createReply({

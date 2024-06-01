@@ -1,7 +1,7 @@
 <script lang="ts">
 
 
-    import {authStore, DiffBar, getDateDifference, Tag} from '$lib';
+    import {authStore, DiffBar, getDateDifference, Tag, UsedInCourse} from '$lib';
 
     import Icon from '@iconify/svelte';
     import { fly } from 'svelte/transition';
@@ -11,7 +11,7 @@
     import { popup } from '@skeletonlabs/skeleton';
 
     export let publication:Publication & {
-        tags: { content: string }[]
+        tags: { content: string }[],
     };
 
     let popupName = publication.id.toString().concat(publication.title);
@@ -21,17 +21,27 @@
         placement: 'bottom',
         closeQuery: '#close, #remove'
     };
+    import {
+        initializeStores,
+        getModalStore,
+        Modal,
+        type ModalSettings,
+        type ModalComponent
+    } from '@skeletonlabs/skeleton';
+    import {coursesStore} from "$lib/stores/courses";
 
+    initializeStores();
+
+    const modalStore = getModalStore();
 
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let numMaterials: number = 1;
-    export let used: number = 5;
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
     export let markAsUsed: boolean = false;
-    export let isChecked = false;
+    export let courses: string[] = ["no courses found"]
 
     const userId = $authStore.user?.id;
 
@@ -44,6 +54,7 @@
 
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
     $:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
+    $:used = courses.length;
 
     let likes = publication.likes;
     const toggleLike = async () => {
@@ -57,22 +68,6 @@
         await fetch(`/api/user/${userId}/saved/${publication.id}`, {
             method: 'POST',
         }).then(() => saved = !saved);
-    }
-
-    const toggleUsedInCourse = async () => {
-        if (isChecked) {
-            used++;
-            await fetch(`/api/user/${userId}/use-in-course/${publication.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ courses: ['a'] }),
-            });
-        } else {
-            used--;
-            await fetch(`/api/user/${userId}/use-in-course/${publication.id}?courses=["a"]`, {method: "DELETE"});
-        }
     }
 
     let hoverDiv: HTMLDivElement;
@@ -144,9 +139,35 @@
         dispatch('removed', { id: publication.id });
     };
 
+    let modalRegistry: Record<string, ModalComponent> = {
+        // Set a unique modal ID, then pass the component reference
+        useInCourseComponent: {
+            ref: UsedInCourse,
+            props: {
+                courses: courses,
+                publicationId: publication.id,
+            }
+        },
+    };
+
+    const modal: ModalSettings = {
+        type: 'component',
+        component: 'useInCourseComponent',
+        response: () => {
+            courses = $coursesStore.filter(x => x.publicationId === publication.id)[0].courses;
+            modalRegistry = {
+                useInCourseComponent: {
+                    ref: UsedInCourse,
+                    props: {
+                        courses: courses,
+                        publicationId: publication.id,
+                    }
+                },
+            };
+        }
+    };
 
 </script>
-
 
 
 <div class="{className} h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
@@ -237,10 +258,9 @@
                 {/if}
 
                     {#if markAsUsed}
-                        <div class="w-full flex justify-center space-x-2">
-                            <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>
+                        <button on:click={() => modalStore.trigger(modal)}>
                             <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
-                        </div>
+                        </button>
                     {/if}
                 </div>
 
@@ -270,3 +290,5 @@
         </div>
     </div>
 </div>
+
+<Modal components={modalRegistry}/>

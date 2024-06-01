@@ -13,7 +13,6 @@ describe('Filter Component', () => {
 		const instance = new PublicationCard({
 			target: host,
 			props: {
-				used: 6,
 				imgSrc: 'some_image',
 				publication: {
 					id: 1,

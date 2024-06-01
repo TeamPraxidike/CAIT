@@ -1,4 +1,9 @@
-import {coverPicFetcher, type FetchedFileArray, getSavedPublications, getUserById} from "$lib/database";
+import {
+    coverPicFetcher,
+    type FetchedFileArray,
+    getSavedPublications,
+    getUserById
+} from "$lib/database";
 
 /**
  * Returns all saved publications of a user

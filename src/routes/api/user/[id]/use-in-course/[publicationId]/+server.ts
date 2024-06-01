@@ -3,10 +3,10 @@ import {
     getPublicationById,
     getUserById,
 } from "$lib/database";
-import {removeFromUsedInCourse} from "$lib/database/usedInCourse";
+
 
 /**
- * Marks a publication as used in a course
+ * Replaces ALL courses linked to this publication and user with a new set of courses
  * @param params
  * @param request
  */
@@ -27,24 +27,4 @@ export async function POST({params, request}) {
     }
 }
 
-export async function DELETE({params, url}){
-    const {id, publicationId} = params;
-
-    const user = await getUserById(parseInt(id));
-    if(!user) return new Response(JSON.stringify({error: 'User not found'}), {status: 404});
-
-    const publication = await getPublicationById(parseInt(publicationId));
-    if(!publication) return new Response(JSON.stringify({error: 'Publication not found'}), {status: 404});
-
-    const coursesRes = url.searchParams.get("courses");
-    if (coursesRes === null) return new Response(JSON.stringify({error: "Bad request - missing query parameters"}), {status: 400});
-
-    const courses = JSON.parse(coursesRes);
-    if (!Array.isArray(courses)) {
-        return new Response(JSON.stringify({error: "Bad request - wrong format of query parameters"}), {status: 400})
-    }
-    await removeFromUsedInCourse(parseInt(publicationId), courses);
-
-    return new Response("Successful deletion", {status: 200});
-}
 
