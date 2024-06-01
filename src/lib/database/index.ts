@@ -112,6 +112,24 @@ type MaterialForm = {
 	fileDiff: FileDiffActions;
 };
 
+type UserCreateForm = {
+	metaData: {
+		firstName: string;
+		lastName: string;
+		email: string;
+		password: string;
+	};
+};
+
+type UserForm = {
+	metaData: {
+		firstName: string;
+		lastName: string;
+		email: string;
+	};
+	profilePic: { type: string; info: string } | null;
+};
+
 type CircuitForm = {
 	userId: string;
 	metaData: {
@@ -125,15 +143,6 @@ type CircuitForm = {
 	};
 	coverPic: { type: string; info: string } | null;
 	nodeDiff: NodeDiffActions;
-};
-
-type UserForm = {
-	metaData: {
-		firstName: string;
-		lastName: string;
-		email: string;
-	};
-	profilePic: { type: string; info: string } | null;
 };
 
 /**
@@ -250,4 +259,5 @@ export type {
 	createCommentData,
 	editCommentData,
 	editReplyData,
+	UserCreateForm,
 };

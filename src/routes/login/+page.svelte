@@ -1,35 +1,29 @@
 <script lang="ts">
-	import {signIn} from '@auth/sveltekit/client';
 	import Icon from '@iconify/svelte';
-	import { signInSchema } from '$lib/util/zod';
+	import { signIn } from '@auth/sveltekit/client';
+	import { writable } from 'svelte/store';
 
 	let email = ""
 	let password = ""
 	let validationErrors = { email: '', password: '', output: '' }
+	let errorMessage = writable("");
 
 
-	async function handleSignIn(e: Event) {
-		e.preventDefault();
-
-		const { success, error } = signInSchema.safeParse({ email, password });
-
-		if (!success) {
-			// Handle validation error
-			validationErrors.email = error.formErrors.fieldErrors.email?.join(', ') || '';
-			validationErrors.password = error.formErrors.fieldErrors.password?.join(', ') || '';
-			return;
-		}
-
+	async function handleSignIn() {
 		try {
-			await signIn('credentials', { email, password, firstName: 'John', lastName: 'Doe'});
-		} catch (error) {
-			console.error(error);
+			const result = await signIn('credentials', { email, password });
+			if (!result?.ok) {
+				throw new Error(result?.statusText || 'Failed to sign in');
+			}
+			// Handle successful sign-in (e.g., redirect to dashboard)
+		} catch (error:any) {
+			errorMessage.set("Failed to sign in: " + error.message);
 		}
 	}
 </script>
 
 <div class="col-span-12 h-[80vh] flex items-center justify-center">
-	<form class="flex flex-col w-96 border p-8 rounded-lg shadow text-surface-600 gap-2">
+	<form on:submit|preventDefault={handleSignIn} method="POST" class="flex flex-col w-96 border p-8 rounded-lg shadow text-surface-600 gap-2">
 		<h3 class="text-center mt-4 text-surface-700 font-semibold text-xl">Login</h3>
 		<label for="email">
 			Email
@@ -45,13 +39,15 @@
 		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
 			<span>{validationErrors.password}</span>
 		</div>
-		<button class="btn rounded-lg mt-4 variant-soft-primary" on:click={handleSignIn}>Log in</button>
+		<button class="btn rounded-lg mt-4 variant-soft-primary" type="submit">Log in</button>
 		<hr class="my-4 text-surface-200">
 		<button class="btn rounded-lg bg-surface-800 text-surface-50" on:click={handleSignIn}>
 			<Icon icon="mdi:github" class="text-2xl mr-2" />
 			Log in with GitHub
 		</button>
 		<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/register">Create one</a></p>
-
+		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
+			<span>{$errorMessage}</span>
+		</div>
 	</form>
 </div>
