@@ -2,7 +2,8 @@ import type { Tag } from '@prisma/client';
 import type { Actions, PageServerLoad } from './$types';
 import type { CircuitForm } from '$lib/database';
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, parent }) => {
+	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const users = await (await fetch(`/api/user`)).json();
 	return { tags, users };

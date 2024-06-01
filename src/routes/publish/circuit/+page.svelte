@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { authStore, Circuit, Meta } from '$lib';
+	import { fly } from 'svelte/transition';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -13,6 +14,8 @@
 	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
+	import Icon from '@iconify/svelte';
+	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 
@@ -42,7 +45,7 @@
 		};
 	});
 
-	let uid = $authStore.user?.id || 0;
+	let uid = $page.data.session?.user.id || 0;
 
 	let priorKnowledge:string[] = [];
 	$: priorKnowledge = priorKnowledge;
@@ -97,7 +100,7 @@
 			message: 'Publication Added successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/${$authStore.user?.id}/${form?.id}`);
+		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,

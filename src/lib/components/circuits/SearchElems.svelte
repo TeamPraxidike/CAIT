@@ -1,10 +1,9 @@
 <script lang="ts">
-
-
-	import { authStore, Grid, PublicationCard, SearchBar } from '$lib';
+	import { Grid, PublicationCard, SearchBar } from '$lib';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import ToggleComponent from '$lib/components/ToggleComponent.svelte';
 	import type { FetchedFileArray } from '$lib/database';
+	import { page } from '$app/stores';
 
 	import { scale } from 'svelte/transition';
 	export let materials : any = [];
@@ -73,8 +72,8 @@
 		if (event.detail.option === 0)
 			userIds = []
 		if (event.detail.option === 2){
-			if ($authStore.user?.id)
-				userIds = [$authStore.user.id]
+			if ($page.data.session?.user.id)
+				userIds = [$page.data.session?.user.id]
 		}
 
 		searchAPI()

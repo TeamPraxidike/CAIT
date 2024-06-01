@@ -12,6 +12,7 @@
 		Tag,
 		UserProp
 	} from '$lib';
+
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
@@ -20,11 +21,12 @@
 	import { goto } from '$app/navigation';
 	import { createFileList } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
+	import { page } from '$app/stores';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
 	export let data: LayoutServerData;
-	const userId = $authStore.user?.id;
+	const userId = $page.data.session?.user.id;
 
 	let serverData: PublicationView = data.loadedPublication.loadedPublication;
 	const isMaterial : boolean = serverData.isMaterial
@@ -36,9 +38,7 @@
 	let likedReplies = data.likedReplies as number[];
 
 	let files: FileList;
-
-		if (isMaterial)
-		{
+		if (isMaterial) {
 			files = createFileList(serverData.fileData, serverData.publication.materials.files)
 		}
 
@@ -98,7 +98,6 @@
 	}
 
 	async function downloadFiles() {
-
 		const zip = new JSZip();
 
 		for (let i = 0; i < files.length; i++) {
@@ -281,8 +280,8 @@
 	<hr>
 </div>
 
-{#if $authStore.user}
-	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{serverData.publication.id}"/>
+{#if $page.data.session?.user}
+	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{serverData.material.publicationId}"/>
 {/if}
 
 {#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}

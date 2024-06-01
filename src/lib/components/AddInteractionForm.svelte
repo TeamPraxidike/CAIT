@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { authStore } from '$lib';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { enhance, applyAction } from '$app/forms';
+	import { page } from '$app/stores';
 
 	let isFocused = false;
 	let originalHeight: string;
@@ -12,7 +12,7 @@
 	export let display = 'flex';
 	export let publicationId = 0;
 
-	let userId = $authStore.user?.id || 0;
+	let userId = $page.data.session?.user.id || 0;
 
 	let text = addComment ? 'Comment':'Reply'
 	let commentText = '';

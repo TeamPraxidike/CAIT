@@ -5,7 +5,7 @@
     import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
-    import { signIn, signOut } from '@auth/sveltekit/client';
+    import { signIn } from '@auth/sveltekit/client';
 
     type NavOption = {
         text: string;
@@ -66,7 +66,11 @@
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                     {#if $page.data.session.user && $page.data.session.user.profilePicData !== ''}
-                        <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $page.data.session.user.profilePicData} alt={$page.data.session.user?.name}/>
+                        {#if $page.data.session.user.profilePicData.startsWith('http')}
+                            <img class="h-8 w-8 rounded-full" src={$page.data.session.user.profilePicData} alt={$page.data.session.user.name}/>
+                        {:else}
+                            <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $page.data.session.user.profilePicData} alt={$page.data.session.user.name}/>
+                        {/if}
                     {:else}
                         <div class="w-8 h-8 placeholder-circle" />
                     {/if}

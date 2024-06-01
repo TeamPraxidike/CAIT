@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore, DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
+	import { DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -14,6 +14,7 @@
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 
@@ -62,7 +63,7 @@
 		}
 	}
 
-	$: uid = $authStore.user?.id;
+	$: uid = $page.data.session?.user.id;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 	let flavorOptions: TagOption[] = allTags.map(tag => {
@@ -122,7 +123,7 @@
 			message: 'Publication Edited successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/${$authStore.user?.id}/${form?.id}`);
+		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,

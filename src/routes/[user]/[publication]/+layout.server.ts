@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { FetchedFileArray, FetchedFileItem } from '$lib/database';
 import type {
 	Circuit,
@@ -14,14 +14,22 @@ import type {
 	User,
 } from '@prisma/client';
 
-export const load: LayoutServerLoad = async ({ params, fetch, cookies }) => {
-	//const pRes = await fetch(`/api/material/${params.publication}`);
-	const pRes = await fetch(`/api/publication/${params.publication}`);
+export const load: LayoutServerLoad = async ({
+	params,
+	fetch,
+	locals,
+	parent,
+}) => {
+	await parent();
 
+	const session = await locals.auth();
+	if (!session) throw redirect(303, '/signin');
+
+	const pRes = await fetch(`/api/material/${params.publication}`);
 	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
 
 	const userRes = await fetch(
-		`/api/user/${cookies.get('userId')}/publicationInfo/${params.publication}`,
+		`/api/user/${session.user.id}/publicationInfo/${params.publication}`,
 	);
 	if (userRes.status !== 200) error(userRes.status, userRes.statusText);
 
@@ -87,26 +95,5 @@ export type PublicationView = {
 			})[];
 		};
 	};
-
-	// material: Material & {
-	// 	files: PrismaFile[];
-	// 	publication: Publication & {
-	// 		tags: Tag[];
-	// 		publisher: User;
-	// 		maintainers: User[];
-	// 		comments: (Comment & {
-	// 			replies: (Reply & {
-	// 				user: User;
-	// 			})[];
-	// 			user: User;
-	// 		})[];
-	// 	};
-	// };
-	// circuit: Circuit & {
-	// 	nodes: (PrismaNode & {
-	// 		prerequisites: Edge[];
-	// 		next: Edge[];
-	// 	})[];
-	// };
 	coverFileData: FetchedFileItem;
 };
