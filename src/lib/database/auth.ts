@@ -1,18 +1,20 @@
 import { SvelteKitAuth } from '@auth/sveltekit';
 import { PrismaAdapter } from '@auth/prisma-adapter';
+import { ZodError } from 'zod';
 import { prisma } from './prisma';
 import { profilePicFetcher } from '$lib/database/file';
 import Credentials from '@auth/core/providers/credentials';
 import { createUser, getUserByEmail } from '$lib/database/user';
 import type { User as PrismaUser } from '@prisma/client';
 import crypto from 'crypto';
+import { signInSchema } from '$lib/util/zod';
 
 // TODO: PROTECT AGAINST RAINBOW TABLES ATTACK BY USING SALTS
 async function hashPassword(password: string) {
 	return crypto.createHash('sha512').update(password).digest('hex');
 }
 
-async function verifyPassword(password: string, hashedPassword: string) {
+function verifyPassword(password: string, hashedPassword: string) {
 	const hash = crypto.createHash('sha512').update(password).digest('hex');
 	return hash === hashedPassword;
 }
@@ -26,35 +28,37 @@ const providers = [
 			lastName: { label: 'Last Name', type: 'text' },
 		},
 		authorize: async (credentials) => {
-			if (!credentials?.email || !credentials?.password) {
-				throw new Error('Missing email or password');
-			}
+			try {
+				const { email, password } =
+					await signInSchema.parseAsync(credentials);
 
-			const password = credentials.password as string;
-			const email = credentials.email as string;
+				// logic to verify if user exists
+				let user = await getUserByEmail(email);
 
-			// logic to verify if user exists
-			let user = await getUserByEmail(email);
+				// TODO: Remove this once we have a proper password reset flow
+				if (user) {
+					// User exists, verify password
+					const isValid = verifyPassword(password, user.password);
 
-			if (user) {
-				// User exists, verify password
-				const isValid = await verifyPassword(password, user.password);
-				if (!isValid) {
-					throw new Error('Invalid password');
+					if (!isValid) throw new Error('Invalid password');
+				} else {
+					// User does not exist, create new user
+					const hashedPassword = await hashPassword(password);
+					user = await createUser({
+						email: credentials.email as string,
+						firstName: credentials.firstName as string,
+						lastName: credentials.lastName as string,
+						password: hashedPassword,
+					});
 				}
-			} else {
-				// User does not exist, create new user
-				const hashedPassword = await hashPassword(password);
-				user = await createUser({
-					email: credentials.email as string,
-					firstName: credentials.firstName as string,
-					lastName: credentials.lastName as string,
-					password: hashedPassword,
-				});
-			}
 
-			// return json object with the user data
-			return user;
+				// return json object with the user data
+				return user;
+			} catch (error) {
+				if (error instanceof ZodError) {
+					return null;
+				}
+			}
 		},
 	}),
 ];
