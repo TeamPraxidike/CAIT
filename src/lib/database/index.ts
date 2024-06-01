@@ -111,6 +111,15 @@ type MaterialForm = {
 	fileDiff: FileDiffActions;
 };
 
+type UserCreateForm = {
+	metaData: {
+		firstName: string;
+		lastName: string;
+		email: string;
+		password: string;
+	};
+};
+
 type UserForm = {
 	metaData: {
 		firstName: string;
@@ -247,4 +256,5 @@ export type {
 	createCommentData,
 	editCommentData,
 	editReplyData,
+	UserCreateForm,
 };

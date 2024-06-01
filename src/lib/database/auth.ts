@@ -1,23 +1,12 @@
-import { SvelteKitAuth } from '@auth/sveltekit';
+import { CredentialsSignin, SvelteKitAuth } from '@auth/sveltekit';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import { ZodError } from 'zod';
 import { prisma } from './prisma';
 import { profilePicFetcher } from '$lib/database/file';
 import Credentials from '@auth/core/providers/credentials';
-import { createUser, getUserByEmail } from '$lib/database/user';
+import { getUserByEmail } from '$lib/database/user';
 import type { User as PrismaUser } from '@prisma/client';
-import crypto from 'crypto';
 import { signInSchema } from '$lib/util/zod';
-
-// TODO: PROTECT AGAINST RAINBOW TABLES ATTACK BY USING SALTS
-async function hashPassword(password: string) {
-	return crypto.createHash('sha512').update(password).digest('hex');
-}
-
-function verifyPassword(password: string, hashedPassword: string) {
-	const hash = crypto.createHash('sha512').update(password).digest('hex');
-	return hash === hashedPassword;
-}
+import { verifyPassword } from '$lib/util/auth';
 
 const providers = [
 	Credentials({
@@ -28,37 +17,20 @@ const providers = [
 			lastName: { label: 'Last Name', type: 'text' },
 		},
 		authorize: async (credentials) => {
-			try {
-				const { email, password } =
-					await signInSchema.parseAsync(credentials);
+			const { email, password } =
+				await signInSchema.parseAsync(credentials);
 
-				// logic to verify if user exists
-				let user = await getUserByEmail(email);
+			// logic to verify if user exists
+			const user = await getUserByEmail(email);
 
-				// TODO: Remove this once we have a proper password reset flow
-				if (user) {
-					// User exists, verify password
-					const isValid = verifyPassword(password, user.password);
+			if (!user) throw new CredentialsSignin('User not found');
 
-					if (!isValid) throw new Error('Invalid password');
-				} else {
-					// User does not exist, create new user
-					const hashedPassword = await hashPassword(password);
-					user = await createUser({
-						email: credentials.email as string,
-						firstName: credentials.firstName as string,
-						lastName: credentials.lastName as string,
-						password: hashedPassword,
-					});
-				}
+			// User exists, verify password
+			if (!verifyPassword(password, user.password))
+				throw new CredentialsSignin('Invalid password');
 
-				// return json object with the user data
-				return user;
-			} catch (error) {
-				if (error instanceof ZodError) {
-					return null;
-				}
-			}
+			// return json object with the user data
+			return user;
 		},
 	}),
 ];
@@ -70,7 +42,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		strategy: 'jwt',
 	},
 	pages: {
-		signIn: '/login', // Define your custom sign-in page here
+		signIn: '/login',
 	},
 	callbacks: {
 		async jwt({ token, user }) {
