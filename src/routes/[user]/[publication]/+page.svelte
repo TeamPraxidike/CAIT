@@ -31,9 +31,6 @@
 	let serverData: PublicationView = data.loadedPublication.loadedPublication;
 	const isMaterial : boolean = serverData.isMaterial
 
-	// console.log(isMaterial)
-	 console.log(serverData)
-
 	let likedComments = data.likedComments as number[];
 	let likedReplies = data.likedReplies as number[];
 
@@ -263,7 +260,7 @@
 				<Circuit publishing="{false}" nodes="{serverData.publication.circuit.nodes}"/>
 		</div>
 	{/if}
-	{#if serverData.publication.publisherId === $authStore.user?.id}
+	{#if serverData.publication.publisherId === $page.data.session?.user.id}
 		<div class="flex gap-2 mt-4">
 			<button
 				on:click={() => goto(`/${serverData.publication.publisherId}/${serverData.publication.id}/edit`)}

@@ -1,13 +1,14 @@
 <script lang="ts">
 
 
-	import { authStore, DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
+    import {DiffBar, getDateDifference, Tag} from '$lib';
 
-	import Icon from '@iconify/svelte';
-	import { fly } from 'svelte/transition';
-	import { createEventDispatcher, onMount } from 'svelte';
-	import type { Publication } from '@prisma/client';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import Icon from '@iconify/svelte';
+    import { fly } from 'svelte/transition';
+    import { createEventDispatcher, onMount } from 'svelte';
+    import type { Publication } from '@prisma/client';
+    import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import { page } from '$app/stores';
 	import {
 		getModalStore,
 		initializeStores,
@@ -45,7 +46,7 @@
 		export let extensions: string[] = [];
     export let forArrow: boolean = false;
 
-    const userId = $authStore.user?.id;
+    const userId = $page.data.session?.user.id;
 
     //used to differentiate if its used in a normal browse or in the circuit browse
     export let inCircuits: boolean = false;
