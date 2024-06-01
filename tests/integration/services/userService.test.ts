@@ -6,7 +6,7 @@ import {
 	getPublicationById,
 	getUserById,
 } from '$lib/database';
-import { randomUUID } from 'node:crypto';
+
 import {
 	editUser,
 	getLikedPublications,

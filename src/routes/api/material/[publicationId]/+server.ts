@@ -1,6 +1,5 @@
 import {
 	coverPicFetcher,
-	deleteFile,
 	deleteMaterialByPublicationId,
 	type FetchedFileArray,
 	type FetchedFileItem,

@@ -64,6 +64,7 @@ export type PublicationView = {
 				})[];
 				user: User;
 			})[];
+			usedInCourse: {course: string}[]
 		};
 	};
 	coverFileData: FetchedFileItem;

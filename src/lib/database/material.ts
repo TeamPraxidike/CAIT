@@ -50,6 +50,11 @@ export async function getMaterialByPublicationId(
 							user: true,
 						},
 					},
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+					},
 				},
 			},
 			files: true,
