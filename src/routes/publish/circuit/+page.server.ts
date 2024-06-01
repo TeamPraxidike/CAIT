@@ -15,11 +15,14 @@ export const actions = {
 	 * @param fetch the fetch function to send requests to the server, *provided by SvelteKit*
 	 */
 	publish: async ({ request, fetch }) => {
+		console.log('A');
 		const data = await request.formData();
 		const pid = data.get('publisherId')?.toString();
 		const title = data.get('title')?.toString() || '';
 		const description = data.get('description')?.toString() || '';
 		const selectedTags = data.get('selectedTags')?.toString() || '';
+
+		console.log('B');
 
 		//I need to get the separate strings here so I can create them as string[], but not sure how to do that
 		const newTags = data.getAll('newTags') || '';
@@ -32,12 +35,14 @@ export const actions = {
 		//circuit data does not get carried over to the submission of the form, don't know why
 		const circuitData = data.get('circuitData')?.toString() || '';
 
-		const circuitCoverPic = data.get('circuitCoverPic')?.toString() || '';
+		const circuitCoverPic = data.get('coverPic')?.toString() || '';
 
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
-		const newTagsArray = JSON.parse(outerArray[0]);
+		const newTagsArray = JSON.parse(outerArray[0]) || [];
 
+		console.log('C');
+		console.log(newTagsArray);
 		for (const tag of newTagsArray) {
 			const res = await fetch('/api/tags', {
 				method: 'POST',
@@ -48,6 +53,8 @@ export const actions = {
 			}
 		}
 
+		console.log('D');
+		console.log(circuitCoverPic);
 		const circuit: CircuitForm = {
 			userId: Number(pid),
 			metaData: {
@@ -62,6 +69,7 @@ export const actions = {
 			coverPic: JSON.parse(circuitCoverPic),
 			nodeDiff: JSON.parse(circuitData),
 		};
+		console.log('E');
 		const res = await fetch('/api/circuit', {
 			method: 'POST',
 			body: JSON.stringify(circuit),

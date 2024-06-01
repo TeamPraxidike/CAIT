@@ -13,13 +13,13 @@
 
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationView = data.loadedPublication.loadedPublication;
-	let publication: Publication = serverData.material.publication;
+	let publication: Publication = serverData.publication;
 
-	let tags: string[] = serverData.material.publication.tags.map(tag => tag.content);
-	let files: FileList = createFileList(serverData.fileData, serverData.material.files);
+	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
+	let files: FileList = createFileList(serverData.fileData, serverData.publication.materials.files);
 
-	let LOs: string[] = serverData.material.publication.learningObjectives;
-	let difficulty: Difficulty = serverData.material.publication.difficulty;
+	let LOs: string[] = serverData.publication.learningObjectives;
+	let difficulty: Difficulty = serverData.publication.difficulty;
 	let maintainers: number[] = [$authStore.user?.id || 1];
 	let coverPic: File | undefined = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 
@@ -94,7 +94,7 @@
 	  class="col-span-full my-20"
 	  use:enhance={({ formData }) => {
         Array.from(files).forEach(file => appendFile(formData, file, 'file'));
-		formData.append('oldFiles', JSON.stringify(serverData.material.files));
+		formData.append('oldFiles', JSON.stringify(serverData.publication.materials.files));
 		formData.append('oldFilesData', JSON.stringify(serverData.fileData));
 
 		formData.append('userId', $authStore.user?.id.toString() || '');
@@ -106,7 +106,7 @@
     }}>
 
 	<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">Edit Publication</h2>
-	<p>{serverData.material.publication.publisher.firstName}</p>
+	<p>{serverData.publication.publisher.firstName}</p>
 
 	<hr class="my-10">
 

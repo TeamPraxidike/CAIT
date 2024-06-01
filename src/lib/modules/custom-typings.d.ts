@@ -1,4 +1,4 @@
-// declare module 'cytoscape-node-html-label' {
+declare module 'cytoscape-node-html-label'; //{
 // 	const cytoscapeNodeHtmlLabel: (cytoscape: any) => void;
 // 	export default cytoscapeNodeHtmlLabel;
 // }
