@@ -1,12 +1,14 @@
-import { getAllCircuits } from '$lib/database/circuit';
+import {
+	getAllCircuits
+} from '$lib/database/circuit';
 import {
 	addNode,
 	type CircuitForm,
-	createCircuitPublication,
+	createCircuitPublication, fileSystem,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
-	prisma,
+	prisma, updateCircuitCoverPic,
 } from '$lib/database';
 
 export async function GET() {
@@ -14,7 +16,18 @@ export async function GET() {
 	// return 401 if user not authenticated
 
 	try {
-		const circuits = await getAllCircuits();
+		let circuits = await getAllCircuits();
+
+		circuits = circuits.map((circuit) => {
+			const filePath = circuit.publication.coverPic!.path;
+
+			const currentFileData = fileSystem.readFile(filePath);
+
+			return {
+				...circuit,
+				coverPicData: currentFileData.toString('base64'),
+			}
+		})
 		return new Response(JSON.stringify(circuits), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
@@ -39,6 +52,7 @@ export async function POST({ request }) {
 	const metaData = body.metaData;
 	const userId = body.userId;
 	const nodeInfo: NodeDiffActions = body.nodeDiff;
+	const coverPic = body.coverPic;
 
 	try {
 		const createdCircuit = await prisma.$transaction(
@@ -55,6 +69,19 @@ export async function POST({ request }) {
 					circuit.publicationId,
 					prismaTransaction,
 				);
+
+				// if no cover pic detected in post, throw error
+				if (coverPic){
+					await updateCircuitCoverPic(
+						coverPic,
+						circuit.publicationId,
+						prismaTransaction,
+					);
+				}
+				else {
+					throw new Error("Circuit POST request needs a cover picture");
+				}
+
 
 				// add nodes
 				for (const node of nodeInfo.add) {
@@ -77,7 +104,11 @@ export async function POST({ request }) {
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
-		console.error(error);
+		if (error instanceof Error && error.message === "Circuit POST request needs a cover picture"){
+			return new Response(JSON.stringify({ error: 'Bad request - Circuit POST request needs a cover picture' }), {
+				status: 400,
+			});
+		}
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});

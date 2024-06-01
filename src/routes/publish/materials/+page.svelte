@@ -30,7 +30,8 @@
 
 
 	let files: FileList = [] as unknown as FileList;
-	let maintainers: User[] = [];
+	type UserWithProfilePic = User & { profilePicData: string };
+	let maintainers: UserWithProfilePic[] = [];
 
 	// learning objectives
 	let LOs: string[] = [];
@@ -62,7 +63,7 @@
 		}
 	}
 
-	$: uid = $authStore.user?.id || 0;
+	$: uid = $authStore.user?.id;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 	let flavorOptions: TagOption[] = allTags.map(tag => {
@@ -151,7 +152,7 @@
           }
         });
 
-        formData.append('userId', uid.toString());
+        formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
         formData.append('difficulty', difficulty);

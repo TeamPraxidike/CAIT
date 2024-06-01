@@ -23,6 +23,7 @@ const mockUser = {
 	profilePic: 'https://example.com/profile.jpg',
 	reputation: 100,
 	isAdmin: false,
+	profilePicData: 'null',
 };
 
 describe('Header Component', () => {
@@ -49,7 +50,14 @@ describe('Header Component', () => {
 			session: 'aa',
 		});
 
-		storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+		storePopup.set({
+			computePosition,
+			autoUpdate,
+			flip,
+			shift,
+			offset,
+			arrow,
+		});
 
 		const instance = new Header({
 			target: host,
@@ -71,7 +79,14 @@ describe('Header Component', () => {
 			session: 'aa',
 		});
 
-		storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+		storePopup.set({
+			computePosition,
+			autoUpdate,
+			flip,
+			shift,
+			offset,
+			arrow,
+		});
 
 		const instance = new Header({
 			target: host,

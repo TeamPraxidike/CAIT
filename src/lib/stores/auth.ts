@@ -2,7 +2,7 @@ import { type Writable, writable } from 'svelte/store';
 import type { User } from '@prisma/client';
 
 export type AuthStruct = {
-	user: User | null;
+	user: (User & { profilePicData: string }) | null;
 	session: string | null;
 };
 
@@ -17,7 +17,11 @@ export interface AuthStore {
 		run: (value: AuthStruct) => void,
 		invalidate?: (value?: AuthStruct) => void,
 	) => () => void;
-	setAuth: (user: User, session: string) => void;
+	setAuth: (
+		user: User & { profilePicData: string },
+		profilePicData: string,
+		session: string,
+	) => void;
 	logout: () => void;
 }
 
@@ -58,8 +62,14 @@ const createAuthStore = (): AuthStore => {
 	return {
 		subscribe,
 		/* This is more than insecure, must change */
-		setAuth: (user: User, session: string) => {
-			set({ user, session });
+		setAuth: (user: User, profilePicData: string, session: string) => {
+			set({
+				user: {
+					...user,
+					profilePicData,
+				},
+				session,
+			});
 		},
 		logout: () => {
 			set({ user: null, session: null });

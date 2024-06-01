@@ -197,9 +197,8 @@
 
     <div bind:this={commentDiv}
      class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full relative rounded-lg flex gap-2 p-1 ">
-    <div class="w-12 h-12 placeholder-circle">
-    </div>
-    <div class="flex flex-col w-full">
+        <div class="w-12 h-12 placeholder-circle" />
+        <div class="flex flex-col w-full">
 
         <div class="flex gap-3 items-center max-w-full">
             <span class="text-surface-800 dark:text-surface-50 font-bold text-l">{userName}</span>

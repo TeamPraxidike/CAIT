@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { authStore, Grid, UserMenu } from '$lib';
+    import {authStore, Grid, UserMenu} from '$lib';
     import { LightSwitch, popup, type PopupSettings } from '@skeletonlabs/skeleton';
     import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
@@ -32,7 +32,8 @@
     async function login(event: MouseEvent) {
 
         fetch('/api/user/1').then(res => res.json()).then(data => {
-            authStore.setAuth(data, 'token');
+            const { user, profilePicData } = data;
+            authStore.setAuth(user, profilePicData.data, 'token');
         }).catch(err => console.error(err));
 
         // Find the closest form element
@@ -86,7 +87,11 @@
             {#if loggedIn}
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                    <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
+                    {#if $authStore.user && $authStore.user.profilePicData !== ''}
+                        <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $authStore.user.profilePicData} alt={$authStore.user?.firstName}/>
+                    {:else}
+                        <div class="w-8 h-8 placeholder-circle" />
+                    {/if}
                 </div>
                 <div data-popup="popupHover">
                     <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
@@ -125,7 +130,11 @@
 
                     {#if loggedIn}
                         <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                            <enhanced:img class="h-8 w-8 rounded-full" src="/static/fdr.jpg" alt="Profile Picture"/>
+                            {#if $authStore.user && $authStore.user.profilePicData !== ''}
+                                <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $authStore.user.profilePicData} alt={$authStore.user?.firstName}/>
+                            {:else}
+                                <div class="w-8 h-8 placeholder-circle" />
+                            {/if}
                         </div>
                     {:else}
                         <form action="/" method="post">

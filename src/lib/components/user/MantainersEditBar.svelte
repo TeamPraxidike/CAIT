@@ -6,10 +6,11 @@
 
     let userName:HTMLInputElement;
     export let users: User[] = [];
-    let additionalMaintainers: User[] = [];
+    let additionalMaintainers: UserWithProfilePic[] = [];
     let searchableUsers = users;
     let display = 'hidden';
     let uid = $authStore.user?.id || 0;
+    type UserWithProfilePic = User & { profilePicData: string };
 
     const handleRemoveMaintainer = (index: number) => {
         const user = additionalMaintainers.filter((_,i)=> i===index)[0];
@@ -20,7 +21,7 @@
     $: additionalMaintainers = additionalMaintainers
     $: searchableUsers = searchableUsers
 
-    const addMaintainer = (user: User) =>{
+    const addMaintainer = (user: UserWithProfilePic) =>{
         if(!additionalMaintainers.map(x=>x.id).includes(user.id)){
             additionalMaintainers = [...additionalMaintainers,user];
             searchableUsers = users.filter(x=> !additionalMaintainers.map(y=>y.id).includes(x.id));
@@ -65,11 +66,11 @@
     <div class="flex flex-wrap my-2 gap-1 items-center w-full">
         {#if $authStore.user}
             <UserProp
-                    user={$authStore.user} view="publish" role="Publisher" userPhotoUrl="/fdr.jpg" />
+                    user={$authStore.user} view="publish" role="Publisher" userPhotoUrl={'data:image;base64,' + $authStore.user.profilePicData} />
         {/if}
 
         {#each additionalMaintainers as maintainer, key}
-            <UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish" role="Maintainer" userPhotoUrl="/fdr.jpg" />
+            <UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish" role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
         {/each}
 
         <button on:click={()=>{display='flex'}} type="button" name="add_maintainer" inputmode="decimal"

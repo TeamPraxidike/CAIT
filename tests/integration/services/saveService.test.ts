@@ -1,7 +1,15 @@
 import { it, expect, describe, beforeEach } from 'vitest';
 import { Difficulty, type Material, type User } from '@prisma/client';
-import {addPublicationToUsedInCourse, createMaterialPublication, createUser} from '$lib/database';
-import {getSavedPublications, isPublicationSaved, savePublication} from '$lib/database/save';
+import {
+	addPublicationToUsedInCourse,
+	createMaterialPublication,
+	createUser,
+} from '$lib/database';
+import {
+	getSavedPublications,
+	isPublicationSaved,
+	savePublication,
+} from '$lib/database/save';
 
 describe('Liking publications', () => {
 	let user: User;
@@ -9,12 +17,11 @@ describe('Liking publications', () => {
 	let savedMessage: string;
 
 	beforeEach(async () => {
-		user = await createUser(
-			'Bober234234',
-			'Damyanov',
-			'email2@email',
-			'vasko.pdf',
-		);
+		user = await createUser({
+			firstName: 'Marti',
+			lastName: 'Parti',
+			email: 'email@gmail',
+		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',
 			description: 'This publication has description',
@@ -68,30 +75,39 @@ describe('Liking publications', () => {
 	});
 
 	it('correctly returns used courses', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.publicationId, ["ADS", "Calculus"]);
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, [
+			'ADS',
+			'Calculus',
+		]);
 		const saved = await getSavedPublications(user.id);
 		if (saved === null)
 			throw new Error('Could not get saved publications list');
 
 		expect(saved.saved.length).toBe(1);
 		expect(saved.saved[0].usedInCourse).toHaveLength(2);
-		const used = saved.saved[0].usedInCourse.map(x => x.course)
+		const used = saved.saved[0].usedInCourse.map((x) => x.course);
 		expect(used).toContain('ADS');
 		expect(used).toContain('Calculus');
 	});
 
-	it("should get whether a publication was saved", async () => {
-		const saved = await isPublicationSaved(user.id, publication.publicationId);
-		if(saved === null){
-			throw Error("saved was null");
+	it('should get whether a publication was saved', async () => {
+		const saved = await isPublicationSaved(
+			user.id,
+			publication.publicationId,
+		);
+		if (saved === null) {
+			throw Error('saved was null');
 		}
 		expect(saved).toBe(true);
 
 		await savePublication(user.id, publication.publicationId);
 
-		const saved2 = await isPublicationSaved(user.id, publication.publicationId);
-		if(saved2 === null){
-			throw Error("liked was null");
+		const saved2 = await isPublicationSaved(
+			user.id,
+			publication.publicationId,
+		);
+		if (saved2 === null) {
+			throw Error('liked was null');
 		}
 		expect(saved2).toBe(false);
 	});
