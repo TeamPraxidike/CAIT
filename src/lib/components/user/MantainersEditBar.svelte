@@ -69,7 +69,7 @@
                     user={$authStore.user} view="publish" role="Publisher" userPhotoUrl={'data:image;base64,' + $authStore.user.profilePicData} />
         {/if}
 
-        {#each additionalMaintainers as maintainer, key}
+        {#each additionalMaintainers as maintainer, key (maintainer.id)}
             <UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish" role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
         {/each}
 
