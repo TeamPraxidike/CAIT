@@ -136,7 +136,7 @@
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit bind:this={circuitRef} publishing="{true}"/>
+			<Circuit nodes={[]} bind:this={circuitRef} publishing="{true}"/>
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
