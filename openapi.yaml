@@ -433,7 +433,7 @@ paths:
     post:
       tags:
         - User
-      summary: Mark publication as used in course
+      summary: Mark publication as used in course. Replaces all courses in the publication with the ones you pass through the body
       parameters:
         - in: path
           name: userId
@@ -473,38 +473,6 @@ paths:
         '500':
           description: Server Error
 
-
-    delete:
-      tags:
-        - User
-      summary: Unmark publication as used in course
-      parameters:
-        - in: path
-          name: userId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the user
-        - in: path
-          name: publicationId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the publication (could be material or circuit)
-
-      responses:
-        '200':
-          description: Successfully unmarked usage of publication
-        '400':
-          description: Bad request
-        '401':
-          description: Cannot perform action
-        '404':
-          description: User/Publication not found
-        '500':
-          description: Server Error
 
   #  /user/{userId}/maintaining/{publicationId}:
   #    post:

@@ -17,7 +17,7 @@ describe('Comments CRUD', () => {
 
 	beforeEach(async () => {
 		user = await createUser({
-			firstName: 'Marti',
+			firstName: 'Marti23',
 			lastName: 'Parti',
 			email: 'email@gmail',
 		});
@@ -34,15 +34,15 @@ describe('Comments CRUD', () => {
 		});
 		comment = await createComment({
 			userId: user.id,
-			publicationId: publication.id,
+			publicationId: publication.publicationId,
 			content: 'Ivan',
 		});
 	});
 	it('should add comment successfully', async () => {
 		expect(comment).toBeTruthy();
-		expect(comment.publicationId).toEqual(publication.id);
+		expect(comment.publicationId).toEqual(publication.publicationId);
 		expect(comment.content).toEqual('Ivan');
-		const comments = await getCommentsByPublicationId(publication.id);
+		const comments = await getCommentsByPublicationId(publication.publicationId);
 		expect(comments.length).toEqual(1);
 	});
 	it('should get comment successfully', async () => {
@@ -54,7 +54,7 @@ describe('Comments CRUD', () => {
 	it('should delete comment successfully', async () => {
 		await deleteComment(comment.id);
 
-		const comments = await getCommentsByPublicationId(publication.id);
+		const comments = await getCommentsByPublicationId(publication.publicationId);
 		expect(comments.length).toEqual(0);
 	});
 	it('should update comment successfully', async () => {
@@ -64,7 +64,7 @@ describe('Comments CRUD', () => {
 		});
 		expect(comment.content).toEqual('notIvan');
 		expect(comment.createdAt).not.toEqual(comment.updatedAt);
-		const comments = await getCommentsByPublicationId(publication.id);
+		const comments = await getCommentsByPublicationId(publication.publicationId);
 		expect(comments.length).toEqual(1);
 	});
 });

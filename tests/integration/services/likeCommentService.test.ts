@@ -33,7 +33,7 @@ describe('Comments Liking', () => {
 		});
 		comment = await createComment({
 			userId: user.id,
-			publicationId: publication.id,
+			publicationId: publication.publicationId,
 			content: 'Ivan',
 		});
 		message = await likesCommentUpdate(user.id, comment.id);

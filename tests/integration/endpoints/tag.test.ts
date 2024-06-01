@@ -90,7 +90,7 @@ describe("[DELETE] /api/tags/{content}", () => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                content: "atag22",
+                content: "atag2",
             }),
         });
         expect(response1.status).toBe(200);

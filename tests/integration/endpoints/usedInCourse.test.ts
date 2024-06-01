@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
 	addPublicationToUsedInCourse,
-	coursesUsingPublication,
 	createMaterialPublication,
 	createUser,
 	prisma,
@@ -220,61 +219,5 @@ describe('[GET] /user/[id]/use-in-course', () => {
 		expect(body).toHaveLength(2);
 		expect(body).toContain(publication1.publicationId);
 		expect(body).toContain(publication2.publicationId);
-	});
-});
-
-describe('[DELETE] /user/[id]/use-in-course/[publicationId]', () => {
-	it('should delete only the courses passed', async () => {
-		const user = await createUser({
-			firstName: 'body.firstName',
-			lastName: 'body.lastName',
-			email: 'body.email',
-		});
-		const publication1 = await createMaterialPublication(user.id, {
-			title: 'cool publicationa',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			materialType: 'video',
-			copyright: true,
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-		});
-		const publication2 = await createMaterialPublication(user.id, {
-			title: 'cool publicationd',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			materialType: 'video',
-			copyright: true,
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-		});
-
-		await addPublicationToUsedInCourse(
-			user.id,
-			publication1.publicationId,
-			['A', 'B'],
-		);
-		await addPublicationToUsedInCourse(
-			user.id,
-			publication2.publicationId,
-			['C'],
-		);
-
-		// console.log(JSON.stringify(['A']))
-		const response = await fetch(
-			`${testingUrl}/user/${user.id}/use-in-course/${publication1.publicationId}?courses=${JSON.stringify(['A'])}`,
-			{
-				method: 'DELETE',
-			},
-		);
-		expect(response.status).toBe(200);
-
-		const courses = await coursesUsingPublication(publication1.id);
-
-		expect(courses).toHaveLength(1);
 	});
 });

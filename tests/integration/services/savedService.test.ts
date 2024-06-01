@@ -14,7 +14,7 @@ describe('Liking publications', () => {
 
 	beforeEach(async () => {
 		user = await createUser({
-			firstName: 'Marti',
+			firstName: 'Marti11',
 			lastName: 'Parti',
 			email: 'email@gmail',
 		});

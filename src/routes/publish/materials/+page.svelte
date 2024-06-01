@@ -213,7 +213,7 @@
 				<div class="flex col-span-2 items-center gap-4">
 					<div class="w-1/2">
 						<label for="estimate">Time Estimate:</label>
-						<input type="text" name="estimate" bind:value={estimate}
+						<input type="number" name="estimate" bind:value={estimate}
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 					</div>
 					<div class="w-1/2">
