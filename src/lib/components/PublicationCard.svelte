@@ -1,7 +1,7 @@
 <script lang="ts">
 
 
-    import {authStore, DiffBar, getDateDifference, Tag} from '$lib';
+    import {DiffBar, getDateDifference, Tag} from '$lib';
 
     import Icon from '@iconify/svelte';
     import { fly } from 'svelte/transition';
@@ -9,6 +9,7 @@
     import type { Publication } from '@prisma/client';
     import type { PopupSettings } from '@skeletonlabs/skeleton';
     import { popup } from '@skeletonlabs/skeleton';
+    import { page } from '$app/stores';
 
     export let publication:Publication & {
         tags: { content: string }[]
@@ -33,7 +34,7 @@
     export let markAsUsed: boolean = false;
     export let isChecked = false;
 
-    const userId = $authStore.user?.id;
+    const userId = $page.data.session?.user.id;
 
     //used to differentiate if its used in a normal browse or in the circuit browse
     export let inCircuits: boolean = false;

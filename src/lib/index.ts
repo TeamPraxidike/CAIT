@@ -25,9 +25,6 @@ import Download from '$lib/components/generic/Download.svelte';
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
 
-// Stores
-import { authStore } from '$lib/stores/auth';
-
 // util
 import { getDateDifference } from '$lib/util/date';
 
@@ -48,7 +45,6 @@ export {
 	DifficultySelection,
 	DiffBar,
 	UserProfileBar,
-	authStore,
 	TheoryAppBar,
 	PublicationCard,
 	SearchBar,

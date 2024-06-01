@@ -7,7 +7,6 @@
 		Tag,
 		FileTable,
 		Comment,
-		authStore,
 		AddInteractionForm,
 		UserProp
 	} from '$lib';
@@ -19,6 +18,7 @@
 	import { goto } from '$app/navigation';
 	import { createFileList } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
+	import { page } from '$app/stores';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -219,7 +219,7 @@
 	<div class="min-h-96 w-full">
 		<FileTable operation="download" {files} />
 	</div>
-	{#if serverData.material.publication.publisherId === $authStore.user?.id}
+	{#if serverData.material.publication.publisherId === $page.data.session?.user.id}
 		<div class="flex gap-2 mt-4">
 			<button
 				on:click={() => goto(`/${serverData.material.publication.publisherId}/${serverData.material.publicationId}/edit`)}
