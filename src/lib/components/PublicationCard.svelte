@@ -1,7 +1,7 @@
 <script lang="ts">
 
 
-    import {authStore, DiffBar, getDateDifference, Tag} from '$lib';
+    import {authStore, DiffBar, getDateDifference, Tag, UsedInCourse} from '$lib';
 
     import Icon from '@iconify/svelte';
     import { fly } from 'svelte/transition';
@@ -12,7 +12,7 @@
     import { IconMapExtension } from '$lib/util/file';
 
     export let publication:Publication & {
-        tags: { content: string }[]
+        tags: { content: string }[],
     };
 
     let popupName = publication.id.toString().concat(publication.title);
@@ -22,19 +22,29 @@
         placement: 'bottom',
         closeQuery: '#close, #remove'
     };
+    import {
+        initializeStores,
+        getModalStore,
+        Modal,
+        type ModalSettings,
+        type ModalComponent
+    } from '@skeletonlabs/skeleton';
+    import {coursesStore} from "$lib/stores/courses";
 
+    initializeStores();
+
+    const modalStore = getModalStore();
 
     export let className: string = 'col-span-4 lg:col-span-3';
-    export let liked: boolean;
-    export let saved: boolean;
-    export let extensions: string[] = [];
-    export let used: number = 5;
+    export let liked: boolean = true;
+    export let saved: boolean = true;
+    export let numMaterials: number = 1;
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
     export let markAsUsed: boolean = false;
+    export let courses: string[] = ["no courses found"]
     export let isChecked = false;
-    console.log(publication)
-
+		export let extensions: string[] = [];
     export let forArrow: boolean = false;
 
     const userId = $authStore.user?.id;
@@ -48,6 +58,7 @@
 
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
     $:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
+    $:used = courses.length;
 
     let likes = publication.likes;
     const toggleLike = async () => {
@@ -61,22 +72,6 @@
         await fetch(`/api/user/${userId}/saved/${publication.id}`, {
             method: 'POST',
         }).then(() => saved = !saved);
-    }
-
-    const toggleUsedInCourse = async () => {
-        if (isChecked) {
-            used++;
-            await fetch(`/api/user/${userId}/use-in-course/${publication.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ courses: ['a'] }),
-            });
-        } else {
-            used--;
-            await fetch(`/api/user/${userId}/use-in-course/${publication.id}?courses=["a"]`, {method: "DELETE"});
-        }
     }
 
     let hoverDiv: HTMLDivElement;
@@ -148,6 +143,33 @@
         dispatch('removed', { id: publication.id });
     };
 
+    let modalRegistry: Record<string, ModalComponent> = {
+        // Set a unique modal ID, then pass the component reference
+        useInCourseComponent: {
+            ref: UsedInCourse,
+            props: {
+                courses: courses,
+                publicationId: publication.id,
+            }
+        },
+    };
+
+    const modal: ModalSettings = {
+        type: 'component',
+        component: 'useInCourseComponent',
+        response: () => {
+            courses = $coursesStore.filter(x => x.publicationId === publication.id)[0].courses;
+            modalRegistry = {
+                useInCourseComponent: {
+                    ref: UsedInCourse,
+                    props: {
+                        courses: courses,
+                        publicationId: publication.id,
+                    }
+                },
+            };
+        }
+    };
 
 </script>
 
@@ -157,13 +179,13 @@
 {/if}
     <div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
         <div class="w-full relative h-3/6 rounded-t-lg">
-            {#if used > 5}
-                <p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
-                    Used in {used} courses</p>
-            {:else if used > 0}
-                <p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface">
-                    Used in {used} courses</p>
-            {/if}
+					{#if used > 5}
+						<p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
+							Used in {used} courses</p>
+					{:else if used > 0}
+						<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface">
+							Used in {used} courses</p>
+					{/if}
             <img class="w-full h-full object-cover" src={imgSrc} alt="" />
         </div>
         <div class="flex flex-col justify-between px-2 py-2 w-full h-3/6 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
@@ -242,30 +264,31 @@
                             </div>
                         {/if}
 
-                        {#if markAsUsed}
-                            <div class="w-full flex justify-center space-x-2">
-                                <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>
-                                <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
-                            </div>
-                        {/if}
+											{#if markAsUsed}
+												<button on:click={() => modalStore.trigger(modal)}>
+													<p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
+												</button>
+											{/if}
                     </div>
 
                     <div class="flex gap-2">
                         <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
-                            <button
-                              class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
-                              on:click={() => toggleLike()}>
-                                <Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
-                                <span>{likes}</span>
-                            </button>
+													<button
+														type="button"
+														class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
+														on:click={() => toggleLike()}>
+														<Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
+														<span>{likes}</span>
+													</button>
 
                             <div class="h-2/3 w-px bg-surface-200"></div>
 
-                            <button
-                              class="flex items-center text-xl text-surface-500 h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
-                              on:click={() => toggleSave()}>
-                                <Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
-                            </button>
+													<button
+														type="button"
+														class="flex items-center text-xl text-surface-500 h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
+														on:click={() => toggleSave()}>
+														<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
+													</button>
                         </div>
 
                         <Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile"/>
@@ -274,6 +297,8 @@
             </div>
         </div>
     </div>
+
+<Modal components={modalRegistry}/>
 
 
 </div>

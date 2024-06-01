@@ -74,6 +74,7 @@ export type PublicationView = {
 		})[];
 		materials: Material & {
 			files: PrismaFile[];
+			usedInCourse: {course: string}[]
 		};
 
 		circuit: Circuit & {

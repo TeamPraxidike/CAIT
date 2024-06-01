@@ -2,15 +2,16 @@ import {
 	addNode,
 	type CircuitForm,
 	deleteCircuitByPublicationId,
-	deleteNode,
+	deleteNode, editNode, fileSystem,
 	getCircuitByPublicationId,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
 	prisma,
-	updateCircuitByPublicationId,
+	updateCircuitByPublicationId, updateCircuitCoverPic,
 } from '$lib/database';
 import {Prisma} from '@prisma/client';
+import type {File as PrismaFile} from '@prisma/client';
 
 export async function GET({ params }) {
 	// Authentication step
@@ -29,6 +30,7 @@ export async function GET({ params }) {
 
 	try {
 		const circuit = await getCircuitByPublicationId(publicationId);
+
 		if (!circuit) {
 			return new Response(
 				JSON.stringify({ error: 'Circuit Not Found' }),
@@ -37,7 +39,17 @@ export async function GET({ params }) {
 				},
 			);
 		}
-		return new Response(JSON.stringify(circuit), { status: 200 });
+
+		const filePath = circuit.publication.coverPic!.path;
+
+		const currentFileData = fileSystem.readFile(filePath);
+
+		const circuitInfo = {
+			...circuit,
+			coverPicData: currentFileData.toString('base64'),
+		}
+
+		return new Response(JSON.stringify(circuitInfo), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
@@ -63,6 +75,7 @@ export async function PUT({ request, params }) {
 	const nodeInfo: NodeDiffActions = circuit.nodeDiff;
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
+	const coverPic = body.coverPic;
 
 	const publicationId = parseInt(params.publicationId);
 
@@ -85,6 +98,15 @@ export async function PUT({ request, params }) {
 				prismaTransaction,
 			);
 
+			// if coverPic detected, change
+			if (coverPic){
+				await updateCircuitCoverPic(
+					coverPic,
+					circuit.publicationId,
+					prismaTransaction,
+				);
+			}
+
 			// add nodes
 			for (const node of nodeInfo.add) {
 				await addNode(
@@ -101,16 +123,16 @@ export async function PUT({ request, params }) {
 				await deleteNode(body.circuitId, node.publicationId, prismaTransaction);
 			}
 
-			// // edit existing nodes
-			// for (const node of nodeInfo.edit) {
-			// 	await editNode(
-			// 		node.nodeId,
-			// 		node.publicationId,
-			// 		node.x,
-			// 		node.y,
-			// 		prismaTransaction,
-			// 	);
-			// }
+			// edit existing nodes (currently editing positions only)
+			for (const node of nodeInfo.edit) {
+				await editNode(
+					body.circuitId,
+					node.publicationId,
+					node.x,
+					node.y,
+					prismaTransaction,
+				);
+			}
 
 			await handleEdges(body.circuitId, nodeInfo.next, prismaTransaction);
 
@@ -155,6 +177,13 @@ export async function DELETE({ params }) {
 					id,
 					prismaTransaction,
 				);
+
+			const coverPic: PrismaFile = publication.coverPic;
+
+			// if there is a coverPic, delete
+			if (coverPic) {
+				fileSystem.deleteFile(coverPic.path);
+			}
 
 			return publication.circuit;
 		});

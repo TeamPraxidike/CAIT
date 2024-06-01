@@ -111,6 +111,7 @@ export const GET: RequestHandler = async ({ url }) => {
 export async function POST({ request }) {
 	// Authentication step
 	// return 401 if user not authenticated
+	// Add 400 Bad Request check
 
 	const body: MaterialForm = await request.json();
 	const tags = body.metaData.tags;
@@ -128,15 +129,6 @@ export async function POST({ request }) {
 					metaData,
 					prismaTransaction,
 				);
-
-				if (!material) {
-					return new Response(
-						JSON.stringify({ error: 'Bad Request' }),
-						{
-							status: 400,
-						},
-					);
-				}
 
 				await handleConnections(
 					tags,

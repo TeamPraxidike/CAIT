@@ -46,45 +46,6 @@ export async function handleEdges(
 		data: edgeData,
 		skipDuplicates: true
 	});
-
-	// for (const edge of next) {
-	// 	if (edge.fromId <= 0 || isNaN(edge.fromId)) {
-	// 		throw new Error('Invalid id found');
-	// 	}
-	//
-	//
-	// 	for (const toId of edge.toId) {
-	// 		await prismaContext.edge.create({
-	// 			data: {
-	// 				circuitId: circuitId,
-	// 				fromPublicationId: edge.fromId,
-	// 				toPublicationId: toId
-	// 			}
-	// 		});
-	// 	}
-	// }
-
-		// await prismaContext.node.update({
-		// 	where: { id: edge.fromId },
-		// 	data: {
-		// 		next: {
-		// 			connect: edge.toId.map((id) => ({ id })),
-		// 		},
-		// 	},
-		// });
-
-		// for (const to of edge.toId) {
-		// 	await prismaContext.node.update({
-		// 		where: { id: to },
-		// 		data: {
-		// 			prerequisites: {
-		// 				connect: {
-		// 					id: edge.fromId,
-		// 				},
-		// 			},
-		// 		},
-		// 	});
-		// }
 }
 
 export async function addNode(
@@ -112,28 +73,27 @@ export async function addNode(
 }
 
 export async function editNode(
-	nodeId: number,
+	circuitId: number,
 	publicationId: number,
 	x: number,
 	y: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	const extensions = await fetchExtensions(publicationId);
-
 	try {
 		return prismaContext.node.update({
 			where: {
-				id: nodeId,
+				circuitId_publicationId: {
+					circuitId: circuitId,
+					publicationId: publicationId
+				}
 			},
 			data: {
-				publicationId: publicationId,
-				extensions: extensions,
 				posX: x,
 				posY: y,
 			},
 		});
 	} catch (error) {
-		throw new Error('Error while updating node');
+		throw new Error('Error while updating node position');
 	}
 }
 

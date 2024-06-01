@@ -23,6 +23,7 @@ const mockUser = {
 	profilePic: 'https://example.com/profile.jpg',
 	reputation: 100,
 	isAdmin: false,
+	profilePicData: 'null',
 };
 
 describe('Header Component', () => {

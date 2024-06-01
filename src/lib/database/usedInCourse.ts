@@ -1,13 +1,19 @@
 import {prisma} from "$lib/database/prisma";
 
 /**
- * Adds a publication to the usedInCourse table
+ * Replaces ALL courses that a user is using a publication in with the new courses send to this function
  * @param userId
  * @param publicationId
  * @param courses
  */
 export async function addPublicationToUsedInCourse(userId: number, publicationId: number, courses: string[]) {
-    // use create many to create multiple records at once
+    await prisma.publicationUsedInCourse.deleteMany({
+        where: {
+            userId: userId,
+            publicationId: publicationId,
+        },
+    });
+
     await prisma.publicationUsedInCourse.createMany({
         data: courses.map(x => {
             return {
@@ -16,22 +22,6 @@ export async function addPublicationToUsedInCourse(userId: number, publicationId
                 course: x
             }
         })
-    });
-}
-
-/**
- * Removes a publication from the usedInCourse table
- * @param publicationId
- * @param courses
- */
-export async function removeFromUsedInCourse(publicationId: number, courses: string[]) {
-    return prisma.publicationUsedInCourse.deleteMany({
-        where: {
-            publicationId: publicationId,
-            course: {
-                in: courses
-            }
-        }
     });
 }
 

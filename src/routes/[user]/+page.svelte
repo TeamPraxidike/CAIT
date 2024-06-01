@@ -2,7 +2,7 @@
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
     import type {LayoutData, PageServerData} from './$types';
     import type { Publication, Tag, User } from '@prisma/client';
-    import type { FetchedFileArray } from '$lib/database';
+    import type {FetchedFileArray, FetchedFileItem} from '$lib/database';
 
     /* This is the data that was returned from the server */
     export let data: LayoutData & PageServerData;
@@ -13,18 +13,24 @@
         }[]
     } = data.user;
 
+    let profilePic: FetchedFileItem = data.profilePicData;
+
     let fileData:FetchedFileArray = data.fileData;
-    let saved = data.saved;
+    // let saved = data.saved;
     let savedFileData = data.savedFileData;
     let liked = data.liked;
-    let used = data.used as number[];
 
-    console.log("liked: " + liked);
+    let saved:Publication & {
+            tags: Tag[];
+            usedInCourse: {course: string}[]
+        }[] = data.saved;
+
+    // console.log(usedInCourse);
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
 
-<UserProfileBar {user}/>
+<UserProfileBar user={user} userPhotoUrl={'data:image;base64,' + profilePic.data}/>
 
 <div class="grid grid-cols-3 gap-4 mb-20
             md:col-span-8 lg:col-span-12 xl:col-span-8">
@@ -36,8 +42,8 @@
             No saved publications
         </p>
     {:else}
-        {#each saved as publication, i}
-            <PublicationCard saved="{saved.includes(publication.id)}" imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} isChecked={used.includes(publication.id)} used={publication.usedInCourse.length}/>
+        {#each data.saved as publication, i}
+            <PublicationCard imgSrc={'data:image;base64,' + savedFileData[i].data} {publication} liked={liked.includes(publication.id)} markAsUsed={true} courses={saved[i].usedInCourse.map(x => x.course)}/>
         {/each}
     {/if}
 
@@ -45,7 +51,7 @@
         {user.firstName}'s Publications
     </h3>
     {#each data.user.posts as publication, i}
-        <PublicationCard saved="{saved.includes(publication.id)}" imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)}/>
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)} courses={saved[i].usedInCourse.map(x => x.course)}/>
     {/each}
 </div>
 

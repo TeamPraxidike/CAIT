@@ -25,6 +25,7 @@ import Download from '$lib/components/generic/Download.svelte';
 import type { AuthStore, AuthStruct } from '$lib/stores/auth';
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
+import UsedInCourse from "$lib/components/UsedInCourse.svelte";
 
 // Stores
 import { authStore } from '$lib/stores/auth';
@@ -66,4 +67,5 @@ export {
 	type AuthStruct,
 	type AuthStore,
 	AddInteractionForm,
+	UsedInCourse
 };

@@ -4,7 +4,7 @@ import type { Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
-	const users = await (await fetch(`/api/user`)).json();
+	const { users } = await (await fetch(`/api/user`)).json();
 	return { tags, users };
 };
 
@@ -50,8 +50,6 @@ export const actions = {
 		const coverPicFile = data.get('coverPic');
 		let coverPic = null;
 
-		console.log(coverPicFile);
-
 		if (coverPicFile instanceof File) {
 			const buffer = await coverPicFile.arrayBuffer();
 			const info = Buffer.from(buffer).toString('base64');
@@ -76,10 +74,6 @@ export const actions = {
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 				materialType: 'video',
 			},
-			// coverPic: {
-			// 	type: 'image/jpeg',
-			// 	info: data.get('coverPic')?.toString() || '',
-			// },
 			coverPic,
 			fileDiff: {
 				add,

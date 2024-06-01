@@ -82,9 +82,10 @@ import {
 	deleteFile,
 	editFile,
 	bufToBase64,
-	addCover,
+	addCoverPic,
 	coverPicFetcher,
 	updateCoverPic,
+	updateCircuitCoverPic,
 	updateFiles,
 } from '$lib/database/file';
 import { prisma } from './prisma';
@@ -126,7 +127,17 @@ type CircuitForm = {
 		tags: string[];
 		maintainers: number[];
 	};
+	coverPic: { type: string; info: string } | null;
 	nodeDiff: NodeDiffActions;
+};
+
+type UserForm = {
+	metaData: {
+		firstName: string;
+		lastName: string;
+		email: string;
+	};
+	profilePic: { type: string; info: string } | null;
 };
 
 /**
@@ -173,16 +184,18 @@ export const fileSystem = new LocalFileSystem(basePath);
 
 export {
 	prisma,
+	type UserForm,
 	type MaterialForm,
 	type CircuitForm,
 	type FileDiffActions,
 	type FetchedFileItem,
 	type FetchedFileArray,
 	type NodeDiffActions,
+	updateCircuitCoverPic,
 	updateFiles,
 	coverPicFetcher,
 	updateCoverPic,
-	addCover,
+	addCoverPic,
 	addFile,
 	editFile,
 	deleteFile,
