@@ -6,7 +6,8 @@ import type {
 } from '$lib/database';
 import type { Difficulty, MaterialType, Tag } from '@prisma/client';
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, parent }) => {
+	await parent();
 	const tagRes = await fetch('/api/tags');
 	const tags: Tag[] = await tagRes.json();
 	return { tags };

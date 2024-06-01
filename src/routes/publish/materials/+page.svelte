@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore, DifficultySelection, FileTable, Meta, UserProp } from '$lib';
+	import { DifficultySelection, FileTable, Meta, UserProp } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -15,6 +15,7 @@
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	export let form: ActionData;
 	export let data: PageServerData;
@@ -59,7 +60,7 @@
 		}
 	}
 
-	$: uid = $authStore.user?.id;
+	$: uid = $page.data.session?.user.id;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 	let flavorOptions: TagOption[] = allTags.map(tag => {
@@ -142,7 +143,7 @@
 			message: 'Publication Edited successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/${$authStore.user?.id}/${form?.id}`);
+		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -233,9 +234,9 @@
 						</button>
 					</div>
 					<div class="flex my-2">
-						{#if $authStore.user}
+						{#if $page.data.session?.user}
 							<UserProp
-								user={$authStore.user} view="publish" role="Publisher" userPhotoUrl={'data:image;base64,' + $authStore.user.profilePicData} />
+								user={$page.data.session?.user} view="publish" role="Publisher" userPhotoUrl={'data:image;base64,' + $page.data.session?.user.profilePicData} />
 							{#each maintainers as maintainer, key (maintainer.id)}
 								<UserProp on:removeMaintainer={() => handleRemoveMaintainer(key)} user={maintainer}
 										  view="publish"

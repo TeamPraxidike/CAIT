@@ -11,15 +11,30 @@ import type {
 	Reply,
 } from '@prisma/client';
 
-export const load: LayoutServerLoad = async ({ params, fetch , cookies}) => {
+export const load: LayoutServerLoad = async ({
+	params,
+	fetch,
+	locals,
+	parent,
+}) => {
+	await parent();
+
+	const session = await locals.auth();
+	if (!session) throw redirect(303, '/signin');
+
 	const pRes = await fetch(`/api/material/${params.publication}`);
 	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
 
-	const userRes = await fetch(`/api/user/${cookies.get("userId")}/publicationInfo/${params.publication}`);
-	if(userRes.status !== 200) error(userRes.status, userRes.statusText);
+	const userRes = await fetch(
+		`/api/user/${session.user.id}/publicationInfo/${params.publication}`,
+	);
+	if (userRes.status !== 200) error(userRes.status, userRes.statusText);
 
 	const userSpecificInfo = await userRes.json();
-	const loadedPublication = {loadedPublication: await pRes.json(), userSpecificInfo: userSpecificInfo};
+	const loadedPublication = {
+		loadedPublication: await pRes.json(),
+		userSpecificInfo: userSpecificInfo,
+	};
 
 	//const userId = cookies.get('browsingUser');
 	//const cRes = await fetch(`/api/user/${userId}/liked/comment`);
@@ -41,11 +56,10 @@ export const load: LayoutServerLoad = async ({ params, fetch , cookies}) => {
 	};
 };
 
-
 export type PublicationViewLoad = {
-	loadedPublication: PublicationView,
-	userSpecificInfo: {liked: boolean, saved: boolean}
-}
+	loadedPublication: PublicationView;
+	userSpecificInfo: { liked: boolean; saved: boolean };
+};
 /**
  * The data that is loaded for the publication view layout.
  * Only to be used in the publication view layout or child pages.

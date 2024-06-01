@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore, Circuit, Meta, UserProp } from '$lib';
+	import { Circuit, Meta, UserProp } from '$lib';
 	import { fly } from 'svelte/transition';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
@@ -15,6 +15,7 @@
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
 	import Icon from '@iconify/svelte';
+	import { page } from '$app/stores';
 
 	export let data: PageServerData;
 
@@ -55,7 +56,7 @@
 		};
 	});
 
-	let uid = $authStore.user?.id || 0;
+	let uid = $page.data.session?.user.id || 0;
 
 	let priorInput: HTMLInputElement;
 	let priorKnowledge:string[] = [];
@@ -193,7 +194,7 @@
 			message: 'Publication Added successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/${$authStore.user?.id}/${form?.id}`);
+		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -323,9 +324,9 @@
 					<div class="flex flex-col gap-2 w-full">
 						<span>Maintainers<span class="text-error-300">*</span>:</span>
 						<div class="flex flex-wrap my-2 gap-1 items-center w-full">
-							{#if $authStore.user}
+							{#if $page.data.session?.user}
 								<UserProp
-									user={$authStore.user} view="publish" role="Publisher" userPhotoUrl="/fdr.jpg" />
+									user={$page.data.session?.user} view="publish" role="Publisher" userPhotoUrl="/fdr.jpg" />
 							{/if}
 
 							{#each additionalMaintainers as maintainer,key (maintainer.id)}

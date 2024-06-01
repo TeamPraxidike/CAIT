@@ -23,7 +23,7 @@
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
 	export let data: LayoutServerData;
-	const userId = $authStore.user?.id;
+	const userId = $page.data.session?.user.id;
 
 	let serverData: PublicationView = data.loadedPublication.loadedPublication;
 
@@ -236,7 +236,7 @@
 	<hr>
 </div>
 
-{#if $authStore.user}
+{#if $page.data.session?.user}
 	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{serverData.material.publicationId}"/>
 {/if}
 

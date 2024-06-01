@@ -2,7 +2,7 @@
 	import type { LayoutServerData } from '../$types';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Publication, Tag as PrismaTag } from '@prisma/client';
-	import { authStore, FileTable, Meta } from '$lib';
+	import { FileTable, Meta } from '$lib';
 	import {
 		Autocomplete, type AutocompleteOption, FileButton, FileDropzone, getToastStore, InputChip
 	} from '@skeletonlabs/skeleton';
@@ -10,6 +10,7 @@
 	import type { PublicationView } from '../+layout.server';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationView = data.loadedPublication.loadedPublication;
@@ -20,7 +21,7 @@
 
 	let LOs: string[] = serverData.material.publication.learningObjectives;
 	let difficulty: Difficulty = serverData.material.publication.difficulty;
-	let maintainers: string[] = [$authStore.user?.id || "kur"];
+	let maintainers: string[] = [$page.data.session?.user.id || "0"];
 	let coverPic: File | undefined = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 
 	function chooseCover(e: Event) {
@@ -97,7 +98,7 @@
 		formData.append('oldFiles', JSON.stringify(serverData.material.files));
 		formData.append('oldFilesData', JSON.stringify(serverData.fileData));
 
-		formData.append('userId', $authStore.user?.id.toString() || '');
+		formData.append('userId', $page.data.session?.user.id.toString() || '');
 		formData.append('tags', tags.join(';'));
 		formData.append('difficulty', difficulty);
 		formData.append('maintainers', maintainers.join(';'));

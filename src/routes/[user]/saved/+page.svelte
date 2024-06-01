@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {authStore} from "$lib";
+	import { page } from '$app/stores';
 </script>
 
-<h1 class="col-span-3">SAVED for {$authStore.user?.firstName} {$authStore.user?.lastName}</h1>
+<h1 class="col-span-3">SAVED for {$page.data.session?.user.firstName} {$page.data.session?.user.lastName}</h1>

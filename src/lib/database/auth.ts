@@ -1,14 +1,18 @@
 import { CredentialsSignin, SvelteKitAuth } from '@auth/sveltekit';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from './prisma';
-import { profilePicFetcher } from '$lib/database/file';
+import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 import Credentials from '@auth/core/providers/credentials';
 import { createUser, getUserByEmail } from '$lib/database/user';
 import type { User as PrismaUser } from '@prisma/client';
 import { signInSchema } from '$lib/util/zod';
 import { verifyPassword } from '$lib/util/auth';
 import GitHub from '@auth/sveltekit/providers/github';
-import { AUTH_GITHUB_ID, AUTH_GITHUB_SECRET } from '$env/static/private';
+import {
+	AUTH_GITHUB_ID,
+	AUTH_GITHUB_SECRET,
+	AUTH_SECRET,
+} from '$env/static/private';
 import type { AdapterUser } from '@auth/core/adapters';
 
 function ModifiedPrismaAdapter(p: typeof prisma) {
@@ -21,6 +25,12 @@ function ModifiedPrismaAdapter(p: typeof prisma) {
 				firstName: user.firstName ?? user.name?.split(' ')[0] ?? '',
 				lastName: user.lastName ?? user.name?.split(' ')[1] ?? '',
 			});
+
+			if (user.image)
+				await updateProfilePic(
+					{ type: 'link', info: user.image },
+					created.id,
+				);
 
 			return created as AdapterUser;
 		},
@@ -67,6 +77,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 	pages: {
 		signIn: '/signin',
 	},
+	secret: AUTH_SECRET,
 	callbacks: {
 		async jwt({ token, user }) {
 			if (user) {
@@ -94,3 +105,17 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		},
 	},
 });
+
+// export async function validateBearerToken(authHeader: string | undefined) {
+// 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
+// 		return null;
+// 	}
+//
+// 	const token = authHeader.slice(7, authHeader.length);
+// 	try {
+// 		return verify(token, AUTH_SECRET);
+// 	} catch (err) {
+// 		console.error('Invalid token', err);
+// 		return null;
+// 	}
+// }

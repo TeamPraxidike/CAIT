@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { authStore, Meta } from '$lib';
+	import { Meta } from '$lib';
 	import type { LayoutData } from '../$types';
 	import type { ActionData } from './$types';
 	import type { Publication, Tag, User } from '@prisma/client';
 	import { FileButton, getToastStore } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 
 	/* This is the data that was returned from the server */
 	export let data: LayoutData;
@@ -26,7 +27,7 @@
 			message: 'User Edited successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/${$authStore.user?.id}/${form?.id}`);
+		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,

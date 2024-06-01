@@ -22,7 +22,6 @@ import Circuit from '$lib/components/circuits/Circuit.svelte';
 import CircuitPureHTML from '$lib/components/circuits/CircuitPureHTML.svelte';
 import Download from '$lib/components/generic/Download.svelte';
 
-import type { AuthStore, AuthStruct } from '$lib/stores/auth';
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
 
@@ -63,7 +62,5 @@ export {
 	Filter,
 	Circuit,
 	CircuitPureHTML,
-	type AuthStruct,
-	type AuthStore,
 	AddInteractionForm,
 };
