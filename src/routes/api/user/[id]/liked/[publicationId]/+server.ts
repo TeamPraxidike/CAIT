@@ -4,12 +4,16 @@ import {
 	likePublication,
 } from '$lib/database';
 import { isPublicationLiked } from '$lib/database/user';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Likes a publication
  * @param params
  */
-export async function POST({ params }) {
+export async function POST({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, publicationId } = params;
 	const user = await getUserById(id);
 	if (!user)
@@ -34,7 +38,10 @@ export async function POST({ params }) {
 	}
 }
 
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, publicationId } = params;
 	const user = await getUserById(id);
 	if (!user)

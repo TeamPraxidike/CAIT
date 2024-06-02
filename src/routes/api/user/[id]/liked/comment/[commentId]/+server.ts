@@ -1,10 +1,14 @@
 import { getComment, getUserById, likesCommentUpdate } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Likes a comment
  * @param params
  */
-export async function POST({ params }) {
+export async function POST({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, commentId } = params;
 	const user = await getUserById(id);
 	if (!user)

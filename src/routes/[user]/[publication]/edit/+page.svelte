@@ -73,6 +73,11 @@
 			message: `Malformed information, please check your inputs: ${form?.message}`,
 			background: 'bg-warning-200'
 		});
+	} else if (form?.status === 401) {
+		toastStore.trigger({
+			message: `Unauthorized! ${form?.message}`,
+			background: 'bg-error-200'
+		});
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
