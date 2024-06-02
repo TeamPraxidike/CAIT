@@ -46,7 +46,7 @@
 		export let extensions: string[] = [];
     export let forArrow: boolean = false;
 
-    const userId = $page.data.session?.user.id;
+    const userId = $page.data.session?.user.id || "0";
 
     //used to differentiate if its used in a normal browse or in the circuit browse
     export let inCircuits: boolean = false;
