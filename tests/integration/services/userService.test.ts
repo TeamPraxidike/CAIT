@@ -6,7 +6,6 @@ import {
 	getPublicationById,
 	getUserById,
 } from '$lib/database';
-
 import {
 	editUser,
 	getLikedPublications,

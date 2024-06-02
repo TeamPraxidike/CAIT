@@ -59,6 +59,21 @@ export const actions = {
 			};
 		}
 
+		const newTags = data.getAll('newTags') || '';
+		const newTagsJ = JSON.stringify(newTags);
+		const outerArray = JSON.parse(newTagsJ);
+		const newTagsArray = JSON.parse(outerArray[0]);
+
+		for (const tag of newTagsArray) {
+			const res = await fetch('/api/tags', {
+				method: 'POST',
+				body: JSON.stringify({ content: tag }),
+			});
+			if (res.status !== 200) {
+				return { status: 500, message: 'Tag Failed' };
+			}
+		}
+
 		const material: MaterialForm = {
 			userId: Number(data.get('userId')?.toString()),
 			metaData: {
@@ -69,7 +84,7 @@ export const actions = {
 				prerequisites: [data.get('prerequisites')?.toString() || ''],
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
-				theoryPractice: 34,
+				theoryPractice: Number(data.get('theoryToApplication')),
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 				materialType: 'video',
@@ -82,7 +97,6 @@ export const actions = {
 			},
 		};
 
-		console.log(material);
 
 		const res = await fetch('/api/material', {
 			method: 'POST',

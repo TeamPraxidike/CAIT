@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore, DifficultySelection, FileTable, Meta, UserProp } from '$lib';
+	import {authStore, DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -9,12 +9,13 @@
 		Step,
 		Stepper
 	} from '@skeletonlabs/skeleton';
-	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
+	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
+	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 
 	export let form: ActionData;
 	export let data: PageServerData;
@@ -25,17 +26,19 @@
 	let allTags: PrismaTag[] = data.tags;
 	let inputChip: InputChip;
 	let tagInput = '';
+	let newTags: string[] = [];
 
-	// maintainerIds
-	let maintainersInput: HTMLInputElement;
+
 	let files: FileList = [] as unknown as FileList;
 	type UserWithProfilePic = User & { profilePicData: string };
 	let maintainers: UserWithProfilePic[] = [];
 
 	// learning objectives
-	let loInput: HTMLInputElement;
 	let LOs: string[] = [];
 	$: LOs = LOs;
+
+	let PKs: string[] = [];
+	$: PKs = PKs;
 
 	// input data
 	let title: string = '';
@@ -43,6 +46,7 @@
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
+	let theoryApplicationRatio = 0.5;
 
 	// cover
 	let coverPic: File | undefined = undefined;
@@ -69,6 +73,25 @@
 		};
 	});
 
+	const triggerRepeatInput = (type: string,input: string)=>{
+		toastStore.trigger({
+			message: `${type} ${input} Already Added`,
+			background: 'bg-warning-200'
+		});
+	}
+
+	const handleInvalid = () => {
+		if(tagInput.length>0 && !tags.includes(tagInput)) {
+			tags=[...tags,tagInput];
+			newTags=[...newTags,tagInput];
+			tagInput='';
+		}
+		else {
+			triggerRepeatInput("Tag",tagInput);
+		}
+	}
+
+
 	function onInputChipSelect(e: CustomEvent<TagOption>): void {
 		console.log('onInputChipSelect', e.detail);
 		if (!tags.includes(e.detail.value)) {
@@ -84,48 +107,6 @@
 		}
 	}
 
-	async function fetchMaintainer() {
-		const input = maintainersInput.value;
-
-
-		let res: UserWithProfilePic | undefined = undefined;
-
-		if (isNaN(Number(input))) {
-			data.users.find((user: UserWithProfilePic) => {
-				if (user.firstName === input || user.lastName === input) {
-					res = user;
-				}
-			});
-		} else {
-			data.users.find((user: UserWithProfilePic) => {
-				if (user.id === Number(input)) {
-					res = user;
-				}
-			});
-		}
-
-		if (res === undefined) {
-			toastStore.trigger({
-				message: 'User not found',
-				background: 'bg-warning-200'
-			});
-		} else if (maintainers.find((m: User) => {
-			if (res !== undefined) m.id === res.id;
-		})) {
-			toastStore.trigger({
-				message: 'User already added',
-				background: 'bg-warning-200'
-			});
-			return;
-		} else {
-			maintainers = [...maintainers, res];
-			maintainersInput.value = '';
-		}
-	}
-
-	function handleRemoveMaintainer(index: number) {
-		maintainers = maintainers.filter((_, i) => i !== index);
-	}
 
 	/* LOCK = TRUE => LOCKED */
 	const locks: boolean[] = [true, true, true];
@@ -180,7 +161,10 @@
         formData.append('tags', JSON.stringify(tags));
         formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
+		formData.append('prerequisites', JSON.stringify(PKs));
         formData.append('coverPic', coverPic || '');
+		formData.append('newTags', JSON.stringify(newTags));
+		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
 	<Stepper buttonCompleteType="submit">
 		<Step locked={locks[0]}>
@@ -205,73 +189,48 @@
 		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-			<div class="flex gap-4 items-center">
-				<label for="difficulty">Difficulty:</label>
-				<DifficultySelection bind:difficulty={difficulty} />
+			<div class="flex flex-row p-6 justify-between">
+				<div class="flex gap-4 items-center">
+					<DifficultySelection bind:difficulty={difficulty} />
+				</div>
+				<TheoryAppBar bind:value={theoryApplicationRatio}/>
 			</div>
-			<div class="grid grid-cols-2 gap-4">
-				<div class="flex col-span-2 items-center gap-4">
+			<div class="grid grid-cols-2 gap-4 p-3">
+				<div class="flex col-span-2 items-center gap-4 p-3">
 					<div class="w-1/2">
-						<label for="estimate">Time Estimate:</label>
-						<input type="number" name="estimate" bind:value={estimate}
+						<label for="estimate">Time Estimate (in minutes):</label>
+						<input type="number" name="estimate" bind:value={estimate} placeholder="How much time do the materials take"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 					</div>
 					<div class="w-1/2">
-						<label for="copyright">Copyright:</label>
-						<input type="text" name="copyright" bind:value={copyright}
+						<label for="copyright">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
+						class="text-tertiary-700" > Check here how this applies to you</a>):</label>
+						<input type="text" name="copyright" bind:value={copyright} placeholder="Leave blank if material is your own"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
 					</div>
 				</div>
 				<div class="col-span-2">
-					<label for="maintainers">Maintainers:</label>
-					<div class="flex gap-2">
-						<input type="text" name="maintainers" id="maintainers" bind:this={maintainersInput}
-							   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 flex-grow">
-						<button type="button" name="add_maintainer" inputmode="decimal"
-								on:click={fetchMaintainer}
-								class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
-						</button>
-					</div>
-					<div class="flex my-2">
-						{#if $authStore.user}
-							<UserProp
-								user={$authStore.user} view="publish" role="Publisher" userPhotoUrl={'data:image;base64,' + $authStore.user.profilePicData} />
-							{#each maintainers as maintainer, key (maintainer.id)}
-								<UserProp on:removeMaintainer={() => handleRemoveMaintainer(key)} user={maintainer}
-										  view="publish"
-										  role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
-							{/each}
-						{/if}
-					</div>
+					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}/>
 				</div>
-				<div>
-					<label for="tags_input">Tags:</label>
-					<div class="text-token space-y-2">
-						<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
-								   bind:input={tagInput} bind:value={tags} name="chips" />
-						<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-							<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
-										  on:selection={onInputChipSelect} />
+				<div class="flex flex-col w-full">
+					<MantainersEditBar users={data.users}/>
+					<div>
+
+						<label for="tags_input">Tags:</label>
+						<div class="text-token space-y-2">
+							<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
+									   bind:input={tagInput} bind:value={tags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
+							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
+											  on:selection={onInputChipSelect} />
+							</div>
 						</div>
+
 					</div>
+
+
 				</div>
-				<div>
-					<label for="learning_objective_input">Learning Objectives:</label>
-					<div class="flex gap-2">
-						<input type="text" name="learning_objective_input" id="learning_objective_input"
-							   bind:this={loInput}
-							   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 flex-grow">
-						<button type="button" name="add_lo"
-								on:click={() => { LOs = [...LOs, loInput.value]; loInput.value = ""; }}
-								class="btn bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">+
-						</button>
-					</div>
-					<ol class="list-decimal bg-surface-100 list-inside gap-2 max-h-40 overflow-y-auto">
-						{#each LOs as LO}
-							<li transition:fade={{ duration: 200 }}>{LO}</li>
-						{/each}
-					</ol>
-				</div>
+
 			</div>
 		</Step>
 		<Step>

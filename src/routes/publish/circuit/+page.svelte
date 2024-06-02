@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { authStore, Circuit, Meta, UserProp } from '$lib';
-	import { fly } from 'svelte/transition';
+	import { authStore, Circuit, Meta } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -14,12 +13,13 @@
 	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
-	import Icon from '@iconify/svelte';
+	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
+	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 
 	export let data: PageServerData;
 
 	let circuitRef : InstanceType<typeof Circuit>;
-	let display = 'hidden';
+	type UserWithProfilePic = User & { profilePicData: string };
 
 	let title = '';
 	let description = '';
@@ -27,24 +27,11 @@
 	let newTags: string[] = [];
 	let additionalMaintainers: User[] = [];
 
-	let userName:HTMLInputElement;
-
-
-	let editingPK = false;
-	let editingLO = false;
-	let editingIndexPK: number;
-	let editingIndexLO: number;
-	let editingPKText:string;
-	let editingLOText:string;
-	let hoverIndexPK:number;
-	let hoverIndexLO: number;
-
 	let inputChip: InputChip;
 	let tagInput = '';
 
 	let tagsDatabase = data.tags as PrismaTag[];
-	let users = data.users.users as User[];
-	let searchableUsers = users;
+	let users = data.users as UserWithProfilePic[];
 
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
@@ -57,7 +44,6 @@
 
 	let uid = $authStore.user?.id || 0;
 
-	let priorInput: HTMLInputElement;
 	let priorKnowledge:string[] = [];
 	$: priorKnowledge = priorKnowledge;
 
@@ -69,92 +55,10 @@
 	}
 
 	// learning objectives
-	let loInput: HTMLInputElement;
 	let LOs: string[] = [];
 	$: LOs = LOs;
 
-	const handleLOPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter' && loInput.value!=='' ){
-			if(LOs.includes(loInput.value)){
-				triggerRepeatInput("Learning Objective",loInput.value);
-			}else{
-				LOs = [...LOs, loInput.value];
-				loInput.value = "";
-				event.preventDefault();
-			}
-
-		}
-	}
-	const handlePriorPress = (event: KeyboardEvent) =>{
-		if (event.key === 'Enter' && priorInput.value!=='' ){
-			if(priorKnowledge.includes(priorInput.value)){
-				triggerRepeatInput("Prior Knowledge",priorInput.value);
-
-			}else{
-				priorKnowledge = [...priorKnowledge, priorInput.value];
-				priorInput.value = "";
-				event.preventDefault();
-			}
-
-		}
-	}
-	const handleRemoveMaintainer = (index: number) => {
-		const user = additionalMaintainers.filter((_,i)=> i===index)[0];
-		additionalMaintainers = additionalMaintainers.filter((_,i)=>i !== index);
-		searchableUsers = [...searchableUsers,user];
-	}
-
 	$: additionalMaintainers = additionalMaintainers
-	$: searchableUsers = searchableUsers
-
-	const addMaintainer = (user: User) =>{
-		if(!additionalMaintainers.map(x=>x.id).includes(user.id)){
-			additionalMaintainers = [...additionalMaintainers,user];
-			searchableUsers = users.filter(x=> !additionalMaintainers.map(y=>y.id).includes(x.id));
-			searchableUsers = searchableUsers.filter(x=>x.id!==user.id);
-			userName.value = '';
-			display='hidden';
-		}
-	}
-
-	const handleSearchUsers = () =>{
-		let text = userName.value.toLowerCase() ?? '';
-		if (text === ''){
-			searchableUsers = users.filter(x=> !additionalMaintainers.map(y=>y.id).includes(x.id));
-		}
-		else{
-			searchableUsers = users.filter(x=> !additionalMaintainers.map(y=>y.id).includes(x.id));
-			searchableUsers = searchableUsers.filter(x=>`${x.firstName} ${x.lastName}`.toLowerCase().includes(text ?? ''));
-		}
-	}
-
-	//handle edit of PK
-	const handlePKEdit = (event: KeyboardEvent) => {
-		if(event.key === 'Enter'){
-			if(editingPKText === ''){
-				priorKnowledge = priorKnowledge.filter((_,i) => i !== editingIndexPK);
-			}else{
-				priorKnowledge[editingIndexPK] = editingPKText;
-			}
-			editingPK = false;
-			editingPKText='';
-			editingIndexPK = -1;
-		}
-	}
-
-	//handle edit of LO
-	const handleLOEdit = (event: KeyboardEvent) => {
-		if(event.key === 'Enter'){
-			if(editingLOText === ''){
-				LOs = LOs.filter((_,i) => i !==editingIndexLO);
-			}else{
-				LOs[editingIndexLO] = editingLOText;
-			}
-			editingLO = false;
-			editingLOText='';
-			editingIndexLO = -1;
-		}
-	}
 
 	const handleInvalid = () => {
 		if(tagInput.length>0 && !addedTags.includes(tagInput)) {
@@ -208,33 +112,11 @@
 		}
 
 	}
-	let displayButton = false;
-	let displayButtonLO = false;
-
-	function clickOutside(node: HTMLElement): { destroy: () => void } {
-		const handleClick = (event: MouseEvent) => {
-			if (!node.contains(event.target as Node)) {
-				if(display === "flex"){
-					display = 'hidden'
-				}
-			}
-		};
-
-		document.addEventListener('click', handleClick, true);
-
-		return {
-			destroy() {
-				document.removeEventListener('click', handleClick, true);
-			}
-		};
-	}
-
-
-
 </script>
 
+<!--<Node></Node>-->
 <Meta title="Publish Circuit" description="Organize publications into a circuits" type="site" />
-
+<!--<div class="col-span-9 h-[256px]"><CircuitManual isDraggable="{true}"/></div>-->
 <form method="POST" action="?/publish" class="col-start-2 col-span-10 my-20 pr-10 shadow p-4"
 			use:enhance={({ formData }) => {
 
@@ -254,7 +136,7 @@
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit nodes="{[]}" publishing="{true}" bind:this={circuitRef}/>
+			<Circuit nodes={[]} bind:this={circuitRef} publishing="{true}"/>
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
@@ -273,106 +155,11 @@
 		<Step locked="{locks[1]}">
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between gap-3 col-span-full">
-					<div class="flex flex-col space-y-1 w-full">
-						<label for="learningObjective" >Learning Objectives<span class="text-error-300">*</span>:</label>
-						<div class="w-full">
-							<div class="w-full flex justify-between gap-2">
-								<input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:ring-primary-500 focus:ring-1 "/>
-								<button on:click={()=>{ if(LOs.includes(loInput.value)) { triggerRepeatInput("Learning Objective",loInput.value)} else { if(loInput.value!=='') {LOs = [...LOs, loInput.value]; loInput.value = "";}}}} type="button" name="add_LO" inputmode="decimal"
-												class="text-center">
-									<Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
-								</button>
-							</div>
 
-							<div class="overflow-y-auto max-h-56 mt-1 space-y-1 flex flex-col">
-								{#each LOs as LO, index}
-									{#if editingLO && index === editingIndexLO}
-										<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingLOText} on:keypress={handleLOEdit}/>
-									{:else }
-										<div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center w-1/2 text-wrap" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
-											<span class="relative right-1 text-base p-1 rounded-md">{LO}</span>
-											{#if !editingLO && displayButtonLO && hoverIndexLO ===index}
-												<div class=" items-end flex gap-2" >
-													<button type="button" class="self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
-														<Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 ml-auto hover:text-opacity-85" />
-													</button>
-													<button type="button" class=" self-center rounded-lg" on:click={() => {LOs = LOs.filter(x=>x!==LO)}}>
-														<Icon icon="mdi:trash-can" width="20" height="20" class="text-error-300 ml-auto hover:text-opacity-85" />
-													</button>
-												</div>
-											{/if}
-										</div>
-									{/if}
-								{/each}
-							</div>
-						</div>
-					</div>
+				<MetadataLOandPK />
 
-					<div class="w-full">
-						<label for="priorKnowledge" class="mb-1" >Prior Knowledge:</label>
-
-						<div class="flex w-full justify-between gap-2">
-							<input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:ring-primary-500"/>
-							<button on:click={()=>{if(priorKnowledge.includes(priorInput.value)) {triggerRepeatInput("Prior Knowledge",priorInput.value)}  if(priorInput.value!=='') {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
-											class="text-center">
-								<Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
-							</button>
-						</div>
-
-
-						<div class="overflow-y-auto max-h-56 mt-1 space-y-1 flex flex-col">
-							{#each priorKnowledge as pk, index}
-								{#if editingPK && index === editingIndexPK}
-									<input class="bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
-								{:else }
-									<div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center w-1/2 text-wrap" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
-										<p class="relative right-1 text-base p-1 rounded-md">{pk}</p>
-										{#if !editingPK && displayButton && hoverIndexPK === index }
-											<div class=" items-end flex gap-2" >
-												<button type="button" class="self-center rounded-lg" on:click={() => {editingPK=true; editingIndexPK=index; editingPKText=pk;}}>
-													<Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 ml-auto hover:text-opacity-85" />
-												</button>
-												<button type="button" class=" self-center rounded-lg" on:click={() => {priorKnowledge = priorKnowledge.filter(x=>x!==pk)}}>
-													<Icon icon="mdi:trash-can" width="16" height="16" class="text-error-300 ml-auto hover:text-opacity-85" />
-												</button>
-											</div>
-										{/if}
-									</div>
-								{/if}
-							{/each}
-						</div>
-					</div>
-
-				<div class="flex flex-col w-full">
-					<div class="flex flex-col gap-2 w-full">
-						<span>Maintainers<span class="text-error-300">*</span>:</span>
-						<div class="flex flex-wrap my-2 gap-1 items-center w-full">
-							{#if $authStore.user}
-								<UserProp
-									user={$authStore.user} view="publish" role="Publisher" userPhotoUrl="/fdr.jpg" />
-							{/if}
-
-							{#each additionalMaintainers as maintainer,key (maintainer.id)}
-								<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish" role="Maintainer" userPhotoUrl="/fdr.jpg" />
-							{/each}
-
-							<button on:click={()=>{display='flex'}} type="button" name="add_maintainer" inputmode="decimal"
-											class="rounded-lg hover:bg-opacity-85 text-center">
-								<Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
-							</button>
-
-							<div transition:fly={{ x: -8, duration: 300 }} use:clickOutside class="{display} flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700" >
-								<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user" class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm"/>
-								{#each searchableUsers as user}
-									{#if user.id !== uid}
-										<button type="button" class="dark:hover:text-surface-600  hover:bg-primary-100 text-start p-0.5 px-3" on:click={()=>{addMaintainer(user)}}>
-											{user.firstName} {user.lastName}
-										</button>
-									{/if}
-								{/each}
-							</div>
-						</div>
-					</div>
+				<div class="flex flex-col w-full p-3">
+					<MantainersEditBar users={users}/>
 
 					<div class="flex flex-col gap-2">
 						<span>Tags<span class="text-error-300">*</span>:</span>

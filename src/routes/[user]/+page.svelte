@@ -25,7 +25,10 @@
             usedInCourse: {course: string}[]
         }[] = data.saved;
 
-    // console.log(usedInCourse);
+    let posts: Publication & {
+        tags: Tag[];
+        usedInCourse: {course: string}[]
+    }[] = data.user.posts;
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -51,7 +54,7 @@
         {user.firstName}'s Publications
     </h3>
     {#each data.user.posts as publication, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)} courses={saved[i].usedInCourse.map(x => x.course)}/>
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
     {/each}
 </div>
 
