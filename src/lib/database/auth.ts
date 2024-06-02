@@ -106,16 +106,32 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 	},
 });
 
-// export async function validateBearerToken(authHeader: string | undefined) {
-// 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-// 		return null;
-// 	}
-//
-// 	const token = authHeader.slice(7, authHeader.length);
-// 	try {
-// 		return verify(token, AUTH_SECRET);
-// 	} catch (err) {
-// 		console.error('Invalid token', err);
-// 		return null;
-// 	}
-// }
+export const verifyAuth = async (locals: App.Locals) => {
+	const session = await locals.auth();
+	if (!session || !session.user) return unauthResponse();
+
+	return null;
+};
+
+// TODO: ALLOW MAINTAINERS AND ADMINS TO EDIT, RIGHT NOW EVERYONE CAN!
+export const canEdit = async (locals: App.Locals, ownerId: string) => {
+	const session = await locals.auth();
+	if (!session || !session.user) return false;
+
+	// return session.user.id === ownerId || session.user.role === 'ADMIN';
+	return session.user.id === ownerId;
+};
+
+export const unauthResponse = () => {
+	return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+		status: 401,
+	});
+};
+
+export const canRemove = async (locals: App.Locals, ownerId: string) => {
+	const session = await locals.auth();
+	if (!session || !session.user) return false;
+
+	//  || session.user.role === 'ADMIN';
+	return session.user.id === ownerId;
+};

@@ -12,6 +12,7 @@ import {
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty, MaterialType } from '@prisma/client';
 import { coverPicFetcher } from '$lib/database/file';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -51,9 +52,9 @@ function mapToType(mt: string): MaterialType {
 /**
  * Get all materials
  */
-export const GET: RequestHandler = async ({ url }) => {
-	// Authentication step
-	// return 401 if user not authenticated
+export const GET: RequestHandler = async ({ url, locals }) => {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
 	try {
 		const t = url.searchParams.get('tags');

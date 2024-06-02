@@ -4,6 +4,7 @@ import {
 	getComment,
 	type editCommentData,
 } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
 export async function GET({ params }) {
 	const { commentId } = params;
@@ -35,7 +36,9 @@ export async function DELETE({ params }) {
 	}
 }
 
-export async function PUT({ params, request }) {
+export async function PUT({ params, request, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 	try {
 		const body = await request.json();
 		const commentData: editCommentData = {

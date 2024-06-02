@@ -191,16 +191,9 @@
                     </div>
                 </div>
             </div>
-
-
             <p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
-
-
         </div>
-
         <p class="w-full line-clamp-3 text-xs text-surface-500  dark:text-surface-400">{publication.description}</p>
-
-
         <div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
             <div class="flex gap-1">
                 {#each tags.slice(0, maxTags) as tag, i}
@@ -236,15 +229,16 @@
                         <div class="arrow bg-surface-100-token" />
                     </div>
                 {/if}
-
-                    {#if markAsUsed}
-                        <div class="w-full flex justify-center space-x-2">
-                            <input type="checkbox" class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85" bind:checked={isChecked} on:change={toggleUsedInCourse}>
-                            <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
-                        </div>
-                    {/if}
+                {#if markAsUsed}
+                    <div class="w-full flex justify-center space-x-2">
+                        <input type="checkbox"
+                               class="py-3 px-3 bg-surface-700 text-surface-600 rounded-full hover:bg-opacity-85"
+                               bind:checked={isChecked} on:change={toggleUsedInCourse}>
+                        <p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a
+                            course</p>
+                    </div>
+                {/if}
                 </div>
-
                 <div class="flex gap-2">
                     <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
                         <button
@@ -254,9 +248,7 @@
                             <Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
                             <span>{likes}</span>
                         </button>
-
                         <div class="h-2/3 w-px bg-surface-200"></div>
-
                         <button
                                 type="button"
                                 class="flex items-center text-xl text-surface-500 h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
@@ -264,7 +256,6 @@
                             <Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
                         </button>
                     </div>
-
                     <Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile"/>
                 </div>
             </div>

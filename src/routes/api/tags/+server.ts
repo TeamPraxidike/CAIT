@@ -1,8 +1,12 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { addTag, getAllTags, getTagByContent } from '$lib/database/tag';
 import { prisma } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ locals }) => {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	try {
 		const tags = await getAllTags();
 		return new Response(JSON.stringify(tags), { status: 200 });
@@ -14,7 +18,10 @@ export const GET: RequestHandler = async () => {
 	}
 };
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	try {
 		let failed = false;
 		const addTagTransaction = await prisma.$transaction(
@@ -43,7 +50,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			},
 		);
 		console.log(failed);
-		if(failed) return addTagTransaction;
+		if (failed) return addTagTransaction;
 		const id = addTagTransaction.id;
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
@@ -51,7 +58,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
-			//		body: error?.message || ""
 		});
 	}
 };

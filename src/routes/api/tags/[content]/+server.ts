@@ -1,6 +1,9 @@
 import { deleteTagByContent, getTagByContent } from '$lib/database/tag';
+import { verifyAuth } from '$lib/database/auth';
 
-export async function DELETE({ params }) {
+export async function DELETE({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 	const content = params.content;
 
 	if (content === '' || !content) {
@@ -30,7 +33,10 @@ export async function DELETE({ params }) {
 	}
 }
 
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const content = params.content;
 
 	if (content === '' || !content) {

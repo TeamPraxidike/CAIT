@@ -1,6 +1,9 @@
 import { createComment, type createCommentData } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
-export async function POST({ request }) {
+export async function POST({ request, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 	try {
 		const body = await request.json();
 		const commentData: createCommentData = {

@@ -8,10 +8,11 @@ import {
 	type NodeDiffActions,
 	prisma,
 } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
-export async function GET() {
-	// Authentication step
-	// return 401 if user not authenticated
+export async function GET({ locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
 	try {
 		const circuits = await getAllCircuits();
@@ -28,10 +29,9 @@ export async function GET() {
  * @param request
  * @param params
  */
-export async function POST({ request }) {
-	// Authentication step
-	// return 401 if user not authenticated
-	// TODO: Add 400 Bad request check
+export async function POST({ request, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
 	const body: CircuitForm = await request.json();
 	const tags = body.metaData.tags;

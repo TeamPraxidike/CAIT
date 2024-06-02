@@ -18,10 +18,7 @@ export async function load({ url, fetch, locals }) {
 		const savedResponse = await fetch(
 			`/api/user/${session.user.id}/saved?fullPublications=false`,
 		);
-		saved =
-			savedResponse.status === 200
-				? await savedResponse.json()
-				: { saved: [] };
+		saved = savedResponse.status === 200 ? await savedResponse.json() : [];
 	}
 
 	return {

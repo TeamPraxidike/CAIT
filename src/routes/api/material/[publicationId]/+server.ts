@@ -1,6 +1,5 @@
 import {
 	coverPicFetcher,
-	deleteFile,
 	deleteMaterialByPublicationId,
 	type FetchedFileArray,
 	type FetchedFileItem,
@@ -14,11 +13,12 @@ import {
 	updateFiles,
 	updateMaterialByPublicationId,
 } from '$lib/database';
-import {type File as PrismaFile, Prisma} from "@prisma/client"
+import { type File as PrismaFile, Prisma } from '@prisma/client';
+import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
 
-export async function GET({ params }) {
-	// Authentication step
-	// return 401 if user not authenticated
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
 	const publicationId = parseInt(params.publicationId);
 
@@ -72,15 +72,9 @@ export async function GET({ params }) {
 	}
 }
 
-/**
- * Update material
- * @param request
- * @param params
- */
-export async function PUT({ request, params }) {
-	// Authentication step
-	// return 401 if user not authenticated
-	// Add 400 Bad Request check
+export async function PUT({ request, params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
 	const body: MaterialForm & {
 		materialId: number;
@@ -105,6 +99,10 @@ export async function PUT({ request, params }) {
 	}
 
 	try {
+		const material = await getMaterialByPublicationId(publicationId);
+		if (!(await canEdit(locals, material.publication.publisher.id)))
+			return unauthResponse();
+
 		const updatedMaterial = await prisma.$transaction(
 			async (prismaTransaction) => {
 				await handleConnections(
@@ -135,11 +133,16 @@ export async function PUT({ request, params }) {
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
 		console.error(error);
-		// TODO: documentation on this is atrocious, verify with tests!!!
-		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
-			return new Response(JSON.stringify({ error: 'Material not found' }), {
-				status: 404,
-			});
+		if (
+			error instanceof Prisma.PrismaClientKnownRequestError &&
+			error.code === 'P2025'
+		) {
+			return new Response(
+				JSON.stringify({ error: 'Material not found' }),
+				{
+					status: 404,
+				},
+			);
 		}
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
@@ -159,35 +162,41 @@ export async function DELETE({ params }) {
 		);
 	}
 	try {
-		const material = await prisma.$transaction(async (prismaTransaction) => {
-			const publication =
-				await deleteMaterialByPublicationId(
+		const material = await prisma.$transaction(
+			async (prismaTransaction) => {
+				const publication = await deleteMaterialByPublicationId(
 					id,
 					prismaTransaction,
 				);
 
-			const coverPic: PrismaFile = publication.coverPic;
+				const coverPic: PrismaFile = publication.coverPic;
 
-			// if there is a coverPic, delete
-			if (coverPic) {
-				fileSystem.deleteFile(coverPic.path);
-			}
+				// if there is a coverPic, delete
+				if (coverPic) {
+					fileSystem.deleteFile(coverPic.path);
+				}
 
-			// delete all files
-			for (const file of publication.material!.files) {
-				fileSystem.deleteFile(file.path);
-			}
+				// delete all files
+				for (const file of publication.material!.files) {
+					fileSystem.deleteFile(file.path);
+				}
 
-			return publication.material;
-		});
+				return publication.material;
+			},
+		);
 
 		return new Response(JSON.stringify(material), { status: 200 });
 	} catch (error) {
-		// TODO: documentation on this is atrocious, verify with tests!!!
-		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
-			return new Response(JSON.stringify({ error: 'Material not found' }), {
-				status: 404,
-			});
+		if (
+			error instanceof Prisma.PrismaClientKnownRequestError &&
+			error.code === 'P2025'
+		) {
+			return new Response(
+				JSON.stringify({ error: 'Material not found' }),
+				{
+					status: 404,
+				},
+			);
 		}
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
