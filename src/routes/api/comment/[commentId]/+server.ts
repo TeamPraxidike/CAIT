@@ -6,7 +6,10 @@ import {
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { commentId } = params;
 	try {
 		const comment = await getComment(parseInt(commentId));

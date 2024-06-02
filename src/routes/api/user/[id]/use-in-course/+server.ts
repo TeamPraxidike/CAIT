@@ -1,11 +1,15 @@
 import { getUserById, publicationsAUserUses } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Gets all publications that a user uses in any course
  * @param params
  * @constructor
  */
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id } = params;
 	const user = await getUserById(id);
 	if (!user)

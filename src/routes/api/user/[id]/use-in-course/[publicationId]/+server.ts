@@ -3,13 +3,17 @@ import {
 	getPublicationById,
 	getUserById,
 } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Replaces ALL courses linked to this publication and user with a new set of courses
  * @param params
  * @param request
  */
-export async function POST({ params, request }) {
+export async function POST({ params, request, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, publicationId } = params;
 	const user = await getUserById(id);
 	if (!user)

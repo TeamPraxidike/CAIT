@@ -4,8 +4,11 @@ import { verifyAuth } from '$lib/database/auth';
 /**
  * Get all courses that use a publication
  */
-export async function GET({params}) {
-    const {publicationId} = params;
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
+	const { publicationId } = params;
 
 	const publication = await getPublicationById(parseInt(publicationId));
 	if (!publication)
