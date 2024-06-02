@@ -1,10 +1,15 @@
 import { getLikedPublications, getUserById } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Gets the liked publications of a user
  * @param params
+ * @param locals
  */
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id } = params;
 
 	const user = await getUserById(id);

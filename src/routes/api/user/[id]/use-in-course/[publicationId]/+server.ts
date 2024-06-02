@@ -4,13 +4,17 @@ import {
 	getUserById,
 } from '$lib/database';
 import { removeFromUsedInCourse } from '$lib/database/usedInCourse';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Marks a publication as used in a course
  * @param params
  * @param request
  */
-export async function POST({ params, request }) {
+export async function POST({ params, request, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, publicationId } = params;
 	const user = await getUserById(id);
 	if (!user)
@@ -40,7 +44,10 @@ export async function POST({ params, request }) {
 	}
 }
 
-export async function DELETE({ params, url }) {
+export async function DELETE({ params, url, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, publicationId } = params;
 
 	const user = await getUserById(id);

@@ -4,13 +4,18 @@ import {
 	getSavedPublications,
 	getUserById,
 } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Returns all saved publications of a user
  * @param params
  * @param url
+ * @param locals
  */
-export async function GET({ params, url }) {
+export async function GET({ params, url, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id } = params;
 
 	const user = await getUserById(id);

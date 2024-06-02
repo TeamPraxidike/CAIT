@@ -11,12 +11,16 @@ import {
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 import type { File as PrismaFile } from '@prisma/client';
 import { Prisma } from '@prisma/client';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Returns a user by id
  * @param params
  */
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id } = params;
 	try {
 		const user = await getUserById(id);
@@ -42,7 +46,10 @@ export async function GET({ params }) {
  * Deletes a user by id
  * @param params
  */
-export async function DELETE({ params }) {
+export async function DELETE({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id: userId } = params;
 
 	try {
@@ -86,7 +93,10 @@ export async function DELETE({ params }) {
  * @param params
  * @param request
  */
-export async function PUT({ params, request }) {
+export async function PUT({ params, request, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const body: UserForm = await request.json();
 	try {
 		const user = await prisma.$transaction(async (prismaTransaction) => {

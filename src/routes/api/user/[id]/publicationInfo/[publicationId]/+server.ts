@@ -1,13 +1,17 @@
 import { getPublicationById, getUserById } from '$lib/database';
 import { isPublicationLiked } from '$lib/database/user';
 import { isPublicationSaved } from '$lib/database/save';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Returns user specific information for a publications, like whether it is liked or saved
  * @param params
  * @constructor
  */
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, publicationId } = params;
 
 	const user = await getUserById(id);

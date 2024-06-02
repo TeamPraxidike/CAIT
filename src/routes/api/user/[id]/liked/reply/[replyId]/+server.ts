@@ -1,10 +1,15 @@
 import { getReply, getUserById, likesReplyUpdate } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * likes a reply
  * @param params
+ * @param locals
  */
-export async function POST({ params }) {
+export async function POST({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, replyId } = params;
 	const user = await getUserById(id);
 	if (!user)
