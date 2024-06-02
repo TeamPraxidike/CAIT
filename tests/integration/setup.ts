@@ -1,5 +1,7 @@
 // import {beforeEach} from "vitest";
 import { prisma } from '$lib/database';
+import { vi } from 'vitest';
+import * as authModule from '$lib/database/auth';
 
 export const resetDb = async () => {
 	// await prisma.$transaction([
@@ -57,17 +59,24 @@ export async function resetUserTable() {
 }
 
 export async function resetTagsTable() {
-    try {
-        await prisma.tag.deleteMany({});
-    } catch (error) {
-        console.error('Failed to reset Tag table:', error);
-    }
+	try {
+		await prisma.tag.deleteMany({});
+	} catch (error) {
+		console.error('Failed to reset Tag table:', error);
+	}
 }
 
+vi.mock('../src/auth', () => {
+	return {
+		...authModule,
+		verifyAuth: vi.fn(),
+		canEdit: vi.fn(),
+		canRemove: vi.fn(),
+	};
+});
 
-// // reset all tables before each test
-// beforeEach(async () => {
-//     await resetDb()
-// });
+vi.mocked(authModule.verifyAuth).mockResolvedValue(null);
+vi.mocked(authModule.canEdit).mockResolvedValue(true);
+vi.mocked(authModule.canRemove).mockResolvedValue(true);
 
 export const testingUrl = 'http://localhost:4173/api';
