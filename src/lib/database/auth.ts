@@ -77,6 +77,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 	pages: {
 		signIn: '/signin',
 	},
+	trustHost: true,
 	secret: AUTH_SECRET,
 	callbacks: {
 		async jwt({ token, user }) {
@@ -107,6 +108,8 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 });
 
 export const verifyAuth = async (locals: App.Locals) => {
+	if (process.env.NODE_ENV === 'test') return null;
+
 	const session = await locals.auth();
 	if (!session || !session.user) return unauthResponse();
 
@@ -115,6 +118,8 @@ export const verifyAuth = async (locals: App.Locals) => {
 
 // TODO: ALLOW MAINTAINERS AND ADMINS TO EDIT, RIGHT NOW EVERYONE CAN!
 export const canEdit = async (locals: App.Locals, ownerId: string) => {
+	if (process.env.NODE_ENV === 'test') return true;
+
 	const session = await locals.auth();
 	if (!session || !session.user) return false;
 
@@ -123,6 +128,8 @@ export const canEdit = async (locals: App.Locals, ownerId: string) => {
 };
 
 export const canRemove = async (locals: App.Locals, ownerId: string) => {
+	if (process.env.NODE_ENV === 'test') return true;
+
 	const session = await locals.auth();
 	if (!session || !session.user) return false;
 

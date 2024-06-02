@@ -1,21 +1,5 @@
 // import {beforeEach} from "vitest";
 import { prisma } from '$lib/database';
-import {beforeAll, vi} from "vitest";
-const authModule = await vi.hoisted(() => import('$lib/database/auth'));
-
-beforeAll(() => {
-	vi.mock('$lib/database/auth', () => {
-		return {
-			...authModule,
-			verifyAuth: vi.fn(async (locals) => {
-				console.log("STE SE SAMOUBIQ")
-				return null;
-			}),
-			canEdit: vi.fn(async (locals: App.Locals, ownerId: string) => true),
-			canRemove: vi.fn(async (locals: App.Locals, ownerId: string) => true),
-		};
-	});
-});
 
 export const resetDb = async () => {
 	// await prisma.$transaction([
