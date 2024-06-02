@@ -57,11 +57,6 @@
 		{#if form && form.status !== 200}
 			<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
 				<span>{form.message}</span>
-				{#if form.message === 'Bad input' && form.errors}
-					{#each form.errors as error}
-						<span>{error.message}</span>
-					{/each}
-				{/if}
 			</div>
 		{/if}
 	</form>
