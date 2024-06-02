@@ -19,6 +19,7 @@
 image: node:22
 variables:
   DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
+  AUTH_TRUST_HOST: "http://localhost:4173"
 
 stages:          # List of stages for jobs, and their order of execution
   - build
