@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 import * as authModule from '$lib/database/auth';
 
 export const mockAuthModule = () => {
-	vi.mock('../src/auth', () => {
+	vi.mock('$lib/database/auth', () => {
 		return {
 			...authModule,
 			verifyAuth: vi.fn(),

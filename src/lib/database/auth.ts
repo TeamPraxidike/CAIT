@@ -122,16 +122,16 @@ export const canEdit = async (locals: App.Locals, ownerId: string) => {
 	return session.user.id === ownerId;
 };
 
-export const unauthResponse = () => {
-	return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-		status: 401,
-	});
-};
-
 export const canRemove = async (locals: App.Locals, ownerId: string) => {
 	const session = await locals.auth();
 	if (!session || !session.user) return false;
 
 	//  || session.user.role === 'ADMIN';
 	return session.user.id === ownerId;
+};
+
+export const unauthResponse = () => {
+	return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+		status: 401,
+	});
 };
