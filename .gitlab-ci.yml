@@ -19,7 +19,11 @@
 image: node:22
 variables:
   DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
-  AUTH_TRUST_HOST: "http://localhost:4173"
+  AUTH_SECRET: 4IJ38cUEY+Chf+ile0/1fh0FG3hOoQ83Lv+DVz9QviE=
+  AUTH_GITHUB_ID: REDACTED
+  AUTH_GITHUB_SECRET: REDACTED
+  AUTH_TRUST_HOST: true
+  AUTH_URL: http://localhost:4173
 
 stages:          # List of stages for jobs, and their order of execution
   - build
