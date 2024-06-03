@@ -135,6 +135,7 @@
 			background: 'bg-error-200'
 		});
 	}
+	console.log("hello 2")
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />

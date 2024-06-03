@@ -5,8 +5,8 @@ import type { CircuitForm } from '$lib/database';
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
-	const users = await (await fetch(`/api/user`)).json();
-	return { tags, users };
+	const { users, profilePicData } = await (await fetch(`/api/user`)).json();
+	return { tags, users, profilePicData };
 };
 
 export const actions = {
