@@ -5,11 +5,12 @@
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-    import type { Material, Publication, Tag } from '@prisma/client';
+    import type {Material, MaterialType, Publication, Tag} from '@prisma/client';
+    import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
     let searchWord: string = '';
-    let materials:Material & {
+    let materials: (Material & {
         publication: Publication & {
             tags: Tag[];
             usedInCourse: {course: string}[]
@@ -20,7 +21,6 @@
     let tags = data.tags
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
-
 
     $: pageType = data.type;
 
