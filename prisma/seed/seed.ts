@@ -5,6 +5,7 @@
  * Learn more about the Seed Client by following our guide: https://docs.snaplet.dev/seed/getting-started
  */
 import { createSeedClient } from '@snaplet/seed';
+import { files } from "./files";
 
 const main = async () => {
 	const seed = await createSeedClient();
@@ -41,7 +42,7 @@ const main = async () => {
 	];
 
 	const titles = [
-		'ANN',
+		'Neural networks',
 		'Convolutional neural networks',
 		'SVM',
 		'Reinforcment learning',
@@ -60,6 +61,7 @@ const main = async () => {
 		'catboost',
 		'neural networks',
 	];
+
 
 	await seed.tag((x) =>
 		x(tags.length, ({ index }) => ({ content: tags[index] })),
@@ -88,6 +90,7 @@ const main = async () => {
 			title: titles[index],
 			publicationId: index + 1,
 			userId: index + 1,
+			files: files[index]
 		})),
 	);
 
