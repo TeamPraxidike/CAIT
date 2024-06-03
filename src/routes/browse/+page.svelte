@@ -5,24 +5,24 @@
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-    import type { Material, Publication, Tag } from '@prisma/client';
+    import type {Material, MaterialType, Publication, Tag} from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
     let searchWord: string = '';
-    let materials:Material & {
+    let materials: (Material & {
         publication: Publication & {
             tags: Tag[];
             usedInCourse: {course: string}[]
         }
-    }[] = data.materials;
+    })[] = data.materials;
+
     let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
     let profilePics:FetchedFileArray = data.profilePics;
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
-
 
     $: pageType = data.type;
 
@@ -303,7 +303,7 @@
 
 {#if pageType === "materials"}
     {#each materials as material, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} courses={material.publication.usedInCourse.map(x  => x.course)}/>
+        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} courses={material.publication.usedInCourse.map(x  => x.course)} />
     {/each}
 {:else if pageType === "people"}
     {#each users as person, i}

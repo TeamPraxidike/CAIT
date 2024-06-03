@@ -32,7 +32,7 @@
 	<h4 class="text-xl">{file.name}</h4>
 	<p class="text-surface-500 dark:text-surface-300">{file.type}</p>
 	<div class="w-[60vw] max-h-[80vh] border rounded-lg snap-y overflow-y-auto scroll-smooth snap-mandatory">
-		{#if file.size > 1024 * 1024 * 10}
+		{#if file.size > 1024 * 1024 * 30}
 			<div
 				class="h-full w-full flex flex-col gap-2 justify-center items-center text-surface-500 dark:text-surface-300">
 				<Icon icon="bi:exclamation-triangle" class="text-4xl text-surface-500 dark:text-surface-300" />
