@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { authStore, Circuit, Filter, Meta } from '$lib';
-	import type { PageServerData, ActionData } from './$types';
-	import {enhance} from '$app/forms';
+	import { authStore, Circuit, Meta } from '$lib';
+	import type { ActionData, PageServerData } from './$types';
+	import { enhance } from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
 	import {
-	 	Autocomplete,
+		Autocomplete,
 		type AutocompleteOption,
 		getToastStore,
 		InputChip,
@@ -13,8 +13,8 @@
 	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
-	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
-	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
+	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
+	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 
 	export let data: PageServerData;
 
@@ -104,9 +104,10 @@
 			background: 'bg-error-200'
 		});
 	}
-	const onNextHandler = (event:CustomEvent) =>{
-		if(event.detail.step === 0){
-			let {nodeDiffActions, coverPic} = circuitRef.publishCircuit();
+	const onNextHandler = async (event: CustomEvent) => {
+		if (event.detail.step === 0) {
+			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
+
 			nodeActions = nodeDiffActions;
 			circuitCoverPic = coverPic;
 		}

@@ -12,8 +12,8 @@ export async function getCircuitByPublicationId(publicationId: number) {
 		include: {
 			publication: {
 				include: {
-					coverPic: true
-				}
+					coverPic: true,
+				},
 			},
 			nodes: {
 				include: {
@@ -33,9 +33,15 @@ export async function getAllCircuits() {
 	return prisma.circuit.findMany({
 		include: {
 			publication: {
-				include:{
-					coverPic: true
-				}
+				include: {
+					tags: true,
+					coverPic: true,
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+					},
+				},
 			},
 			nodes: false,
 		},
@@ -43,12 +49,13 @@ export async function getAllCircuits() {
 }
 export async function deleteCircuitByPublicationId(
 	publicationId: number,
-	prismaContext: Prisma.TransactionClient = prisma,) {
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
 	return prismaContext.publication.delete({
 		where: { id: publicationId },
 		include: {
-			circuit: true
-		}
+			circuit: true,
+		},
 	});
 }
 

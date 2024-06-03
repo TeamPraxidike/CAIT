@@ -5,7 +5,7 @@
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-    import type { Material, Publication, Tag, File as PrismaFile } from '@prisma/client';
+    import type { Material, Publication, Tag, File as PrismaFile, Circuit } from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
@@ -18,12 +18,19 @@
         files: PrismaFile[]
     })[] = data.materials;
     let fileData:FetchedFileArray = data.fileData;
+    let circuits : (Circuit & {
+        coverPicData: string,
+        publication: Publication & {
+            tags: Tag[];
+            usedInCourse: {course: string}[]
+        }
+    })[] = data.circuits
+    console.log(circuits)
     let users = data.users
     let tags = data.tags
     let profilePics:FetchedFileArray = data.profilePics;
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
-    console.log(materials)
 
     $: pageType = data.type;
 
@@ -56,11 +63,11 @@
 
     //Used to make the dropdown appear/disappear
     const toggleSortBy = () => {
-        //If sort by is active just close all the dropdowns else we first need to close down every other dropdown and then dropdown the sort by
+        clearAll();        //If sort by is active just close all the dropdowns else we first need to close down every other dropdown and then dropdown the sort by
         if (!sortByActive) {
             sortByActive = true;
         }
-        clearAll();
+
 
     };
     //Make the border light blue showing the current toggle is active
@@ -326,5 +333,9 @@
 {:else if pageType === "people"}
     {#each users as person, i}
         <UserProp view="search" posts="{5}"  userPhotoUrl={'data:image;base64,' + profilePics[i].data} role="Maintainer" user={person} />
+    {/each}
+{:else if pageType === "circuits"}
+    {#each circuits as circuit}
+        <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} />
     {/each}
 {/if}

@@ -1,11 +1,11 @@
 import {
 	createMaterialPublication,
+	type FetchedFileArray,
 	type FileDiffActions,
 	getAllMaterials,
 	handleConnections,
 	type MaterialForm,
 	prisma,
-	type FetchedFileArray,
 	updateCoverPic,
 	updateFiles,
 } from '$lib/database';

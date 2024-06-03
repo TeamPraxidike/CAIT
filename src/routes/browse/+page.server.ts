@@ -2,8 +2,18 @@ export async function load({ url, fetch, cookies }) {
 	const userId = cookies.get('userId');
 	const type = url.searchParams.get('type') || 'materials';
 
-	// get all the materials
-	const { materials, fileData } = await (await fetch(`/api/material`)).json();
+	const mtest = await (await fetch(`/api/material`)).json();
+	console.log(mtest);
+	console.log('Stop');
+
+	const { materials, fileData } =
+		type === 'materials'
+			? await (await fetch(`/api/material`)).json()
+			: { materials: [], fileData: [] };
+	const circuits =
+		type === 'circuits'
+			? await (await fetch(`/api/circuit`)).json()
+			: { circuits: [] };
 	const { users, profilePics } = await (await fetch(`/api/user`)).json();
 	const tags = await (await fetch(`/api/tags`)).json();
 
@@ -23,6 +33,7 @@ export async function load({ url, fetch, cookies }) {
 		type,
 		materials,
 		fileData,
+		circuits,
 		users,
 		tags,
 		liked,
