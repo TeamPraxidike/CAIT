@@ -55,7 +55,7 @@
         {user.firstName}'s Publications
     </h3>
 
-    {#each postsPublication as publication}
+    {#each postsPublication as publication, i}
         <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
     {/each}
 </div>
