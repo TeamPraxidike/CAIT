@@ -37,6 +37,8 @@ export async function load({ url, fetch, locals }) {
 		tags = await (await fetch(`/api/tags`)).json();
 	}
 
+	console.log(materials);
+
 	return {
 		type,
 		materials,

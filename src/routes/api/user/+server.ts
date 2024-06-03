@@ -1,6 +1,5 @@
 import { createUser, prisma, type UserCreateForm } from '$lib/database';
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
-import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Create a new user
@@ -8,7 +7,6 @@ import { verifyAuth } from '$lib/database/auth';
  * @constructor
  */
 export async function POST({ request }) {
-
 	// authentication step here
 	const body: UserCreateForm = await request.json();
 	try {
@@ -36,10 +34,7 @@ export async function POST({ request }) {
 }
 
 // get all users
-export async function GET({ locals }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
+export async function GET() {
 	try {
 		let users = await prisma.user.findMany({
 			include: {
