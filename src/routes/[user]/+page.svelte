@@ -1,7 +1,7 @@
 <script lang="ts">
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
     import type {LayoutData, PageServerData} from './$types';
-    import type { Publication, Tag, User } from '@prisma/client';
+    import { type Publication, PublicationType, type Tag, type User} from '@prisma/client';
     import type {FetchedFileArray, FetchedFileItem} from '$lib/database';
 
     /* This is the data that was returned from the server */
@@ -16,6 +16,7 @@
     let profilePic: FetchedFileItem = data.profilePicData;
 
     let fileData:FetchedFileArray = data.fileData;
+
     // let saved = data.saved;
     let savedFileData = data.savedFileData;
     let liked = data.liked;
@@ -25,10 +26,11 @@
             usedInCourse: {course: string}[]
         }[] = data.saved;
 
+    let postsPublication = data.user.posts.filter((x: any) => x.type !== PublicationType.Circuit);
     let posts: Publication & {
         tags: Tag[];
         usedInCourse: {course: string}[]
-    }[] = data.user.posts;
+    }[] = data.user.posts.filter((x: any) => x.type !== PublicationType.Circuit);
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -53,7 +55,7 @@
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         {user.firstName}'s Publications
     </h3>
-    {#each data.user.posts as publication, i}
+    {#each postsPublication as publication, i}
         <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
     {/each}
 </div>
