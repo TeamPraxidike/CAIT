@@ -83,6 +83,10 @@ const main = async () => {
 		'boosting',
 		'random forests',
 		'gradient boosting',
+		'RL',
+		'SVM',
+		"reinforcement learning",
+		"perceptron"
 	];
 
 	const circuitTitles = [
@@ -108,6 +112,16 @@ const main = async () => {
 		Difficulty.hard,
 		Difficulty.hard
 	]
+
+	const materialTag = [
+		["ANNs", "neural networks", "supervised learning"],
+		["ANNs", "neural networks", "supervised learning"],
+		["SVM", "supervised learning"],
+		["RL", "reinforcement learning"],
+		["perceptron", "ANNs", "neural networks"],
+		["supervised learning", "unsupervised learning"],
+		["clustering", "unsupervised learning"]
+	];
 
 	await seed.tag((x) =>
 		x(tags.length, ({ index }) => ({ content: tags[index] })),
@@ -148,6 +162,9 @@ const main = async () => {
 						coverPic: {
 							connect: coverPic[i]
 						},
+						tags: {
+							connect: materialTag[i].map(tag => ({ content: tag }))
+						},
 						likes: Math.round(Math.random() * 400)
 					}
 				},
@@ -161,9 +178,9 @@ const main = async () => {
 
 	await prisma.file.createMany({
 		data: {
-			path: "mlb.png",
+			path: "circuit.png",
 			type: 'image/png',
-			title: "mlb.png"
+			title: "circuit.png"
 		}
 	});
 
