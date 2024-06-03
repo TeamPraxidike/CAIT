@@ -1,6 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
 import type { MaterialForm } from '$lib/database';
-import type { Tag } from '@prisma/client';
+import { MaterialType, type Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
@@ -29,6 +29,25 @@ async function filesToAddOperation(fileList: FileList) {
 
 	return await Promise.all(addPromises);
 }
+
+const convertMaterial = (s: string): MaterialType => {
+	console.log(`THIS: ${s}`);
+	switch (s.toLowerCase()) {
+		case 'exam':
+			return MaterialType.exam;
+		case 'presentation':
+			return MaterialType.presentation;
+		case 'code':
+			return MaterialType.code;
+		case 'dataset':
+			return MaterialType.dataset;
+		case 'video':
+			return MaterialType.video;
+		default:
+			// Handle invalid input if necessary
+			return MaterialType.assignment;
+	}
+};
 
 export const actions = {
 	/**
@@ -87,7 +106,9 @@ export const actions = {
 				theoryPractice: Number(data.get('theoryToApplication')),
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
-				materialType: 'video',
+				materialType: convertMaterial(
+					data.get('type')?.toString() || '',
+				),
 			},
 			coverPic,
 			fileDiff: {
@@ -96,7 +117,6 @@ export const actions = {
 				edit: [],
 			},
 		};
-
 
 		const res = await fetch('/api/material', {
 			method: 'POST',

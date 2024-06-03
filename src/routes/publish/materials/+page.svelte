@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {authStore, DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
+	import { authStore, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -47,6 +47,8 @@
 	let estimate: string = '';
 	let copyright: string = '';
 	let theoryApplicationRatio = 0.5;
+	let selectedType = "Select Type";
+	let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
 
 	// cover
 	let coverPic: File | undefined = undefined;
@@ -112,7 +114,7 @@
 	const locks: boolean[] = [true, true, true];
 
 	$: locks[0] = files ? files.length === 0 : true;
-	$: locks[1] = title.length < 2 || description.length < 10;
+	$: locks[1] = title.length < 2 || description.length < 10 || selectedType === "Select Type";
 	$: locks[2] = tags.length < 2;
 
 
@@ -120,7 +122,7 @@
 
 	$: if (form?.status === 200) {
 		toastStore.trigger({
-			message: 'Publication Edited successfully',
+			message: 'Publication Added successfully',
 			background: 'bg-success-200'
 		});
 		goto(`/${$authStore.user?.id}/${form?.id}`);
@@ -154,6 +156,7 @@
 
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
+				formData.append('type', selectedType);
         formData.append('description', description);
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
@@ -177,6 +180,8 @@
 			<div class="flex flex-col gap-2">
 				<input type="text" name="title" placeholder="Title" bind:value={title}
 					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+				<Filter label="Types" selected={[]} bind:all="{allTypes}" bind:display="{allTypes}"
+								profilePic="{false}" active="{false}" oneAllowed="{true}" bind:selectedOption="{selectedType}"/>
 				<textarea name="description" placeholder="Description..." bind:value={description}
 						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>
@@ -213,7 +218,7 @@
 					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}/>
 				</div>
 				<div class="flex flex-col w-full">
-					<MantainersEditBar users={data.users}/>
+					<MantainersEditBar users={data.users} bind:additionalMaintainers={maintainers}/>
 					<div>
 
 						<label for="tags_input">Tags:</label>

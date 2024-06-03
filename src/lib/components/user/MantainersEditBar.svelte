@@ -6,7 +6,7 @@
 
     let userName:HTMLInputElement;
     export let users: UserWithProfilePic[] = [];
-    let additionalMaintainers: UserWithProfilePic[] = [];
+    export let additionalMaintainers: UserWithProfilePic[] = [];
     let searchableUsers = users;
     let display = 'hidden';
     let uid = $authStore.user?.id || 0;

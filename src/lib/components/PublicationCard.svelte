@@ -6,7 +6,7 @@
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import type { Publication } from '@prisma/client';
+	import { type Publication, PublicationType } from '@prisma/client';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import {
 		getModalStore,
@@ -24,12 +24,7 @@
     };
 
     let popupName = publication.id.toString().concat(publication.title);
-    const popupClick: PopupSettings = {
-        event: 'click',
-        target: popupName,
-        placement: 'bottom',
-        closeQuery: '#close, #remove'
-    };
+
 
 	initializeStores();
 
@@ -44,6 +39,7 @@
     export let courses: string[] = ["no courses found"]
 		export let extensions: string[] = [];
     export let forArrow: boolean = false;
+
 
     const userId = $authStore.user?.id;
 
@@ -169,6 +165,13 @@
         }
     };
 
+	const popupClickPubCard: PopupSettings = {
+		event: 'click',
+		target: popupName,
+		placement: 'bottom',
+		closeQuery: '#close, #remove'
+	};
+
 </script>
 
 <div class="{className} flex items-center">
@@ -189,36 +192,45 @@
         <div class="flex flex-col justify-between px-2 py-2 w-full h-3/6 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
             <!-- Title and difficulty -->
             <div class="w-full">
-                <div class="flex justify-between">
+                <div class="flex justify-between items-start">
                     <h4
                       class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}</h4>
-                    <div class="flex gap-2 self-center">
-                        {#if (extensions.length === 1)}
-                            <Icon icon={IconMapExtension.get(extensions[0]) || 'vscode-icons:file-type-text'} class="text-primary-600 text-lg"/>
-                        {:else if (extensions.length > 1)}
-                            <div class="py-1" bind:this={hoverDiv}>
-                                <Icon icon="clarity:file-group-solid" class="text-primary-600 text-lg"/>
-                                {#if isHovered}
-                                    <div
-                                      class="absolute  mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
-                                      style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-                                        {#each extensions as e}
-                                            <Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="text-lg self-center" />
-                                        {/each}
+                    <div class="flex gap-2">
+											{#if publication.type === PublicationType.Circuit}
+												<Icon icon="mdi:graph" class="text-xl text-surface-500" />
+											{:else}
 
-                                    </div>
-                                {/if}
-                            </div>
+												{#if (extensions.length === 1)}
+													<Icon icon={IconMapExtension.get(extensions[0]) || 'vscode-icons:file-type-text'} class="text-primary-600 size-5 text-lg"/>
+												{:else if (extensions.length > 1)}
+													<div class="py-1" bind:this={hoverDiv}>
+														<Icon icon="clarity:file-group-solid" class="text-primary-600 size-5" />
+														{#if isHovered}
+															<div
+																class="absolute  mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+																style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+																{#each extensions as e}
+																	<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
+																{/each}
 
-                        {/if}
-                        <div class="self-center">
-                            <DiffBar diff={publication.difficulty}></DiffBar>
-                        </div>
-                    </div>
-                </div>
+															</div>
+														{/if}
+
+													</div>
+
+												{/if}
+													<div class="self-center">
+														<DiffBar className="size-5" diff={publication.difficulty}></DiffBar>
+													</div>
+
+											{/if}
 
 
-                <p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
+										</div>
+								</div>
+
+
+							<p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
 
 
             </div>
@@ -251,7 +263,7 @@
                             </button>
                         {:else}
                             <button class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
-                                    use:popup={popupClick}>Remove
+																		use:popup={popupClickPubCard}>Remove
                             </button>
                             <div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
                                 <div class="flex gap-2">

@@ -17,6 +17,9 @@
 	export let active = false;
 	let input: HTMLInputElement;
 
+	export let oneAllowed : boolean = false;
+	export let selectedOption : string = "";
+
 	//TODO: Change the profile pic to actual href later when we set up functionality
 	export let profilePic: boolean;
 	//export let text: string;
@@ -65,15 +68,20 @@
 			text = text.slice(0, -1)
 		}
 
-
-		if (label === "Publisher" && selectedIds.includes(event.detail.idval.id)) {
-			selected = selected.filter(item => item.id !== event.detail.idval.id); //if we are removing a tag remove it from selected tags
-		}
-		else if (selectedVals.includes(event.detail.idval.content)){
-			selected = selected.filter(item => item.content !== event.detail.idval.content); //if we are removing a tag remove it from selected tags
+		if (oneAllowed){
+			selectedOption = text.toLowerCase()
+			active = false
 		}
 		else {
-			selected = [...selected, {id : event.detail.idval.id, content:text}]; //if we are selecting a tag add it to the selected tags
+			if (label === "Publisher" && selectedIds.includes(event.detail.idval.id)) {
+				selected = selected.filter(item => item.id !== event.detail.idval.id); //if we are removing a tag remove it from selected tags
+			}
+			else if (selectedVals.includes(event.detail.idval.content)){
+				selected = selected.filter(item => item.content !== event.detail.idval.content); //if we are removing a tag remove it from selected tags
+			}
+			else {
+				selected = [...selected, {id : event.detail.idval.id, content:text}]; //if we are selecting a tag add it to the selected tags
+			}
 		}
 
 		dispatch('filterSelected');
@@ -95,10 +103,10 @@
 </script>
 
 <div bind:this={targetDiv} class="space-y-1 relative">
-	<button
+	<button type = "button"
 		class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
 		on:click={toggle}>
-		<span class="flex-grow text-surface-700 dark:text-surface-300">{label}</span>
+		<span class="flex-grow text-surface-700 dark:text-surface-300">{oneAllowed ? selectedOption : label}</span>
 		{#if active}
 			<Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text" />
 		{:else}
@@ -108,8 +116,8 @@
 	{#if active}
 		<div class="absolute  min-w-32 flex flex-col rounded-lg border border-surface-400 bg-surface-50"
 				 transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
-			{#if all.length > 3}
-				<input bind:this={input} class="text-xs dark:text-surface-600 border-none rounded-lg focus:ring-0"
+			{#if all.length > 10}
+				<input  bind:this={input} class="text-xs dark:text-surface-600 border-none rounded-lg focus:ring-0"
 							 on:input={updateFilter} placeholder="Search for {label.toLowerCase()}" />
 			{/if}
 

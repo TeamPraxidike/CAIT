@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore, Circuit, Meta } from '$lib';
+	import { authStore, Circuit, Filter, Meta } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -25,13 +25,13 @@
 	let description = '';
 	let addedTags: string[] = [];
 	let newTags: string[] = [];
-	let additionalMaintainers: User[] = [];
+	let additionalMaintainers: UserWithProfilePic[] = [];
 
 	let inputChip: InputChip;
 	let tagInput = '';
 
 	let tagsDatabase = data.tags as PrismaTag[];
-	let users = data.users as UserWithProfilePic[];
+	let users = data.users.users as UserWithProfilePic[];
 
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
@@ -156,10 +156,10 @@
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between gap-3 col-span-full">
 
-				<MetadataLOandPK />
+				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} />
 
 				<div class="flex flex-col w-full p-3">
-					<MantainersEditBar users={users}/>
+					<MantainersEditBar users={users} bind:additionalMaintainers={additionalMaintainers}/>
 
 					<div class="flex flex-col gap-2">
 						<span>Tags<span class="text-error-300">*</span>:</span>

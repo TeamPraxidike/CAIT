@@ -5,24 +5,25 @@
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-    import type { Material, Publication, Tag } from '@prisma/client';
+    import type { Material, Publication, Tag, File as PrismaFile } from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
     let searchWord: string = '';
-    let materials:Material & {
+    let materials:(Material & {
         publication: Publication & {
             tags: Tag[];
             usedInCourse: {course: string}[]
         }
-    }[] = data.materials;
+        files: PrismaFile[]
+    })[] = data.materials;
     let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
     let profilePics:FetchedFileArray = data.profilePics;
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
-
+    console.log(materials)
 
     $: pageType = data.type;
 
@@ -138,6 +139,23 @@
         searchWord = event.detail.value.inputKeywords
         sendFiltersToAPI()
     }
+
+    const getFileExtension = (filePath: string): string =>  {
+        const index = filePath.lastIndexOf('.');
+        return index !== -1 ? filePath.substring(index + 1) : '';
+    }
+
+    const getExtensions = (material : Material & {
+        publication: Publication & {
+            tags: Tag[];
+            usedInCourse: {course: string}[]
+        }
+        files: PrismaFile[]
+    }) => (
+        material.files.map((f: { title: string; }) => getFileExtension(f.title))
+    )
+
+
 
 
 
@@ -303,10 +321,10 @@
 
 {#if pageType === "materials"}
     {#each materials as material, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} courses={material.publication.usedInCourse.map(x  => x.course)}/>
+        <PublicationCard extensions="{getExtensions(material)}" imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} courses={material.publication.usedInCourse.map(x  => x.course)}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person, i}
-        <UserProp view="search" posts="{5}" userPhotoUrl={'data:image;base64,' + profilePics[i].data} role="Maintainer" user={person} />
+        <UserProp view="search" posts="{5}"  userPhotoUrl={'data:image;base64,' + profilePics[i].data} role="Maintainer" user={person} />
     {/each}
 {/if}
