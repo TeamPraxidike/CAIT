@@ -4,6 +4,7 @@
 	import type { User } from '@prisma/client';
 	import { fly } from 'svelte/transition';
 	import { page } from '$app/stores';
+	import { loggedInPfp } from '$lib/stores/loggedInPfp';
 
 	let userName: HTMLInputElement;
 	export let users: UserWithProfilePic[] = [];
@@ -67,7 +68,7 @@
 		{#if $page.data.session?.user}
 			<UserProp
 				user={$page.data.session?.user} view="publish" role="Publisher"
-				userPhotoUrl={'data:image;base64,' + $page.data.session?.user.profilePicData} />
+				userPhotoUrl={'data:image;base64,' + $loggedInPfp} />
 		{/if}
 
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}

@@ -14,6 +14,7 @@ import {
 	AUTH_SECRET,
 } from '$env/static/private';
 import type { AdapterUser } from '@auth/core/adapters';
+import { loggedInPfp } from '$lib/stores/loggedInPfp';
 
 function ModifiedPrismaAdapter(p: typeof prisma) {
 	return {
@@ -82,9 +83,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 	callbacks: {
 		async jwt({ token, user }) {
 			if (user) {
-				token.user = user as PrismaUser & {
-					profilePicData: string;
-				};
+				token.user = user as PrismaUser;
 			}
 			return token;
 		},
@@ -99,7 +98,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 
 				if (userAndPfp) {
 					const profilePic = profilePicFetcher(userAndPfp.profilePic);
-					session.user.profilePicData = profilePic.data;
+					loggedInPfp.set(profilePic.data);
 				}
 			}
 			return session;
