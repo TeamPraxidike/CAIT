@@ -182,6 +182,9 @@
 	}
 
 	const generateCourses = (courses: string[]): string => {
+		if(courses.length === 0){
+			return '';
+		}
 		let out = `Material is used in `
 		console.log(courses.length)
 		for(let i = 0; i < Math.min(courses.length, 2); i++) {
