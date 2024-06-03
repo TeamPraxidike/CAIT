@@ -1,3 +1,5 @@
+import type {FetchedFileArray} from "$lib/database";
+
 export async function load({ url, fetch, locals }) {
 	const session = await locals.auth();
 
@@ -6,10 +8,11 @@ export async function load({ url, fetch, locals }) {
 	// get all the materials
 	const { materials, fileData } = await (await fetch(`/api/material`)).json();
 	const { users, profilePics } = await (await fetch(`/api/user`)).json();
-	const tags = await (await fetch(`/api/tags`)).json();
+
 
 	let liked: number[] = [];
-	let saved: number[] = [];
+	let saved: {saved: number[], savedFileData: FetchedFileArray} = {saved: [], savedFileData: []};
+	let tags: {content: string}[] = [];
 
 	if (session !== null) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
@@ -19,6 +22,8 @@ export async function load({ url, fetch, locals }) {
 			`/api/user/${session.user.id}/saved?fullPublications=false`,
 		);
 		saved = savedResponse.status === 200 ? await savedResponse.json() : [];
+
+		tags = await (await fetch(`/api/tags`)).json();
 	}
 
 	return {

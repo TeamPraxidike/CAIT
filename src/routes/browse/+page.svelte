@@ -21,8 +21,7 @@
     let tags = data.tags
     let profilePics:FetchedFileArray = data.profilePics;
     let liked = data.liked as number[];
-    let saved = data.saved as number[];
-
+    let saved = data.saved.saved as number[];
 
     $: pageType = data.type;
 
