@@ -47,7 +47,7 @@ export async function GET({ params, url, locals }) {
 
 	if (saved.length === 0) return new Response(null, { status: 204 });
 
-	return new Response(JSON.stringify({ saved, savedFileData: fileData }), {
+	return new Response(JSON.stringify({ saved: saved, savedFileData: fileData }), {
 		status: 200,
 	});
 }

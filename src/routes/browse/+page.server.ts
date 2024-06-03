@@ -9,7 +9,6 @@ export async function load({ url, fetch, locals }) {
 	const { materials, fileData } = await (await fetch(`/api/material`)).json();
 	const { users, profilePics } = await (await fetch(`/api/user`)).json();
 
-
 	let liked: number[] = [];
 	let saved: {saved: number[], savedFileData: FetchedFileArray} = {saved: [], savedFileData: []};
 	let tags: {content: string}[] = [];
@@ -21,7 +20,15 @@ export async function load({ url, fetch, locals }) {
 		const savedResponse = await fetch(
 			`/api/user/${session.user.id}/saved?fullPublications=false`,
 		);
-		saved = savedResponse.status === 200 ? await savedResponse.json() : [];
+
+		// dont ask for some reason it doesnt work if I do await savedResponse.json()
+		if (savedResponse.status) {
+			const responseBody = await savedResponse.text();
+			saved = responseBody ? JSON.parse(responseBody) : {saved: [], savedFileData: []};
+		} else {
+			saved = {saved: [], savedFileData: []};
+		}
+
 
 		tags = await (await fetch(`/api/tags`)).json();
 	}
