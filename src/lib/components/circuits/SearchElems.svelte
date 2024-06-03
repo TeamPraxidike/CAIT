@@ -2,12 +2,10 @@
 	import { Grid, PublicationCard, SearchBar } from '$lib';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-	import type { FetchedFileArray } from '$lib/database';
 	import { page } from '$app/stores';
 
 	import { scale } from 'svelte/transition';
 	export let materials : any = [];
-	export let fileData : FetchedFileArray = []
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
@@ -95,11 +93,8 @@
 				return response.json();
 			})
 			.then(data => {
-				console.log(data)
 			// Handle the response data from the API
 				materials = data.materials
-				console.log(materials)
-				fileData = data.fileData
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -131,10 +126,10 @@
 			</div>
 
 
-			{#each materials as m, i}
+			{#each materials as m}
 				<PublicationCard publication="{m.publication}" inCircuits="{true}"
 												 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-												 on:removed={removeCard} imgSrc={'data:image;base64,' + fileData[i].data} liked="{false}" saved="{false}"/>
+												 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked="{false}" saved="{false}"/>
 			{/each}
 		</Grid>
 	</div>
