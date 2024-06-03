@@ -6,7 +6,6 @@
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
     import type { Material, Publication, Tag } from '@prisma/client';
-    import type { FetchedFileArray } from '$lib/database';
 
     export let data:PageServerData;
     let searchWord: string = '';
@@ -14,14 +13,14 @@
         publication: Publication & {
             tags: Tag[];
             usedInCourse: {course: string}[]
-        }
+        },
+        coverPicData: string,
     }[] = data.materials;
-    let fileData:FetchedFileArray = data.fileData;
     let users = data.users
     let tags = data.tags
-    let profilePics:FetchedFileArray = data.profilePics;
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
+
 
     $: pageType = data.type;
 
@@ -165,7 +164,6 @@
           .then(data => {
               // Handle the response data from the API
               materials = data.materials
-              fileData = data.fileData
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);
@@ -301,11 +299,11 @@
 </div>
 
 {#if pageType === "materials"}
-    {#each materials as material, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} courses={material.publication.usedInCourse.map(x  => x.course)}/>
+    {#each materials as material}
+        <PublicationCard imgSrc={'data:image;base64,' + material.coverPicData} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} courses={material.publication.usedInCourse.map(x  => x.course)}/>
     {/each}
 {:else if pageType === "people"}
-    {#each users as person, i}
-        <UserProp view="search" posts="{5}" userPhotoUrl={'data:image;base64,' + profilePics[i].data} role="Maintainer" user={person} />
+    {#each users as person}
+        <UserProp view="search" posts="{5}" userPhotoUrl={'data:image;base64,' + person.profilePicData} role="Maintainer" user={person} />
     {/each}
 {/if}

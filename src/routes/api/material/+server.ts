@@ -5,7 +5,6 @@ import {
 	handleConnections,
 	type MaterialForm,
 	prisma,
-	type FetchedFileArray,
 	updateCoverPic,
 	updateFiles,
 } from '$lib/database';
@@ -73,7 +72,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
 
-		const materials = await getAllMaterials(
+		let materials = await getAllMaterials(
 			tags,
 			publishers,
 			diff,
@@ -83,18 +82,18 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		);
 
 		// coverPic return
-		const fileData: FetchedFileArray = [];
 
-		for (const material of materials) {
-			fileData.push(
-				coverPicFetcher(
+		materials = materials.map((material) => {
+			return {
+				...material,
+				coverPicData: coverPicFetcher(
 					material.encapsulatingType,
 					material.publication.coverPic,
-				),
-			);
-		}
+				).data,
+			};
+		});
 
-		return new Response(JSON.stringify({ materials, fileData }), {
+		return new Response(JSON.stringify({ materials }), {
 			status: 200,
 		});
 	} catch (error) {

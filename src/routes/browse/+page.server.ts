@@ -1,4 +1,4 @@
-import type {FetchedFileArray} from "$lib/database";
+import type { FetchedFileArray } from '$lib/database';
 
 export async function load({ url, fetch, locals }) {
 	const session = await locals.auth();
@@ -6,12 +6,15 @@ export async function load({ url, fetch, locals }) {
 	const type = url.searchParams.get('type') || 'materials';
 
 	// get all the materials
-	const { materials, fileData } = await (await fetch(`/api/material`)).json();
-	const { users, profilePics } = await (await fetch(`/api/user`)).json();
+	const { materials } = await (await fetch(`/api/material`)).json();
+	const { users } = await (await fetch(`/api/user`)).json();
 
 	let liked: number[] = [];
-	let saved: {saved: number[], savedFileData: FetchedFileArray} = {saved: [], savedFileData: []};
-	let tags: {content: string}[] = [];
+	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
+		saved: [],
+		savedFileData: [],
+	};
+	let tags: { content: string }[] = [];
 
 	if (session !== null) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
@@ -24,11 +27,12 @@ export async function load({ url, fetch, locals }) {
 		// dont ask for some reason it doesnt work if I do await savedResponse.json()
 		if (savedResponse.status) {
 			const responseBody = await savedResponse.text();
-			saved = responseBody ? JSON.parse(responseBody) : {saved: [], savedFileData: []};
+			saved = responseBody
+				? JSON.parse(responseBody)
+				: { saved: [], savedFileData: [] };
 		} else {
-			saved = {saved: [], savedFileData: []};
+			saved = { saved: [], savedFileData: [] };
 		}
-
 
 		tags = await (await fetch(`/api/tags`)).json();
 	}
@@ -36,12 +40,10 @@ export async function load({ url, fetch, locals }) {
 	return {
 		type,
 		materials,
-		fileData,
 		users,
 		tags,
 		liked,
 		saved,
-		profilePics,
 	};
 }
 

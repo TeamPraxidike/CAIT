@@ -42,9 +42,9 @@ export const load: PageServerLoad = async ({
 		savedRes.status === 204
 			? { saved: [], savedFileData: [] }
 			: await savedRes.json();
-	const { materials, fileData } = await materialsRes.json();
+	const { materials } = await materialsRes.json();
 
-	return { materials, fileData, saved, savedFileData, liked, used };
+	return { materials, saved, savedFileData, liked, used };
 };
 
 export type PublicationInfo = {
