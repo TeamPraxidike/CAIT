@@ -3,7 +3,7 @@ export const files = [
     [
         {
             path: "nn7.png",
-            type: 'image',
+            type: 'image/png',
             title: "Neural networks diagram"
         },
         {
@@ -13,27 +13,109 @@ export const files = [
         },
         {
             path: "Backpropagation_3blue1brown.mp4",
-            type: 'video',
+            type: 'video/mp4',
             title: "Backpropagation by 3blue1brown"
         }
     ],
     [
         {
-            path: '1689bd9c-a2df-4665-8f1e-c1380d29798d.jpg',
-            type: 'image',
-            title: "omni-man"
+            path: 'flight_data.csv',
+            type: 'text/csv',
+            title: "flight_data.csv"
+        },
+        {
+            path: 'cnn-pytorch.py',
+            type: 'text/x-python',
+            title: "cnn-pytorch.py"
+        },
+        {
+            path: 'images.zip',
+            type: 'application/zip',
+            title: "images.zip"
+        },
+    ],
+    [
+        {
+            path: 'support_vector_machines.pdf',
+            type: 'application/pdf',
+            title: "support_vector_machines.pdf"
+        }
+    ],
+    [
+
+    ],
+    [
+        {
+            path: 'perceptron.py',
+            type: 'text/x-python',
+            title: "perceptron.py"
         }
     ],
     [
         {
-            path: '7984c2fc-59d2-4c88-8007-62349de535f1.png',
-            type: 'image',
-            title: "omni-man"
+            path: 'file.pdf',
+            type: 'application/pdf',
+            title: "file.pdf"
+        },
+        {
+            path: 'n.ipynb',
+            type: 'notebook',
+            title: "n.ipynb"
         }
     ],
-    [{
-        path: 'a4375a87-4b32-46ae-ad04-33a191c28363.jpg',
-        type: 'image',
-        title: "omni-man"
-    }]
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+]
+
+export const coverPic = [
+    {
+        path: 'MLP.png',
+        type: 'image/png',
+        title: "MLP.png"
+    },
+    {
+        path: 'cnn.png',
+        type: 'image/png',
+        title: "cnn.png"
+    },
+    {
+        path: 'svm.png',
+        type: 'image/png',
+        title: "svm.png"
+    },
+    {
+        path: 'rl.png',
+        type: 'image/png',
+        title: "rl.png"
+    },
+    {
+        path: 'perceptron.png',
+        type: 'image/png',
+        title: "perceptron.png"
+    },
+    {
+        path: 'ml.png',
+        type: 'image/png',
+        title: "ml.png"
+    },
+    {
+        path: 'anomaly.png',
+        type: 'image/png',
+        title: "anomaly.png"
+    },
+    {
+        path: 'cluster.png',
+        type: 'image/png',
+        title: "cluster.png"
+    },
 ]
