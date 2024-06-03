@@ -12,3 +12,4 @@ vite.config.ts.timestamp-*
 reports
 prisma/migrations
 .snaplet
+static/uploadedFiles
