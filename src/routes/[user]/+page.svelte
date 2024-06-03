@@ -2,7 +2,7 @@
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
     import type {LayoutData, PageServerData} from './$types';
     import { type Publication, PublicationType, type Tag, type User} from '@prisma/client';
-    import type {FetchedFileArray, FetchedFileItem} from '$lib/database';
+    import type {FetchedFileItem} from '$lib/database';
 
     /* This is the data that was returned from the server */
     export let data: LayoutData & PageServerData;
@@ -15,7 +15,6 @@
 
     let profilePic: FetchedFileItem = data.profilePicData;
 
-    let fileData:FetchedFileArray = data.fileData;
 
     // let saved = data.saved;
     let savedFileData = data.savedFileData;
@@ -55,8 +54,9 @@
     <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
         {user.firstName}'s Publications
     </h3>
+
     {#each postsPublication as publication, i}
-        <PublicationCard imgSrc={'data:image;base64,' + fileData[i].data} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
+        <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
     {/each}
 </div>
 

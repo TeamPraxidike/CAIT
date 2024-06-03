@@ -5,7 +5,6 @@ import {
 	handleConnections,
 	type MaterialForm,
 	prisma,
-	type FetchedFileArray,
 	updateCoverPic,
 	updateFiles,
 } from '$lib/database';
@@ -52,9 +51,6 @@ function mapToType(mt: string): MaterialType {
  * Get all materials
  */
 export const GET: RequestHandler = async ({ url }) => {
-	// Authentication step
-	// return 401 if user not authenticated
-
 	try {
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
@@ -63,7 +59,8 @@ export const GET: RequestHandler = async ({ url }) => {
 		const diff = d ? d.split(',').map(mapToDifficulty) : [];
 
 		const p = url.searchParams.get('publishers');
-		const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
+		const publishers = p ? p.split(',') : [];
+		// const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
 
 		const ty = url.searchParams.get('types');
 		const type = ty ? ty.split(',').map(mapToType) : [];
@@ -71,7 +68,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
 
-		const materials = await getAllMaterials(
+		let materials = await getAllMaterials(
 			tags,
 			publishers,
 			diff,
@@ -81,18 +78,18 @@ export const GET: RequestHandler = async ({ url }) => {
 		);
 
 		// coverPic return
-		const fileData: FetchedFileArray = [];
 
-		for (const material of materials) {
-			fileData.push(
-				coverPicFetcher(
+		materials = materials.map((material) => {
+			return {
+				...material,
+				coverPicData: coverPicFetcher(
 					material.encapsulatingType,
 					material.publication.coverPic,
-				),
-			);
-		}
+				).data,
+			};
+		});
 
-		return new Response(JSON.stringify({ materials, fileData }), {
+		return new Response(JSON.stringify({ materials }), {
 			status: 200,
 		});
 	} catch (error) {
@@ -149,7 +146,7 @@ export async function POST({ request }) {
 			},
 		);
 
-		const id = createdMaterial.id;
+		const id = createdMaterial.publicationId;
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

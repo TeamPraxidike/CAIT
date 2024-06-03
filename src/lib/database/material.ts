@@ -67,7 +67,7 @@ export async function getMaterialByPublicationId(
  */
 export async function getAllMaterials(
 	tags: string[],
-	publishers: number[],
+	publishers: string[],
 	diff: Difficulty[],
 	type: MaterialType[],
 	sort: string,
@@ -168,7 +168,7 @@ export async function deleteMaterialByPublicationId(
  * @param prismaContext
  */
 export async function createMaterialPublication(
-	userId: number,
+	userId: string,
 	metaData: {
 		title: string;
 		description: string;

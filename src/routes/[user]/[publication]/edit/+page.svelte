@@ -2,7 +2,7 @@
 	import type { LayoutServerData } from '../$types';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Publication, Tag as PrismaTag } from '@prisma/client';
-	import { authStore, FileTable, Meta } from '$lib';
+	import { FileTable, Meta } from '$lib';
 	import {
 		Autocomplete, type AutocompleteOption, FileButton, FileDropzone, getToastStore, InputChip
 	} from '@skeletonlabs/skeleton';
@@ -10,9 +10,10 @@
 	import type { PublicationView } from '../+layout.server';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	export let data: LayoutServerData & PageServerData;
-	let serverData: PublicationView = data.loadedPublication.loadedPublication;
+	let serverData: PublicationView = data.pubView;
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
@@ -20,7 +21,7 @@
 
 	let LOs: string[] = serverData.publication.learningObjectives;
 	let difficulty: Difficulty = serverData.publication.difficulty;
-	let maintainers: number[] = [$authStore.user?.id || 1];
+	let maintainers: string[] = [$page.data.session?.user.id || "1"];
 	let coverPic: File | undefined = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 
 	function chooseCover(e: Event) {
@@ -72,6 +73,11 @@
 			message: `Malformed information, please check your inputs: ${form?.message}`,
 			background: 'bg-warning-200'
 		});
+	} else if (form?.status === 401) {
+		toastStore.trigger({
+			message: `Unauthorized! ${form?.message}`,
+			background: 'bg-error-200'
+		});
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
@@ -97,7 +103,7 @@
 		formData.append('oldFiles', JSON.stringify(serverData.publication.materials.files));
 		formData.append('oldFilesData', JSON.stringify(serverData.fileData));
 
-		formData.append('userId', $authStore.user?.id.toString() || '');
+		formData.append('userId', $page.data.session?.user.id.toString() || '');
 		formData.append('tags', tags.join(';'));
 		formData.append('difficulty', difficulty);
 		formData.append('maintainers', maintainers.join(';'));

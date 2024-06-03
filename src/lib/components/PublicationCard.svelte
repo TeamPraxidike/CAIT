@@ -1,13 +1,14 @@
 <script lang="ts">
 
 
-	import { authStore, DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
+	import { DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
 
-	import Icon from '@iconify/svelte';
-	import { fly } from 'svelte/transition';
-	import { createEventDispatcher, onMount } from 'svelte';
-	import type { Publication } from '@prisma/client';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import Icon from '@iconify/svelte';
+    import { fly } from 'svelte/transition';
+    import { createEventDispatcher, onMount } from 'svelte';
+    import type { Publication } from '@prisma/client';
+    import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import { page } from '$app/stores';
 	import {
 		getModalStore,
 		initializeStores,
@@ -45,7 +46,7 @@
 		export let extensions: string[] = [];
     export let forArrow: boolean = false;
 
-    const userId = $authStore.user?.id;
+    const userId = $page.data?.session?.user?.id || "0";
 
     //used to differentiate if its used in a normal browse or in the circuit browse
     export let inCircuits: boolean = false;
@@ -264,7 +265,7 @@
 
 											{#if markAsUsed}
 												<button on:click={() => modalStore.trigger(modal)}>
-													<p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
+													<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</span>
 												</button>
 											{/if}
                     </div>

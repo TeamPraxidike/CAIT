@@ -5,7 +5,7 @@ export const actions = {
 	edit: async ({ request, fetch }) => {
 		const formData = await request.formData();
 
-		const id = Number(formData.get('userId'));
+		const id = formData.get('userId');
 		const firstName = formData.get('firstName')?.toString();
 		const lastName = formData.get('lastName')?.toString();
 		const email = formData.get('email')?.toString();

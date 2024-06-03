@@ -4,7 +4,8 @@
     import Icon from '@iconify/svelte';
     import { getModalStore, getToastStore, type PopupSettings } from '@skeletonlabs/skeleton';
     import {popup} from '@skeletonlabs/skeleton';
-    import { authStore, getDateDifference, AddInteractionForm } from '$lib';
+    import { getDateDifference, AddInteractionForm } from '$lib';
+    import { page } from '$app/stores';
 
     //assuming that you create the comment object prior to creating the components when adding a new comment, having all info available in it
     export let interaction: Comment | Reply;
@@ -13,7 +14,7 @@
 
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = ""
-    let browsingUser = $authStore.user?.id || 0
+    let browsingUser = $page.data.session?.user.id || 0
     let popupName = isReply ? `reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}` : `comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}`;
     let user = interaction.userId
     let text = interaction.content

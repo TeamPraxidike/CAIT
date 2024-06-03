@@ -1,12 +1,17 @@
 import { getReply, getUserById, likesReplyUpdate } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * likes a reply
  * @param params
+ * @param locals
  */
-export async function POST({ params }) {
+export async function POST({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { id, replyId } = params;
-	const user = await getUserById(parseInt(id));
+	const user = await getUserById(id);
 	if (!user)
 		return new Response(JSON.stringify({ error: 'User not found' }), {
 			status: 404,
@@ -19,10 +24,7 @@ export async function POST({ params }) {
 		});
 
 	try {
-		const response = await likesReplyUpdate(
-			parseInt(id),
-			parseInt(replyId),
-		);
+		const response = await likesReplyUpdate(id, parseInt(replyId));
 		console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 		return new Response(JSON.stringify({ message: response }), {
 			status: 200,

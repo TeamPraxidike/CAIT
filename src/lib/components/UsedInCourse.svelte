@@ -1,7 +1,7 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
-    import {authStore} from "$lib";
     import {coursesStore} from "$lib/stores/courses";
+    import { page } from '$app/stores';
 
     export let courses: string[];
     export let publicationId: number;
@@ -34,7 +34,7 @@
     }
 
     async function sendCourses() {
-        await fetch(`/api/user/${$authStore.user?.id}/use-in-course/${publicationId}`, {
+        await fetch(`/api/user/${$page.data.session?.user.id}/use-in-course/${publicationId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

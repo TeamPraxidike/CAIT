@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore, Circuit, Meta } from '$lib';
+	import { Circuit, Meta } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -13,6 +13,7 @@
 	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
+	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 
@@ -42,7 +43,7 @@
 		};
 	});
 
-	let uid = $authStore.user?.id || 0;
+	let uid = $page.data.session?.user.id || 0;
 
 	let priorKnowledge:string[] = [];
 	$: priorKnowledge = priorKnowledge;
@@ -97,7 +98,7 @@
 			message: 'Publication Added successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/${$authStore.user?.id}/${form?.id}`);
+		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -126,10 +127,9 @@
         formData.append('difficulty', 'easy');
         formData.append('selectedTags', JSON.stringify(addedTags));
 				formData.append('newTags', JSON.stringify(newTags))
-        formData.append('additionalMaintainers', JSON.stringify([...additionalMaintainers.map(m => m.id), uid]));
+        formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
-				console.log(nodeActions);
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
@@ -156,7 +156,7 @@
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between gap-3 col-span-full">
 
-				<MetadataLOandPK />
+				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge}/>
 
 				<div class="flex flex-col w-full p-3">
 					<MantainersEditBar users={users}/>
@@ -164,11 +164,11 @@
 					<div class="flex flex-col gap-2">
 						<span>Tags<span class="text-error-300">*</span>:</span>
 						<div class="text-token space-y-2">
-							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content)}
-												 bind:input={tagInput} bind:value={addedTags} name="chips" class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700 w-1/2" on:invalid={handleInvalid}  />
-							<div class="card max-h-48 p-4 overflow-y-auto w-1/2" tabindex="-1">
+							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content.toLowerCase())}
+												 bind:input={tagInput} bind:value={addedTags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
+							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
 								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
-															on:selection={onInputChipSelect}  />
+															on:selection={onInputChipSelect} />
 							</div>
 						</div>
 					</div>

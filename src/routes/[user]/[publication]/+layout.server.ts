@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { FetchedFileArray, FetchedFileItem } from '$lib/database';
 import type {
 	Circuit,
@@ -14,50 +14,50 @@ import type {
 	User,
 } from '@prisma/client';
 
-export const load: LayoutServerLoad = async ({ params, fetch, cookies }) => {
-	//const pRes = await fetch(`/api/material/${params.publication}`);
-	const pRes = await fetch(`/api/publication/${params.publication}`);
+export const load: LayoutServerLoad = async ({
+	params,
+	fetch,
+	locals,
+	parent,
+}) => {
+	await parent();
 
+	const session = await locals.auth();
+	if (!session) throw redirect(303, '/signin');
+
+	const pRes = await fetch(`/api/publication/${params.publication}`);
 	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
 
 	const userRes = await fetch(
-		`/api/user/${cookies.get('userId')}/publicationInfo/${params.publication}`,
+		`/api/user/${session.user.id}/publicationInfo/${params.publication}`,
 	);
 	if (userRes.status !== 200) error(userRes.status, userRes.statusText);
 
 	const userSpecificInfo = await userRes.json();
-	const loadedPublication = {
-		loadedPublication: await pRes.json(),
-		userSpecificInfo: userSpecificInfo,
-	};
+	const pubView = await pRes.json();
 
-	//const userId = cookies.get('browsingUser');
-	//const cRes = await fetch(`/api/user/${userId}/liked/comment`);
-	const cRes = await fetch(`/api/user/1/liked/comment`);
-	//const rRes = await fetch(`/api/user/${userId}/liked/comment`);
-	const rRes = await fetch(`/api/user/1/liked/reply`);
+	const cRes = await fetch(`/api/user/${session.user.id}/liked/comment`);
+	const rRes = await fetch(`/api/user/${session.user.id}/liked/reply`);
 
 	const likedComments = cRes.status === 200 ? await cRes.json() : [];
 	const likedReplies = rRes.status === 200 ? await rRes.json() : [];
 
 	return {
-		loadedPublication,
+		userSpecificInfo,
+		pubView,
 		likedComments,
 		likedReplies,
 	} satisfies {
-		loadedPublication: PublicationViewLoad;
+		userSpecificInfo: { liked: boolean; saved: boolean };
+		pubView: PublicationView;
 		likedComments: number[];
 		likedReplies: number[];
 	};
 };
 
-export type PublicationViewLoad = {
-	loadedPublication: PublicationView;
-	userSpecificInfo: { liked: boolean; saved: boolean };
-};
 /**
- * The data that is loaded for the publication view layout.
- * Only to be used in the publication view layout or child pages.
+ * The data that is loaded for the pubView view layout.
+ * Only to be used in the pubView view layout or child pages.
  */
 export type PublicationView = {
 	isMaterial: boolean;
@@ -87,26 +87,5 @@ export type PublicationView = {
 			})[];
 		};
 	};
-
-	// material: Material & {
-	// 	files: PrismaFile[];
-	// 	publication: Publication & {
-	// 		tags: Tag[];
-	// 		publisher: User;
-	// 		maintainers: User[];
-	// 		comments: (Comment & {
-	// 			replies: (Reply & {
-	// 				user: User;
-	// 			})[];
-	// 			user: User;
-	// 		})[];
-	// 	};
-	// };
-	// circuit: Circuit & {
-	// 	nodes: (PrismaNode & {
-	// 		prerequisites: Edge[];
-	// 		next: Edge[];
-	// 	})[];
-	// };
 	coverFileData: FetchedFileItem;
 };

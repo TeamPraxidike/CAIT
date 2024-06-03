@@ -1,9 +1,12 @@
 <script lang="ts">
-    import {authStore, Grid, UserMenu} from '$lib';
+    import {Grid, UserMenu} from '$lib';
     import { LightSwitch, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+    import { page } from "$app/stores";
     import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
+    import { signIn } from '@auth/sveltekit/client';
+    import { loggedInPfp } from '$lib/stores/loggedInPfp';
 
     type NavOption = {
         text: string;
@@ -23,34 +26,8 @@
     };
 
     let dropDown: boolean = false;
-    let loggedIn: boolean;
-    $: loggedIn = $authStore.user !== null;
 
     const toggleDropDown = () => dropDown = !dropDown;
-
-    // TODO: THIS WOULD ACTUALLY BE A CALL TO THE AUTH SERVICE. CURRENTLY IT'S A MOCK CALL TO THE API TO GET FDR
-    async function login(event: MouseEvent) {
-
-        fetch('/api/user/1').then(res => res.json()).then(data => {
-            const { user, profilePicData } = data;
-            authStore.setAuth(user, profilePicData.data, 'token');
-        }).catch(err => console.error(err));
-
-        // Find the closest form element
-        const form = (event.target as HTMLElement).closest('form');
-        if (!form) throw new Error('No form found');
-
-        const formData = new FormData(form);
-
-        try {
-            await fetch(form.action, {
-                method: form.method,
-                body: formData
-            });
-        } catch (error) {
-            console.error('Error submitting form', error);
-        }
-    }
 
 </script>
 
@@ -72,23 +49,29 @@
         </div>
 
         <div class="hidden md:flex col-start-11 col-span-2 md:gap-2 xl:gap-4 items-center justify-self-end">
-            {#if loggedIn}
-                <a href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Publish</a>
+            {#if $page.data.session}
+                <a href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
+                    Publish
+                </a>
             {:else}
-                <form action="/" method="post" >
-                    <button on:click={login} type="button" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">Sign In</button>
-                </form>
+                <button on:click={() => signIn()} type="button" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
+                    Sign In
+                </button>
             {/if}
             <div class="border-l border-surface-300 h-8"/>
             <div>
                 <LightSwitch />
             </div>
 
-            {#if loggedIn}
+            {#if $page.data.session}
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                    {#if $authStore.user && $authStore.user.profilePicData !== ''}
-                        <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $authStore.user.profilePicData} alt={$authStore.user?.firstName}/>
+                    {#if $page.data.session}
+                        {#if $loggedInPfp.startsWith('http')}
+                            <img class="h-8 w-8 rounded-full" src={$loggedInPfp} alt={$page.data.session.user.name}/>
+                        {:else}
+                            <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $loggedInPfp} alt={$page.data.session.user.name}/>
+                        {/if}
                     {:else}
                         <div class="w-8 h-8 placeholder-circle" />
                     {/if}
@@ -118,7 +101,7 @@
                 {/each}
 
 
-                {#if loggedIn}
+                {#if $page.data.session}
                     <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
                     <UserMenu device="mobile" />
                 {/if}
@@ -128,18 +111,18 @@
                         <LightSwitch />
                     </div>
 
-                    {#if loggedIn}
+                    {#if $page.data.session}
                         <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                            {#if $authStore.user && $authStore.user.profilePicData !== ''}
-                                <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $authStore.user.profilePicData} alt={$authStore.user?.firstName}/>
+                            {#if $page.data.session.user && $loggedInPfp !== ''}
+                                <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $loggedInPfp} alt={$page.data.session.user?.name}/>
                             {:else}
                                 <div class="w-8 h-8 placeholder-circle" />
                             {/if}
                         </div>
                     {:else}
-                        <form action="/" method="post">
-                        <button on:click={login} type="button" class="btn rounded-lg variant-ghost-primary">Sign In</button>
-                        </form>
+                        <button on:click={() => signIn()} type="button" class="btn rounded-lg variant-ghost-primary">
+                            Sign In
+                        </button>
                     {/if}
                 </div>
             </div>

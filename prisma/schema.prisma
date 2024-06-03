@@ -34,33 +34,95 @@ enum PublicationType {
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
-  firstName  String
-  lastName   String
-  username   String  @unique @default(uuid())
-  email      String
-  reputation Int     @default(0)
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  username      String    @unique @default(uuid())
+  email         String    @unique
+  emailVerified DateTime?
+  reputation    Int       @default(0)
+  password      String? // hashed password
 
   saved            Publication[]             @relation("saved")
   posts            Publication[]
   liked            Publication[]             @relation("liked")
   usedPublications PublicationUsedInCourse[]
 
-  likedComments    Comment[] @relation("likedComments")
-  likedReplies     Reply[] @relation("likedReplies")
+  likedComments Comment[] @relation("likedComments")
+  likedReplies  Reply[]   @relation("likedReplies")
 
   maintaining Publication[] @relation("maintainers")
   comments    Comment[]
   replies     Reply[]
   isAdmin     Boolean       @default(false)
 
-  profilePic   File?   @relation("ProfilePic")
+  profilePic File? @relation("ProfilePic")
+
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  Authenticator Authenticator[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
 }
 
 model PublicationUsedInCourse {
   // the user that is using the publication
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int
   publication   Publication @relation(fields: [publicationId], references: [id])
@@ -86,7 +148,7 @@ model Publication {
   comments Comment[]
 
   publisher   User   @relation(fields: [publisherId], references: [id], onDelete: Cascade)
-  publisherId Int
+  publisherId String
   savedBy     User[] @relation("saved")
   likedBy     User[] @relation("liked")
 
@@ -118,12 +180,12 @@ model File {
   path  String @id
   title String
   type  String
-  
-  userId    Int?  @unique
-  profilePic   User? @relation("ProfilePic", fields: [userId], references: [id], onDelete: Cascade)
 
-  publicationId    Int?  @unique
-  coverPic   Publication? @relation("CoverPic", fields: [publicationId], references: [id], onDelete: Cascade)
+  userId     String? @unique
+  profilePic User?   @relation("ProfilePic", fields: [userId], references: [id], onDelete: Cascade)
+
+  publicationId Int?         @unique
+  coverPic      Publication? @relation("CoverPic", fields: [publicationId], references: [id], onDelete: Cascade)
 
   materialId Int?
   material   Material? @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)
@@ -137,16 +199,16 @@ model Circuit {
 }
 
 model Node {
-  circuitId     Int
-  circuit       Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  circuitId Int
+  circuit   Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
 
-  extensions    String[]
+  extensions String[]
 
   publicationId Int
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
-  posX          Int
-  posY          Int
+  posX Int
+  posY Int
 
   prerequisites Edge[] @relation("Prereq")
   next          Edge[] @relation("Next")
@@ -156,18 +218,17 @@ model Node {
 
 model Edge {
   circuitId         Int
-  fromPublicationId     Int
-  //toCircuitId Int
-  toPublicationId Int
+  fromPublicationId Int
+  // toCircuitId Int
+  toPublicationId   Int
 
   // for this relation, the "from" node needs to have its "next" relation updated
-  from           Node @relation("Next", fields: [circuitId, fromPublicationId], references: [circuitId, publicationId], onDelete: Cascade)
+  from Node @relation("Next", fields: [circuitId, fromPublicationId], references: [circuitId, publicationId], onDelete: Cascade)
   // for this relation, the "to" node needs to have its "prereq" relation updated
   to   Node @relation("Prereq", fields: [circuitId, toPublicationId], references: [circuitId, publicationId], onDelete: Cascade)
 
   @@id([circuitId, fromPublicationId, toPublicationId])
 }
-
 
 model Tag {
   content     String        @id
@@ -179,12 +240,12 @@ model Comment {
   publicationId Int
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   replies   Reply[]
   likes     Int      @default(0)
-  likedBy   User[] @relation("likedComments")
+  likedBy   User[]   @relation("likedComments")
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -196,11 +257,11 @@ model Reply {
   commentId Int
   comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  likes     Int      @default(0)
-  likedBy   User[] @relation("likedReplies")
+  likes   Int    @default(0)
+  likedBy User[] @relation("likedReplies")
 
   content   String
   createdAt DateTime @default(now())

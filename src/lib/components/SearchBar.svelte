@@ -7,8 +7,10 @@
     const dispatch = createEventDispatcher()
 
     const handleKeyDown = (event:KeyboardEvent) => {
-        if(event.key === 'Enter')
+        if(event.key === 'Enter'){
             searchQuery();
+            event.preventDefault();
+        }
     }
     function searchQuery(){
         dispatch("SearchQuery", {message: {searchType}, value:{inputKeywords}})
@@ -18,7 +20,7 @@
 
 <div class="w-full h-8 relative justify-center border border-surface-400 dark:border-surface-700 rounded-lg focus-within:ring-2 focus-within:ring-primary-300 dark:focus-within:ring-primary-700 focus-within:border-none flex">
     <!-- Search icon button -->
-    <button on:click={searchQuery} class="">
+    <button type="button" on:click={searchQuery} class="">
         <Icon icon="ci:search-magnifying-glass" class="size-5 text-surface-500  dark:text-surface-400 pt-0.5"/>
     </button>
     <!-- Search input field -->
