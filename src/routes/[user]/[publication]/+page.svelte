@@ -2,7 +2,6 @@
 	import type { LayoutServerData } from './$types';
 	import {
 		AddInteractionForm,
-		authStore,
 		Circuit,
 		Comment,
 		DiffBar,
@@ -278,7 +277,7 @@
 </div>
 
 {#if $page.data.session?.user}
-	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{serverData.material.publicationId}"/>
+	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{serverData.publication.id}"/>
 {/if}
 
 {#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}

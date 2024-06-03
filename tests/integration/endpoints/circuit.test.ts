@@ -1,37 +1,34 @@
 import { describe, expect, it } from 'vitest';
-import { testingUrl } from '../setup';
-// import { createCircuitPublication } from '$lib/database';
-import { Difficulty } from '@prisma/client';
 
-async function populate() {
-	const reqBody = {
-		firstName: 'Paisii',
-		lastName: 'Hilendarski',
-		email: 'paiskataH@yahoomail.com',
-		profilePic: 'paiskata.jpg',
-	};
-	const user = await fetch(`${testingUrl}/user`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(reqBody),
-	});
-	const userData = await user.json();
-
-	return {
-		title: 'Vasko and Friends',
-		description: 'Vasko falls in love with Travis Scott',
-		copyright: true,
-		difficulty: Difficulty.easy,
-		userId: userData.user.id,
-	};
-}
+// async function populate() {
+// 	const reqBody = {
+// 		firstName: 'Paisii',
+// 		lastName: 'Hilendarski',
+// 		email: 'paiskataH@yahoomail.com',
+// 		profilePic: 'paiskata.jpg',
+// 	};
+// 	const user = await fetch(`${testingUrl}/user`, {
+// 		method: 'POST',
+// 		headers: {
+// 			'Content-Type': 'application/json',
+// 		},
+// 		body: JSON.stringify(reqBody),
+// 	});
+// 	const userData = await user.json();
+//
+// 	return {
+// 		title: 'Vasko and Friends',
+// 		description: 'Vasko falls in love with Travis Scott',
+// 		copyright: true,
+// 		difficulty: Difficulty.easy,
+// 		userId: userData.user.id,
+// 	};
+// }
 
 describe('Circuits', async () => {
-	it("should be remade", () => {
+	it('should be remade', () => {
 		expect(true).toBe(true);
-	})
+	});
 });
 
 //

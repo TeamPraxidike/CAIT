@@ -15,10 +15,10 @@
 	let targetDiv: HTMLDivElement;
 	let searchWord : string = ""
 
-	function getFileExtension(filePath: string): string {
-		const index = filePath.lastIndexOf('.');
-		return index !== -1 ? filePath.substring(index + 1) : '';
-	}
+	// function getFileExtension(filePath: string): string {
+	// 	const index = filePath.lastIndexOf('.');
+	// 	return index !== -1 ? filePath.substring(index + 1) : '';
+	// }
 
 
 	const removePopup = (event: MouseEvent) => {

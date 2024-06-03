@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { authStore, Circuit, Meta } from '$lib';
-	import { fly } from 'svelte/transition';
+	import { Circuit, Meta } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -14,7 +13,6 @@
 	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
-	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";

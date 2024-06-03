@@ -1,7 +1,7 @@
 <script lang="ts">
 
 
-    import {DiffBar, getDateDifference, Tag} from '$lib';
+	import { DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
 
     import Icon from '@iconify/svelte';
     import { fly } from 'svelte/transition';
@@ -265,7 +265,7 @@
 
 											{#if markAsUsed}
 												<button on:click={() => modalStore.trigger(modal)}>
-													<p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
+													<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</span>
 												</button>
 											{/if}
                     </div>

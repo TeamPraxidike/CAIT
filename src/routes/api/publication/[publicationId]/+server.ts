@@ -3,7 +3,6 @@ import {
 	type FetchedFileArray,
 	type FetchedFileItem,
 	fileSystem,
-	getMaterialByPublicationId,
 	getPublicationById,
 } from '$lib/database';
 

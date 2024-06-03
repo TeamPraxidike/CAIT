@@ -1,6 +1,5 @@
 <script lang="ts">
     import {lorem, Meta, Section} from "$lib";
-    import { page } from '$app/stores';
 </script>
 
 <Meta title="Home" description="CAIT" type="site"/>
