@@ -7,9 +7,7 @@ import { verifyAuth } from '$lib/database/auth';
  * @param request
  * @constructor
  */
-export async function POST({ request, locals }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
+export async function POST({ request }) {
 
 	// authentication step here
 	const body: UserCreateForm = await request.json();
