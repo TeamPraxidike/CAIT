@@ -25,7 +25,7 @@ export const load: LayoutServerLoad = async ({
 	const session = await locals.auth();
 	if (!session) throw redirect(303, '/signin');
 
-	const pRes = await fetch(`/api/material/${params.publication}`);
+	const pRes = await fetch(`/api/publication/${params.publication}`);
 	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
 
 	const userRes = await fetch(
@@ -34,10 +34,7 @@ export const load: LayoutServerLoad = async ({
 	if (userRes.status !== 200) error(userRes.status, userRes.statusText);
 
 	const userSpecificInfo = await userRes.json();
-	const loadedPublication = {
-		loadedPublication: await pRes.json(),
-		userSpecificInfo: userSpecificInfo,
-	};
+	const pubView = await pRes.json();
 
 	const cRes = await fetch(`/api/user/${session.user.id}/liked/comment`);
 	const rRes = await fetch(`/api/user/${session.user.id}/liked/reply`);
@@ -46,23 +43,21 @@ export const load: LayoutServerLoad = async ({
 	const likedReplies = rRes.status === 200 ? await rRes.json() : [];
 
 	return {
-		loadedPublication,
+		userSpecificInfo,
+		pubView,
 		likedComments,
 		likedReplies,
 	} satisfies {
-		loadedPublication: PublicationViewLoad;
+		userSpecificInfo: { liked: boolean; saved: boolean };
+		pubView: PublicationView;
 		likedComments: number[];
 		likedReplies: number[];
 	};
 };
 
-export type PublicationViewLoad = {
-	loadedPublication: PublicationView;
-	userSpecificInfo: { liked: boolean; saved: boolean };
-};
 /**
- * The data that is loaded for the publication view layout.
- * Only to be used in the publication view layout or child pages.
+ * The data that is loaded for the pubView view layout.
+ * Only to be used in the pubView view layout or child pages.
  */
 export type PublicationView = {
 	isMaterial: boolean;

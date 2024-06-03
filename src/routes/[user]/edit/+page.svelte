@@ -67,7 +67,7 @@
 
 <form enctype="multipart/form-data" method="POST" action="?/edit" class="col-span-6 flex flex-col gap-8"
 	  use:enhance={({formData}) => {
-		formData.append('userId', user.id.toString());
+		formData.append('userId', user.id);
 	  }}>
 
 	<div class="flex gap-8 items-center">

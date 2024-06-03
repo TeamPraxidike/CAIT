@@ -13,7 +13,7 @@
 	import { page } from '$app/stores';
 
 	export let data: LayoutServerData & PageServerData;
-	let serverData: PublicationView = data.loadedPublication.loadedPublication;
+	let serverData: PublicationView = data.pubView;
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
