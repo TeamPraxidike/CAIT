@@ -146,7 +146,7 @@ export async function POST({ request }) {
 			},
 		);
 
-		const id = createdMaterial.id;
+		const id = createdMaterial.publicationId;
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

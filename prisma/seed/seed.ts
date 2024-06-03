@@ -47,7 +47,7 @@ const main = async () => {
 		'Neural networks',
 		'Convolutional neural networks',
 		'SVM',
-		'Reinforcment learning',
+		'Reinforcement learning',
 		'The perceptron - basics',
 		'Introduction to Machine Learning',
 		'Clustering Techniques',
@@ -64,7 +64,7 @@ const main = async () => {
 	];
 	const tags = [
 		'clustering',
-		'ANNs',
+		'ann',
 		'regression',
 		'classification',
 		'datasets',
@@ -75,7 +75,7 @@ const main = async () => {
 		'evolutionary algorithms',
 		'genetic algorithms',
 		'optimization',
-		'hyperparameter tuning',
+		'hyper-parameter tuning',
 		'feature selection',
 		'feature engineering',
 		'ensemble learning',
@@ -83,8 +83,8 @@ const main = async () => {
 		'boosting',
 		'random forests',
 		'gradient boosting',
-		'RL',
-		'SVM',
+		'rl',
+		'svm',
 		'reinforcement learning',
 		'perceptron',
 	];
@@ -112,11 +112,11 @@ const main = async () => {
 	];
 
 	const materialTag = [
-		['ANNs', 'neural networks', 'supervised learning'],
-		['ANNs', 'neural networks', 'supervised learning'],
-		['SVM', 'supervised learning'],
-		['RL', 'reinforcement learning'],
-		['perceptron', 'ANNs', 'neural networks'],
+		['ann', 'neural networks', 'supervised learning'],
+		['ann', 'neural networks', 'supervised learning'],
+		['svm', 'supervised learning'],
+		['rl', 'reinforcement learning'],
+		['perceptron', 'ann', 'neural networks'],
 		['supervised learning', 'unsupervised learning'],
 		['clustering', 'unsupervised learning'],
 	];

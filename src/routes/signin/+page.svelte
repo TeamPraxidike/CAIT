@@ -3,22 +3,48 @@
 	import { signIn } from '@auth/sveltekit/client';
 	import { writable } from 'svelte/store';
 	import { SignIn } from '@auth/sveltekit/components';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+
+	let toastStore = getToastStore();
 
 	let email = ""
 	let password = ""
 	let validationErrors = { email: '', password: '', output: '' }
 	let errorMessage = writable("");
+	let display = 'hidden';
 
 
 	async function handleSignIn() {
 		try {
-			const result = await signIn('credentials', { email, password });
-			if (!result?.ok) {
-				throw new Error(result?.statusText || 'Failed to sign in');
+			const response = await signIn('credentials', {
+				email,
+				password,
+				redirect: false
+			});
+			const url = (await response?.json()).url;
+			if (url.includes('error=CredentialsSignin')) {
+				toastStore.trigger({
+					message: 'Login fail, wrong email or password',
+					background: 'bg-error-200'
+				});
+			} else {
+				toastStore.trigger({
+					message: 'Login successful',
+					background: 'bg-success-200'
+				});
+				window.location.href = '/browse';
 			}
-			// Handle successful sign-in (e.g., redirect to dashboard)
 		} catch (error:any) {
-			errorMessage.set("Failed to sign in: " + error.message);
+			toastStore.trigger({
+				message: 'An unexpected error occurred',
+				background: 'bg-error-200'
+			});
+		}
+	}
+
+	const handleInputEnter = (event: KeyboardEvent) => {
+		if (event.key==='Enter'){
+			event.preventDefault();
 		}
 	}
 </script>
@@ -28,14 +54,14 @@
 		<h3 class="text-center mt-4 text-surface-700 font-semibold text-xl">Login</h3>
 		<label for="email">
 			Email
-			<input class="input rounded-lg bg-white" name="email" type="email" bind:value={email} />
+			<input class="input rounded-lg bg-white" name="email" type="email" bind:value={email} on:keypress={handleInputEnter} />
 		</label>
 		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
 			<span>{validationErrors.email}</span>
 		</div>
 		<label for="password">
 			Password
-			<input class="input rounded-lg bg-white" name="password" type="password" bind:value={password} />
+			<input class="input rounded-lg bg-white" name="password" type="password" bind:value={password} on:keypress={handleInputEnter} />
 		</label>
 		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
 			<span>{validationErrors.password}</span>
@@ -49,7 +75,7 @@
 			</button>
 		</SignIn>
 		<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/register">Create one</a></p>
-		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
+		<div class="{display} text-sm px-2 rounded-lg variant-soft-error text-wrap">
 			<span>{$errorMessage}</span>
 		</div>
 	</form>
