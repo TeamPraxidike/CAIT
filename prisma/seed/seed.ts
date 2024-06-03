@@ -89,7 +89,9 @@ const main = async () => {
 		'perceptron',
 	];
 
-	const circuitTitles = ['Machine Learning for beginners'];
+	const circuitTitles = [
+		'Machine Learning for beginners'
+	];
 
 	const types = [
 		MaterialType.dataset,
