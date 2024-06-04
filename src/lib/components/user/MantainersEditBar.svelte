@@ -9,7 +9,7 @@
 	let userName: HTMLInputElement;
 	export let users: UserWithProfilePic[] = [];
 	export let additionalMaintainers: UserWithProfilePic[] = [];
-	let searchableUsers = users;
+	export let searchableUsers = users;
 	let display = 'hidden';
 	let uid = $page.data.session?.user.id || 0;
 	type UserWithProfilePic = User & { profilePicData: string };

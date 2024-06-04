@@ -34,6 +34,7 @@
 	type UserWithProfilePic = User & { profilePicData: string };
 	let maintainers: UserWithProfilePic[] = [];
 
+	let searchableUsers = data.users;
 	// learning objectives
 	let LOs: string[] = [];
 	$: LOs = LOs;
@@ -225,7 +226,7 @@
 					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
 				</div>
 				<div class="flex flex-col w-full">
-					<MantainersEditBar users={data.users} bind:additionalMaintainers={maintainers}/>
+					<MantainersEditBar bind:searchableUsers={searchableUsers} users={data.users} bind:additionalMaintainers={maintainers}/>
 					<div>
 
 						<label for="tags_input">Tags<span class="text-error-300">*</span>:</label>

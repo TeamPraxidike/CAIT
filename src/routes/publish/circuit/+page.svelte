@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Circuit, Meta } from '$lib';
+	import { Circuit, Meta, PublishReview } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -32,8 +32,9 @@
 	let tagInput = '';
 
 	let tagsDatabase = data.tags as PrismaTag[];
-	let users = data.users.users as UserWithProfilePic[];
+	let users = data.users as UserWithProfilePic[];
 
+	let searchableUsers = users;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 	let flavorOptions: TagOption[] = tagsDatabase.map(tag => {
@@ -158,10 +159,10 @@
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between gap-3 col-span-full">
 
-				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge}/>
+				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} adding="{true}"/>
 
 				<div class="flex flex-col w-full p-3">
-					<MantainersEditBar users={users}/>
+					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
 
 					<div class="flex flex-col gap-2">
 						<span>Tags<span class="text-error-300">*</span>:</span>
@@ -176,6 +177,12 @@
 					</div>
 				</div>
 			</div>
+		</Step>
+		<Step>
+			<svelte:fragment slot="header">Review</svelte:fragment>
+			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
+										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
+			/>
 		</Step>
 	</Stepper>
 
