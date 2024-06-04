@@ -8,7 +8,7 @@
 
 	let userName: HTMLInputElement;
 	export let users: UserWithProfilePic[] = [];
-	let additionalMaintainers: UserWithProfilePic[] = [];
+	export let additionalMaintainers: UserWithProfilePic[] = [];
 	let searchableUsers = users;
 	let display = 'hidden';
 	let uid = $page.data.session?.user.id || 0;
@@ -62,7 +62,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-2 w-full">
+<div class="flex flex-col gap-2 w-full p-3">
 	<span>Maintainers<span class="text-error-300">*</span>:</span>
 	<div class="flex flex-wrap my-2 gap-1 items-center w-full">
 		{#if $page.data.session?.user}

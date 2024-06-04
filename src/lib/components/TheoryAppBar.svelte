@@ -46,7 +46,6 @@
 </script>
 
 <div class="flex flex-col gap-2">
-    <p>Theory to application ratio</p>
     <div class="flex justify-center items-center ">
         <div class="bg-primary-500 flex-col items-center justify-center p-1 rounded-md border border-surface-600">
             <div class="flex justify-center text-xl text-surface-50">

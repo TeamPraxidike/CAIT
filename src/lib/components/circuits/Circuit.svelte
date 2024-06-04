@@ -501,6 +501,7 @@
 					data: { id: data.material.publication.id, label: data.material.publication.title, extensions : extensions},
 					position: { x: 100, y: 100 }
 				});
+
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
