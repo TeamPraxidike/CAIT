@@ -28,10 +28,10 @@
         })[] = data.saved;
 
     let postsPublication = data.user.posts.filter((x: any) => x.type !== PublicationType.Circuit);
-    let posts: Publication & {
+    let posts: (Publication & {
         tags: Tag[];
         usedInCourse: {course: string}[]
-    }[] = data.user.posts.filter((x: any) => x.type !== PublicationType.Circuit);
+    })[] = data.user.posts.filter((x: any) => x.type !== PublicationType.Circuit);
 
     let tabSet: number = 0;
 </script>
@@ -53,8 +53,7 @@
             </Tab>
             <svelte:fragment slot="panel">
                 {#if tabSet === 0}
-                    <div class="grid grid-cols-4 gap-4 mb-20
-               md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4">
+                    <div class="grid grid-cols-4 gap-4 mb-20">
                         {#if saved.length !== 0}
                             {#each saved as publication, i}
                                 <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
@@ -64,10 +63,9 @@
                         {/if}
                     </div>
                 {:else if tabSet === 1}
-                    <div class="grid grid-cols-4 gap-4 mb-20
-               md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4">
+                    <div class="grid grid-cols-4 gap-4 mb-20">
                         {#if postsPublication.length === 0}
-                            <p class="col-span-full text-center">So empty... There are no publications here</p>
+                            <p class="col-span-4 text-center">So empty... There are no publications here </p>
                         {:else}
                             {#each postsPublication as publication, i}
                                 <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
@@ -79,23 +77,23 @@
                 {/if}
             </svelte:fragment>
         </TabGroup>
-        {:else}
-            <div class="grid grid-cols-4 gap-4 mb-20
-                   md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4">
-                <h3 class="text-xl mt-8 text-surface-900 col-span-full text-center dark:text-surface-50">
-                    {user.firstName}'s Publications
-                </h3>
-                {#if postsPublication.length === 0}
-                    <p class="col-span-full text-center">So empty... There are no publications here</p>
-                {:else}
-                    {#each postsPublication as publication, i}
-                        <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
-                            <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
-                        </div>
-                    {/each}
-                {/if}
-            </div>
-        {/if}
+    {:else}
+        <div class="grid grid-cols-4 gap-4 mb-20
+               md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4">
+            <h3 class="text-xl mt-8 text-surface-900 col-span-full text-center dark:text-surface-50">
+                {user.firstName}'s Publications
+            </h3>
+            {#if postsPublication.length === 0}
+                <p class="col-span-full text-center">So empty... There are no publications here</p>
+            {:else}
+                {#each postsPublication as publication, i}
+                    <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
+                        <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
+                    </div>
+                {/each}
+            {/if}
+        </div>
+    {/if}
 </div>
 
 
