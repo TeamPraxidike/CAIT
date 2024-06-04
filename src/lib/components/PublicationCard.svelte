@@ -1,12 +1,12 @@
 <script lang="ts">
 
 
-	import { authStore, DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
+	import { DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
 
     import Icon from '@iconify/svelte';
     import { fly } from 'svelte/transition';
     import { createEventDispatcher, onMount } from 'svelte';
-    import type { Publication } from '@prisma/client';
+	import { type Publication, PublicationType } from '@prisma/client';
     import type { PopupSettings } from '@skeletonlabs/skeleton';
     import { page } from '$app/stores';
 	import {

@@ -161,7 +161,7 @@
 				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge}/>
 
 				<div class="flex flex-col w-full p-3">
-					<MantainersEditBar users={users} bind:additionalMaintainers={additionalMaintainers}/>
+					<MantainersEditBar users={users}/>
 
 					<div class="flex flex-col gap-2">
 						<span>Tags<span class="text-error-300">*</span>:</span>

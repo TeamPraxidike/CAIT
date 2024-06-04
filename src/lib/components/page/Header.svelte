@@ -26,34 +26,8 @@
     };
 
     let dropDown: boolean = false;
-    let loggedIn: boolean;
-    $: loggedIn = $authStore.user !== null;
 
     const toggleDropDown = () => dropDown = !dropDown;
-
-    // TODO: THIS WOULD ACTUALLY BE A CALL TO THE AUTH SERVICE. CURRENTLY IT'S A MOCK CALL TO THE API TO GET FDR
-    async function login(event: MouseEvent) {
-
-        fetch('/api/user/1').then(res => res.json()).then(data => {
-            const { user, profilePicData } = data;
-            authStore.setAuth(user, profilePicData.data, 'token');
-        }).catch(err => console.error(err));
-
-        // Find the closest form element
-        const form = (event.target as HTMLElement).closest('form');
-        if (!form) throw new Error('No form found');
-
-        const formData = new FormData(form);
-
-        try {
-            await fetch(form.action, {
-                method: form.method,
-                body: formData
-            });
-        } catch (error) {
-            console.error('Error submitting form', error);
-        }
-    }
 
 </script>
 
@@ -155,3 +129,4 @@
         {/if}
     </Grid>
 </header>
+

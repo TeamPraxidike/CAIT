@@ -12,12 +12,11 @@
     export let data:PageServerData;
     let searchWord: string = '';
     $: materials = data.materials;
-    $: fileData = data.fileData;
     $: circuits = data.circuits
 
     let users = data.users
     let tags = data.tags
-    let profilePics:FetchedFileArray = data.profilePics;
+    //let profilePics:FetchedFileArray = data.profilePics;
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
 
@@ -183,7 +182,6 @@
               // Handle the response data from the API
               if (s === "material") {
                   materials = data.materials;
-                  fileData = data.fileData;
               } else {
                   circuits = data;
               }
@@ -325,11 +323,11 @@
 
 {#if pageType === "materials"}
     {#each materials as material, i}
-        <PublicationCard extensions="{getExtensions(material)}" imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
+        <PublicationCard extensions="{getExtensions(material)}" imgSrc={'data:image;base64,' + material.coverPicData} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person, i}
-        <UserProp view="search" posts="{5}"  userPhotoUrl={'data:image;base64,' + profilePics[i].data} role="Maintainer" user={person} />
+        <UserProp view="search" posts="{5}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
     {/each}
 {:else if pageType === "circuits"}
     {#each circuits as circuit}
