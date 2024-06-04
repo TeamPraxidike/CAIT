@@ -260,7 +260,7 @@
 				<TheoryAppBar value="{theoryApplicationRatio}" editable="{false}" />
 			</div>
 			<p class="text-lg pl-3">Type: {selectedType.toUpperCase()}</p>
-			<p class="text-lg pl-3">Time Estimate: {estimate} minutes</p>
+			<p class="text-lg pl-3">Time Estimate: {#if estimate !== ''} {estimate} minutes {:else} No estimate provided {/if} </p>
 			<p class="text-lg pl-3">Copyright: {copyright}</p>
 			<div class="pl-3">
 				<FileTable bind:files={files} />

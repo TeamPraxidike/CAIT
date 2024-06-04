@@ -16,8 +16,15 @@
 </script>
 
 <div class="flex flex-col gap-2 pl-3">
-	<h2 class="text-2xl max-w-full break-words">Title: {title}</h2>
-	<p class="text-lg break-words max-w-full">Description: {description}</p>
+	<h2 class="text-2xl max-w-full break-words">Title: <br> {title}</h2>
+	<p class="text-lg break-words max-w-full">Description: <br> {description}</p>
+</div>
+
+<p class="text-lg pl-3">Tags: </p>
+<div class="flex flex-wrap gap-2 pl-3">
+	{#each tags as tag}
+		<Tag tagText="{tag}" removable="{false}" width="{12}" />
+	{/each}
 </div>
 
 <MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={prior} adding="{false}"/>
@@ -30,12 +37,6 @@
 	{/each}
 </div>
 
-<p class="text-lg pl-3">Tags: </p>
-<div class="flex flex-wrap gap-2 pl-3">
-	{#each tags as tag}
-		<Tag tagText="{tag}" removable="{false}" width="{12}" />
-	{/each}
-</div>
 
 
 
