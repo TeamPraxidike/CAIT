@@ -81,6 +81,7 @@ export type PublicationView = {
 			nodes: (PrismaNode & {
 				publication: Publication & {
 					tags: Tag[];
+					usedInCourse: { course: string }[];
 				};
 				prerequisites: Edge[];
 				next: Edge[];
