@@ -166,12 +166,12 @@
 
 					<div class="flex flex-col gap-2">
 						<span>Tags<span class="text-error-300">*</span>:</span>
-						<div class="text-token space-y-2">
+						<div class="text-token space-y-2 w-1/2">
 							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content.toLowerCase())}
 												 bind:input={tagInput} bind:value={addedTags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
-							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+							<div class="card max-h-48 p-4 overflow-y-auto" tabindex="-1">
 								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
-															on:selection={onInputChipSelect} />
+															on:selection={onInputChipSelect} emptyState="No Results Found. Press Enter to Create New Tag."/>
 							</div>
 						</div>
 					</div>
