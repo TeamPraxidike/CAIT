@@ -21,7 +21,8 @@
 
 	export let publication: Publication & {
         tags: { content: string }[],
-    };
+		usedInCourse: {course: string}[]
+		  };
 
     let popupName = publication.id.toString().concat(publication.title);
 
@@ -29,6 +30,7 @@
 	initializeStores();
 
     const modalStore = getModalStore();
+		console.log(publication)
 
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
@@ -36,7 +38,8 @@
     export let tags: string[] = publication.tags.map(tag => tag.content);
     export let imgSrc: string;
     export let markAsUsed: boolean = false;
-    export let courses: string[] = ["no courses found"]
+    export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
+
 		export let extensions: string[] = [];
     export let forArrow: boolean = false;
 

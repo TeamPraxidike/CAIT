@@ -7,25 +7,14 @@
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
     import type { Material, Publication, Tag, File as PrismaFile, Circuit } from '@prisma/client';
     import type { FetchedFileArray } from '$lib/database';
+    import { page } from '$app/stores';
 
     export let data:PageServerData;
     let searchWord: string = '';
-    let materials:(Material & {
-        publication: Publication & {
-            tags: Tag[];
-            usedInCourse: {course: string}[]
-        }
-        files: PrismaFile[]
-    })[] = data.materials;
-    let fileData:FetchedFileArray = data.fileData;
-    let circuits : (Circuit & {
-        coverPicData: string,
-        publication: Publication & {
-            tags: Tag[];
-            usedInCourse: {course: string}[]
-        }
-    })[] = data.circuits
-    console.log(circuits)
+    $: materials = data.materials;
+    $: fileData = data.fileData;
+    $: circuits = data.circuits
+
     let users = data.users
     let tags = data.tags
     let profilePics:FetchedFileArray = data.profilePics;
@@ -33,6 +22,8 @@
     let saved = data.saved.saved as number[];
 
     $: pageType = data.type;
+
+
 
     //Variables needed to deal with Sort and Difficulty
         let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
@@ -129,12 +120,13 @@
         resetFilters();
     };
 
-    const resetFilterButton = () => {
-        resetFilters();
-        sendFiltersToAPI();
-    };
+    // const resetFilterButton = () => {
+    //     resetFilters();
+    //     sendFiltersToAPI();
+    // };
 
     const resetFilters = () => {
+        console.log("In reset filters: " + pageType)
         selectedTags = [];
         selectedTypes = [];
         selectedPublishers = [];
@@ -163,12 +155,8 @@
     )
 
 
-
-
-
     const sendFiltersToAPI = async () => {
-        // Construct the URL with query parameters based on selected filters
-
+        console.log(pageType)
         applyActive = false;
         const queryParams = new URLSearchParams({
             publishers: selectedPublishers.map(x => x.id).join(','),
@@ -178,7 +166,11 @@
             sort: sortByText,
             q: searchWord
         });
-        const url = `/api/material?${queryParams.toString()}`;
+
+        const s = pageType === "materials" ? "material" : "circuit";
+        console.log(s)
+
+        const url = `/api/${s}?${queryParams.toString()}`;
 
         // Make a GET request to the API
         await fetch(url)
@@ -190,13 +182,19 @@
           })
           .then(data => {
               // Handle the response data from the API
-              materials = data.materials
-              fileData = data.fileData
+              if (s === "material") {
+                  materials = data.materials;
+                  fileData = data.fileData;
+              } else {
+                  circuits = data;
+              }
           })
           .catch(error => {
               console.error('There was a problem with the fetch operation:', error);
           });
     };
+
+
 
 
     let applyActive = false;
@@ -209,7 +207,7 @@
 
     <div class="hidden rounded-lg lg:flex w-1/4">
         <ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-                         labels={["Materials", "People", "Circuits"]} on:reset={resetAll} />
+                         labels={["Materials", "People", "Circuits"]}  />
     </div>
 </div>
 
@@ -257,7 +255,7 @@
 
     <div class="flex rounded-lg lg:hidden w-1/4">
         <ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-                         labels={["Materials", "People", "Circuits"]} on:reset={resetAll} />
+                         labels={["Materials", "People", "Circuits"]}  />
     </div>
 </div>
 
@@ -320,7 +318,7 @@
 
     {#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
         <button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
-                on:click={resetFilterButton}>
+                on:click={resetFilters}>
             Reset Filters
         </button>
     {/if}
@@ -328,7 +326,7 @@
 
 {#if pageType === "materials"}
     {#each materials as material, i}
-        <PublicationCard extensions="{getExtensions(material)}" imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)} courses={material.publication.usedInCourse.map(x  => x.course)}/>
+        <PublicationCard extensions="{getExtensions(material)}" imgSrc={'data:image;base64,' + fileData[i].data} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
     {/each}
 {:else if pageType === "people"}
     {#each users as person, i}

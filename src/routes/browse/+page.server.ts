@@ -1,11 +1,7 @@
 export async function load({ url, fetch, cookies }) {
 	const userId = cookies.get('userId');
 	const type = url.searchParams.get('type') || 'materials';
-
-	const mtest = await (await fetch(`/api/material`)).json();
-	console.log(mtest);
-	console.log('Stop');
-
+	console.log('Me here');
 	const { materials, fileData } =
 		type === 'materials'
 			? await (await fetch(`/api/material`)).json()
