@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
+	import { DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -157,6 +157,7 @@
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
+				formData.append('type', selectedType);
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
@@ -172,6 +173,7 @@
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files</svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
+			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]}/>
 			<FileTable operation="edit" bind:files={files} />
 		</Step>
 		<Step locked={locks[1]}>
