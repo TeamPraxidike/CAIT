@@ -134,7 +134,7 @@ export async function getAllMaterials(
 					},
 				},
 			},
-			files: false,
+			files: true,
 		},
 	});
 }

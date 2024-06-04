@@ -26,6 +26,7 @@
 
 	const dispatch = createEventDispatcher();
 	const resetAll = (i: number) => {
+
 		if(!page)
 			pageType = labels[i]
 		dispatch('reset', {option: i});

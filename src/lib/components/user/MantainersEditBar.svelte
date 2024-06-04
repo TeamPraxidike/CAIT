@@ -73,24 +73,24 @@
 
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
-					  role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
+								role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
 		{/each}
 
 		<button on:click={()=>{display='flex'}} type="button" name="add_maintainer" inputmode="decimal"
-				class="rounded-lg hover:bg-opacity-85 text-center">
+						class="rounded-lg hover:bg-opacity-85 text-center">
 			<Icon icon="mdi:plus-circle" width="32" height="32"
-				  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
+						class="bg-surface-0 text-surface-800 hover:text-surface-600" />
 		</button>
 
 		<div transition:fly={{ x: -8, duration: 300 }} use:clickOutside
-			 class="{display} flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700">
+				 class="{display} flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700">
 			<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user"
-				   class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm" />
+						 class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm" />
 			{#each searchableUsers as user}
 				{#if user.id !== uid}
 					<button type="button"
-							class="dark:hover:text-surface-600  hover:bg-primary-100 text-start p-0.5 px-3"
-							on:click={()=>{addMaintainer(user)}}>
+									class="dark:hover:text-surface-600  hover:bg-primary-100 text-start p-0.5 px-3"
+									on:click={()=>{addMaintainer(user)}}>
 						{user.firstName} {user.lastName}
 					</button>
 				{/if}

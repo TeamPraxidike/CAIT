@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
+	import { DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -47,6 +47,8 @@
 	let estimate: string = '';
 	let copyright: string = '';
 	let theoryApplicationRatio = 0.5;
+	let selectedType = "Select Type";
+	let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
 
 	// cover
 	let coverPic: File | undefined = undefined;
@@ -112,7 +114,7 @@
 	const locks: boolean[] = [true, true, true];
 
 	$: locks[0] = files ? files.length === 0 : true;
-	$: locks[1] = title.length < 2 || description.length < 10;
+	$: locks[1] = title.length < 2 || description.length < 10 || selectedType === "Select Type";
 	$: locks[2] = tags.length < 2;
 
 
@@ -120,7 +122,7 @@
 
 	$: if (form?.status === 200) {
 		toastStore.trigger({
-			message: 'Publication Edited successfully',
+			message: 'Publication Added successfully',
 			background: 'bg-success-200'
 		});
 		goto(`/${$page.data.session?.user.id}/${form?.id}`);
@@ -135,7 +137,6 @@
 			background: 'bg-error-200'
 		});
 	}
-	console.log("hello 2")
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -156,6 +157,7 @@
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
+				formData.append('type', selectedType);
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
@@ -171,6 +173,7 @@
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files</svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
+			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]}/>
 			<FileTable operation="edit" bind:files={files} />
 		</Step>
 		<Step locked={locks[1]}>
@@ -216,6 +219,7 @@
 				<div class="flex flex-col w-full">
 					<MantainersEditBar users={data.users}/>
 					<div>
+
 						<label for="tags_input">Tags:</label>
 						<div class="text-token space-y-2">
 							<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
@@ -225,8 +229,12 @@
 											  on:selection={onInputChipSelect} />
 							</div>
 						</div>
+
 					</div>
+
+
 				</div>
+
 			</div>
 		</Step>
 		<Step>

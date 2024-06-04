@@ -4,7 +4,7 @@
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
 	import {
-	 	Autocomplete,
+		Autocomplete,
 		type AutocompleteOption,
 		getToastStore,
 		InputChip,
@@ -26,13 +26,13 @@
 	let description = '';
 	let addedTags: string[] = [];
 	let newTags: string[] = [];
-	let additionalMaintainers: User[] = [];
+	let additionalMaintainers: UserWithProfilePic[] = [];
 
 	let inputChip: InputChip;
 	let tagInput = '';
 
 	let tagsDatabase = data.tags as PrismaTag[];
-	let users = data.users as UserWithProfilePic[];
+	let users = data.users.users as UserWithProfilePic[];
 
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
@@ -105,9 +105,10 @@
 			background: 'bg-error-200'
 		});
 	}
-	const onNextHandler = (event:CustomEvent) =>{
-		if(event.detail.step === 0){
-			let {nodeDiffActions, coverPic} = circuitRef.publishCircuit();
+	const onNextHandler = async (event: CustomEvent) => {
+		if (event.detail.step === 0) {
+			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
+
 			nodeActions = nodeDiffActions;
 			circuitCoverPic = coverPic;
 		}
@@ -127,9 +128,10 @@
         formData.append('difficulty', 'easy');
         formData.append('selectedTags', JSON.stringify(addedTags));
 				formData.append('newTags', JSON.stringify(newTags))
-        formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
+        formData.append('additionalMaintainers', JSON.stringify([...additionalMaintainers.map(m => m.id), uid]));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
+				console.log(nodeActions);
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>

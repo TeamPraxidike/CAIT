@@ -9,9 +9,25 @@
 	import nodeHtmlLabel from 'cytoscape-node-html-label';
 	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
 	import { PublicationCard } from '$lib';
+	import html2canvas from 'html2canvas';
 
+	async function captureScreenshot () : Promise<string> {
+		const container = document.getElementById('cy');
+		try{
+			if (container) {
+				const result = await html2canvas(container)
+				const imgData = result.toDataURL('image/png');
+				return imgData.split(",")[1];
+			}
+			return ''
+		}
+		catch(error)  {
+				console.error('Error capturing screenshot:', error);
+				return ""
+			}
+	}
 
-	function getFileExtension(filePath: string): string {
+	const getFileExtension = (filePath: string): string =>  {
 		const index = filePath.lastIndexOf('.');
 		return index !== -1 ? filePath.substring(index + 1) : '';
 	}
@@ -55,7 +71,8 @@
 
 	export let nodes: (PrismaNode & {
 		publication: Publication & {
-			tags: { content: string }[]
+			tags: { content: string }[],
+			usedInCourse: { course: string }[],
 		}
 		next: {
 			circuitId: number,
@@ -531,33 +548,37 @@
 		}
 	};
 
-	export const publishCircuit = () => {
+	export const publishCircuit = async () => {
 
-	 	let nodeDiffActions: NodeDiffActions;
+		let nodeDiffActions: NodeDiffActions;
 
 		const add: ({ publicationId: number; x: number; y: number }[]) = [];
 		const del: ({ publicationId: number }[]) = [];
 		const edit: ({ publicationId: number; x: number; y: number }[]) = [];
 		const next: { fromId: number; toId: number[] }[] = [];
-	//
-	 	cy.nodes().forEach((node: any) => {
+		//
+		cy.nodes().forEach((node: any) => {
 			add.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
 			del.push(({ publicationId: Number(node.id()) }));
 			edit.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
 			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => Number(edge.target().id()));
 			next.push(({ fromId: Number(node.id()), toId: toID }));
-	 	})
+		})
 		nodeDiffActions = { add: add, delete: del, edit: edit, next: next };
 
-		cy.fit();
+		// cy.fit();
+		// addHtmlLabel("node", false)
 		// generate a png, could also use cy.jpg
 		// base64uri by default, using base64 for now
-		const cover = cy.png({output: 'base64'});
+		//const cover = cy.png({output: 'base64'});
+		const cover = await captureScreenshot()
+		console.log("COVER")
+		console.log(cover)
 		const coverPic = {
 			type: 'image/png',
 			info: cover
 		}
-		return {nodeDiffActions, coverPic};
+		return { nodeDiffActions, coverPic };
 
 	}
 

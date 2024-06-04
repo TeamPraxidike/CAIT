@@ -1,5 +1,6 @@
 import {
 	createMaterialPublication,
+	type FetchedFileArray,
 	type FileDiffActions,
 	getAllMaterials,
 	handleConnections,
