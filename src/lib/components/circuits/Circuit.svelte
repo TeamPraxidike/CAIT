@@ -71,7 +71,8 @@
 
 	export let nodes: (PrismaNode & {
 		publication: Publication & {
-			tags: { content: string }[]
+			tags: { content: string }[],
+			usedInCourse: { course: string }[],
 		}
 		next: {
 			circuitId: number,
