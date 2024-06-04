@@ -39,10 +39,10 @@
 
 <UserProfileBar user={user} userPhotoUrl={'data:image;base64,' + profilePic.data}/>
 
-<div class="grid grid-cols-3 gap-4 mb-20
+<div class="grid col-span-full gap-4 mb-20
             md:col-span-8 lg:col-span-12 xl:col-span-8">
     {#if saved.length !== 0}
-        <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
+        <h3 class="text-xl mt-8 text-surface-900 col-span-6 text-center dark:text-surface-50">
             Saved Publications
         </h3>
 
@@ -52,20 +52,19 @@
     {/if}
 
     {#if $page.data.session?.user.id === user.id}
-        <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
+        <h3 class="text-xl mt-8 text-surface-900 col-span-6 text-center dark:text-surface-50">
             Your Publications
         </h3>
     {:else}
-        <h3 class="text-xl mt-8 text-surface-900 col-span-3 text-center dark:text-surface-50">
+        <h3 class="text-xl mt-8 text-surface-900 col-span-6 text-center dark:text-surface-50">
             {user.firstName}'s Publications
         </h3>
     {/if}
 
     {#if postsPublication.length === 0}
-        <p>So empty... There are no publications here</p>
+        <p class="col-span-6 text-center">So empty... There are no publications here</p>
     {:else}
         {#each postsPublication as publication, i}
-            <p></p>
             <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
         {/each}
     {/if}
