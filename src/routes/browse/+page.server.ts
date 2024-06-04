@@ -1,6 +1,28 @@
-export async function load({ url, fetch, cookies }) {
-	const userId = cookies.get('userId');
+import type { FetchedFileArray } from '$lib/database';
+
+export async function load({ url, fetch, locals }) {
+	const session = await locals.auth();
+
 	const type = url.searchParams.get('type') || 'materials';
+
+	// get all the materials
+	const { materials } = await (await fetch(`/api/material`)).json();
+	const { users } = await (await fetch(`/api/user`)).json();
+
+	let liked: number[] = [];
+	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
+		saved: [],
+		savedFileData: [],
+	};
+	let tags: { content: string }[] = [];
+
+	if (session !== null) {
+		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
+		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
+
+		const savedResponse = await fetch(
+			`/api/user/${session.user.id}/saved?fullPublications=false`,
+		);
 	console.log('Me here');
 	const { materials, fileData } =
 		type === 'materials'
@@ -13,17 +35,18 @@ export async function load({ url, fetch, cookies }) {
 	const { users, profilePics } = await (await fetch(`/api/user`)).json();
 	const tags = await (await fetch(`/api/tags`)).json();
 
-	const likedResponse = await fetch(`/api/user/${userId}/liked`);
-	const liked =
-		likedResponse.status === 200 ? await likedResponse.json() : [];
+		// dont ask for some reason it doesnt work if I do await savedResponse.json()
+		if (savedResponse.status) {
+			const responseBody = await savedResponse.text();
+			saved = responseBody
+				? JSON.parse(responseBody)
+				: { saved: [], savedFileData: [] };
+		} else {
+			saved = { saved: [], savedFileData: [] };
+		}
 
-	const savedResponse = await fetch(
-		`/api/user/${userId}/saved?fullPublications=false`,
-	);
-	const saved =
-		savedResponse.status === 200
-			? await savedResponse.json()
-			: { saved: [] };
+		tags = await (await fetch(`/api/tags`)).json();
+	}
 
 	return {
 		type,

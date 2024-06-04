@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
+	import { DifficultySelection, FileTable, Meta, TheoryAppBar } from '$lib';
 	import {
 		Autocomplete,
 		type AutocompleteOption, FileButton,
@@ -14,6 +14,7 @@
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 
@@ -27,7 +28,6 @@
 	let inputChip: InputChip;
 	let tagInput = '';
 	let newTags: string[] = [];
-
 
 	let files: FileList = [] as unknown as FileList;
 	type UserWithProfilePic = User & { profilePicData: string };
@@ -65,7 +65,7 @@
 		}
 	}
 
-	$: uid = $authStore.user?.id;
+	$: uid = $page.data.session?.user.id;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 	let flavorOptions: TagOption[] = allTags.map(tag => {
@@ -125,7 +125,7 @@
 			message: 'Publication Added successfully',
 			background: 'bg-success-200'
 		});
-		goto(`/${$authStore.user?.id}/${form?.id}`);
+		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -156,7 +156,6 @@
 
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
-				formData.append('type', selectedType);
         formData.append('description', description);
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
@@ -180,8 +179,6 @@
 			<div class="flex flex-col gap-2">
 				<input type="text" name="title" placeholder="Title" bind:value={title}
 					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
-				<Filter label="Types" selected={[]} bind:all="{allTypes}" bind:display="{allTypes}"
-								profilePic="{false}" active="{false}" oneAllowed="{true}" bind:selectedOption="{selectedType}"/>
 				<textarea name="description" placeholder="Description..." bind:value={description}
 						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>
@@ -218,7 +215,7 @@
 					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}/>
 				</div>
 				<div class="flex flex-col w-full">
-					<MantainersEditBar users={data.users} bind:additionalMaintainers={maintainers}/>
+					<MantainersEditBar users={data.users}/>
 					<div>
 
 						<label for="tags_input">Tags:</label>

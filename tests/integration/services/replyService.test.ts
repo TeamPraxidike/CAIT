@@ -22,7 +22,8 @@ describe('Reply CRUD', () => {
 		user = await createUser({
 			firstName: 'Marti232',
 			lastName: 'Parti232323',
-			email: 'email@gmail',
+			email: 'email@gmail' + Math.random(),
+			password: 'password',
 		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication1',

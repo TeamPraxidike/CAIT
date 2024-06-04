@@ -24,7 +24,7 @@ describe('Filter Component', () => {
 					prerequisites: ['p'],
 					createdAt: new Date(),
 					updatedAt: new Date(),
-					publisherId: 3,
+					publisherId: 'hello',
 					reports: 2,
 					type: 'Material',
 					tags: [{ content: 'tag1' }],

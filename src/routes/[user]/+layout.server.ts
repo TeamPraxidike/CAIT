@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 
 /**
  * User is the slug in the parameter.
@@ -7,8 +7,10 @@ import { error } from '@sveltejs/kit';
  * It could be a user id which is bad for SEO or a slug from their name which is much preferable!
  * Examples of slugs: 'john-doe', 'jane-doe', 'jane-smith'
  */
-export const load: LayoutServerLoad = async ({ params, fetch }) => {
-	// {fetch, params}
+export const load: LayoutServerLoad = async ({ params, fetch, locals }) => {
+	const session = await locals.auth();
+	if (!session) throw redirect(303, '/signin');
+
 	const uRes = await fetch(`/api/user/${params.user}`);
 
 	if (uRes.status !== 200) {

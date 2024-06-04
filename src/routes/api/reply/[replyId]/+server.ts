@@ -4,8 +4,12 @@ import {
 	getReply,
 	updateReply,
 } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const { replyId } = params;
 	try {
 		const reply = await getReply(parseInt(replyId));
@@ -32,7 +36,10 @@ export async function DELETE({ params }) {
 	}
 }
 
-export async function PUT({ params, request }) {
+export async function PUT({ params, request, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	try {
 		const body = await request.json();
 		const replyData: editReplyData = {

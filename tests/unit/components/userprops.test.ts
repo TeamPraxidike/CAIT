@@ -14,14 +14,18 @@ storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 describe('User Components', () => {
 	let host: HTMLDivElement;
 	const user = {
-		id: 1,
+		id: 'aaaaaaaaaa',
 		firstName: 'Ivan',
 		lastName: 'Guenov',
 		email: 'kitajski@gmail.com',
 		username: 'ivanguenov',
-		profilePic: '',
+		// profilePic: '',
+		password: 'password',
 		reputation: 5,
 		isAdmin: false,
+		emailVerified: null,
+		createdAt: new Date(2),
+		updatedAt: new Date(2),
 	};
 
 	beforeEach(() => {

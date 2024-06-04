@@ -1,8 +1,4 @@
-import {
-	getPublicationById,
-	//createCircuitPublication,
-	//createMaterialPublication,
-} from './db';
+import { getPublicationById } from './db';
 
 import {
 	getMaterialByPublicationId,
@@ -98,7 +94,7 @@ import path from 'path';
  * It is used in the `MaterialForm.svelte` component and on the server side on the POST request to `/api/materials`.
  */
 type MaterialForm = {
-	userId: number;
+	userId: string;
 	metaData: {
 		title: string;
 		description: string;
@@ -110,25 +106,19 @@ type MaterialForm = {
 		timeEstimate: number;
 		theoryPractice: number;
 		tags: string[];
-		maintainers: number[];
+		maintainers: string[];
 	};
 	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;
 };
 
-type CircuitForm = {
-	userId: number;
+type UserCreateForm = {
 	metaData: {
-		title: string;
-		description: string;
-		difficulty: Difficulty;
-		learningObjectives: string[];
-		prerequisites: string[];
-		tags: string[];
-		maintainers: number[];
+		firstName: string;
+		lastName: string;
+		email: string;
+		password: string;
 	};
-	coverPic: { type: string; info: string } | null;
-	nodeDiff: NodeDiffActions;
 };
 
 type UserForm = {
@@ -138,6 +128,21 @@ type UserForm = {
 		email: string;
 	};
 	profilePic: { type: string; info: string } | null;
+};
+
+type CircuitForm = {
+	userId: string;
+	metaData: {
+		title: string;
+		description: string;
+		difficulty: Difficulty;
+		learningObjectives: string[];
+		prerequisites: string[];
+		tags: string[];
+		maintainers: string[];
+	};
+	coverPic: { type: string; info: string } | null;
+	nodeDiff: NodeDiffActions;
 };
 
 /**
@@ -254,4 +259,5 @@ export type {
 	createCommentData,
 	editCommentData,
 	editReplyData,
+	UserCreateForm,
 };

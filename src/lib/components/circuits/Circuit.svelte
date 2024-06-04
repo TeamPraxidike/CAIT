@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
-	import type { FetchedFileArray, NodeDiffActions } from '$lib/database';
+	import type {  NodeDiffActions } from '$lib/database';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { Node as PrismaNode, Publication } from '@prisma/client';
@@ -455,7 +455,6 @@
 
 	let addActive: boolean = false;
 	let displayedMaterials: any = [];
-	let fileData : FetchedFileArray = []
 	let pubIds: Set<number> = new Set();
 
 	/**
@@ -473,7 +472,6 @@
 			.then(data => {
 				// Handle the response data from the API
 				displayedMaterials = data.materials;
-				fileData = data.fileData
 				addActive = true;
 			})
 			.catch(error => {
@@ -655,7 +653,6 @@
 {#if addActive}
 	<div>
 		<SearchElems bind:addActive={addActive} bind:selectedIds={pubIds} bind:materials={displayedMaterials}
-								 bind:fileData={fileData}
 								 on:selFurther={addNode} on:remFurther={removeNode} />
 	</div>
 {/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { lorem, Meta, Section } from '$lib';
+    import {lorem, Meta, Section} from "$lib";
 </script>
 
 <Meta title="Home" description="CAIT" type="site"/>

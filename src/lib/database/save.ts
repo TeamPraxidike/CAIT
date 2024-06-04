@@ -1,4 +1,4 @@
-import {prisma} from "$lib/database/prisma";
+import { prisma } from '$lib/database/prisma';
 
 /**
  * Saves a publication for a user or unsaves it if it is already saved.
@@ -6,17 +6,17 @@ import {prisma} from "$lib/database/prisma";
  * @param userId
  * @param publicationId
  */
-export async function savePublication(userId: number, publicationId: number) {
-    const saved = await getSavedPublications(userId);
-    if (saved === null) throw Error("Saved publications were not found");
-    if(saved.saved.map(x => x.id).includes(publicationId)) {
-        await unsave(userId, publicationId);
-        return "Publication unsaved successfully";
-        // return liked.liked
-    } else {
-        await save(userId, publicationId);
-        return "Publication saved successfully"
-    }
+export async function savePublication(userId: string, publicationId: number) {
+	const saved = await getSavedPublications(userId);
+	if (saved === null) throw Error('Saved publications were not found');
+	if (saved.saved.map((x) => x.id).includes(publicationId)) {
+		await unsave(userId, publicationId);
+		return 'Publication unsaved successfully';
+		// return liked.liked
+	} else {
+		await save(userId, publicationId);
+		return 'Publication saved successfully';
+	}
 }
 
 /**
@@ -24,21 +24,21 @@ export async function savePublication(userId: number, publicationId: number) {
  * @param userId
  * @param publicationId
  */
-async function save(userId: number, publicationId: number) {
-    await prisma.$transaction(async (prismaTransaction) => {
-        await prismaTransaction.user.update({
-            where: {
-                id: userId
-            },
-            data: {
-                saved: {
-                    connect: {
-                        id: publicationId
-                    }
-                }
-            }
-        });
-    });
+async function save(userId: string, publicationId: number) {
+	await prisma.$transaction(async (prismaTransaction) => {
+		await prismaTransaction.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				saved: {
+					connect: {
+						id: publicationId,
+					},
+				},
+			},
+		});
+	});
 }
 
 /**
@@ -46,59 +46,62 @@ async function save(userId: number, publicationId: number) {
  * @param userId
  * @param publicationId
  */
-async function unsave(userId: number, publicationId: number) {
-    await prisma.$transaction(async (prismaTransaction) => {
-        await prismaTransaction.user.update({
-            where: {
-                id: userId
-            },
-            data: {
-                saved: {
-                    disconnect: {
-                        id: publicationId
-                    }
-                }
-            }
-        });
-    });
+async function unsave(userId: string, publicationId: number) {
+	await prisma.$transaction(async (prismaTransaction) => {
+		await prismaTransaction.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				saved: {
+					disconnect: {
+						id: publicationId,
+					},
+				},
+			},
+		});
+	});
 }
 
-export async function getSavedPublications(userId: number) {
-    return prisma.user.findUnique({
-        where: {
-            id: userId
-        },
-        select: {
-            saved: {
-                include: {
-                    tags: true,
-                    materials: true,
-                    coverPic: true,
-                    usedInCourse: {
-                        select: {
-                            course: true,
-                        },
-                    },
-                },
-            },
-        },
-    });
+export async function getSavedPublications(userId: string) {
+	return prisma.user.findUnique({
+		where: {
+			id: userId,
+		},
+		select: {
+			saved: {
+				include: {
+					tags: true,
+					materials: true,
+					coverPic: true,
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+					},
+				},
+			},
+		},
+	});
 }
 
-export async function isPublicationSaved(userId: number, publicationId: number) {
-    const saved = await prisma.user.findUnique({
-        where: {
-            id: userId
-        },
-        select: {
-            saved: {
-                where: {
-                    id: publicationId
-                }
-            }
-        }
-    });
+export async function isPublicationSaved(
+	userId: string,
+	publicationId: number,
+) {
+	const saved = await prisma.user.findUnique({
+		where: {
+			id: userId,
+		},
+		select: {
+			saved: {
+				where: {
+					id: publicationId,
+				},
+			},
+		},
+	});
 
-    if(saved === null) return false;
-    return saved.saved.length > 0;
+	if (saved === null) return false;
+	return saved.saved.length > 0;
 }

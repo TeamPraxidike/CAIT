@@ -1,38 +1,65 @@
-import {getPublicationById, getUserById, likePublication} from "$lib/database";
-import {isPublicationLiked} from "$lib/database/user";
+import {
+	getPublicationById,
+	getUserById,
+	likePublication,
+} from '$lib/database';
+import { isPublicationLiked } from '$lib/database/user';
+import { verifyAuth } from '$lib/database/auth';
 
 /**
  * Likes a publication
  * @param params
  */
-export async function POST({params}) {
-    const {id, publicationId} = params;
-    const user = await getUserById(parseInt(id));
-    if(!user) return new Response(JSON.stringify({error: 'User not found'}), {status: 404});
+export async function POST({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
-    const publication = await getPublicationById(parseInt(publicationId));
-    if(!publication) return new Response(JSON.stringify({error: 'Publication not found'}), {status: 404});
+	const { id, publicationId } = params;
+	const user = await getUserById(id);
+	if (!user)
+		return new Response(JSON.stringify({ error: 'User not found' }), {
+			status: 404,
+		});
 
-    try {
-        const response = await likePublication(parseInt(id), parseInt(publicationId));
-        return new Response(JSON.stringify({message: response}), {status: 200});
-    } catch (error) {
-        return new Response(JSON.stringify({error}), {status: 500});
-    }
+	const publication = await getPublicationById(parseInt(publicationId));
+	if (!publication)
+		return new Response(
+			JSON.stringify({ error: 'Publication not found' }),
+			{ status: 404 },
+		);
+
+	try {
+		const response = await likePublication(id, parseInt(publicationId));
+		return new Response(JSON.stringify({ message: response }), {
+			status: 200,
+		});
+	} catch (error) {
+		return new Response(JSON.stringify({ error }), { status: 500 });
+	}
 }
 
-export async function GET({params}) {
-    const {id, publicationId} = params;
-    const user = await getUserById(parseInt(id));
-    if(!user) return new Response(JSON.stringify({error: 'User not found'}), {status: 404});
+export async function GET({ params, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
-    const publication = await getPublicationById(parseInt(publicationId));
-    if(!publication) return new Response(JSON.stringify({error: 'Publication not found'}), {status: 404});
+	const { id, publicationId } = params;
+	const user = await getUserById(id);
+	if (!user)
+		return new Response(JSON.stringify({ error: 'User not found' }), {
+			status: 404,
+		});
 
-    try {
-        const response = await isPublicationLiked(parseInt(id), parseInt(publicationId));
-        return new Response(JSON.stringify(response), {status: 200});
-    } catch (error) {
-        return new Response(JSON.stringify({error}), {status: 500});
-    }
+	const publication = await getPublicationById(parseInt(publicationId));
+	if (!publication)
+		return new Response(
+			JSON.stringify({ error: 'Publication not found' }),
+			{ status: 404 },
+		);
+
+	try {
+		const response = await isPublicationLiked(id, parseInt(publicationId));
+		return new Response(JSON.stringify(response), { status: 200 });
+	} catch (error) {
+		return new Response(JSON.stringify({ error }), { status: 500 });
+	}
 }

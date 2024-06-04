@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {User} from "@prisma/client";
-    import {authStore} from "$lib";
+    import { page } from '$app/stores';
 
     export let user:User;
     export let userPhotoUrl: string;
@@ -10,7 +10,7 @@
     /**
      * Check if the current user is the same as the user being viewed.
      */
-    const currentlyAuth = () => $authStore.user?.id === user.id;
+    const currentlyAuth = () => $page.data.session?.user.id === user.id;
 </script>
 
 <div class="col-span-4 flex flex-col items-center gap-2 text-surface-800 rounded-b-lg pb-4 border border-surface-300 border-t-0 self-start

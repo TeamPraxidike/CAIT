@@ -2,7 +2,8 @@ import type { Actions, PageServerLoad } from './$types';
 import type { MaterialForm } from '$lib/database';
 import { MaterialType, type Tag } from '@prisma/client';
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, parent }) => {
+	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
 	return { tags, users };
@@ -78,6 +79,9 @@ export const actions = {
 			};
 		}
 
+		const userId = data.get('userId')?.toString();
+		if (userId === undefined) throw new Error('User id is undefined');
+
 		const newTags = data.getAll('newTags') || '';
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
@@ -94,7 +98,7 @@ export const actions = {
 		}
 
 		const material: MaterialForm = {
-			userId: Number(data.get('userId')?.toString()),
+			userId,
 			metaData: {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',

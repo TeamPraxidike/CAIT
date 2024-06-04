@@ -6,7 +6,7 @@ export type editCommentData = {
 };
 
 export type createCommentData = {
-	userId: number;
+	userId: string;
 	publicationId: number;
 	content: string;
 };

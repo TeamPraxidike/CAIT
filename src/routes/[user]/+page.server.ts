@@ -1,6 +1,17 @@
 import type { PageServerLoad } from './$types';
+import { redirect } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params, fetch , cookies}) => {
+export const load: PageServerLoad = async ({
+	params,
+	fetch,
+	parent,
+	locals,
+}) => {
+	await parent();
+
+	const session = await locals.auth();
+	if (!session) throw redirect(303, '/signin');
+
 	const materialsRes = await fetch(`/api/material?publishers=${params.user}`);
 
 	if (materialsRes.status !== 200) {
@@ -10,38 +21,46 @@ export const load: PageServerLoad = async ({ params, fetch , cookies}) => {
 		};
 	}
 
-	const savedRes = await fetch(`/api/user/${params.user}/saved?fullPublications=true`);
+	const savedRes = await fetch(
+		`/api/user/${params.user}/saved?fullPublications=true`,
+	);
 
 	if (![200, 204].includes(savedRes.status)) {
 		throw new Error('Failed to fetch saved materials');
 	}
 
-	const likedResponse = await fetch(`/api/user/${cookies.get("userId")}/liked`);
-	const liked = likedResponse.status === 200 ? await likedResponse.json() : [];
+	const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
+	const liked =
+		likedResponse.status === 200 ? await likedResponse.json() : [];
 
-	const usedResponse = await fetch(`/api/user/${cookies.get("userId")}/use-in-course`);
+	const usedResponse = await fetch(
+		`/api/user/${session.user.id}/use-in-course`,
+	);
 	const used = usedResponse.status === 200 ? await usedResponse.json() : [];
 
-	const {saved, savedFileData} = savedRes.status === 204 ? {saved: [], savedFileData: []} : await savedRes.json();
-	const { materials, fileData } = await materialsRes.json();
+	const { saved, savedFileData } =
+		savedRes.status === 204
+			? { saved: [], savedFileData: [] }
+			: await savedRes.json();
+	const { materials } = await materialsRes.json();
 
-	return { materials, fileData, saved, savedFileData, liked, used }
+	return { materials, saved, savedFileData, liked, used };
 };
 
 export type PublicationInfo = {
 	publication: {
 		tags: {
-			content: string
-		}[]
-	},
+			content: string;
+		}[];
+	};
 	coverPic: {
-		path: string,
-		title: string,
-		type: string,
-		coverId: number | null,
-		materialId: number | null
-	} | null,
+		path: string;
+		title: string;
+		type: string;
+		coverId: number | null;
+		materialId: number | null;
+	} | null;
 	usedInCourse: {
-		course: string
-	}[]
-}
+		course: string;
+	}[];
+};

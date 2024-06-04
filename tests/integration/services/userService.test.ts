@@ -22,7 +22,8 @@ describe('Creating users', () => {
 		const user = await createUser({
 			firstName: 'Vasko',
 			lastName: 'Prasko',
-			email: 'email@gmail',
+			email: 'email@gmailfdnfsdghgfd',
+			password: 'password',
 		});
 		expect(await getUserById(user.id)).toHaveProperty(
 			'username',
@@ -33,7 +34,8 @@ describe('Creating users', () => {
 			const newUser = await createUser({
 				firstName: 'Vasko',
 				lastName: 'Prasko',
-				email: 'email@gmail',
+				email: 'email@gmailadsgfahr' + i,
+				password: 'password',
 			});
 			expect(await getUserById(newUser.id)).toHaveProperty(
 				'username',
@@ -48,7 +50,8 @@ describe('Editing users', () => {
 		const user = await createUser({
 			firstName: 'Marti',
 			lastName: 'Parti',
-			email: 'email@gmail',
+			email: 'email@gmailsdfgsdfgsdfg',
+			password: 'password',
 		});
 
 		await editUser({
@@ -76,7 +79,8 @@ describe('Liking publications', () => {
 		user = await createUser({
 			firstName: 'Marti21e1423213',
 			lastName: 'Parti',
-			email: 'email@gmail',
+			email: 'email@gmailasdjryukryuk5' + Math.random(),
+			password: 'password',
 		});
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',

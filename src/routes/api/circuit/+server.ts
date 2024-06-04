@@ -10,10 +10,11 @@ import {
 	prisma,
 	updateCircuitCoverPic,
 } from '$lib/database';
+import { verifyAuth } from '$lib/database/auth';
 
-export async function GET() {
-	// Authentication step
-	// return 401 if user not authenticated
+export async function GET({ locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
 	try {
 		let circuits = await getAllCircuits();
@@ -41,10 +42,9 @@ export async function GET() {
  * @param request
  * @param params
  */
-export async function POST({ request }) {
-	// Authentication step
-	// return 401 if user not authenticated
-	// TODO: Add 400 Bad request check
+export async function POST({ request, locals }) {
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
 	const body: CircuitForm = await request.json();
 	const tags = body.metaData.tags;
@@ -62,6 +62,7 @@ export async function POST({ request }) {
 					metaData,
 					prismaTransaction,
 				);
+				console.log('AAAAAAAAAAAAAAAAA');
 
 				await handleConnections(
 					tags,
@@ -69,6 +70,8 @@ export async function POST({ request }) {
 					circuit.publicationId,
 					prismaTransaction,
 				);
+
+				console.log('bBBBBBBBBBBBBBBBBBBBB');
 
 				// if no cover pic detected in post, throw error
 				if (coverPic) {
@@ -83,6 +86,8 @@ export async function POST({ request }) {
 					);
 				}
 
+				console.log('CCCCCCCCCCCCCCCCCCCCCCCCC');
+
 				// add nodes
 				for (const node of nodeInfo.add) {
 					await addNode(
@@ -93,8 +98,10 @@ export async function POST({ request }) {
 						prismaTransaction,
 					);
 				}
+				console.log('DDDDDDDDDDDDDDDDDDDDD');
 
 				await handleEdges(circuit.id, nodeInfo.next, prismaTransaction);
+				console.log('eeeeeeeeeeeeeeeeeeeeeeee');
 
 				return circuit;
 			},

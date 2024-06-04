@@ -21,9 +21,8 @@
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
 
+
     $: pageType = data.type;
-
-
 
     //Variables needed to deal with Sort and Difficulty
         let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]

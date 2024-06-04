@@ -3,11 +3,12 @@
 
 	import { authStore, DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
 
-	import Icon from '@iconify/svelte';
-	import { fly } from 'svelte/transition';
-	import { createEventDispatcher, onMount } from 'svelte';
-	import { type Publication, PublicationType } from '@prisma/client';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import Icon from '@iconify/svelte';
+    import { fly } from 'svelte/transition';
+    import { createEventDispatcher, onMount } from 'svelte';
+    import type { Publication } from '@prisma/client';
+    import type { PopupSettings } from '@skeletonlabs/skeleton';
+    import { page } from '$app/stores';
 	import {
 		getModalStore,
 		initializeStores,
@@ -30,7 +31,6 @@
 	initializeStores();
 
     const modalStore = getModalStore();
-		console.log(publication)
 
     export let className: string = 'col-span-4 lg:col-span-3';
     export let liked: boolean = true;
@@ -43,8 +43,7 @@
 		export let extensions: string[] = [];
     export let forArrow: boolean = false;
 
-
-    const userId = $authStore.user?.id;
+    const userId = $page.data?.session?.user?.id || "0";
 
     //used to differentiate if its used in a normal browse or in the circuit browse
     export let inCircuits: boolean = false;
@@ -233,7 +232,7 @@
 								</div>
 
 
-							<p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
+                <p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
 
 
             </div>
@@ -279,7 +278,7 @@
 
 											{#if markAsUsed}
 												<button on:click={() => modalStore.trigger(modal)}>
-													<p class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</p>
+													<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</span>
 												</button>
 											{/if}
                     </div>

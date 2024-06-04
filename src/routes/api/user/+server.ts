@@ -1,21 +1,34 @@
-import { createUser, prisma, type UserForm } from '$lib/database';
+import { createUser, prisma, type UserCreateForm } from '$lib/database';
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 
+/**
+ * Create a new user
+ * @param request
+ * @constructor
+ */
 export async function POST({ request }) {
 	// authentication step here
-	const body: UserForm = await request.json();
+	const body: UserCreateForm = await request.json();
 	try {
 		const user = await prisma.$transaction(async (prismaTransaction) => {
 			const user = await createUser(body.metaData, prismaTransaction);
 
-			await updateProfilePic(body.profilePic, user.id, prismaTransaction);
+			await updateProfilePic(null, user.id, prismaTransaction);
 
 			return user;
 		});
 
 		return new Response(JSON.stringify({ user }), { status: 200 });
-	} catch (error) {
+	} catch (error: any) {
 		console.error(error);
+
+		if (error.code === 'P2002') {
+			return new Response(JSON.stringify('Email already exists'), {
+				status: 400,
+				statusText: 'Email already exists',
+			});
+		}
+
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
 }

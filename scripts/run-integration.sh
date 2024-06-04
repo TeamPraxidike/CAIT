@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export NODE_ENV=test
 
 DIR="$(cd "$(dirname "$0")" && pwd)"                                       # get the current directory
 ENV=$(grep -v '^#' .env | xargs)                                           # load the environment variables

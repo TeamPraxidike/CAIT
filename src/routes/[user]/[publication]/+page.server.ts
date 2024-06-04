@@ -1,4 +1,8 @@
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ parent }) => {
+	await parent();
+};
 
 export const actions = {
 	comment: async ({ request, fetch }) => {
@@ -12,7 +16,7 @@ export const actions = {
 		if (isComment) {
 			const comment = {
 				content: data.get('comment'),
-				userId: parseInt(data.get('userId')?.toString() || ''),
+				userId: data.get('userId')?.toString() || '',
 				publicationId: parseInt(
 					data.get('publicationId')?.toString() || '',
 				),
@@ -24,7 +28,7 @@ export const actions = {
 		} else {
 			const reply = {
 				content: data.get('comment'),
-				userId: parseInt(data.get('userId')?.toString() || ''),
+				userId: data.get('userId')?.toString() || '',
 				commentId: parseInt(data.get('commentId')?.toString() || ''),
 			};
 			console.log(reply);

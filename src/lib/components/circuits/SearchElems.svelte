@@ -1,26 +1,22 @@
 <script lang="ts">
-
-
-	import { authStore, Grid, PublicationCard, SearchBar } from '$lib';
+	import { Grid, PublicationCard, SearchBar } from '$lib';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-	import type { FetchedFileArray } from '$lib/database';
-	import { quartOut } from 'svelte/easing';
+	import { page } from '$app/stores';
+
 	import { scale } from 'svelte/transition';
-		export let materials : any = [];
-	export let fileData : FetchedFileArray = []
+	export let materials : any = [];
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
-
-	let userIds : number[] = []
+	let userIds : string[] = []
 	let targetDiv: HTMLDivElement;
 	let searchWord : string = ""
 
-	function getFileExtension(filePath: string): string {
-		const index = filePath.lastIndexOf('.');
-		return index !== -1 ? filePath.substring(index + 1) : '';
-	}
+	// function getFileExtension(filePath: string): string {
+	// 	const index = filePath.lastIndexOf('.');
+	// 	return index !== -1 ? filePath.substring(index + 1) : '';
+	// }
 
 
 	const removePopup = (event: MouseEvent) => {
@@ -74,8 +70,8 @@
 		if (event.detail.option === 0)
 			userIds = []
 		if (event.detail.option === 2){
-			if ($authStore.user?.id)
-				userIds = [$authStore.user.id]
+			if ($page.data.session?.user.id)
+				userIds = [$page.data.session?.user.id]
 		}
 
 		searchAPI()
@@ -97,11 +93,8 @@
 				return response.json();
 			})
 			.then(data => {
-				console.log(data)
 			// Handle the response data from the API
 				materials = data.materials
-				console.log(materials)
-				fileData = data.fileData
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -133,11 +126,10 @@
 			</div>
 
 
-			{#each materials as m, i}
+			{#each materials as m}
 				<PublicationCard publication="{m.publication}" inCircuits="{true}"
 												 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-												 on:removed={removeCard} imgSrc={'data:image;base64,' + fileData[i].data} liked="{false}" saved="{false}"/>
+												 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked="{false}" saved="{false}"/>
 			{/each}
 		</Grid>
 	</div>
-
