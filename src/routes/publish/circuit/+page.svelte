@@ -96,7 +96,7 @@
 
 	$: if (form?.status === 200) {
 		toastStore.trigger({
-			message: 'Publication Added successfully',
+			message: 'Circuit Added successfully',
 			background: 'bg-success-200'
 		});
 		goto(`/${$page.data.session?.user.id}/${form?.id}`);
@@ -129,7 +129,7 @@
         formData.append('difficulty', 'easy');
         formData.append('selectedTags', JSON.stringify(addedTags));
 				formData.append('newTags', JSON.stringify(newTags))
-        formData.append('additionalMaintainers', JSON.stringify([...additionalMaintainers.map(m => m.id), uid]));
+        formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
 				console.log(nodeActions);
@@ -161,10 +161,10 @@
 
 				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} adding="{true}"/>
 
-				<div class="flex flex-col w-full p-3">
+				<div class="flex flex-col w-full">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
 
-					<div class="flex flex-col gap-2">
+					<div class="flex flex-col gap-2 p-3">
 						<span>Tags<span class="text-error-300">*</span>:</span>
 						<div class="text-token space-y-2 w-1/2">
 							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content.toLowerCase())}

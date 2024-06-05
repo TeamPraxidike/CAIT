@@ -73,7 +73,8 @@
 	</a>
 
 {:else if view === "material"}
-	<a href={link} type="button">
+	<a href={link} type="button"
+	class="flex-grow-0 overflow-hidden">
 		<div style="height:fit-content" use:popup={popupHoverBottom}
 			 class="[&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
 			<div class="flex flex-col flex-1 items-center justify-center space-y-1">
@@ -93,7 +94,7 @@
 
 {:else if view === "publish"}
 	<div style="height:fit-content"
-		 class="col-span-1 w-[80] group flex relative flex-col text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 rounded-lg hover:shadow-lg shadow">
+		 class="col-span-1 w-[80] group flex relative flex-col text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 rounded-lg hover:shadow-lg shadow flex-grow-0">
 		{#if role!=="Publisher"}
 			<button type="button" on:click={removeMaintainer} class="absolute top-0 right-0 rounded-lg hidden group-hover:block">
 				<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 36 36" {...$$props}>
@@ -131,7 +132,7 @@
 			{/if}
 			<div class="flex flex-col items-start w-4/5">
 				<div class="w-full items-center">
-					<div class="dark:text-surface-50 text-surface-900 max-w-[80%] truncate ">{name}</div>
+					<div class="dark:text-surface-50 text-surface-900 max-w-[80%] truncate">{name}</div>
 					<hr class="dark:bg-surface-50 bg-surface-300 max-w-[80%]" />
 				</div>
 				<span>Rep: {rep}</span>

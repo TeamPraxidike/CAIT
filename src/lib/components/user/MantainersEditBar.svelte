@@ -6,12 +6,14 @@
 	import { page } from '$app/stores';
 	import { loggedInPfp } from '$lib/stores/loggedInPfp';
 
+
 	let userName: HTMLInputElement;
 	export let users: UserWithProfilePic[] = [];
 	export let additionalMaintainers: UserWithProfilePic[] = [];
 	export let searchableUsers = users;
 	let display = 'hidden';
 	let uid = $page.data.session?.user.id || 0;
+	console.log(users);
 	type UserWithProfilePic = User & { profilePicData: string };
 
 	const handleRemoveMaintainer = (index: number) => {
@@ -59,17 +61,14 @@
 				document.removeEventListener('click', handleClick, true);
 			}
 		};
+
 	}
 </script>
 
 <div class="flex flex-col gap-2 w-full p-3">
-	<span>Maintainers<span class="text-error-300">*</span>:</span>
-	<div class="flex flex-wrap my-2 gap-1 items-center w-full">
-		{#if $page.data.session?.user}
-			<UserProp
-				user={$page.data.session?.user} view="publish" role="Publisher"
-				userPhotoUrl={'data:image;base64,' + $loggedInPfp} />
-		{/if}
+	<span>Maintainers:</span>
+	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
+
 
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
@@ -83,15 +82,17 @@
 		</button>
 
 		<div transition:fly={{ x: -8, duration: 300 }} use:clickOutside
-				 class="{display} flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700">
+				 class="{display} flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700 z-[9999]">
 			<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user"
 						 class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm" />
 			{#each searchableUsers as user}
 				{#if user.id !== uid}
 					<button type="button"
-									class="dark:hover:text-surface-600  hover:bg-primary-100 text-start p-0.5 px-3"
+									class="dark:hover:text-surface-600  hover:bg-primary-100 p-0.5 flex flex-items items-center"
 									on:click={()=>{addMaintainer(user)}}>
-						{user.firstName} {user.lastName}
+<!--						<enhanced:img class="rounded-full w-8 h-8" src={'data:image;base64,' + user.profilePicData} alt='user profile pic' />-->
+						<span class="w-full h-full">{user.firstName} {user.lastName}</span>
+
 					</button>
 				{/if}
 			{/each}
