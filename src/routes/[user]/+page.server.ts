@@ -32,6 +32,13 @@ export const load: PageServerLoad = async ({
 		}
 	}
 
+	const savedByUserRes = await fetch(
+		`/api/user/${session.user.id}/saved?fullPublications=false`,
+	);
+	if (![200, 204].includes(savedByUserRes.status)) {
+		throw new Error('Failed to fetch saved by user materials');
+	}
+
 	const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
 	const liked =
 		likedResponse.status === 200 ? await likedResponse.json() : [];
@@ -45,8 +52,9 @@ export const load: PageServerLoad = async ({
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
-	const { materials } = await materialsRes.json();
-	return { materials, saved, savedFileData, liked, used };
+	const savedByUser = await savedByUserRes.json();
+	const materials  = await materialsRes.json();
+	return { materials: materials.materials, saved, savedFileData, liked, used, savedByUser: savedByUser.saved };
 };
 
 export type PublicationInfo = {

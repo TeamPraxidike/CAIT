@@ -1,7 +1,7 @@
 <script lang="ts">
     import {Meta, PublicationCard, UserProfileBar} from "$lib";
     import type {LayoutData, PageServerData} from './$types';
-    import { type Publication, PublicationType, type Tag, type User} from '@prisma/client';
+    import {type Material, type Publication, PublicationType, type Tag, type User} from '@prisma/client';
     import type {FetchedFileItem} from '$lib/database';
     import { page } from '$app/stores';
     import { TabGroup, Tab } from '@skeletonlabs/skeleton';
@@ -27,12 +27,11 @@
             usedInCourse: {course: string}[]
         })[] = data.saved;
 
-    let postsPublication = data.user.posts.filter((x: any) => x.type !== PublicationType.Circuit);
-    let posts: (Publication & {
-        tags: Tag[];
-        usedInCourse: {course: string}[]
-    })[] = data.user.posts.filter((x: any) => x.type !== PublicationType.Circuit);
 
+    let posts : (Material & {
+        publication: Publication & {usedInCourse: {course: string}[], tags: Tag[]},
+        coverPicData: string
+    })[] = data.materials.filter((x: any) => x.publication.type !== PublicationType.Circuit);
     let tabSet: number = 0;
 </script>
 
@@ -64,12 +63,16 @@
                     </div>
                 {:else if tabSet === 1}
                     <div class="grid grid-cols-4 gap-4 mb-20">
-                        {#if postsPublication.length === 0}
+                        {#if posts.length === 0}
                             <p class="col-span-4 text-center">So empty... There are no publications here </p>
                         {:else}
-                            {#each postsPublication as publication, i}
+                            {#each posts as publication, i}
                                 <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
-                                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
+                                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
+                                                     publication={publication.publication}
+                                                     liked={liked.includes(publication.publicationId)}
+                                                     courses={posts[i].publication.usedInCourse.map(x => x.course)}
+                                                     saved={data.savedByUser.includes(publication.publicationId)}/>
                                 </div>
                             {/each}
                         {/if}
@@ -83,12 +86,16 @@
             <h3 class="text-xl mt-8 text-surface-900 col-span-full text-center dark:text-surface-50">
                 {user.firstName}'s Publications
             </h3>
-            {#if postsPublication.length === 0}
+            {#if posts.length === 0}
                 <p class="col-span-full text-center">So empty... There are no publications here</p>
             {:else}
-                {#each postsPublication as publication, i}
+                {#each posts as publication, i}
                     <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
-                        <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} courses={posts[i].usedInCourse.map(x => x.course)}/>
+                        <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
+                                         publication={publication.publication}
+                                         liked={liked.includes(publication.publicationId)}
+                                         courses={posts[i].publication.usedInCourse.map(x => x.course)}
+                                         saved={data.savedByUser.includes(publication.publicationId)}/>
                     </div>
                 {/each}
             {/if}

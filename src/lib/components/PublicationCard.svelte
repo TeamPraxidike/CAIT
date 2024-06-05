@@ -154,7 +154,7 @@
         type: 'component',
         component: 'useInCourseComponent',
         response: () => {
-            if($coursesStore.length !== 0)
+            if($coursesStore.length !== 0) {
                 courses = $coursesStore.filter(x => x.publicationId === publication.id)[0].courses;
                 modalRegistry = {
                     useInCourseComponent: {
@@ -165,6 +165,8 @@
                         }
                     },
                 };
+            }
+
         }
     };
 

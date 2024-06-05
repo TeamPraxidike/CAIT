@@ -119,6 +119,7 @@ export async function getAllMaterials(
 	}
 
 	const sortBy = sortSwitch(sort);
+
 	return prisma.material.findMany({
 		where,
 		orderBy: sortBy,

@@ -1,6 +1,5 @@
 import {
 	createMaterialPublication,
-	type FetchedFileArray,
 	type FileDiffActions,
 	getAllMaterials,
 	handleConnections,
@@ -89,7 +88,6 @@ export const GET: RequestHandler = async ({ url }) => {
 				).data,
 			};
 		});
-
 		return new Response(JSON.stringify({ materials }), {
 			status: 200,
 		});
