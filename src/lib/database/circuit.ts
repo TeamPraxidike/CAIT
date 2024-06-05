@@ -1,6 +1,7 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
-import { Difficulty, PublicationType } from '@prisma/client';
+import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
+import { sortSwitch } from '$lib';
 
 /**
  * [GET] Returns a publication of type Circuit with the given id.
@@ -29,8 +30,59 @@ export async function getCircuitByPublicationId(publicationId: number) {
 /**
  * [GET] Returns the all publications of type Circuit in the database
  */
-export async function getAllCircuits() {
+export async function getAllCircuits(
+	tags: string[],
+	publishers: string[],
+	limit: number,
+	sort: string,
+	query: string,
+) {
+	const where: any = { AND: [] };
+
+	if (query !== '') {
+		where.AND.push({
+			OR: [
+				{
+					publication: {
+						title: { contains: query, mode: 'insensitive' },
+					},
+				},
+				{
+					publication: {
+						description: { contains: query, mode: 'insensitive' },
+					},
+				},
+
+				{
+					publication: {
+						learningObjectives: {
+							hasSome: [query],
+						},
+					},
+				},
+			],
+		});
+	}
+
+	if (publishers.length > 0) {
+		where.AND.push({ publication: { publisherId: { in: publishers } } });
+	}
+
+	if (limit > 0) {
+		where.AND.push({ numNodes: { gte: limit } });
+	}
+
+	if (tags.length > 0) {
+		where.AND.push({
+			publication: { tags: { some: { content: { in: tags } } } },
+		});
+	}
+
+	const sortBy = sortSwitch(sort);
+
 	return prisma.circuit.findMany({
+		where,
+		orderBy: sortBy,
 		include: {
 			publication: {
 				include: {
@@ -67,6 +119,7 @@ export async function deleteCircuitByPublicationId(
  */
 export async function createCircuitPublication(
 	userId: string,
+	numNodes: number,
 	metaData: {
 		title: string;
 		description: string;
@@ -78,6 +131,7 @@ export async function createCircuitPublication(
 ) {
 	return prismaContext.circuit.create({
 		data: {
+			numNodes: numNodes,
 			publication: {
 				create: {
 					publisherId: userId,

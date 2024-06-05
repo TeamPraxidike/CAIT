@@ -32,7 +32,7 @@
 
     const modalStore = getModalStore();
 
-    export let className: string = 'col-span-4 lg:col-span-3';
+    export let className: string = 'col-span-4 lg:col-span-3 3xl:col-span-2';
     export let liked: boolean = true;
     export let saved: boolean = true;
     export let tags: string[] = publication.tags.map(tag => tag.content);
@@ -49,7 +49,6 @@
     export let inCircuits: boolean = false;
     //Used to see if its used in circuit whether it is selected for the circuit
     export let selected: boolean = false;
-
     let lastUpdated: string = getDateDifference(publication.updatedAt, new Date());
 
     $:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';

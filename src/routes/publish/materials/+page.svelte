@@ -173,7 +173,7 @@
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files</svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
-			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]}/>
+			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
 			<FileTable operation="edit" bind:files={files} />
 		</Step>
 		<Step locked={locks[1]}>

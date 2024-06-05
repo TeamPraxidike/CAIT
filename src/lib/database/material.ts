@@ -1,26 +1,7 @@
 import { prisma } from '$lib/database';
 import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
-
-const sortSwitch = (sort: string) => {
-	let orderBy: any;
-	switch (sort) {
-		case 'Most Liked':
-			orderBy = { publication: { likes: 'desc' } };
-			break;
-		case 'Most Used':
-			orderBy = { publication: { usageCount: 'desc' } };
-			break;
-		case 'Oldest':
-			orderBy = { publication: { createdAt: 'asc' } };
-			break;
-		default:
-			orderBy = { publication: { createdAt: 'desc' } }; // Default to 'Most Recent'
-			break;
-	}
-
-	return orderBy;
-};
+import { sortSwitch } from '$lib';
 
 /**
  * [GET] Returns a publication of type Material with the given id.
