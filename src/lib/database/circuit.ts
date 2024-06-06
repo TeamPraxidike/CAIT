@@ -2,6 +2,7 @@ import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
 import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 import { sortSwitch } from '$lib';
+import Fuse from 'fuse.js';
 
 /**
  * [GET] Returns a publication of type Circuit with the given id.
@@ -39,31 +40,6 @@ export async function getAllCircuits(
 ) {
 	const where: any = { AND: [] };
 
-	if (query !== '') {
-		where.AND.push({
-			OR: [
-				{
-					publication: {
-						title: { contains: query, mode: 'insensitive' },
-					},
-				},
-				{
-					publication: {
-						description: { contains: query, mode: 'insensitive' },
-					},
-				},
-
-				{
-					publication: {
-						learningObjectives: {
-							hasSome: [query],
-						},
-					},
-				},
-			],
-		});
-	}
-
 	if (publishers.length > 0) {
 		where.AND.push({ publication: { publisherId: { in: publishers } } });
 	}
@@ -80,7 +56,7 @@ export async function getAllCircuits(
 
 	const sortBy = sortSwitch(sort);
 
-	return prisma.circuit.findMany({
+	let circuits = await prisma.circuit.findMany({
 		where,
 		orderBy: sortBy,
 		include: {
@@ -98,6 +74,25 @@ export async function getAllCircuits(
 			nodes: false,
 		},
 	});
+
+	if (query !== '') {
+		const c = circuits;
+		let shouldSort = false;
+		if (sort !== 'Sort By') shouldSort = true;
+		const searcher = new Fuse(c, {
+			keys: [
+				{ name: 'publication.title', weight: 0.4 },
+				{ name: 'publication.description', weight: 0.4 },
+				{ name: 'publication.learningObjectives', weight: 0.2 },
+			],
+			isCaseSensitive: false,
+			threshold: 0.6,
+			shouldSort: shouldSort,
+		});
+		circuits = searcher.search(query).map((c) => c.item);
+	}
+
+	return circuits;
 }
 export async function deleteCircuitByPublicationId(
 	publicationId: number,

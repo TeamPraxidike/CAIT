@@ -108,9 +108,11 @@ export const sortSwitch = (sort: string) => {
 		case 'Oldest':
 			orderBy = { publication: { createdAt: 'asc' } };
 			break;
-		default:
+		case 'Most Recent':
 			orderBy = { publication: { createdAt: 'desc' } }; // Default to 'Most Recent'
 			break;
+		default:
+			orderBy = {};
 	}
 
 	return orderBy;

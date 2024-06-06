@@ -28,8 +28,6 @@ export async function GET({ locals, url }) {
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
 
-		console.log('Yassss: ' + url.searchParams.get('limit'));
-		console.log(limit);
 		let circuits = await getAllCircuits(
 			tags,
 			publishers,
@@ -66,7 +64,6 @@ export async function POST({ request, locals }) {
 	if (authError) return authError;
 
 	const body: CircuitForm = await request.json();
-	console.log('BODY: ' + body);
 	const tags = body.metaData.tags;
 	const maintainers = body.metaData.maintainers;
 	const metaData = body.metaData;

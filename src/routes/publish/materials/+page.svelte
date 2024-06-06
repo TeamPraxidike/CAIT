@@ -173,7 +173,6 @@
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files</svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
-			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
 			<FileTable operation="edit" bind:files={files} />
 		</Step>
 		<Step locked={locks[1]}>
@@ -181,6 +180,7 @@
 			<div class="flex flex-col gap-2">
 				<input type="text" name="title" placeholder="Title" bind:value={title}
 					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
 				<textarea name="description" placeholder="Description..." bind:value={description}
 						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>

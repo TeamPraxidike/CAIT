@@ -75,7 +75,7 @@
 		}
 
 		if (oneAllowed){
-			selectedOption = text.toLowerCase()
+			selectedOption = text
 			active = false
 		}
 		else {
@@ -98,7 +98,7 @@
 			* Update the tags shown in the dropdown based on what has been inputted
 	 */
 	const updateFilter = () => {
-		let text = input.value.toLowerCase() ?? '';
+		let text = oneAllowed ? (input.value ?? '') : (input.value.toLowerCase() ?? '');
 		if (text === '')
 			display = all; // if there is no text display all without filtering
 		else
