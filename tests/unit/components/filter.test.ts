@@ -23,6 +23,7 @@ describe('Filter Component', () => {
 				display: [],
 				active: false,
 				profilePic: false,
+				num: 0,
 			},
 		});
 		expect(instance).toBeTruthy();
@@ -48,6 +49,7 @@ describe('Filter Component', () => {
 				display: [],
 				active: true,
 				profilePic: true,
+				num: 0,
 			},
 		});
 		expect(instance).toBeTruthy();
@@ -77,6 +79,7 @@ describe('Filter Component', () => {
 				],
 				active: true,
 				profilePic: true,
+				num: 0,
 			},
 		});
 		expect(instance).toBeTruthy();
