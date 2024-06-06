@@ -154,16 +154,19 @@
         type: 'component',
         component: 'useInCourseComponent',
         response: () => {
-            courses = $coursesStore.filter(x => x.publicationId === publication.id)[0].courses;
-            modalRegistry = {
-                useInCourseComponent: {
-                    ref: UsedInCourse,
-                    props: {
-                        courses: courses,
-                        publicationId: publication.id,
-                    }
-                },
-            };
+            if($coursesStore.length !== 0) {
+                courses = $coursesStore.filter(x => x.publicationId === publication.id)[0].courses;
+                modalRegistry = {
+                    useInCourseComponent: {
+                        ref: UsedInCourse,
+                        props: {
+                            courses: courses,
+                            publicationId: publication.id,
+                        }
+                    },
+                };
+            }
+
         }
     };
 

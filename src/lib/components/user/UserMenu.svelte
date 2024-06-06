@@ -22,9 +22,9 @@
                 <span class="text-sm">Go to profile</span>
             </div>
         </a>
-        <IconLink p="p-4" icon="ion:person-sharp" href="/{$page.data.session?.user.id}" link="Profile"/>
-        <IconLink p="p-4" icon="ion:bookmark-sharp" href="/{$page.data.session?.user.id}/saved" link="Saved"/>
-        <IconLink p="p-4" icon="ion:book" href="/{$page.data.session?.user.id}/publications" link="Publications"/>
+<!--        <IconLink p="p-4" icon="ion:person-sharp" href="/{$page.data.session?.user.id}" link="Profile"/>-->
+<!--        <IconLink p="p-4" icon="ion:bookmark-sharp" href="/{$page.data.session?.user.id}/saved" link="Saved"/>-->
+<!--        <IconLink p="p-4" icon="ion:book" href="/{$page.data.session?.user.id}/publications" link="Publications"/>-->
         <IconLink p="p-4" icon="ion:settings-sharp" href="/settings" link="Settings"/>
         <button on:click={() => signOut()} class="anchor">Log out</button>
     </div>
@@ -45,10 +45,10 @@
                     <span class="text-sm">Go to profile</span>
                 </div>
             </a>
-            <hr class="my-2">
-            <IconLink icon="ion:person-sharp" href="/{$page.data.session?.user.id}" link="Profile"/>
-            <IconLink icon="ion:bookmark-sharp" href="/{$page.data.session?.user.id}/saved" link="Saved"/>
-            <IconLink icon="ion:book" href="/{$page.data.session?.user.id}/publications" link="Publications"/>
+<!--            <hr class="my-2">-->
+<!--            <IconLink icon="ion:person-sharp" href="/{$page.data.session?.user.id}" link="Profile"/>-->
+<!--            <IconLink icon="ion:bookmark-sharp" href="/{$page.data.session?.user.id}/saved" link="Saved"/>-->
+<!--            <IconLink icon="ion:book" href="/{$page.data.session?.user.id}/publications" link="Publications"/>-->
             <hr class="my-2">
             <IconLink icon="ion:settings-sharp" href="/settings" link="Settings"/>
             <hr class="my-2">
