@@ -209,7 +209,7 @@
 														<Icon icon="clarity:file-group-solid" class="text-primary-600 size-5" />
 														{#if isHovered}
 															<div
-																class="absolute  mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+																class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
 																style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 																{#each extensions as e}
 																	<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />

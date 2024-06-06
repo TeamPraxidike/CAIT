@@ -82,7 +82,7 @@
 		</button>
 
 		<div transition:fly={{ x: -8, duration: 300 }} use:clickOutside
-				 class="{display} flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700 z-[9999]">
+				 class="{display} absolute flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700 z-[9999]">
 			<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user"
 						 class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm" />
 			{#each searchableUsers as user}

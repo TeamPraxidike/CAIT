@@ -106,7 +106,9 @@ export const actions = {
 				description: data.get('description')?.toString() || '',
 				difficulty: 'easy',
 				learningObjectives: JSON.parse(losDataEntry?.toString() || ''),
-				prerequisites: [data.get('prerequisites')?.toString() || ''],
+				prerequisites: JSON.parse(
+					data.get('prerequisites')?.toString() || '',
+				),
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: Number(data.get('theoryToApplication')),

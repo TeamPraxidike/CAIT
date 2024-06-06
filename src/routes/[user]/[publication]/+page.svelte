@@ -16,9 +16,9 @@
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
 	import type { PublicationView } from './+layout.server';
-	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
+	import { Accordion, AccordionItem, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
-	import { createFileList } from '$lib/util/file';
+	import { createFileList, IconMapExtension } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
 
@@ -86,7 +86,7 @@
 		modalStore.trigger({
 			type: 'confirm',
 			title: 'Delete Publication',
-			body: 'Are you sure you want to delete this pubView?',
+			body: 'Are you sure you want to delete this publication?',
 			response: (r: boolean) => {
 				if (r) deletePublication();
 			}
@@ -181,7 +181,6 @@
 			return '';
 		}
 		let out = `Material is used in `
-		console.log(courses.length)
 		for(let i = 0; i < Math.min(courses.length, 2); i++) {
 			if(courses.length === i + 1){
 				out += ' and '
@@ -196,52 +195,79 @@
 		}
 		return out + '!';
 	}
+
+	const getFileExtension = (filePath: string): string =>  {
+		const index = filePath.lastIndexOf('.');
+		return index !== -1 ? filePath.substring(index + 1) : '';
+	}
 </script>
 
 <Meta title={pubView.publication.title} description="CAIT" type="site" />
 
 <div class="col-span-full flex flex-col items-start mt-20">
-	<div class="flex justify-between w-full">
-		<div class="max-w-1/2">
-			<div class="flex flex-row items-center">
-				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{pubView.publication.title}</h2>
-				<p class="text-sm opacity-85 pl-5">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
-			</div>
-			<p> By {pubView.publication.publisher.firstName}</p>
-			<div class="flex gap-2">
-				<p class="text-sm text-surface-500">{created}</p>
-				{#if isMaterial}
-					<Icon icon="mdi:presentation" class="text-xl text-surface-500" />
-					<DiffBar diff="easy" className="w-4 h-4" />
-				{:else}
-					<Icon icon="mdi:graph" class="text-xl text-surface-500" />
-				{/if}
+	<div class="flex flex-row items-top justify-between w-full">
+		<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-1/2 max-w-full">{pubView.publication.title}</h2>
+		<p class="text-sm opacity-85 pl-5 break-words max-w-full">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
+		<div class="flex self-end flex-col gap-2 max-w-full ">
+			{#if isMaterial && pubView.publication.materials.theoryPractice}
+				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}"/>
+			{/if}
+			{#if pubView.publication.publisherId === $page.data.session?.user.id || pubView.publication.maintainers.map(x=>x.id).includes($page.data.session?.user.id || '')}
+				<div class="flex gap-2 mt-4">
+					<button
+						on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
+						type="button" class="btn rounded-lg variant-filled-primary">Edit
+					</button>
+					<button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">Delete
+					</button>
+				</div>
+			{/if}
+		</div>
+	</div>
+</div>
 
-			</div>
-			<div class="flex flex-wrap gap-2 my-2">
-				{#each tags as tag}
-					<Tag tagText={tag} removable={false} />
-				{/each}
-			</div>
-			<p class="text-surface-700 dark:text-surface-400">{pubView.publication.description}</p>
+<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
+{#each pubView.publication.maintainers as maintainer}
+	<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
+{/each}
+
+<div class="col-span-full flex flex-col items-start mt-2">
+	<div class="flex gap-2">
+		<p class="text-sm text-surface-500">{created}</p>
+
+		{#if isMaterial}
+			{#if pubView.publication.materials.files.length===1}
+				<Icon icon={IconMapExtension.get(pubView.publication.materials.files.map((f => getFileExtension(f.title)))[0]) || 'vscode-icons:file-type-text'} class="text-xl text-surface-500" />
+				{:else}
+				<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
+			{/if}
+			<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+		{:else }
+			<Icon icon="mdi:graph" class="text-xl text-primary-500" />
+		{/if}
+
+	</div>
+
+	<div class="flex flex-wrap gap-2 my-2">
+		{#each tags as tag}
+			<Tag tagText={tag} removable={false} />
+		{/each}
+	</div>
+
+</div>
+
+<div class="col-span-full flex flex-col items-start mt-2">
+	<div class="flex justify-between w-full">
+		<div class="w-full">
+			<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">{pubView.publication.description}</p>
 			{#if isMaterial}
 				{#if pubView.publication.materials.timeEstimate}
-					<p class="text-surface-400 text-sm"> Time Estimate: {pubView.publication.materials.timeEstimate} </p>
+					<p class="text-surface-400 text-sm mt-4"> Time Estimate: {pubView.publication.materials.timeEstimate} </p>
 				{/if}
-				<p class="text-surface-500">Copyright: {pubView.publication.materials.copyright}</p>
+				<p class="text-surface-400 text-sm">Copyright: {pubView.publication.materials.copyright}</p>
 			{/if}
 		</div>
-		<div class="flex flex-end flex-col gap-2 max-w-full ">
-			{#if pubView.publication.materials.theoryPractice}
-				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}"/>
-			{/if}
-			<div class="flex gap-2 max-w-full flex-wrap">
-				<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
-				{#each pubView.publication.maintainers as maintainer}
-					<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
-				{/each}
-			</div>
-		</div>
+
 
 	</div>
 
@@ -264,29 +290,49 @@
 			<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
 		</button>
 	</div>
+	<Accordion class="mt-4 bg-surface-100">
+		<AccordionItem class="variant-soft-primary rounded-lg">
+			<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+			<svelte:fragment slot="content" >
+				{#if pubView.publication.learningObjectives.length === 0}
+					<span>No learning objectives have been indicated</span>
+				{:else}
+				{#each pubView.publication.learningObjectives as LO}
+					<p class="w-full text-surface-800 my-1">{LO}</p>
+				{/each}
+				{/if }
+			</svelte:fragment>
+		</AccordionItem>
+		<AccordionItem class="variant-soft-primary rounded-lg">
+			<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+			<svelte:fragment slot="content">
+				{#if pubView.publication.prerequisites.length === 0}
+					<span>No prior knowledge has been indicated</span>
+					{:else}
+					{#each pubView.publication.prerequisites as PK}
+						<p class="w-full text-surface-800 my-1">{PK}</p>
+					{/each}
+				{/if}
 
+			</svelte:fragment>
+		</AccordionItem>
+	</Accordion>
 	{#if isMaterial}
-		<div class="min-h-96 w-full">
+		<div class="w-full">
 			<FileTable operation="download" {files} />
 		</div>
 	{:else}
-		<div  class="min-h-96 w-full">
-				<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}"/>
+		<div  class="w-full">
+			<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}"/>
 		</div>
 	{/if}
-	{#if pubView.publication.publisherId === $page.data.session?.user.id}
-		<div class="flex gap-2 mt-4">
-			<button
-				on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
-				type="button" class="btn rounded-lg variant-filled-primary">Edit
-			</button>
-			<button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">Delete
-			</button>
-		</div>
-	{/if}
+
 </div>
 
-<div class="col-span-full flex flex-col mb-1 gap-1">
+
+
+
+<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
 	<h2 class="text-2xl">Discussion Forum</h2>
 	<hr>
 </div>
