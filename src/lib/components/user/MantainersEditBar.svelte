@@ -2,9 +2,9 @@
 	import { UserProp } from '$lib';
 	import Icon from '@iconify/svelte';
 	import type { User } from '@prisma/client';
-	import { fly } from 'svelte/transition';
 	import { page } from '$app/stores';
-	import { loggedInPfp } from '$lib/stores/loggedInPfp';
+	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+
 
 
 	let userName: HTMLInputElement;
@@ -13,7 +13,6 @@
 	export let searchableUsers = users;
 	let display = 'hidden';
 	let uid = $page.data.session?.user.id || 0;
-	console.log(users);
 	type UserWithProfilePic = User & { profilePicData: string };
 
 	const handleRemoveMaintainer = (index: number) => {
@@ -56,46 +55,55 @@
 
 		document.addEventListener('click', handleClick, true);
 
+
 		return {
 			destroy() {
 				document.removeEventListener('click', handleClick, true);
 			}
 		};
-
 	}
+	const popupAdd: PopupSettings = {
+		event: 'focus-click',
+		target: 'hoverAdd',
+		placement: 'right',
+		middleware: {
+			offset: 2
+		},
+		closeQuery: '#user'
+	};
+
+
 </script>
 
 <div class="flex flex-col gap-2 w-full p-3">
 	<span>Maintainers:</span>
 	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
-
-
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
 								role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
 		{/each}
 
-		<button on:click={()=>{display='flex'}} type="button" name="add_maintainer" inputmode="decimal"
-						class="rounded-lg hover:bg-opacity-85 text-center">
+		<button type="button" name="add_maintainer" use:popup={popupAdd} class="btn rounded-lg hover:bg-opacity-85 text-center" >
 			<Icon icon="mdi:plus-circle" width="32" height="32"
 						class="bg-surface-0 text-surface-800 hover:text-surface-600" />
 		</button>
 
-		<div transition:fly={{ x: -8, duration: 300 }} use:clickOutside
-				 class="{display} absolute flex-col overflow-y-auto max-h-full border rounded-lg dark:bg-surface-700 z-[9999]">
-			<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user"
-						 class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm" />
-			{#each searchableUsers as user}
-				{#if user.id !== uid}
-					<button type="button"
-									class="dark:hover:text-surface-600  hover:bg-primary-100 p-0.5 flex flex-items items-center"
-									on:click={()=>{addMaintainer(user)}}>
-<!--						<enhanced:img class="rounded-full w-8 h-8" src={'data:image;base64,' + user.profilePicData} alt='user profile pic' />-->
-						<span class="w-full h-full">{user.firstName} {user.lastName}</span>
-
-					</button>
-				{/if}
-			{/each}
-		</div>
 	</div>
+</div>
+
+<div data-popup="hoverAdd"
+		 class="flex flex-col overflow-y-auto max-h-48 border rounded-lg dark:bg-surface-700 bg-surface-50 z-[9999]">
+	<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user"
+				 class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm" />
+	{#each searchableUsers as user}
+		{#if user.id !== uid}
+			<button type="button" id="user"
+							class="btn dark:hover:text-surface-600 hover:bg-primary-100 p-0.5 flex flex-items items-center w-full"
+							on:click={()=>{addMaintainer(user)}}>
+				<!--						<enhanced:img class="rounded-full w-8 h-8" src={'data:image;base64,' + user.profilePicData} alt='user profile pic' />-->
+				<span class="w-full h-full">{user.firstName} {user.lastName}</span>
+
+			</button>
+		{/if}
+	{/each}
 </div>

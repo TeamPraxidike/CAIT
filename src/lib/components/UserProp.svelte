@@ -92,7 +92,7 @@
 
 {:else if view === "publish"}
 	<div style="height:fit-content"
-		 class="col-span-1 w-[80] group flex relative flex-col text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 rounded-lg hover:shadow-lg shadow flex-grow-0">
+		 class="w-32 group flex flex-none relative flex-col text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 rounded-lg hover:shadow-lg shadow flex-grow-0">
 		{#if role!=="Publisher"}
 			<button type="button" on:click={removeMaintainer} class="absolute top-0 right-0 rounded-lg hidden group-hover:block">
 				<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 36 36" {...$$props}>
@@ -106,7 +106,7 @@
 				</svg>
 			</button>
 		{/if}
-		<div class="w-full flex flex-col items-center">
+		<div class="w-full flex flex-col items-center flex-none">
 			{#if userPhotoUrl !== ''}
 				<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
 			{:else}

@@ -206,12 +206,8 @@
 
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex flex-row items-top justify-between w-full">
-		<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-1/2 max-w-full">{pubView.publication.title}</h2>
-		<p class="text-sm opacity-85 pl-5 break-words max-w-full">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
-		<div class="flex self-end flex-col gap-2 max-w-full ">
-			{#if isMaterial && pubView.publication.materials.theoryPractice}
-				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}"/>
-			{/if}
+		<div class="flex flex-col gap-2 w-1/2">
+			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
 			{#if pubView.publication.publisherId === $page.data.session?.user.id || pubView.publication.maintainers.map(x=>x.id).includes($page.data.session?.user.id || '')}
 				<div class="flex gap-2 mt-4">
 					<button
@@ -222,6 +218,13 @@
 					</button>
 				</div>
 			{/if}
+		</div>
+		<p class="text-sm opacity-85 pl-5 break-words max-w-full">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
+		<div class="flex self-end flex-col gap-2 max-w-full ">
+			{#if isMaterial && pubView.publication.materials.theoryPractice}
+				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}"/>
+			{/if}
+
 		</div>
 	</div>
 </div>
@@ -290,7 +293,7 @@
 			<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
 		</button>
 	</div>
-	<Accordion class="mt-4 bg-surface-100">
+	<Accordion class="mt-4">
 		<AccordionItem class="variant-soft-primary rounded-lg">
 			<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
 			<svelte:fragment slot="content" >
@@ -298,7 +301,7 @@
 					<span>No learning objectives have been indicated</span>
 				{:else}
 				{#each pubView.publication.learningObjectives as LO}
-					<p class="w-full text-surface-800 my-1">{LO}</p>
+					<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
 				{/each}
 				{/if }
 			</svelte:fragment>
@@ -310,7 +313,7 @@
 					<span>No prior knowledge has been indicated</span>
 					{:else}
 					{#each pubView.publication.prerequisites as PK}
-						<p class="w-full text-surface-800 my-1">{PK}</p>
+						<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
 					{/each}
 				{/if}
 
