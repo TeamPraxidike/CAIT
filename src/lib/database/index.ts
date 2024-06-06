@@ -25,6 +25,14 @@ import {
 } from './publication';
 
 import {
+	addTag,
+	addTags,
+	getAllTags,
+	getTagByContent,
+	deleteTagByContent,
+} from '$lib/database/tag';
+
+import {
 	handleEdges,
 	fetchExtensions,
 	addNode,
@@ -251,6 +259,11 @@ export {
 	getLikedComments,
 	likesCommentUpdate,
 	likesReplyUpdate,
+	addTag,
+	addTags,
+	getAllTags,
+	getTagByContent,
+	deleteTagByContent,
 };
 
 export type {

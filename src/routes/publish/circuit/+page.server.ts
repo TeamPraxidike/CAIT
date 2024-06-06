@@ -37,15 +37,18 @@ export const actions = {
 
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
-		const newTagsArray = JSON.parse(outerArray[0]) || [];
+		const newTagsArray: string[] = JSON.parse(outerArray[0]) || [];
 
-		for (const tag of newTagsArray) {
-			const res = await fetch('/api/tags', {
+		if (newTagsArray.length !== 0) {
+			const resTags = await fetch('/api/tags', {
 				method: 'POST',
-				body: JSON.stringify({ content: tag }),
+				body: JSON.stringify({ tags: newTagsArray }),
 			});
-			if (res.status !== 200) {
-				return { status: 500, message: 'Tag Failed' };
+			if (resTags.status !== 200) {
+				return {
+					status: resTags.status,
+					message: await resTags.json(),
+				};
 			}
 		}
 

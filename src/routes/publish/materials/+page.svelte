@@ -209,6 +209,7 @@
 				</div>
 
 			</div>
+
 			<div class="grid grid-cols-2 gap-4 p-3">
 				<div class="flex col-span-2 items-center gap-4 p-3">
 					<div class="w-1/2">
@@ -230,8 +231,8 @@
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
 					<div>
 
-						<label for="tags_input">Tags<span class="text-error-300">*</span>:</label>
-						<div class="text-token space-y-2">
+						<label class="pl-3" for="tags_input">Tags<span class="text-error-300">*</span>:</label>
+						<div class="text-token space-y-2 pl-3">
 							<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
 									   bind:input={tagInput} bind:value={tags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
 							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">

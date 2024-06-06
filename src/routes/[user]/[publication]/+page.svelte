@@ -8,7 +8,7 @@
 		FileTable,
 		getDateDifference,
 		Meta,
-		Tag,
+		Tag, TheoryAppBar,
 		UserProp
 	} from '$lib';
 
@@ -202,7 +202,7 @@
 
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex justify-between w-full">
-		<div>
+		<div class="max-w-1/2">
 			<div class="flex flex-row items-center">
 				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{pubView.publication.title}</h2>
 				<p class="text-sm opacity-85 pl-5">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
@@ -224,13 +224,25 @@
 				{/each}
 			</div>
 			<p class="text-surface-700 dark:text-surface-400">{pubView.publication.description}</p>
+			{#if isMaterial}
+				{#if pubView.publication.materials.timeEstimate}
+					<p class="text-surface-400 text-sm"> Time Estimate: {pubView.publication.materials.timeEstimate} </p>
+				{/if}
+				<p class="text-surface-500">Copyright: {pubView.publication.materials.copyright}</p>
+			{/if}
 		</div>
-		<div class="flex gap-2">
-			<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
-			{#each pubView.publication.maintainers as maintainer}
-				<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
-			{/each}
+		<div class="flex flex-end flex-col gap-2 max-w-full ">
+			{#if pubView.publication.materials.theoryPractice}
+				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}"/>
+			{/if}
+			<div class="flex gap-2 max-w-full flex-wrap">
+				<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
+				{#each pubView.publication.maintainers as maintainer}
+					<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
+				{/each}
+			</div>
 		</div>
+
 	</div>
 
 	<div class="flex items-center text-3xl rounded-lg border mt-4">

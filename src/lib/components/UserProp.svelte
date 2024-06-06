@@ -50,7 +50,7 @@
 
 {#if view === "search"}
 	<a href={link} style="height:fit-content"
-	   class="col-span-2 flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
+	   class="col-span-2 flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow">
 		<div class="flex flex-col space-y-1 items-start w-full md:pb-2">
 			<div class="w-full flex flex-col items-center">
 				{#if userPhotoUrl !== ''}
@@ -73,11 +73,9 @@
 	</a>
 
 {:else if view === "material"}
-	<a href={link} type="button"
-	class="flex-grow-0 overflow-hidden">
-		<div style="height:fit-content" use:popup={popupHoverBottom}
-			 class="[&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
-			<div class="flex flex-col flex-1 items-center justify-center space-y-1">
+	<a href={link} type="button" style="height:fit-content" use:popup={popupHoverBottom}
+	class="flex-none [&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
+					<div class="flex flex-col flex-1 items-center justify-center space-y-1">
 				{#if userPhotoUrl !== ''}
 					<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
 				{:else}
@@ -89,7 +87,6 @@
 				</div>
 				<div class="text-sm md:text-md ">{role}</div>
 			</div>
-		</div>
 	</a>
 
 {:else if view === "publish"}
