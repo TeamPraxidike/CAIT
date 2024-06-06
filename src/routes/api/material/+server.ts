@@ -56,7 +56,6 @@ export const GET: RequestHandler = async ({ url }) => {
 				).data,
 			};
 		});
-
 		return new Response(JSON.stringify({ materials }), {
 			status: 200,
 		});

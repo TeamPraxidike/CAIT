@@ -4,7 +4,7 @@
 
     export let user:User;
     export let userPhotoUrl: string;
-    let about = "Franklin Delano Roosevelt[a] (January 30, 1882 – April 12, 1945), commonly known by his initials FDR, was an American statesman and politician who served as the 32nd president of the United States from 1933 until his death in 1945. He was a member of the Democratic Party and is the only U.S. president to have served more than two terms."
+    export let about = '';
 
 
     /**
@@ -35,9 +35,11 @@
         <div class="hidden md:flex items-start flex-col gap-4 text-surface-700 dark:text-surface-200 ">
             <p class="lg:text-sm 2xl:text-base">Email: {user.email}</p>
             <hr class="w-11/12">
-            <p class="text-surface-700 text-sm dark:text-surface-400">
-                {about}
-            </p>
+            {#if about !== ''}
+                <p class="text-surface-700 text-sm dark:text-surface-400">
+                    {about}
+                </p>
+            {/if}
             <div class="flex gap-2 flex-wrap">
                 <p class="variant-soft-primary hidden md:block p-2 rounded-lg">Reputation: {user.reputation}</p>
                 {#if currentlyAuth()}

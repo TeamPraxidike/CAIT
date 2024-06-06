@@ -78,6 +78,9 @@ export async function getSavedPublications(userId: string) {
 						select: {
 							course: true,
 						},
+						where: {
+							userId: userId
+						}
 					},
 				},
 			},
