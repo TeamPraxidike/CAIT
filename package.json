@@ -69,11 +69,13 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@floating-ui/dom": "^1.6.4",
 		"@auth/core": "^0.31.0",
 		"@auth/prisma-adapter": "^2.1.0",
 		"@auth/sveltekit": "^1.1.0",
+		"@floating-ui/dom": "^1.6.4",
 		"@next-auth/prisma-adapter": "^1.0.7",
+		"@types/remove-markdown": "^0.3.4",
+		"@types/word-extractor": "^1.0.5",
 		"cytoscape": "^3.29.2",
 		"cytoscape-html": "^0.1.2",
 		"cytoscape-node-html-label": "^1.2.2",
@@ -84,6 +86,10 @@
 		"html2canvas": "^1.4.1",
 		"interactjs": "^1.10.27",
 		"jszip": "^3.10.1",
-		"tippy.js": "^6.3.7"
+		"natural": "^7.0.6",
+		"office-text-extractor": "^3.0.3",
+		"remove-markdown": "^0.5.0",
+		"tippy.js": "^6.3.7",
+		"word-extractor": "^1.0.4"
 	}
 }
