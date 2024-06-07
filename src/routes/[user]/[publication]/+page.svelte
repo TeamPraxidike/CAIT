@@ -257,8 +257,6 @@
 			{/if}
 			<div class="flex gap-2">
 				<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
-				<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
-				<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
 				{#each pubView.publication.maintainers as maintainer}
 					<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
 				{/each}
