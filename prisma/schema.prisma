@@ -194,6 +194,7 @@ model File {
 model Circuit {
   id            Int         @id @default(autoincrement())
   nodes         Node[]
+  numNodes      Int         @default(0)
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 }

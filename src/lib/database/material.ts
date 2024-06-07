@@ -1,26 +1,8 @@
 import { prisma } from '$lib/database';
 import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
-
-const sortSwitch = (sort: string) => {
-	let orderBy: any;
-	switch (sort) {
-		case 'Most Liked':
-			orderBy = { publication: { likes: 'desc' } };
-			break;
-		case 'Most Used':
-			orderBy = { publication: { usageCount: 'desc' } };
-			break;
-		case 'Oldest':
-			orderBy = { publication: { createdAt: 'asc' } };
-			break;
-		default:
-			orderBy = { publication: { createdAt: 'desc' } }; // Default to 'Most Recent'
-			break;
-	}
-
-	return orderBy;
-};
+import { sortSwitch } from '$lib';
+import Fuse from 'fuse.js';
 
 /**
  * [GET] Returns a publication of type Material with the given id.
@@ -75,31 +57,6 @@ export async function getAllMaterials(
 ) {
 	const where: any = { AND: [] };
 
-	if (query !== '') {
-		where.AND.push({
-			OR: [
-				{
-					publication: {
-						title: { contains: query, mode: 'insensitive' },
-					},
-				},
-				{
-					publication: {
-						description: { contains: query, mode: 'insensitive' },
-					},
-				},
-
-				{
-					publication: {
-						learningObjectives: {
-							hasSome: [query],
-						},
-					},
-				},
-			],
-		});
-	}
-
 	if (publishers.length > 0) {
 		where.AND.push({ publication: { publisherId: { in: publishers } } });
 	}
@@ -119,7 +76,7 @@ export async function getAllMaterials(
 	}
 
 	const sortBy = sortSwitch(sort);
-	return prisma.material.findMany({
+	let materials = await prisma.material.findMany({
 		where,
 		orderBy: sortBy,
 		include: {
@@ -137,6 +94,25 @@ export async function getAllMaterials(
 			files: true,
 		},
 	});
+
+	if (query !== '') {
+		const m = materials;
+		let shouldSort = false;
+		if (sort !== 'Sort By') shouldSort = true;
+		const searcher = new Fuse(m, {
+			keys: [
+				{ name: 'publication.title', weight: 0.4 },
+				{ name: 'publication.description', weight: 0.4 },
+				{ name: 'publication.learningObjectives', weight: 0.2 },
+			],
+			isCaseSensitive: false,
+			threshold: 0.6,
+			shouldSort: shouldSort,
+		});
+		materials = searcher.search(query).map((m) => m.item);
+	}
+
+	return materials;
 }
 
 /**

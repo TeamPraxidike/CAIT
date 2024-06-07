@@ -183,12 +183,10 @@
 			<div class="flex flex-col gap-2">
 				<label for="title" >Title<span class="text-error-300">*</span></label>
 				<input type="text" name="title" placeholder="Title" bind:value={title}
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
-				<label for="type">Type<span class="text-error-300">*</span></label>
-				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]}/>
-				<label for="description" >Description<span class="text-error-300">*</span></label>
-				<textarea minlength="10" name="description" placeholder="Description..." bind:value={description}
-						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400" />
+					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
+				<textarea name="description" placeholder="Description..." bind:value={description}
+						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>
 			<label for="coverPhoto">Cover Picture:</label>
 			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>
