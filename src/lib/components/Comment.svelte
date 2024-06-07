@@ -271,12 +271,12 @@
                     class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
                 Edit
             </button>
-            {#if user === $page.data.session?.user.id || $page.data.session?.user.isAdmin}
-                <button on:click={handleDelete} id="deleteButton"
-                        class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
-                    Delete
-                </button>
-            {/if}
+        {/if}
+        {#if user === $page.data.session?.user.id || $page.data.session?.user.isAdmin}
+            <button on:click={handleDelete} id="deleteButton"
+                    class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
+                Delete
+            </button>
         {/if}
     </div>
 </div>
