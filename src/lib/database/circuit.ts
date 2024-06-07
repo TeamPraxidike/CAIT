@@ -128,11 +128,13 @@ export async function deleteCircuitByPublicationId(
 /**
  * [POST] Returns a created publication of type Circuit
  * @param userId
+ * @param numNodes
  * @param metaData
  * @param prismaContext
  */
 export async function createCircuitPublication(
 	userId: string,
+	numNodes: number,
 	metaData: {
 		title: string;
 		description: string;
@@ -144,6 +146,7 @@ export async function createCircuitPublication(
 ) {
 	return prismaContext.circuit.create({
 		data: {
+			numNodes: numNodes,
 			publication: {
 				create: {
 					publisherId: userId,
