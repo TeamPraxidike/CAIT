@@ -203,7 +203,7 @@
 			   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
 		{#if isMaterial}
 			<label for="type"> Type</label>
-			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]}/>
+			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
 		{/if}
 		<label for="description"> Description</label>
 		<textarea minlength="10" id="description" name="description" bind:value={description}
