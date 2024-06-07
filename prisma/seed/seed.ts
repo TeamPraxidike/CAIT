@@ -89,9 +89,7 @@ const main = async () => {
 		'perceptron',
 	];
 
-	const circuitTitles = [
-		'Machine Learning for beginners'
-	];
+	const circuitTitles = ['Machine Learning for beginners'];
 
 	const types = [
 		MaterialType.dataset,
@@ -188,6 +186,7 @@ const main = async () => {
 
 	const circuit = await prisma.circuit.create({
 		data: {
+			numNodes: 5,
 			publication: {
 				create: {
 					title: circuitTitles[0],

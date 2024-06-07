@@ -1,13 +1,17 @@
 <script lang="ts">
-    import {Filter, PublicationCard, SearchBar, UserProp} from '$lib';
+    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-    import type { Material, Publication, Tag, File as PrismaFile, Circuit } from '@prisma/client';
-    import type { FetchedFileArray } from '$lib/database';
-    import { page } from '$app/stores';
+    import type { File as PrismaFile, Material, Publication, Tag } from '@prisma/client';
+
+
+    //TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
+    //TODO: fix tags on pubCard fix the icon to be the encapsulating type of the publication
+    //TODO: add animation on loading
+    //TODO: Fix the browsing on other pages as well
 
     export let data:PageServerData;
     let searchWord: string = '';
@@ -20,13 +24,13 @@
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
 
-
+    console.log(data.circuits)
     $: pageType = data.type;
 
     //Variables needed to deal with Sort and Difficulty
-        let sortOptions: string[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"]
+        let sortOptions: {id:number, content:string }[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"].map(x => ({id:0, content:x}))
         let sortByActive = false
-        let sortByText = 'Most Recent'
+        let sortByText = 'Sort By'
 
         let selectedDiff: {id:number, content:string }[] = []
         let diffOptions: { id: number, content: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, content: x }));
@@ -49,6 +53,8 @@
         let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
         let displayTypes: {id:number, content:string }[] = allTypes; //
         let typeActive = false
+
+        let numberNodes : number;
 
     //Used to make the dropdown appear/disappear
     const toggleSortBy = () => {
@@ -112,11 +118,11 @@
         typeActive = false;
     };
 
-    const resetAll = () => {
-        searchWord = '';
-        applyActive = false
-        resetFilters();
-    };
+    // const resetAll = () => {
+    //     searchWord = '';
+    //     applyActive = false
+    //     rese tFilters();
+    // };
 
     // const resetFilterButton = () => {
     //     resetFilters();
@@ -157,20 +163,45 @@
         console.log(pageType)
         applyActive = false;
         const queryParams = new URLSearchParams({
-            publishers: selectedPublishers.map(x => x.id).join(','),
-            difficulty: selectedDiff.map(x => x.content).join(','),
-            types: selectedTypes.map(x => x.content).join(','),
-            tags: selectedTags.map(x => x.content).join(','),
-            sort: sortByText,
-            q: searchWord
+            type: pageType
         });
 
+        if (selectedPublishers.length > 0)
+        {
+            queryParams.set("publishers", selectedPublishers.map(x => x.id).join(','))
+        }
+
+        if (selectedDiff.length > 0)
+        {
+            queryParams.set("difficulty", selectedDiff.map(x => x.content).join(','))
+        }
+        if (selectedTags.length > 0)
+        {
+            queryParams.set("tags", selectedTags.map(x => x.content).join(','))
+        }
+        if (selectedTypes.length > 0)
+        {
+            queryParams.set("types", selectedTypes.map(x => x.content).join(','))
+        }
+        if (sortByText !== "Most Recent")
+        {
+            queryParams.set("sort", sortByText)
+        }
+        if (searchWord !== "")
+        {
+            queryParams.set("q", searchWord)
+        }
+        if (numberNodes != undefined && numberNodes !== 0)
+        {
+            queryParams.set("limit", numberNodes.toString())
+        }
+
+
         const s = pageType === "materials" ? "material" : "circuit";
-        console.log(s)
-
         const url = `/api/${s}?${queryParams.toString()}`;
-
-        // Make a GET request to the API
+        materials = [];
+        circuits = [];
+        //Make a GET request to the API
         await fetch(url)
           .then(response => {
               if (!response.ok) {
@@ -182,8 +213,11 @@
               // Handle the response data from the API
               if (s === "material") {
                   materials = data.materials;
+                  console.log(materials)
               } else {
                   circuits = data;
+                  console.log("Got Here")
+                  console.log(circuits)
               }
           })
           .catch(error => {
@@ -196,7 +230,10 @@
 
     let applyActive = false;
     $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
+
+
 </script>
+
 <div class="flex justify-between col-span-full mt-32">
     <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
         <SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
@@ -209,45 +246,35 @@
 </div>
 
 <div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
-    <div class="flex gap-1 items-center">
+    {#if pageType !== "people"}
+        <div class="flex gap-1 items-center">
 
-        <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
-                profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
-                on:filterSelected={() => {applyActive = true}} />
-        <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
-                bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}"
-                on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} />
-        <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
-                profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
-                on:filterSelected={() => {applyActive = true}} />
-        <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
-                profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
-                on:filterSelected={() => {applyActive = true}} />
-        <div class = "w-px h-4/5 bg-surface-600" ></div>
-        <div class="space-y-1 relative">
-            <button class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {sortByBorder}"
-                    on:click={toggleSortBy}>
-                <span class="flex-grow text-surface-700 dark:text-surface-300">{sortByText}</span>
-                {#if sortByActive}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text"/>
-                {:else}
-                    <Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5"/>
-                {/if}
-            </button>
-            {#if sortByActive}
-                <div class="absolute left-0 right-0 flex flex-col rounded-lg border border-surface-400 bg-surface-50 min-w-32"
-                     transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
-                    {#each sortOptions as sopt}
-                        <button class="text-xs p-1 rounded-lg hover:bg-primary-50 text-left text-surface-600"
-                                on:click={updateSortBy}>{sopt}</button>
-                    {/each}
-                </div>
+            <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
+                    profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
+                    on:filterSelected={() => {applyActive = true}} num="{0}"/>
+            <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
+                    bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}"
+                    on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}"/>
+            {#if pageType === "materials"}
+                <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
+                        profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
+                        on:filterSelected={() => {applyActive = true}} num="{0}" />
+                <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
+                        profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
+                        on:filterSelected={() => {applyActive = true}} num="{0}" />
+            {:else}
+                <Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
+                        profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
             {/if}
+            <div class = "w-px h-4/5 bg-surface-600" ></div>
+            <Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" />
+
+
+            <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 {applyBackground}"
+                    on:click={sendFiltersToAPI}  >Apply
+            </button>
         </div>
-        <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 {applyBackground}"
-                on:click={sendFiltersToAPI} disabled="{!applyActive}">Apply
-        </button>
-    </div>
+    {/if}
 
 
     <div class="flex rounded-lg lg:hidden w-1/4">
