@@ -55,30 +55,30 @@ export async function getAllMaterials(
 	sort: string,
 	query: string,
 ) {
-	const where: any = { AND: [] };
+	// const where: any = { AND: [] };
+	//
+	// if (publishers.length > 0) {
+	// 	where.AND.push({ publication: { publisherId: { in: publishers } } });
+	// }
+	//
+	// if (diff.length > 0) {
+	// 	where.AND.push({ publication: { difficulty: { in: diff } } });
+	// }
+	//
+	// if (tags.length > 0) {
+	// 	where.AND.push({
+	// 		publication: { tags: { some: { content: { in: tags } } } },
+	// 	});
+	// }
+	//
+	// if (type.length > 0) {
+	// 	where.AND.push({ encapsulatingType: { in: type } });
+	// }
 
-	if (publishers.length > 0) {
-		where.AND.push({ publication: { publisherId: { in: publishers } } });
-	}
-
-	if (diff.length > 0) {
-		where.AND.push({ publication: { difficulty: { in: diff } } });
-	}
-
-	if (tags.length > 0) {
-		where.AND.push({
-			publication: { tags: { some: { content: { in: tags } } } },
-		});
-	}
-
-	if (type.length > 0) {
-		where.AND.push({ encapsulatingType: { in: type } });
-	}
-
-	const sortBy = sortSwitch(sort);
+	//const sortBy = sortSwitch(sort);
 	let materials = await prisma.material.findMany({
-		where,
-		orderBy: sortBy,
+		// where,
+		// orderBy: sortBy,
 		include: {
 			publication: {
 				include: {
@@ -95,22 +95,22 @@ export async function getAllMaterials(
 		},
 	});
 
-	if (query !== '') {
-		const m = materials;
-		let shouldSort = false;
-		if (sort !== 'Sort By') shouldSort = true;
-		const searcher = new Fuse(m, {
-			keys: [
-				{ name: 'publication.title', weight: 0.4 },
-				{ name: 'publication.description', weight: 0.4 },
-				{ name: 'publication.learningObjectives', weight: 0.2 },
-			],
-			isCaseSensitive: false,
-			threshold: 0.6,
-			shouldSort: shouldSort,
-		});
-		materials = searcher.search(query).map((m) => m.item);
-	}
+	// if (query !== '') {
+	// 	const m = materials;
+	// 	let shouldSort = false;
+	// 	if (sort !== 'Sort By') shouldSort = true;
+	// 	const searcher = new Fuse(m, {
+	// 		keys: [
+	// 			{ name: 'publication.title', weight: 0.4 },
+	// 			{ name: 'publication.description', weight: 0.4 },
+	// 			{ name: 'publication.learningObjectives', weight: 0.2 },
+	// 		],
+	// 		isCaseSensitive: false,
+	// 		threshold: 0.6,
+	// 		shouldSort: shouldSort,
+	// 	});
+	// 	materials = searcher.search(query).map((m) => m.item);
+	// }
 
 	return materials;
 }

@@ -1,6 +1,6 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
-import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
+import { Difficulty, PublicationType } from '@prisma/client';
 import { sortSwitch } from '$lib';
 import Fuse from 'fuse.js';
 
@@ -38,27 +38,27 @@ export async function getAllCircuits(
 	sort: string,
 	query: string,
 ) {
-	const where: any = { AND: [] };
+	// const where: any = { AND: [] };
+	//
+	// if (publishers.length > 0) {
+	// 	where.AND.push({ publication: { publisherId: { in: publishers } } });
+	// }
+	//
+	// if (limit > 0) {
+	// 	where.AND.push({ numNodes: { gte: limit } });
+	// }
+	//
+	// if (tags.length > 0) {
+	// 	where.AND.push({
+	// 		publication: { tags: { some: { content: { in: tags } } } },
+	// 	});
+	// }
+	//
+	// const sortBy = sortSwitch(sort);
 
-	if (publishers.length > 0) {
-		where.AND.push({ publication: { publisherId: { in: publishers } } });
-	}
-
-	if (limit > 0) {
-		where.AND.push({ numNodes: { gte: limit } });
-	}
-
-	if (tags.length > 0) {
-		where.AND.push({
-			publication: { tags: { some: { content: { in: tags } } } },
-		});
-	}
-
-	const sortBy = sortSwitch(sort);
-
-	let circuits = await prisma.circuit.findMany({
-		where,
-		orderBy: sortBy,
+	const circuits = await prisma.circuit.findMany({
+		// where,
+		// orderBy: sortBy,
 		include: {
 			publication: {
 				include: {
@@ -74,23 +74,23 @@ export async function getAllCircuits(
 			nodes: false,
 		},
 	});
-
-	if (query !== '') {
-		const c = circuits;
-		let shouldSort = false;
-		if (sort !== 'Sort By') shouldSort = true;
-		const searcher = new Fuse(c, {
-			keys: [
-				{ name: 'publication.title', weight: 0.4 },
-				{ name: 'publication.description', weight: 0.4 },
-				{ name: 'publication.learningObjectives', weight: 0.2 },
-			],
-			isCaseSensitive: false,
-			threshold: 0.6,
-			shouldSort: shouldSort,
-		});
-		circuits = searcher.search(query).map((c) => c.item);
-	}
+	//
+	// if (query !== '') {
+	// 	const c = circuits;
+	// 	let shouldSort = false;
+	// 	if (sort !== 'Sort By') shouldSort = true;
+	// 	const searcher = new Fuse(c, {
+	// 		keys: [
+	// 			{ name: 'publication.title', weight: 0.4 },
+	// 			{ name: 'publication.description', weight: 0.4 },
+	// 			{ name: 'publication.learningObjectives', weight: 0.2 },
+	// 		],
+	// 		isCaseSensitive: false,
+	// 		threshold: 0.6,
+	// 		shouldSort: shouldSort,
+	// 	});
+	// 	circuits = searcher.search(query).map((c) => c.item);
+	// }
 
 	return circuits;
 }
@@ -109,6 +109,7 @@ export async function deleteCircuitByPublicationId(
 /**
  * [POST] Returns a created publication of type Circuit
  * @param userId
+ * @param numNodes
  * @param metaData
  * @param prismaContext
  */
