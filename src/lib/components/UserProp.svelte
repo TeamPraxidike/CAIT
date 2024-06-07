@@ -73,22 +73,22 @@
 	</a>
 
 {:else if view === "material"}
-		<a href={link} type="button" style="height:fit-content" use:popup={popupHoverBottom}
-			 class="flex-none [&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
-			<div class="flex flex-col items-center justify-center space-y-1 flex-none">
-				{#if userPhotoUrl !== ''}
-					<img src={userPhotoUrl} alt="User Profile" class="flex-none rounded-full" />
-				{:else}
-					<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
-				{/if}
-				<div class="max-w-full items-center flex-none">
-					<div class="dark:text-surface-50 text-surface-900 max-w-full truncate flex-none">{name}</div>
-					<hr class="dark:bg-surface-50 bg-surface-300" />
-				</div>
-				<div class="text-sm md:text-md ">{role}</div>
-			</div>
-		</a>
 
+	<a href={link} type="button" style="height:fit-content" use:popup={popupHoverBottom}
+		 class="flex-none [&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
+		<div class="flex flex-col items-center justify-center space-y-1 flex-none">
+			{#if userPhotoUrl !== ''}
+				<img src={userPhotoUrl} alt="User Profile" class="flex-none w-10 h-10 md:w-20 md:h-20 rounded-full" />
+			{:else}
+				<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
+			{/if}
+			<div class="max-w-full items-center flex-none">
+				<div class="dark:text-surface-50 text-surface-900 max-w-full truncate flex-none">{name}</div>
+				<hr class="dark:bg-surface-50 bg-surface-300" />
+			</div>
+			<div class="text-sm md:text-md ">{role}</div>
+		</div>
+	</a>
 
 {:else if view === "publish"}
 	<div style="height:fit-content"

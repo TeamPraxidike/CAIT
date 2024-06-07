@@ -218,61 +218,61 @@
 					</button>
 				</div>
 			{/if}
+			<div class="flex gap-2">
+				<p class="text-sm text-surface-500">{created}</p>
+
+				{#if isMaterial}
+					{#if pubView.publication.materials.files.length===1}
+						<Icon icon={IconMapExtension.get(pubView.publication.materials.files.map((f => getFileExtension(f.title)))[0]) || 'vscode-icons:file-type-text'} class="text-xl text-surface-500" />
+					{:else}
+						<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
+					{/if}
+					<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+				{:else }
+					<Icon icon="mdi:graph" class="text-xl text-primary-500" />
+				{/if}
+
+			</div>
+
+			<div class="flex flex-wrap gap-2 my-2">
+				{#each tags as tag}
+					<Tag tagText={tag} removable={false} />
+				{/each}
+			</div>
+			<div class="w-full">
+				<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">{pubView.publication.description}</p>
+				{#if isMaterial}
+					{#if pubView.publication.materials.timeEstimate}
+						<p class="text-surface-400 text-sm mt-4"> Time Estimate: {pubView.publication.materials.timeEstimate} </p>
+					{/if}
+					<p class="text-surface-400 text-sm">Copyright: {pubView.publication.materials.copyright}</p>
+				{/if}
+			</div>
 		</div>
 		<p class="text-sm opacity-85 pl-5 break-words max-w-full">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
-		<div class="flex self-end flex-col gap-2 max-w-full ">
+
+		<div class="flex gap-2">
 			{#if isMaterial && pubView.publication.materials.theoryPractice}
 				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}"/>
 			{/if}
-
+			<div class="flex gap-2">
+				<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
+				<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
+				<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
+				{#each pubView.publication.maintainers as maintainer}
+					<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
+				{/each}
+			</div>
 		</div>
 	</div>
 </div>
 
-<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
-{#each pubView.publication.maintainers as maintainer}
-	<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
-{/each}
 
 <div class="col-span-full flex flex-col items-start mt-2">
-	<div class="flex gap-2">
-		<p class="text-sm text-surface-500">{created}</p>
-
-		{#if isMaterial}
-			{#if pubView.publication.materials.files.length===1}
-				<Icon icon={IconMapExtension.get(pubView.publication.materials.files.map((f => getFileExtension(f.title)))[0]) || 'vscode-icons:file-type-text'} class="text-xl text-surface-500" />
-				{:else}
-				<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
-			{/if}
-			<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
-		{:else }
-			<Icon icon="mdi:graph" class="text-xl text-primary-500" />
-		{/if}
-
-	</div>
-
-	<div class="flex flex-wrap gap-2 my-2">
-		{#each tags as tag}
-			<Tag tagText={tag} removable={false} />
-		{/each}
-	</div>
 
 </div>
 
 <div class="col-span-full flex flex-col items-start mt-2">
-	<div class="flex justify-between w-full">
-		<div class="w-full">
-			<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">{pubView.publication.description}</p>
-			{#if isMaterial}
-				{#if pubView.publication.materials.timeEstimate}
-					<p class="text-surface-400 text-sm mt-4"> Time Estimate: {pubView.publication.materials.timeEstimate} </p>
-				{/if}
-				<p class="text-surface-400 text-sm">Copyright: {pubView.publication.materials.copyright}</p>
-			{/if}
-		</div>
-
-
-	</div>
 
 	<div class="flex items-center text-3xl rounded-lg border mt-4">
 		<button type="button"
@@ -293,37 +293,41 @@
 			<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
 		</button>
 	</div>
-	<Accordion class="mt-4">
-		<AccordionItem class="variant-soft-primary rounded-lg">
-			<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
-			<svelte:fragment slot="content" >
-				{#if pubView.publication.learningObjectives.length === 0}
-					<span>No learning objectives have been indicated</span>
-				{:else}
-				{#each pubView.publication.learningObjectives as LO}
-					<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
-				{/each}
-				{/if }
-			</svelte:fragment>
-		</AccordionItem>
-		<AccordionItem class="variant-soft-primary rounded-lg">
-			<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
-			<svelte:fragment slot="content">
-				{#if pubView.publication.prerequisites.length === 0}
-					<span>No prior knowledge has been indicated</span>
-					{:else}
-					{#each pubView.publication.prerequisites as PK}
-						<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
-					{/each}
-				{/if}
 
-			</svelte:fragment>
-		</AccordionItem>
-	</Accordion>
 	{#if isMaterial}
-		<div class="w-full">
-			<FileTable operation="download" {files} />
+		<div class="flex justify-between w-full gap-4">
+			<div class="w-full">
+				<FileTable operation="download" {files} />
+			</div>
+			<Accordion class="mt-7 " regionPanel="space-y-8" padding="p-3">
+				<AccordionItem class="variant-soft-primary rounded-lg">
+					<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+					<svelte:fragment slot="content" >
+						{#if pubView.publication.learningObjectives.length === 0}
+							<span>No learning objectives have been indicated</span>
+						{:else}
+							{#each pubView.publication.learningObjectives as LO}
+								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
+							{/each}
+						{/if }
+					</svelte:fragment>
+				</AccordionItem>
+				<AccordionItem class="variant-soft-primary rounded-lg">
+					<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+					<svelte:fragment slot="content">
+						{#if pubView.publication.prerequisites.length === 0}
+							<span>No prior knowledge has been indicated</span>
+						{:else}
+							{#each pubView.publication.prerequisites as PK}
+								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
+							{/each}
+						{/if}
+
+					</svelte:fragment>
+				</AccordionItem>
+			</Accordion>
 		</div>
+
 	{:else}
 		<div  class="w-full">
 			<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}"/>
