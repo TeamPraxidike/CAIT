@@ -5,7 +5,7 @@ import removeMd from 'remove-markdown'
 import {pythonKeywords} from "./pythonKeywords.js";
 
 
-export async function reader(filePath: string): Promise<string> {
+export async function reader(filePath: string): Promise<string | null> {
     switch(filePath.split('.')[1]) {
         case 'txt':
             return txtReader(filePath);
@@ -29,7 +29,7 @@ export async function reader(filePath: string): Promise<string> {
             return officeReader(filePath)
 
         default:
-            throw new Error("File extension not supported")
+            return null
     }
 }
 

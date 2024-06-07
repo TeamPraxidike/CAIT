@@ -1,27 +1,21 @@
 import {reader} from './reader';
 import {calculateCosineSimilarity, calculateTfIdf} from './textProcessor';
-
-async function main() {
-    const path1 = 'long.txt'
-    const path2 = 'net-flow-work.pdf'
-    const path3 = 'Main.ipynb'
-    const path4 = 'Praxidike_Covenant.pdf'
-    const path5 = 'summary.txt'
-    const path6 = 'short-summary.txt'
+import type {File as PrismaFile} from '@prisma/client'
+import path from "path";
+import {basePath} from '$lib/database'
 
 
+/**
+ * Main method that returns the similarity between two sets of files
+ * @param pubAFiles
+ * @param pubBFiles
+ */
+export async function compare(pubAFiles: PrismaFile[], pubBFiles: PrismaFile[]): Promise<number> {
     try {
-        const start = performance.now()
+        //const start = performance.now()
 
-        const text1: string = await reader(path1);
-        const text2: string = await reader(path2);
-        const text3: string = await reader(path3);
-        const text4: string = await reader(path4);
-        const text5: string = await reader(path5);
-        const text6: string = await reader(path6);
-
-        const pubAText: Set<string> = new Set([text1]);
-        const pubBText: Set<string> = new Set([text2, text3, text4, text5, text6]);
+        const pubAText: Set<string> = await getPubText(pubAFiles)
+        const pubBText: Set<string> = await getPubText(pubBFiles)
 
         const combinedList: string[] = Array.from(new Set([...pubAText, ...pubBText]))
             .sort((first, second) => (first > second ? -1 : 1));
@@ -95,14 +89,27 @@ async function main() {
         }
         else similarity = Number((weightedSimilarities / sumWeights).toPrecision(3));
 
-        console.log(`Cosine Similarity: ${similarity}`);
+        //console.log(`Cosine Similarity: ${similarity}`);
 
-        const end = performance.now()
+        return similarity
 
-        console.log(`took ${end - start}`)
+        // const end = performance.now()
+        //
+        // console.log(`took ${end - start}`)
     } catch (error) {
         console.error('Error reading PDFs:', error);
+        return 0;
     }
 }
 
-main().catch(err => console.error('Unhandled error in main:', err));
+/**
+ * Helper method that reads text from a list of File entities
+ * @param pubFiles
+ */
+async function getPubText(pubFiles: PrismaFile[]): Promise<Set<string>> {
+    const pubAPromises = pubFiles.map(file => reader(path.join(basePath, file.path)));
+    const pubAContents = await Promise.all(pubAPromises);
+    const validContents = pubAContents.filter(content => content !== null);
+
+    return new Set(validContents as string[]);
+}
