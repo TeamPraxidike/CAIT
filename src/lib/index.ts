@@ -30,13 +30,16 @@ import PublishReview from '$lib/components/PublishReview.svelte';
 // util
 import { getDateDifference } from '$lib/util/date';
 
+import { mapToType, mapToDifficulty } from '$lib/util/types';
+
 const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
 
 import AddInteractionForm from '$lib/components/AddInteractionForm.svelte';
-import { Difficulty, MaterialType } from '@prisma/client';
 
 export {
+	mapToType,
+	mapToDifficulty,
 	Download,
 	getDateDifference,
 	Render,
@@ -64,58 +67,4 @@ export {
 	AddInteractionForm,
 	UsedInCourse,
 	PublishReview,
-};
-
-export function mapToDifficulty(difficulty: string): Difficulty {
-	switch (difficulty.toLowerCase()) {
-		case 'easy':
-			return Difficulty.easy;
-		case 'medium':
-			return Difficulty.medium;
-		case 'hard':
-			return Difficulty.hard;
-		default:
-			throw new Error(`Invalid difficulty: ${difficulty}`);
-	}
-}
-
-export function mapToType(mt: string): MaterialType {
-	switch (mt.toLowerCase()) {
-		case 'video':
-			return MaterialType.video;
-		case 'presentation':
-			return MaterialType.presentation;
-		case 'assignment':
-			return MaterialType.assignment;
-		case 'dataset':
-			return MaterialType.dataset;
-		case 'exam':
-			return MaterialType.exam;
-		case 'code':
-			return MaterialType.code;
-		default:
-			throw new Error(`Invalid material type: ${mt}`);
-	}
-}
-
-export const sortSwitch = (sort: string) => {
-	let orderBy: any;
-	switch (sort) {
-		case 'Most Liked':
-			orderBy = { publication: { likes: 'desc' } };
-			break;
-		case 'Most Used':
-			orderBy = { publication: { usageCount: 'desc' } };
-			break;
-		case 'Oldest':
-			orderBy = { publication: { createdAt: 'asc' } };
-			break;
-		case 'Most Recent':
-			orderBy = { publication: { createdAt: 'desc' } }; // Default to 'Most Recent'
-			break;
-		default:
-			orderBy = {};
-	}
-
-	return orderBy;
 };

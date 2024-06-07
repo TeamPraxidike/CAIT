@@ -1,8 +1,27 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
-import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
-import { sortSwitch } from '$lib';
+import { Difficulty, PublicationType } from '@prisma/client';
 import Fuse from 'fuse.js';
+
+const sortSwitch = (sort: string) => {
+	let orderBy: any;
+	switch (sort) {
+		case 'Most Liked':
+			orderBy = { publication: { likes: 'desc' } };
+			break;
+		case 'Most Used':
+			orderBy = { publication: { usageCount: 'desc' } };
+			break;
+		case 'Oldest':
+			orderBy = { publication: { createdAt: 'asc' } };
+			break;
+		default:
+			orderBy = { publication: { createdAt: 'desc' } }; // Default to 'Most Recent'
+			break;
+	}
+
+	return orderBy;
+};
 
 /**
  * [GET] Returns a publication of type Circuit with the given id.
@@ -109,6 +128,7 @@ export async function deleteCircuitByPublicationId(
 /**
  * [POST] Returns a created publication of type Circuit
  * @param userId
+ * @param numNodes
  * @param metaData
  * @param prismaContext
  */

@@ -1,7 +1,26 @@
 import { prisma } from '$lib/database';
 import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
-import { sortSwitch } from '$lib';
+
+const sortSwitch = (sort: string) => {
+	let orderBy: any;
+	switch (sort) {
+		case 'Most Liked':
+			orderBy = { publication: { likes: 'desc' } };
+			break;
+		case 'Most Used':
+			orderBy = { publication: { usageCount: 'desc' } };
+			break;
+		case 'Oldest':
+			orderBy = { publication: { createdAt: 'asc' } };
+			break;
+		default:
+			orderBy = { publication: { createdAt: 'desc' } }; // Default to 'Most Recent'
+			break;
+	}
+
+	return orderBy;
+};
 import Fuse from 'fuse.js';
 
 /**
