@@ -22,7 +22,7 @@ describe('get all circuits', () => {
 			{ id: 4, publicationId: 2 },
 		]);
 
-		const circuits = await getAllCircuits();
+		const circuits = await getAllCircuits([], [], 0, 'Most Recent', '');
 		expect(circuits).toHaveLength(2);
 		expect(circuits[0].publicationId).toBe(1);
 		expect(circuits[1].publicationId).toBe(2);

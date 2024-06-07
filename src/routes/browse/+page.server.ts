@@ -5,8 +5,6 @@ export async function load({ url, fetch, locals }) {
 
 	const type = url.searchParams.get('type') || 'materials';
 
-	// get all the materials
-
 	const { materials } =
 		type === 'materials'
 			? await (await fetch(`/api/material`)).json()
@@ -15,6 +13,7 @@ export async function load({ url, fetch, locals }) {
 		type === 'circuits'
 			? await (await fetch(`/api/circuit`)).json()
 			: { circuits: [] };
+	console.log('Brooooooooooooooo');
 	const { users } = await (await fetch(`/api/user`)).json();
 
 	let liked: number[] = [];
@@ -44,8 +43,6 @@ export async function load({ url, fetch, locals }) {
 
 		tags = await (await fetch(`/api/tags`)).json();
 	}
-
-	console.log(materials);
 
 	return {
 		type,

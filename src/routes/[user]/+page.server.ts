@@ -21,12 +21,22 @@ export const load: PageServerLoad = async ({
 		};
 	}
 
-	const savedRes = await fetch(
-		`/api/user/${params.user}/saved?fullPublications=true`,
-	);
 
-	if (![200, 204].includes(savedRes.status)) {
-		throw new Error('Failed to fetch saved materials');
+	let savedRes = null;
+	if(params.user === session.user.id){
+		savedRes = await fetch(
+			`/api/user/${params.user}/saved?fullPublications=true`,
+		);
+		if (![200, 204].includes(savedRes.status)) {
+			throw new Error('Failed to fetch saved materials');
+		}
+	}
+
+	const savedByUserRes = await fetch(
+		`/api/user/${session.user.id}/saved?fullPublications=false`,
+	);
+	if (![200, 204].includes(savedByUserRes.status)) {
+		throw new Error('Failed to fetch saved by user materials');
 	}
 
 	const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
@@ -38,13 +48,13 @@ export const load: PageServerLoad = async ({
 	);
 	const used = usedResponse.status === 200 ? await usedResponse.json() : [];
 
-	const { saved, savedFileData } =
-		savedRes.status === 204
-			? { saved: [], savedFileData: [] }
-			: await savedRes.json();
-	const { materials } = await materialsRes.json();
+	const savedJson = savedRes === null || savedRes.status === 204 ? { saved: [], savedFileData: [] } : await savedRes.json();
+	const saved = savedJson.saved;
+	const savedFileData = savedJson.savedFileData;
 
-	return { materials, saved, savedFileData, liked, used };
+	const savedByUser = await savedByUserRes.json();
+	const materials  = await materialsRes.json();
+	return { materials: materials.materials, saved, savedFileData, liked, used, savedByUser: savedByUser.saved };
 };
 
 export type PublicationInfo = {

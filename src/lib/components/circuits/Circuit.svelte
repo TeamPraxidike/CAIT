@@ -552,7 +552,7 @@
 	export const publishCircuit = async () => {
 
 		let nodeDiffActions: NodeDiffActions;
-
+		const numNodes = cy.nodes().length;
 		const add: ({ publicationId: number; x: number; y: number }[]) = [];
 		const del: ({ publicationId: number }[]) = [];
 		const edit: ({ publicationId: number; x: number; y: number }[]) = [];
@@ -565,7 +565,7 @@
 			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => Number(edge.target().id()));
 			next.push(({ fromId: Number(node.id()), toId: toID }));
 		})
-		nodeDiffActions = { add: add, delete: del, edit: edit, next: next };
+		nodeDiffActions = {numNodes, add, delete:del, edit, next };
 
 		// cy.fit();
 		// addHtmlLabel("node", false)

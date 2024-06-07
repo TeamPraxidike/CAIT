@@ -185,6 +185,7 @@ type FetchedFileArray = FetchedFileItem[];
  */
 
 type NodeDiffActions = {
+	numNodes: number;
 	add: { publicationId: number; x: number; y: number }[];
 	delete: { publicationId: number }[];
 	edit: { publicationId: number; x: number; y: number }[];
