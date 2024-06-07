@@ -27,7 +27,6 @@ export const actions = {
 		const title = data.get('title')?.toString() || '';
 		const description = data.get('description')?.toString() || '';
 		const isMaterial = data.get('isMaterial')?.toString() || '';
-		console.log(isMaterial);
 		const difficulty = data.get('difficulty')?.toString() || '';
 		const copyright = data.get('copyright')?.toString() || '';
 		const time = data.get('timeEstimate')?.toString() || '';

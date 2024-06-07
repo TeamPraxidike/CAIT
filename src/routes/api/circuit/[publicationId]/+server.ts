@@ -109,7 +109,16 @@ export async function PUT({ request, params, locals }) {
 			if (coverPic) {
 				await updateCircuitCoverPic(
 					coverPic,
-					circuit.publicationId,
+					publicationId,
+					prismaTransaction,
+				);
+			}
+
+			// delete nodes
+			for (const node of nodeInfo.delete) {
+				await deleteNode(
+					body.circuitId,
+					node.publicationId,
 					prismaTransaction,
 				);
 			}
@@ -121,15 +130,6 @@ export async function PUT({ request, params, locals }) {
 					node.publicationId,
 					node.x,
 					node.y,
-					prismaTransaction,
-				);
-			}
-
-			// delete nodes
-			for (const node of nodeInfo.delete) {
-				await deleteNode(
-					body.circuitId,
-					node.publicationId,
 					prismaTransaction,
 				);
 			}

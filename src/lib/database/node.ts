@@ -35,16 +35,16 @@ export async function handleEdges(
 	//TODO: check if node is connected to itself (improper behaviour)
 
 	const edgeData = next.flatMap(({ fromId, toId }) =>
-		toId.map(toIdValue => ({
+		toId.map((toIdValue) => ({
 			circuitId: circuitId,
 			fromPublicationId: fromId,
 			toPublicationId: toIdValue,
-		}))
+		})),
 	);
 
 	await prismaContext.edge.createMany({
 		data: edgeData,
-		skipDuplicates: true
+		skipDuplicates: true,
 	});
 }
 
@@ -84,8 +84,8 @@ export async function editNode(
 			where: {
 				circuitId_publicationId: {
 					circuitId: circuitId,
-					publicationId: publicationId
-				}
+					publicationId: publicationId,
+				},
 			},
 			data: {
 				posX: x,
@@ -102,13 +102,15 @@ export async function deleteNode(
 	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
+	console.log(circuitId);
+	console.log(publicationId);
 	try {
 		return prismaContext.node.delete({
 			where: {
 				circuitId_publicationId: {
 					circuitId: circuitId,
-					publicationId: publicationId
-				}
+					publicationId: publicationId,
+				},
 			},
 		});
 	} catch (error) {
