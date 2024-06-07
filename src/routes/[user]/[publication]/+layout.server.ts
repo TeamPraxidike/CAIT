@@ -89,4 +89,5 @@ export type PublicationView = {
 		};
 	};
 	coverFileData: FetchedFileItem;
+	maintainers: (User & { profilePicData: string })[];
 };

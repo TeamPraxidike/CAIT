@@ -126,7 +126,6 @@
 				formData.append('publisherId', uid.toString());
         formData.append('title', title);
         formData.append('description', description);
-        formData.append('difficulty', 'easy');
         formData.append('selectedTags', JSON.stringify(addedTags));
 				formData.append('newTags', JSON.stringify(newTags))
         formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));

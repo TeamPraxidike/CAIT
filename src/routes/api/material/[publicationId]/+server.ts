@@ -79,6 +79,7 @@ export async function PUT({ request, params, locals }) {
 	const body: MaterialForm & {
 		materialId: number;
 	} = await request.json();
+
 	const material: MaterialForm = body;
 	const metaData = material.metaData;
 	// const userId = material.userId;

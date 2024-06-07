@@ -5,6 +5,7 @@ import {
 	fileSystem,
 	getPublicationById,
 } from '$lib/database';
+import { profilePicFetcher } from '$lib/database/file';
 
 export async function GET({ params }) {
 	// Authentication step
@@ -32,6 +33,13 @@ export async function GET({ params }) {
 			);
 		}
 
+		const maintainers = publication.maintainers.map((user) => {
+			return {
+				...user,
+				profilePicData: profilePicFetcher(user.profilePic).data,
+			};
+		});
+
 		if (publication.materials) {
 			//const material = await getMaterialByPublicationId(publicationId);
 			const fileData: FetchedFileArray = [];
@@ -56,6 +64,7 @@ export async function GET({ params }) {
 					publication: publication,
 					fileData,
 					coverFileData,
+					maintainers,
 				}),
 				{
 					status: 200,
@@ -66,7 +75,8 @@ export async function GET({ params }) {
 				JSON.stringify({
 					isMaterial: false,
 					publication: publication,
-					fileData: {},
+					maintainers,
+					fileData: [],
 					coverFileData: {},
 				}),
 				{

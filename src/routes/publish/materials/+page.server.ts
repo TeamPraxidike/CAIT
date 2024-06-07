@@ -1,6 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
-import type { MaterialForm } from '$lib/database';
-import { MaterialType, type Tag } from '@prisma/client';
+import { type MaterialForm } from '$lib/database';
+import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();
@@ -86,6 +86,7 @@ export const actions = {
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
 		const newTagsArray: string[] = JSON.parse(outerArray[0]);
+
 		if (newTagsArray.length !== 0) {
 			const resTags = await fetch('/api/tags', {
 				method: 'POST',
@@ -104,7 +105,10 @@ export const actions = {
 			metaData: {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',
-				difficulty: 'easy',
+				difficulty:
+					((
+						data.get('difficulty')?.toString() || ''
+					).toLowerCase() as Difficulty) || 'easy',
 				learningObjectives: JSON.parse(losDataEntry?.toString() || ''),
 				prerequisites: JSON.parse(
 					data.get('prerequisites')?.toString() || '',

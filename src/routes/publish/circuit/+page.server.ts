@@ -1,6 +1,6 @@
 import type { Tag } from '@prisma/client';
 import type { Actions, PageServerLoad } from './$types';
-import type { CircuitForm } from '$lib/database';
+import { type CircuitForm } from '$lib/database';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();
@@ -21,7 +21,6 @@ export const actions = {
 		const title = data.get('title')?.toString() || '';
 		const description = data.get('description')?.toString() || '';
 		const selectedTags = data.get('selectedTags')?.toString() || '';
-
 		//I need to get the separate strings here so I can create them as string[], but not sure how to do that
 		const newTags = data.getAll('newTags') || '';
 

@@ -51,7 +51,7 @@
 	let copyright: string = '';
 	let theoryApplicationRatio = 0.5;
 	let selectedType = "Select Type";
-	let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+	let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
 
 	// cover
 	let coverPic: File | undefined = undefined;

@@ -63,7 +63,7 @@
 		};
 	}
 	const popupAdd: PopupSettings = {
-		event: 'focus-click',
+		event: 'click',
 		target: 'hoverAdd',
 		placement: 'right',
 		middleware: {
@@ -91,14 +91,14 @@
 	</div>
 </div>
 
-<div data-popup="hoverAdd"
-		 class="flex flex-col overflow-y-auto max-h-48 border rounded-lg dark:bg-surface-700 bg-surface-50 z-[9999]">
+<div data-popup="hoverAdd" use:clickOutside
+		 class="hidden flex-col overflow-y-auto max-h-48 border rounded-lg dark:bg-surface-700 bg-surface-50 z-[9999]">
 	<input on:input={handleSearchUsers} bind:this={userName} placeholder="Search for user"
 				 class="dark:text-surface-50 dark:bg-surface-600 text-surface-800 border-none rounded-lg focus:ring-0 text-sm" />
 	{#each searchableUsers as user}
 		{#if user.id !== uid}
 			<button type="button" id="user"
-							class="btn dark:hover:text-surface-600 hover:bg-primary-100 p-0.5 flex flex-items items-center w-full"
+							class="btn rounded-none dark:hover:text-surface-600 hover:bg-primary-100 p-0.5 flex flex-items items-center w-full"
 							on:click={()=>{addMaintainer(user)}}>
 				<!--						<enhanced:img class="rounded-full w-8 h-8" src={'data:image;base64,' + user.profilePicData} alt='user profile pic' />-->
 				<span class="w-full h-full">{user.firstName} {user.lastName}</span>

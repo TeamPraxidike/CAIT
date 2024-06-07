@@ -2,17 +2,20 @@ import {
 	addNode,
 	type CircuitForm,
 	deleteCircuitByPublicationId,
-	deleteNode, editNode, fileSystem,
+	deleteNode,
+	editNode,
+	fileSystem,
 	getCircuitByPublicationId,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
 	prisma,
-	updateCircuitByPublicationId, updateCircuitCoverPic,
+	updateCircuitByPublicationId,
+	updateCircuitCoverPic,
 } from '$lib/database';
 import { Prisma } from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
-import type {File as PrismaFile} from '@prisma/client';
+import type { File as PrismaFile } from '@prisma/client';
 
 export async function GET({ params, locals }) {
 	try {
@@ -48,7 +51,7 @@ export async function GET({ params, locals }) {
 		const circuitInfo = {
 			...circuit,
 			coverPicData: currentFileData.toString('base64'),
-		}
+		};
 
 		return new Response(JSON.stringify(circuitInfo), { status: 200 });
 	} catch (error) {
@@ -62,18 +65,22 @@ export async function GET({ params, locals }) {
  * Update circuit
  * @param request
  * @param params
+ * @param locals
  */
-export async function PUT({ request, params }) {
+export async function PUT({ request, params, locals }) {
 	// Authentication step
 	// return 401 if user not authenticated
+
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
 
 	const body: CircuitForm & {
 		circuitId: number;
 	} = await request.json();
-	const circuit: CircuitForm = body;
-	const metaData = circuit.metaData;
+
+	const metaData = body.metaData;
 	// const userId = circuit.userId;
-	const nodeInfo: NodeDiffActions = circuit.nodeDiff;
+	const nodeInfo: NodeDiffActions = body.nodeDiff;
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
 	const coverPic = body.coverPic;
@@ -99,7 +106,7 @@ export async function PUT({ request, params }) {
 			);
 
 			// if coverPic detected, change
-			if (coverPic){
+			if (coverPic) {
 				await updateCircuitCoverPic(
 					coverPic,
 					circuit.publicationId,
