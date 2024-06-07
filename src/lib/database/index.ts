@@ -84,6 +84,9 @@ import {
 	updateCircuitCoverPic,
 	updateFiles,
 } from '$lib/database/file';
+
+import {handleSimilarity} from "$lib/database/similarity";
+
 import { prisma } from './prisma';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { Difficulty, MaterialType } from '@prisma/client';
@@ -196,6 +199,7 @@ export {
 	type FetchedFileItem,
 	type FetchedFileArray,
 	type NodeDiffActions,
+	handleSimilarity,
 	updateCircuitCoverPic,
 	updateFiles,
 	coverPicFetcher,

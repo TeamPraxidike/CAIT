@@ -159,9 +159,23 @@ model Publication {
 
   coverPic File? @relation("CoverPic")
 
+  similarToThis  SimilarContent[] @relation("ThatSimilarToThis") // like an incoming edge
+  thisSimilarTo  SimilarContent[] @relation("ThisSimilarToThat") // like an outgoing edge
+
   materials    Material?
   circuit      Circuit?
   usedInCourse PublicationUsedInCourse[]
+}
+
+model SimilarContent {
+  similarFromId Int
+  similarFrom   Publication @relation("ThisSimilarToThat", fields: [similarFromId], references: [id], onDelete: Cascade)
+  similarToId  Int
+  similarTo   Publication @relation("ThatSimilarToThis", fields: [similarToId], references: [id], onDelete: Cascade)
+
+  similarity  Float
+
+  @@id([similarFromId, similarToId])
 }
 
 model Material {

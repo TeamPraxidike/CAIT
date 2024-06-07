@@ -1,10 +1,10 @@
 import Piscina from 'piscina';
 import { join } from 'path';
-import {getAllMaterials, getMaterialByPublicationId} from "$lib/database";
+import {getAllMaterials, getMaterialByPublicationId, handleSimilarity} from "$lib/database";
 import type {File as PrismaFile} from "@prisma/client";
 
 const piscina = new Piscina({
-    filename: join(__dirname, 'worker.js'), // link worker file
+    filename: join(__dirname, 'worker.ts'), // link worker file
     maxThreads: 4 // max number of threads
 });
 
@@ -18,17 +18,31 @@ async function compareFilesInBackground(pubAFiles: PrismaFile[], pubBFiles: Pris
 }
 
 export async function enqueueComparisonTasks(publicationId: number): Promise<void> {
-    const materials = await getAllMaterials([],[],[],[],'','');
-    const currentMaterial = await getMaterialByPublicationId(publicationId)
-    const comparisons: Promise<number>[] = [];
+    try{
+        const materials = await getAllMaterials([],[],[],[],'','');
+        const currentMaterial = await getMaterialByPublicationId(publicationId)
+        const comparisons: {fromPubId: number, toPubId: number, similarity: Promise<number>}[] = [];
 
-    for (let i = 0; i < materials.length; i++) {
-        if (materials[i].publicationId !== publicationId) {
-            // enqueue the task and push the promise to the comparisons array
-            comparisons.push(compareFilesInBackground(currentMaterial.files, materials[i].files));
+        for (let i = 0; i < materials.length; i++) {
+            if (materials[i].publicationId !== publicationId) {
+                // enqueue the task and push the promise to the comparisons array
+                comparisons.push({
+                    fromPubId: publicationId,
+                    toPubId: materials[i].publicationId,
+                    similarity: compareFilesInBackground(currentMaterial.files, materials[i].files)
+                });
+            }
         }
-    }
 
-    const results = await Promise.all(comparisons);
-    console.log('Comparison Results:', results);
+        const comparisonsResolved: {fromPubId: number, toPubId: number, similarity: number}[] = await Promise.all(comparisons.map(async data => ({
+            fromPubId: data.fromPubId,
+            toPubId: data.toPubId,
+            similarity: await data.similarity
+        })));
+
+        await handleSimilarity(comparisonsResolved)
+    }
+    catch (error){
+        console.error("Error while doing comparisons\n" + error)
+    }
 }
