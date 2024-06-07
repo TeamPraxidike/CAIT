@@ -30,7 +30,7 @@ import PublishReview from '$lib/components/PublishReview.svelte';
 // util
 import { getDateDifference } from '$lib/util/date';
 
-import { sortSwitch, mapToType, mapToDifficulty } from '$lib/util/types';
+import { mapToType, mapToDifficulty } from '$lib/util/types';
 
 const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
@@ -38,7 +38,6 @@ const lorem =
 import AddInteractionForm from '$lib/components/AddInteractionForm.svelte';
 
 export {
-	sortSwitch,
 	mapToType,
 	mapToDifficulty,
 	Download,

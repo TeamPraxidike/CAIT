@@ -257,7 +257,7 @@
 		</div>
 		<p class="text-sm opacity-85 pl-5 break-words max-w-full">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
 
-		<div class="flex gap-2">
+		<div class="flex flex-col gap-2">
 			{#if isMaterial && pubView.publication.materials.theoryPractice}
 				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}"/>
 			{/if}
