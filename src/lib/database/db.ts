@@ -120,7 +120,11 @@ export async function getPublicationById(id: number) {
 			usedInCourse: true,
 			tags: true,
 			publisher: true,
-			maintainers: true,
+			maintainers: {
+				include: {
+					profilePic: true,
+				},
+			},
 			coverPic: true,
 			comments: {
 				include: {

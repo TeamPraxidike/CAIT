@@ -10,12 +10,17 @@
 
 	const toastStore = getToastStore();
 
-	$: if (form && form.status === 200) {
+	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Registration successful',
 			background: 'bg-success-200'
 		});
 		goto('/signin');
+	} else if(form && form?.status !== 200){
+		toastStore.trigger({
+			message: `Registration failed: ${form?.message}`,
+			background: 'bg-error-200'
+		});
 	}
 
 	let email = '';
@@ -65,12 +70,11 @@
 				Register with GitHub
 			</button>
 		</SignIn>
-		<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/register">Create
-			one</a></p>
-		{#if form && form.status !== 200}
-			<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
-				<span>{form.message}</span>
-			</div>
-		{/if}
+		<p class="text-center text-sm mt-2">Already have an account? <a class="anchor text-primary-600" href="/signin">Login</a></p>
+		<!--{#if form && form.status !== 200}-->
+		<!--	<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">-->
+		<!--		<span>{form.message}</span>-->
+		<!--	</div>-->
+		<!--{/if}-->
 	</form>
 </div>

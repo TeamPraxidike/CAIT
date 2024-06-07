@@ -25,6 +25,7 @@ import Download from '$lib/components/generic/Download.svelte';
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
 import UsedInCourse from '$lib/components/UsedInCourse.svelte';
+import PublishReview from '$lib/components/PublishReview.svelte';
 
 // util
 import { getDateDifference } from '$lib/util/date';
@@ -62,6 +63,7 @@ export {
 	CircuitPureHTML,
 	AddInteractionForm,
 	UsedInCourse,
+	PublishReview,
 };
 
 export function mapToDifficulty(difficulty: string): Difficulty {

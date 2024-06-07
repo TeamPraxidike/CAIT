@@ -122,7 +122,6 @@ export const canEdit = async (locals: App.Locals, ownerId: string) => {
 	const session = await locals.auth();
 	if (!session || !session.user) return false;
 
-	// return session.user.id === ownerId || session.user.role === 'ADMIN';
 	return session.user.id === ownerId;
 };
 
@@ -132,7 +131,8 @@ export const canRemove = async (locals: App.Locals, ownerId: string) => {
 	const session = await locals.auth();
 	if (!session || !session.user) return false;
 
-	//  || session.user.role === 'ADMIN';
+	if (session.user.isAdmin) return true;
+
 	return session.user.id === ownerId;
 };
 

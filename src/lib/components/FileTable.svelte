@@ -27,7 +27,7 @@
 <div class="rounded-lg p-1">
 	<h4>Uploaded files</h4>
 	{#if files}
-		<div class="flex flex-col gap-2">
+		<div class="flex flex-col gap-1">
 			{#each files as file (file.name)}
 				<button type="button" animate:flip={{ delay: 0, duration: 200 }}
 						class="hover:bg-gray-200 transition-colors duration-75 flex items-center rounded-lg gap-2 p-3 bg-gray-100"

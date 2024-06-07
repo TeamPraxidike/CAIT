@@ -211,7 +211,7 @@
 														<Icon icon="clarity:file-group-solid" class="text-primary-600 size-5" />
 														{#if isHovered}
 															<div
-																class="absolute  mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+																class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
 																style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 																{#each extensions as e}
 																	<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
@@ -262,24 +262,24 @@
                             <a href="{publication.publisherId}/{publication.id}"
                                class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
                         {:else if !selected}
-                            <button class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
+                            <button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
                                     on:click="{select}">Select
                             </button>
                         {:else}
-                            <button class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
+                            <button type="button" class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
 																		use:popup={popupClickPubCard}>Remove
                             </button>
                             <div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
                                 <div class="flex gap-2">
-                                    <button id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
-                                    <button id="close" class="btn variant-filled bg-surface-600">Go Back</button>
+                                    <button type="button" id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
+                                    <button type="button" id="close" class="btn variant-filled bg-surface-600">Go Back</button>
                                 </div>
                                 <div class="arrow bg-surface-100-token" />
                             </div>
                         {/if}
 
 											{#if markAsUsed}
-												<button on:click={() => modalStore.trigger(modal)}>
+												<button type="button" on:click={() => modalStore.trigger(modal)}>
 													<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</span>
 												</button>
 											{/if}

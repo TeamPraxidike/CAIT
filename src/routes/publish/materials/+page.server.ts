@@ -1,6 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
-import type { MaterialForm } from '$lib/database';
-import { MaterialType, type Tag } from '@prisma/client';
+import { type MaterialForm } from '$lib/database';
+import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();
@@ -85,15 +85,18 @@ export const actions = {
 		const newTags = data.getAll('newTags') || '';
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
-		const newTagsArray = JSON.parse(outerArray[0]);
+		const newTagsArray: string[] = JSON.parse(outerArray[0]);
 
-		for (const tag of newTagsArray) {
-			const res = await fetch('/api/tags', {
+		if (newTagsArray.length !== 0) {
+			const resTags = await fetch('/api/tags', {
 				method: 'POST',
-				body: JSON.stringify({ content: tag }),
+				body: JSON.stringify({ tags: newTagsArray }),
 			});
-			if (res.status !== 200) {
-				return { status: 500, message: 'Tag Failed' };
+			if (resTags.status !== 200) {
+				return {
+					status: resTags.status,
+					message: await resTags.json(),
+				};
 			}
 		}
 
@@ -102,9 +105,14 @@ export const actions = {
 			metaData: {
 				title: data.get('title')?.toString() || '',
 				description: data.get('description')?.toString() || '',
-				difficulty: 'easy',
+				difficulty:
+					((
+						data.get('difficulty')?.toString() || ''
+					).toLowerCase() as Difficulty) || 'easy',
 				learningObjectives: JSON.parse(losDataEntry?.toString() || ''),
-				prerequisites: [data.get('prerequisites')?.toString() || ''],
+				prerequisites: JSON.parse(
+					data.get('prerequisites')?.toString() || '',
+				),
 				copyright: Boolean(data.get('copyright')),
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: Number(data.get('theoryToApplication')),

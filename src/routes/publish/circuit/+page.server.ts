@@ -1,12 +1,12 @@
 import type { Tag } from '@prisma/client';
 import type { Actions, PageServerLoad } from './$types';
-import type { CircuitForm } from '$lib/database';
+import { type CircuitForm } from '$lib/database';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
-	const { users, profilePicData } = await (await fetch(`/api/user`)).json();
-	return { tags, users, profilePicData };
+	const { users } = await (await fetch(`/api/user`)).json();
+	return { tags, users };
 };
 
 export const actions = {
@@ -21,7 +21,6 @@ export const actions = {
 		const title = data.get('title')?.toString() || '';
 		const description = data.get('description')?.toString() || '';
 		const selectedTags = data.get('selectedTags')?.toString() || '';
-
 		//I need to get the separate strings here so I can create them as string[], but not sure how to do that
 		const newTags = data.getAll('newTags') || '';
 
@@ -37,15 +36,18 @@ export const actions = {
 
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
-		const newTagsArray = JSON.parse(outerArray[0]) || [];
+		const newTagsArray: string[] = JSON.parse(outerArray[0]) || [];
 
-		for (const tag of newTagsArray) {
-			const res = await fetch('/api/tags', {
+		if (newTagsArray.length !== 0) {
+			const resTags = await fetch('/api/tags', {
 				method: 'POST',
-				body: JSON.stringify({ content: tag }),
+				body: JSON.stringify({ tags: newTagsArray }),
 			});
-			if (res.status !== 200) {
-				return { status: 500, message: 'Tag Failed' };
+			if (resTags.status !== 200) {
+				return {
+					status: resTags.status,
+					message: await resTags.json(),
+				};
 			}
 		}
 

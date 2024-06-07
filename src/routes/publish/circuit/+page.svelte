@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Circuit, Meta } from '$lib';
+	import { Circuit, Meta, PublishReview } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
@@ -32,8 +32,9 @@
 	let tagInput = '';
 
 	let tagsDatabase = data.tags as PrismaTag[];
-	let users = data.users.users as UserWithProfilePic[];
+	let users = data.users as UserWithProfilePic[];
 
+	let searchableUsers = users;
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 	let flavorOptions: TagOption[] = tagsDatabase.map(tag => {
@@ -95,7 +96,7 @@
 
 	$: if (form?.status === 200) {
 		toastStore.trigger({
-			message: 'Publication Added successfully',
+			message: 'Circuit Added successfully',
 			background: 'bg-success-200'
 		});
 		goto(`/${$page.data.session?.user.id}/${form?.id}`);
@@ -125,10 +126,9 @@
 				formData.append('publisherId', uid.toString());
         formData.append('title', title);
         formData.append('description', description);
-        formData.append('difficulty', 'easy');
         formData.append('selectedTags', JSON.stringify(addedTags));
 				formData.append('newTags', JSON.stringify(newTags))
-        formData.append('additionalMaintainers', JSON.stringify([...additionalMaintainers.map(m => m.id), uid]));
+        formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
 				console.log(nodeActions);
@@ -158,24 +158,30 @@
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between gap-3 col-span-full">
 
-				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge}/>
+				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} adding="{true}"/>
 
-				<div class="flex flex-col w-full p-3">
-					<MantainersEditBar users={users}/>
+				<div class="flex flex-col w-full">
+					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
 
-					<div class="flex flex-col gap-2">
+					<div class="flex flex-col gap-2 p-3">
 						<span>Tags<span class="text-error-300">*</span>:</span>
-						<div class="text-token space-y-2">
+						<div class="text-token space-y-2 w-1/2">
 							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content.toLowerCase())}
 												 bind:input={tagInput} bind:value={addedTags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
-							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+							<div class="card max-h-48 p-4 overflow-y-auto" tabindex="-1">
 								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
-															on:selection={onInputChipSelect} />
+															on:selection={onInputChipSelect} emptyState="No Results Found. Press Enter to Create New Tag."/>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+		</Step>
+		<Step>
+			<svelte:fragment slot="header">Review</svelte:fragment>
+			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
+										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
+			/>
 		</Step>
 	</Stepper>
 
