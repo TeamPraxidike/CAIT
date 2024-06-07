@@ -27,7 +27,6 @@
 	}
 </script>
 
-<!--style="height: {lineHeight}px;" -->
 <div class="bg-surface-100 p-8 rounded-lg flex flex-col">
 	<h4 class="text-xl">{file.name}</h4>
 	<p class="text-surface-500 dark:text-surface-300">{file.type}</p>
