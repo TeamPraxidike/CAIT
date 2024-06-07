@@ -209,11 +209,11 @@
 		<div class="flex flex-col gap-2 w-1/2">
 			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
 			{#if pubView.publication.publisherId === $page.data.session?.user.id
-			|| pubView.publication.maintainers.map(x=>x.id).includes($page.data.session?.user.id)
+			|| pubView.publication.maintainers.map(x=>x.id).includes($page.data.session?.user.id || "-1")
 			|| $page.data.session?.user.isAdmin}
 				<div class="flex gap-2 mt-4">
 					{#if pubView.publication.publisherId === $page.data.session?.user.id
-					|| pubView.publication.maintainers.map(x=>x.id).includes($page.data.session?.user.id)}
+					|| pubView.publication.maintainers.map(x=>x.id).includes($page.data.session?.user.id || "-1")}
 						<button
 							on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
 							type="button" class="btn rounded-lg variant-filled-primary">Edit
