@@ -25,7 +25,6 @@ export async function POST({ params, locals }) {
 
 	try {
 		const response = await likesReplyUpdate(id, parseInt(replyId));
-		console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 		return new Response(JSON.stringify({ message: response }), {
 			status: 200,
 		});

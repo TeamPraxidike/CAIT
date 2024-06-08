@@ -24,7 +24,6 @@
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
 
-    console.log(data.circuits)
     $: pageType = data.type;
 
     //Variables needed to deal with Sort and Difficulty
@@ -130,7 +129,6 @@
     // };
 
     const resetFilters = () => {
-        console.log("In reset filters: " + pageType)
         selectedTags = [];
         selectedTypes = [];
         selectedPublishers = [];
@@ -160,7 +158,6 @@
 
 
     const sendFiltersToAPI = async () => {
-        console.log(pageType)
         applyActive = false;
         const queryParams = new URLSearchParams({
             type: pageType
@@ -213,11 +210,9 @@
               // Handle the response data from the API
               if (s === "material") {
                   materials = data.materials;
-                  console.log(materials)
               } else {
                   circuits = data;
-                  console.log("Got Here")
-                  console.log(circuits)
+
               }
           })
           .catch(error => {

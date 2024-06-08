@@ -131,7 +131,6 @@
         formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
-				console.log(nodeActions);
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>

@@ -189,7 +189,6 @@
 
 
 		cy.on('select', 'node', (event: any) => {
-			console.log('Selected: ' + event.target.data().label);
 			numSelected++;
 			let node = event.target;
 			if (!publishing) {
@@ -380,7 +379,6 @@
 
 
 			if (!node.selected() && !prereqActive) {
-				console.log("Here")
 				node.style({
 					'background-color': '#4C4C5C',
 					'color': '#F9F9FA',
@@ -573,8 +571,6 @@
 		// base64uri by default, using base64 for now
 		//const cover = cy.png({output: 'base64'});
 		const cover = await captureScreenshot()
-		console.log("COVER")
-		console.log(cover)
 		const coverPic = {
 			type: 'image/png',
 			info: cover

@@ -32,7 +32,6 @@ async function filesToAddOperation(fileList: FileList) {
 }
 
 const convertMaterial = (s: string): MaterialType => {
-	console.log(`THIS: ${s}`);
 	switch (s.toLowerCase()) {
 		case 'exam':
 			return MaterialType.exam;
@@ -41,9 +40,9 @@ const convertMaterial = (s: string): MaterialType => {
 		case 'code':
 			return MaterialType.code;
 		case 'dataset':
-			return MaterialType.dataset;
+			return MaterialType.information;
 		case 'video':
-			return MaterialType.video;
+			return MaterialType.other;
 		default:
 			// Handle invalid input if necessary
 			return MaterialType.assignment;

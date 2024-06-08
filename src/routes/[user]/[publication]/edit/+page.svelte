@@ -162,7 +162,6 @@
 
 		formData.append('title', title);
 		formData.append('description', description)
-		console.log(isMaterial);
 		formData.append('isMaterial', JSON.stringify(isMaterial));
 
 		formData.append('oldFiles', JSON.stringify(oldFiles));

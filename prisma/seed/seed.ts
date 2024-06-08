@@ -209,7 +209,6 @@ const main = async () => {
 			},
 		},
 	});
-	console.log(circuit.publicationId);
 	const nodes = [];
 
 	nodes.push(await addNode(circuit.id, materials[0].publicationId, 0, 500)); // neural networks 0

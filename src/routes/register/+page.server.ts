@@ -26,8 +26,6 @@ export const actions = {
 			};
 		}
 
-		console.log('going to fetch');
-
 		const sent: UserCreateForm = {
 			metaData: {
 				firstName: formDataObj.firstName.toString(),

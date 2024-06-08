@@ -98,7 +98,6 @@
 
 
 	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		console.log('onInputChipSelect', e.detail);
 		if (!tags.includes(e.detail.value)) {
 			inputChip.addChip(e.detail.value);
 			tagInput = '';
