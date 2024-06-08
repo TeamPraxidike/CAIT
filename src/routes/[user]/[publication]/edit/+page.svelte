@@ -34,8 +34,6 @@
 	let oldFiles: any;
 
 
-
-
 	let LOs: string[] = serverData.publication.learningObjectives;
 	let PKs: string[] = serverData.publication.prerequisites;
 	let difficulty: Difficulty = serverData.publication.difficulty;

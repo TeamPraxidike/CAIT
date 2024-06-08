@@ -2,6 +2,8 @@ import {
 	getPublicationById,
 	getUserById,
 	savePublication,
+	updateAllTimeSaved,
+	updateReputation,
 } from '$lib/database';
 
 /**
@@ -25,6 +27,17 @@ export async function POST({ params }) {
 
 	try {
 		const response = await savePublication(id, parseInt(publicationId));
+		if (id !== publication.publisherId) {
+			if (response === 'Publication saved successfully') {
+				const savedBefore = await updateAllTimeSaved(
+					id,
+					parseInt(publicationId),
+				);
+				if (savedBefore !== 'User saved previously') {
+					await updateReputation(publication.publisherId, 10);
+				}
+			}
+		}
 		return new Response(JSON.stringify({ message: response }), {
 			status: 200,
 		});
