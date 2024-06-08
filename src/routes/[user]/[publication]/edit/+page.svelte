@@ -13,6 +13,8 @@
 	import { page } from '$app/stores';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import { onMount } from 'svelte';
+	import type { NodeDiffActions } from '$lib/database';
 
 
 
@@ -147,6 +149,14 @@
 	}
 
 	let circuitRef : InstanceType<typeof Circuit>;
+	let nodeActions:NodeDiffActions;
+	onMount(async () => {
+		if (circuitRef) {
+			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
+			nodeActions = nodeDiffActions;
+		}
+	})
+
 
 </script>
 
@@ -162,7 +172,6 @@
 
 		formData.append('title', title);
 		formData.append('description', description)
-		console.log(isMaterial);
 		formData.append('isMaterial', JSON.stringify(isMaterial));
 
 		formData.append('oldFiles', JSON.stringify(oldFiles));
@@ -186,7 +195,32 @@
 
 		if(circuitRef){
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
-			formData.append('circuitData', JSON.stringify(nodeDiffActions));
+			let oldAdd = nodeActions.add;
+			let newAdd = nodeDiffActions.add;
+			let add = [];
+			let edit = [];
+			for (const node of newAdd){
+				let found = false;
+				for (const old of oldAdd){
+					if(old.publicationId === node.publicationId ){
+						found = true;
+						if((node.y !== old.y || node.x !== old.x)){
+								edit.push(node);
+						}
+					}
+				}
+				if (!found){
+					add.push(node);
+				}else{
+					oldAdd = oldAdd.filter(x=>x.publicationId !== node.publicationId);
+				}
+			}
+
+			const del = oldAdd;
+			const number = nodeDiffActions.numNodes;
+			const next = nodeDiffActions.next;
+			let finalDiffActions = {number, add, delete:del, edit,next }
+			formData.append('circuitData', JSON.stringify(finalDiffActions));
 			formData.append('circuitCoverPic', JSON.stringify(coverPic));
 		}
 

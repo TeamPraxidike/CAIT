@@ -66,7 +66,12 @@
 	});
 
 	async function deletePublication() {
-		const url = '/api/material/' + pubView.publication.id;
+		let url:string;
+		if(isMaterial){
+			url = '/api/material/' + pubView.publication.id;
+		} else{
+			url = '/api/circuit/' + pubView.publication.id;
+		}
 		try {
 			await fetch(url, {
 				method: 'DELETE'
@@ -75,7 +80,11 @@
 					message: 'Publication deleted successfully',
 					background: 'bg-success-200'
 				});
-				goto('/browse');
+				if (isMaterial){
+					goto('/browse');
+				}else{
+					goto('/browse?type=circuits');
+				}
 			});
 		} catch (e) {
 			console.error(e);

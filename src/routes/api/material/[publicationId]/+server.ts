@@ -154,6 +154,8 @@ export async function PUT({ request, params, locals }) {
 export async function DELETE({ params }) {
 	const id = parseInt(params.publicationId);
 
+	console.log(id);
+
 	if (isNaN(id) || id <= 0) {
 		return new Response(
 			JSON.stringify({
@@ -178,16 +180,17 @@ export async function DELETE({ params }) {
 				}
 
 				// delete all files
-				for (const file of publication.material!.files) {
+				for (const file of publication.materials!.files) {
 					fileSystem.deleteFile(file.path);
 				}
 
-				return publication.material;
+				return publication.materials;
 			},
 		);
 
 		return new Response(JSON.stringify(material), { status: 200 });
 	} catch (error) {
+		console.error(error);
 		if (
 			error instanceof Prisma.PrismaClientKnownRequestError &&
 			error.code === 'P2025'
