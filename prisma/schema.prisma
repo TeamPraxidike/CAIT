@@ -20,10 +20,10 @@ enum Difficulty {
 }
 
 enum MaterialType {
-  video
+  information
   presentation
   assignment
-  dataset
+  other
   exam
   code
 }

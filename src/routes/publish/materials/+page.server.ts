@@ -39,13 +39,13 @@ const convertMaterial = (s: string): MaterialType => {
 			return MaterialType.presentation;
 		case 'code':
 			return MaterialType.code;
-		case 'dataset':
+		case 'assignment':
+			return MaterialType.assignment;
+		case 'information':
 			return MaterialType.information;
-		case 'video':
-			return MaterialType.other;
 		default:
 			// Handle invalid input if necessary
-			return MaterialType.assignment;
+			return MaterialType.other;
 	}
 };
 

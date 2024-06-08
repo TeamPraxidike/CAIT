@@ -49,7 +49,7 @@
 
         //Variables needed to deal with Types
         let selectedTypes: {id:number, content:string }[] = []; //keeps track of selected tags
-        let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Circuit"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+        let allTypes: {id:number, content:string }[] = ["Presentation", "Information", "Code", "Assignment", "Exam", "Other"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
         let displayTypes: {id:number, content:string }[] = allTypes; //
         let typeActive = false
 

@@ -23,7 +23,7 @@ describe('Using in a course', () => {
 			title: 'cool publication',
 			description: 'This publication has description',
 			difficulty: Difficulty.easy,
-			materialType: 'video',
+			materialType: 'presentation',
 			copyright: true,
 			timeEstimate: 4,
 			theoryPractice: 9,
@@ -34,7 +34,7 @@ describe('Using in a course', () => {
 			title: 'cool publication',
 			description: 'This publication has description',
 			difficulty: Difficulty.easy,
-			materialType: 'video',
+			materialType: 'presentation',
 			copyright: true,
 			timeEstimate: 4,
 			theoryPractice: 9,
@@ -44,8 +44,12 @@ describe('Using in a course', () => {
 	});
 
 	it('should add to the list of used in course', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.publicationId, ['PTS']);
-		const courses = await coursesUsingPublication(publication.publicationId);
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, [
+			'PTS',
+		]);
+		const courses = await coursesUsingPublication(
+			publication.publicationId,
+		);
 		expect(courses).length.greaterThanOrEqual(1);
 		expect(courses).toContain('PTS');
 	});
@@ -64,7 +68,9 @@ describe('Using in a course', () => {
 	});
 
 	it('should add to the list of what users use', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.publicationId, ['ADS']);
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, [
+			'ADS',
+		]);
 		const publications = (await publicationsAUserUses(user.id)).map(
 			(x) => x.id,
 		);
@@ -83,5 +89,4 @@ describe('Using in a course', () => {
 		expect(publications).toContain(publication.id);
 		expect(publications).toContain(publication2.id);
 	});
-
 });
