@@ -40,7 +40,7 @@
     export let markAsUsed: boolean = false;
     export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
-		export let extensions: string[] = [];
+    export let extensions: string[] = [];
     export let forArrow: boolean = false;
 
     const userId = $page.data?.session?.user?.id || "0";
@@ -203,8 +203,9 @@
             <!-- Title and difficulty -->
             <div class="w-full">
                 <div class="flex justify-between items-start">
-                    <h4
-                      class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}</h4>
+                    <a href="../{publication.publisherId}/{publication.id}"
+                       class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}
+                    </a>
                     <div class="flex gap-2">
 											{#if publication.type === PublicationType.Circuit}
 												<Icon icon="mdi:graph" class="text-xl text-surface-500" />
@@ -291,7 +292,7 @@
 											{/if}
                     </div>
 
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 items-center">
                         <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
 													<button
 														type="button"
@@ -310,8 +311,9 @@
 														<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
 													</button>
                         </div>
-
-                        <Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile"/>
+                        <a href="../{publication.publisherId}">
+                            <Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile"/>
+                        </a>
                     </div>
                 </div>
             </div>
