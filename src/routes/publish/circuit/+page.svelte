@@ -4,7 +4,6 @@
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
 	import {
-		Autocomplete,
 		type AutocompleteOption,
 		getToastStore,
 		InputChip,
@@ -29,50 +28,22 @@
 	let newTags: string[] = [];
 	let additionalMaintainers: UserWithProfilePic[] = [];
 
-	let inputChip: InputChip;
-	let tagInput = '';
-
 	let tagsDatabase = data.tags as PrismaTag[];
 	let users = data.users as UserWithProfilePic[];
 
 	let searchableUsers = users;
-
-	type TagOption = AutocompleteOption<string, { content: string }>;
-	let flavorOptions: TagOption[] = tagsDatabase.map(tag => {
-		return {
-			value: tag.content,
-			label: tag.content
-		};
-	});
 
 	let uid = $page.data.session?.user.id || 0;
 
 	let priorKnowledge:string[] = [];
 	$: priorKnowledge = priorKnowledge;
 
-	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		if (!addedTags.includes(e.detail.value)) {
-			inputChip.addChip(e.detail.value);
-			tagInput = '';
-		}
-	}
 
 	// learning objectives
 	let LOs: string[] = [];
 	$: LOs = LOs;
 
 	$: additionalMaintainers = additionalMaintainers
-
-	const handleInvalid = () => {
-		if(tagInput.length>0 && !addedTags.includes(tagInput)) {
-			addedTags=[...addedTags,tagInput];
-			newTags=[...newTags,tagInput];
-			tagInput='';
-		}
-		else {
-			triggerRepeatInput("Tag",tagInput);
-		}
-	}
 
 	const triggerRepeatInput = (type: string,input: string)=>{
 		toastStore.trigger({
