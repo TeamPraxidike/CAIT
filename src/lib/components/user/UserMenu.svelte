@@ -2,7 +2,6 @@
     import { IconLink } from '$lib';
     import { signOut } from '@auth/sveltekit/client';
     import { page } from '$app/stores';
-    import { loggedInPfp } from '$lib/stores/loggedInPfp';
 
     export let device: 'mobile' | 'desktop';
 
@@ -24,6 +23,8 @@
             if (confirmation) {
                 signOut()
             }
+        } else {
+            signOut();
         }
     }
 
@@ -44,8 +45,8 @@
     <div class="grid grid-cols-2">
         <a href="/{$page.data.session?.user.id}"  on:click={confirmPublishReset}
            class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
-            {#if $page.data.session && $loggedInPfp !== ''}
-                <img class="h-16 w-16 rounded-full" src={'data:image;base64,' + $loggedInPfp} alt={$page.data.session.user?.firstName}/>
+            {#if $page.data.session && $page.data.session.userPfp.data !== ''}
+                <img class="h-16 w-16 rounded-full" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user?.firstName}/>
             {:else}
                 <div class="h-16 w-16 placeholder-circle" />
             {/if}
@@ -68,7 +69,7 @@
                class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1
                   dark:hover:bg-surface-700">
                 {#if $page.data.session}
-                    <img class="h-16 w-16 rounded-full" src={'data:image;base64,' + $loggedInPfp} alt={$page.data.session.user.firstName}/>
+                    <img class="h-16 w-16 rounded-full" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user.firstName}/>
                 {:else}
                     <div class="h-16 w-16 placeholder-circle" />
                 {/if}

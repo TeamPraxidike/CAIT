@@ -1,5 +1,6 @@
 <script lang="ts">
     import {lorem, Meta, Section} from "$lib";
+    import { page } from '$app/stores';
 </script>
 
 <Meta title="Home" description="CAIT" type="site"/>
@@ -19,6 +20,7 @@
             <h4 class="xl:pr-40 xl:text-1xl dark:text-surface-200">Community for AI Teachers: Contribute and search for
                 lecture materials, assignments, exam questions and more!</h4>
         </div>
+        {$page.data.session.userPfp.data + " logged in pfp"}
         <div class="flex flex-col gap-2 mb-20">
             <div class="flex gap-2">
                 <a href="/browse">

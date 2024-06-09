@@ -21,9 +21,8 @@ export const load: PageServerLoad = async ({
 		};
 	}
 
-
 	let savedRes = null;
-	if(params.user === session.user.id){
+	if (params.user === session.user.id) {
 		savedRes = await fetch(
 			`/api/user/${params.user}/saved?fullPublications=true`,
 		);
@@ -48,13 +47,26 @@ export const load: PageServerLoad = async ({
 	);
 	const used = usedResponse.status === 200 ? await usedResponse.json() : [];
 
-	const savedJson = savedRes === null || savedRes.status === 204 ? { saved: [], savedFileData: [] } : await savedRes.json();
+	const savedJson =
+		savedRes === null || savedRes.status === 204
+			? { saved: [], savedFileData: [] }
+			: await savedRes.json();
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
-	const savedByUser = await savedByUserRes.json();
-	const materials  = await materialsRes.json();
-	return { materials: materials.materials, saved, savedFileData, liked, used, savedByUser: savedByUser.saved };
+	const savedByUser =
+		savedByUserRes.status === 204
+			? { saved: saved }
+			: await savedByUserRes.json();
+	const materials = await materialsRes.json();
+	return {
+		materials: materials.materials,
+		saved,
+		savedFileData,
+		liked,
+		used,
+		savedByUser: savedByUser.saved,
+	};
 };
 
 export type PublicationInfo = {
