@@ -204,7 +204,11 @@
     let applyActive = false;
     $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
 
-
+    const deleteFilters = (pageType: string) => {
+        if(pageType === "people")
+            resetFilters();
+    }
+    $: deleteFilters(pageType)
 </script>
 
 <div class="flex justify-between col-span-full mt-32">
