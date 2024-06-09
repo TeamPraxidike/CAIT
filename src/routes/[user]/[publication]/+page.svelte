@@ -28,7 +28,6 @@
 	const userId = $page.data.session?.user.id;
 
 	const pubView: PublicationView = data.pubView;
-	console.log(pubView.publication.circuit.nodes)
 	const isMaterial : boolean = pubView.isMaterial
 
 	let likedComments = data.likedComments as number[];
@@ -121,7 +120,6 @@
 	 */
 	const addComment = async (event: CustomEvent) => {
 		//comment = await (await fetch(`/api/comment/pubView/${pubView.material.publicationId}`)).json()
-		//console.log(event.detail.content)
 		// const maxId = (comments.length > 0 ? Math.max(...comments.map(a => a.id)) : 0) + 1;
 		const content = event.detail.content
 		const comment = {
