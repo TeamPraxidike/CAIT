@@ -122,6 +122,7 @@
 		publication: Publication & {
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
+			publisher: User & {profilePicData:string},
 		}
 		next: {
 			circuitId: number,
