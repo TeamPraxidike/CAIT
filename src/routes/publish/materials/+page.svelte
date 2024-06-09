@@ -78,7 +78,7 @@
 
 	$: locks[0] = files ? files.length === 0 : true;
 	$: locks[1] = title.length < 1 || description.length < 1 || selectedType === "Select Type";
-	$: locks[2] = tags.length < 2 || LOs.length<1;
+	$: locks[2] = tags.length < 1 || LOs.length<1;
 
 
 	const toastStore = getToastStore();
@@ -174,7 +174,6 @@
 					<label for="theoryRatio">Theory Application Ratio</label>
 					<TheoryAppBar bind:value={theoryApplicationRatio}/>
 				</div>
-
 			</div>
 
 			<div class="grid grid-cols-2 gap-4 p-3">

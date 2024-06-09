@@ -46,7 +46,7 @@
     }
 </script>
 
-<label class="pl-3" for="tags_input">Tags<span class="text-error-300">*</span>:</label>
+<label class="pl-3" for="tags_input">Tags (at least one)<span class="text-error-300">*</span>:</label>
 <div class="text-token space-y-2 pl-3">
     <InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
                bind:input={tagInput} bind:value={tags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>

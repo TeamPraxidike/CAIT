@@ -4,9 +4,7 @@
 	import {enhance} from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
 	import {
-		type AutocompleteOption,
 		getToastStore,
-		InputChip,
 		Step,
 		Stepper
 	} from '@skeletonlabs/skeleton';
@@ -47,8 +45,8 @@
 
 	const locks: boolean[] = [true, true];
 
-	$: locks[0] = title.length < 2 || description.length < 10;
-	$: locks[1] = addedTags.length < 2 || LOs.length < 1;
+	$: locks[0] = title.length < 1 || description.length < 1;
+	$: locks[1] = addedTags.length < 1|| LOs.length < 1;
 	$: priorKnowledge = priorKnowledge;
 	$: LOs = LOs;
 

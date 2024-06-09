@@ -234,7 +234,7 @@
 	</div>
 
 	<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
-	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:users={browsingUsers}  />
+	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
 
 	<div class="text-token w-1/2 space-y-2 pl-3">
 		<p>Tags:</p>
