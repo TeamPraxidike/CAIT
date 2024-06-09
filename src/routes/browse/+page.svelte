@@ -330,6 +330,6 @@
     {/each}
 {:else if pageType === "circuits"}
     {#each circuits as circuit}
-        <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} />
+        <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} liked={liked.includes(circuit.publication.id)} saved={saved.includes(circuit.publication.id)}/>
     {/each}
 {/if}

@@ -33,6 +33,9 @@
 
 	let tagsDatabase = data.tags as PrismaTag[];
 	let users = data.users as UserWithProfilePic[];
+	let liked = data.liked as number[];
+	let saved = data.saved.saved as number[];
+
 
 	let searchableUsers = users;
 
@@ -137,7 +140,7 @@
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit nodes={[]} bind:this={circuitRef} publishing="{true}"/>
+			<Circuit nodes={[]} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>

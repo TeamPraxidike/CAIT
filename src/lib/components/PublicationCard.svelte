@@ -60,13 +60,19 @@
         likes = liked ? likes - 1 : likes + 1;
         await fetch(`/api/user/${userId}/liked/${publication.id}`, {
             method: 'POST',
-        }).then(() => liked = !liked);
+        }).then(() => {
+					liked = !liked
+					dispatch('liked', { id: publication.id })
+				});
     }
 
     const toggleSave = async () => {
         await fetch(`/api/user/${userId}/saved/${publication.id}`, {
             method: 'POST',
-        }).then(() => saved = !saved);
+        }).then(() => {
+					saved = !saved
+					dispatch('saved', { id: publication.id })
+				});
     }
 
     let hoverDiv: HTMLDivElement;

@@ -5,18 +5,42 @@
 	import { page } from '$app/stores';
 
 	import { scale } from 'svelte/transition';
+	import type { Material, Publication } from '@prisma/client';
 	export let materials : any = [];
+	let circuits : any = [];
+	let publications: any = [];
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
 	let userIds : string[] = []
 	let targetDiv: HTMLDivElement;
 	let searchWord : string = ""
+	let urlParam = "material"
+	let chosenOption = 0
 
-	// function getFileExtension(filePath: string): string {
-	// 	const index = filePath.lastIndexOf('.');
-	// 	return index !== -1 ? filePath.substring(index + 1) : '';
-	// }
+	export let liked: number[];
+	export let saved: number[];
+
+	const likedToggled = (event:CustomEvent) => {
+		const id = event.detail.id;
+		if (liked.includes(id)) {
+			liked = liked.filter((i) => i !== id);
+		} else {
+			liked.push(id);
+		}
+	}
+
+	const savedToggled = (event:CustomEvent) => {
+		const id = event.detail.id;
+		if (saved.includes(id)) {
+			saved = saved.filter((i) => i !== id);
+		} else {
+			saved.push(id);
+		}
+	}
+
+
+
 
 
 	const removePopup = (event: MouseEvent) => {
@@ -68,10 +92,22 @@
 	const newMaterials = (event : CustomEvent) => {
 
 		if (event.detail.option === 0)
+		{
+			chosenOption = 0
 			userIds = []
+			urlParam = "material"
+		}
+		if (event.detail.option === 1) {
+			chosenOption = 1
+			if ($page.data.session?.user.id)
+				userIds = []
+			urlParam = "circuit"
+		}
 		if (event.detail.option === 2){
+			chosenOption = 2
 			if ($page.data.session?.user.id)
 				userIds = [$page.data.session?.user.id]
+			urlParam = "material"
 		}
 
 		searchAPI()
@@ -82,8 +118,7 @@
 			publishers: userIds.join(','),
 			q: searchWord
 		});
-		const url = `/api/material?${queryParams.toString()}`;
-
+		const url = `/api/${urlParam}?${queryParams.toString()}`;
 		// Make a GET request to the API
 		await fetch(url)
 			.then(response => {
@@ -94,7 +129,19 @@
 			})
 			.then(data => {
 			// Handle the response data from the API
-				materials = data.materials
+				if (chosenOption === 0 || chosenOption === 2)
+				{
+					console.log(data)
+					materials = []
+					materials = data.materials
+				}
+				if (chosenOption === 1)
+				{
+					console.log(data)
+					circuits = []
+					circuits = data
+				}
+
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -125,11 +172,20 @@
 				</div>
 			</div>
 
+			{#if chosenOption === 0}
+				{#each materials as m}
+					<PublicationCard publication="{m.publication}" inCircuits="{true}"
+													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
+													 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled}/>
+				{/each}
+				{:else if chosenOption===1}
+					{#each circuits as m}
+					<PublicationCard publication="{m.publication}" inCircuits="{true}"
+					selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
+					on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled}/>
+					{/each}
+			{/if}
 
-			{#each materials as m}
-				<PublicationCard publication="{m.publication}" inCircuits="{true}"
-												 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-												 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked="{false}" saved="{false}"/>
-			{/each}
+
 		</Grid>
 	</div>

@@ -66,6 +66,9 @@
 	}
 
 	//cytoscapeNodeHtmlLabel(cytoscape);
+
+	export let liked : number[] = []
+	export let saved : number[] = []
 	export let publishing: boolean;
 
 
@@ -651,7 +654,7 @@
 {#if addActive}
 	<div>
 		<SearchElems bind:addActive={addActive} bind:selectedIds={pubIds} bind:materials={displayedMaterials}
-								 on:selFurther={addNode} on:remFurther={removeNode} />
+								 on:selFurther={addNode} on:remFurther={removeNode} bind:liked={liked} bind:saved={saved}/>
 	</div>
 {/if}
 
