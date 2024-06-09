@@ -28,12 +28,14 @@
 	let saved: (Publication & {
 		tags: Tag[];
 		usedInCourse: { course: string }[]
+		publisher: User & {profilePicData: string}
 	})[] = data.saved;
 
 
 	let posts: (Material & {
 		publication: Publication & { usedInCourse: { course: string }[], tags: Tag[] },
 		coverPicData: string
+		publisher: User & {profilePicData: string}
 	})[] = data.materials.filter((x: any) => x.publication.type !== PublicationType.Circuit);
 	let tabSet: number = 0;
 </script>

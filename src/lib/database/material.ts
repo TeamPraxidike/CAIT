@@ -38,7 +38,11 @@ export async function getMaterialByPublicationId(
 			publication: {
 				include: {
 					tags: true,
-					publisher: true,
+					publisher: {
+						include: {
+							profilePic: true,
+						},
+					},
 					maintainers: true,
 					coverPic: true,
 					comments: {
