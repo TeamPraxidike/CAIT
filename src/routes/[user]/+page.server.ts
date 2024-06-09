@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
+import {PublicationType} from "@prisma/client";
 
 export const load: PageServerLoad = async ({
 	params,
@@ -54,9 +55,15 @@ export const load: PageServerLoad = async ({
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
+	for(let i = 0; i < saved.length; i++){
+		if(saved[i].type === PublicationType.Circuit){
+			savedFileData.splice(i, 0, "no data")
+		}
+	}
+
 	const savedByUser =
 		savedByUserRes.status === 204
-			? { saved: saved }
+			? { saved: [] }
 			: await savedByUserRes.json();
 	const materials = await materialsRes.json();
 	return {
