@@ -24,6 +24,8 @@
             if (confirmation) {
                 signOut()
             }
+        } else {
+            signOut()
         }
     }
 

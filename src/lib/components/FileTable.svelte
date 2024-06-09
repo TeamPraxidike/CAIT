@@ -25,7 +25,11 @@
 </script>
 
 <div class="rounded-lg p-1">
-	<h4>Uploaded files</h4>
+	{#if files ? files.length === 0 : true}
+		<p class="text-error-300 dark:text-error-400">Upload at least one file to continue</p>
+	{:else}
+		<h4>Uploaded files</h4>
+	{/if}
 	{#if files}
 		<div class="flex flex-col gap-1">
 			{#each files as file (file.name)}
@@ -48,8 +52,5 @@
 				</button>
 			{/each}
 		</div>
-	{/if}
-	{#if files ? files.length === 0 : true}
-		<p class="text-error-300 dark:text-error-400">No files uploaded...</p>
 	{/if}
 </div>

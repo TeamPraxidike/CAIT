@@ -52,7 +52,7 @@ export const load: PageServerLoad = async ({
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
-	const savedByUser = await savedByUserRes.json();
+	const savedByUser = savedByUserRes.status === 204 ? { saved: saved } : await savedByUserRes.json();
 	const materials  = await materialsRes.json();
 	return { materials: materials.materials, saved, savedFileData, liked, used, savedByUser: savedByUser.saved };
 };

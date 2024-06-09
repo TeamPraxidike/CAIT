@@ -26,6 +26,7 @@ enum MaterialType {
   dataset
   exam
   code
+  other
 }
 
 enum PublicationType {
