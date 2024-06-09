@@ -16,6 +16,7 @@
 	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
+	import TagsSelect from "$lib/components/TagsSelect.svelte";
 
 	export let data: PageServerData;
 
@@ -162,17 +163,8 @@
 
 				<div class="flex flex-col w-full">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
-
 					<div class="flex flex-col gap-2 p-3">
-						<span>Tags<span class="text-error-300">*</span>:</span>
-						<div class="text-token space-y-2 w-1/2">
-							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content.toLowerCase())}
-												 bind:input={tagInput} bind:value={addedTags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
-							<div class="card max-h-48 p-4 overflow-y-auto" tabindex="-1">
-								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
-															on:selection={onInputChipSelect} emptyState="No Results Found. Press Enter to Create New Tag."/>
-							</div>
-						</div>
+						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} />
 					</div>
 				</div>
 			</div>
