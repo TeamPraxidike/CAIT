@@ -9,6 +9,7 @@ import {
 	type NodeDiffActions,
 	prisma,
 	updateCircuitCoverPic,
+	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 import { mapToDifficulty, mapToType } from '$lib';
@@ -81,7 +82,6 @@ export async function POST({ request, locals }) {
 					metaData,
 					prismaTransaction,
 				);
-				console.log('AAAAAAAAAAAAAAAAA');
 
 				await handleConnections(
 					tags,
@@ -89,8 +89,6 @@ export async function POST({ request, locals }) {
 					circuit.publicationId,
 					prismaTransaction,
 				);
-
-				console.log('bBBBBBBBBBBBBBBBBBBBB');
 
 				// if no cover pic detected in post, throw error
 				if (coverPic) {
@@ -105,8 +103,6 @@ export async function POST({ request, locals }) {
 					);
 				}
 
-				console.log('CCCCCCCCCCCCCCCCCCCCCCCCC');
-
 				// add nodes
 				for (const node of nodeInfo.add) {
 					await addNode(
@@ -117,14 +113,13 @@ export async function POST({ request, locals }) {
 						prismaTransaction,
 					);
 				}
-				console.log('DDDDDDDDDDDDDDDDDDDDD');
 
 				await handleEdges(circuit.id, nodeInfo.next, prismaTransaction);
-				console.log('eeeeeeeeeeeeeeeeeeeeeeee');
 
 				return circuit;
 			},
 		);
+		await updateReputation(userId, 50);
 
 		const id = createdCircuit.publicationId;
 

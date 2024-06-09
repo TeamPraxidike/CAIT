@@ -1,11 +1,10 @@
 <script lang="ts">
     import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
-    import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-    import type { File as PrismaFile, Material, Publication, Tag } from '@prisma/client';
+    import type { File as PrismaFile, Material, Publication, Tag, User } from '@prisma/client';
 
 
     //TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
@@ -24,7 +23,6 @@
     let liked = data.liked as number[];
     let saved = data.saved.saved as number[];
 
-    console.log(data.circuits)
     $: pageType = data.type;
 
     //Variables needed to deal with Sort and Difficulty
@@ -353,8 +351,8 @@
         <PublicationCard extensions="{getExtensions(material)}" imgSrc={'data:image;base64,' + material.coverPicData} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
     {/each}
 {:else if pageType === "people"}
-    {#each users as person, i}
-        <UserProp view="search" posts="{5}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
+    {#each users as person}
+        <UserProp view="search" posts="{person.posts.length}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
     {/each}
 {:else if pageType === "circuits"}
     {#each circuits as circuit}

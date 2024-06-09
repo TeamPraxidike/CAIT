@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client/extension';
 import { prisma } from '$lib/database/prisma';
+import { getPublicationById } from '$lib/database/db';
 
 ////////////////////////////////////////////////
 //   HELPER METHODS
@@ -163,4 +164,25 @@ export async function updatePublicationConnectTags(
 			},
 		},
 	});
+}
+/**
+ * update all time people who have saved the publication with id publicationId
+ * @param id - the id of the user who is saving it now
+ * @param publicationId -
+ */
+export async function updateAllTimeSaved(id: string, publicationId: number) {
+	const publication = await getPublicationById(publicationId);
+	if (publication) {
+		let allTime = publication.savedByAllTime;
+		if (!allTime.includes(id)) {
+			allTime = [...allTime, id];
+			return prisma.publication.update({
+				where: { id: publicationId },
+				data: {
+					savedByAllTime: allTime,
+				},
+			});
+		}
+		return 'User saved previously';
+	}
 }
