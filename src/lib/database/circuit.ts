@@ -12,6 +12,7 @@ export async function getCircuitByPublicationId(publicationId: number) {
 		include: {
 			publication: {
 				include: {
+					tags: true,
 					coverPic: true,
 				},
 			},
@@ -43,7 +44,7 @@ export async function getAllCircuits() {
 					},
 				},
 			},
-			nodes: false,
+			nodes: true,
 		},
 	});
 }
