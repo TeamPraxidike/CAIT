@@ -121,7 +121,7 @@
         containerWidth = container.getBoundingClientRect().width;
         window.addEventListener('resize', updateContainerWidth);
 
-        maxTags = 10;
+        maxTags = calcMaxTags();
         if (hoverDiv) {
             hoverDiv.addEventListener('mouseenter', handleHover);
             hoverDiv.addEventListener('mouseleave', handleHover);

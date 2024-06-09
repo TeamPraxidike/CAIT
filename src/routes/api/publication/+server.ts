@@ -12,7 +12,6 @@ export const GET: RequestHandler = async ({ url }) => {
 		const query: string = url.searchParams.get('q') || '';
 
 		let publications = await getAllPublications(publishers, query);
-		console.log(publications);
 
 		publications = publications.map((publication) => {
 			let coverPicData = '';

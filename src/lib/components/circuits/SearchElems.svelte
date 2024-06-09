@@ -22,6 +22,7 @@
 	export let saved: number[];
 
 	const likedToggled = (event:CustomEvent) => {
+
 		const id = event.detail.id;
 		if (liked.includes(id)) {
 			liked = liked.filter((i) => i !== id);
@@ -109,14 +110,23 @@
 				userIds = [$page.data.session?.user.id]
 			urlParam = "publication"
 		}
+		if (event.detail.option === 3){
+			chosenOption = 3
+			if ($page.data.session?.user.id)
+				userIds = [$page.data.session?.user.id]
+			urlParam = `user/${$page.data.session?.user.id}/saved`
+			console.log(urlParam)
+		}
 
 		searchAPI()
 	}
 
 	const searchAPI = async () => {
+
 		const queryParams = new URLSearchParams({
 			publishers: userIds.join(','),
-			q: searchWord
+			q: searchWord,
+			fullPublications: "true"
 		});
 		const url = `/api/${urlParam}?${queryParams.toString()}`;
 		// Make a GET request to the API
@@ -143,6 +153,11 @@
 				{
 					publications = []
 					publications = data.publications
+				}
+				if (chosenOption === 3)
+				{
+					publications = []
+					publications = data.saved
 				}
 
 
@@ -189,7 +204,7 @@
 					selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
 					on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled}/>
 					{/each}
-			{:else if chosenOption===2}
+			{:else if (chosenOption===2 || chosenOption===3)}
 				{#each publications as p}
 					<PublicationCard publication="{p}" inCircuits="{true}"
 													 selected="{selectedIds.has(p.id)}" on:selected={selectCard}
