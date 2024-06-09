@@ -1,4 +1,9 @@
-import { createComment, type createCommentData } from '$lib/database';
+import {
+	createComment,
+	type createCommentData,
+	getPublicationById,
+	updateReputation,
+} from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
 export async function POST({ request, locals }) {
@@ -20,6 +25,13 @@ export async function POST({ request, locals }) {
 					status: 404,
 				},
 			);
+		const publication = await getPublicationById(body.publicationId);
+		if (publication?.publisherId === body.userId) {
+			await updateReputation(body.userId, 3);
+		} else {
+			await updateReputation(body.userId, 5);
+		}
+
 		return new Response(JSON.stringify(comment), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error }), { status: 500 });

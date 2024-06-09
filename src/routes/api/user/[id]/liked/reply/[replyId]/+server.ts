@@ -1,4 +1,9 @@
-import { getReply, getUserById, likesReplyUpdate } from '$lib/database';
+import {
+	getReply,
+	getUserById,
+	likesReplyUpdate,
+	updateReputation,
+} from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
 /**
@@ -25,6 +30,15 @@ export async function POST({ params, locals }) {
 
 	try {
 		const response = await likesReplyUpdate(id, parseInt(replyId));
+
+		if (id !== comment.userId) {
+			if (response === 'Reply liked successfully') {
+				await updateReputation(comment.userId, 1);
+			} else if (response === 'Reply unliked successfully') {
+				await updateReputation(comment.userId, -1);
+			}
+		}
+
 		return new Response(JSON.stringify({ message: response }), {
 			status: 200,
 		});

@@ -26,6 +26,7 @@ enum MaterialType {
   other
   exam
   code
+  other
 }
 
 enum PublicationType {
@@ -156,6 +157,8 @@ model Publication {
   type    PublicationType
 
   node Node[]
+
+  savedByAllTime String[] @default([])
 
   coverPic File? @relation("CoverPic")
 

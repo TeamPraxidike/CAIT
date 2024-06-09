@@ -322,7 +322,7 @@
     {/each}
 {:else if pageType === "people"}
     {#each users as person}
-        <UserProp view="search" posts="{5}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
+        <UserProp view="search" posts="{person.posts.length}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
     {/each}
 {:else if pageType === "circuits"}
     {#each circuits as circuit}
