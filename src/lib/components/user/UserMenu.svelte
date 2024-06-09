@@ -24,7 +24,7 @@
                 signOut()
             }
         } else {
-            signOut();
+            signOut()
         }
     }
 

@@ -10,6 +10,7 @@ import { verifyAuth } from '$lib/database/auth';
 /**
  * Likes a publication
  * @param params
+ * @param locals
  */
 export async function POST({ params, locals }) {
 	const authError = await verifyAuth(locals);
