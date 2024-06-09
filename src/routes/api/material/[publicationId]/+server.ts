@@ -15,6 +15,8 @@ import {
 } from '$lib/database';
 import { type File as PrismaFile, Prisma } from '@prisma/client';
 import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
+import {enqueueComparisonTasks} from "$lib/PiscinaUtils/main";
+import {error} from "@sveltejs/kit";
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -129,6 +131,8 @@ export async function PUT({ request, params, locals }) {
 		);
 
 		const id = updatedMaterial.id;
+
+		enqueueComparisonTasks(publicationId).catch(error => console.error(error))
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

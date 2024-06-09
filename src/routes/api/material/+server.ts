@@ -148,7 +148,7 @@ export async function POST({ request }) {
 
 		const id = createdMaterial.publicationId;
 
-		enqueueComparisonTasks(id)
+		enqueueComparisonTasks(id).catch(error => console.error(error))
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

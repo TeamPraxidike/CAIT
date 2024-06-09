@@ -1,5 +1,6 @@
+import {calculateCosineSimilarity} from "$lib";
 import {reader} from './reader';
-import {calculateCosineSimilarity, calculateTfIdf} from './textProcessor';
+import {calculateTfIdf} from './textProcessor';
 import type {File as PrismaFile} from '@prisma/client'
 import path from "path";
 import {basePath} from '$lib/database'
