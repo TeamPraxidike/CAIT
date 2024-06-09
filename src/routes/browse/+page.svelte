@@ -317,11 +317,11 @@
 </div>
 
 {#if pageType === "materials"}
-    {#each materials as material, i}
+    {#each materials as material}
         <PublicationCard extensions="{getExtensions(material)}" imgSrc={'data:image;base64,' + material.coverPicData} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
     {/each}
 {:else if pageType === "people"}
-    {#each users as person, i}
+    {#each users as person}
         <UserProp view="search" posts="{5}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
     {/each}
 {:else if pageType === "circuits"}

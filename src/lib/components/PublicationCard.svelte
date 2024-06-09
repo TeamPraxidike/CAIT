@@ -207,7 +207,8 @@
                       class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}</h4>
                     <div class="flex gap-2">
 											{#if publication.type === PublicationType.Circuit}
-												<Icon icon="mdi:graph" class="text-xl text-surface-500" />
+												<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
+
 											{:else}
 
 												{#if (extensions.length === 1)}

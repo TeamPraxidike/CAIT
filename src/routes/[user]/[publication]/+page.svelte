@@ -28,6 +28,7 @@
 	const userId = $page.data.session?.user.id;
 
 	const pubView: PublicationView = data.pubView;
+	console.log(pubView.publication.circuit.nodes)
 	const isMaterial : boolean = pubView.isMaterial
 
 	let likedComments = data.likedComments as number[];
