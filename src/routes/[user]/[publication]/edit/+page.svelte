@@ -13,6 +13,9 @@
 	import { page } from '$app/stores';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import { onMount } from 'svelte';
+	import type { NodeDiffActions } from '$lib/database';
+	import TagsSelect from "$lib/components/TagsSelect.svelte";
 
 
 
@@ -30,8 +33,6 @@
 	let selectedType:any;
 	let files: FileList;
 	let oldFiles: any;
-
-
 
 
 	let LOs: string[] = serverData.publication.learningObjectives;
@@ -147,6 +148,32 @@
 	}
 
 	let circuitRef : InstanceType<typeof Circuit>;
+	let nodeActions:NodeDiffActions;
+	onMount(async () => {
+		if (circuitRef) {
+			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
+			nodeActions = nodeDiffActions;
+		}
+	});
+
+	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+
+		if (!confirmation) {
+			event.preventDefault();
+			return;
+		}
+
+	};
+
+	onMount(() => {
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	});
+
 
 </script>
 
@@ -185,7 +212,32 @@
 
 		if(circuitRef){
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
-			formData.append('circuitData', JSON.stringify(nodeDiffActions));
+			let oldAdd = nodeActions.add;
+			let newAdd = nodeDiffActions.add;
+			let add = [];
+			let edit = [];
+			for (const node of newAdd){
+				let found = false;
+				for (const old of oldAdd){
+					if(old.publicationId === node.publicationId ){
+						found = true;
+						if((node.y !== old.y || node.x !== old.x)){
+								edit.push(node);
+						}
+					}
+				}
+				if (!found){
+					add.push(node);
+				}else{
+					oldAdd = oldAdd.filter(x=>x.publicationId !== node.publicationId);
+				}
+			}
+
+			const del = oldAdd;
+			const number = nodeDiffActions.numNodes;
+			const next = nodeDiffActions.next;
+			let finalDiffActions = {number, add, delete:del, edit,next }
+			formData.append('circuitData', JSON.stringify(finalDiffActions));
 			formData.append('circuitCoverPic', JSON.stringify(coverPic));
 		}
 
@@ -233,16 +285,10 @@
 	</div>
 
 	<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
-	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:users={browsingUsers}  />
+	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
 
 	<div class="text-token w-1/2 space-y-2 pl-3">
-		<p>Tags:</p>
-		<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)} bind:input={tagInput} bind:value={tags}
-				   name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:invalid:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700" />
-		<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-			<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
-						  on:selection={onInputChipSelect} emptyState="No Tags Found. Press Enter to Create New Tag."  />
-		</div>
+		<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 	</div>
 
 	{#if isMaterial}

@@ -317,7 +317,7 @@
 </div>
 
 {#if pageType === "materials"}
-    {#each materials as material, i}
+    {#each materials as material}
         <PublicationCard extensions="{getExtensions(material)}"
                          imgSrc={'data:image;base64,' + material.coverPicData}
                          publication={material.publication}
@@ -327,8 +327,8 @@
         />
     {/each}
 {:else if pageType === "people"}
-    {#each users as person, i}
-        <UserProp view="search" posts="{6}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
+    {#each users as person}
+        <UserProp view="search" posts="{person.posts.length}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
     {/each}
 {:else if pageType === "circuits"}
     {#each circuits as circuit}

@@ -6,7 +6,6 @@ import { PublicationType } from '@prisma/client';
 
 export const GET: RequestHandler = async ({ url }) => {
 	try {
-		console.log('HERE');
 		const p = url.searchParams.get('publishers');
 		const publishers = p ? p.split(',') : [];
 		const query: string = url.searchParams.get('q') || '';

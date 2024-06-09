@@ -9,9 +9,9 @@ import {
 	type NodeDiffActions,
 	prisma,
 	updateCircuitCoverPic,
+	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
-import { mapToDifficulty, mapToType } from '$lib';
 
 export async function GET({ locals, url }) {
 	const authError = await verifyAuth(locals);
@@ -118,6 +118,7 @@ export async function POST({ request, locals }) {
 				return circuit;
 			},
 		);
+		await updateReputation(userId, 50);
 
 		const id = createdCircuit.publicationId;
 

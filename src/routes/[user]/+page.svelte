@@ -28,10 +28,11 @@
             coverPicData: string
         })[] = data.saved;
 
-    let posts : (Material & {
-        publication: Publication & {usedInCourse: {course: string}[], tags: Tag[]},
+    let posts : (Publication & {
+        tags: Tag[];
+        usedInCourse: {course: string}[]
         coverPicData: string
-    })[] = data.materials.filter((x: any) => x.publication.type !== PublicationType.Circuit);
+    })[] = data.publications.publications;
 
     let tabSet: number = 0;
 </script>
@@ -70,10 +71,10 @@
                             {#each posts as publication, i}
                                 <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
                                     <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
-                                                     publication={publication.publication}
-                                                     liked={liked.includes(publication.publicationId)}
-                                                     courses={posts[i].publication.usedInCourse.map(x => x.course)}
-                                                     saved={data.savedByUser.includes(publication.publicationId)}/>
+                                                     publication={publication}
+                                                     liked={liked.includes(publication.id)}
+                                                     courses={posts[i].usedInCourse.map(x => x.course)}
+                                                     saved={data.savedByUser.includes(publication.id)}/>
 
                                 </div>
                             {/each}
@@ -94,10 +95,10 @@
                 {#each posts as publication, i}
                     <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
                         <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
-                                         publication={publication.publication}
-                                         liked={liked.includes(publication.publicationId)}
-                                         courses={posts[i].publication.usedInCourse.map(x => x.course)}
-                                         saved={data.savedByUser.includes(publication.publicationId)}/>
+                                         publication={publication}
+                                         liked={liked.includes(publication.id)}
+                                         courses={posts[i].usedInCourse.map(x => x.course)}
+                                         saved={data.savedByUser.includes(publication.id)}/>
                     </div>
 
                 {/each}

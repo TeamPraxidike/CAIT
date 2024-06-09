@@ -29,18 +29,29 @@
 
     const toggleDropDown = () => dropDown = !dropDown;
 
+    const confirmPublishReset = (event: MouseEvent) => {
+        const url = $page.url.pathname;
+        if(url.includes('publish/') || url.includes('edit')){
+            const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+            if (!confirmation) {
+                event.preventDefault();
+                return;
+            }
+
+        }
+    }
 </script>
 
 <header class="w-screen shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none">
     <Grid>
-        <a href="/" class = "col-start-1">
+        <a href="/" class = "col-start-1" on:click={confirmPublishReset}>
             <enhanced:img class="h-16 w-16 md:hidden" src="/static/favicon.png" alt="CAIT Logo"/>
             <enhanced:img class="h-16 w-16 hidden md:block" src="/static/Logo.webp" alt="CAIT Logo"/>
         </a>
 
         <div class="hidden col-start-2 col-span-7 gap-4 lg:gap-8 items-center md:flex">
             {#each navOptions as opt}
-                <a class="group transition text-surface-800 dark:text-surface-50 h-full flex items-center" href={opt.link} >
+                <a class="group transition text-surface-800 dark:text-surface-50 h-full flex items-center" href={opt.link} on:click={confirmPublishReset}>
                     <span class="bg-left-bottom bg-gradient-to-r from-primary-400 to-primary-400 bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-300 ease-in">
                         {opt.text}
                     </span>
@@ -50,7 +61,7 @@
 
         <div class="hidden md:flex col-start-11 col-span-2 md:gap-2 xl:gap-4 items-center justify-self-end">
             {#if $page.data.session}
-                <a href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
+                <a on:click={confirmPublishReset} href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
                     Publish
                 </a>
             {:else}
@@ -90,7 +101,7 @@
         {#if dropDown}
             <div class="md:hidden col-span-4 w-full flex flex-col items-stretch" transition:slide={{ delay: 0, duration: 400, easing: quartOut, axis: 'y' }}>
                 {#each navOptions as opt}
-                    <a class="md:underline text-surface-800" href={opt.link} on:click={toggleDropDown}>
+                    <a class="md:underline text-surface-800" href={opt.link} on:click={toggleDropDown} on:click={confirmPublishReset}>
                         <div class="p-4 rounded-lg flex justify-between  items-center dark:text-surface-50">
                             {opt.text}
                             <Icon icon="oui:arrow-right" className="text-sm text-surface-600"/>

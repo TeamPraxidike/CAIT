@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import {PublicationType} from "@prisma/client";
+import { PublicationType } from '@prisma/client';
 
 export const load: PageServerLoad = async ({
 	params,
@@ -13,12 +13,12 @@ export const load: PageServerLoad = async ({
 	const session = await locals.auth();
 	if (!session) throw redirect(303, '/signin');
 
-	const materialsRes = await fetch(`/api/material?publishers=${params.user}`);
+	const pubsRes = await fetch(`/api/publication?publishers=${params.user}`);
 
-	if (materialsRes.status !== 200) {
+	if (pubsRes.status !== 200) {
 		return {
-			status: materialsRes.status,
-			error: materialsRes.statusText,
+			status: pubsRes.status,
+			error: pubsRes.statusText,
 		};
 	}
 
@@ -55,9 +55,9 @@ export const load: PageServerLoad = async ({
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
-	for(let i = 0; i < saved.length; i++){
-		if(saved[i].type === PublicationType.Circuit){
-			savedFileData.splice(i, 0, "no data")
+	for (let i = 0; i < saved.length; i++) {
+		if (saved[i].type === PublicationType.Circuit) {
+			savedFileData.splice(i, 0, 'no data');
 		}
 	}
 
@@ -65,9 +65,9 @@ export const load: PageServerLoad = async ({
 		savedByUserRes.status === 204
 			? { saved: [] }
 			: await savedByUserRes.json();
-	const materials = await materialsRes.json();
+	const publications = await pubsRes.json();
 	return {
-		materials: materials.materials,
+		publications,
 		saved,
 		savedFileData,
 		liked,

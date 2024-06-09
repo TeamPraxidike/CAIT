@@ -15,6 +15,7 @@ describe('Filter Component', () => {
 			props: {
 				imgSrc: 'some_image',
 				publication: {
+					savedByAllTime: [],
 					id: 1,
 					title: 'aaa',
 					description: 'string',

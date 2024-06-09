@@ -209,7 +209,8 @@
                     </a>
                     <div class="flex gap-2">
 											{#if publication.type === PublicationType.Circuit}
-												<Icon icon="mdi:graph" class="text-xl text-surface-500" />
+												<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
+
 											{:else}
 
 

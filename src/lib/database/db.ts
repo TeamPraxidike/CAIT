@@ -156,6 +156,12 @@ export async function getPublicationById(id: number) {
 								include: {
 									tags: true,
 									coverPic: true,
+									publisher: {
+										include: {
+											profilePic: true,
+										},
+									},
+									usedInCourse: true,
 								},
 							},
 							next: true,

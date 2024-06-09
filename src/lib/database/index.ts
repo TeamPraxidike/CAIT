@@ -22,6 +22,7 @@ import {
 	connectMaintainers,
 	connectTags,
 	handleConnections,
+	updateAllTimeSaved,
 } from './publication';
 
 import {
@@ -53,6 +54,7 @@ import {
 	likesCommentUpdate,
 	getLikedReplies,
 	getLikedComments,
+	updateReputation,
 } from '$lib/database/user';
 
 import {
@@ -265,6 +267,8 @@ export {
 	getAllTags,
 	getTagByContent,
 	deleteTagByContent,
+	updateReputation,
+	updateAllTimeSaved,
 };
 
 export type {

@@ -5,6 +5,7 @@ import {
 	createUser,
 	getPublicationById,
 	getUserById,
+	updateReputation,
 } from '$lib/database';
 import {
 	editUser,
@@ -46,6 +47,25 @@ describe('Creating users', () => {
 });
 
 describe('Editing users', () => {
+	it('should update user reputation', async () => {
+		const user = await createUser({
+			firstName: 'Marti',
+			lastName: 'Parti',
+			email: 'email@gmailsdfgsdfgsdfg',
+			password: 'password',
+		});
+
+		await updateReputation(user.id, 10);
+
+		const updatedUser = await getUserById(user.id);
+		expect(updatedUser.reputation).toEqual(10);
+
+		await updateReputation(user.id, -5);
+
+		const updatedUser2 = await getUserById(user.id);
+		expect(updatedUser2.reputation).toEqual(5);
+	});
+
 	it('should change users', async () => {
 		const user = await createUser({
 			firstName: 'Marti',

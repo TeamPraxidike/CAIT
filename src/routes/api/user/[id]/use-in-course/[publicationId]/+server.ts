@@ -2,6 +2,7 @@ import {
 	addPublicationToUsedInCourse,
 	getPublicationById,
 	getUserById,
+	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
@@ -9,6 +10,7 @@ import { verifyAuth } from '$lib/database/auth';
  * Replaces ALL courses linked to this publication and user with a new set of courses
  * @param params
  * @param request
+ * @param locals
  */
 export async function POST({ params, request, locals }) {
 	const authError = await verifyAuth(locals);
@@ -35,6 +37,9 @@ export async function POST({ params, request, locals }) {
 			parseInt(publicationId),
 			body.courses,
 		);
+
+		await updateReputation(publication.publisherId, 15);
+
 		return new Response('Successfully marked usage of publication', {
 			status: 200,
 		});
