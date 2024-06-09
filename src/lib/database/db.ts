@@ -119,7 +119,11 @@ export async function getPublicationById(id: number) {
 		include: {
 			usedInCourse: true,
 			tags: true,
-			publisher: true,
+			publisher: {
+				include: {
+					profilePic: true,
+				},
+			},
 			maintainers: {
 				include: {
 					profilePic: true,
@@ -130,10 +134,18 @@ export async function getPublicationById(id: number) {
 				include: {
 					replies: {
 						include: {
-							user: true,
+							user: {
+								include: {
+									profilePic: true,
+								},
+							},
 						},
 					},
-					user: true,
+					user: {
+						include: {
+							profilePic: true,
+						},
+					},
 				},
 			},
 			materials: {

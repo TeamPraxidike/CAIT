@@ -63,7 +63,7 @@
 
 
 <div class="{addComment ? 'col-start-1':'col-start-2'} {display} mb-2 gap-2 col-span-full items-top">
-	<enhanced:img class="w-10 md:w-14 rounded-full my-4 border" src="/static/fdr.jpg" alt="CAIT Logo" />
+	<img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + $page.data.session?.userPfp.data} alt="CAIT Logo" />
 	<form method="POST" class="flex-grow" use:enhance={({ formData }) => {
         formData.append('userId',userId.toString());
 				formData.append('isComment', addComment.toString());
@@ -81,15 +81,12 @@
 							await applyAction(result);
 						}
 				};
-				// setTimeout(() => {
-        //              window.location.reload();
-        //          }, 50);
       }}>
 			<textarea
 				name="comment"
 				bind:this={textarea}
 				class="w-full border-0 border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm dark:text-surface-800 ring-0
-				 focus:border-b focus:border-primary-500 focus:ring-0 "
+				 focus:border-b focus:border-primary-500 focus:ring-0 my-2"
 				placeholder="{addComment ? 'Start a discussion...' : 'Write a response...'}  "
 				rows="1"
 				bind:value={commentText}

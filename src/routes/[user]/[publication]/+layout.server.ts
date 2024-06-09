@@ -55,6 +55,9 @@ export const load: LayoutServerLoad = async ({
 	};
 };
 
+type UserPfp = User & {
+	profilePicData: string;
+};
 /**
  * The data that is loaded for the pubView view layout.
  * Only to be used in the pubView view layout or child pages.
@@ -65,13 +68,13 @@ export type PublicationView = {
 	publication: Publication & {
 		usedInCourse: { course: string }[];
 		tags: Tag[];
-		publisher: User;
-		maintainers: User[];
+		publisher: UserPfp;
+		maintainers: UserPfp[];
 		comments: (Comment & {
 			replies: (Reply & {
-				user: User;
+				user: UserPfp;
 			})[];
-			user: User;
+			user: UserPfp;
 		})[];
 		materials: Material & {
 			files: PrismaFile[];
@@ -89,5 +92,4 @@ export type PublicationView = {
 		};
 	};
 	coverFileData: FetchedFileItem;
-	maintainers: (User & { profilePicData: string })[];
 };

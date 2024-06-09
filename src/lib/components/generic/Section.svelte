@@ -20,5 +20,4 @@
         </a>
     </div>
     <div class="md:w-1/2 rounded-lg h-64 bg-surface-200"></div>
-<!--    <img src="fdr.jpg" alt="fdrkata" class="md:w-1/2 rounded-lg">-->
 </div>
