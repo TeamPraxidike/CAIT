@@ -1,7 +1,6 @@
 <script lang="ts">
     import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
-    import { fly } from 'svelte/transition';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
@@ -43,7 +42,7 @@
 
         //Variables needed to deal with Publishers
         let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
-        let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstNname + " " + x.lastName)})); //array with all the tags MOCK
+        let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstName + " " + x.lastName)})); //array with all the tags MOCK
         let displayPublishers: {id:number, content:string }[] = allPublisherNames; //
         let publisherActive = false
 
@@ -55,28 +54,6 @@
 
         let numberNodes : number;
 
-    //Used to make the dropdown appear/disappear
-    const toggleSortBy = () => {
-        clearAll();        //If sort by is active just close all the dropdowns else we first need to close down every other dropdown and then dropdown the sort by
-        if (!sortByActive) {
-            sortByActive = true;
-        }
-
-
-    };
-    //Make the border light blue showing the current toggle is active
-    $: sortByBorder = sortByActive ? "border-primary-400" : "border-surface-400"
-
-    //Updates the sortBy text for easier understanding
-    const updateSortBy = (event: MouseEvent) => {
-        //Take the selected option
-        const target = event.target as HTMLButtonElement
-        // change the text of the dropdown button
-        sortByText = target.textContent ?? "Sort By"
-        //close the dropdown upon selection
-        sortByActive = false;
-        applyActive = true;
-    }
 
 
     /**
@@ -158,6 +135,7 @@
 
 
     const sendFiltersToAPI = async () => {
+
         applyActive = false;
         const queryParams = new URLSearchParams({
             type: pageType
@@ -259,15 +237,14 @@
                         on:filterSelected={() => {applyActive = true}} num="{0}" />
             {:else}
                 <Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
-                        profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
+                        profilePic="{false}" on:filterSelected={() => {applyActive = true}} bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
             {/if}
             <div class = "w-px h-4/5 bg-surface-600" ></div>
-            <Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" />
+            <Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:active={sortByActive} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}}/>
 
 
-            <button class="rounded-lg text-xs py-1 px-3 text-surface-100 dark:text-surface-800 {applyBackground}"
-                    on:click={sendFiltersToAPI}  >Apply
-            </button>
+            <button class="rounded-lg text-xs py-1.5 px-3 text-surface-100 dark:text-surface-800 shadow-lg {applyBackground}"
+                    on:click={sendFiltersToAPI} disabled="{!applyActive}"  >Apply</button>
         </div>
     {/if}
 

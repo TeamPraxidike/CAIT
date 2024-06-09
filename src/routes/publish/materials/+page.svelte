@@ -53,6 +53,7 @@
 	let selectedType = "Select Type";
 	let allTypes: {id:number, content:string }[] = ["Presentation", "Information", "Code", "Assignment", "Exam", "Other"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
 
+	let typeActive = false;
 	// cover
 	let coverPic: File | undefined = undefined;
 	function chooseCover(e: Event) {
@@ -183,7 +184,7 @@
 				<label for="title" >Title<span class="text-error-300">*</span></label>
 				<input type="text" name="title" placeholder="Title" bind:value={title}
 					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
-				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
+					<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive} on:clearSettings={() => {typeActive=false}}/>
 				<textarea name="description" placeholder="Description..." bind:value={description}
 						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>
