@@ -54,8 +54,8 @@ export async function GET({ params, url, locals }) {
 	const fileData: FetchedFileArray = [];
 	if (url.searchParams.get('fullPublications') === 'true') {
 		saved = savedResponse.saved;
-		let temp = [];
-		for (let publication of saved) {
+		const temp = [];
+		for (const publication of saved) {
 			if (publication.materials === null) {
 				const filePath = publication.coverPic!.path;
 				const currentFileData = fileSystem.readFile(filePath);
