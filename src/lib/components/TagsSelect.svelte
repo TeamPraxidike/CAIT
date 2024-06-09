@@ -8,7 +8,7 @@
     $: tags = tags;
     const toastStore = getToastStore();
     let tagInput = '';
-    let newTags: string[] = [];
+    export let newTags: string[] = [];
 
     type TagOption = AutocompleteOption<string, { content: string }>;
     let flavorOptions: TagOption[] = allTags.map(tag => {

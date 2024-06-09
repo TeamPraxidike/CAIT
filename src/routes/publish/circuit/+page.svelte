@@ -160,7 +160,7 @@
 				<div class="flex flex-col w-full">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
 					<div class="flex flex-col gap-2 p-3">
-						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} />
+						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} bind:newTags={newTags}/>
 					</div>
 				</div>
 			</div>

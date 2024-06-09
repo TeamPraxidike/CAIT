@@ -215,7 +215,7 @@
 				</div>
 				<div class="flex flex-col w-full">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
-					<TagsSelect allTags={allTags} bind:tags={tags}/>
+					<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 				</div>
 
 			</div>

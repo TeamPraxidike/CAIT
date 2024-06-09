@@ -15,6 +15,7 @@
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import { onMount } from 'svelte';
 	import type { NodeDiffActions } from '$lib/database';
+	import TagsSelect from "$lib/components/TagsSelect.svelte";
 
 
 
@@ -287,13 +288,7 @@
 	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
 
 	<div class="text-token w-1/2 space-y-2 pl-3">
-		<p>Tags:</p>
-		<InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)} bind:input={tagInput} bind:value={tags}
-				   name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:invalid:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700" />
-		<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-			<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
-						  on:selection={onInputChipSelect} emptyState="No Tags Found. Press Enter to Create New Tag."  />
-		</div>
+		<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 	</div>
 
 	{#if isMaterial}
