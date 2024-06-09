@@ -23,7 +23,6 @@ enum MaterialType {
   information
   presentation
   assignment
-  other
   exam
   code
   other

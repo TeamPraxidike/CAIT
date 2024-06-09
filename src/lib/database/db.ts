@@ -155,6 +155,8 @@ export async function getPublicationById(id: number) {
 							publication: {
 								include: {
 									tags: true,
+									materials: true,
+									circuit: true,
 									coverPic: true,
 									publisher: {
 										include: {

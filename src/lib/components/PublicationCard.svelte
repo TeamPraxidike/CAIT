@@ -215,7 +215,7 @@
 
 
 													<div class="py-1" bind:this={hoverDiv}>
-														<Icon icon={String(PublicationTypeIconMap.get(materialType))} class="text-primary-600 size-5" />
+														<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
 														{#if isHovered}
 															<div
 																class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"

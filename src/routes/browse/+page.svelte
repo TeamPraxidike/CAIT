@@ -14,6 +14,8 @@
 
     export let data:PageServerData;
     let searchWord: string = '';
+    console.log(data)
+
     $: materials = data.materials;
     $: circuits = data.circuits
 
@@ -82,6 +84,7 @@
         applyActive = true;
 
     };
+
 
     /**
      * Method that makes all the dropdowns go up; Used so whenever you drop down a menu it closes all others

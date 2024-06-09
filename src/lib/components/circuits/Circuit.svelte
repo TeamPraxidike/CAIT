@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
-	import type { NodeDiffActions } from '$lib/database';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { Difficulty, type Node as PrismaNode, type Publication, PublicationType } from '@prisma/client';
@@ -10,6 +9,7 @@
 	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
 	import { PublicationCard } from '$lib';
 	import html2canvas from 'html2canvas';
+	import type { NodeDiffActions } from '$lib/database';
 
 	async function captureScreenshot () : Promise<string> {
 		const container = document.getElementById('cy');
@@ -185,7 +185,12 @@
 			layout: {
 				name: 'preset'
 			},
+
+			minZoom: 0.5,
+			maxZoom: 2,
 		});
+
+
 
 		addHtmlLabel("node", false);
 
@@ -347,12 +352,28 @@
 							let publication = nodes.find(n => n.publicationId === Number(node.id()));
 
 							if (publication) {
+								console.log(publication.publication)
+								 let coverPicData = '';
+								// if (
+								// 	publication.publication.type === PublicationType.Material &&
+								// 	publication.publication.materials
+								// ) {
+								// 	coverPicData = coverPicFetcher(
+								// 		publication.publication.materials.encapsulatingType,
+								// 		publication.publication.coverPic,
+								// 	).data;
+								// } else {
+								// 	const filePath = publication.publication.coverPic!.path;
+								// 	const currentFileData = fileSystem.readFile(filePath);
+								// 	coverPicData = currentFileData.toString('base64');
+								// }
+
 								const publicationCard = new PublicationCard({
 									target: divElement,
 									props: {
 										publication: publication.publication,
 										inCircuits: false,
-										imgSrc: 'data:image;base64,',
+										imgSrc: 'data:image;base64,' + coverPicData,
 										forArrow: true,
 										extensions: node.data().extensions,
 										liked: liked.includes(publication.publicationId),

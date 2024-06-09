@@ -68,39 +68,6 @@
 
 	$: uid = $page.data.session?.user.id;
 
-	type TagOption = AutocompleteOption<string, { content: string }>;
-	let flavorOptions: TagOption[] = allTags.map(tag => {
-		return {
-			value: tag.content,
-			label: tag.content
-		};
-	});
-
-	const triggerRepeatInput = (type: string,input: string)=>{
-		toastStore.trigger({
-			message: `${type} ${input} Already Added`,
-			background: 'bg-warning-200'
-		});
-	}
-
-	const handleInvalid = () => {
-		if(tagInput.length>0 && !tags.includes(tagInput)) {
-			tags=[...tags,tagInput];
-			newTags=[...newTags,tagInput];
-			tagInput='';
-		}
-		else {
-			triggerRepeatInput("Tag",tagInput);
-		}
-	}
-
-
-	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		if (!tags.includes(e.detail.value)) {
-			inputChip.addChip(e.detail.value);
-			tagInput = '';
-		}
-	}
 
 	function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
