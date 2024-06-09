@@ -108,17 +108,6 @@
 		typeActive = false;
 	};
 
-	// const resetAll = () => {
-	//     searchWord = '';
-	//     applyActive = false
-	//     rese tFilters();
-	// };
-
-	// const resetFilterButton = () => {
-	//     resetFilters();
-	//     sendFiltersToAPI();
-	// };
-
 	const resetFilters = () => {
 		console.log('In reset filters: ' + pageType);
 		selectedTags = [];

@@ -5,13 +5,14 @@
 	import { page } from '$app/stores';
 
 	import { scale } from 'svelte/transition';
-	export let materials : any = [];
+
+	export let materials: any = [];
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
-	let userIds : string[] = []
+	let userIds: string[] = [];
 	let targetDiv: HTMLDivElement;
-	let searchWord : string = ""
+	let searchWord: string = '';
 
 	// function getFileExtension(filePath: string): string {
 	// 	const index = filePath.lastIndexOf('.');
@@ -60,22 +61,22 @@
 		dispatch('remFurther', { id: event.detail.id });
 	};
 
-	const onSearch = (event : CustomEvent) => {
-		searchWord = event.detail.value.inputKeywords
-		searchAPI()
-	}
+	const onSearch = (event: CustomEvent) => {
+		searchWord = event.detail.value.inputKeywords;
+		searchAPI();
+	};
 
-	const newMaterials = (event : CustomEvent) => {
+	const newMaterials = (event: CustomEvent) => {
 
 		if (event.detail.option === 0)
-			userIds = []
-		if (event.detail.option === 2){
+			userIds = [];
+		if (event.detail.option === 2) {
 			if ($page.data.session?.user.id)
-				userIds = [$page.data.session?.user.id]
+				userIds = [$page.data.session?.user.id];
 		}
 
-		searchAPI()
-	}
+		searchAPI();
+	};
 
 	const searchAPI = async () => {
 		const queryParams = new URLSearchParams({
@@ -93,43 +94,48 @@
 				return response.json();
 			})
 			.then(data => {
-			// Handle the response data from the API
-				materials = data.materials
+				// Handle the response data from the API
+				materials = data.materials;
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
 			});
-	}
-
-
+	};
 
 
 </script>
 
-<div class="fixed top-0 left-0 w-full h-full bg-surface-800 bg-opacity-70"/>
-	<div bind:this={targetDiv}
-			 class="fixed top-1/2 left-1/2 w-4/5 h-4/5 bg-surface-100 rounded-lg shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex overflow-auto items-start"  transition:scale={{ delay: 0, duration: 200, start:0.9}}>
-		<Grid pageGrid="{false}">
+<div class="fixed top-0 left-0 w-full h-full bg-surface-800 bg-opacity-70" />
+<div bind:this={targetDiv}
+	 class="fixed top-1/2 left-1/2 w-4/5 h-4/5 bg-surface-100 rounded-lg shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex overflow-auto items-start"
+	 transition:scale={{ delay: 0, duration: 200, start:0.9}}>
+	<Grid pageGrid="{false}">
 
-			<div class="flex-col col-span-full mt-8">
-				<div class="flex justify-between w-full">
-					<h2 class="text-surface-700 font-bold mb-4">Select Publications to Add to Your Circuit</h2>
-					<button type="button" class="rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
-				</div>
-				<div class = "w-full lg:w-7/12 xl:w-1/2 mb-2">
-					<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
-				</div>
-				<div class="hidden rounded-lg lg:flex w-full lg:w-7/12 xl:w-1/2 h-8 mb-8">
-					<ToggleComponent page="{false}" pageType="All Materials" options={["All Materials", "All Circuits", "My Publications", "Saved Publications"]}
-													 labels={["All Materials", "All Circuits", "My Publications", "Saved Publications"]} on:reset={newMaterials} />
-				</div>
+		<div class="flex-col col-span-full mt-8">
+			<div class="flex justify-between w-full">
+				<h2 class="text-surface-700 font-bold mb-4">Select Publications to Add to Your Circuit</h2>
+				<button type="button" class="rounded-lg py-1 px-3 bg-surface-800 text-surface-50"
+						on:click="{() => {addActive = false}}">Done
+				</button>
 			</div>
+			<div class="w-full lg:w-7/12 xl:w-1/2 mb-2">
+				<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch} />
+			</div>
+			<div class="hidden rounded-lg lg:flex w-full lg:w-7/12 xl:w-1/2 h-8 mb-8">
+				<ToggleComponent page="{false}" pageType="All Materials"
+								 options={["All Materials", "All Circuits", "My Publications", "Saved Publications"]}
+								 labels={["All Materials", "All Circuits", "My Publications", "Saved Publications"]}
+								 on:reset={newMaterials} />
+			</div>
+		</div>
 
 
-			{#each materials as m}
-				<PublicationCard publication="{m.publication}" inCircuits="{true}"
-												 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-												 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked="{false}" saved="{false}"/>
-			{/each}
-		</Grid>
-	</div>
+		{#each materials as m}
+			<PublicationCard publication="{m.publication}" inCircuits="{true}"
+							 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
+							 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked="{false}"
+							 saved="{false}"
+							 publisher={m.publisher} />
+		{/each}
+	</Grid>
+</div>

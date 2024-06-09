@@ -5,6 +5,7 @@ import {
 	getUserById,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { profilePicFetcher } from '$lib/database/file';
 
 /**
  * Returns all saved publications of a user
@@ -32,6 +33,9 @@ export async function GET({ params, url, locals }) {
 
 	let saved;
 	const fileData: FetchedFileArray = [];
+
+	console.log(savedResponse.saved);
+
 	if (url.searchParams.get('fullPublications') === 'true') {
 		saved = savedResponse.saved;
 		for (const publication of saved) {
@@ -43,11 +47,25 @@ export async function GET({ params, url, locals }) {
 				),
 			);
 		}
+
+		saved = saved.map((x) => {
+			return {
+				...x,
+				publisher: {
+					...x.publisher,
+					profilePicData: profilePicFetcher(x.publisher.profilePic)
+						.data,
+				},
+			};
+		});
 	} else saved = savedResponse.saved.map((x) => x.id);
 
 	if (saved.length === 0) return new Response(null, { status: 204 });
 
-	return new Response(JSON.stringify({ saved: saved, savedFileData: fileData }), {
-		status: 200,
-	});
+	return new Response(
+		JSON.stringify({ saved: saved, savedFileData: fileData }),
+		{
+			status: 200,
+		},
+	);
 }
