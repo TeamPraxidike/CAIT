@@ -458,6 +458,7 @@
 	let addActive: boolean = false;
 	let displayedMaterials: any = [];
 	let pubIds: Set<number> = new Set();
+	nodes.map(node => pubIds.add(node.publicationId));
 
 	/**
 	 * Fetches all materials

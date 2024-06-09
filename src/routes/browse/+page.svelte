@@ -94,16 +94,7 @@
         typeActive = false;
     };
 
-    // const resetAll = () => {
-    //     searchWord = '';
-    //     applyActive = false
-    //     rese tFilters();
-    // };
 
-    // const resetFilterButton = () => {
-    //     resetFilters();
-    //     sendFiltersToAPI();
-    // };
 
     const resetFilters = () => {
         selectedTags = [];

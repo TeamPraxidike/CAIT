@@ -111,7 +111,7 @@
 
 </script>
 
-<div  class="bind:this={targetDiv} space-y-1 relative">
+<div bind:this={targetDiv}   class="space-y-1 relative">
 	{#if type}
 		<button class="flex rounded-lg py-2 px-2 gap-1 items-center shadow-md border-none hover:font-semibold" on:click={() => {nodes.focus()}}>
 			<span class="text-xs {text}">{label}:</span>
