@@ -108,6 +108,11 @@ export async function getAllMaterials(
 							course: true,
 						},
 					},
+					publisher: {
+						include: {
+							profilePic: true,
+						},
+					},
 				},
 			},
 			files: true,

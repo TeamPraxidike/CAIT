@@ -79,8 +79,13 @@ export async function getSavedPublications(userId: string) {
 							course: true,
 						},
 						where: {
-							userId: userId
-						}
+							userId: userId,
+						},
+					},
+					publisher: {
+						include: {
+							profilePic: true,
+						},
 					},
 				},
 			},

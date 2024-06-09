@@ -12,7 +12,6 @@ import {
 	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
-import { mapToDifficulty, mapToType } from '$lib';
 
 export async function GET({ locals, url }) {
 	const authError = await verifyAuth(locals);

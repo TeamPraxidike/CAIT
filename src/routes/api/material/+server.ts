@@ -10,7 +10,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
-import { coverPicFetcher } from '$lib/database/file';
+import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
 /**
  * Convert a difficulty string to difficulty enum
@@ -46,17 +46,22 @@ export const GET: RequestHandler = async ({ url }) => {
 			query,
 		);
 
-		// coverPic return
-
 		materials = materials.map((material) => {
 			return {
 				...material,
+				publisher: {
+					...material.publication.publisher,
+					profilePicData: profilePicFetcher(
+						material.publication.publisher.profilePic,
+					).data,
+				},
 				coverPicData: coverPicFetcher(
 					material.encapsulatingType,
 					material.publication.coverPic,
 				).data,
 			};
 		});
+
 		return new Response(JSON.stringify({ materials }), {
 			status: 200,
 		});

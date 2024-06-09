@@ -20,7 +20,7 @@
             xl:col-span-3
             dark:bg-surface-800 dark:text-surface-50 dark:border-none">
     {#if userPhotoUrl !== ''}
-        <img src={userPhotoUrl} alt="User Profile" class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full" />
+        <img src={userPhotoUrl} alt="User Profile" class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full object-cover" />
     {:else}
         <div class="w-20 h-20 md:w-40 md:h-40 rounded-full bg-surface-500 placeholder-circle" />
     {/if}

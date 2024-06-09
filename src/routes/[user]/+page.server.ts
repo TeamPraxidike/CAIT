@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
+import type { User } from '@prisma/client';
 
 export const load: PageServerLoad = async ({
 	params,
@@ -58,9 +59,9 @@ export const load: PageServerLoad = async ({
 		savedByUserRes.status === 204
 			? { saved: saved }
 			: await savedByUserRes.json();
-	const materials = await materialsRes.json();
+	const { materials } = await materialsRes.json();
 	return {
-		materials: materials.materials,
+		materials,
 		saved,
 		savedFileData,
 		liked,
@@ -74,6 +75,9 @@ export type PublicationInfo = {
 		tags: {
 			content: string;
 		}[];
+		publisher: User & {
+			profilePicData: string;
+		};
 	};
 	coverPic: {
 		path: string;
