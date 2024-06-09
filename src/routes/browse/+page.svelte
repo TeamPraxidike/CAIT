@@ -318,11 +318,17 @@
 
 {#if pageType === "materials"}
     {#each materials as material, i}
-        <PublicationCard extensions="{getExtensions(material)}" imgSrc={'data:image;base64,' + material.coverPicData} publication={material.publication} liked={liked.includes(material.publication.id)} saved={saved.includes(material.publication.id)}/>
+        <PublicationCard extensions="{getExtensions(material)}"
+                         imgSrc={'data:image;base64,' + material.coverPicData}
+                         publication={material.publication}
+                         liked={liked.includes(material.publication.id)}
+                         saved={saved.includes(material.publication.id)}
+                         materialType={material.encapsulatingType}
+        />
     {/each}
 {:else if pageType === "people"}
     {#each users as person, i}
-        <UserProp view="search" posts="{5}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
+        <UserProp view="search" posts="{6}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
     {/each}
 {:else if pageType === "circuits"}
     {#each circuits as circuit}
