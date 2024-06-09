@@ -146,7 +146,7 @@ export async function deleteMaterialByPublicationId(
 	return prismaContext.publication.delete({
 		where: { id: publicationId },
 		include: {
-			material: {
+			materials: {
 				include: {
 					files: true,
 				},

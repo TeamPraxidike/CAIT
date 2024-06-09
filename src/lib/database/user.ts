@@ -163,6 +163,30 @@ export async function editUser(
 }
 
 /**
+ * Increases the reputation with number amount of points of the user with id userId
+ * @param userId - the id of the user receiving points
+ * @param number - the reputation points to be added
+ * @param prismaContext
+ */
+
+export async function updateReputation(
+	userId: string,
+	number: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	return prismaContext.user.update({
+		where: {
+			id: userId,
+		},
+		data: {
+			reputation: {
+				increment: number,
+			},
+		},
+	});
+}
+
+/**
  * Used to like/unlike a publication
  * Checks whether the user has already liked it and does the right action based on that (like or unlike)
  *

@@ -2,6 +2,7 @@ import {
 	getPublicationById,
 	getUserById,
 	likePublication,
+	updateReputation,
 } from '$lib/database';
 import { isPublicationLiked } from '$lib/database/user';
 import { verifyAuth } from '$lib/database/auth';
@@ -9,6 +10,7 @@ import { verifyAuth } from '$lib/database/auth';
 /**
  * Likes a publication
  * @param params
+ * @param locals
  */
 export async function POST({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -30,6 +32,15 @@ export async function POST({ params, locals }) {
 
 	try {
 		const response = await likePublication(id, parseInt(publicationId));
+
+		if (id !== publication.publisherId) {
+			if (response === 'Publication liked successfully') {
+				await updateReputation(publication.publisherId, 2);
+			} else if (response === 'Publication unliked successfully') {
+				await updateReputation(publication.publisherId, -2);
+			}
+		}
+
 		return new Response(JSON.stringify({ message: response }), {
 			status: 200,
 		});

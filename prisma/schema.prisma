@@ -158,6 +158,8 @@ model Publication {
 
   node Node[]
 
+  savedByAllTime String[] @default([])
+
   coverPic File? @relation("CoverPic")
 
   materials    Material?

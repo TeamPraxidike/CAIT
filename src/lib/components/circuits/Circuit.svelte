@@ -5,7 +5,7 @@
 	import type {  NodeDiffActions } from '$lib/database';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import type { Node as PrismaNode, Publication } from '@prisma/client';
+	import { Difficulty, type Node as PrismaNode, type Publication, PublicationType } from '@prisma/client';
 	import nodeHtmlLabel from 'cytoscape-node-html-label';
 	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
 	import { PublicationCard } from '$lib';
@@ -80,6 +80,7 @@
 			toPublicationId: number
 		}[]
 	})[];
+
 
 	const removePopupDiv = (event: MouseEvent) => {
 		let rect = document.getElementById('cy')?.getBoundingClientRect()
@@ -220,6 +221,7 @@
 						data: { id: `${edgeId}`, source: `${node.id()}`, target: `${selectedId}` }
 					});
 					selectedNodePrereqs.add(Number(node.id()))
+
 				}
 
 				cy.$(`#${node.id()}`).unselect();
@@ -501,7 +503,33 @@
 					data: { id: data.material.publication.id, label: data.material.publication.title, extensions : extensions},
 					position: { x: 100, y: 100 }
 				});
-
+				nodes.push(
+					{
+						next: [],
+						circuitId: 1,
+						publicationId: pubId,
+						extensions: extensions,
+						posX: 100,
+						posY: 100,
+						publication: {
+							id: pubId as number,
+							title: data.material.publication.title as string,
+							description:"",
+							difficulty: Difficulty.easy,
+							likes: 0,
+							learningObjectives: ['1'],
+							prerequisites: ['1'],
+							createdAt: new Date(),
+							updatedAt: new Date(),
+							publisherId: '1',
+							reports: 2,
+							type: PublicationType.Circuit,
+							savedByAllTime: ['1'],
+							tags: [{content: 'haha'}],
+							usedInCourse: [{ course: '1' }],
+						}
+					},
+				)
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -517,6 +545,7 @@
 		selectedId = '';
 		selected = false;
 		pubIds.delete(event.detail.id);
+		nodes = nodes.filter(x=>x.publicationId !== event.detail.id)
 	};
 
 
@@ -539,6 +568,7 @@
 						cy.remove(cy.$(`#${node.id()}`));
 						pubIds.delete(Number(node.id()));
 						numSelected--
+						nodes = nodes.filter(x=>x.publicationId !== Number(node.id()))
 					}
 				});
 				selectedId = '';
@@ -562,7 +592,20 @@
 			add.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
 			del.push(({ publicationId: Number(node.id()) }));
 			edit.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
-			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => Number(edge.target().id()));
+
+			let curNode = nodes.filter(x=>x.publicationId === Number(node.id()))[0]
+			curNode.posY = Number(node.position().y);
+			curNode.posX = Number(node.position().x);
+
+			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => {
+				const targetId = Number(edge.target().id());
+				curNode.next.push({
+					circuitId: 1,
+					fromPublicationId: node.id(),
+					toPublicationId: targetId,
+				})
+				return targetId;
+			});
 			next.push(({ fromId: Number(node.id()), toId: toID }));
 		})
 		nodeDiffActions = {numNodes, add, delete:del, edit, next };
@@ -608,6 +651,7 @@
 	const savePrereq = () => {
 		prereqActive = false;
 		cy.$(`#${selectedId}`).unselect();
+
 	};
 
 

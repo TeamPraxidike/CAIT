@@ -7,6 +7,7 @@ import {
 	prisma,
 	updateCoverPic,
 	updateFiles,
+	updateReputation,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { coverPicFetcher } from '$lib/database/file';
@@ -112,6 +113,8 @@ export async function POST({ request }) {
 				return material;
 			},
 		);
+
+		await updateReputation(userId, 30);
 
 		const id = createdMaterial.publicationId;
 

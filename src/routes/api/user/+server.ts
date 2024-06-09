@@ -38,6 +38,7 @@ export async function GET() {
 	try {
 		let users = await prisma.user.findMany({
 			include: {
+				posts: true,
 				profilePic: true,
 			},
 		});

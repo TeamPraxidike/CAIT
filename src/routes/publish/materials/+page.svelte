@@ -16,6 +16,7 @@
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
+	import { onMount } from 'svelte';
 
 	export let form: ActionData;
 	export let data: PageServerData;
@@ -100,6 +101,25 @@
 			background: 'bg-error-200'
 		});
 	}
+
+	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+
+		if (!confirmation) {
+			event.preventDefault();
+			return;
+		}
+
+	};
+
+	onMount(() => {
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	});
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
