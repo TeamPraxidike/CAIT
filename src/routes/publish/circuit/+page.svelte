@@ -2,7 +2,7 @@
 	import { Circuit, Meta, PublishReview } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
-	import type { Tag as PrismaTag, User } from '@prisma/client';
+	import type { Publication, Tag as PrismaTag, User } from '@prisma/client';
 	import {
 		Autocomplete,
 		type AutocompleteOption,
@@ -16,6 +16,10 @@
 	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
+	import type {
+		Node as PrismaNode
+	} from '@prisma/client';
+	import { onMount } from 'svelte';
 
 	export let data: PageServerData;
 
@@ -113,8 +117,38 @@
 			nodeActions = nodeDiffActions;
 			circuitCoverPic = coverPic;
 		}
-
 	}
+	let circuitNodesPlaceholder: (PrismaNode & {
+		publication: Publication & {
+			tags: { content: string }[],
+			usedInCourse: { course: string }[],
+		}
+		next: {
+			circuitId: number,
+			fromPublicationId: number,
+			toPublicationId: number
+		}[]
+	})[] = [];
+
+
+	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+
+		if (!confirmation) {
+			event.preventDefault();
+			return;
+		}
+
+	};
+
+	onMount(() => {
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	});
+
 </script>
 
 <!--<Node></Node>-->
@@ -138,7 +172,7 @@
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit nodes={[]} bind:this={circuitRef} publishing="{true}"/>
+			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}"/>
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>

@@ -153,7 +153,25 @@
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 			nodeActions = nodeDiffActions;
 		}
-	})
+	});
+
+	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+
+		if (!confirmation) {
+			event.preventDefault();
+			return;
+		}
+
+	};
+
+	onMount(() => {
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	});
 
 
 </script>
@@ -266,7 +284,7 @@
 	</div>
 
 	<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
-	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:users={browsingUsers}  />
+	<MantainersEditBar bind:searchableUsers={browsingUsers} users={users} bind:additionalMaintainers={maintainers}  />
 
 	<div class="text-token w-1/2 space-y-2 pl-3">
 		<p>Tags:</p>
