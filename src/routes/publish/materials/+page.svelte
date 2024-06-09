@@ -47,7 +47,7 @@
 	let copyright: string = '';
 	let theoryApplicationRatio = 0.5;
 	let selectedType = "Select Type";
-	let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+	let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Other"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
 
 	// cover
 	let coverPic: File | undefined = undefined;
@@ -77,7 +77,7 @@
 	const locks: boolean[] = [true, true, true];
 
 	$: locks[0] = files ? files.length === 0 : true;
-	$: locks[1] = title.length < 2 || description.length < 10 || selectedType === "Select Type";
+	$: locks[1] = title.length < 1 || description.length < 1 || selectedType === "Select Type";
 	$: locks[2] = tags.length < 2 || LOs.length<1;
 
 
@@ -134,25 +134,34 @@
       }}>
 	<Stepper buttonCompleteType="submit">
 		<Step locked={locks[0]}>
-			<svelte:fragment slot="header">Upload files</svelte:fragment>
+			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
 			<FileTable operation="edit" bind:files={files} />
 		</Step>
 		<Step locked={locks[1]}>
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-			<div class="flex flex-col gap-2">
-				<label for="title" >Title<span class="text-error-300">*</span></label>
-				<input type="text" name="title" placeholder="Title" bind:value={title}
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
-				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
+			<div class="flex flex-col gap-5">
+				<div>
+					<label for="title" >Title<span class="text-error-300">*</span></label>
+					<input type="text" name="title" placeholder="Title" bind:value={title}
+						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+				</div>
+				<div>
+					<span>Select a type for the publication<span class="text-error-300">*</span>: </span>
+					<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
+				</div>
+
 				<textarea name="description" placeholder="Description..." bind:value={description}
 						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>
-			<label for="coverPhoto">Cover Picture:</label>
-			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>
 			{#if coverPic}
-				<button on:click={() => coverPic = undefined} type="button" class="btn">Remove</button>
-				<img src={URL.createObjectURL(coverPic)} alt="sss">
+				<button on:click={() => coverPic = undefined} type="button" class="btn py-2 px-4 bg-error-400 text-surface-50 rounded-full hover:bg-opacity-85">Remove Cover Picture</button>
+			{:else}
+				<FileButton on:change={chooseCover} name="coverPhoto">Upload Cover Picture</FileButton>
+			{/if}
+
+			{#if coverPic}
+				<img src={URL.createObjectURL(coverPic)} alt="coverPicture" class="border-2 border-surface-700 w-1/2">
 			{/if}
 		</Step>
 		<Step locked={locks[2]}>

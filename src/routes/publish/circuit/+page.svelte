@@ -45,13 +45,6 @@
 
 	$: additionalMaintainers = additionalMaintainers
 
-	const triggerRepeatInput = (type: string,input: string)=>{
-		toastStore.trigger({
-			message: `${type} ${input} Already Added`,
-			background: 'bg-warning-200'
-		});
-	}
-
 	const locks: boolean[] = [true, true];
 
 	$: locks[0] = title.length < 2 || description.length < 10;
