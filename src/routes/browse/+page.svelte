@@ -253,64 +253,6 @@
         <ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
                          labels={["Materials", "People", "Circuits"]}  />
     </div>
-</div>
-
-
-<div class="col-span-full flex flex-wrap gap-2">
-    {#if (selectedTags.length !== 0)}
-        <div class=" flex gap-2 items-center">
-            <p class="text-xs text-surface-600 dark:text-surface-200">Tags:</p>
-            {#each selectedTags as tag}
-                <div>
-                    <TagComponent tagText="{tag.content}" width="{0}" removable="{true}" on:Remove={removeTag}/>
-                </div>
-            {/each}
-        </div>
-    {/if}
-
-    {#if (selectedPublishers.length !== 0)}
-        <div class=" flex gap-2 items-center">
-            <p class="text-xs text-surface-600 dark:text-surface-200">Publishers:</p>
-            {#each selectedPublishers as sp}
-                <div class="flex gap-1 items-center">
-                    <Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile"/>
-                    <p class="text-xs">{sp.content}</p>
-                    <button class="h-full" on:click={() => removePublisher(sp)}>
-                        <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
-                    </button>
-                </div>
-            {/each}
-        </div>
-    {/if}
-
-    {#if (selectedDiff.length !== 0)}
-        <div class=" flex gap-2 items-center">
-            <p class="text-xs text-surface-600 dark:text-surface-200">Difficulty:</p>
-            {#each selectedDiff as sd}
-                <div class="flex gap-1 items-center">
-                    <p class="text-xs">{sd.content}</p>
-                    <button class="h-full" on:click={() => removeDiff(sd)}>
-                        <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
-                    </button>
-                </div>
-            {/each}
-        </div>
-    {/if}
-
-{#if (selectedTypes.length !== 0)}
-    <div class=" flex gap-2 items-center">
-        <p class="text-xs text-surface-600 dark:text-surface-200">Type:</p>
-        {#each selectedTypes as sd}
-            <div class="flex gap-1 items-center">
-                <p class="text-xs">{sd.content}</p>
-                <button class="h-full" on:click={() => removeType(sd)}>
-                    <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
-                </button>
-            </div>
-        {/each}
-    </div>
-{/if}
-
 
     {#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
         <button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
@@ -318,6 +260,65 @@
             Reset Filters
         </button>
     {/if}
+</div>
+
+
+<div class="col-span-full flex flex-wrap gap-2">
+    <div class="space-y-4">
+        {#if (selectedTags.length !== 0)}
+            <div class="gap-2 flex items-center flex-wrap">
+                <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Tags:</p>
+                {#each selectedTags as tag}
+                    <div>
+                        <TagComponent tagText="{tag.content}" width="{0}" removable="{true}" on:Remove={removeTag}/>
+                    </div>
+                {/each}
+            </div>
+        {/if}
+
+        {#if (selectedPublishers.length !== 0)}
+            <div class=" flex gap-2 items-center">
+                <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Publishers:</p>
+                {#each selectedPublishers as sp}
+                    <div class="flex gap-1 items-center">
+                        <Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile"/>
+                        <p class="text-xs">{sp.content}</p>
+                        <button class="h-full" on:click={() => removePublisher(sp)}>
+                            <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
+                        </button>
+                    </div>
+                {/each}
+            </div>
+        {/if}
+
+        {#if (selectedDiff.length !== 0)}
+            <div class=" flex gap-2 items-center">
+                <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Difficulty:</p>
+                {#each selectedDiff as sd}
+                    <div class="flex gap-1 items-center">
+                        <p class="text-xs">{sd.content}</p>
+                        <button class="h-full" on:click={() => removeDiff(sd)}>
+                            <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
+                        </button>
+                    </div>
+                {/each}
+            </div>
+        {/if}
+
+        {#if (selectedTypes.length !== 0)}
+            <div class=" flex gap-2 items-center">
+                <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Type:</p>
+                {#each selectedTypes as sd}
+                    <div class="flex gap-1 items-center">
+                        <p class="text-xs">{sd.content}</p>
+                        <button class="h-full" on:click={() => removeType(sd)}>
+                            <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
+                        </button>
+                    </div>
+                {/each}
+            </div>
+        {/if}
+    </div>
 </div>
 
 {#if pageType === "materials"}
