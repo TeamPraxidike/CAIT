@@ -14,12 +14,13 @@
             tags: Tag[];
         }[]
     } = data.user;
-
     let profilePic: FetchedFileItem = data.profilePicData;
 
 
     // let saved = data.saved;
     let savedFileData = data.savedFileData;
+    console.log(savedFileData)
+
     let liked = data.liked;
 
     let saved:(Publication & {
