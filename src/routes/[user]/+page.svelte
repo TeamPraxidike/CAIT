@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Meta, PublicationCard, UserProfileBar } from '$lib';
 	import type { LayoutData, PageServerData } from './$types';
-	import { type Material, type Publication, PublicationType, type Tag, type User } from '@prisma/client';
+	import { type Publication, type Tag, type User } from '@prisma/client';
 	import type { FetchedFileItem } from '$lib/database';
 	import { page } from '$app/stores';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
@@ -33,7 +33,7 @@
         tags: Tag[];
         usedInCourse: {course: string}[]
         coverPicData: string
-		publisher: User & {profilePicData: string}
+		    publisher: User & {profilePicData: string}
     })[] = data.publications.publications;
 
     let tabSet: number = 0;
@@ -58,7 +58,7 @@
                 {#if tabSet === 0}
                     <div class="grid grid-cols-4 gap-4 mb-20">
                         {#if saved.length !== 0}
-                            {#each saved as publication, i}
+                            {#each saved as publication}
                                 <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
                                     <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} markAsUsed={true} courses={publication.usedInCourse.map(x => x.course)} publisher={publication.publisher}/>
                                 </div>
