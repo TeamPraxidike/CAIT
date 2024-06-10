@@ -291,7 +291,7 @@
 						{/if}
 					</div>
 
-					<div class="flex gap-1 items-center">
+					<div class="flex gap-1 items-center pr-5">
 						<div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
 							<button
 								type="button"
@@ -310,8 +310,13 @@
 								<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
 							</button>
 						</div>
-							<img class="w-4 h-4 md:w-6 md:h-6 rounded-full border object-cover"
-									 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
+							<a href="../{publication.publisherId}" class="flex-none" >
+								<img class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
+										 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
+
+							</a>
+
+
 					</div>
 				</div>
 			</div>
