@@ -80,22 +80,6 @@
 
 	type TagOption = AutocompleteOption<string, { content: string }>;
 
-	let flavorOptions: TagOption[] = allTags.map(tag => {
-		return {
-			value: tag.content,
-			label: tag.content
-		};
-	});
-
-	let tagInput = '';
-
-	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		if (!tags.includes(e.detail.value)) {
-			inputChip.addChip(e.detail.value);
-			tagInput = '';
-		}
-	}
-
 	export let form: ActionData;
 	const toastStore = getToastStore();
 
@@ -129,16 +113,6 @@
 		}
 	}
 	let newTags: string[] = [];
-	const handleInvalid = () => {
-		if(tagInput.length>0 && !tags.includes(tagInput)) {
-			tags=[...tags,tagInput];
-			newTags=[...newTags,tagInput];
-			tagInput='';
-		}
-		else {
-			triggerRepeatInput("Tag",tagInput);
-		}
-	}
 
 	const triggerRepeatInput = (type: string,input: string)=>{
 		toastStore.trigger({

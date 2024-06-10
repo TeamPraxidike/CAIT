@@ -7,7 +7,7 @@
 		DiffBar,
 		FileTable,
 		getDateDifference,
-		Meta,
+		Meta, publication,
 		Tag, TheoryAppBar,
 		UserProp
 	} from '$lib';
@@ -251,7 +251,9 @@
 					{:else}
 						<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
 					{/if}
-					<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+					<div class="self-center">
+						<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+					</div>
 				{:else }
 					<Icon icon="mdi:graph" class="text-xl text-primary-500" />
 				{/if}
