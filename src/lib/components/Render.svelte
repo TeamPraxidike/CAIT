@@ -51,6 +51,9 @@
 						<source src={URL.createObjectURL(new Blob([fileBuffer], { type: file.type }))}
 								type={file.type} />
 					</video>
+				{:else if file.type === 'application/pdf'}
+					<iframe title="pdf" src={URL.createObjectURL(new Blob([fileBuffer], { type: 'application/pdf' }))}
+							class="w-full h-[70vh]" />
 				{:else if file.type.startsWith('text') || file.type.startsWith('application')}
 					<CodeBlock language={getLanguage(file.type)} code={decoder.decode(fileBuffer)} />
 				{:else}
