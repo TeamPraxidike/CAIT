@@ -9,8 +9,9 @@ export const actions = {
 		const firstName = formData.get('firstName')?.toString();
 		const lastName = formData.get('lastName')?.toString();
 		const email = formData.get('email')?.toString();
+		const aboutMe = formData.get('aboutMe')?.toString();
 
-		if (!id || !firstName || !lastName || !email)
+		if (!id || !firstName || !lastName || !email || !aboutMe)
 			return {
 				status: 400,
 				message:
@@ -42,7 +43,7 @@ export const actions = {
 				firstName,
 				lastName,
 				email,
-				aboutMe: "hello"
+				aboutMe,
 			},
 			profilePic,
 		};

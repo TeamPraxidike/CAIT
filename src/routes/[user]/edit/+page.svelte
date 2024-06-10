@@ -97,5 +97,11 @@
 		</label>
 		<input type="text" name="email" id="email" class="input" value={user.email} />
 	</div>
+	<div>
+		<label for="aboutMe" class="text-surface-900 dark:text-surface-50">
+			About me
+		</label>
+		<input type="text" name="aboutMe" id="aboutMe" class="input" value={user.aboutMe} />
+	</div>
 	<button type="submit" class="btn">Edit</button>
 </form>
