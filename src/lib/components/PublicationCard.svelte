@@ -186,7 +186,6 @@
 	};
 
 </script>
-
 <div class="{className} flex items-center">
 	{#if forArrow}
 		<div class="carrow shadow-lg"/>
@@ -292,23 +291,27 @@
 						{/if}
 					</div>
 
-					<div class="flex gap-3 items-center">
-						<button
-							type="button"
-							class="text-xs flex items-center h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
-							on:click={() => toggleLike()}>
-							<Icon class="text-lg {likedColor}" icon="material-symbols:star" />
-							<span>{likes}</span>
-						</button>
-						<button
-							type="button"
-							class="flex items-center text-xl text-surface-500 h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
-							on:click={() => toggleSave()}>
-							<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark" />
-						</button>
+					<div class="flex gap-1 items-center">
+						<div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
+							<button
+								type="button"
+								class="text-xs flex gap-x-1 items-center h-full w-full px-1 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
+								on:click={() => toggleLike()}>
+								<Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
+								<span>{likes}</span>
+							</button>
 
-						<img class="w-6 h-6 md:w-8 md:h-8 rounded-full border object-cover"
-								 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
+							<div class="h-2/3 w-px bg-surface-200"></div>
+
+							<button
+								type="button"
+								class="flex items-center text-xl text-surface-500 h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
+								on:click={() => toggleSave()}>
+								<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
+							</button>
+						</div>
+							<img class="w-4 h-4 md:w-6 md:h-6 rounded-full border object-cover"
+									 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
 					</div>
 				</div>
 			</div>
@@ -319,6 +322,7 @@
 
 
 </div>
+
 
 
 <style>

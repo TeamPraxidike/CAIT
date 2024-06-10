@@ -1,4 +1,4 @@
-import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
+import { Difficulty, PublicationType } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
 
 import { prisma } from '$lib/database';
@@ -201,6 +201,11 @@ export async function getAllPublications(publishers: string[], query: string) {
 			materials: true,
 			circuit: true,
 			coverPic: true,
+			publisher: {
+				include: {
+					profilePic: true,
+				},
+			},
 			usedInCourse: {
 				select: {
 					course: true,
