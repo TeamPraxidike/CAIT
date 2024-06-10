@@ -11,7 +11,7 @@ import {
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty, MaterialType } from '@prisma/client';
 import { coverPicFetcher } from '$lib/database/file';
-import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
 
 /**
  * Convert a difficulty string to difficulty enum

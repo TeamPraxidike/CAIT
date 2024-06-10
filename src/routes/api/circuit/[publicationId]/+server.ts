@@ -13,7 +13,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
 import type {File as PrismaFile} from '@prisma/client';
-import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+import {enqueueCircuitComparison} from "$lib/PiscinaUtils/runner";
 
 export async function GET({ params, locals }) {
 	try {
@@ -150,7 +150,7 @@ export async function PUT({ request, params }) {
 
 		const id = circuit.id;
 
-		enqueueMaterialComparison(id).catch(error => console.error(error))
+		enqueueCircuitComparison(id).catch(error => console.error(error))
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

@@ -15,7 +15,7 @@ import {
 } from '$lib/database';
 import { type File as PrismaFile, Prisma } from '@prisma/client';
 import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
-import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
 import {error} from "@sveltejs/kit";
 
 export async function GET({ params, locals }) {
