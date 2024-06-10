@@ -79,6 +79,7 @@ describe('Editing users', () => {
 			firstName: 'Kiro',
 			lastName: 'Breika',
 			email: 'l',
+			aboutMe: "hello I am Kiro"
 		});
 
 		const editedUser = await getUserById(user.id);

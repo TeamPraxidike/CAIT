@@ -42,6 +42,7 @@ export const actions = {
 				firstName,
 				lastName,
 				email,
+				aboutMe: "hello"
 			},
 			profilePic,
 		};

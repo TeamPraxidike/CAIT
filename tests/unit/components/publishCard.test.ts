@@ -26,6 +26,7 @@ describe('Filter Component', () => {
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					profilePicData: '',
+					aboutMe: "Hello I am a user",
 				},
 				imgSrc: 'some_image',
 				publication: {
