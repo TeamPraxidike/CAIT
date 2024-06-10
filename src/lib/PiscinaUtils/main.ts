@@ -1,5 +1,5 @@
 import Piscina from 'piscina';
-import { join } from 'path';
+import path, { join } from 'path';
 import {
     getAllCircuits,
     getAllMaterials,
@@ -8,10 +8,14 @@ import {
     handleSimilarity
 } from "$lib/database";
 import type {Difficulty, File as PrismaFile} from "@prisma/client";
-import type {PublicationMeta, ResultMeta} from "$lib/PiscinaUtils/worker";
+import type {PublicationMeta, ResultMeta} from "$lib/PiscinaUtils/worker.js";
+import {fileURLToPath} from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const piscina = new Piscina({
-    filename: join(__dirname, 'worker.ts'), // link worker file
+    filename: path.resolve(__dirname,'pedal'), // link worker file
     maxThreads: 4 // max number of threads
 });
 

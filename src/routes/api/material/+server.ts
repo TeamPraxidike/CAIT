@@ -11,7 +11,7 @@ import {
 import type { RequestHandler } from '@sveltejs/kit';
 import { Difficulty, MaterialType } from '@prisma/client';
 import { coverPicFetcher } from '$lib/database/file';
-import {enqueueComparisonTasks} from "$lib/PiscinaUtils/main";
+import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
 
 /**
  * Convert a difficulty string to difficulty enum
@@ -148,7 +148,7 @@ export async function POST({ request }) {
 
 		const id = createdMaterial.publicationId;
 
-		enqueueComparisonTasks(id).catch(error => console.error(error))
+		enqueueMaterialComparison(id).catch(error => console.error(error))
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

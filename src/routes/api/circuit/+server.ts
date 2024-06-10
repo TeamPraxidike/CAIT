@@ -11,6 +11,7 @@ import {
 	updateCircuitCoverPic,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import {enqueueCircuitComparison, enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
 
 export async function GET({ locals }) {
 	const authError = await verifyAuth(locals);
@@ -101,6 +102,8 @@ export async function POST({ request, locals }) {
 		);
 
 		const id = createdCircuit.publicationId;
+
+		enqueueCircuitComparison(id).catch(error => console.error(error))
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
