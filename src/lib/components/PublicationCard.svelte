@@ -17,7 +17,7 @@
 		type ModalSettings,
 		popup
 	} from '@skeletonlabs/skeleton';
-	import { IconMapExtension } from '$lib/util/file';
+    import {IconMapExtension, PublicationTypeIconMap} from '$lib/util/file';
 	import { coursesStore } from '$lib/stores/courses';
 
 	export let publication: Publication & {
@@ -40,7 +40,8 @@
     export let markAsUsed: boolean = false;
     export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
-		export let extensions: string[] = [];
+    export let extensions: string[] = [];
+    export let materialType: string = "information";
     export let forArrow: boolean = false;
 
     const userId = $page.data?.session?.user?.id || "0";
@@ -60,13 +61,19 @@
         likes = liked ? likes - 1 : likes + 1;
         await fetch(`/api/user/${userId}/liked/${publication.id}`, {
             method: 'POST',
-        }).then(() => liked = !liked);
+        }).then(() => {
+					liked = !liked
+					dispatch('liked', { id: publication.id })
+				});
     }
 
     const toggleSave = async () => {
         await fetch(`/api/user/${userId}/saved/${publication.id}`, {
             method: 'POST',
-        }).then(() => saved = !saved);
+        }).then(() => {
+					saved = !saved
+					dispatch('saved', { id: publication.id })
+				});
     }
 
     let hoverDiv: HTMLDivElement;
@@ -115,7 +122,7 @@
         containerWidth = container.getBoundingClientRect().width;
         window.addEventListener('resize', updateContainerWidth);
 
-        maxTags = 10;
+        maxTags = calcMaxTags();
         if (hoverDiv) {
             hoverDiv.addEventListener('mouseenter', handleHover);
             hoverDiv.addEventListener('mouseleave', handleHover);
@@ -197,18 +204,18 @@
             <!-- Title and difficulty -->
             <div class="w-full">
                 <div class="flex justify-between items-start">
-                    <h4
-                      class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}</h4>
+                    <a href="../{publication.publisherId}/{publication.id}"
+                       class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}
+                    </a>
                     <div class="flex gap-2">
 											{#if publication.type === PublicationType.Circuit}
-												<Icon icon="mdi:graph" class="text-xl text-surface-500" />
+												<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
+
 											{:else}
 
-												{#if (extensions.length === 1)}
-													<Icon icon={IconMapExtension.get(extensions[0]) || 'vscode-icons:file-type-text'} class="text-primary-600 size-5 text-lg"/>
-												{:else if (extensions.length > 1)}
+
 													<div class="py-1" bind:this={hoverDiv}>
-														<Icon icon="clarity:file-group-solid" class="text-primary-600 size-5" />
+														<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
 														{#if isHovered}
 															<div
 																class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
@@ -221,8 +228,6 @@
 														{/if}
 
 													</div>
-
-												{/if}
 													<div class="self-center">
 														<DiffBar className="size-5" diff={publication.difficulty}></DiffBar>
 													</div>
@@ -285,7 +290,7 @@
 											{/if}
                     </div>
 
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 items-center">
                         <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
 													<button
 														type="button"
@@ -304,8 +309,9 @@
 														<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
 													</button>
                         </div>
-
-                        <Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile"/>
+                        <a href="../{publication.publisherId}">
+                            <Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile"/>
+                        </a>
                     </div>
                 </div>
             </div>

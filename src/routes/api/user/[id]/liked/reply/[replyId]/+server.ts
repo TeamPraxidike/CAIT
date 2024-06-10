@@ -30,7 +30,7 @@ export async function POST({ params, locals }) {
 
 	try {
 		const response = await likesReplyUpdate(id, parseInt(replyId));
-		console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+
 		if (id !== comment.userId) {
 			if (response === 'Reply liked successfully') {
 				await updateReputation(comment.userId, 1);
@@ -38,6 +38,7 @@ export async function POST({ params, locals }) {
 				await updateReputation(comment.userId, -1);
 			}
 		}
+
 		return new Response(JSON.stringify({ message: response }), {
 			status: 200,
 		});

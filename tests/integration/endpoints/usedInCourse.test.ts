@@ -34,7 +34,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 				theoryPractice: 9,
 				learningObjectives: [],
 				prerequisites: [],
-				materialType: 'video',
+				materialType: 'presentation',
 			});
 
 			const response = await fetch(
@@ -126,7 +126,7 @@ describe('[GET] /publication/{publicationId}/used-in-course', () => {
 			title: 'cool publication',
 			description: 'This publication has description',
 			difficulty: Difficulty.easy,
-			materialType: 'video',
+			materialType: 'presentation',
 			copyright: true,
 			timeEstimate: 4,
 			theoryPractice: 9,
@@ -185,7 +185,7 @@ describe('[GET] /user/[id]/use-in-course', () => {
 			title: 'cool publication',
 			description: 'This publication has description',
 			difficulty: Difficulty.easy,
-			materialType: 'video',
+			materialType: 'presentation',
 			copyright: true,
 			timeEstimate: 4,
 			theoryPractice: 9,
@@ -196,7 +196,7 @@ describe('[GET] /user/[id]/use-in-course', () => {
 			title: 'cool publication',
 			description: 'This publication has description',
 			difficulty: Difficulty.easy,
-			materialType: 'video',
+			materialType: 'presentation',
 			copyright: true,
 			timeEstimate: 4,
 			theoryPractice: 9,

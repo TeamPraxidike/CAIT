@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
+import { PublicationType } from '@prisma/client';
 
 export const load: PageServerLoad = async ({
 	params,
@@ -12,18 +13,17 @@ export const load: PageServerLoad = async ({
 	const session = await locals.auth();
 	if (!session) throw redirect(303, '/signin');
 
-	const materialsRes = await fetch(`/api/material?publishers=${params.user}`);
+	const pubsRes = await fetch(`/api/publication?publishers=${params.user}`);
 
-	if (materialsRes.status !== 200) {
+	if (pubsRes.status !== 200) {
 		return {
-			status: materialsRes.status,
-			error: materialsRes.statusText,
+			status: pubsRes.status,
+			error: pubsRes.statusText,
 		};
 	}
 
-
 	let savedRes = null;
-	if(params.user === session.user.id){
+	if (params.user === session.user.id) {
 		savedRes = await fetch(
 			`/api/user/${params.user}/saved?fullPublications=true`,
 		);
@@ -48,13 +48,32 @@ export const load: PageServerLoad = async ({
 	);
 	const used = usedResponse.status === 200 ? await usedResponse.json() : [];
 
-	const savedJson = savedRes === null || savedRes.status === 204 ? { saved: [], savedFileData: [] } : await savedRes.json();
+	const savedJson =
+		savedRes === null || savedRes.status === 204
+			? { saved: [], savedFileData: [] }
+			: await savedRes.json();
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
-	const savedByUser = savedByUserRes.status === 204 ? { saved: saved } : await savedByUserRes.json();
-	const materials  = await materialsRes.json();
-	return { materials: materials.materials, saved, savedFileData, liked, used, savedByUser: savedByUser.saved };
+	for (let i = 0; i < saved.length; i++) {
+		if (saved[i].type === PublicationType.Circuit) {
+			savedFileData.splice(i, 0, 'no data');
+		}
+	}
+
+	const savedByUser =
+		savedByUserRes.status === 204
+			? { saved: [] }
+			: await savedByUserRes.json();
+	const publications = await pubsRes.json();
+	return {
+		publications,
+		saved,
+		savedFileData,
+		liked,
+		used,
+		savedByUser: savedByUser.saved,
+	};
 };
 
 export type PublicationInfo = {

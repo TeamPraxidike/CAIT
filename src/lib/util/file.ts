@@ -246,3 +246,12 @@ export const IconMapExtension: Map<string, string> = new Map([
 	['ts', 'vscode-icons:file-type-typescript'],
 	['ipynb', 'vscode-icons:file-type-jupyter'],
 ]);
+
+export const PublicationTypeIconMap: Map<string, string> = new Map([
+	['information', 'flowbite:book-outline'],
+	['presentation', 'mdi:presentation'],
+	['assignment', 'material-symbols:assignment'],
+	['other', 'mage:dots-horizontal-circle'],
+	['exam', 'healthicons:i-exam-multiple-choice'],
+	['code', 'ph:code-fill']
+]);

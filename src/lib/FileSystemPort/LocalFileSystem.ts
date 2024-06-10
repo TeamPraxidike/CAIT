@@ -25,7 +25,6 @@ export class LocalFileSystem implements FileSystem {
 	deleteFile(pathArg: string) {
 		fs.unlink(path.join(this.basePath, pathArg), (err) => {
 			if (err) throw err;
-			console.log(pathArg + ' deleted!');
 		});
 	}
 
@@ -46,7 +45,6 @@ export class LocalFileSystem implements FileSystem {
 	 */
 	readFile(pathArg: string): Buffer {
 		try {
-			console.log('Reading file ' + path.join(this.basePath, pathArg));
 			return fs.readFileSync(path.join(this.basePath, pathArg));
 		} catch (error) {
 			throw error;
@@ -78,7 +76,6 @@ export class LocalFileSystem implements FileSystem {
 				path.join(this.basePath, pathFileNameGenerated),
 				file,
 			);
-			console.log(name + ' saved as ' + pathFileNameGenerated);
 			return pathFileNameGenerated;
 		} catch (error) {
 			throw error;

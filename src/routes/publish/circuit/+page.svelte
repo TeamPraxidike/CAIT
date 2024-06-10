@@ -32,6 +32,9 @@
 
 	let tagsDatabase = data.tags as PrismaTag[];
 	let users = data.users as UserWithProfilePic[];
+	let liked = data.liked as number[];
+	let saved = data.saved.saved as number[];
+
 
 	let searchableUsers = users;
 
@@ -128,14 +131,14 @@
         formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
-				console.log(nodeActions);
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}"/>
+			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
+
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>

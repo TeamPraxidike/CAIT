@@ -142,8 +142,6 @@ export const actions = {
 			const coverPicFile = data.get('coverPicMat');
 			let coverPic = null;
 
-			console.log(coverPicFile);
-
 			if (coverPicFile instanceof File) {
 				const buffer = await coverPicFile.arrayBuffer();
 				const info = Buffer.from(buffer).toString('base64');

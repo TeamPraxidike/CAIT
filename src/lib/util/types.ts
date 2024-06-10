@@ -15,14 +15,14 @@ export function mapToDifficulty(difficulty: string): Difficulty {
 
 export function mapToType(mt: string): MaterialType {
 	switch (mt.toLowerCase()) {
-		case 'video':
-			return MaterialType.video;
+		case 'information':
+			return MaterialType.information;
 		case 'presentation':
 			return MaterialType.presentation;
 		case 'assignment':
 			return MaterialType.assignment;
-		case 'dataset':
-			return MaterialType.dataset;
+		case 'other':
+			return MaterialType.other;
 		case 'exam':
 			return MaterialType.exam;
 		case 'code':

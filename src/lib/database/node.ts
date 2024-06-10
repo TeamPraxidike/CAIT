@@ -102,8 +102,6 @@ export async function deleteNode(
 	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	console.log(circuitId);
-	console.log(publicationId);
 	try {
 		return prismaContext.node.delete({
 			where: {
