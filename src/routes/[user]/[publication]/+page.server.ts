@@ -1,7 +1,10 @@
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ parent }) => {
+export const load: PageServerLoad = async ({ parent, params, fetch }) => {
 	await parent();
+	const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
+	const circuitsPubAppearIn = await circuitRes.json();
+	return { circuitsPubAppearIn };
 };
 
 export const actions = {
