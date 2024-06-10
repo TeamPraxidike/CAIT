@@ -18,7 +18,7 @@
 	import type { PublicationView } from './+layout.server';
 	import { Accordion, AccordionItem, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
-	import { createFileList, IconMapExtension } from '$lib/util/file';
+	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
 
@@ -111,6 +111,9 @@
 			const blob = await file.arrayBuffer();
 			zip.file(file.name, blob);
 		}
+
+		const zipBlob = await zip.generateAsync({ type: 'blob' });
+		saveFile(zipBlob, pubView.publication.title + '.zip');
 	}
 
 
