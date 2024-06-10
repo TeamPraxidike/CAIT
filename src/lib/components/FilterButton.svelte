@@ -21,9 +21,9 @@
 
 	$: background = (t: {id:number, content:string}) => {
 		if (label === "Publisher")
-			return selectedIds.includes(t.id) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50';
+			return selectedIds.includes(t.id) ? 'font-bold bg-surface-200 bg-opacity-75' : 'hover:font-bold';
 		else
-			return selectedVals.includes(t.content) ? 'bg-primary-100 hover:bg-primary-100' : 'hover:bg-primary-50';
+			return selectedVals.includes(t.content) ? 'font-bold bg-surface-200 bg-opacity-75' : 'hover:font-semibold';
 	} //colors in light blue if the tag is already selected in the dropdown
 
 
@@ -45,7 +45,7 @@
 
 
 <button type="button"
-	class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-600 {roundingMenuItem(row, display.length)} {background(idValue)}"
+	class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-800 {roundingMenuItem(row, display.length)} {background(idValue)}"
 	on:click={update}>
 	{#if profilePic}
 		<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />

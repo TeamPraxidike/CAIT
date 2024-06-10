@@ -11,7 +11,6 @@ import {
 	updateReply,
 } from '$lib/database';
 
-
 describe('Reply CRUD', () => {
 	let user: User;
 	let publication: Material;
@@ -29,7 +28,7 @@ describe('Reply CRUD', () => {
 			title: 'cool publication1',
 			description: 'This publication has description',
 			difficulty: Difficulty.easy,
-			materialType: 'video',
+			materialType: 'presentation',
 			copyright: true,
 			timeEstimate: 4,
 			theoryPractice: 9,
@@ -71,7 +70,6 @@ describe('Reply CRUD', () => {
 			id: reply.id,
 			content: 'notIvan',
 		});
-		console.log(reply);
 		reply = await getReply(reply.id);
 		expect(reply.content).toEqual('notIvan');
 		expect(reply.createdAt).not.toEqual(reply.updatedAt);

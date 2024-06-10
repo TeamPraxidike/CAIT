@@ -14,7 +14,6 @@ export async function load({ url, fetch, locals }) {
 		type === 'circuits'
 			? await (await fetch(`/api/circuit`)).json()
 			: { circuits: [] };
-
 	const { users } = await (await fetch(`/api/user`)).json();
 
 	let liked: number[] = [];

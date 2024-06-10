@@ -48,8 +48,9 @@
 	let copyright: string = '';
 	let theoryApplicationRatio = 0.5;
 	let selectedType = "Select Type";
-	let allTypes: {id:number, content:string }[] = ["Presentation", "Code", "Video", "Assignment", "Dataset", "Exam", "Other"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+	let allTypes: {id:number, content:string }[] = ["Presentation", "Information", "Code", "Assignment", "Exam", "Other"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
 
+	let typeActive = false;
 	// cover
 	let coverPic: File | undefined = undefined;
 	function chooseCover(e: Event) {
@@ -66,6 +67,7 @@
 	}
 
 	$: uid = $page.data.session?.user.id;
+
 
 	function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
@@ -160,17 +162,11 @@
 		</Step>
 		<Step locked={locks[1]}>
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-			<div class="flex flex-col gap-5">
-				<div>
-					<label for="title" >Title<span class="text-error-300">*</span></label>
-					<input type="text" name="title" placeholder="Title" bind:value={title}
-						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
-				</div>
-				<div>
-					<span>Select a type for the publication<span class="text-error-300">*</span>: </span>
-					<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
-				</div>
-
+			<div class="flex flex-col gap-2">
+				<label for="title" >Title<span class="text-error-300">*</span></label>
+				<input type="text" name="title" placeholder="Title" bind:value={title}
+					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+					<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive} on:clearSettings={() => {typeActive=false}}/>
 				<textarea name="description" placeholder="Description..." bind:value={description}
 						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
 			</div>

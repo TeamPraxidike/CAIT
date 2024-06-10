@@ -1,7 +1,8 @@
-import { Difficulty, PublicationType } from '@prisma/client';
+import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
 
 import { prisma } from '$lib/database';
+import Fuse from 'fuse.js';
 
 /**
  * Creates a new publication with the given data. Sets the likes to 0.
@@ -166,13 +167,15 @@ export async function getPublicationById(id: number) {
 							publication: {
 								include: {
 									tags: true,
+									materials: true,
+									circuit: true,
 									coverPic: true,
-									usedInCourse: true,
 									publisher: {
 										include: {
 											profilePic: true,
 										},
 									},
+									usedInCourse: true,
 								},
 							},
 							next: true,
@@ -182,4 +185,44 @@ export async function getPublicationById(id: number) {
 			},
 		},
 	});
+}
+
+export async function getAllPublications(publishers: string[], query: string) {
+	const where: any = { AND: [] };
+
+	if (publishers.length > 0) {
+		where.AND.push({ publisherId: { in: publishers } });
+	}
+
+	let publications = await prisma.publication.findMany({
+		where,
+		include: {
+			tags: true,
+			materials: true,
+			circuit: true,
+			coverPic: true,
+			usedInCourse: {
+				select: {
+					course: true,
+				},
+			},
+		},
+	});
+
+	if (query !== '') {
+		const p = publications;
+		const searcher = new Fuse(p, {
+			keys: [
+				{ name: 'title', weight: 0.4 },
+				{ name: 'description', weight: 0.4 },
+				{ name: 'learningObjectives', weight: 0.2 },
+			],
+			isCaseSensitive: false,
+			threshold: 0.6,
+			shouldSort: true,
+		});
+		publications = searcher.search(query).map((m) => m.item);
+	}
+
+	return publications;
 }

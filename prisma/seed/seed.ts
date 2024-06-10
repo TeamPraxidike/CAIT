@@ -92,11 +92,11 @@ const main = async () => {
 	const circuitTitles = ['Machine Learning for beginners'];
 
 	const types = [
-		MaterialType.dataset,
+		MaterialType.information,
 		MaterialType.presentation,
 		MaterialType.exam,
 		MaterialType.code,
-		MaterialType.video,
+		MaterialType.other,
 		MaterialType.code,
 		MaterialType.presentation,
 	];
@@ -209,7 +209,6 @@ const main = async () => {
 			},
 		},
 	});
-	console.log(circuit.publicationId);
 	const nodes = [];
 
 	nodes.push(await addNode(circuit.id, materials[0].publicationId, 0, 500)); // neural networks 0

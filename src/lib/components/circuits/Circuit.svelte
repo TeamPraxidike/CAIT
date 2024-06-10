@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
-	import type {  NodeDiffActions } from '$lib/database';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { Difficulty, type Node as PrismaNode, type Publication, PublicationType, type User } from '@prisma/client';
@@ -10,6 +9,7 @@
 	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
 	import { PublicationCard } from '$lib';
 	import html2canvas from 'html2canvas';
+	import type { NodeDiffActions } from '$lib/database';
 
 	async function captureScreenshot () : Promise<string> {
 		const container = document.getElementById('cy');
@@ -44,7 +44,8 @@
 						props: {
 							data: data.label,
 							selected: selected,
-							extensions : data.extensions
+							extensions : data.extensions,
+							isMaterial : data.isMaterial
 						}
 					});
 					return container.outerHTML;
@@ -55,7 +56,6 @@
 
 	nodeHtmlLabel(cytoscape)
 	const modalStore = getModalStore();
-	//	import cytoscapeNodeHtmlLabel from 'cytoscape-node-html-label';
 
 	type Edge = {
 		data: {
@@ -65,7 +65,9 @@
 		}
 	}
 
-	//cytoscapeNodeHtmlLabel(cytoscape);
+
+	export let liked : number[] = []
+	export let saved : number[] = []
 	export let publishing: boolean;
 
 
@@ -124,9 +126,8 @@
 	// 		{ x: targetPos.posX, y: midY },
 	// 	];
 	// }
-
 	let mappedNodes = nodes.map(node => ({
-		data: { id: node.publicationId.toString(), label: node.publication.title, extensions : node.extensions
+		data: { id: node.publicationId.toString(), label: node.publication.title, extensions : node.extensions, isMaterial:node.publication.type === PublicationType.Material,
 	},
 		position: { x: node.posX, y: node.posY }
 	}));
@@ -185,13 +186,17 @@
 			layout: {
 				name: 'preset'
 			},
+
+			minZoom: 0.5,
+			maxZoom: 2,
 		});
+
+
 
 		addHtmlLabel("node", false);
 
 
 		cy.on('select', 'node', (event: any) => {
-			console.log('Selected: ' + event.target.data().label);
 			numSelected++;
 			let node = event.target;
 			if (!publishing) {
@@ -333,7 +338,7 @@
 		/**
 		 * The two methods below are used to simulate hover effect on a node
 		 */
-		cy.on('mouseover', 'node', async (event: any) => {
+		cy.on('mouseover', 'node',  (event: any) => {
 			const node = event.target;
 			cursorInsideNode = true;
 			hoveredNodeId = Number(node.id());
@@ -348,26 +353,45 @@
 							let publication = nodes.find(n => n.publicationId === Number(node.id()));
 
 							if (publication) {
-								new PublicationCard({
+								console.log(publication.publication)
+								 let coverPicData = '';
+								// if (
+								// 	publication.publication.type === PublicationType.Material &&
+								// 	publication.publication.materials
+								// ) {
+								// 	coverPicData = coverPicFetcher(
+								// 		publication.publication.materials.encapsulatingType,
+								// 		publication.publication.coverPic,
+								// 	).data;
+								// } else {
+								// 	const filePath = publication.publication.coverPic!.path;
+								// 	const currentFileData = fileSystem.readFile(filePath);
+								// 	coverPicData = currentFileData.toString('base64');
+								// }
+
+								const publicationCard = new PublicationCard({
 									target: divElement,
 									props: {
 										publication: publication.publication,
 										inCircuits: false,
-										imgSrc: 'data:image;base64,',
+										imgSrc: 'data:image;base64,' + coverPicData,
 										forArrow: true,
 										extensions: node.data().extensions,
-										liked: true,
-										saved: true,
 										publisher: publication.publication.publisher,
+										liked: liked.includes(publication.publicationId),
+										saved: saved.includes(publication.publicationId)
 									}
 								});
+								publicationCard.$on('liked', likedToggled);
+								publicationCard.$on('saved', savedToggled);
+
+
 							}
 
 							divElement.id = 'PublicationCardDiv';
 							divElement.className = 'w-[300px]';
 							divElement.style.position = 'fixed';
 							divElement.style.transition = 'transform 0.5s';
-
 
 
 							document.body.appendChild(divElement);
@@ -384,7 +408,6 @@
 
 
 			if (!node.selected() && !prereqActive) {
-				console.log("Here")
 				node.style({
 					'background-color': '#4C4C5C',
 					'color': '#F9F9FA',
@@ -461,6 +484,7 @@
 	let addActive: boolean = false;
 	let displayedMaterials: any = [];
 	let pubIds: Set<number> = new Set();
+	nodes.map(node => pubIds.add(node.publicationId));
 
 	/**
 	 * Fetches all materials
@@ -491,7 +515,8 @@
 	const addNode = async (event: CustomEvent) => {
 		let pubId = event.detail.id;
 
-		await fetch(`/api/material/${pubId}`)
+
+		await fetch(`/api/publication/${pubId}`)
 			.then(response => {
 				if (!response.ok) {
 					throw new Error('Network response was not ok');
@@ -499,10 +524,14 @@
 				return response.json();
 			})
 			.then(data => {
-				let extensions = data.material.files.map((f: { title: string; }) => getFileExtension(f.title));
+				console.log(data)
+				let extensions = [];
+				if (data.isMaterial) {
+					extensions = data.publication.materials.files.map((f: { title: string; }) => getFileExtension(f.title));
+				}
 				cy.add({
 					group: 'nodes',
-					data: { id: data.material.publication.id, label: data.material.publication.title, extensions : extensions},
+					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial},
 					position: { x: 100, y: 100 }
 				});
 				nodes.push(
@@ -619,8 +648,6 @@
 		// base64uri by default, using base64 for now
 		//const cover = cy.png({output: 'base64'});
 		const cover = await captureScreenshot()
-		console.log("COVER")
-		console.log(cover)
 		const coverPic = {
 			type: 'image/png',
 			info: cover
@@ -656,6 +683,26 @@
 		cy.$(`#${selectedId}`).unselect();
 
 	};
+
+	const likedToggled = (event: CustomEvent) => {
+
+		const id = event.detail.id;
+		if (liked.includes(id)) {
+			liked = liked.filter((i) => i !== id);
+		} else {
+			liked.push(id);
+		}
+	};
+
+	const savedToggled = (event: CustomEvent) => {
+		const id = event.detail.id;
+		if (saved.includes(id)) {
+			saved = saved.filter((i) => i !== id);
+		} else {
+			saved.push(id);
+		}
+	};
+
 
 
 </script>
@@ -702,7 +749,7 @@
 {#if addActive}
 	<div>
 		<SearchElems bind:addActive={addActive} bind:selectedIds={pubIds} bind:materials={displayedMaterials}
-								 on:selFurther={addNode} on:remFurther={removeNode} />
+								 on:selFurther={addNode} on:remFurther={removeNode} bind:liked={liked} bind:saved={saved}/>
 	</div>
 {/if}
 

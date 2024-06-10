@@ -17,7 +17,7 @@
 		type ModalSettings,
 		popup
 	} from '@skeletonlabs/skeleton';
-	import { IconMapExtension } from '$lib/util/file';
+    import {IconMapExtension, PublicationTypeIconMap} from '$lib/util/file';
 	import { coursesStore } from '$lib/stores/courses';
 
 	export let publication: Publication & {
@@ -42,8 +42,9 @@
 	export let markAsUsed: boolean = false;
 	export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
-	export let extensions: string[] = [];
-	export let forArrow: boolean = false;
+    export let extensions: string[] = [];
+    export let materialType: string = "information";
+    export let forArrow: boolean = false;
 
 	const userId = $page.data?.session?.user?.id || '0';
 
@@ -57,19 +58,25 @@
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 	$:used = courses.length;
 
-	let likes = publication.likes;
-	const toggleLike = async () => {
-		likes = liked ? likes - 1 : likes + 1;
-		await fetch(`/api/user/${userId}/liked/${publication.id}`, {
-			method: 'POST'
-		}).then(() => liked = !liked);
-	};
+    let likes = publication.likes;
+    const toggleLike = async () => {
+        likes = liked ? likes - 1 : likes + 1;
+        await fetch(`/api/user/${userId}/liked/${publication.id}`, {
+            method: 'POST',
+        }).then(() => {
+					liked = !liked
+					dispatch('liked', { id: publication.id })
+				});
+    }
 
-	const toggleSave = async () => {
-		await fetch(`/api/user/${userId}/saved/${publication.id}`, {
-			method: 'POST'
-		}).then(() => saved = !saved);
-	};
+    const toggleSave = async () => {
+        await fetch(`/api/user/${userId}/saved/${publication.id}`, {
+            method: 'POST',
+        }).then(() => {
+					saved = !saved
+					dispatch('saved', { id: publication.id })
+				});
+    }
 
 	let hoverDiv: HTMLDivElement;
 	let container: HTMLDivElement;
@@ -117,10 +124,10 @@
 		containerWidth = container.getBoundingClientRect().width;
 		window.addEventListener('resize', updateContainerWidth);
 
-		maxTags = 10;
-		if (hoverDiv) {
-			hoverDiv.addEventListener('mouseenter', handleHover);
-			hoverDiv.addEventListener('mouseleave', handleHover);
+        maxTags = calcMaxTags();
+        if (hoverDiv) {
+            hoverDiv.addEventListener('mouseenter', handleHover);
+            hoverDiv.addEventListener('mouseleave', handleHover);
 
 			return () => {
 				hoverDiv.removeEventListener('mouseenter', handleHover);
@@ -181,31 +188,53 @@
 </script>
 
 <div class="{className} flex items-center">
-	{#if forArrow}
-		<div class="carrow shadow-lg" />
-	{/if}
-	<div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
-		<div class="w-full relative h-3/6 rounded-t-lg">
-			{#if used > 5}
-				<p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
-					Used in {used} courses</p>
-			{:else if used > 0}
-				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface">
-					Used in {used} courses</p>
-			{/if}
-			<img class="w-full h-full object-cover" src={imgSrc} alt="" />
-		</div>
-		<div
-			class="flex flex-col justify-between px-2 py-2 w-full h-3/6 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
-			<!-- Title and difficulty -->
-			<div class="w-full">
-				<div class="flex justify-between items-start">
-					<h4
-						class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}</h4>
-					<div class="flex gap-2">
-						{#if publication.type === PublicationType.Circuit}
-							<Icon icon="mdi:graph" class="text-xl text-surface-500" />
-						{:else}
+{#if forArrow}
+    <div class="carrow shadow-lg"/>
+{/if}
+    <div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
+        <div class="w-full relative h-3/6 rounded-t-lg">
+					{#if used > 5}
+						<p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
+							Used in {used} courses</p>
+					{:else if used > 0}
+						<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface">
+							Used in {used} courses</p>
+					{/if}
+            <img class="w-full h-full object-cover" src={imgSrc} alt="" />
+        </div>
+        <div class="flex flex-col justify-between px-2 py-2 w-full h-3/6 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
+            <!-- Title and difficulty -->
+            <div class="w-full">
+                <div class="flex justify-between items-start">
+                    <a href="../{publication.publisherId}/{publication.id}"
+                       class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}
+                    </a>
+                    <div class="flex gap-2">
+											{#if publication.type === PublicationType.Circuit}
+												<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
+
+											{:else}
+
+
+													<div class="py-1" bind:this={hoverDiv}>
+														<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
+														{#if isHovered}
+															<div
+																class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+																style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+																{#each extensions as e}
+																	<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
+																{/each}
+
+															</div>
+														{/if}
+
+													</div>
+													<div class="self-center">
+														<DiffBar className="size-5" diff={publication.difficulty}></DiffBar>
+													</div>
+
+											{/if}
 
 							{#if (extensions.length === 1)}
 								<Icon icon={IconMapExtension.get(extensions[0]) || 'vscode-icons:file-type-text'}
@@ -242,7 +271,15 @@
 				<p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
 
 
-			</div>
+                    <div class="flex gap-2 items-center">
+                        <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
+													<button
+														type="button"
+														class="text-xs flex gap-x-1 items-center h-full w-full px-2 bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
+														on:click={() => toggleLike()}>
+														<Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
+														<span>{likes}</span>
+													</button>
 
 			<p class="w-full line-clamp-3 text-xs text-surface-500  dark:text-surface-400">{publication.description}</p>
 

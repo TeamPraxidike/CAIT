@@ -10,7 +10,6 @@ export const GET: RequestHandler = async ({ locals }) => {
 		const tags = await getAllTags();
 		return new Response(JSON.stringify(tags), { status: 200 });
 	} catch (error) {
-		console.log('There was an Error');
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
