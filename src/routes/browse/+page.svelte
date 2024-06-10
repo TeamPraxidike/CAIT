@@ -62,19 +62,19 @@
 
 
 
-	const sendFiltersToAPI = async () => {
-		applyActive = false;
-		const queryParams = new URLSearchParams({
-			type: pageType
-		});
-
-		if (selectedPublishers.length > 0) {
-			queryParams.set('publishers', selectedPublishers.map(x => x.id).join(','));
+		const removeTag = (event: CustomEvent) => {
+			selectedTags = selectedTags.filter(item => item.content !== event.detail.text)
+			applyActive = true;
 		}
 
-    };
+		const removePublisher = (name: {id:number, content:string }) => {
+			selectedPublishers = selectedPublishers.filter(publisher => publisher.content !== name.content);
+			applyActive = true;
 
-    const removeDiff = (name:{id:number, content:string }) => {
+		};
+
+
+		const removeDiff = (name:{id:number, content:string }) => {
         selectedDiff = selectedDiff.filter(diff => diff.content !== name.content);
         applyActive = true;
 
@@ -328,6 +328,7 @@
                          liked={liked.includes(material.publication.id)}
                          saved={saved.includes(material.publication.id)}
                          materialType={material.encapsulatingType}
+												 publisher={material.publisher}
         />
     {/each}
 {:else if pageType === "people"}
@@ -337,6 +338,6 @@
 	{/each}
 {:else if pageType === "circuits"}
     {#each circuits as circuit}
-        <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} liked={liked.includes(circuit.publication.id)} saved={saved.includes(circuit.publication.id)}/>
+        <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} liked={liked.includes(circuit.publication.id)} saved={saved.includes(circuit.publication.id)} publisher={circuit.publisher}/>
     {/each}
 {/if}

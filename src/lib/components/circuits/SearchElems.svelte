@@ -189,44 +189,26 @@
 													 labels={["All Materials", "All Circuits", "My Publications", "Saved Publications"]} on:reset={newMaterials} />
 				</div>
 			</div>
-			<div class="w-full lg:w-7/12 xl:w-1/2 mb-2">
-				<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch} />
-			</div>
-			<div class="hidden rounded-lg lg:flex w-full lg:w-7/12 xl:w-1/2 h-8 mb-8">
-				<ToggleComponent page="{false}" pageType="All Materials"
-								 options={["All Materials", "All Circuits", "My Publications", "Saved Publications"]}
-								 labels={["All Materials", "All Circuits", "My Publications", "Saved Publications"]}
-								 on:reset={newMaterials} />
-			</div>
-		</div>
 
 			{#if chosenOption === 0}
 				{#each materials as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
 													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled}/>
+													 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
 				{/each}
 				{:else if chosenOption===1}
 					{#each circuits as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
 					selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-					on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled}/>
+					on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
 					{/each}
 			{:else if (chosenOption===2 || chosenOption===3)}
 				{#each publications as p}
 					<PublicationCard publication="{p}" inCircuits="{true}"
 													 selected="{selectedIds.has(p.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled}/>
+													 on:removed={removeCard} imgSrc={'data:image;base64,' + p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher}/>
 				{/each}
 			{/if}
 
-
-		{#each materials as m}
-			<PublicationCard publication="{m.publication}" inCircuits="{true}"
-							 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-							 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked="{false}"
-							 saved="{false}"
-							 publisher={m.publisher} />
-		{/each}
 	</Grid>
 </div>
