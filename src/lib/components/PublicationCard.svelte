@@ -6,7 +6,7 @@
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { type Publication, PublicationType } from '@prisma/client';
+	import { type Publication, PublicationType, type User } from '@prisma/client';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import {
@@ -17,7 +17,7 @@
 		type ModalSettings,
 		popup
 	} from '@skeletonlabs/skeleton';
-	import { IconMapExtension } from '$lib/util/file';
+    import {IconMapExtension, PublicationTypeIconMap} from '$lib/util/file';
 	import { coursesStore } from '$lib/stores/courses';
 
 	export let publication: Publication & {
@@ -43,6 +43,7 @@
 	export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
 	export let extensions: string[] = [];
+	export let materialType: string = "information";
 	export let forArrow: boolean = false;
 
 	const userId = $page.data?.session?.user?.id || '0';
@@ -57,19 +58,25 @@
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 	$:used = courses.length;
 
-	let likes = publication.likes;
-	const toggleLike = async () => {
-		likes = liked ? likes - 1 : likes + 1;
-		await fetch(`/api/user/${userId}/liked/${publication.id}`, {
-			method: 'POST'
-		}).then(() => liked = !liked);
-	};
+    let likes = publication.likes;
+    const toggleLike = async () => {
+        likes = liked ? likes - 1 : likes + 1;
+        await fetch(`/api/user/${userId}/liked/${publication.id}`, {
+            method: 'POST',
+        }).then(() => {
+					liked = !liked
+					dispatch('liked', { id: publication.id })
+				});
+    }
 
-	const toggleSave = async () => {
-		await fetch(`/api/user/${userId}/saved/${publication.id}`, {
-			method: 'POST'
-		}).then(() => saved = !saved);
-	};
+    const toggleSave = async () => {
+        await fetch(`/api/user/${userId}/saved/${publication.id}`, {
+            method: 'POST',
+        }).then(() => {
+					saved = !saved
+					dispatch('saved', { id: publication.id })
+				});
+    }
 
 	let hoverDiv: HTMLDivElement;
 	let container: HTMLDivElement;
@@ -117,10 +124,10 @@
 		containerWidth = container.getBoundingClientRect().width;
 		window.addEventListener('resize', updateContainerWidth);
 
-		maxTags = 10;
-		if (hoverDiv) {
-			hoverDiv.addEventListener('mouseenter', handleHover);
-			hoverDiv.addEventListener('mouseleave', handleHover);
+        maxTags = calcMaxTags();
+        if (hoverDiv) {
+            hoverDiv.addEventListener('mouseenter', handleHover);
+            hoverDiv.addEventListener('mouseleave', handleHover);
 
 			return () => {
 				hoverDiv.removeEventListener('mouseenter', handleHover);
@@ -182,7 +189,7 @@
 
 <div class="{className} flex items-center">
 	{#if forArrow}
-		<div class="carrow shadow-lg" />
+		<div class="carrow shadow-lg"/>
 	{/if}
 	<div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
 		<div class="w-full relative h-3/6 rounded-t-lg">
@@ -195,39 +202,34 @@
 			{/if}
 			<img class="w-full h-full object-cover" src={imgSrc} alt="" />
 		</div>
-		<div
-			class="flex flex-col justify-between px-2 py-2 w-full h-3/6 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
+		<div class="flex flex-col justify-between px-2 py-2 w-full h-3/6 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
 			<!-- Title and difficulty -->
 			<div class="w-full">
 				<div class="flex justify-between items-start">
-					<h4
-						class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}</h4>
+					<a href="../{publication.publisherId}/{publication.id}"
+						 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}
+					</a>
 					<div class="flex gap-2">
 						{#if publication.type === PublicationType.Circuit}
-							<Icon icon="mdi:graph" class="text-xl text-surface-500" />
+							<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
+
 						{:else}
 
-							{#if (extensions.length === 1)}
-								<Icon icon={IconMapExtension.get(extensions[0]) || 'vscode-icons:file-type-text'}
-									  class="text-primary-600 size-5 text-lg" />
-							{:else if (extensions.length > 1)}
-								<div class="py-1" bind:this={hoverDiv}>
-									<Icon icon="clarity:file-group-solid" class="text-primary-600 size-5" />
-									{#if isHovered}
-										<div
-											class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
-											style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-											{#each extensions as e}
-												<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'}
-													  class="size-5 self-center" />
-											{/each}
 
-										</div>
-									{/if}
+							<div class="py-1" bind:this={hoverDiv}>
+								<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
+								{#if isHovered}
+									<div
+										class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+										style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+										{#each extensions as e}
+											<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
+										{/each}
 
-								</div>
+									</div>
+								{/if}
 
-							{/if}
+							</div>
 							<div class="self-center">
 								<DiffBar className="size-5" diff={publication.difficulty}></DiffBar>
 							</div>
@@ -250,7 +252,7 @@
 			<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
 				<div class="flex gap-1">
 					{#each tags.slice(0, maxTags) as tag, i}
-						<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}" />
+						<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
 					{/each}
 				</div>
 				<div class=" self-center">
@@ -262,27 +264,22 @@
 			<div class="w-full space-y-2">
 				<hr class="opacity-50">
 				<div class="w-full flex justify-between">
-					<div class=" flex justify-left space-x-4">
+					<div class="w-full flex justify-left space-x-4">
 						{#if !inCircuits}
 							<a href="{publication.publisherId}/{publication.id}"
-							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+								 class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
 						{:else if !selected}
-							<button type="button"
-									class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
-									on:click="{select}">Select
+							<button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
+											on:click="{select}">Select
 							</button>
 						{:else}
-							<button type="button"
-									class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
-									use:popup={popupClickPubCard}>Remove
+							<button type="button" class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
+											use:popup={popupClickPubCard}>Remove
 							</button>
 							<div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
 								<div class="flex gap-2">
-									<button type="button" id="remove" on:click="{remove}"
-											class="btn variant-filled-error">Confirm
-									</button>
-									<button type="button" id="close" class="btn variant-filled bg-surface-600">Go Back
-									</button>
+									<button type="button" id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
+									<button type="button" id="close" class="btn variant-filled bg-surface-600">Go Back</button>
 								</div>
 								<div class="arrow bg-surface-100-token" />
 							</div>
@@ -290,7 +287,7 @@
 
 						{#if markAsUsed}
 							<button type="button" on:click={() => modalStore.trigger(modal)}>
-								<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>
+								<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</span>
 							</button>
 						{/if}
 					</div>
@@ -298,7 +295,7 @@
 					<div class="flex gap-3 items-center">
 						<button
 							type="button"
-							class="text-xs flex gap-x-1 items-center h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
+							class="text-xs flex items-center h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
 							on:click={() => toggleLike()}>
 							<Icon class="text-lg {likedColor}" icon="material-symbols:star" />
 							<span>{likes}</span>
@@ -311,17 +308,18 @@
 						</button>
 
 						<img class="w-6 h-6 md:w-8 md:h-8 rounded-full border object-cover"
-							 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
+								 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<Modal components={modalRegistry} />
+	<Modal components={modalRegistry}/>
 
 
 </div>
+
 
 <style>
     .carrow {
@@ -335,3 +333,4 @@
 
     }
 </style>
+

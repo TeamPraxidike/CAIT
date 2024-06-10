@@ -1,6 +1,4 @@
 <script lang="ts">
-	export let hello = "Whenever"
-	console.log(hello)
 </script>
 <!DOCTYPE html>
 <html lang="en">

@@ -4,10 +4,7 @@
 	import {enhance} from '$app/forms';
 	import type { Publication, Tag as PrismaTag, User } from '@prisma/client';
 	import {
-		Autocomplete,
-		type AutocompleteOption,
 		getToastStore,
-		InputChip,
 		Step,
 		Stepper
 	} from '@skeletonlabs/skeleton';
@@ -16,6 +13,7 @@
 	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
+	import TagsSelect from "$lib/components/TagsSelect.svelte";
 	import type {
 		Node as PrismaNode
 	} from '@prisma/client';
@@ -32,33 +30,19 @@
 	let newTags: string[] = [];
 	let additionalMaintainers: UserWithProfilePic[] = [];
 
-	let inputChip: InputChip;
-	let tagInput = '';
-
 	let tagsDatabase = data.tags as PrismaTag[];
 	let users = data.users as UserWithProfilePic[];
+	let liked = data.liked as number[];
+	let saved = data.saved.saved as number[];
+
 
 	let searchableUsers = users;
-
-	type TagOption = AutocompleteOption<string, { content: string }>;
-	let flavorOptions: TagOption[] = tagsDatabase.map(tag => {
-		return {
-			value: tag.content,
-			label: tag.content
-		};
-	});
 
 	let uid = $page.data.session?.user.id || 0;
 
 	let priorKnowledge:string[] = [];
 	$: priorKnowledge = priorKnowledge;
 
-	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		if (!addedTags.includes(e.detail.value)) {
-			inputChip.addChip(e.detail.value);
-			tagInput = '';
-		}
-	}
 
 	// learning objectives
 	let LOs: string[] = [];
@@ -66,28 +50,10 @@
 
 	$: additionalMaintainers = additionalMaintainers
 
-	const handleInvalid = () => {
-		if(tagInput.length>0 && !addedTags.includes(tagInput)) {
-			addedTags=[...addedTags,tagInput];
-			newTags=[...newTags,tagInput];
-			tagInput='';
-		}
-		else {
-			triggerRepeatInput("Tag",tagInput);
-		}
-	}
-
-	const triggerRepeatInput = (type: string,input: string)=>{
-		toastStore.trigger({
-			message: `${type} ${input} Already Added`,
-			background: 'bg-warning-200'
-		});
-	}
-
 	const locks: boolean[] = [true, true];
 
-	$: locks[0] = title.length < 2 || description.length < 10;
-	$: locks[1] = addedTags.length < 2 || LOs.length < 1;
+	$: locks[0] = title.length < 1 || description.length < 1;
+	$: locks[1] = addedTags.length < 1|| LOs.length < 1;
 	$: priorKnowledge = priorKnowledge;
 	$: LOs = LOs;
 
@@ -116,12 +82,15 @@
 
 			nodeActions = nodeDiffActions;
 			circuitCoverPic = coverPic;
+
+			console.log(circuitNodesPlaceholder);
 		}
 	}
 	let circuitNodesPlaceholder: (PrismaNode & {
 		publication: Publication & {
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
+			publisher: User & {profilePicData:string},
 		}
 		next: {
 			circuitId: number,
@@ -165,14 +134,15 @@
         formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
-				console.log(nodeActions);
+
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}"/>
+			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
+
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
@@ -196,18 +166,7 @@
 
 				<div class="flex flex-col w-full">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
-
-					<div class="flex flex-col gap-2 p-3">
-						<span>Tags<span class="text-error-300">*</span>:</span>
-						<div class="text-token space-y-2 w-1/2">
-							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content.toLowerCase())}
-												 bind:input={tagInput} bind:value={addedTags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
-							<div class="card max-h-48 p-4 overflow-y-auto" tabindex="-1">
-								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
-															on:selection={onInputChipSelect} emptyState="No Results Found. Press Enter to Create New Tag."/>
-							</div>
-						</div>
-					</div>
+						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} bind:newTags={newTags}/>
 				</div>
 			</div>
 		</Step>

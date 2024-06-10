@@ -15,6 +15,7 @@ import {
 } from '$lib/database';
 import { type File as PrismaFile, Prisma } from '@prisma/client';
 import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
+import { profilePicFetcher } from '$lib/database/file';
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -59,6 +60,12 @@ export async function GET({ params, locals }) {
 			material.publication.coverPic,
 		);
 
+		material.publication.publisher = {
+			...material.publication.publisher,
+			profilePicData:
+				material.publication.publisher.profilePic?.data || '',
+		};
+
 		return new Response(
 			JSON.stringify({ material, fileData, coverFileData }),
 			{
@@ -66,6 +73,7 @@ export async function GET({ params, locals }) {
 			},
 		);
 	} catch (error) {
+		console.error(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});

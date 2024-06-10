@@ -26,7 +26,7 @@ describe('Comments CRUD', () => {
 			title: 'cool publication',
 			description: 'This publication has description',
 			difficulty: Difficulty.easy,
-			materialType: 'video',
+			materialType: 'presentation',
 			copyright: true,
 			timeEstimate: 4,
 			theoryPractice: 9,
@@ -43,7 +43,9 @@ describe('Comments CRUD', () => {
 		expect(comment).toBeTruthy();
 		expect(comment.publicationId).toEqual(publication.publicationId);
 		expect(comment.content).toEqual('Ivan');
-		const comments = await getCommentsByPublicationId(publication.publicationId);
+		const comments = await getCommentsByPublicationId(
+			publication.publicationId,
+		);
 		expect(comments.length).toEqual(1);
 	});
 	it('should get comment successfully', async () => {
@@ -55,7 +57,9 @@ describe('Comments CRUD', () => {
 	it('should delete comment successfully', async () => {
 		await deleteComment(comment.id);
 
-		const comments = await getCommentsByPublicationId(publication.publicationId);
+		const comments = await getCommentsByPublicationId(
+			publication.publicationId,
+		);
 		expect(comments.length).toEqual(0);
 	});
 	it('should update comment successfully', async () => {
@@ -65,7 +69,9 @@ describe('Comments CRUD', () => {
 		});
 		expect(comment.content).toEqual('notIvan');
 		expect(comment.createdAt).not.toEqual(comment.updatedAt);
-		const comments = await getCommentsByPublicationId(publication.publicationId);
+		const comments = await getCommentsByPublicationId(
+			publication.publicationId,
+		);
 		expect(comments.length).toEqual(1);
 	});
 });

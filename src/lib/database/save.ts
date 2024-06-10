@@ -73,6 +73,7 @@ export async function getSavedPublications(userId: string) {
 				include: {
 					tags: true,
 					materials: true,
+					circuit: true,
 					coverPic: true,
 					usedInCourse: {
 						select: {

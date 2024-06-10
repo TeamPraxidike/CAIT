@@ -94,7 +94,23 @@ export async function GET({ params }) {
 					status: 200,
 				},
 			);
-		} else {
+		} else if (publication.circuit) {
+			publication.circuit.nodes = publication.circuit.nodes.map(
+				(node) => {
+					return {
+						...node,
+						publication: {
+							...node.publication,
+							publisher: {
+								...node.publication.publisher,
+								profilePicData: profilePicFetcher(
+									node.publication.publisher.profilePic,
+								).data,
+							},
+						},
+					};
+				},
+			);
 			return new Response(
 				JSON.stringify({
 					isMaterial: false,

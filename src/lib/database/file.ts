@@ -58,7 +58,7 @@ export function coverPicFetcher(
 		filePath = path.join(
 			'static',
 			'defaultCoverPic',
-			encapsulatingType + '.jpg',
+			'assignment' + '.jpg',
 		);
 
 		const currentFileData = fs.readFileSync(filePath);

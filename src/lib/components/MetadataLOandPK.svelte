@@ -83,6 +83,26 @@
         }
     }
 
+    const submitLO = () => {
+        if (LOs.includes(loInput.value)) {
+            triggerRepeatInput("Learning Objective",loInput.value)
+        } else {
+            if(loInput.value!=='') {
+                LOs = [...LOs, loInput.value];
+                loInput.value = "";
+            }
+        }
+    }
+
+    const submitPrereq = () => {
+        if (priorKnowledge.includes(priorInput.value)) {
+            triggerRepeatInput("Prior Knowledge",priorInput.value)
+        }  if(priorInput.value!=='') {
+            priorKnowledge = [...priorKnowledge, priorInput.value];
+            priorInput.value = "";
+        }
+    }
+
 </script>
 
 
@@ -90,13 +110,15 @@
 <div class="flex flex-row justify-between">
 
     <div class="flex flex-col space-y-1 w-full p-3 max-w-full">
-        <label for="learningObjective" >Learning Objectives {#if adding}<span class="text-error-300">*</span>{/if} :</label>
+        <label for="learningObjective" >Learning Objectives {#if adding}(at least one)<span class="text-error-300">*</span>{/if} :</label>
 
         <div class="w-full max-w-full">
             {#if adding}
                 <div class="w-full flex justify-between gap-2">
-                    <input on:keydown={handleLOPress}  bind:this={loInput} id="learningObjective" type="text" placeholder="Enter learning objective" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-400 focus:ring-0 "/>
-                    <button on:click={()=>{ if(LOs.includes(loInput.value)) { triggerRepeatInput("Learning Objective",loInput.value)} else { if(loInput.value!=='') {LOs = [...LOs, loInput.value]; loInput.value = "";}}}} type="button" name="add_LO" inputmode="decimal"
+                    <input on:keydown={handleLOPress} on:blur={submitLO}  bind:this={loInput}
+                           id="learningObjective" type="text" placeholder="Enter learning objective"
+                           class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-400 focus:ring-0 "/>
+                    <button on:click={submitLO} type="button" name="add_LO" inputmode="decimal"
                             class="text-center">
                         <Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
                     </button>
@@ -108,7 +130,8 @@
                 {#each LOs as LO, index}
 
                     {#if editingLO && index === editingIndexLO}
-                        <input class="focus:border-primary-400 bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingLOText} on:keypress={handleLOEdit}/>
+                        <input class="focus:border-primary-400 bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md"
+                               bind:value={editingLOText} on:keypress={handleLOEdit}/>
                     {:else }
 
                         <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center text-wrap shrink break-words" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
@@ -135,12 +158,17 @@
     </div>
 
     <div class="flex flex-col space-y-1 w-full p-3">
-        <label for="priorKnowledge" >Prior Knowledge:</label>
-
+        {#if !adding && priorKnowledge.length !== 0}
+            <label for="priorKnowledge" >Prior Knowledge:</label>
+        {:else if adding}
+            <label for="priorKnowledge" >Prior Knowledge:</label>
+        {/if}
         {#if adding}
             <div class="flex w-full justify-between gap-2">
-                <input   bind:this={priorInput} on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept" class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-400 focus:ring-0"/>
-                <button on:click={()=>{if(priorKnowledge.includes(priorInput.value)) {triggerRepeatInput("Prior Knowledge",priorInput.value)}  if(priorInput.value!=='') {priorKnowledge = [...priorKnowledge, priorInput.value]; priorInput.value = "";}}} type="button" name="add_prior" inputmode="decimal"
+                <input   bind:this={priorInput} on:blur={submitPrereq}
+                         on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept"
+                         class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-400 focus:ring-0"/>
+                <button on:click={submitPrereq} type="button" name="add_prior" inputmode="decimal"
                         class="text-center">
                     <Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
                 </button>
@@ -167,8 +195,6 @@
                     </div>
                 {/if}
             {/each}
-
-
         </div>
     </div>
 </div>

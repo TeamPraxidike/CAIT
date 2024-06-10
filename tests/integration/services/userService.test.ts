@@ -109,7 +109,7 @@ describe('Liking publications', () => {
 			difficulty: Difficulty.easy,
 			learningObjectives: [],
 			prerequisites: [],
-			materialType: 'video',
+			materialType: 'presentation',
 			timeEstimate: 4,
 			theoryPractice: 9,
 		});

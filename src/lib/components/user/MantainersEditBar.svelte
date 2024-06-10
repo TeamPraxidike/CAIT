@@ -15,6 +15,21 @@
 	let uid = $page.data.session?.user.id || 0;
 	type UserWithProfilePic = User & { profilePicData: string };
 
+	let p = $page.data.session?.user as User & {profilePic: string};
+	let publisher = {
+		id: p.id,
+		firstName: p.firstName,
+		lastName: p.lastName,
+		username: p.username,
+		email: p.email,
+		emailVerified: p.emailVerified,
+		reputation: p.reputation,
+		password: p.password,
+		isAdmin: p.isAdmin,
+		createdAt: p.createdAt,
+		updatedAt: p.updatedAt
+	}
+
 	const handleRemoveMaintainer = (index: number) => {
 		const user = additionalMaintainers.filter((_, i) => i === index)[0];
 		additionalMaintainers = additionalMaintainers.filter((_, i) => i !== index);
@@ -71,13 +86,12 @@
 		},
 		closeQuery: '#user'
 	};
-
-
 </script>
 
 <div class="flex flex-col gap-2 w-full p-3">
 	<span>Maintainers:</span>
 	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
+		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={'data:image;base64,' + $page.data.session?.userPfp.data}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
 								role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />

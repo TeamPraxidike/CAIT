@@ -50,14 +50,12 @@ describe('Local File Handling', () => {
 		createdFiles.push(pathSaved);
 
 		const data = fileSystem.readFile(pathSaved);
-		console.log('Data is: ' + data);
 		expect(data.toString()).toEqual('Hello I am a blob, my name is blob');
 
 		await fileSystem.editFile(pathSaved, Buffer.from('I am a new blob'));
 
 		const data2 = fileSystem.readFile(pathSaved);
 		expect(data2.toString()).toEqual('I am a new blob');
-		console.log('Data is: ' + data2);
 
 		fileSystem.deleteFile(pathSaved);
 		expect(() => fileSystem.readFile(pathSaved)).toThrowError();
