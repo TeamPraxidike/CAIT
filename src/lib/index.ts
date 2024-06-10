@@ -24,10 +24,13 @@ import Download from '$lib/components/generic/Download.svelte';
 
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
-import UsedInCourse from "$lib/components/UsedInCourse.svelte";
+import UsedInCourse from '$lib/components/UsedInCourse.svelte';
+import PublishReview from '$lib/components/PublishReview.svelte';
 
 // util
 import { getDateDifference } from '$lib/util/date';
+
+import { mapToType, mapToDifficulty } from '$lib/util/types';
 
 const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
@@ -70,6 +73,8 @@ export function calculateCosineSimilarity(vector1: number[], vector2: number[]):
 }
 
 export {
+	mapToType,
+	mapToDifficulty,
 	Download,
 	getDateDifference,
 	Render,
@@ -95,5 +100,6 @@ export {
 	Circuit,
 	CircuitPureHTML,
 	AddInteractionForm,
-	UsedInCourse
+	UsedInCourse,
+	PublishReview,
 };

@@ -1,11 +1,10 @@
 import type { FetchedFileArray } from '$lib/database';
+import type { User } from '@prisma/client';
 
 export async function load({ url, fetch, locals }) {
 	const session = await locals.auth();
 
 	const type = url.searchParams.get('type') || 'materials';
-
-	// get all the materials
 
 	const { materials } =
 		type === 'materials'
@@ -32,7 +31,6 @@ export async function load({ url, fetch, locals }) {
 			`/api/user/${session.user.id}/saved?fullPublications=false`,
 		);
 
-		// dont ask for some reason it doesnt work if I do await savedResponse.json()
 		if (savedResponse.status) {
 			const responseBody = await savedResponse.text();
 			saved = responseBody
@@ -44,8 +42,6 @@ export async function load({ url, fetch, locals }) {
 
 		tags = await (await fetch(`/api/tags`)).json();
 	}
-
-	console.log(materials);
 
 	return {
 		type,
@@ -63,6 +59,9 @@ export type material = {
 		tags: {
 			content: string;
 		}[];
+		publisher: User & {
+			profilePicData: string;
+		};
 		coverPic: {
 			path: string;
 			title: string;

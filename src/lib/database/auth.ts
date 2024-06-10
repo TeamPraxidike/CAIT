@@ -14,7 +14,6 @@ import {
 	AUTH_SECRET,
 } from '$env/static/private';
 import type { AdapterUser } from '@auth/core/adapters';
-import { loggedInPfp } from '$lib/stores/loggedInPfp';
 
 function ModifiedPrismaAdapter(p: typeof prisma) {
 	return {
@@ -96,10 +95,8 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 					include: { profilePic: true },
 				});
 
-				if (userAndPfp) {
-					const profilePic = profilePicFetcher(userAndPfp.profilePic);
-					loggedInPfp.set(profilePic.data);
-				}
+				if (!userAndPfp) throw new Error('User not found');
+				session.userPfp = profilePicFetcher(userAndPfp.profilePic);
 			}
 			return session;
 		},
@@ -122,7 +119,6 @@ export const canEdit = async (locals: App.Locals, ownerId: string) => {
 	const session = await locals.auth();
 	if (!session || !session.user) return false;
 
-	// return session.user.id === ownerId || session.user.role === 'ADMIN';
 	return session.user.id === ownerId;
 };
 
@@ -132,7 +128,8 @@ export const canRemove = async (locals: App.Locals, ownerId: string) => {
 	const session = await locals.auth();
 	if (!session || !session.user) return false;
 
-	//  || session.user.role === 'ADMIN';
+	if (session.user.isAdmin) return true;
+
 	return session.user.id === ownerId;
 };
 

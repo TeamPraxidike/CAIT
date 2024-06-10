@@ -50,7 +50,7 @@
 
 {#if view === "search"}
 	<a href={link} style="height:fit-content"
-	   class="col-span-2 flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
+	   class="col-span-2 flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow">
 		<div class="flex flex-col space-y-1 items-start w-full md:pb-2">
 			<div class="w-full flex flex-col items-center">
 				{#if userPhotoUrl !== ''}
@@ -73,27 +73,26 @@
 	</a>
 
 {:else if view === "material"}
-	<a href={link} type="button">
-		<div style="height:fit-content" use:popup={popupHoverBottom}
-			 class="[&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
-			<div class="flex flex-col flex-1 items-center justify-center space-y-1">
-				{#if userPhotoUrl !== ''}
-					<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
-				{:else}
-					<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
-				{/if}
-				<div class="max-w-full items-center">
-					<div class="dark:text-surface-50 text-surface-900 max-w-full truncate">{name}</div>
-					<hr class="dark:bg-surface-50 bg-surface-300" />
-				</div>
-				<div class="text-sm md:text-md ">{role}</div>
+
+	<a href={link} type="button" style="height:fit-content" use:popup={popupHoverBottom}
+		 class="flex-none [&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
+		<div class="flex flex-col items-center justify-center space-y-1 flex-none">
+			{#if userPhotoUrl !== ''}
+				<img src={userPhotoUrl} alt="User Profile" class="flex-none w-10 h-10 md:w-20 md:h-20 rounded-full" />
+			{:else}
+				<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
+			{/if}
+			<div class="max-w-full items-center flex-none">
+				<div class="dark:text-surface-50 text-surface-900 max-w-full truncate flex-none">{name}</div>
+				<hr class="dark:bg-surface-50 bg-surface-300" />
 			</div>
+			<div class="text-sm md:text-md ">{role}</div>
 		</div>
 	</a>
 
 {:else if view === "publish"}
 	<div style="height:fit-content"
-		 class="col-span-1 w-[80] group flex relative flex-col text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 rounded-lg hover:shadow-lg shadow">
+		 class="w-32 group flex flex-none relative flex-col text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 rounded-lg hover:shadow-lg shadow flex-grow-0">
 		{#if role!=="Publisher"}
 			<button type="button" on:click={removeMaintainer} class="absolute top-0 right-0 rounded-lg hidden group-hover:block">
 				<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 36 36" {...$$props}>
@@ -107,7 +106,7 @@
 				</svg>
 			</button>
 		{/if}
-		<div class="w-full flex flex-col items-center">
+		<div class="w-full flex flex-col items-center flex-none">
 			{#if userPhotoUrl !== ''}
 				<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
 			{:else}
@@ -131,7 +130,7 @@
 			{/if}
 			<div class="flex flex-col items-start w-4/5">
 				<div class="w-full items-center">
-					<div class="dark:text-surface-50 text-surface-900 max-w-[80%] truncate ">{name}</div>
+					<div class="dark:text-surface-50 text-surface-900 max-w-[80%] truncate">{name}</div>
 					<hr class="dark:bg-surface-50 bg-surface-300 max-w-[80%]" />
 				</div>
 				<span>Rep: {rep}</span>

@@ -38,10 +38,10 @@
 {#each options as opt,i}
 
 	{#if page}
-		<a href="/browse/?type={opt}" on:click={() => resetAll(i)}
+		<a type="button" href="/browse/?type={opt}" on:click={() => resetAll(i)}
 			 class="{rounding(i)} text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600 {text(opt)} {bg(opt)}">{labels[i]}</a>
 	{:else}
-		<button on:click={() => resetAll(i)}
+		<button type="button" on:click={() => resetAll(i)}
 			 class="{rounding(i)} text-xs lg:text-sm w-1/3 text-center flex justify-center items-center border-y border-l border-primary-500 dark:border-primary-600 {text(opt)} {bg(opt)}">{labels[i]}</button>
 	{/if}
 	{/each}

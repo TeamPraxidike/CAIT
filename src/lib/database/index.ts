@@ -22,7 +22,16 @@ import {
 	connectMaintainers,
 	connectTags,
 	handleConnections,
+	updateAllTimeSaved,
 } from './publication';
+
+import {
+	addTag,
+	addTags,
+	getAllTags,
+	getTagByContent,
+	deleteTagByContent,
+} from '$lib/database/tag';
 
 import {
 	handleEdges,
@@ -45,6 +54,7 @@ import {
 	likesCommentUpdate,
 	getLikedReplies,
 	getLikedComments,
+	updateReputation,
 } from '$lib/database/user';
 
 import {
@@ -180,6 +190,7 @@ type FetchedFileArray = FetchedFileItem[];
  */
 
 type NodeDiffActions = {
+	numNodes: number;
 	add: { publicationId: number; x: number; y: number }[];
 	delete: { publicationId: number }[];
 	edit: { publicationId: number; x: number; y: number }[];
@@ -255,6 +266,13 @@ export {
 	getLikedComments,
 	likesCommentUpdate,
 	likesReplyUpdate,
+	addTag,
+	addTags,
+	getAllTags,
+	getTagByContent,
+	deleteTagByContent,
+	updateReputation,
+	updateAllTimeSaved,
 };
 
 export type {

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 // 		firstName: 'Paisii',
 // 		lastName: 'Hilendarski',
 // 		email: 'paiskataH@yahoomail.com',
-// 		loggedInPfp: 'paiskata.jpg',
+// 		logged2InPfp: 'paiskata.jpg',
 // 	};
 // 	const user = await fetch(`${testingUrl}/user`, {
 // 		method: 'POST',

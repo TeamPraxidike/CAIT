@@ -5,11 +5,9 @@ import {
 	fileSystem,
 	getPublicationById,
 } from '$lib/database';
+import { profilePicFetcher } from '$lib/database/file';
 
 export async function GET({ params }) {
-	// Authentication step
-	// return 401 if user not authenticated
-
 	const publicationId = parseInt(params.publicationId);
 
 	if (isNaN(publicationId) || publicationId <= 0) {
@@ -32,8 +30,43 @@ export async function GET({ params }) {
 			);
 		}
 
+		publication.publisher = {
+			...publication.publisher,
+			// @ts-ignore
+			profilePicData: profilePicFetcher(publication.publisher.profilePic)
+				.data,
+		};
+
+		publication.comments = publication.comments.map((comment) => {
+			return {
+				...comment,
+				user: {
+					...comment.user,
+					profilePicData: profilePicFetcher(comment.user.profilePic)
+						.data,
+				},
+				replies: comment.replies.map((reply) => {
+					return {
+						...reply,
+						user: {
+							...reply.user,
+							profilePicData: profilePicFetcher(
+								reply.user.profilePic,
+							).data,
+						},
+					};
+				}),
+			};
+		});
+
+		publication.maintainers = publication.maintainers.map((user) => {
+			return {
+				...user,
+				profilePicData: profilePicFetcher(user.profilePic).data,
+			};
+		});
+
 		if (publication.materials) {
-			//const material = await getMaterialByPublicationId(publicationId);
 			const fileData: FetchedFileArray = [];
 
 			for (const file of publication.materials.files) {
@@ -61,12 +94,28 @@ export async function GET({ params }) {
 					status: 200,
 				},
 			);
-		} else {
+		} else if (publication.circuit) {
+			publication.circuit.nodes = publication.circuit.nodes.map(
+				(node) => {
+					return {
+						...node,
+						publication: {
+							...node.publication,
+							publisher: {
+								...node.publication.publisher,
+								profilePicData: profilePicFetcher(
+									node.publication.publisher.profilePic,
+								).data,
+							},
+						},
+					};
+				},
+			);
 			return new Response(
 				JSON.stringify({
 					isMaterial: false,
 					publication: publication,
-					fileData: {},
+					fileData: [],
 					coverFileData: {},
 				}),
 				{

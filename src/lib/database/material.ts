@@ -21,6 +21,7 @@ const sortSwitch = (sort: string) => {
 
 	return orderBy;
 };
+import Fuse from 'fuse.js';
 
 /**
  * [GET] Returns a publication of type Material with the given id.
@@ -37,7 +38,11 @@ export async function getMaterialByPublicationId(
 			publication: {
 				include: {
 					tags: true,
-					publisher: true,
+					publisher: {
+						include: {
+							profilePic: true,
+						},
+					},
 					maintainers: true,
 					coverPic: true,
 					comments: {
@@ -75,31 +80,6 @@ export async function getAllMaterials(
 ) {
 	const where: any = { AND: [] };
 
-	if (query !== '') {
-		where.AND.push({
-			OR: [
-				{
-					publication: {
-						title: { contains: query, mode: 'insensitive' },
-					},
-				},
-				{
-					publication: {
-						description: { contains: query, mode: 'insensitive' },
-					},
-				},
-
-				{
-					publication: {
-						learningObjectives: {
-							hasSome: [query],
-						},
-					},
-				},
-			],
-		});
-	}
-
 	if (publishers.length > 0) {
 		where.AND.push({ publication: { publisherId: { in: publishers } } });
 	}
@@ -119,8 +99,7 @@ export async function getAllMaterials(
 	}
 
 	const sortBy = sortSwitch(sort);
-
-	return prisma.material.findMany({
+	let materials = await prisma.material.findMany({
 		where,
 		orderBy: sortBy,
 		include: {
@@ -133,11 +112,35 @@ export async function getAllMaterials(
 							course: true,
 						},
 					},
+					publisher: {
+						include: {
+							profilePic: true,
+						},
+					},
 				},
 			},
 			files: true,
 		},
 	});
+
+	if (query !== '') {
+		const m = materials;
+		let shouldSort = false;
+		if (sort !== 'Sort By') shouldSort = true;
+		const searcher = new Fuse(m, {
+			keys: [
+				{ name: 'publication.title', weight: 0.4 },
+				{ name: 'publication.description', weight: 0.4 },
+				{ name: 'publication.learningObjectives', weight: 0.2 },
+			],
+			isCaseSensitive: false,
+			threshold: 0.6,
+			shouldSort: shouldSort,
+		});
+		materials = searcher.search(query).map((m) => m.item);
+	}
+
+	return materials;
 }
 
 /**
@@ -152,7 +155,7 @@ export async function deleteMaterialByPublicationId(
 	return prismaContext.publication.delete({
 		where: { id: publicationId },
 		include: {
-			material: {
+			materials: {
 				include: {
 					files: true,
 				},

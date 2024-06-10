@@ -20,12 +20,12 @@ enum Difficulty {
 }
 
 enum MaterialType {
-  video
+  information
   presentation
   assignment
-  dataset
   exam
   code
+  other
 }
 
 enum PublicationType {
@@ -157,6 +157,8 @@ model Publication {
 
   node Node[]
 
+  savedByAllTime String[] @default([])
+
   coverPic File? @relation("CoverPic")
 
   similarToThis  SimilarContent[] @relation("ThatSimilarToThis") // like an incoming edge
@@ -208,6 +210,7 @@ model File {
 model Circuit {
   id            Int         @id @default(autoincrement())
   nodes         Node[]
+  numNodes      Int         @default(0)
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 }

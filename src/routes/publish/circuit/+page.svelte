@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { Circuit, Meta } from '$lib';
+	import { Circuit, Meta, PublishReview } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
-	import type { Tag as PrismaTag, User } from '@prisma/client';
+	import type { Publication, Tag as PrismaTag, User } from '@prisma/client';
 	import {
-		Autocomplete,
-		type AutocompleteOption,
 		getToastStore,
-		InputChip,
 		Step,
 		Stepper
 	} from '@skeletonlabs/skeleton';
@@ -16,6 +13,11 @@
 	import { page } from '$app/stores';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
+	import TagsSelect from "$lib/components/TagsSelect.svelte";
+	import type {
+		Node as PrismaNode
+	} from '@prisma/client';
+	import { onMount } from 'svelte';
 
 	export let data: PageServerData;
 
@@ -28,32 +30,19 @@
 	let newTags: string[] = [];
 	let additionalMaintainers: UserWithProfilePic[] = [];
 
-	let inputChip: InputChip;
-	let tagInput = '';
-
 	let tagsDatabase = data.tags as PrismaTag[];
-	let users = data.users.users as UserWithProfilePic[];
+	let users = data.users as UserWithProfilePic[];
+	let liked = data.liked as number[];
+	let saved = data.saved.saved as number[];
 
 
-	type TagOption = AutocompleteOption<string, { content: string }>;
-	let flavorOptions: TagOption[] = tagsDatabase.map(tag => {
-		return {
-			value: tag.content,
-			label: tag.content
-		};
-	});
+	let searchableUsers = users;
 
 	let uid = $page.data.session?.user.id || 0;
 
 	let priorKnowledge:string[] = [];
 	$: priorKnowledge = priorKnowledge;
 
-	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		if (!addedTags.includes(e.detail.value)) {
-			inputChip.addChip(e.detail.value);
-			tagInput = '';
-		}
-	}
 
 	// learning objectives
 	let LOs: string[] = [];
@@ -61,28 +50,10 @@
 
 	$: additionalMaintainers = additionalMaintainers
 
-	const handleInvalid = () => {
-		if(tagInput.length>0 && !addedTags.includes(tagInput)) {
-			addedTags=[...addedTags,tagInput];
-			newTags=[...newTags,tagInput];
-			tagInput='';
-		}
-		else {
-			triggerRepeatInput("Tag",tagInput);
-		}
-	}
-
-	const triggerRepeatInput = (type: string,input: string)=>{
-		toastStore.trigger({
-			message: `${type} ${input} Already Added`,
-			background: 'bg-warning-200'
-		});
-	}
-
 	const locks: boolean[] = [true, true];
 
-	$: locks[0] = title.length < 2 || description.length < 10;
-	$: locks[1] = addedTags.length < 2 || LOs.length < 1;
+	$: locks[0] = title.length < 1 || description.length < 1;
+	$: locks[1] = addedTags.length < 1|| LOs.length < 1;
 	$: priorKnowledge = priorKnowledge;
 	$: LOs = LOs;
 
@@ -95,7 +66,7 @@
 
 	$: if (form?.status === 200) {
 		toastStore.trigger({
-			message: 'Publication Added successfully',
+			message: 'Circuit Added successfully',
 			background: 'bg-success-200'
 		});
 		goto(`/${$page.data.session?.user.id}/${form?.id}`);
@@ -111,9 +82,42 @@
 
 			nodeActions = nodeDiffActions;
 			circuitCoverPic = coverPic;
+
+			console.log(circuitNodesPlaceholder);
+		}
+	}
+	let circuitNodesPlaceholder: (PrismaNode & {
+		publication: Publication & {
+			tags: { content: string }[],
+			usedInCourse: { course: string }[],
+			publisher: User & {profilePicData:string},
+		}
+		next: {
+			circuitId: number,
+			fromPublicationId: number,
+			toPublicationId: number
+		}[]
+	})[] = [];
+
+
+	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+
+		if (!confirmation) {
+			event.preventDefault();
+			return;
 		}
 
-	}
+	};
+
+	onMount(() => {
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	});
+
 </script>
 
 <!--<Node></Node>-->
@@ -125,20 +129,20 @@
 				formData.append('publisherId', uid.toString());
         formData.append('title', title);
         formData.append('description', description);
-        formData.append('difficulty', 'easy');
         formData.append('selectedTags', JSON.stringify(addedTags));
 				formData.append('newTags', JSON.stringify(newTags))
-        formData.append('additionalMaintainers', JSON.stringify([...additionalMaintainers.map(m => m.id), uid]));
+        formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
-				console.log(nodeActions);
+
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit nodes={[]} bind:this={circuitRef} publishing="{true}"/>
+			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
+
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
@@ -158,24 +162,19 @@
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between gap-3 col-span-full">
 
-				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge}/>
+				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} adding="{true}"/>
 
-				<div class="flex flex-col w-full p-3">
-					<MantainersEditBar users={users}/>
-
-					<div class="flex flex-col gap-2">
-						<span>Tags<span class="text-error-300">*</span>:</span>
-						<div class="text-token space-y-2">
-							<InputChip bind:this={inputChip} whitelist={tagsDatabase.map(t => t.content.toLowerCase())}
-												 bind:input={tagInput} bind:value={addedTags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
-							<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-								<Autocomplete bind:input={tagInput} options={flavorOptions} denylist={addedTags}
-															on:selection={onInputChipSelect} />
-							</div>
-						</div>
-					</div>
+				<div class="flex flex-col w-full">
+					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
+						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} bind:newTags={newTags}/>
 				</div>
 			</div>
+		</Step>
+		<Step>
+			<svelte:fragment slot="header">Review</svelte:fragment>
+			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
+										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
+			/>
 		</Step>
 	</Stepper>
 

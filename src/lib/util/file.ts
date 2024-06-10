@@ -106,6 +106,25 @@ export function appendFile(
 }
 
 /**
+ * Saves a blob as a file
+ * @param blob Blob to save
+ * @param filename the name of the file to save
+ */
+export function saveFile(blob: Blob, filename: string): void {
+	const url = URL.createObjectURL(blob);
+
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = filename;
+
+	document.body.appendChild(a);
+	a.click();
+
+	// Remove the anchor from the body
+	document.body.removeChild(a);
+}
+
+/**
  * Concatenates two FileList objects
  * @param fileList1 the first FileList object
  * @param fileList2 the second FileList object
@@ -245,4 +264,13 @@ export const IconMapExtension: Map<string, string> = new Map([
 	['json', 'vscode-icons:file-type-json'],
 	['ts', 'vscode-icons:file-type-typescript'],
 	['ipynb', 'vscode-icons:file-type-jupyter'],
+]);
+
+export const PublicationTypeIconMap: Map<string, string> = new Map([
+	['information', 'flowbite:book-outline'],
+	['presentation', 'mdi:presentation'],
+	['assignment', 'material-symbols:assignment'],
+	['other', 'mage:dots-horizontal-circle'],
+	['exam', 'healthicons:i-exam-multiple-choice'],
+	['code', 'ph:code-fill'],
 ]);

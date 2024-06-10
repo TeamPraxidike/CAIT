@@ -13,6 +13,9 @@
 
 	//export let selectedIds: number[];
 	export let all: {id:number, content:string } [];
+
+	export let num: number;
+	export let type: boolean = false;
 	export let display: {id:number, content:string } [] = all;
 	export let active = false;
 	let input: HTMLInputElement;
@@ -20,16 +23,21 @@
 	export let oneAllowed : boolean = false;
 	export let selectedOption : string = "";
 
+	let nodes: HTMLInputElement;
+
+	$: overflow = display.length>10 ? "overflow-y-scroll" : "overflow-y-hidden";
+
 	//TODO: Change the profile pic to actual href later when we set up functionality
 	export let profilePic: boolean;
 	//export let text: string;
 	let targetDiv: HTMLDivElement;
+	let targetButton: HTMLButtonElement;
 
 	const removePopup = (event: MouseEvent) => {
 		if (!(event.target instanceof HTMLElement)) {
 			return; // Ignore if the target is not an HTMLElement
 		}
-		const isClickedInsideDiv = targetDiv.contains(event.target);
+		const isClickedInsideDiv = oneAllowed ? targetButton.contains(event.target) : targetDiv.contains(event.target);
 		if (!isClickedInsideDiv)
 			active = false;
 	}
@@ -48,9 +56,10 @@
 		dispatch('clearSettings');
 		if (!active) {
 			active = true;
+			nodes?.blur();
 		}
 	};
-	$: border = active ? 'border-primary-400' : 'border-surface-400';
+	$: text = active ? 'text-primary-800 font-semibold' : 'text-surface-800';
 
 
 	/*
@@ -69,7 +78,7 @@
 		}
 
 		if (oneAllowed){
-			selectedOption = text.toLowerCase()
+			selectedOption = text
 			active = false
 		}
 		else {
@@ -92,7 +101,7 @@
 			* Update the tags shown in the dropdown based on what has been inputted
 	 */
 	const updateFilter = () => {
-		let text = input.value.toLowerCase() ?? '';
+		let text = oneAllowed ? (input.value ?? '') : (input.value.toLowerCase() ?? '');
 		if (text === '')
 			display = all; // if there is no text display all without filtering
 		else
@@ -102,19 +111,28 @@
 
 </script>
 
-<div bind:this={targetDiv} class="space-y-1 relative">
-	<button type = "button"
-		class="text-xs rounded-lg border py-1 px-2 h-full flex items-center justify-between gap-2 hover:border-primary-400 {border}"
-		on:click={toggle}>
-		<span class="flex-grow text-surface-700 dark:text-surface-300">{oneAllowed ? selectedOption : label}</span>
-		{#if active}
-			<Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5 transform rotate-90 text" />
-		{:else}
-			<Icon icon="oui:arrow-right" class="text-xs text-surface-600 mt-0.5" />
-		{/if}
-	</button>
+<div bind:this={targetDiv}   class="space-y-1 relative">
+	{#if type}
+		<button class="flex rounded-lg py-2 px-2 gap-1 items-center shadow-md border-none hover:font-semibold" on:click={() => {nodes.focus()}}>
+			<span class="text-xs {text}">{label}:</span>
+			<input  bind:this={nodes} class="text-xs h-4 bg-surface-50 border-none w-4 focus:ring-0 px-0"
+						 type="number" name="nodes" bind:value={num} min="0" on:input={() => {dispatch("filterSelected")}}/>
+		</button>
+
+	{:else}
+		<button bind:this={targetButton}  type = "button"
+						class=" hover:font-semibold text-xs rounded-lg py-2 px-2 h-full flex items-center justify-between gap-2 shadow-md"
+						on:click={toggle}>
+			<span class="flex-grow {text}">{oneAllowed ? selectedOption : label}</span>
+			{#if active}
+				<Icon icon="oui:arrow-right" class="text-xs {text} mt-0.5 transform rotate-90 text" />
+			{:else}
+				<Icon icon="oui:arrow-right" class="text-xs {text} mt-0.5" />
+			{/if}
+		</button>
+	{/if}
 	{#if active}
-		<div class="absolute  min-w-32 flex flex-col rounded-lg border border-surface-400 bg-surface-50"
+		<div class="absolute  min-w-32 flex flex-col rounded-lg shadow-lg bg-surface-50"
 				 transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
 			{#if all.length > 10}
 				<input  bind:this={input} class="text-xs dark:text-surface-600 border-none rounded-lg focus:ring-0"
@@ -124,11 +142,26 @@
 			{#if display.length === 0}
 				<p class="p-2 text-xs text-left text-surface-600">No Matching {label.toLowerCase()}</p>
 			{:else}
-				{#each display as dis, i}
-
-					<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display} on:update={update}/>
-				{/each}
+				<div class="max-h-64 {overflow}">
+					{#each display as dis, i}
+						<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display} on:update={update}/>
+					{/each}
+				</div>
 			{/if}
 		</div>
 	{/if}
 </div>
+
+<style>
+    /* For Chrome, Safari, Edge, Opera */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* For Firefox */
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>

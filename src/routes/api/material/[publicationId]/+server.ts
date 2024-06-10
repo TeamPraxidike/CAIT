@@ -15,8 +15,9 @@ import {
 } from '$lib/database';
 import { type File as PrismaFile, Prisma } from '@prisma/client';
 import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
+
 import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
-import {error} from "@sveltejs/kit";
+
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -61,6 +62,12 @@ export async function GET({ params, locals }) {
 			material.publication.coverPic,
 		);
 
+		material.publication.publisher = {
+			...material.publication.publisher,
+			profilePicData:
+				material.publication.publisher.profilePic?.data || '',
+		};
+
 		return new Response(
 			JSON.stringify({ material, fileData, coverFileData }),
 			{
@@ -68,6 +75,7 @@ export async function GET({ params, locals }) {
 			},
 		);
 	} catch (error) {
+		console.error(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
@@ -81,6 +89,7 @@ export async function PUT({ request, params, locals }) {
 	const body: MaterialForm & {
 		materialId: number;
 	} = await request.json();
+
 	const material: MaterialForm = body;
 	const metaData = material.metaData;
 	// const userId = material.userId;
@@ -157,6 +166,8 @@ export async function PUT({ request, params, locals }) {
 export async function DELETE({ params }) {
 	const id = parseInt(params.publicationId);
 
+	console.log(id);
+
 	if (isNaN(id) || id <= 0) {
 		return new Response(
 			JSON.stringify({
@@ -181,16 +192,17 @@ export async function DELETE({ params }) {
 				}
 
 				// delete all files
-				for (const file of publication.material!.files) {
+				for (const file of publication.materials!.files) {
 					fileSystem.deleteFile(file.path);
 				}
 
-				return publication.material;
+				return publication.materials;
 			},
 		);
 
 		return new Response(JSON.stringify(material), { status: 200 });
 	} catch (error) {
+		console.error(error);
 		if (
 			error instanceof Prisma.PrismaClientKnownRequestError &&
 			error.code === 'P2025'

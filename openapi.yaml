@@ -102,8 +102,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user to update
       requestBody:
@@ -143,8 +142,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user to get
 
@@ -170,8 +168,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user to be deleted
 
@@ -198,8 +195,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user
         - in: query
@@ -247,8 +243,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user
         - in: path
@@ -288,8 +283,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user
 
@@ -365,8 +359,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user
         - in: path
@@ -397,6 +390,148 @@ paths:
         '500':
           description: Server Error
 
+  /user/{userId}/liked/comment:
+    get:
+      tags:
+        - User
+      summary: Return liked comments of a user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+
+      responses:
+        '200':
+          description: Successfully liked publication
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '204':
+          description: Successful request but there are no liked comments
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+        '500':
+          description: Server Error
+
+  /user/{userId}/liked/reply:
+    get:
+      tags:
+        - User
+      summary: Return liked reply of a user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+
+      responses:
+        '200':
+          description: Successfully liked replies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reply'
+        '204':
+          description: Successful request but there are no liked reply
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+        '500':
+          description: Server Error
+
+  /user/{userId}/liked/comment/{commentId}:
+    post:
+      tags:
+        - User
+      summary: Like or unlike a comment, automatically increase/decrease like counter
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+        - in: path
+          name: commentId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the comment
+
+      responses:
+        '200':
+          description: Successfully liked comment
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: string
+                    example: "Comment liked successfully"
+                  - type: string
+                    example: "Comment unliked successfully"
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot like this comment
+        '404':
+          description: User/Comment not found
+        '500':
+          description: Server Error
+
+  /user/{userId}/liked/reply/{replyId}:
+    post:
+      tags:
+        - User
+      summary: Like or unlike a reply, automatically increase/decrease like counter
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+        - in: path
+          name: replyId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the reply
+
+      responses:
+        '200':
+          description: Successfully liked reply
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: string
+                    example: "Reply liked successfully"
+                  - type: string
+                    example: "Reply unliked successfully"
+        '400':
+          description: Bad request
+        '401':
+          description: User cannot like this reply
+        '404':
+          description: User/Reply not found
+        '500':
+          description: Server Error
+
   /user/{userId}/use-in-course:
     get:
       tags:
@@ -406,8 +541,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user
 
@@ -438,8 +572,7 @@ paths:
         - in: path
           name: userId
           schema:
-            type: number
-            format: long
+            type: string
           required: true
           description: Numeric ID of the user
         - in: path
@@ -1244,13 +1377,15 @@ paths:
     post:
       tags:
         - Tag
-      summary: Add a tag
+      summary: Add tags
       requestBody:
         description: The tag information
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Tag'
+              type: array
+              items:
+                $ref: '#/components/schemas/Tag'
 
       responses:
         '200':
@@ -1258,7 +1393,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Tag'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
         '400':
           description: Bad request
         '401':
@@ -1637,6 +1774,7 @@ components:
     Publication:
       type: object
       description: A publication is a parent object of materials and circuits and it holds a reference to one of them
+
       properties:
         id:
           type: number
@@ -1649,6 +1787,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
+        savedByAllTime:
+          type: array
+          items:
+            type: string
+            example: "user15"
         difficulty:
           type: string
           enum:
@@ -1674,8 +1817,7 @@ components:
           items:
             $ref: '#/components/schemas/Comment'
         publisherId:
-          type: number
-          format: long
+          type: string
         savedBy:
           type: array
           items:
@@ -1761,6 +1903,10 @@ components:
         id:
           type: number
           format: long
+        numNodes:
+          type: number
+          format: long
+          example: 5
         nodes:
           type: array
           description: A list of nodes in this circuit
@@ -1823,8 +1969,7 @@ components:
           description: which publication is this comment on
           example: 456789345
         userId:
-          type: number
-          format: long
+          type: string
           description: User that posted the comment
           example: 7638595
         replies:

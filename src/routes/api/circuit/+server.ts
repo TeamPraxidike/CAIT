@@ -9,16 +9,37 @@ import {
 	type NodeDiffActions,
 	prisma,
 	updateCircuitCoverPic,
+	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+
 import {enqueueCircuitComparison, enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
 
-export async function GET({ locals }) {
+import { profilePicFetcher } from '$lib/database/file';
+
+
+export async function GET({ locals, url }) {
 	const authError = await verifyAuth(locals);
 	if (authError) return authError;
 
 	try {
-		let circuits = await getAllCircuits();
+		const t = url.searchParams.get('tags');
+		const tags = t ? t.split(',') : [];
+
+		const p = url.searchParams.get('publishers');
+		const publishers = p ? p.split(',') : [];
+		// const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
+		const limit = Number(url.searchParams.get('limit')) || 0;
+		const sort = url.searchParams.get('sort') || 'Most Recent';
+		const query: string = url.searchParams.get('q') || '';
+
+		let circuits = await getAllCircuits(
+			tags,
+			publishers,
+			limit,
+			sort,
+			query,
+		);
 
 		circuits = circuits.map((circuit) => {
 			const filePath = circuit.publication.coverPic!.path;
@@ -27,6 +48,12 @@ export async function GET({ locals }) {
 
 			return {
 				...circuit,
+				publisher: {
+					...circuit.publication.publisher,
+					profilePicData: profilePicFetcher(
+						circuit.publication.publisher.profilePic,
+					).data,
+				},
 				coverPicData: currentFileData.toString('base64'),
 			};
 		});
@@ -54,12 +81,14 @@ export async function POST({ request, locals }) {
 	const userId = body.userId;
 	const nodeInfo: NodeDiffActions = body.nodeDiff;
 	const coverPic = body.coverPic;
+	const numNodes = body.nodeDiff.numNodes;
 
 	try {
 		const createdCircuit = await prisma.$transaction(
 			async (prismaTransaction) => {
 				const circuit = await createCircuitPublication(
 					userId,
+					numNodes,
 					metaData,
 					prismaTransaction,
 				);
@@ -100,6 +129,7 @@ export async function POST({ request, locals }) {
 				return circuit;
 			},
 		);
+		await updateReputation(userId, 50);
 
 		const id = createdCircuit.publicationId;
 

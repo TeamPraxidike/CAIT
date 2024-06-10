@@ -11,7 +11,7 @@ describe('[POST]/[GET] /api/tags', () => {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				content: 'a tag',
+				tags: ['a tag'],
 			}),
 		});
 
@@ -33,7 +33,7 @@ describe('[POST]/[GET] /api/tags', () => {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				content: 'hello',
+				tags: ['hello'],
 			}),
 		});
 		expect(response.status).toBe(200);

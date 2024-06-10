@@ -8,7 +8,7 @@
 		FileTable,
 		getDateDifference,
 		Meta,
-		Tag,
+		Tag, TheoryAppBar,
 		UserProp
 	} from '$lib';
 
@@ -16,9 +16,9 @@
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
 	import type { PublicationView } from './+layout.server';
-	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
+	import { Accordion, AccordionItem, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
-	import { createFileList } from '$lib/util/file';
+	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
 
@@ -28,15 +28,15 @@
 	const userId = $page.data.session?.user.id;
 
 	const pubView: PublicationView = data.pubView;
-	const isMaterial : boolean = pubView.isMaterial
+	const isMaterial: boolean = pubView.isMaterial;
 
 	let likedComments = data.likedComments as number[];
 	let likedReplies = data.likedReplies as number[];
 
 	let files: FileList;
-		if (isMaterial) {
-			files = createFileList(pubView.fileData, pubView.publication.materials.files)
-		}
+	if (isMaterial) {
+		files = createFileList(pubView.fileData, pubView.publication.materials.files);
+	}
 
 	let liked: boolean = data.userSpecificInfo.liked;
 	let likes = pubView.publication.likes;
@@ -44,17 +44,18 @@
 	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
+
 	const toggleLike = async () => {
 		likes = liked ? likes - 1 : likes + 1;
 		await fetch(`/api/user/${userId}/liked/${pubView.publication.id}`, {
-			method: 'POST',
+			method: 'POST'
 		}).then(() => liked = !liked);
-	}
+	};
 	const toggleSave = async () => {
 		await fetch(`/api/user/${userId}/saved/${pubView.publication.id}`, {
-			method: 'POST',
+			method: 'POST'
 		}).then(() => saved = !saved);
-	}
+	};
 
 	let tags: string[] = pubView.publication.tags.map(tag => tag.content);
 
@@ -66,7 +67,12 @@
 	});
 
 	async function deletePublication() {
-		const url = '/api/material/' + pubView.publication.id;
+		let url: string;
+		if (isMaterial) {
+			url = '/api/material/' + pubView.publication.id;
+		} else {
+			url = '/api/circuit/' + pubView.publication.id;
+		}
 		try {
 			await fetch(url, {
 				method: 'DELETE'
@@ -75,7 +81,11 @@
 					message: 'Publication deleted successfully',
 					background: 'bg-success-200'
 				});
-				goto('/browse');
+				if (isMaterial) {
+					goto('/browse');
+				} else {
+					goto('/browse?type=circuits');
+				}
 			});
 		} catch (e) {
 			console.error(e);
@@ -86,7 +96,7 @@
 		modalStore.trigger({
 			type: 'confirm',
 			title: 'Delete Publication',
-			body: 'Are you sure you want to delete this pubView?',
+			body: 'Are you sure you want to delete this publication?',
 			response: (r: boolean) => {
 				if (r) deletePublication();
 			}
@@ -101,19 +111,19 @@
 			const blob = await file.arrayBuffer();
 			zip.file(file.name, blob);
 		}
+
+		const zipBlob = await zip.generateAsync({ type: 'blob' });
+		saveFile(zipBlob, pubView.publication.title + '.zip');
 	}
 
 
-	let comments = pubView.publication.comments
+	let comments = pubView.publication.comments;
 
-	/*
-	add placeholder comment to make it smoother
+	/**
+	 * add placeholder comment to make it smoother
 	 */
 	const addComment = async (event: CustomEvent) => {
-		//comment = await (await fetch(`/api/comment/pubView/${pubView.material.publicationId}`)).json()
-		//console.log(event.detail.content)
-		// const maxId = (comments.length > 0 ? Math.max(...comments.map(a => a.id)) : 0) + 1;
-		const content = event.detail.content
+		const content = event.detail.content;
 		const comment = {
 			id: content.id,
 			userId: content.userId,
@@ -123,10 +133,13 @@
 			createdAt: content.createdAt,
 			updatedAt: content.updatedAt,
 			replies: content.replies,
-			user: content.user,
-		}
+			user: {
+				...$page.data.session!.user,
+				profilePicData: $page.data.session!.userPfp.data
+			}
+		};
 		comments = [...comments, comment];
-	}
+	};
 
 	/*
 	add placeholder reply
@@ -134,7 +147,7 @@
 	const addReply = (event: CustomEvent) => {
 		// comment = await (await fetch(`/api/comment/pubView/${pubView.material.publicationId}`)).json()
 
-		let replies = getReplies(event.detail.content.commentId)
+		let replies = getReplies(event.detail.content.commentId);
 		replies.push({
 			id: event.detail.content.id,
 			userId: event.detail.content.userId,
@@ -143,95 +156,147 @@
 			content: event.detail.content.content,
 			createdAt: event.detail.content.createdAt,
 			updatedAt: event.detail.content.updatedAt,
-			user: event.detail.content.user,
+			user: {
+				...$page.data.session!.user,
+				profilePicData: $page.data.session!.userPfp.data
+			}
 		});
 		comments = comments;
 		// commentMap.set(event.detail.content.commentId, replies);
-	}
+	};
 
-	const getReplies = (commentId: number): (Reply & {user: User})[] => {
-		return comments.filter(x=> x.id == commentId).map(x=>x.replies)[0];
-	}
+	const getReplies = (commentId: number): (Reply & { user: User & {profilePicData:string} })[] => {
+		return comments.filter(x => x.id == commentId).map(x => x.replies)[0];
+	};
 
 	/*
 	method to update likes and dislikes prior to reloading the page to deal with updating issues from the backend
 	 */
-	const updateLikes = (event: CustomEvent) =>{
+	const updateLikes = (event: CustomEvent) => {
 		const liked = event.detail.like;
 		const reply = event.detail.reply;
 		const id = event.detail.id;
 
-		if(reply){
-			if(liked){
+		if (reply) {
+			if (liked) {
 				likedReplies.push(id);
-			}else{
-				likedReplies = likedReplies.filter(x=>x!==id)
+			} else {
+				likedReplies = likedReplies.filter(x => x !== id);
 			}
-		}else{
-			if(liked){
+		} else {
+			if (liked) {
 				likedComments.push(id);
-			}else{
-				likedComments = likedComments.filter(x=>x!==id)
+			} else {
+				likedComments = likedComments.filter(x => x !== id);
 			}
 		}
-	}
+	};
 
 	const generateCourses = (courses: string[]): string => {
-		if(courses.length === 0){
+		if (courses.length === 0) {
 			return '';
 		}
-		let out = `Material is used in `
-		console.log(courses.length)
-		for(let i = 0; i < Math.min(courses.length, 2); i++) {
-			if(courses.length === i + 1){
-				out += ' and '
+		let out = `Material is used in `;
+		for (let i = 0; i < Math.min(courses.length, 2); i++) {
+			if (courses.length === i + 1) {
+				out += ' and ';
 			}
-			out += "'" + courses[i] + "' ";
-			if(!(courses.length === i+2 || courses.length === i+1)){
-				out += ', '
+			out += '\'' + courses[i] + '\' ';
+			if (!(courses.length === i + 2 || courses.length === i + 1)) {
+				out += ', ';
 			}
 		}
-		if(courses.length > 2){
+		if (courses.length > 2) {
 			out += ' and ' + (courses.length - 2) + ' more';
 		}
 		return out + '!';
-	}
+	};
+
+	const getFileExtension = (filePath: string): string => {
+		const index = filePath.lastIndexOf('.');
+		return index !== -1 ? filePath.substring(index + 1) : '';
+	};
 </script>
 
 <Meta title={pubView.publication.title} description="CAIT" type="site" />
 
 <div class="col-span-full flex flex-col items-start mt-20">
-	<div class="flex justify-between w-full">
-		<div>
-			<div class="flex flex-row items-center">
-				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">{pubView.publication.title}</h2>
-				<p class="text-sm opacity-85 pl-5">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
-			</div>
-			<p> By {pubView.publication.publisher.firstName}</p>
+	<div class="flex flex-row items-top justify-between w-full">
+		<div class="flex flex-col gap-2 w-1/2">
+			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
+			{#if pubView.publication.publisherId === $page.data.session?.user.id
+			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
+			|| $page.data.session?.user.isAdmin}
+				<div class="flex gap-2 mt-4">
+					{#if pubView.publication.publisherId === $page.data.session?.user.id
+					|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
+						<button
+							on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
+							type="button" class="btn rounded-lg variant-filled-primary">Edit
+						</button>
+					{/if}
+					<button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">
+						Delete
+					</button>
+				</div>
+			{/if}
 			<div class="flex gap-2">
 				<p class="text-sm text-surface-500">{created}</p>
+
 				{#if isMaterial}
-					<Icon icon="mdi:presentation" class="text-xl text-surface-500" />
-					<DiffBar diff="easy" className="w-4 h-4" />
-				{:else}
-					<Icon icon="mdi:graph" class="text-xl text-surface-500" />
+					{#if pubView.publication.materials.files.length === 1}
+						<Icon
+							icon={IconMapExtension.get(pubView.publication.materials.files.map((f => getFileExtension(f.title)))[0]) || 'vscode-icons:file-type-text'}
+							class="text-xl text-surface-500" />
+					{:else}
+						<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
+					{/if}
+					<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+				{:else }
+					<Icon icon="mdi:graph" class="text-xl text-primary-500" />
 				{/if}
 
 			</div>
+
 			<div class="flex flex-wrap gap-2 my-2">
 				{#each tags as tag}
 					<Tag tagText={tag} removable={false} />
 				{/each}
 			</div>
-			<p class="text-surface-700 dark:text-surface-400">{pubView.publication.description}</p>
+			<div class="w-full">
+				<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">{pubView.publication.description}</p>
+				{#if isMaterial}
+					{#if pubView.publication.materials.timeEstimate}
+						<p class="text-surface-400 text-sm mt-4"> Time
+							Estimate: {pubView.publication.materials.timeEstimate} </p>
+					{/if}
+					<p class="text-surface-400 text-sm">Copyright: {pubView.publication.materials.copyright}</p>
+				{/if}
+			</div>
 		</div>
-		<div class="flex gap-2">
-			<UserProp role="Publisher" userPhotoUrl="/fdr.jpg" view="material" user={pubView.publication.publisher} />
-			{#each pubView.publication.maintainers as maintainer}
-				<UserProp role="Maintainer" userPhotoUrl="/fdr.jpg" view="material" user={maintainer} />
-			{/each}
+		<p class="text-sm opacity-85 pl-5 break-words max-w-full">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
+
+		<div class="flex flex-col gap-2">
+			{#if isMaterial && pubView.publication.materials.theoryPractice}
+				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}" />
+			{/if}
+			<div class="flex gap-2">
+				<UserProp role="Publisher" userPhotoUrl={'data:image;base64,' + pubView.publication.publisher.profilePicData} view="material"
+						  user={pubView.publication.publisher} />
+				{#each pubView.publication.maintainers as maintainer}
+					<UserProp role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} view="material" user={maintainer} />
+				{/each}
+			</div>
 		</div>
 	</div>
+</div>
+
+
+<div class="col-span-full flex flex-col items-start mt-2">
+
+</div>
+
+<div class="col-span-full flex flex-col items-start mt-2">
 
 	<div class="flex items-center text-3xl rounded-lg border mt-4">
 		<button type="button"
@@ -242,7 +307,7 @@
 		</button>
 		{#if isMaterial}
 			<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-							on:click={downloadFiles}>
+					on:click={downloadFiles}>
 				<Icon class="xl:text-2xl" icon="material-symbols:download" />
 			</button>
 		{/if}
@@ -254,41 +319,67 @@
 	</div>
 
 	{#if isMaterial}
-		<div class="min-h-96 w-full">
-			<FileTable operation="download" {files} />
+		<div class="flex justify-between w-full gap-4">
+			<div class="w-full">
+				<FileTable operation="download" {files} />
+			</div>
+			<Accordion class="mt-7 " regionPanel="space-y-8" padding="p-3">
+				<AccordionItem class="variant-soft-primary rounded-lg">
+					<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+					<svelte:fragment slot="content">
+						{#if pubView.publication.learningObjectives.length === 0}
+							<span>No learning objectives have been indicated</span>
+						{:else}
+							{#each pubView.publication.learningObjectives as LO}
+								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
+							{/each}
+						{/if  }
+					</svelte:fragment>
+				</AccordionItem>
+				<AccordionItem class="variant-soft-primary rounded-lg">
+					<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+					<svelte:fragment slot="content">
+						{#if pubView.publication.prerequisites.length === 0}
+							<span>No prior knowledge has been indicated</span>
+						{:else}
+							{#each pubView.publication.prerequisites as PK}
+								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
+							{/each}
+						{/if}
+
+					</svelte:fragment>
+				</AccordionItem>
+			</Accordion>
 		</div>
+
 	{:else}
-		<div  class="min-h-96 w-full">
-				<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}"/>
+		<div class="w-full">
+			<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}" />
 		</div>
 	{/if}
-	{#if pubView.publication.publisherId === $page.data.session?.user.id}
-		<div class="flex gap-2 mt-4">
-			<button
-				on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
-				type="button" class="btn rounded-lg variant-filled-primary">Edit
-			</button>
-			<button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">Delete
-			</button>
-		</div>
-	{/if}
+
 </div>
 
-<div class="col-span-full flex flex-col mb-1 gap-1">
+
+<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
 	<h2 class="text-2xl">Discussion Forum</h2>
 	<hr>
 </div>
 
 {#if $page.data.session?.user}
-	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}" publicationId="{pubView.publication.id}"/>
+	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}"
+						publicationId="{pubView.publication.id}" />
 {/if}
 
 {#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
 	<Comment on:likeUpdate={updateLikes} on:ReplyAction={addReply} interaction={comment}
-			  isReply={false} userName="{comment.user.firstName} {comment.user.lastName}" liked='{likedComments.includes(comment.id)}'
+			 photoUrl={comment.user.profilePicData}
+			 isReply={false} userName="{comment.user.firstName} {comment.user.lastName}"
+			 liked='{likedComments.includes(comment.id)}'
 	/>
-		{#each comment.replies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())  as reply (reply.id)}
-			<Comment on:likeUpdate={updateLikes} interaction={reply} isReply={true} userName="{reply.user.firstName} {reply.user.lastName}" liked='{likedReplies.includes(reply.id)}'/>
-		{/each}
+	{#each comment.replies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) as reply (reply.id)}
+		<Comment on:likeUpdate={updateLikes} interaction={reply} isReply={true} photoUrl={reply.user.profilePicData}
+				 userName="{reply.user.firstName} {reply.user.lastName}" liked='{likedReplies.includes(reply.id)}' />
+	{/each}
 
 {/each}

@@ -7,7 +7,7 @@
 </script>
 
 <div class="flex flex-col gap-2">
-    <p>Select a difficulty</p>
+    <label for="difficulty">Select a difficulty:</label>
     <RadioGroup class="rounded-lg h-8 items-center" background="" border="white" active="variant-soft-primary"
                 hover="hover:variant-soft-surface">
         <RadioItem bind:group={difficulty} name="justify" value={"easy"}>

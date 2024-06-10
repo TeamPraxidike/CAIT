@@ -27,7 +27,6 @@
 	}
 </script>
 
-<!--style="height: {lineHeight}px;" -->
 <div class="bg-surface-100 p-8 rounded-lg flex flex-col">
 	<h4 class="text-xl">{file.name}</h4>
 	<p class="text-surface-500 dark:text-surface-300">{file.type}</p>
@@ -52,6 +51,9 @@
 						<source src={URL.createObjectURL(new Blob([fileBuffer], { type: file.type }))}
 								type={file.type} />
 					</video>
+				{:else if file.type === 'application/pdf'}
+					<iframe title="pdf" src={URL.createObjectURL(new Blob([fileBuffer], { type: 'application/pdf' }))}
+							class="w-full h-[70vh]" />
 				{:else if file.type.startsWith('text') || file.type.startsWith('application')}
 					<CodeBlock language={getLanguage(file.type)} code={decoder.decode(fileBuffer)} />
 				{:else}
@@ -66,9 +68,9 @@
 			{/await}
 		{/if}
 	</div>
-    <div class="self-end flex items-center gap-2">
+	<div class="self-end flex items-center gap-2">
 		<span class="text-surface-600">Size: {file.size}</span>
-        <button type="button" on:click={closeModal} class="btn rounded-lg variant-soft-surface mt-4">Close</button>
+		<button type="button" on:click={closeModal} class="btn rounded-lg variant-soft-surface mt-4">Close</button>
 		<Download {file} className="btn rounded-lg bg-surface-600 text-surface-50 mt-4">Download</Download>
-    </div>
+	</div>
 </div>

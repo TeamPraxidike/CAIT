@@ -11,6 +11,7 @@
     export let interaction: Comment | Reply;
     export let isReply: boolean;
     export let liked:boolean;
+    export let photoUrl: string;
 
     //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = ""
@@ -48,6 +49,7 @@
     const expandAction = () => {
         isExpanded = !isExpanded
     }
+
     const copyToClipboard = () => {
         navigator.clipboard.writeText(text)
             .then(() => {
@@ -63,6 +65,7 @@
             });
         commentDiv.ariaPressed = "false"
     }
+
     const handleDelete = () => {
         modalStore.trigger({
             type: 'confirm',
@@ -76,8 +79,6 @@
     }
 
     async function confirmDelete () {
-        //I could try to do this with dispatching here and handling this on the page, but it does work from here for now
-
         if (isReply){
             try {
                 const res = await fetch(`/api/reply/${interaction.id}`, {
@@ -192,13 +193,12 @@
         },
         closeQuery: '#copyButton'
     }
-
 </script>
 
 
     <div bind:this={commentDiv}
      class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full relative rounded-lg flex gap-2 p-1 ">
-        <div class="w-12 h-12 placeholder-circle" />
+        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />
         <div class="flex flex-col w-full">
 
         <div class="flex gap-3 items-center max-w-full">
@@ -227,11 +227,9 @@
                 <p
                   id="commentText"
                   class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full break-words">{text}</p>
-                <!--{#if truncated}-->
                     <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
                         {isExpanded ? 'Show Less' : 'Show More'}
                     </button>
-                <!--{/if}-->
             {/if}
         </div>
 
@@ -260,7 +258,7 @@
 <AddInteractionForm on:addedReply={sendReplyEvent}  on:cancelEventForum={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
 
 <div data-popup="{popupName}">
-    <div class="flex flex-col w-12 gap-2 bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">
+    <div class="flex flex-col w-12 h-12 gap-2 bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">
         <button id="copyButton" on:click={copyToClipboard}
                 class="rounded-lg hover:bg-surface-300 dark:hover:bg-surface-700">
             Copy
@@ -271,6 +269,8 @@
                     class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
                 Edit
             </button>
+        {/if}
+        {#if user === $page.data.session?.user.id || $page.data.session?.user.isAdmin}
             <button on:click={handleDelete} id="deleteButton"
                     class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
                 Delete

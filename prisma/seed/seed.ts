@@ -89,16 +89,14 @@ const main = async () => {
 		'perceptron',
 	];
 
-	const circuitTitles = [
-		'Machine Learning for beginners'
-	];
+	const circuitTitles = ['Machine Learning for beginners'];
 
 	const types = [
-		MaterialType.dataset,
+		MaterialType.information,
 		MaterialType.presentation,
 		MaterialType.exam,
 		MaterialType.code,
-		MaterialType.video,
+		MaterialType.other,
 		MaterialType.code,
 		MaterialType.presentation,
 	];
@@ -188,6 +186,7 @@ const main = async () => {
 
 	const circuit = await prisma.circuit.create({
 		data: {
+			numNodes: 5,
 			publication: {
 				create: {
 					title: circuitTitles[0],
@@ -210,7 +209,6 @@ const main = async () => {
 			},
 		},
 	});
-	console.log(circuit.publicationId);
 	const nodes = [];
 
 	nodes.push(await addNode(circuit.id, materials[0].publicationId, 0, 500)); // neural networks 0
