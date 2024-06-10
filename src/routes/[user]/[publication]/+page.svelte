@@ -41,7 +41,9 @@
 	let liked: boolean = data.userSpecificInfo.liked;
 	let likes = pubView.publication.likes;
 	let circuitsPubAppearIn = data.circuitsPubAppearIn;
-	console.log(circuitsPubAppearIn)
+	let likedPublications = data.liked as number[];
+	let savedPublications = data.saved.saved as number[];
+
 	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
@@ -367,7 +369,7 @@
 		<hr>
 	</div>
 	<div class="col-span-full">
-		<HorizontalScroll publications="{circuitsPubAppearIn}" liked="{[]}" saved="{[]}"/>
+		<HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
 	</div>
 {/if}
 

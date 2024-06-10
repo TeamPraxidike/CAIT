@@ -1,10 +1,36 @@
 import type { Actions, PageServerLoad } from './$types';
+import type { FetchedFileArray } from '$lib/database';
 
-export const load: PageServerLoad = async ({ parent, params, fetch }) => {
+export const load: PageServerLoad = async ({
+	parent,
+	params,
+	fetch,
+	locals,
+}) => {
 	await parent();
+	const session = await locals.auth();
+
+	let liked: number[] = [];
+	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
+		saved: [],
+		savedFileData: [],
+	};
+
+	if (session !== null) {
+		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
+		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
+
+		const savedResponse = await fetch(
+			`/api/user/${session.user.id}/saved?fullPublications=false`,
+		);
+		saved =
+			savedResponse.status === 200
+				? await savedResponse.json()
+				: { saved: [], savedFileData: [] };
+	}
 	const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
 	const circuitsPubAppearIn = await circuitRes.json();
-	return { circuitsPubAppearIn };
+	return { circuitsPubAppearIn, liked, saved };
 };
 
 export const actions = {
