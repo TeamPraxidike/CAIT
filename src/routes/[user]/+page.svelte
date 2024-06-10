@@ -1,13 +1,13 @@
 <script lang="ts">
-    import {Meta, PublicationCard, UserProfileBar} from "$lib";
-    import type {LayoutData, PageServerData} from './$types';
-    import {type Material, type Publication, PublicationType, type Tag, type User} from '@prisma/client';
-    import type {FetchedFileItem} from '$lib/database';
-    import { page } from '$app/stores';
-    import { TabGroup, Tab } from '@skeletonlabs/skeleton';
+	import { Meta, PublicationCard, UserProfileBar } from '$lib';
+	import type { LayoutData, PageServerData } from './$types';
+	import { type Publication, type Tag, type User } from '@prisma/client';
+	import type { FetchedFileItem } from '$lib/database';
+	import { page } from '$app/stores';
+	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 
-    /* This is the data that was returned from the server */
-    export let data: LayoutData & PageServerData;
+	/* This is the data that was returned from the server */
+	export let data: LayoutData & PageServerData;
 
     let user:User & {
         posts: Publication & {
@@ -24,25 +24,27 @@
 
     let saved:(Publication & {
             tags: Tag[];
-            usedInCourse: {course: string}[]
-            coverPicData: string
+            usedInCourse: {course: string}[];
+            coverPicData: string;
+			publisher: User & {profilePicData: string};
         })[] = data.saved;
 
     let posts : (Publication & {
         tags: Tag[];
         usedInCourse: {course: string}[]
         coverPicData: string
+		    publisher: User & {profilePicData: string}
     })[] = data.publications.publications;
 
     let tabSet: number = 0;
 </script>
 
-<Meta title="Profile" description="CAIT" type="site"/>
+<Meta title="Profile" description="CAIT" type="site" />
 
 <div class="col-span-full xl:flex xl:flex-row xl:space-x-5
                             lg:flex lg:flex-row lg:space-x-5">
 
-    <UserProfileBar user={user} userPhotoUrl={'data:image;base64,' + profilePic.data}/>
+	<UserProfileBar user={user} userPhotoUrl={'data:image;base64,' + profilePic.data} />
 
     {#if $page.data.session?.user.id === user.id}
         <TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
@@ -56,9 +58,9 @@
                 {#if tabSet === 0}
                     <div class="grid grid-cols-4 gap-4 mb-20">
                         {#if saved.length !== 0}
-                            {#each saved as publication, i}
+                            {#each saved as publication}
                                 <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
-                                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} markAsUsed={true} courses={publication.usedInCourse.map(x => x.course)}/>
+                                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} markAsUsed={true} courses={publication.usedInCourse.map(x => x.course)} publisher={publication.publisher}/>
                                 </div>
                             {/each}
                         {/if}
@@ -74,7 +76,8 @@
                                                      publication={publication}
                                                      liked={liked.includes(publication.id)}
                                                      courses={posts[i].usedInCourse.map(x => x.course)}
-                                                     saved={data.savedByUser.includes(publication.id)}/>
+                                                     saved={data.savedByUser.includes(publication.id)}
+													 publisher={publication.publisher}/>
 
                                 </div>
                             {/each}
@@ -98,7 +101,8 @@
                                          publication={publication}
                                          liked={liked.includes(publication.id)}
                                          courses={posts[i].usedInCourse.map(x => x.course)}
-                                         saved={data.savedByUser.includes(publication.id)}/>
+                                         saved={data.savedByUser.includes(publication.id)}
+										 publisher={publication.publisher}/>
                     </div>
 
                 {/each}

@@ -6,7 +6,6 @@
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
     import { signIn } from '@auth/sveltekit/client';
-    import { loggedInPfp } from '$lib/stores/loggedInPfp';
 
     type NavOption = {
         text: string;
@@ -78,10 +77,10 @@
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                     {#if $page.data.session}
-                        {#if $loggedInPfp.startsWith('http')}
-                            <img class="h-8 w-8 rounded-full" src={$loggedInPfp} alt={$page.data.session.user.name}/>
+                        {#if $page.data.session.userPfp.data.startsWith('http')}
+                            <img class="h-8 w-8 rounded-full object-cover" src={$page.data.session.userPfp.data} alt={$page.data.session.user.name}/>
                         {:else}
-                            <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $loggedInPfp} alt={$page.data.session.user.name}/>
+                            <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user.name}/>
                         {/if}
                     {:else}
                         <div class="w-8 h-8 placeholder-circle" />
@@ -124,8 +123,8 @@
 
                     {#if $page.data.session}
                         <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                            {#if $page.data.session.user && $loggedInPfp !== ''}
-                                <img class="h-8 w-8 rounded-full" src={'data:image;base64,' + $loggedInPfp} alt={$page.data.session.user?.name}/>
+                            {#if $page.data.session.user && $page.data.session.userPfp.data !== ''}
+                                <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user?.name}/>
                             {:else}
                                 <div class="w-8 h-8 placeholder-circle" />
                             {/if}

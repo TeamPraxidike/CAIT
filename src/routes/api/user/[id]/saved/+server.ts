@@ -6,6 +6,7 @@ import {
 	getUserById,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { profilePicFetcher } from '$lib/database/file';
 import Fuse from 'fuse.js';
 
 function filterSaved(saved: any, query: string) {
@@ -52,6 +53,9 @@ export async function GET({ params, url, locals }) {
 
 	let saved;
 	const fileData: FetchedFileArray = [];
+
+	console.log(savedResponse.saved);
+
 	if (url.searchParams.get('fullPublications') === 'true') {
 		saved = savedResponse.saved;
 		const temp = [];
@@ -78,6 +82,17 @@ export async function GET({ params, url, locals }) {
 			}
 			saved = temp;
 		}
+
+		saved = saved.map((x) => {
+			return {
+				...x,
+				publisher: {
+					...x.publisher,
+					profilePicData: profilePicFetcher(x.publisher.profilePic)
+						.data,
+				},
+			};
+		});
 	} else saved = savedResponse.saved.map((x) => x.id);
 
 	saved = filterSaved(saved, query);

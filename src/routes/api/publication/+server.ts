@@ -1,8 +1,8 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { mapToDifficulty, mapToType } from '$lib';
-import { coverPicFetcher, fileSystem, getAllMaterials } from '$lib/database';
+import { coverPicFetcher, fileSystem } from '$lib/database';
 import { getAllPublications } from '$lib/database/db';
 import { PublicationType } from '@prisma/client';
+import { profilePicFetcher } from '$lib/database/file';
 
 export const GET: RequestHandler = async ({ url }) => {
 	try {
@@ -30,6 +30,17 @@ export const GET: RequestHandler = async ({ url }) => {
 			return {
 				...publication,
 				coverPicData: coverPicData,
+			};
+		});
+		publications = publications.map((publication) => {
+			return {
+				...publication,
+				publisher: {
+					...publication.publisher,
+					profilePicData: profilePicFetcher(
+						publication.publisher.profilePic,
+					).data,
+				},
 			};
 		});
 		return new Response(JSON.stringify({ publications }), {

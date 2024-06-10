@@ -13,6 +13,20 @@ describe('Filter Component', () => {
 		const instance = new PublicationCard({
 			target: host,
 			props: {
+				publisher: {
+					id: '1',
+					firstName: 'a',
+					lastName: 'b',
+					email: 'a',
+					username: 'a',
+					reputation: 5,
+					emailVerified: null,
+					password: null,
+					isAdmin: false,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					profilePicData: '',
+				},
 				imgSrc: 'some_image',
 				publication: {
 					savedByAllTime: [],

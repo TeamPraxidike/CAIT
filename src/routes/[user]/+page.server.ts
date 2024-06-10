@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
+import type { User } from '@prisma/client';
 import { PublicationType } from '@prisma/client';
 
 export const load: PageServerLoad = async ({
@@ -55,6 +56,7 @@ export const load: PageServerLoad = async ({
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
+
 	for (let i = 0; i < saved.length; i++) {
 		if (saved[i].type === PublicationType.Circuit) {
 			savedFileData.splice(i, 0, 'no data');
@@ -66,6 +68,7 @@ export const load: PageServerLoad = async ({
 			? { saved: [] }
 			: await savedByUserRes.json();
 	const publications = await pubsRes.json();
+	
 	return {
 		publications,
 		saved,
@@ -81,6 +84,9 @@ export type PublicationInfo = {
 		tags: {
 			content: string;
 		}[];
+		publisher: User & {
+			profilePicData: string;
+		};
 	};
 	coverPic: {
 		path: string;

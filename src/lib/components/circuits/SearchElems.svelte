@@ -12,7 +12,7 @@
 	export let addActive: boolean = false;
 	export let selectedIds: Set<number>;
 
-	let userIds : string[] = []
+	let userIds: string[] = [];
 	let targetDiv: HTMLDivElement;
 	let searchWord : string = ""
 	let urlParam = "material"
@@ -85,12 +85,12 @@
 		dispatch('remFurther', { id: event.detail.id });
 	};
 
-	const onSearch = (event : CustomEvent) => {
-		searchWord = event.detail.value.inputKeywords
-		searchAPI()
-	}
+	const onSearch = (event: CustomEvent) => {
+		searchWord = event.detail.value.inputKeywords;
+		searchAPI();
+	};
 
-	const newMaterials = (event : CustomEvent) => {
+	const newMaterials = (event: CustomEvent) => {
 
 		if (event.detail.option === 0)
 		{
@@ -118,8 +118,8 @@
 			console.log(urlParam)
 		}
 
-		searchAPI()
-	}
+		searchAPI();
+	};
 
 	const searchAPI = async () => {
 
@@ -166,9 +166,7 @@
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
 			});
-	}
-
-
+	};
 
 
 </script>
@@ -196,22 +194,21 @@
 				{#each materials as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
 													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled}/>
+													 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
 				{/each}
 				{:else if chosenOption===1}
 					{#each circuits as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
 					selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-					on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled}/>
+					on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
 					{/each}
 			{:else if (chosenOption===2 || chosenOption===3)}
 				{#each publications as p}
 					<PublicationCard publication="{p}" inCircuits="{true}"
 													 selected="{selectedIds.has(p.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled}/>
+													 on:removed={removeCard} imgSrc={'data:image;base64,' + p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher}/>
 				{/each}
 			{/if}
 
-
-		</Grid>
-	</div>
+	</Grid>
+</div>

@@ -12,6 +12,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { profilePicFetcher } from '$lib/database/file';
 
 export async function GET({ locals, url }) {
 	const authError = await verifyAuth(locals);
@@ -43,6 +44,12 @@ export async function GET({ locals, url }) {
 
 			return {
 				...circuit,
+				publisher: {
+					...circuit.publication.publisher,
+					profilePicData: profilePicFetcher(
+						circuit.publication.publisher.profilePic,
+					).data,
+				},
 				coverPicData: currentFileData.toString('base64'),
 			};
 		});

@@ -2,7 +2,6 @@
     import { IconLink } from '$lib';
     import { signOut } from '@auth/sveltekit/client';
     import { page } from '$app/stores';
-    import { loggedInPfp } from '$lib/stores/loggedInPfp';
 
     export let device: 'mobile' | 'desktop';
 
@@ -46,10 +45,10 @@
     <div class="grid grid-cols-2">
         <a href="/{$page.data.session?.user.id}"  on:click={confirmPublishReset}
            class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
-            {#if $page.data.session && $loggedInPfp !== ''}
-                <img class="h-16 w-16 rounded-full" src={'data:image;base64,' + $loggedInPfp} alt={$page.data.session.user?.firstName}/>
+            {#if $page.data.session && $page.data.session.userPfp.data !== ''}
+                <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user?.firstName}/>
             {:else}
-                <div class="h-16 w-16 placeholder-circle" />
+                <div class="h-16 w-16 placeholder-circle object-cover" />
             {/if}
             <div class="flex flex-col">
                 <span>{$page.data.session?.user.firstName}</span>
@@ -70,7 +69,7 @@
                class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1
                   dark:hover:bg-surface-700">
                 {#if $page.data.session}
-                    <img class="h-16 w-16 rounded-full" src={'data:image;base64,' + $loggedInPfp} alt={$page.data.session.user.firstName}/>
+                    <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user.firstName}/>
                 {:else}
                     <div class="h-16 w-16 placeholder-circle" />
                 {/if}
@@ -79,10 +78,10 @@
                     <span class="text-sm">Go to profile</span>
                 </div>
             </a>
-<!--            <hr class="my-2">-->
-<!--            <IconLink icon="ion:person-sharp" href="/{$page.data.session?.user.id}" link="Profile"/>-->
-<!--            <IconLink icon="ion:bookmark-sharp" href="/{$page.data.session?.user.id}/saved" link="Saved"/>-->
-<!--            <IconLink icon="ion:book" href="/{$page.data.session?.user.id}/publications" link="Publications"/>-->
+            <hr class="my-2">
+            <IconLink icon="ion:person-sharp" href="/{$page.data.session?.user.id}" link="Profile"/>
+            <IconLink icon="ion:bookmark-sharp" href="/{$page.data.session?.user.id}/saved" link="Saved"/>
+            <IconLink icon="ion:book" href="/{$page.data.session?.user.id}/publications" link="Publications"/>
             <hr class="my-2">
             <IconLink on:click={settingsReset} icon="ion:settings-sharp" href="/settings" link="Settings"/>
             <hr class="my-2">

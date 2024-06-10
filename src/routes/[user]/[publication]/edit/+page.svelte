@@ -40,7 +40,7 @@
 	let difficulty: Difficulty = serverData.publication.difficulty;
 	type UserWithProfilePic = User & { profilePicData: string };
 
-	let maintainers:UserWithProfilePic[] = serverData.maintainers;
+	let maintainers:UserWithProfilePic[] = serverData.publication.maintainers;
 	let users: UserWithProfilePic[] = data.users
 	let browsingUsers = users.filter(x => !maintainers.map(y=>y.id).includes(x.id));
 

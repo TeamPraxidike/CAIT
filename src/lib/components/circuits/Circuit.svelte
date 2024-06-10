@@ -4,7 +4,7 @@
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { Difficulty, type Node as PrismaNode, type Publication, PublicationType } from '@prisma/client';
+	import { Difficulty, type Node as PrismaNode, type Publication, PublicationType, type User } from '@prisma/client';
 	import nodeHtmlLabel from 'cytoscape-node-html-label';
 	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
 	import { PublicationCard } from '$lib';
@@ -75,6 +75,7 @@
 		publication: Publication & {
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
+			publisher: (User & {profilePicData: string})
 		}
 		next: {
 			circuitId: number,
@@ -130,6 +131,7 @@
 	},
 		position: { x: node.posX, y: node.posY }
 	}));
+
 
 	nodes.forEach(node => {
 		let curNext = node.next.map(nextNode =>
@@ -352,7 +354,6 @@
 							let publication = nodes.find(n => n.publicationId === Number(node.id()));
 
 							if (publication) {
-								console.log(publication.publication)
 								 let coverPicData = '';
 								// if (
 								// 	publication.publication.type === PublicationType.Material &&
@@ -376,6 +377,7 @@
 										imgSrc: 'data:image;base64,' + coverPicData,
 										forArrow: true,
 										extensions: node.data().extensions,
+										publisher: publication.publication.publisher,
 										liked: liked.includes(publication.publicationId),
 										saved: saved.includes(publication.publicationId)
 									}
@@ -522,7 +524,6 @@
 				return response.json();
 			})
 			.then(data => {
-				console.log(data)
 				let extensions = [];
 				if (data.isMaterial) {
 					extensions = data.publication.materials.files.map((f: { title: string; }) => getFileExtension(f.title));
@@ -542,7 +543,7 @@
 						posY: 100,
 						publication: {
 							id: pubId as number,
-							title: data.material.publication.title as string,
+							title: data.publication.title as string,
 							description:"",
 							difficulty: Difficulty.easy,
 							likes: 0,
@@ -552,10 +553,11 @@
 							updatedAt: new Date(),
 							publisherId: '1',
 							reports: 2,
-							type: PublicationType.Circuit,
+							type: data.publication.type,
 							savedByAllTime: ['1'],
 							tags: [{content: 'haha'}],
 							usedInCourse: [{ course: '1' }],
+							publisher: data.publication.publisher,
 						}
 					},
 				)

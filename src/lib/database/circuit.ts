@@ -88,6 +88,11 @@ export async function getAllCircuits(
 							course: true,
 						},
 					},
+					publisher: {
+						include: {
+							profilePic: true,
+						},
+					},
 				},
 			},
 			nodes: false,

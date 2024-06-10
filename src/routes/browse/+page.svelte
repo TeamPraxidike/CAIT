@@ -7,40 +7,44 @@
     import type { File as PrismaFile, Material, Publication, Tag } from '@prisma/client';
 
 
-    //TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
-    //TODO: fix tags on pubCard fix the icon to be the encapsulating type of the publication
-    //TODO: add animation on loading
-    //TODO: Fix the browsing on other pages as well
+	//TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
+	//TODO: fix tags on pubCard fix the icon to be the encapsulating type of the publication
+	//TODO: add animation on loading
+	//TODO: Fix the browsing on other pages as well
 
-    export let data:PageServerData;
-    let searchWord: string = '';
-    console.log(data)
+	export let data: PageServerData;
+	let searchWord: string = '';
+	$: materials = data.materials;
+	$: circuits = data.circuits;
 
-    $: materials = data.materials;
-    $: circuits = data.circuits
+	let users = data.users;
+	let tags = data.tags;
+	//let profilePics:FetchedFileArray = data.profilePics;
+	let liked = data.liked as number[];
+	let saved = data.saved.saved as number[];
 
-    let users = data.users
-    let tags = data.tags
-    //let profilePics:FetchedFileArray = data.profilePics;
-    let liked = data.liked as number[];
-    let saved = data.saved.saved as number[];
+	$: pageType = data.type;
 
-    $: pageType = data.type;
+	//Variables needed to deal with Sort and Difficulty
+	let sortOptions: {
+		id: number,
+		content: string
+	}[] = ['Most Recent', 'Most Liked', 'Most Used', 'Oldest'].map(x => ({ id: 0, content: x }));
+	let sortByActive = false;
+	let sortByText = 'Sort By';
 
-    //Variables needed to deal with Sort and Difficulty
-        let sortOptions: {id:number, content:string }[] = ["Most Recent", "Most Liked", "Most Used", "Oldest"].map(x => ({id:0, content:x}))
-        let sortByActive = false
-        let sortByText = 'Sort By'
+	let selectedDiff: { id: number, content: string }[] = [];
+	let diffOptions: { id: number, content: string }[] = ['Easy', 'Medium', 'Hard'].map((x: string) => ({
+		id: 0,
+		content: x
+	}));
+	let diffActive = false;
 
-        let selectedDiff: {id:number, content:string }[] = []
-        let diffOptions: { id: number, content: string }[] = ["Easy", "Medium", "Hard"].map((x: string) => ({ id: 0, content: x }));
-        let diffActive = false
-
-        //Variables needed to deal with Tags
-        let selectedTags: {id:number, content:string }[] = []; //keeps track of selected tags
-        let allTags: {id: number, content:string }[] = tags.map((x: Tag) => ({ id: 0, content: x.content }));
-        let displayTags: {id:number, content:string }[] = allTags;
-        let tagActive = false
+	//Variables needed to deal with Tags
+	let selectedTags: { id: number, content: string }[] = []; //keeps track of selected tags
+	let allTags: { id: number, content: string }[] = tags.map((x: Tag) => ({ id: 0, content: x.content }));
+	let displayTags: { id: number, content: string }[] = allTags;
+	let tagActive = false;
 
         //Variables needed to deal with Publishers
         let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
@@ -58,22 +62,19 @@
 
 
 
-    /**
-     * Remove tag action called by the X on the line
-     *
-     */
-    const removeTag = (event: CustomEvent) => {
-        selectedTags = selectedTags.filter(item => item.content !== event.detail.text)
-        applyActive = true;
-    }
+		const removeTag = (event: CustomEvent) => {
+			selectedTags = selectedTags.filter(item => item.content !== event.detail.text)
+			applyActive = true;
+		}
 
-    const removePublisher = (name: {id:number, content:string }) => {
-        selectedPublishers = selectedPublishers.filter(publisher => publisher.content !== name.content);
-        applyActive = true;
+		const removePublisher = (name: {id:number, content:string }) => {
+			selectedPublishers = selectedPublishers.filter(publisher => publisher.content !== name.content);
+			applyActive = true;
 
-    };
+		};
 
-    const removeDiff = (name:{id:number, content:string }) => {
+
+		const removeDiff = (name:{id:number, content:string }) => {
         selectedDiff = selectedDiff.filter(diff => diff.content !== name.content);
         applyActive = true;
 
@@ -206,19 +207,19 @@
 </script>
 
 <div class="flex justify-between col-span-full mt-32">
-    <div class = "flex gap-2 w-full lg:w-7/12 xl:w-1/2">
-        <SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
-    </div>
+	<div class="flex gap-2 w-full lg:w-7/12 xl:w-1/2">
+		<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch} />
+	</div>
 
-    <div class="hidden rounded-lg lg:flex w-1/4">
-        <ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-                         labels={["Materials", "People", "Circuits"]}  />
-    </div>
+	<div class="hidden rounded-lg lg:flex w-1/4">
+		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
+						 labels={["Materials", "People", "Circuits"]} />
+	</div>
 </div>
 
 <div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
-    {#if pageType !== "people"}
-        <div class="flex gap-1 items-center">
+	{#if pageType !== "people"}
+		<div class="flex gap-1 items-center">
 
             <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
                     profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
@@ -252,12 +253,12 @@
                          labels={["Materials", "People", "Circuits"]}  />
     </div>
 
-    {#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
-        <button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
-                on:click={resetFilters}>
-            Reset Filters
-        </button>
-    {/if}
+	{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
+		<button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
+				on:click={resetFilters}>
+			Reset Filters
+		</button>
+	{/if}
 </div>
 
 
@@ -327,14 +328,16 @@
                          liked={liked.includes(material.publication.id)}
                          saved={saved.includes(material.publication.id)}
                          materialType={material.encapsulatingType}
+												 publisher={material.publisher}
         />
     {/each}
 {:else if pageType === "people"}
-    {#each users as person}
-        <UserProp view="search" posts="{person.posts.length}"  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
-    {/each}
+	{#each users as person}
+		<UserProp view="search" posts="{person.posts.length}"
+				  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
+	{/each}
 {:else if pageType === "circuits"}
     {#each circuits as circuit}
-        <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} liked={liked.includes(circuit.publication.id)} saved={saved.includes(circuit.publication.id)}/>
+        <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} liked={liked.includes(circuit.publication.id)} saved={saved.includes(circuit.publication.id)} publisher={circuit.publisher}/>
     {/each}
 {/if}

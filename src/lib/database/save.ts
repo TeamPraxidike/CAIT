@@ -83,6 +83,11 @@ export async function getSavedPublications(userId: string) {
 							userId: userId,
 						},
 					},
+					publisher: {
+						include: {
+							profilePic: true,
+						},
+					},
 				},
 			},
 		},
