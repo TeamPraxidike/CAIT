@@ -29,7 +29,6 @@
 		createdAt: p.createdAt,
 		updatedAt: p.updatedAt
 	}
-	let publisherPic = p.profilePic
 
 	const handleRemoveMaintainer = (index: number) => {
 		const user = additionalMaintainers.filter((_, i) => i === index)[0];
@@ -92,7 +91,7 @@
 <div class="flex flex-col gap-2 w-full p-3">
 	<span>Maintainers:</span>
 	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
-		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={'data:image;base64,' + publisherPic}/>
+		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={'data:image;base64,' + $page.data.session?.userPfp.data}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
 								role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />

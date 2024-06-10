@@ -82,6 +82,8 @@
 
 			nodeActions = nodeDiffActions;
 			circuitCoverPic = coverPic;
+
+			console.log(circuitNodesPlaceholder);
 		}
 	}
 	let circuitNodesPlaceholder: (PrismaNode & {
@@ -132,6 +134,7 @@
         formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
 				formData.append('prior', JSON.stringify(priorKnowledge));
+
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
@@ -163,9 +166,7 @@
 
 				<div class="flex flex-col w-full">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
-					<div class="flex flex-col gap-2 p-3">
 						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} bind:newTags={newTags}/>
-					</div>
 				</div>
 			</div>
 		</Step>

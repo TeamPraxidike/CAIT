@@ -292,24 +292,23 @@
 						{/if}
 					</div>
 
-					<div class="flex gap-2 items-center">
-							<button
-								type="button"
-								class="text-xs flex  items-center h-full w-full  bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
-								on:click={() => toggleLike()}>
-								<Icon class="text-lg {likedColor}" icon="material-symbols:star"/>
-								<span>{likes}</span>
-							</button>
-							<button
-								type="button"
-								class="flex items-center text-xl text-surface-500 h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
-								on:click={() => toggleSave()}>
-								<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
-							</button>
+					<div class="flex gap-3 items-center">
+						<button
+							type="button"
+							class="text-xs flex items-center h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-l-lg"
+							on:click={() => toggleLike()}>
+							<Icon class="text-lg {likedColor}" icon="material-symbols:star" />
+							<span>{likes}</span>
+						</button>
+						<button
+							type="button"
+							class="flex items-center text-xl text-surface-500 h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
+							on:click={() => toggleSave()}>
+							<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark" />
+						</button>
 
 						<img class="w-6 h-6 md:w-8 md:h-8 rounded-full border object-cover"
 								 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
-
 					</div>
 				</div>
 			</div>

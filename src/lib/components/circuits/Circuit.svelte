@@ -132,6 +132,7 @@
 		position: { x: node.posX, y: node.posY }
 	}));
 
+
 	nodes.forEach(node => {
 		let curNext = node.next.map(nextNode =>
 			({
@@ -353,7 +354,6 @@
 							let publication = nodes.find(n => n.publicationId === Number(node.id()));
 
 							if (publication) {
-								console.log(publication.publication)
 								 let coverPicData = '';
 								// if (
 								// 	publication.publication.type === PublicationType.Material &&
@@ -524,7 +524,6 @@
 				return response.json();
 			})
 			.then(data => {
-				console.log(data)
 				let extensions = [];
 				if (data.isMaterial) {
 					extensions = data.publication.materials.files.map((f: { title: string; }) => getFileExtension(f.title));
@@ -544,7 +543,7 @@
 						posY: 100,
 						publication: {
 							id: pubId as number,
-							title: data.material.publication.title as string,
+							title: data.publication.title as string,
 							description:"",
 							difficulty: Difficulty.easy,
 							likes: 0,
@@ -554,11 +553,11 @@
 							updatedAt: new Date(),
 							publisherId: '1',
 							reports: 2,
-							type: PublicationType.Circuit,
+							type: data.publication.type,
 							savedByAllTime: ['1'],
 							tags: [{content: 'haha'}],
 							usedInCourse: [{ course: '1' }],
-							publisher: data.material.publication.publisher,
+							publisher: data.publication.publisher,
 						}
 					},
 				)
