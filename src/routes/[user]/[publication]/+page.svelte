@@ -7,7 +7,7 @@
 		DiffBar,
 		FileTable,
 		getDateDifference,
-		Meta, publication,
+		Meta,
 		Tag, TheoryAppBar,
 		UserProp
 	} from '$lib';
