@@ -11,6 +11,7 @@
 	import html2canvas from 'html2canvas';
 	import type { NodeDiffActions } from '$lib/database';
 
+	const mapGetTo: Map<number, Set<number>> = new Map();
 	async function captureScreenshot () : Promise<string> {
 		const container = document.getElementById('cy');
 		try{
@@ -46,7 +47,7 @@
 							selected: selected,
 							extensions : data.extensions,
 							isMaterial : data.isMaterial,
-							dummyNode: data.dummyNode
+							dummyNode: data.dummyNode,
 						}
 					});
 					return container.outerHTML;
@@ -107,9 +108,6 @@
 		}
 	}
 
-	//onDestroy(() => {document.removeEventListener('mousemove', removePopupDiv)})
-
-
 
 	let edges: Edge[] = [];
 	let cy: any;
@@ -117,8 +115,10 @@
 	let selectedId: string = '';
 	let prereqActive: boolean = false;
 	let nodeClicked: boolean = false;
+	let edgeSelected: boolean = false;
 	let numSelected: number = 0;
 	let selectedNodePrereqs: Set<number> = new Set();
+	let dummyNodeClicked: boolean = false;
 	// const createBendPoints = (sourcePos: { posX: number; posY: number; publicationId: number; publication: { title: string } }, targetPos: { posX: number; posY: number; publicationId: number; publication: { title: string } }) =>{
 	// 	const midY = (sourcePos.posY + targetPos.posY) / 2;
 	//
@@ -182,8 +182,18 @@
 						'line-color': '#646478',
 						'target-arrow-color': '#646478',
 						'target-arrow-shape': 'triangle',
+
 					},
 				},
+
+				{
+					selector: 'edge:selected',
+					style: {
+						'line-color': '#00A6D6',
+						'target-arrow-color': '#00A6D6'
+					}
+				}
+
 			],
 			layout: {
 				name: 'preset'
@@ -197,10 +207,36 @@
 
 		addHtmlLabel("node", false);
 
+		cy.on('select', 'edge', (event: any) => {
+			if(publishing)
+			{
+				numSelected++;
+				edgeSelected = true;
+			}
+		});
+
+		cy.on('unselect', 'edge', () => {
+			if(publishing){
+				numSelected--;
+				edgeSelected = false;
+			}
+		});
+
+
 
 		cy.on('select', 'node', (event: any) => {
 			numSelected++;
 			let node = event.target;
+			if (node.id() === 'edgeStart')
+			{
+				node.unselect();
+				if (selectedId !== '')
+				{
+					dummyNodeClicked = false
+					cy.$(`#${selectedId}`).select();
+				}
+				return;
+			}
 			if (!publishing) {
 				node.unselect()
 				return;
@@ -219,16 +255,21 @@
 
 
 			if (selected && prereqActive) {
-				let edgeId = 'e'.concat(node.id().toString().concat(selectedId.toString()));
+				let edgeId = `en${selectedId.toString()}n${node.id()}`;
 				if (cy.getElementById(edgeId).length > 0) {
 					cy.remove(cy.$(`#${edgeId}`));
 					selectedNodePrereqs.delete(Number(node.id()))
 				} else {
-					cy.add({
-						group: 'edges',
-						data: { id: `${edgeId}`, source: `${node.id()}`, target: `${selectedId}` }
-					});
-					selectedNodePrereqs.add(Number(node.id()))
+					if (cy.getElementById(`en${node.id()}n${selectedId}`).length === 0) {
+						cy.add({
+							group: 'edges',
+							data: { id: `${edgeId}`, source: `${selectedId}`, target: `${node.id()}` }
+						});
+						selectedNodePrereqs.add(Number(node.id()));
+
+					} else {
+						alert('The reverse edge already exists, adding this edge will create a loop');
+					}
 
 				}
 
@@ -239,13 +280,13 @@
 
 				if (prereqActive) {
 					cy.edges().forEach((edge: any) => {
-						if (edge.target().id() === selectedId) {
+						if (edge.source().id() === selectedId) {
 							edge.source().style({
 								'background-color': '#9E9EAE',
 								'color': '#F9F9FA'
 							});
 
-							addHtmlLabel(`#${edge.source().id()}`, true)
+							addHtmlLabel(`#${edge.target().id()}`, true);
 						}
 					});
 
@@ -264,11 +305,15 @@
 		 * of every node in case more have been coloured
 		 */
 		cy.on('unselect', 'node', (event:any) => {
+			numSelected--;
+			console.log(selected)
+			console.log(event.target.id())
+			console.log(numSelected)
 			if (event.target.id() === 'edgeStart')
 			{
+
 				return;
 			}
-			numSelected--;
 			//let node = event.target;
 			cy.nodes().forEach((n: any) => {
 				n.style({
@@ -283,7 +328,8 @@
 			if (!nodeClicked) {
 				prereqActive = false;
 			}
-			if (!prereqActive) {
+			if (!prereqActive && !dummyNodeClicked) {
+				console.log("Here")
 				selectedNodePrereqs = new Set()
 				selected = false;
 				selectedId = '';
@@ -298,6 +344,7 @@
 		cy.on('click', 'node', (event: any) => {
 			if (event.target.id() === 'edgeStart')
 			{
+				dummyNodeClicked = true;
 				return;
 			}
 			if (publishing) {
@@ -306,7 +353,6 @@
 					nodeClicked = true;
 				}
 			} else {
-
 				let cur = nodes.find(node => node.publicationId === Number(event.target.id()));
 
 				if (cur) {
@@ -354,6 +400,7 @@
 		 */
 		cy.on('mouseover', 'node',  (event: any) => {
 			const node = event.target;
+
 			if (event.target.id() === 'edgeStart')
 			{
 				return;
@@ -394,14 +441,14 @@
 
 
 
-			if (!node.selected() && !prereqActive && !(node.id() === 'edgeStart')) {
-				node.style({
-					'background-color': '#4C4C5C',
-					'color': '#F9F9FA',
-				});
-			}
+			// if (!node.selected() && !prereqActive && !(node.id() === 'edgeStart')) {
+			// 	node.style({
+			// 		'background-color': '#4C4C5C',
+			// 		'color': '#F9F9FA',
+			// 	});
+			// }
 
-			else if(!node.selected() && !(node.id() === 'edgeStart')){
+			if(prereqActive && !node.selected() && !(node.id() === 'edgeStart')){
 				node.style({
 					'background-color': '#9E9EAE',
 					'color': '#F9F9FA'
@@ -409,10 +456,13 @@
 			}
 		});
 
+
+
 		cy.on('drag', 'node', (event : any) => {
 			const nodeA = event.target;
 			if (nodeA.id() === 'edgeStart')
 			{
+				const edgeStartNode = cy.getElementById('edgeStart');
 				return;
 			}
 			else{
@@ -434,6 +484,8 @@
 			{
 				return;
 			}
+
+
 			const positionA = nodeA.position();
 			cy.nodes().forEach((node : {id : () => string, position : () => {x : number, y:number}}) => {
 				if (node.id() !== 'edgeStart' && node.id() !== hoveredNodeId.toString())
@@ -441,10 +493,17 @@
 					const positionB = node.position();
 					if (positionA.x >= positionB.x - 90 && positionA.x <= positionB.x + 90 && positionA.y >= positionB.y - 90 && positionA.y <= positionB.y + 90)
 					{
-						cy.add({
-							group: 'edges',
-							data: { id: `e${hoveredNodeId}${node.id()}`, source: `${hoveredNodeId}`, target: `${node.id()}` }
-						});
+						if (cy.getElementById(`en${hoveredNodeId}n${node.id()}`).length === 0) {
+							if (cy.getElementById(`en${node.id()}n${hoveredNodeId}`).length === 0) {
+								cy.add({
+									group: 'edges',
+									data: { id: `en${hoveredNodeId}n${node.id()}`, source: `${hoveredNodeId}`, target: `${node.id()}` }
+								});
+							} else {
+								alert('The reverse edge already exists, adding this edge will create a loop');
+							}
+						}
+
 					}
 				}
 
@@ -455,6 +514,7 @@
 
 		cy.on('mouseout', 'node', (event: any) => {
 			const node = event.target;
+
 			if (event.target.id() === 'edgeStart')
 			{
 				removeDummyNode(event.position.x, event.position.y, node.id())
@@ -495,23 +555,11 @@
 		cy.fit();
 
 		document.addEventListener('mousemove', removePopupDiv)
-		// cy.edges().forEach((edge:any) => {
-		// 		const controlPoints = edge.data('controlPoints');
-		// 		if (controlPoints) {
-		// 			edge.style({
-		// 				'segment-distances': controlPoints.map((point: { x: number; y: number; }) => {
-		// 					// Calculate the distance from the source to each control point
-		// 					const srcPos = edge.source().position();
-		// 					const dist = Math.sqrt(Math.pow(point.x - srcPos.x, 2) + Math.pow(point.y - srcPos.y, 2));
-		// 					return dist;
-		// 				}),
-		// 				'segment-weights': controlPoints.map((_: any, index: number) => (index + 1) / (controlPoints.length + 1)),
-		// 				'segment-endpoints': controlPoints
-		// 			});
-		// 		}
-		// 	});
-
-
+		document.addEventListener('keydown', (event:KeyboardEvent) => {
+			if (event.key === 'Delete' || event.key === 'Backspace') {
+				removeSelected();
+			}
+		})
 
 		});
 
@@ -598,6 +646,7 @@
 						}
 					},
 				)
+				mapGetTo.set(pubId, new Set());
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -629,22 +678,34 @@
 		// TRUE if confirm pressed, FALSE if cancel pressed
 		response: (r: boolean) => {
 			if (r) {
-				cy.nodes().forEach((node: any) => {
-					if (node.selected()) {
-						node.unselect()
-						cy.remove(cy.$(`#${node.id()}`));
-						pubIds.delete(Number(node.id()));
-						numSelected--
-						nodes = nodes.filter(x=>x.publicationId !== Number(node.id()))
-					}
-				});
-				selectedId = '';
-				selected = false;
-				prereqActive = false;
-
+				removeSelected();
 			}
 		}
 	};
+
+	const removeSelected = () => {
+		cy.nodes().forEach((node: any) => {
+			if (node.selected()) {
+				node.unselect()
+				cy.remove(cy.$(`#${node.id()}`));
+				pubIds.delete(Number(node.id()));
+				numSelected--
+				nodes = nodes.filter(x=>x.publicationId !== Number(node.id()))
+			}
+		});
+		cy.edges().forEach((edge: any) => {
+			if (edge.selected()) {
+				cy.remove(cy.$(`#${edge.id()}`));
+				edges.filter(x=>x.data.id !== edge.id())
+				numSelected--;
+			}
+		});
+
+		selectedId = '';
+		selected = false;
+		edgeSelected = false
+		prereqActive = false;
+	}
 
 	export const publishCircuit = async () => {
 
@@ -740,13 +801,13 @@
 	 */
 	const addPrereq = () => {
 		cy.edges().forEach((edge: any) => {
-			if (edge.target().id() === selectedId) {
-				edge.source().style({
+			if (edge.source().id() === selectedId) {
+				edge.target().style({
 					'background-color': '#9E9EAE',
 					'color': '#F9F9FA'
 				});
-				selectedNodePrereqs.add(Number(edge.source().id()));
-				addHtmlLabel(`#${edge.source().id()}`, true);
+				selectedNodePrereqs.add(Number(edge.target().id()));
+				addHtmlLabel(`#${edge.target().id()}`, true);
 			}
 		});
 		prereqActive = true;
@@ -812,8 +873,8 @@
 				{#if !selected}
 					<button type="button" class="btn variant-filled" on:click={fetchElements}>Add</button>
 				{/if}
-				{#if selected}
-					{#if (numSelected < 2)}
+				{#if (selected || edgeSelected)}
+					{#if (numSelected < 2 && selected)}
 						{#if prereqActive}
 							<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes
 							</button>
