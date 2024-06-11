@@ -45,7 +45,8 @@
 							data: data.label,
 							selected: selected,
 							extensions : data.extensions,
-							isMaterial : data.isMaterial
+							isMaterial : data.isMaterial,
+							dummyNode: data.dummyNode
 						}
 					});
 					return container.outerHTML;
@@ -127,7 +128,7 @@
 	// 	];
 	// }
 	let mappedNodes = nodes.map(node => ({
-		data: { id: node.publicationId.toString(), label: node.publication.title, extensions : node.extensions, isMaterial:node.publication.type === PublicationType.Material,
+		data: { id: node.publicationId.toString(), label: node.publication.title, extensions : node.extensions, isMaterial:node.publication.type === PublicationType.Material, dummyNode: false
 	},
 		position: { x: node.posX, y: node.posY }
 	}));
@@ -205,7 +206,7 @@
 				return;
 			}
 
-			if (!publishing) {
+			if (!publishing && !(node.id() === 'edgeStart')) {
 				cy.$(`#${node.id()}`).unselect();
 			}
 			node.style({
@@ -262,7 +263,11 @@
 		 * Deals with the unselecting of nodes. Restores the background
 		 * of every node in case more have been coloured
 		 */
-		cy.on('unselect', 'node', () => {
+		cy.on('unselect', 'node', (event:any) => {
+			if (event.target.id() === 'edgeStart')
+			{
+				return;
+			}
 			numSelected--;
 			//let node = event.target;
 			cy.nodes().forEach((n: any) => {
@@ -291,6 +296,10 @@
 		 * is Click -> Unselect -> Selected. This is needed to make sure that node is properly unselected.
 		 */
 		cy.on('click', 'node', (event: any) => {
+			if (event.target.id() === 'edgeStart')
+			{
+				return;
+			}
 			if (publishing) {
 				const nodeId = event.target.id();
 				if (selectedId !== nodeId) {
@@ -315,6 +324,10 @@
 		 * Same as the above but activated on tap for mobile
 		 */
 		cy.on('tap', 'node', (event: any) => {
+			if (event.target.id() === 'edgeStart')
+			{
+				return;
+			}
 			if (publishing) {
 				const nodeId = event.target.id();
 				if (selectedId !== nodeId) {
@@ -340,74 +353,41 @@
 		 * The two methods below are used to simulate hover effect on a node
 		 */
 		cy.on('mouseover', 'node',  (event: any) => {
+			if (event.target.id() === 'edgeStart')
+			{
+				return;
+			}
+
 			const node = event.target;
 			cursorInsideNode = true;
 			hoveredNodeId = Number(node.id());
+
 			if(!publishing)
 			{
 				setTimeout(() => {
 					// Check if cursor is still inside the node
-					if (cursorInsideNode && hoveredNodeId === Number(node.id())) {
-						const htmlElement = document.getElementById(node.id());
-						if (htmlElement) {
-							const divElement = document.createElement('div');
-							let publication = nodes.find(n => n.publicationId === Number(node.id()));
-
-							if (publication) {
-								 let coverPicData = '';
-								// if (
-								// 	publication.publication.type === PublicationType.Material &&
-								// 	publication.publication.materials
-								// ) {
-								// 	coverPicData = coverPicFetcher(
-								// 		publication.publication.materials.encapsulatingType,
-								// 		publication.publication.coverPic,
-								// 	).data;
-								// } else {
-								// 	const filePath = publication.publication.coverPic!.path;
-								// 	const currentFileData = fileSystem.readFile(filePath);
-								// 	coverPicData = currentFileData.toString('base64');
-								// }
-
-								const publicationCard = new PublicationCard({
-									target: divElement,
-									props: {
-										publication: publication.publication,
-										inCircuits: false,
-										imgSrc: 'data:image;base64,' + coverPicData,
-										forArrow: true,
-										extensions: node.data().extensions,
-										publisher: publication.publication.publisher,
-										liked: liked.includes(publication.publicationId),
-										saved: saved.includes(publication.publicationId)
-									}
-								});
-								publicationCard.$on('liked', likedToggled);
-								publicationCard.$on('saved', savedToggled);
-
-
-							}
-
-							divElement.id = 'PublicationCardDiv';
-							divElement.className = 'w-[300px]';
-							divElement.style.position = 'fixed';
-							divElement.style.transition = 'transform 0.5s';
-
-
-							document.body.appendChild(divElement);
-
-							divElement.style.left = `${htmlElement.getBoundingClientRect().left + htmlElement.getBoundingClientRect().width}px`;
-							divElement.style.top = `${htmlElement.getBoundingClientRect().top + htmlElement.getBoundingClientRect().height / 2 - divElement.getBoundingClientRect().height / 2}px`;
-						}
-
-					}
+					makePopUp(cursorInsideNode, hoveredNodeId, node)
 				}, 700);
+			}
+			else {
+				cy.add({
+					group: 'nodes',
+					data: { id: "edgeStart", label: "", extensions : [], isMaterial: true, dummyNode: true},
+					position: { x: node.position().x, y: node.position().y + 50 },
+					style: {
+						'border': '0px solid #F9F9FA',
+						'width' : 20,
+						'height' : 20,
+						'shape' : 'circle',
+					}
+				});
+
+
 			}
 
 
 
-
-			if (!node.selected() && !prereqActive) {
+			if (!node.selected() && !prereqActive && !(node.id() === 'edgeStart')) {
 				node.style({
 					'background-color': '#4C4C5C',
 					'color': '#F9F9FA',
@@ -415,7 +395,7 @@
 				});
 			}
 
-			else if(!node.selected()){
+			else if(!node.selected() && !(node.id() === 'edgeStart')){
 				node.style({
 					'background-color': '#9E9EAE',
 					'color': '#F9F9FA'
@@ -425,6 +405,10 @@
 
 
 		cy.on('mouseout', 'node', (event: any) => {
+			if (event.target.id() === 'edgeStart')
+			{
+				return;
+			}
 			const node = event.target;
 			cursorInsideNode = false;
 			const divToRemove = document.getElementById('PublicationCardDiv');
@@ -432,18 +416,20 @@
 				document.body.removeChild(divToRemove);
 			}
 
-			if (!node.selected() && !prereqActive) {
+			if (!node.selected() && !prereqActive && !(node.id() === 'edgeStart')) {
 				node.style({
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
 			}
-			else if (!node.selected() && !selectedNodePrereqs.has(Number(node.id()))) {
+			else if (!node.selected() && !selectedNodePrereqs.has(Number(node.id())) && !(node.id() === 'edgeStart')) {
 				node.style({
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
 			}
+
+			cy.remove(cy.$('#edgeStart'));
 		});
 
 		/**
@@ -530,7 +516,7 @@
 				}
 				cy.add({
 					group: 'nodes',
-					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial},
+					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial, dummyNode: false},
 					position: { x: 100, y: 100 }
 				});
 				nodes.push(
@@ -587,7 +573,6 @@
 	 */
 	const modal: ModalSettings = {
 		type: 'confirm',
-		// Data
 		title: 'Please Confirm',
 		body: 'Are you sure you wish to proceed?',
 		// TRUE if confirm pressed, FALSE if cancel pressed
@@ -654,6 +639,49 @@
 		return { nodeDiffActions, coverPic };
 
 	}
+
+		const makePopUp = (cursorInsideNode: boolean, hoveredNodeId: number, node:{id : () => string, data : () => {extensions:string[]}}) => {
+			if (cursorInsideNode && hoveredNodeId === Number(node.id())) {
+				const htmlElement = document.getElementById(node.id());
+				if (htmlElement) {
+					const divElement = document.createElement('div');
+					let publication = nodes.find(n => n.publicationId === Number(node.id()));
+
+					if (publication) {
+						let coverPicData = '';
+						const publicationCard = new PublicationCard({
+							target: divElement,
+							props: {
+								publication: publication.publication,
+								inCircuits: false,
+								imgSrc: 'data:image;base64,' + coverPicData,
+								forArrow: true,
+								extensions: node.data().extensions,
+								publisher: publication.publication.publisher,
+								liked: liked.includes(publication.publicationId),
+								saved: saved.includes(publication.publicationId)
+							}
+						});
+						publicationCard.$on('liked', likedToggled);
+						publicationCard.$on('saved', savedToggled);
+
+
+					}
+
+					divElement.id = 'PublicationCardDiv';
+					divElement.className = 'w-[300px]';
+					divElement.style.position = 'fixed';
+					divElement.style.transition = 'transform 0.5s';
+
+
+					document.body.appendChild(divElement);
+
+					divElement.style.left = `${htmlElement.getBoundingClientRect().left + htmlElement.getBoundingClientRect().width}px`;
+					divElement.style.top = `${htmlElement.getBoundingClientRect().top + htmlElement.getBoundingClientRect().height / 2 - divElement.getBoundingClientRect().height / 2}px`;
+				}
+
+			}
+		}
 
 
 	/**
