@@ -21,7 +21,7 @@ import Filter from '$lib/components/Filter.svelte';
 import Circuit from '$lib/components/circuits/Circuit.svelte';
 import CircuitPureHTML from '$lib/components/circuits/CircuitPureHTML.svelte';
 import Download from '$lib/components/generic/Download.svelte';
-
+import HorizontalScroll from '$lib/components/HorizontalScroll.svelte';
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
 import UsedInCourse from '$lib/components/UsedInCourse.svelte';
@@ -67,4 +67,5 @@ export {
 	AddInteractionForm,
 	UsedInCourse,
 	PublishReview,
+	HorizontalScroll,
 };
