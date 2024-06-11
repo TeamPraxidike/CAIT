@@ -27,7 +27,8 @@
 		password: p.password,
 		isAdmin: p.isAdmin,
 		createdAt: p.createdAt,
-		updatedAt: p.updatedAt
+		updatedAt: p.updatedAt,
+		aboutMe: p.aboutMe,
 	}
 
 	const handleRemoveMaintainer = (index: number) => {

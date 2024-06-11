@@ -23,7 +23,7 @@ describe('Creating users', () => {
 		const user = await createUser({
 			firstName: 'Vasko',
 			lastName: 'Prasko',
-			email: 'email@gmailfdnfsdghgfd',
+			email: 'email@gmailfdnfsdghgfd' + Math.random(),
 			password: 'password',
 		});
 		expect(await getUserById(user.id)).toHaveProperty(
@@ -35,7 +35,7 @@ describe('Creating users', () => {
 			const newUser = await createUser({
 				firstName: 'Vasko',
 				lastName: 'Prasko',
-				email: 'email@gmailadsgfahr' + i,
+				email: 'email@gmailadsgfahr' + i + Math.random(),
 				password: 'password',
 			});
 			expect(await getUserById(newUser.id)).toHaveProperty(
@@ -51,7 +51,7 @@ describe('Editing users', () => {
 		const user = await createUser({
 			firstName: 'Marti',
 			lastName: 'Parti',
-			email: 'email@gmailsdfgsdfgsdfg',
+			email: 'email@gmailsdfgsdfgsdfg' + Math.random(),
 			password: 'password',
 		});
 
@@ -70,7 +70,7 @@ describe('Editing users', () => {
 		const user = await createUser({
 			firstName: 'Marti',
 			lastName: 'Parti',
-			email: 'email@gmailsdfgsdfgsdfg',
+			email: 'email@gmailsdfgsdfgsdfg' + Math.random(),
 			password: 'password',
 		});
 
@@ -79,6 +79,7 @@ describe('Editing users', () => {
 			firstName: 'Kiro',
 			lastName: 'Breika',
 			email: 'l',
+			aboutMe: "hello I am Kiro"
 		});
 
 		const editedUser = await getUserById(user.id);
