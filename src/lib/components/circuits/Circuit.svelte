@@ -353,12 +353,12 @@
 		 * The two methods below are used to simulate hover effect on a node
 		 */
 		cy.on('mouseover', 'node',  (event: any) => {
+			const node = event.target;
 			if (event.target.id() === 'edgeStart')
 			{
 				return;
 			}
 
-			const node = event.target;
 			cursorInsideNode = true;
 			hoveredNodeId = Number(node.id());
 
@@ -370,17 +370,24 @@
 				}, 700);
 			}
 			else {
-				cy.add({
-					group: 'nodes',
-					data: { id: "edgeStart", label: "", extensions : [], isMaterial: true, dummyNode: true},
-					position: { x: node.position().x, y: node.position().y + 50 },
-					style: {
-						'border': '0px solid #F9F9FA',
-						'width' : 20,
-						'height' : 20,
-						'shape' : 'circle',
-					}
-				});
+				if (cy.getElementById('edgeStart').length === 0){
+					cy.add({
+						group: 'nodes',
+						data: { id: "edgeStart", label: "", extensions : [], isMaterial: true, dummyNode: true},
+						position: { x: node.position().x, y: node.position().y + 50 },
+						style: {
+							'border-width': '0px',
+							'width' : 20,
+							'height' : 20,
+							'shape' : 'ellipse',
+						}
+					});
+					cy.add({
+						group: 'edges',
+						data: { id: `temp`, source: `${hoveredNodeId}`, target: `edgeStart` }
+					});
+				}
+
 
 
 			}
@@ -391,7 +398,6 @@
 				node.style({
 					'background-color': '#4C4C5C',
 					'color': '#F9F9FA',
-					'border': '1px solid #F9F9FA'
 				});
 			}
 
@@ -403,13 +409,58 @@
 			}
 		});
 
-
-		cy.on('mouseout', 'node', (event: any) => {
-			if (event.target.id() === 'edgeStart')
+		cy.on('drag', 'node', (event : any) => {
+			const nodeA = event.target;
+			if (nodeA.id() === 'edgeStart')
 			{
 				return;
 			}
+			else{
+				const positionA = nodeA.position();
+				const nodeB = cy.getElementById('edgeStart');
+
+				// Update the position of node 'b' to match node 'a'
+				nodeB.position({
+					x: positionA.x, // Adjust the offset as needed
+					y: positionA.y + 50
+				});
+			}
+
+		});
+
+		cy.on('free', 'node', (event:any) => {
+			const nodeA = event.target;
+			if (nodeA.id() !== 'edgeStart')
+			{
+				return;
+			}
+			const positionA = nodeA.position();
+			cy.nodes().forEach((node : {id : () => string, position : () => {x : number, y:number}}) => {
+				if (node.id() !== 'edgeStart' && node.id() !== hoveredNodeId.toString())
+				{
+					const positionB = node.position();
+					if (positionA.x >= positionB.x - 90 && positionA.x <= positionB.x + 90 && positionA.y >= positionB.y - 90 && positionA.y <= positionB.y + 90)
+					{
+						cy.add({
+							group: 'edges',
+							data: { id: `e${hoveredNodeId}${node.id()}`, source: `${hoveredNodeId}`, target: `${node.id()}` }
+						});
+					}
+				}
+
+			})
+			cy.remove(cy.$('#edgeStart'));
+		})
+
+
+		cy.on('mouseout', 'node', (event: any) => {
 			const node = event.target;
+			if (event.target.id() === 'edgeStart')
+			{
+				removeDummyNode(event.position.x, event.position.y, node.id())
+				return;
+			}
+
 			cursorInsideNode = false;
 			const divToRemove = document.getElementById('PublicationCardDiv');
 			if (divToRemove) {
@@ -428,8 +479,8 @@
 					'color': '#4C4C5C'
 				});
 			}
+			removeDummyNode(event.position.x, event.position.y, 'edgeStart')
 
-			cy.remove(cy.$('#edgeStart'));
 		});
 
 		/**
@@ -729,6 +780,19 @@
 			saved.push(id);
 		}
 	};
+
+	const removeDummyNode = (mouseX:number, mouseY:number, id:string) => {
+		const edgeStartNode = cy.getElementById(id);
+		if (edgeStartNode.length > 0) {
+			const boundingBox = edgeStartNode.renderedBoundingBox();
+			if (mouseX >= boundingBox.x1 && mouseX <= boundingBox.x2 &&
+				mouseY >= boundingBox.y1 && mouseY <= boundingBox.y2) {
+				return; // Mouse is still over edgeStart node, do not remove it
+			}
+
+		}
+		cy.remove(cy.$('#edgeStart'));
+	}
 
 
 
