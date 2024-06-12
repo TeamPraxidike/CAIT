@@ -5,7 +5,6 @@
 
 	export let data : any;
 	export let selected: boolean;
-	export let disableHover : boolean = false;
 	export let extensions: string[];
 	export let isMaterial: boolean;
 
@@ -16,7 +15,7 @@
 	export let dummyNode: boolean = false;
 </script>
 {#if dummyNode}
-	<button type="button" class="rounded-full size-[20px] bg-surface-800"/>
+	<button type="button" class="rounded-full size-[10px] bg-surface-800"/>
 {:else}
 	<button type="button" style="  overflow-wrap: break-word;"
 			 class=" {text} border border-primary-500 w-[180px] h-[100px] rounded-lg flex flex-col items-center justify-center gap-2 p-1">

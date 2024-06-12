@@ -4,7 +4,14 @@
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { Difficulty, type Node as PrismaNode, type Publication, PublicationType, type User } from '@prisma/client';
+	import {
+		Difficulty,
+		MaterialType,
+		type Node as PrismaNode,
+		type Publication,
+		PublicationType,
+		type User
+	} from '@prisma/client';
 	import nodeHtmlLabel from 'cytoscape-node-html-label';
 	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
 	import { PublicationCard } from '$lib';
@@ -122,43 +129,15 @@
 	let dummyNodeClicked: boolean = false;
 	let cursorInsideNode: boolean = false;
 	let hoveredNodeId : number = -1;
-	// const createBendPoints = (sourcePos: { posX: number; posY: number; publicationId: number; publication: { title: string } }, targetPos: { posX: number; posY: number; publicationId: number; publication: { title: string } }) =>{
-	// 	const midY = (sourcePos.posY + targetPos.posY) / 2;
-	//
-	// 	return [
-	// 		{ x: sourcePos.posX, y: midY },
-	// 		{ x: targetPos.posX, y: midY },
-	// 	];
-	// }
-	let mappedNodes = nodes.map(node => ({
-		data: { id: node.publicationId.toString(), label: node.publication.title, extensions : node.extensions, isMaterial:node.publication.type === PublicationType.Material, dummyNode: false
-	},
-		position: { x: node.posX, y: node.posY }
-	}));
 
 
-	nodes.forEach(node => {
-		let curNext = node.next.map(nextNode =>
-			({
-				data: {
-					id: (node.publicationId.toString()).concat(nextNode.toPublicationId.toString()),
-					source:node.publicationId.toString(),
-					target:nextNode.toPublicationId.toString(),
-				//	controlPoints: createBendPoints(node, nodes.find(node => node.publicationId === nextNode.toPublicationId)!)
-				}
-			}));
-		edges.push(...curNext);
-	});
 
 	onMount(async () => {
-
 
 		// Initialize Cytoscape
 		cy = cytoscape({
 			container: document.getElementById('cy'),
 			elements: [
-				...mappedNodes,
-				...edges
 			],
 			style: [
 				 {
@@ -210,7 +189,7 @@
 
 		addHtmlLabel("node", false);
 
-		cy.on('select', 'edge', (event: any) => {
+		cy.on('select', 'edge', () => {
 			if(publishing)
 			{
 				numSelected++;
@@ -423,8 +402,8 @@
 						position: { x: node.position().x, y: node.position().y + 50 },
 						style: {
 							'border-width': '0px',
-							'width' : 20,
-							'height' : 20,
+							'width' : 10,
+							'height' : 10,
 							'shape' : 'ellipse',
 						}
 					});
@@ -559,6 +538,24 @@
 				removeSelected();
 			}
 		})
+
+		nodes.forEach(node => {
+			console.log("ALEEEEEEEEEEE")
+			cy.add({
+				group: 'nodes',
+				data: { id: node.publicationId, label: node.publication.title, extensions : node.extensions, isMaterial: node.publication.type = PublicationType.Material, dummyNode: false},
+				position: { x: node.posX, y: node.posY}
+			})
+		})
+
+		nodes.forEach(node => {
+			node.next.forEach(nextNode => {
+					cy.add({
+						group: 'edges',
+						data: { id: `en${node.publicationId}n${nextNode.toPublicationId.toString()}`, source: node.publicationId.toString(), target: nextNode.toPublicationId.toString() }
+					})
+				});
+		});
 
 		});
 
@@ -707,7 +704,7 @@
 		prereqActive = false;
 	}
 
-	export const publishCircuit = async () => {
+	export const publishCircuit =  async() => {
 
 		let nodeDiffActions: NodeDiffActions;
 		const numNodes = cy.nodes().length;
@@ -738,11 +735,6 @@
 		})
 		nodeDiffActions = {numNodes, add, delete:del, edit, next };
 
-		// cy.fit();
-		// addHtmlLabel("node", false)
-		// generate a png, could also use cy.jpg
-		// base64uri by default, using base64 for now
-		//const cover = cy.png({output: 'base64'});
 		const cover = await captureScreenshot()
 		const coverPic = {
 			type: 'image/png',
@@ -847,10 +839,6 @@
 		const edgeStartNode = cy.getElementById(id);
 		if (edgeStartNode.length > 0) {
 			const boundingBox = edgeStartNode.renderedBoundingBox();
-			console.log("Checking")
-			console.log(boundingBox)
-			console.log(mouseX)
-			console.log(mouseY)
 			if (mouseX >= boundingBox.x1 && mouseX <= boundingBox.x2 &&
 				mouseY >= boundingBox.y1 && mouseY <= boundingBox.y2) {
 				return; // Mouse is still over edgeStart node, do not remove it

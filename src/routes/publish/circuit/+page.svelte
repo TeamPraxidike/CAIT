@@ -81,9 +81,9 @@
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 
 			nodeActions = nodeDiffActions;
+			console.log(nodeActions);
 			circuitCoverPic = coverPic;
 
-			console.log(circuitNodesPlaceholder);
 		}
 	}
 	let circuitNodesPlaceholder: (PrismaNode & {
