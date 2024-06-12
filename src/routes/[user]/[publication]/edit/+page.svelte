@@ -4,7 +4,7 @@
 	import type { Difficulty, Publication, Tag as PrismaTag, User } from '@prisma/client';
 	import { Circuit, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
-		Autocomplete, type AutocompleteOption, FileButton, FileDropzone, getToastStore, InputChip
+		FileButton, FileDropzone, getToastStore
 	} from '@skeletonlabs/skeleton';
 	import { appendFile, base64ToFile, concatFileList, createFileList } from '$lib/util/file';
 	import type { PublicationView } from '../+layout.server';
@@ -58,7 +58,7 @@
 	if (isMaterial){
 		coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 	}
-	let allTypes: {id:number, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+	let allTypes: {id:string, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 
 	function chooseCover(e: Event) {
@@ -75,10 +75,8 @@
 	}
 
 
-	let inputChip: InputChip;
 	let allTags: PrismaTag[] = data.tags;
 
-	type TagOption = AutocompleteOption<string, { content: string }>;
 
 	export let form: ActionData;
 	const toastStore = getToastStore();
@@ -114,12 +112,6 @@
 	}
 	let newTags: string[] = [];
 
-	const triggerRepeatInput = (type: string,input: string)=>{
-		toastStore.trigger({
-			message: `${type} ${input} Already Added`,
-			background: 'bg-warning-200'
-		});
-	}
 
 	let circuitRef : InstanceType<typeof Circuit>;
 	let nodeActions:NodeDiffActions;
