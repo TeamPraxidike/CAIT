@@ -35,12 +35,12 @@ build-job:
   stage: build
   script:
     - npm run setup
-  cache:  # Cache modules in between jobs
-    key: $CI_COMMIT_REF_SLUG
+  cache:
+    key: dependencies-cache
     paths:
-      - .npm/
-  before_script:
-    - npm ci --cache .npm --prefer-offline
+      - node_modules/
+      - .svelte-kit/
+
 
 
 eslint:
