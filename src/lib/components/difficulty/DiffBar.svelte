@@ -42,7 +42,7 @@
 
     {#if isHovered}
         <div
-          class="absolute mt-2 {colour} bg-opacity-70 shadow-sm p-1 rounded-lg items-center transition-all duration-300"
+          class="absolute mt-2 {colour} bg-opacity-70 shadow-sm p-2 rounded-lg items-center transition-all duration-300"
           style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
             <p class="text-surface-700">{diff}</p>
         </div>
