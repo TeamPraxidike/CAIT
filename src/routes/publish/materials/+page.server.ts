@@ -33,9 +33,9 @@ async function filesToAddOperation(fileList: FileList) {
 
 const convertMaterial = (s: string): MaterialType => {
 	switch (s.toLowerCase()) {
-		case 'examQuestions':
+		case 'exam questions':
 			return MaterialType.examQuestions;
-		case 'lectureNotes':
+		case 'lecture notes':
 			return MaterialType.lectureNotes;
 		case 'slides':
 			return MaterialType.slides;
