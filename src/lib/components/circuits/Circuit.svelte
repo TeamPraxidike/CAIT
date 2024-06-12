@@ -86,6 +86,7 @@
 		}[]
 	})[];
 
+	let startY: number = 100;
 
 	const removePopupDiv = (event: MouseEvent) => {
 		let rect = document.getElementById('cy')?.getBoundingClientRect()
@@ -119,6 +120,8 @@
 	let numSelected: number = 0;
 	let selectedNodePrereqs: Set<number> = new Set();
 	let dummyNodeClicked: boolean = false;
+	let cursorInsideNode: boolean = false;
+	let hoveredNodeId : number = -1;
 	// const createBendPoints = (sourcePos: { posX: number; posY: number; publicationId: number; publication: { title: string } }, targetPos: { posX: number; posY: number; publicationId: number; publication: { title: string } }) =>{
 	// 	const midY = (sourcePos.posY + targetPos.posY) / 2;
 	//
@@ -306,9 +309,6 @@
 		 */
 		cy.on('unselect', 'node', (event:any) => {
 			numSelected--;
-			console.log(selected)
-			console.log(event.target.id())
-			console.log(numSelected)
 			if (event.target.id() === 'edgeStart')
 			{
 
@@ -329,7 +329,6 @@
 				prereqActive = false;
 			}
 			if (!prereqActive && !dummyNodeClicked) {
-				console.log("Here")
 				selectedNodePrereqs = new Set()
 				selected = false;
 				selectedId = '';
@@ -393,12 +392,12 @@
 
 		});
 
-		let cursorInsideNode: boolean = false;
-		let hoveredNodeId : number = -1;
+
 		/**
 		 * The two methods below are used to simulate hover effect on a node
 		 */
 		cy.on('mouseover', 'node',  (event: any) => {
+
 			const node = event.target;
 
 			if (event.target.id() === 'edgeStart')
@@ -459,10 +458,10 @@
 
 
 		cy.on('drag', 'node', (event : any) => {
+			startY = 250;
 			const nodeA = event.target;
 			if (nodeA.id() === 'edgeStart')
 			{
-				const edgeStartNode = cy.getElementById('edgeStart');
 				return;
 			}
 			else{
@@ -517,7 +516,7 @@
 
 			if (event.target.id() === 'edgeStart')
 			{
-				removeDummyNode(event.position.x, event.position.y, node.id())
+				removeDummyNode(event.position.x, event.position.y, hoveredNodeId.toString())
 				return;
 			}
 
@@ -616,7 +615,7 @@
 				cy.add({
 					group: 'nodes',
 					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial, dummyNode: false},
-					position: { x: 100, y: 100 }
+					position: { x: 100, y: startY }
 				});
 				nodes.push(
 					{
@@ -625,7 +624,7 @@
 						publicationId: pubId,
 						extensions: extensions,
 						posX: 100,
-						posY: 100,
+						posY: startY,
 						publication: {
 							id: pubId as number,
 							title: data.publication.title as string,
@@ -647,6 +646,7 @@
 					},
 				)
 				mapGetTo.set(pubId, new Set());
+				startY += 110;
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -843,9 +843,14 @@
 	};
 
 	const removeDummyNode = (mouseX:number, mouseY:number, id:string) => {
+
 		const edgeStartNode = cy.getElementById(id);
 		if (edgeStartNode.length > 0) {
 			const boundingBox = edgeStartNode.renderedBoundingBox();
+			console.log("Checking")
+			console.log(boundingBox)
+			console.log(mouseX)
+			console.log(mouseY)
 			if (mouseX >= boundingBox.x1 && mouseX <= boundingBox.x2 &&
 				mouseY >= boundingBox.y1 && mouseY <= boundingBox.y2) {
 				return; // Mouse is still over edgeStart node, do not remove it
