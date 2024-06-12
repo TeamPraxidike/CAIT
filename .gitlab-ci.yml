@@ -41,21 +41,25 @@ build-job:
   script:
     - npm run setup
     - npm install eslint
-  cache:
-    policy: push
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 week
 
 
 eslint:
   stage: lint
-  cache:
-    policy: pull
+  artifacts:
+    paths:
+      - node_modules/
   script:
     - npm run lint
 
 svelte-check:
   stage: lint
-  cache:
-    policy: pull
+  artifacts:
+    paths:
+      - node_modules/
   script:
     - npm run check
 
