@@ -40,6 +40,11 @@ build-job:
     paths:
       - node_modules/
       - .svelte-kit/
+  artifacts:
+    expire_in: 1 days
+    when: on_success
+    paths:
+      - node_modules/
 
 
 
