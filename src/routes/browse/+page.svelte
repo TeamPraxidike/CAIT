@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+    import {Filter, MaterialTypes, PublicationCard, SearchBar, UserProp} from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
@@ -54,7 +54,7 @@
 
         //Variables needed to deal with Types
         let selectedTypes: {id:string, content:string }[] = []; //keeps track of selected tags
-        let allTypes: {id:string, content:string }[] = ["Presentation", "Information", "Code", "Assignment", "Exam", "Other"].map(x => ({id : '0', content : x})); //array with all the tags MOCK
+        let allTypes: {id:string, content:string }[] =  MaterialTypes.map(x => ({id : '0', content : x})); //array with all the tags MOCK
         let displayTypes: {id:string, content:string }[] = allTypes; //
         let typeActive = false
 
@@ -70,6 +70,7 @@
 		const removePublisher = (name: {id:string, content:string }) => {
 			selectedPublishers = selectedPublishers.filter(publisher => publisher.id !== name.id);
 			applyActive = true;
+
 		};
 
 

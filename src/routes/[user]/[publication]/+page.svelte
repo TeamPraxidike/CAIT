@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { LayoutServerData } from './$types';
+	import type { LayoutServerData, PageServerData } from './$types';
 	import {
 		AddInteractionForm,
 		Circuit,
 		Comment,
 		DiffBar,
 		FileTable,
-		getDateDifference,
+		getDateDifference, HorizontalScroll,
 		Meta,
 		Tag, TheoryAppBar,
 		UserProp
@@ -24,7 +24,7 @@
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
-	export let data: LayoutServerData;
+	export let data: LayoutServerData & PageServerData;
 	const userId = $page.data.session?.user.id;
 
 	const pubView: PublicationView = data.pubView;
@@ -40,6 +40,9 @@
 
 	let liked: boolean = data.userSpecificInfo.liked;
 	let likes = pubView.publication.likes;
+	let circuitsPubAppearIn = data.circuitsPubAppearIn;
+	let likedPublications = data.liked as number[];
+	let savedPublications = data.saved.saved as number[];
 
 	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
@@ -388,6 +391,16 @@
 	{/if}
 
 </div>
+
+{#if circuitsPubAppearIn.length > 0}
+	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
+		<h2 class="text-2xl">This publication appears in:</h2>
+		<hr>
+	</div>
+	<div class="col-span-full">
+		<HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
+	</div>
+{/if}
 
 
 <div class="col-span-full flex flex-col mb-1 gap-1 mt-10">

@@ -138,6 +138,7 @@ export type userEditData = {
 	firstName: string;
 	lastName: string;
 	email: string;
+	aboutMe: string;
 };
 
 /**
@@ -158,6 +159,7 @@ export async function editUser(
 			lastName: user.lastName,
 			email: user.email,
 			username: await generateUsername(user.firstName, user.lastName),
+			aboutMe: user.aboutMe,
 		},
 	});
 }
