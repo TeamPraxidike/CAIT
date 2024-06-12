@@ -31,24 +31,31 @@ stages:          # List of stages for jobs, and their order of execution
   - test-light
   - test-heavy
 
+cache:
+  key: ${CI_COMMIT_REF_SLUG}-node-modules
+  paths:
+    - node_modules/
+
 build-job:
   stage: build
   script:
     - npm run setup
     - npm install eslint
   cache:
-    key: dependencies-cache
-    paths:
-      - node_modules/
+    policy: push
 
 
 eslint:
   stage: lint
+  cache:
+    policy: pull
   script:
     - npm run lint
 
 svelte-check:
   stage: lint
+  cache:
+    policy: pull
   script:
     - npm run check
 
