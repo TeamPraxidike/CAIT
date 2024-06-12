@@ -20,11 +20,11 @@ enum Difficulty {
 }
 
 enum MaterialType {
-  information
-  presentation
+  video
+  lectureNotes
+  slides
   assignment
-  exam
-  code
+  examQuestions
   other
 }
 
@@ -170,7 +170,7 @@ model Publication {
 model Material {
   id                Int          @id @default(autoincrement())
   copyright         Boolean
-  encapsulatingType MaterialType @default(presentation)
+  encapsulatingType MaterialType
   timeEstimate      Int?
   theoryPractice    Float?
   files             File[]       @relation("Files")

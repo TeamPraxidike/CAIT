@@ -2,7 +2,7 @@
 	import type { LayoutServerData } from '../$types';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Publication, Tag as PrismaTag, User } from '@prisma/client';
-	import { Circuit, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
+	import {Circuit, DifficultySelection, FileTable, Filter, MaterialTypes, Meta, TheoryAppBar} from '$lib';
 	import {
 		Autocomplete, type AutocompleteOption, FileButton, FileDropzone, getToastStore, InputChip
 	} from '@skeletonlabs/skeleton';
@@ -16,7 +16,6 @@
 	import { onMount } from 'svelte';
 	import type { NodeDiffActions } from '$lib/database';
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
-
 
 
 	export let data: LayoutServerData & PageServerData;
@@ -58,7 +57,8 @@
 	if (isMaterial){
 		coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 	}
-	let allTypes: {id:number, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+
+	let allTypes: {id:number, content:string }[] = MaterialTypes.map(x => ({id : 0, content : x})); //array with all the tags MOCK
 
 
 	function chooseCover(e: Event) {
