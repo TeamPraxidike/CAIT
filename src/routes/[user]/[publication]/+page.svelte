@@ -356,6 +356,33 @@
 
 	{:else}
 		<div class="w-full">
+			<Accordion class="mt-7 " regionPanel="space-y-8" padding="p-3">
+				<AccordionItem class="variant-soft-primary rounded-lg">
+					<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+					<svelte:fragment slot="content">
+						{#if pubView.publication.learningObjectives.length === 0}
+							<span>No learning objectives have been indicated</span>
+						{:else}
+							{#each pubView.publication.learningObjectives as LO}
+								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
+							{/each}
+						{/if  }
+					</svelte:fragment>
+				</AccordionItem>
+				<AccordionItem class="variant-soft-primary rounded-lg">
+					<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+					<svelte:fragment slot="content">
+						{#if pubView.publication.prerequisites.length === 0}
+							<span>No prior knowledge has been indicated</span>
+						{:else}
+							{#each pubView.publication.prerequisites as PK}
+								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
+							{/each}
+						{/if}
+
+					</svelte:fragment>
+				</AccordionItem>
+			</Accordion>
 			<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}" />
 		</div>
 	{/if}
