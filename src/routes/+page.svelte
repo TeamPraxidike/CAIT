@@ -35,6 +35,6 @@
 </div>
 
 <main class="col-span-full flex flex-col gap-10 my-20">
-    <Section title="Materials" description={'Learn more about the content you can find on this platform'} subtitle="What you can expect to find" img='/materials.svg'/>
+    <Section title="Materials" description={'Learn more about the content you can find on this platform'} subtitle="What you can expect to find" img='/sectionImages/materials.svg'/>
     <Section title="Circuits" description={'Learn more about how to organize publications and give an order to them in a circuit'} subtitle="Define your learning workflow" img='/sectionImages/circuit.png'/>
 </main>

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { Difficulty, User } from '@prisma/client';
-	import { DiffBar, FileTable, Tag, TheoryAppBar, UserProp } from '$lib';
+	import type { User } from '@prisma/client';
+	import { Tag, UserProp } from '$lib';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
+	import { page } from '$app/stores';
 
 	type UserWithProfilePic = User & { profilePicData: string };
 
@@ -11,7 +12,20 @@
 	export let LOs: string[];
 	export let prior: string[];
 	export let maintainers: UserWithProfilePic[];
-
+	let p = $page.data.session?.user as User & {profilePic: string};
+	let publisher = {
+		id: p.id,
+		firstName: p.firstName,
+		lastName: p.lastName,
+		username: p.username,
+		email: p.email,
+		emailVerified: p.emailVerified,
+		reputation: p.reputation,
+		password: p.password,
+		isAdmin: p.isAdmin,
+		createdAt: p.createdAt,
+		updatedAt: p.updatedAt
+	}
 
 </script>
 
@@ -31,6 +45,7 @@
 
 <p class="text-lg pl-3">Maintainers:</p>
 <div class="flex flex-wrap gap-2 pl-3">
+	<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={'data:image;base64,' + $page.data.session?.userPfp.data}/>
 	{#each maintainers as maintainer (maintainer.id)}
 		<UserProp user={maintainer} view="publish"
 							role="Publisher" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
