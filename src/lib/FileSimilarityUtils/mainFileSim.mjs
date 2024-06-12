@@ -16,15 +16,6 @@ export async function compare(pubAFiles, pubBFiles) {
     try {
         //const start = performance.now();
 
-        // const pubAText = await getPubText(pubAFiles);
-        // const pubBText = await getPubText(pubBFiles);
-
-        console.log("\nIN COMPARE MAIN FILE SIM\n")
-        for (const pubAFile of pubAFiles) {console.log(pubAFile)}
-        console.log("--------------")
-        for (const pubBFile of pubBFiles) {console.log(pubBFile)}
-        console.log("--------------")
-
         const pubAText = Array.isArray(pubAFiles) ? await getPubText(pubAFiles) : new Set();
         const pubBText = Array.isArray(pubBFiles) ? await getPubText(pubBFiles) : new Set();
 
@@ -99,7 +90,7 @@ export async function compare(pubAFiles, pubBFiles) {
             similarity = 0;
         } else similarity = Number((weightedSimilarities / sumWeights).toPrecision(3));
 
-        console.log(`\n\nCosine Similarity: ${similarity}\n\n`);
+        //console.log(`\n\nCosine Similarity: ${similarity}\n\n`);
 
         return similarity;
 
@@ -118,12 +109,9 @@ export async function compare(pubAFiles, pubBFiles) {
  * @returns {Promise<Set<string>>}
  */
 async function getPubText(pubFiles) {
-    console.log("\nIN GET PUB TEXT\n")
     const pubAPromises = pubFiles.map(file => reader(path.join(basePath, file.path)));
     const pubAContents = await Promise.all(pubAPromises);
     const validContents = pubAContents.filter(content => content !== null);
-
-    console.log(`VALID CONTENTS: ${validContents}`)
 
     return new Set(validContents);
 }

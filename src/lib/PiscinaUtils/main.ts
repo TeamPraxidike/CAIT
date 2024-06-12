@@ -1,5 +1,4 @@
 import Piscina from 'piscina';
-import path, { join } from 'path';
 import {
     getAllCircuits,
     getAllMaterials,
@@ -8,13 +7,30 @@ import {
     handleSimilarity
 } from "$lib/database";
 import type {Difficulty, File as PrismaFile} from "@prisma/client";
-import {type PublicationMeta, type ResultMeta} from "$lib/PiscinaUtils/worker";
-import { dirname } from 'path';
-import {fileURLToPath} from "node:url";
+
+export type PublicationMeta = {
+    title: string;
+    description: string;
+    learningObjectives: string[];
+    prerequisites: string[];
+    tags: string[];
+    difficulty: Difficulty
+};
+
+export type ResultMeta = {
+    title: number;
+    description: number;
+    learningObjectives: number;
+    prerequisites: number;
+    tags: number;
+    difficulty: number;
+};
 
 const piscina = new Piscina({
     filename: new URL('./workerJS.mjs', import.meta.url).href,
-    maxThreads: 1 // max number of threads
+    minThreads: 1, // Minimum number of threads to start with
+    maxThreads: 4, // Max number of concurrent workers
+    idleTimeout: 60000 // Keep idle workers alive for 60 seconds
 });
 
 /**
@@ -72,22 +88,6 @@ export async function enqueueMaterialComparison(publicationId: number): Promise<
                     difficulty: materials[i].publication.difficulty
                 }
 
-                console.log(`\nPUB A META:
-                \n${pubAMeta.title}
-                \n${pubAMeta.description}
-                \n${pubAMeta.learningObjectives}
-                \n${pubAMeta.prerequisites}
-                \n${pubAMeta.tags}
-                \n${pubAMeta.difficulty}\n------------------------\n`);
-
-                console.log(`PUB B META:
-                \n${pubBMeta.title}
-                \n${pubBMeta.description}
-                \n${pubBMeta.learningObjectives}
-                \n${pubBMeta.prerequisites}
-                \n${pubBMeta.tags}
-                \n${pubBMeta.difficulty}`);
-
                 // enqueue the task and push the promise to the comparisons array
                 comparisons.push({
                     fromPubId: publicationId,
@@ -98,29 +98,14 @@ export async function enqueueMaterialComparison(publicationId: number): Promise<
             }
         }
 
-        console.log("\n\nAFTER FOR LOOP\n\n")
-
         const comparisonsResolved = await Promise.all(comparisons.map(async data => {
-            console.log("\nBEFORE AWAITING IN RESOLVED\n")
             const fileSim = await data.similarityFile
             const metaSim = await data.similarityMeta
-
-            console.log(`\nSIMILARITIES:
-                \n${fileSim}
-                \n${metaSim.title}
-                \n${metaSim.description}
-                \n${metaSim.learningObjectives}
-                \n${metaSim.prerequisites}
-                \n${metaSim.tags}
-                \n${metaSim.difficulty}`);
-
 
             const similarity = 0.5 * fileSim +
                 0.1*metaSim.title + 0.15*metaSim.description +
                 0.09*metaSim.learningObjectives + 0.06*metaSim.prerequisites +
                 0.07*metaSim.tags + 0.03*metaSim.difficulty
-
-            console.log(`\nFINAL SIM: ${similarity}`)
 
             return {
                 fromPubId: data.fromPubId,
