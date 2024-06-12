@@ -85,6 +85,7 @@
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: (User & {profilePicData: string})
+			coverPicData: string,
 		}
 		next: {
 			circuitId: number,
@@ -530,7 +531,7 @@
 						node.lock()
 			});
 
-		cy.fit();
+
 
 		document.addEventListener('mousemove', removePopupDiv)
 		document.addEventListener('keydown', (event:KeyboardEvent) => {
@@ -540,10 +541,9 @@
 		})
 
 		nodes.forEach(node => {
-			console.log("ALEEEEEEEEEEE")
 			cy.add({
 				group: 'nodes',
-				data: { id: node.publicationId, label: node.publication.title, extensions : node.extensions, isMaterial: node.publication.type = PublicationType.Material, dummyNode: false},
+				data: { id: node.publicationId, label: node.publication.title, extensions : node.extensions, isMaterial: node.publication.type === PublicationType.Material, dummyNode: false},
 				position: { x: node.posX, y: node.posY}
 			})
 		})
@@ -556,6 +556,8 @@
 					})
 				});
 		});
+		if(!publishing)
+			cy.fit();
 
 		});
 
@@ -596,7 +598,6 @@
 	const addNode = async (event: CustomEvent) => {
 		let pubId = event.detail.id;
 
-
 		await fetch(`/api/publication/${pubId}`)
 			.then(response => {
 				if (!response.ok) {
@@ -609,6 +610,7 @@
 				if (data.isMaterial) {
 					extensions = data.publication.materials.files.map((f: { title: string; }) => getFileExtension(f.title));
 				}
+				console.log(data)
 				cy.add({
 					group: 'nodes',
 					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial, dummyNode: false},
@@ -639,6 +641,7 @@
 							tags: [{content: 'haha'}],
 							usedInCourse: [{ course: '1' }],
 							publisher: data.publication.publisher,
+							coverPicData: data.publication.coverPicData,
 						}
 					},
 				)
@@ -752,13 +755,13 @@
 					let publication = nodes.find(n => n.publicationId === Number(node.id()));
 
 					if (publication) {
-						let coverPicData = '';
+						const coverPicData = publication.publication.coverPicData;
 						const publicationCard = new PublicationCard({
 							target: divElement,
 							props: {
 								publication: publication.publication,
 								inCircuits: false,
-								imgSrc: 'data:image;base64,' + coverPicData,
+								imgSrc: 'data:image;base64,' +  coverPicData,
 								forArrow: true,
 								extensions: node.data().extensions,
 								publisher: publication.publication.publisher,

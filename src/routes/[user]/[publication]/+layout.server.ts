@@ -91,6 +91,7 @@ export type PublicationView = {
 				next: Edge[];
 			})[];
 		};
+		coverPicData: string;
 	};
 	coverFileData: FetchedFileItem;
 };

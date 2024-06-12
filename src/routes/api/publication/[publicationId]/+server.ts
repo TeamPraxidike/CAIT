@@ -6,6 +6,7 @@ import {
 	getPublicationById,
 } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
+import { PublicationType } from '@prisma/client';
 
 export async function GET({ params }) {
 	const publicationId = parseInt(params.publicationId);
@@ -97,6 +98,20 @@ export async function GET({ params }) {
 		} else if (publication.circuit) {
 			publication.circuit.nodes = publication.circuit.nodes.map(
 				(node) => {
+					let coverPicData = '';
+					if (
+						node.publication.type === PublicationType.Material &&
+						node.publication.materials
+					) {
+						coverPicData = coverPicFetcher(
+							node.publication.materials.encapsulatingType,
+							node.publication.coverPic,
+						).data;
+					} else {
+						const filePath = node.publication.coverPic!.path;
+						const currentFileData = fileSystem.readFile(filePath);
+						coverPicData = currentFileData.toString('base64');
+					}
 					return {
 						...node,
 						publication: {
@@ -107,6 +122,7 @@ export async function GET({ params }) {
 									node.publication.publisher.profilePic,
 								).data,
 							},
+							coverPicData: coverPicData,
 						},
 					};
 				},
