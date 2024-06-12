@@ -36,6 +36,7 @@ build-job:
   script:
     - npm run setup
   cache:
+    key: dependencies-cache
     paths:
       - node_modules/
   artifacts:
