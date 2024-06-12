@@ -18,6 +18,7 @@
 		firstName: p.firstName,
 		lastName: p.lastName,
 		username: p.username,
+		aboutMe: p.aboutMe,
 		email: p.email,
 		emailVerified: p.emailVerified,
 		reputation: p.reputation,
