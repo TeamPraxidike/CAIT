@@ -52,6 +52,7 @@ eslint:
   cache:
     key: ${CI_COMMIT_REF_SLUG}
   script:
+    - npm install eslint
     - npm run lint
 
 svelte-check:
@@ -59,6 +60,7 @@ svelte-check:
   cache:
     key: ${CI_COMMIT_REF_SLUG}
   script:
+    - npm install svelte-check
     - npm run check
 
 test-unit:
