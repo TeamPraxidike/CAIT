@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { page } from '$app/stores';
 
 	export let idValue : {id:number, content:string} ;
 	export let row:number;
@@ -12,6 +13,7 @@
 	export let selectedIds:number [];
 	export let selectedVals:string [];
 
+	export let profilePicData: string = '';
 
 
 
@@ -48,7 +50,8 @@
 	class="w-full h-full flex items-center gap-2 text-xs p-1 text-left text-surface-800 {roundingMenuItem(row, display.length)} {background(idValue)}"
 	on:click={update}>
 	{#if profilePic}
-		<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />
+		<img src='data:image;base64, + {profilePicData}' alt="userProfile" class="size-6" >
+<!--		<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />-->
 	{/if}
 	<span class="w-full h-full">{idValue.content}</span>
 </button>

@@ -4,7 +4,9 @@
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import FilterButton from '$lib/components/FilterButton.svelte';
+	import type { User } from '@prisma/client';
 
+	export let people: (User & {profilePicData: string})[] = []
 	export let label: string;
 	export let selected: {id:number, content:string } [];
 
@@ -143,9 +145,15 @@
 				<p class="p-2 text-xs text-left text-surface-600">No Matching {label.toLowerCase()}</p>
 			{:else}
 				<div class="max-h-64 {overflow}">
+					{#if label === 'Publisher'}
+						{#each people as dis, i}
+							<FilterButton profilePicData={dis.profilePicData} bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={{id: i, content: dis.firstName + "" + dis.lastName  }} bind:display={display} on:update={update}/>
+						{/each}
+						{:else }
 					{#each display as dis, i}
 						<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display} on:update={update}/>
 					{/each}
+						{/if}
 				</div>
 			{/if}
 		</div>
