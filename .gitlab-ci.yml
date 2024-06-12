@@ -36,7 +36,7 @@ build-job:
   script:
     - npm run setup
   cache:
-    key: dependencies-cache
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules/
 
