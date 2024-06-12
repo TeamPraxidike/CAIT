@@ -26,17 +26,11 @@ variables:
   AUTH_URL: http://localhost:4173
 
 stages:          # List of stages for jobs, and their order of execution
-  - install
   - build
   - lint
   - test-light
   - test-heavy
 
-install_dependencies:
-  stage: install
-  script:
-    - npm install
-    
 build-job:
   stage: build
   script:
@@ -45,7 +39,11 @@ build-job:
     key: dependencies-cache
     paths:
       - node_modules/
-
+  artifacts:
+    expire_in: 1 days
+    when: on_success
+    paths:
+      - node_modules/
 
 
 
