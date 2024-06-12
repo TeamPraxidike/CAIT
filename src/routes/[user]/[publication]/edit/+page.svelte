@@ -2,9 +2,9 @@
 	import type { LayoutServerData } from '../$types';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Publication, Tag as PrismaTag, User } from '@prisma/client';
-	import {Circuit, DifficultySelection, FileTable, Filter, MaterialTypes, Meta, TheoryAppBar} from '$lib';
+	import { Circuit, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
-		Autocomplete, type AutocompleteOption, FileButton, FileDropzone, getToastStore, InputChip
+		FileButton, FileDropzone, getToastStore
 	} from '@skeletonlabs/skeleton';
 	import { appendFile, base64ToFile, concatFileList, createFileList } from '$lib/util/file';
 	import type { PublicationView } from '../+layout.server';
@@ -16,6 +16,7 @@
 	import { onMount } from 'svelte';
 	import type { NodeDiffActions } from '$lib/database';
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
+
 
 
 	export let data: LayoutServerData & PageServerData;
@@ -57,8 +58,7 @@
 	if (isMaterial){
 		coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 	}
-
-	let allTypes: {id:number, content:string }[] = MaterialTypes.map(x => ({id : 0, content : x})); //array with all the tags MOCK
+	let allTypes: {id:string, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 
 	function chooseCover(e: Event) {
@@ -75,26 +75,8 @@
 	}
 
 
-	let inputChip: InputChip;
 	let allTags: PrismaTag[] = data.tags;
 
-	type TagOption = AutocompleteOption<string, { content: string }>;
-
-	let flavorOptions: TagOption[] = allTags.map(tag => {
-		return {
-			value: tag.content,
-			label: tag.content
-		};
-	});
-
-	let tagInput = '';
-
-	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		if (!tags.includes(e.detail.value)) {
-			inputChip.addChip(e.detail.value);
-			tagInput = '';
-		}
-	}
 
 	export let form: ActionData;
 	const toastStore = getToastStore();
@@ -129,23 +111,7 @@
 		}
 	}
 	let newTags: string[] = [];
-	const handleInvalid = () => {
-		if(tagInput.length>0 && !tags.includes(tagInput)) {
-			tags=[...tags,tagInput];
-			newTags=[...newTags,tagInput];
-			tagInput='';
-		}
-		else {
-			triggerRepeatInput("Tag",tagInput);
-		}
-	}
 
-	const triggerRepeatInput = (type: string,input: string)=>{
-		toastStore.trigger({
-			message: `${type} ${input} Already Added`,
-			background: 'bg-warning-200'
-		});
-	}
 
 	let circuitRef : InstanceType<typeof Circuit>;
 	let nodeActions:NodeDiffActions;
