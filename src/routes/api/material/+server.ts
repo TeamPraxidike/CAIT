@@ -10,7 +10,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
-import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
+import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
 
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';

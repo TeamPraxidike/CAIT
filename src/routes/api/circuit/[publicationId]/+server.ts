@@ -17,7 +17,7 @@ import { Prisma } from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
 
 import type {File as PrismaFile} from '@prisma/client';
-import {enqueueCircuitComparison} from "$lib/PiscinaUtils/runner";
+import {enqueueCircuitComparison} from "$lib/PiscinaUtils/main";
 
 
 export async function GET({ params, locals }) {
