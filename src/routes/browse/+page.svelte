@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
+	import { Filter, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-    import type { File as PrismaFile, Material, Publication, Tag } from '@prisma/client';
+	import type { File as PrismaFile, Material, Publication, Tag, User } from '@prisma/client';
 
 
 	//TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
@@ -17,7 +17,7 @@
 	$: materials = data.materials;
 	$: circuits = data.circuits;
 
-	let users = data.users;
+	let users: (User & {posts: Publication[], profilePicData:string})[] = data.users;
 	let tags = data.tags;
 	//let profilePics:FetchedFileArray = data.profilePics;
 	let liked = data.liked as number[];
@@ -27,35 +27,35 @@
 
 	//Variables needed to deal with Sort and Difficulty
 	let sortOptions: {
-		id: number,
+		id: string,
 		content: string
-	}[] = ['Most Recent', 'Most Liked', 'Most Used', 'Oldest'].map(x => ({ id: 0, content: x }));
+	}[] = ['Most Recent', 'Most Liked', 'Most Used', 'Oldest'].map(x => ({ id: '0', content: x }));
 	let sortByActive = false;
 	let sortByText = 'Sort By';
 
-	let selectedDiff: { id: number, content: string }[] = [];
-	let diffOptions: { id: number, content: string }[] = ['Easy', 'Medium', 'Hard'].map((x: string) => ({
-		id: 0,
+	let selectedDiff: { id: string, content: string }[] = [];
+	let diffOptions: { id: string, content: string }[] = ['Easy', 'Medium', 'Hard'].map((x: string) => ({
+		id: '0',
 		content: x
 	}));
 	let diffActive = false;
 
 	//Variables needed to deal with Tags
-	let selectedTags: { id: number, content: string }[] = []; //keeps track of selected tags
-	let allTags: { id: number, content: string }[] = tags.map((x: Tag) => ({ id: 0, content: x.content }));
-	let displayTags: { id: number, content: string }[] = allTags;
+	let selectedTags: { id: string, content: string }[] = []; //keeps track of selected tags
+	let allTags: { id: string, content: string }[] = tags.map((x: Tag) => ({ id: '0', content: x.content }));
+	let displayTags: { id: string, content: string }[] = allTags;
 	let tagActive = false;
 
         //Variables needed to deal with Publishers
-        let selectedPublishers: {id:number, content:string }[] = [];//keeps track of selected tags
-        let allPublisherNames: {id:number, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstName + " " + x.lastName)})); //array with all the tags MOCK
-        let displayPublishers: {id:number, content:string }[] = allPublisherNames; //
+        let selectedPublishers: {id:string, content:string }[] = [];//keeps track of selected tags
+        let allPublisherNames: {id:string, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstName + " " + x.lastName)})); //array with all the tags MOCK
+        let displayPublishers: {id:string, content:string }[] = allPublisherNames; //
         let publisherActive = false
 
         //Variables needed to deal with Types
-        let selectedTypes: {id:number, content:string }[] = []; //keeps track of selected tags
-        let allTypes: {id:number, content:string }[] = ["Presentation", "Information", "Code", "Assignment", "Exam", "Other"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
-        let displayTypes: {id:number, content:string }[] = allTypes; //
+        let selectedTypes: {id:string, content:string }[] = []; //keeps track of selected tags
+        let allTypes: {id:string, content:string }[] = ["Presentation", "Information", "Code", "Assignment", "Exam", "Other"].map(x => ({id : '0', content : x})); //array with all the tags MOCK
+        let displayTypes: {id:string, content:string }[] = allTypes; //
         let typeActive = false
 
         let numberNodes : number;
@@ -67,20 +67,19 @@
 			applyActive = true;
 		}
 
-		const removePublisher = (name: {id:number, content:string }) => {
-			selectedPublishers = selectedPublishers.filter(publisher => publisher.content !== name.content);
+		const removePublisher = (name: {id:string, content:string }) => {
+			selectedPublishers = selectedPublishers.filter(publisher => publisher.id !== name.id);
 			applyActive = true;
-
 		};
 
 
-		const removeDiff = (name:{id:number, content:string }) => {
+		const removeDiff = (name:{id:string, content:string }) => {
         selectedDiff = selectedDiff.filter(diff => diff.content !== name.content);
         applyActive = true;
 
     };
 
-    const removeType = (name: {id:number, content:string }) => {
+    const removeType = (name: {id:string, content:string }) => {
         selectedTypes = selectedTypes.filter(diff => diff.content !== name.content);
         applyActive = true;
 
@@ -223,10 +222,10 @@
 
             <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
                     profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
-                    on:filterSelected={() => {applyActive = true}} num="{0}"/>
+                    on:filterSelected={() => {applyActive = true}} num="{0}" />
             <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
-                    bind:display="{displayPublishers}" profilePic="{true}" bind:active="{publisherActive}"
-                    on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}"/>
+                    bind:display="{displayPublishers}" profilePic="{true}"  bind:active="{publisherActive}"
+                    on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}" people="{users}"/>
             {#if pageType === "materials"}
                 <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
                         profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
@@ -280,7 +279,7 @@
                 <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Publishers:</p>
                 {#each selectedPublishers as sp}
                     <div class="flex gap-1 items-center">
-                        <Icon class="text-surface-600 justify-self-end self-center size-4" icon="gg:profile"/>
+												<img src="{'data:image;base64,' + users.filter(x =>x.id === sp.id)[0].profilePicData}" alt="user profile" class="size-4 rounded-full"/>
                         <p class="text-xs">{sp.content}</p>
                         <button class="h-full" on:click={() => removePublisher(sp)}>
                             <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>

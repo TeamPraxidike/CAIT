@@ -8,17 +8,16 @@
 
 	export let people: (User & {profilePicData: string})[] = []
 	export let label: string;
-	export let selected: {id:number, content:string } [];
+	export let selected: {id:string, content:string } [];
 
 	$: selectedIds = selected.map(x => x.id)
 	$: selectedVals = selected.map(x => x.content)
-
 	//export let selectedIds: number[];
-	export let all: {id:number, content:string } [];
+	export let all: {id:string, content:string } [];
 
 	export let num: number;
 	export let type: boolean = false;
-	export let display: {id:number, content:string } [] = all;
+	export let display: {id:string, content:string } [] = all;
 	export let active = false;
 	let input: HTMLInputElement;
 
@@ -87,8 +86,8 @@
 			if (label === "Publisher" && selectedIds.includes(event.detail.idval.id)) {
 				selected = selected.filter(item => item.id !== event.detail.idval.id); //if we are removing a tag remove it from selected tags
 			}
-			else if (selectedVals.includes(event.detail.idval.content)){
-				selected = selected.filter(item => item.content !== event.detail.idval.content); //if we are removing a tag remove it from selected tags
+			else if (label !== 'Publisher' && selectedVals.includes(text)){
+				selected = selected.filter(item => item.content !== text); //if we are removing a tag remove it from selected tags
 			}
 			else {
 				selected = [...selected, {id : event.detail.idval.id, content:text}]; //if we are selecting a tag add it to the selected tags
@@ -147,7 +146,7 @@
 				<div class="max-h-64 {overflow}">
 					{#if label === 'Publisher'}
 						{#each people as dis, i}
-							<FilterButton profilePicData={dis.profilePicData} bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={{id: i, content: dis.firstName + "" + dis.lastName  }} bind:display={display} on:update={update}/>
+							<FilterButton profilePicData={dis.profilePicData} bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={{id: dis.id, content: dis.firstName + " " + dis.lastName  }} bind:display={display} on:update={update}/>
 						{/each}
 						{:else }
 					{#each display as dis, i}
