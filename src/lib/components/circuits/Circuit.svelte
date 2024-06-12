@@ -867,7 +867,7 @@
 		<div class="flex justify justify-between">
 			<div class="flex gap-2">
 				{#if !selected}
-					<button type="button" class="btn variant-filled" on:click={fetchElements}>Add</button>
+					<button type="button" class="btn variant-filled" on:click={fetchElements}>Insert Publications</button>
 				{/if}
 				{#if (selected || edgeSelected)}
 					{#if (numSelected < 2 && selected)}
