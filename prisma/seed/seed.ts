@@ -125,110 +125,110 @@ const main = async () => {
 		x(tags.length, ({ index }) => ({ content: tags[index] })),
 	);
 
-	// await seed.user((x) =>
-	// 	x(users.length, ({ index }) => ({
-	// 		firstName: users[index].first,
-	// 		lastName: users[index].last,
-	// 		email: users[index].email,
-	// 		id: (index + 1).toString(),
-	// 	})),
-	// );
-	//
-	// const materials = [];
-	// for (let i = 0; i < titles.length; i++) {
-	// 	await prisma.file.createMany({
-	// 		data: files[i],
-	// 	});
-	// 	if (coverPic[i] !== undefined)
-	// 		await prisma.file.create({
-	// 			data: coverPic[i],
-	// 		});
-	//
-	// 	const mat = await prisma.material.create({
-	// 		data: {
-	// 			copyright: false,
-	// 			encapsulatingType: types[i],
-	// 			publication: {
-	// 				create: {
-	// 					title: titles[i],
-	// 					publisherId: '1',
-	// 					description: descriptions[i],
-	// 					difficulty: difficulties[i],
-	// 					learningObjectives: [],
-	// 					prerequisites: [],
-	// 					type: PublicationType.Material,
-	// 					coverPic: {
-	// 						connect: coverPic[i],
-	// 					},
-	// 					tags: {
-	// 						connect: materialTag[i].map((tag) => ({
-	// 							content: tag,
-	// 						})),
-	// 					},
-	// 					likes: Math.round(Math.random() * 400),
-	// 				},
-	// 			},
-	// 			files: {
-	// 				connect: files[i].map((file) => ({ path: file.path })), // Connects the created files to the material
-	// 			},
-	// 		},
-	// 	});
-	// 	materials.push(mat);
-	// }
-	//
-	// await prisma.file.createMany({
-	// 	data: {
-	// 		path: 'circuit.png',
-	// 		type: 'image/png',
-	// 		title: 'circuit.png',
-	// 	},
-	// });
-	//
-	// const circuit = await prisma.circuit.create({
-	// 	data: {
-	// 		numNodes: 5,
-	// 		publication: {
-	// 			create: {
-	// 				title: circuitTitles[0],
-	// 				publisherId: '1',
-	// 				description:
-	// 					'A circuit that walks you through the basics of machine learning.',
-	// 				difficulty: Difficulty.easy,
-	// 				learningObjectives: [],
-	// 				prerequisites: [],
-	// 				type: PublicationType.Circuit,
-	// 				coverPic: {
-	// 					connect: {
-	// 						path: 'circuit.png',
-	// 						type: 'image/png',
-	// 						title: 'circuit.png',
-	// 					},
-	// 				},
-	// 				likes: Math.round(Math.random() * 4000),
-	// 			},
-	// 		},
-	// 	},
-	// });
-	// const nodes = [];
-	//
-	// nodes.push(await addNode(circuit.id, materials[0].publicationId, 0, 500)); // neural networks 0
-	// nodes.push(await addNode(circuit.id, materials[1].publicationId, 310, 500)); // cnn 1
-	// nodes.push(await addNode(circuit.id, materials[2].publicationId, 250, 250)); // svm 2
-	// nodes.push(
-	// 	await addNode(circuit.id, materials[4].publicationId, -250, 250),
-	// ); // perceptron 3
-	// nodes.push(await addNode(circuit.id, materials[5].publicationId, 0, 0)); // basics 4
-	//
-	// const edges = [
-	// 	{
-	// 		fromId: nodes[4].publicationId,
-	// 		toId: [nodes[3].publicationId, nodes[2].publicationId],
-	// 	},
-	// 	{ fromId: nodes[2].publicationId, toId: [nodes[0].publicationId] },
-	// 	{ fromId: nodes[3].publicationId, toId: [nodes[0].publicationId] },
-	// 	{ fromId: nodes[0].publicationId, toId: [nodes[1].publicationId] },
-	// ];
-	// await handleEdges(circuit.id, edges);
+	await seed.user((x) =>
+		x(users.length, ({ index }) => ({
+			firstName: users[index].first,
+			lastName: users[index].last,
+			email: users[index].email,
+			id: (index + 1).toString(),
+		})),
+	);
+
+	const materials = [];
+	for (let i = 0; i < titles.length; i++) {
+		await prisma.file.createMany({
+			data: files[i],
+		});
+		if (coverPic[i] !== undefined)
+			await prisma.file.create({
+				data: coverPic[i],
+			});
+
+		const mat = await prisma.material.create({
+			data: {
+				copyright: false,
+				encapsulatingType: types[i],
+				publication: {
+					create: {
+						title: titles[i],
+						publisherId: '1',
+						description: descriptions[i],
+						difficulty: difficulties[i],
+						learningObjectives: [],
+						prerequisites: [],
+						type: PublicationType.Material,
+						coverPic: {
+							connect: coverPic[i],
+						},
+						tags: {
+							connect: materialTag[i].map((tag) => ({
+								content: tag,
+							})),
+						},
+						likes: Math.round(Math.random() * 400),
+					},
+				},
+				files: {
+					connect: files[i].map((file) => ({ path: file.path })), // Connects the created files to the material
+				},
+			},
+		});
+		materials.push(mat);
+	}
+
+	await prisma.file.createMany({
+		data: {
+			path: 'circuit.png',
+			type: 'image/png',
+			title: 'circuit.png',
+		},
+	});
+
+	const circuit = await prisma.circuit.create({
+		data: {
+			numNodes: 5,
+			publication: {
+				create: {
+					title: circuitTitles[0],
+					publisherId: '1',
+					description:
+						'A circuit that walks you through the basics of machine learning.',
+					difficulty: Difficulty.easy,
+					learningObjectives: [],
+					prerequisites: [],
+					type: PublicationType.Circuit,
+					coverPic: {
+						connect: {
+							path: 'circuit.png',
+							type: 'image/png',
+							title: 'circuit.png',
+						},
+					},
+					likes: Math.round(Math.random() * 4000),
+				},
+			},
+		},
+	});
+	const nodes = [];
+
+	nodes.push(await addNode(circuit.id, materials[0].publicationId, 0, 500)); // neural networks 0
+	nodes.push(await addNode(circuit.id, materials[1].publicationId, 310, 500)); // cnn 1
+	nodes.push(await addNode(circuit.id, materials[2].publicationId, 250, 250)); // svm 2
+	nodes.push(
+		await addNode(circuit.id, materials[4].publicationId, -250, 250),
+	); // perceptron 3
+	nodes.push(await addNode(circuit.id, materials[5].publicationId, 0, 0)); // basics 4
+
+	const edges = [
+		{
+			fromId: nodes[4].publicationId,
+			toId: [nodes[3].publicationId, nodes[2].publicationId],
+		},
+		{ fromId: nodes[2].publicationId, toId: [nodes[0].publicationId] },
+		{ fromId: nodes[3].publicationId, toId: [nodes[0].publicationId] },
+		{ fromId: nodes[0].publicationId, toId: [nodes[1].publicationId] },
+	];
+	await handleEdges(circuit.id, edges);
 
 	process.exit();
 };

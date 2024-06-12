@@ -98,7 +98,7 @@ export async function compare(pubAFiles, pubBFiles) {
         //
         // console.log(`took ${end - start}`)
     } catch (error) {
-        console.error('Error reading PDFs:', error);
+        console.error('Error comparing files:', error);
         return 0;
     }
 }

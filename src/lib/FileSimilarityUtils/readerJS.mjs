@@ -109,6 +109,7 @@ export async function ipynbReader(filePath) {
         const data = fs.readFileSync(filePath).toString('utf8');
 
         const notebook = JSON.parse(data);
+
         let textContent = '';
 
         notebook.cells.forEach((cell) => {
