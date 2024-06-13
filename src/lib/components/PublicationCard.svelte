@@ -185,6 +185,7 @@
 		closeQuery: '#close, #remove'
 	};
 
+	let isClickedTags = false;
 </script>
 <div class="{className} flex items-center">
 	{#if forArrow}
@@ -251,16 +252,24 @@
 
 
 			<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
-				<div class="flex gap-1">
+				<div class="flex gap-1 relative">
 					{#each tags.slice(0, maxTags) as tag, i}
 						<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
 					{/each}
 				</div>
-				<div class=" self-center">
-					{#if (tags.length > maxTags)}
-						<p class="text-sm text-primary-500">+{tags.length - maxTags}</p>
+				<div class="flex self-center space-x-1 ">
+					{#if (tags.length > maxTags) }
+						<button on:click={()=>{isClickedTags = !isClickedTags}} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
 					{/if}
+
 				</div>
+				{#if isClickedTags}
+					<div class="absolute ml-44 flex flex-col gap-1 z-[9999]">
+						{#each tags.slice(maxTags, tags.length) as tag, i}
+							<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
+						{/each}
+					</div>
+				{/if}
 			</div>
 			<div class="w-full space-y-2">
 				<hr class="opacity-50">
