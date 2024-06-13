@@ -2,6 +2,12 @@ import {verifyAuth} from "$lib/database/auth";
 import {getPublicationById, getUserById} from "$lib/database";
 import {reportPublication} from "$lib/database/user";
 
+/**
+ * report a publication
+ * @param params
+ * @param locals
+ * @constructor
+ */
 export async function POST({ params, locals }) {
     const authError = await verifyAuth(locals);
     if (authError) return authError;

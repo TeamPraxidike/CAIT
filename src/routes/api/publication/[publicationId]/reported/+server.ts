@@ -2,6 +2,12 @@ import {verifyAuth} from "$lib/database/auth";
 import {getPublicationById} from "$lib/database";
 import {getReportsPublication} from "$lib/database/publication";
 
+/**
+ * See the number of reports on a publication. You can only do that if you are an admin
+ * @param params
+ * @param locals
+ * @constructor
+ */
 export async function GET({ params, locals }) {
     const authError = await verifyAuth(locals);
     if (authError) return authError;
