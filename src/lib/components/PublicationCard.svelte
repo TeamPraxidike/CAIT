@@ -186,6 +186,12 @@
 	};
 
 	let isClickedTags = false;
+	const viewTags = () => {
+		isClickedTags = !isClickedTags;
+		if(isClickedTags){
+			setTimeout(()=>{isClickedTags=false},2000);
+		}
+	}
 </script>
 <div class="{className} flex items-center">
 	{#if forArrow}
@@ -257,14 +263,11 @@
 						<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
 					{/each}
 				</div>
-				<div class="flex self-center space-x-1 ">
 					{#if (tags.length > maxTags) }
-						<button on:click={()=>{isClickedTags = !isClickedTags}} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
+						<button on:click={viewTags} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
 					{/if}
-
-				</div>
 				{#if isClickedTags}
-					<div class="absolute ml-44 flex flex-col gap-1 z-[9999]">
+					<div class="absolute ml-48 flex flex-col gap-1 z-[9999]" transition:fly={{ x:8 , duration: 400 }}>
 						{#each tags.slice(maxTags, tags.length) as tag, i}
 							<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
 						{/each}
