@@ -77,6 +77,10 @@
 		});
 	}
 	const onNextHandler = async (event: CustomEvent) => {
+			window.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			});
 		if (event.detail.step === 0) {
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 
