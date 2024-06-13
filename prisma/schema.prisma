@@ -47,6 +47,7 @@ model User {
   saved            Publication[]             @relation("saved")
   posts            Publication[]
   liked            Publication[]             @relation("liked")
+  reported         Publication[]             @relation("reported")
   usedPublications PublicationUsedInCourse[]
 
   likedComments Comment[] @relation("likedComments")
@@ -153,8 +154,8 @@ model Publication {
   savedBy     User[] @relation("saved")
   likedBy     User[] @relation("liked")
 
-  reports Int             @default(0)
-  type    PublicationType
+  reportedBy User[]          @relation("reported")
+  type       PublicationType
 
   node Node[]
 

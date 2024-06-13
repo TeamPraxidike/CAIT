@@ -517,3 +517,19 @@ export async function getLikedReplies(userId: string) {
 		},
 	});
 }
+
+
+export async function reportPublication(userId: string, publicationId: number) {
+	await prisma.user.update({
+		where: {
+			id: userId,
+		},
+		data: {
+			reported: {
+				connect: {
+					id: publicationId,
+				},
+			},
+		},
+	});
+}
