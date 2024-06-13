@@ -65,7 +65,7 @@ paths:
     get:
       tags:
         - Publication
-      summary: Get the number of reports for this publication. Only works if the user is admin.
+      summary: If the request is made from an admin, this returns the number of reports this publication has. Otherwise it returns whether the current user has reported this publication in particular.
       parameters:
         - in: path
           name: publicationId
@@ -81,8 +81,11 @@ paths:
           content:
             application/json:
               schema:
-                type: number
-                example: 4
+                oneOf:
+                  - type: number
+                    example: 4
+                  - type: boolean
+                    example: true
 
         '400':
           description: Bad request

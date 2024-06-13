@@ -1,7 +1,7 @@
 import {verifyAuth} from "$lib/database/auth";
 import {getPublicationById, getUserById} from "$lib/database";
-import {isReported, reportPublication} from "$lib/database/user";
-import {getReportsPublication} from "$lib/database/publication";
+import {reportPublication} from "$lib/database/user";
+
 
 
 /**
