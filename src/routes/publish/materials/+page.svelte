@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { DiffBar, DifficultySelection, FileTable, Filter, Meta, PublishReview, TheoryAppBar } from '$lib';
+	import {
+		DiffBar,
+		DifficultySelection,
+		FileTable,
+		Filter,
+		MaterialTypes,
+		Meta,
+		PublishReview,
+		TheoryAppBar
+	} from '$lib';
 	import {
 		FileButton,
 		FileDropzone,
@@ -48,7 +57,7 @@
 	let copyright: string = '';
 	let theoryApplicationRatio = 0.5;
 	let selectedType = "Select Type";
-	let allTypes: {id:number, content:string }[] = ["Presentation", "Information", "Code", "Assignment", "Exam", "Other"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+	let allTypes: {id:string, content:string }[] = MaterialTypes.map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 	let typeActive = false;
 	// cover

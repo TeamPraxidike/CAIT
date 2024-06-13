@@ -29,7 +29,7 @@ describe('Liking publications', () => {
 			difficulty: Difficulty.easy,
 			learningObjectives: ['lo1'],
 			prerequisites: ['p1'],
-			materialType: 'presentation',
+			materialType: 'assignment',
 			copyright: true,
 			timeEstimate: 300,
 			theoryPractice: 0.5,
