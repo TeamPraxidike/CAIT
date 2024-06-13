@@ -1,6 +1,8 @@
 import {verifyAuth} from "$lib/database/auth";
 import {getPublicationById, getUserById} from "$lib/database";
-import {reportPublication} from "$lib/database/user";
+import {isReported, reportPublication} from "$lib/database/user";
+import {getReportsPublication} from "$lib/database/publication";
+
 
 /**
  * report a publication
@@ -27,9 +29,8 @@ export async function POST({ params, locals }) {
         );
 
     try {
-        await reportPublication(id, parseInt(publicationId));
-
-        return new Response(JSON.stringify({ message: "Succesfully reported publication" }), {
+        const res = await reportPublication(id, parseInt(publicationId));
+        return new Response(JSON.stringify({ message: res }), {
             status: 200,
         });
     } catch (error) {

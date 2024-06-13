@@ -519,6 +519,26 @@ export async function getLikedReplies(userId: string) {
 	});
 }
 
+export async function isReported(userId: string, publicationId: number){
+	return prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			reported: {
+				where: {
+					id: publicationId,
+				},
+				select: {
+					id: true,
+				},
+			},
+		}
+	}).then(reported => {
+		if(reported === null) throw new Error("Unable to fetch reported applications")
+		return reported.reported.map(x => x.id).includes(publicationId);
+	});
+}
 
 export async function reportPublication(userId: string, publicationId: number) {
 	const reported = await prisma.publication.findUnique({
@@ -533,7 +553,6 @@ export async function reportPublication(userId: string, publicationId: number) {
 	if (reported.reportedBy.map((x) => x.id).includes(userId)) {
 		await unreport(userId, publicationId);
 		return 'Publication unreported successfully';
-		// return liked.liked
 	} else {
 		await report(userId, publicationId);
 		return 'Publication reported successfully';
