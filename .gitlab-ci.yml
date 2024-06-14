@@ -51,6 +51,7 @@ eslint:
 svelte-check:
   stage: lint
   script:
+    - npx prisma generate
     - npm run check
 
 test-unit:
