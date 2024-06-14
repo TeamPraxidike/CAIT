@@ -51,13 +51,13 @@
             if(allTags.includes({ content: newTag })){
                 tagInput=newTag;
                 enterTag = false;
-            }else if(!tags.includes(newTag) && newTag !== ''){
+            }else if(!tags.includes(newTag.toLowerCase()) && newTag !== ''){
                 newTags = [...newTags, newTag];
                 tags = [...tags,newTag];
                 newTag = '';
                 enterTag = false;
             }else{
-                triggerRepeatInput('Tag', newTag);
+                triggerRepeatInput('Tag', newTag.toLowerCase());
             }
         }else{
             enterTag=true;
