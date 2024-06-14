@@ -11,6 +11,7 @@
 		Tag, TheoryAppBar,
 		UserProp
 	} from '$lib';
+	import { fly } from 'svelte/transition';
 
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
@@ -21,7 +22,6 @@
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
-	import { fly } from 'svelte/transition';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -45,6 +45,8 @@
 	let likedPublications = data.liked as number[];
 	let savedPublications = data.saved.saved as number[];
 	let reported = data.reported;
+
+
 
 	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
@@ -202,26 +204,6 @@
 		}
 	};
 
-	const generateCourses = (courses: string[]): string => {
-		if (courses.length === 0) {
-			return '';
-		}
-		let out = `Material is used in `;
-		for (let i = 0; i < Math.min(courses.length, 2); i++) {
-			if (courses.length === i + 1) {
-				out += ' and ';
-			}
-			out += '\'' + courses[i] + '\' ';
-			if (!(courses.length === i + 2 || courses.length === i + 1)) {
-				out += ', ';
-			}
-		}
-		if (courses.length > 2) {
-			out += ' and ' + (courses.length - 2) + ' more';
-		}
-		return out + '!';
-	};
-
 	const getFileExtension = (filePath: string): string => {
 		const index = filePath.lastIndexOf('.');
 		return index !== -1 ? filePath.substring(index + 1) : '';
@@ -229,16 +211,22 @@
 
 	let hoverDivReport: HTMLDivElement;
 	let isHoveredReport = false;
-	const handleHover = () => isHoveredReport = !isHoveredReport;
+	let hoverDiv: HTMLDivElement;
+	let isHovered = false;
+	const handleHoverReport = () => isHoveredReport = !isHoveredReport;
+	const handleHover = () => isHovered = !isHovered;
 	onMount(() => {
-		if (hoverDivReport) {
-			hoverDivReport.addEventListener('mouseenter', handleHover);
-			hoverDivReport.addEventListener('mouseleave', handleHover);
+		if (hoverDivReport && hoverDiv) {
+			hoverDivReport.addEventListener('mouseenter', handleHoverReport);
+			hoverDivReport.addEventListener('mouseleave', handleHoverReport);
+			hoverDiv.addEventListener('mouseenter', handleHover);
+			hoverDiv.addEventListener('mouseleave', handleHover);
 
 			return () => {
-				hoverDivReport.removeEventListener('mouseenter', handleHover);
-				hoverDivReport.removeEventListener('mouseleave', handleHover);
-
+				hoverDivReport.removeEventListener('mouseenter', handleHoverReport);
+				hoverDivReport.removeEventListener('mouseleave', handleHoverReport);
+				hoverDiv.removeEventListener('mouseenter', handleHover);
+				hoverDiv.removeEventListener('mouseleave', handleHover);
 			};
 		}
 	});
@@ -250,6 +238,28 @@
 	<div class="flex flex-row items-top justify-between w-full">
 		<div class="flex flex-col gap-2 w-1/2">
 			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
+
+			<div class="grid grid-cols-6">
+				<div bind:this={hoverDiv} class="col-span-2">
+					{#if pubView.publication.usedInCourse.length === 1}
+						<p class="text-sm opacity-85 break-words max-w-full hover:font-bold underline" >Material is used in {pubView.publication.usedInCourse.length} course</p>
+					{:else if pubView.publication.usedInCourse.length > 1}
+						<p class="text-sm opacity-85 break-words max-w-full hover:font-bold underline" >Material is used in {pubView.publication.usedInCourse.length} courses</p>
+					{/if}
+
+					{#if isHovered}
+						<div
+								class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300 flex-col"
+								style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+							{#each pubView.publication.usedInCourse.map(x => x.course) as course}
+								<p class="text-sm opacity-85 break-words max-w-full">{course}</p>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			</div>
+
+
 			{#if pubView.publication.publisherId === $page.data.session?.user.id
 			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
 			|| $page.data.session?.user.isAdmin}
@@ -302,7 +312,7 @@
 				{/if}
 			</div>
 		</div>
-		<p class="text-sm opacity-85 pl-5 break-words max-w-full">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
+
 
 		<div class="flex flex-col gap-2">
 			{#if isMaterial && pubView.publication.materials.theoryPractice}
