@@ -950,7 +950,8 @@
 
 				</div>
 			</div>
-		<div>
+		<div class="flex gap-4">
+			<button type="button" class="btn variant-filled bg-surface-600" on:click="{() => {cy.center()}}"> Recentre </button>
 			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 rounded-full h-full">
 				<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center"/>
 			</button>
@@ -978,10 +979,6 @@
 	<div class="fixed bottom-[8%] left-1/2 right-1/2 whitespace-nowrap  z-999 flex items-center justify-center" transition:fly={{ duration: 750 }} ><span class=" bg-surface-50 py-2 px-4 shadow-lg text-primary-600 rounded-full">Click on a publication to add/remove edges from the source</span></div>
 {/if}
 
-<div class="card p-4 w-72 shadow-lg bg-surface-200" data-popup="pp">
-	<div><p>Demo Content</p></div>
-	<div class="arrow bg-surface-200" />
-</div>
 
 <Modal components={modalRegistryHelp}/>
 
