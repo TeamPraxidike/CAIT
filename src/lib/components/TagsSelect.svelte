@@ -52,6 +52,7 @@
                 tagInput=newTag;
                 enterTag = false;
             }else if(!tags.includes(newTag) && newTag !== ''){
+                newTags = [...newTags, newTag];
                 tags = [...tags,newTag];
                 newTag = '';
                 enterTag = false;
