@@ -1,6 +1,5 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
-import {use} from "cytoscape";
 
 /**
  * Adds a new user to the database. Generates a unique username based on the user's first and last name.

@@ -21,6 +21,7 @@
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
+	import { fly } from 'svelte/transition';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -225,6 +226,22 @@
 		const index = filePath.lastIndexOf('.');
 		return index !== -1 ? filePath.substring(index + 1) : '';
 	};
+
+	let hoverDivReport: HTMLDivElement;
+	let isHoveredReport = false;
+	const handleHover = () => isHoveredReport = !isHoveredReport;
+	onMount(() => {
+		if (hoverDivReport) {
+			hoverDivReport.addEventListener('mouseenter', handleHover);
+			hoverDivReport.addEventListener('mouseleave', handleHover);
+
+			return () => {
+				hoverDivReport.removeEventListener('mouseenter', handleHover);
+				hoverDivReport.removeEventListener('mouseleave', handleHover);
+
+			};
+		}
+	});
 </script>
 
 <Meta title={pubView.publication.title} description="CAIT" type="site" />
@@ -232,17 +249,7 @@
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex flex-row items-top justify-between w-full">
 		<div class="flex flex-col gap-2 w-1/2">
-			<div class="flex flex-row">
-				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
-				<button on:click={toggleReport}>
-					{#if reported}
-						<Icon icon="material-symbols:flag" width="32"/>
-					{:else}
-						<Icon icon="material-symbols:flag-outline" width="32"/>
-					{/if}
-				</button>
-			</div>
-
+			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
 			{#if pubView.publication.publisherId === $page.data.session?.user.id
 			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
 			|| $page.data.session?.user.isAdmin}
@@ -319,24 +326,46 @@
 
 <div class="col-span-full flex flex-col items-start mt-2">
 
-	<div class="flex items-center text-3xl rounded-lg border mt-4">
-		<button type="button"
-				class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
-				on:click={() => toggleLike()}>
-			<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
-			<span>{likes}</span>
-		</button>
-		{#if isMaterial}
-			<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-					on:click={downloadFiles}>
-				<Icon class="xl:text-2xl" icon="material-symbols:download" />
+	<div class="flex ">
+		<div class="flex items-center text-3xl rounded-lg border mt-4">
+			<button type="button"
+					class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
+					on:click={() => toggleLike()}>
+				<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
+				<span>{likes}</span>
 			</button>
-		{/if}
-		<button type="button"
-				class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-				on:click={() => toggleSave()}>
-			<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
-		</button>
+			{#if isMaterial}
+				<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+						on:click={downloadFiles}>
+					<Icon class="xl:text-2xl" icon="material-symbols:download" />
+				</button>
+			{/if}
+			<button type="button"
+					class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+					on:click={() => toggleSave()}>
+				<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
+			</button>
+
+			<div bind:this={hoverDivReport}>
+				<button on:click={toggleReport} class="pl-2 pr-1">
+					{#if reported}
+						<Icon icon="material-symbols:flag" class="self-center size-6 text-surface-600" />
+					{:else}
+						<Icon icon="material-symbols:flag-outline" class="self-center size-6 text-surface-600" />
+					{/if}
+				</button>
+				{#if isHoveredReport}
+					<div
+							class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+							style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+						<p class="text-xs">Report publication</p>
+					</div>
+				{/if}
+			</div>
+
+		</div>
+
+
 	</div>
 
 	{#if isMaterial}
