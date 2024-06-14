@@ -6,7 +6,6 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import {
 		Difficulty,
-		MaterialType,
 		type Node as PrismaNode,
 		type Publication,
 		PublicationType,
@@ -17,6 +16,7 @@
 	import { PublicationCard } from '$lib';
 	import html2canvas from 'html2canvas';
 	import type { NodeDiffActions } from '$lib/database';
+	import { fly } from 'svelte/transition';
 
 	const mapGetTo: Map<number, Set<number>> = new Map();
 	async function captureScreenshot () : Promise<string> {
@@ -130,6 +130,9 @@
 	let dummyNodeClicked: boolean = false;
 	let cursorInsideNode: boolean = false;
 	let hoveredNodeId : number = -1;
+	let popupPrereq1: boolean = false;
+	let popupPrereq2: boolean = false;
+	let stage1: boolean = false;
 
 
 
@@ -210,6 +213,10 @@
 		cy.on('select', 'node', (event: any) => {
 			numSelected++;
 			let node = event.target;
+
+			//If the dummy node is selected, unselect it and
+			// restore the previous selected node
+
 			if (node.id() === 'edgeStart')
 			{
 				node.unselect();
@@ -225,9 +232,7 @@
 				return;
 			}
 
-			if (!publishing && !(node.id() === 'edgeStart')) {
-				cy.$(`#${node.id()}`).unselect();
-			}
+			//Change the background color of the selected node
 			node.style({
 				'background-color': '#4C4C5C',
 				'color': '#F9F9FA'
@@ -235,8 +240,7 @@
 
 			addHtmlLabel(`#${node.id()}`, true);
 
-
-
+			//If a node is already selected, add an edge between the two nodes
 			if (selected && prereqActive) {
 				let edgeId = `en${selectedId.toString()}n${node.id()}`;
 				if (cy.getElementById(edgeId).length > 0) {
@@ -260,11 +264,21 @@
 				selected = false;
 				cy.$(`#${selectedId}`).select();
 			} else {
-
-				if (prereqActive) {
+					if (stage1)
+					{
+						stage1 = false
+						cy.nodes().style({
+							'border-width': '1px' // new border width
+						});
+						popupPrereq2 = true;
+						setTimeout(() => {
+							popupPrereq2 = false;
+						}, 1500)
+					}
+					if (prereqActive) {
 					cy.edges().forEach((edge: any) => {
 						if (edge.source().id() === selectedId) {
-							edge.source().style({
+							edge.target().style({
 								'background-color': '#9E9EAE',
 								'color': '#F9F9FA'
 							});
@@ -396,7 +410,7 @@
 				}, 700);
 			}
 			else {
-				if (cy.getElementById('edgeStart').length === 0){
+			if (cy.getElementById('edgeStart').length === 0 && !prereqActive && !(node.id() === 'edgeStart')) {
 					cy.add({
 						group: 'nodes',
 						data: { id: "edgeStart", label: "", extensions : [], isMaterial: true, dummyNode: true},
@@ -432,6 +446,8 @@
 					'background-color': '#9E9EAE',
 					'color': '#F9F9FA'
 				});
+				addHtmlLabel(`#${node.id()}`, true);
+
 			}
 		});
 
@@ -511,12 +527,16 @@
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
+				addHtmlLabel(`#${node.id()}`, false);
+
 			}
 			else if (!node.selected() && !selectedNodePrereqs.has(Number(node.id())) && !(node.id() === 'edgeStart')) {
 				node.style({
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
+				addHtmlLabel(`#${node.id()}`, false);
+
 			}
 			removeDummyNode(event.position.x, event.position.y, 'edgeStart')
 
@@ -806,6 +826,23 @@
 			}
 		});
 		prereqActive = true;
+		if(!selected)
+		{
+			cy.nodes().style({
+				'border-width': '3px' // new border width
+			});
+			stage1 = true
+			popupPrereq1 = true;
+			setTimeout(() => {
+				popupPrereq1 = false;
+			}, 1500);
+		}
+		else {
+			popupPrereq2 = true;
+			setTimeout(() => {
+				popupPrereq2 = false;
+			}, 1500);
+		}
 
 	};
 
@@ -814,7 +851,16 @@
 	 */
 	const savePrereq = () => {
 		prereqActive = false;
-		cy.$(`#${selectedId}`).unselect();
+		if (stage1)
+		{
+			stage1 = false
+			cy.nodes().style({
+				'border-width': '1px' // new border width
+			});
+		}
+		else {
+			cy.$(`#${selectedId}`).unselect();
+		}
 
 	};
 
@@ -866,25 +912,27 @@
 	{#if publishing}
 		<div class="flex justify justify-between">
 			<div class="flex gap-2">
-				{#if !selected}
-					<button type="button" class="btn variant-filled" on:click={fetchElements}>Insert Publications</button>
-				{/if}
 				{#if (selected || edgeSelected)}
-					{#if (numSelected < 2 && selected)}
+					<button type="button" class="btn variant-filled bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
+				{:else}
+					<button type="button" class="btn variant-filled bg-success-500" on:click={fetchElements}>Insert Publications</button>
+				{/if}
+
+					{#if (numSelected < 2)}
 						{#if prereqActive}
-							<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes
-							</button>
+							{#if stage1}
+								<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Cancel</button>
+							{:else}
+								<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes</button>
+
+							{/if}
 						{:else}
-							<button type="button" class="btn variant-filled bg-surface-600" on:click={addPrereq}>Select
-								Prerequisites
-							</button>
+							<button type="button" class=" relative btn variant-filled bg-surface-600" on:click={addPrereq}>Connect Publications</button>
+
 						{/if}
 					{/if}
-					<button type="button" class="btn variant-filled bg-error-400" on:click={() => {	modalStore.trigger(modal);}}>
-						Remove From
-						Circuit
-					</button>
-				{/if}
+
+
 			</div>
 		</div>
 	{/if}
@@ -900,6 +948,16 @@
 								 on:selFurther={addNode} on:remFurther={removeNode} bind:liked={liked} bind:saved={saved}/>
 	</div>
 {/if}
+
+{#if popupPrereq1}
+	<div class="fixed bottom-[8%] left-1/2 right-1/2 whitespace-nowrap  z-999 flex items-center justify-center" transition:fly={{ duration: 750 }} ><span class=" bg-surface-50 py-2 px-4 shadow-lg text-primary-600 rounded-full">Click on a publication to select the source</span></div>
+{/if}
+
+{#if popupPrereq2}
+	<div class="fixed bottom-[8%] left-1/2 right-1/2 whitespace-nowrap  z-999 flex items-center justify-center" transition:fly={{ duration: 750 }} ><span class=" bg-surface-50 py-2 px-4 shadow-lg text-primary-600 rounded-full">Click on a publication to add/remove edges from the source</span></div>
+{/if}
+
+
 
 
 
