@@ -511,10 +511,9 @@
 
 		cy.on('mouseout', 'node', (event: any) => {
 			const node = event.target;
-
 			if (event.target.id() === 'edgeStart')
 			{
-				removeDummyNode(event.position.x, event.position.y, hoveredNodeId.toString())
+				removeDummyNode(event.position.x, event.position.y, 'edgeStart')
 				return;
 			}
 
@@ -540,7 +539,7 @@
 				addHtmlLabel(`#${node.id()}`, false);
 
 			}
-			removeDummyNode(event.position.x, event.position.y, 'edgeStart')
+			removeDummyNode(event.position.x, event.position.y, hoveredNodeId.toString())
 
 		});
 
@@ -578,7 +577,6 @@
 					})
 				});
 		});
-		if(!publishing)
 			cy.fit();
 
 		});
@@ -632,7 +630,6 @@
 				if (data.isMaterial) {
 					extensions = data.publication.materials.files.map((f: { title: string; }) => getFileExtension(f.title));
 				}
-				console.log(data)
 				cy.add({
 					group: 'nodes',
 					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial, dummyNode: false},
@@ -901,9 +898,12 @@
 
 		const edgeStartNode = cy.getElementById(id);
 		if (edgeStartNode.length > 0) {
-			const boundingBox = edgeStartNode.renderedBoundingBox();
-			if (mouseX >= boundingBox.x1 && mouseX <= boundingBox.x2 &&
-				mouseY >= boundingBox.y1 && mouseY <= boundingBox.y2) {
+			const nx = edgeStartNode.position().x;
+			const ny = edgeStartNode.position().y;
+			const diffX = id === 'edgeStart' ? 5 : 90;
+			const diffY = id === 'edgeStart' ? 5 : 50;
+			if (mouseX >= nx-diffX && mouseX <= nx+diffX &&
+				mouseY >= ny-diffY && mouseY <= ny+diffY) {
 				return; // Mouse is still over edgeStart node, do not remove it
 			}
 
