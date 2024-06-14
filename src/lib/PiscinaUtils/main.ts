@@ -7,6 +7,7 @@ import {
     handleSimilarity
 } from "$lib/database";
 import type {Difficulty, File as PrismaFile} from "@prisma/client";
+import {handleFileTokens} from "$lib/database/file";
 
 export type PublicationMeta = {
     title: string;
@@ -26,12 +27,20 @@ export type ResultMeta = {
     difficulty: number;
 };
 
+export type FileTokenInfo = {filePath: string, tokens: string}[]
+
+export type ResultFile = {
+    similarity: number,
+    filesToUpdate: FileTokenInfo
+};
+
 const piscina = new Piscina({
     filename: new URL('./workerJS.mjs', import.meta.url).href,
     minThreads: 1, // Minimum number of threads to start with
-    maxThreads: 4, // Max number of concurrent workers
+    maxThreads: 1, // Max number of concurrent workers
     idleTimeout: 60000 // Keep idle workers alive for 60 seconds
 });
+
 
 /**
  * Method which sends task to a worker thread (circuit)
@@ -56,8 +65,16 @@ async function compareMetaInBackground(pubAMeta: PublicationMeta, pubBMeta: Publ
  * @param pubAFiles
  * @param pubBFiles
  */
-async function compareFilesInBackground(pubAFiles: PrismaFile[], pubBFiles: PrismaFile[]): Promise<number> {
+async function compareFilesInBackground(pubAFiles: PrismaFile[], pubBFiles: PrismaFile[]): Promise<ResultFile> {
     return piscina.run({ pubAFiles, pubBFiles }, {name: 'compareFiles'});
+}
+
+/**
+ * Method which sends task to a worker thread (complete initial parsing of uploaded/edited publication)
+ * @param pubFiles
+ */
+async function initialMaterialFileParseInBackground(pubFiles: PrismaFile[]): Promise<FileTokenInfo> {
+    return piscina.run({ pubFiles }, {name: 'initialParse'});
 }
 
 export async function enqueueMaterialComparison(publicationId: number): Promise<void> {
@@ -65,7 +82,13 @@ export async function enqueueMaterialComparison(publicationId: number): Promise<
         const materials = await getAllMaterials([],[],[],[],'','');
         const currentMaterial = await getMaterialByPublicationId(publicationId)
         const comparisons: {fromPubId: number, toPubId: number,
-            similarityFile: Promise<number>, similarityMeta: Promise<ResultMeta>}[] = [];
+            similarityFile: Promise<ResultFile>, similarityMeta: Promise<ResultMeta>}[] = [];
+        const filesToUpdatePrisma: FileTokenInfo = []
+
+        // INITIALLY PARSE CURRENT PUBLICATION FILES IN ORDER TO REUSE TOKENS LATER ON
+        const initialParsing = await initialMaterialFileParseInBackground(currentMaterial.files);
+
+        await handleFileTokens(initialParsing)
 
         const pubAMeta: PublicationMeta = {
             title: currentMaterial!.publication.title,
@@ -99,8 +122,10 @@ export async function enqueueMaterialComparison(publicationId: number): Promise<
         }
 
         const comparisonsResolved = await Promise.all(comparisons.map(async data => {
-            const fileSim = await data.similarityFile
+            const {similarity: fileSim, filesToUpdate: filesToUpdate} = await data.similarityFile
             const metaSim = await data.similarityMeta
+
+            filesToUpdate.forEach(file => filesToUpdatePrisma.push(file))
 
             const similarity = 0.5 * fileSim +
                 0.1*metaSim.title + 0.15*metaSim.description +
@@ -115,6 +140,8 @@ export async function enqueueMaterialComparison(publicationId: number): Promise<
         }));
 
         await handleSimilarity(comparisonsResolved)
+
+        await handleFileTokens(filesToUpdatePrisma)
     }
     catch (error){
         console.error("Error while doing comparisons\n" + error)
@@ -123,7 +150,7 @@ export async function enqueueMaterialComparison(publicationId: number): Promise<
 
 export async function enqueueCircuitComparison(publicationId: number): Promise<void> {
     try{
-        const circuits = await getAllCircuits([], [], 3, '', '');
+        const circuits = await getAllCircuits([], [], 0, '', '');
         const currentCircuit = await getCircuitByPublicationId(publicationId)
         const comparisons: {fromPubId: number, toPubId: number,
             similarityNode: Promise<number>, similarityMeta: Promise<ResultMeta>}[] = [];

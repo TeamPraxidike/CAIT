@@ -1,6 +1,6 @@
-import { calculateCosineSimilarity} from "../similarityIndex.mjs";
-import { reader } from './readerJS.mjs';
-import { calculateTfIdf } from './textProcessorJs.mjs';
+import {calculateCosineSimilarity} from "../similarityIndex.mjs";
+import {reader} from './readerJS.mjs';
+import {calculateTfIdf, preprocessText} from './textProcessorJs.mjs';
 import path from 'path';
 //import { basePath } from '$lib/database';
 
@@ -10,14 +10,28 @@ const basePath = path.join('static', 'uploadedFiles');
  * Main method that returns the similarity between two sets of files
  * @param {Array} pubAFiles
  * @param {Array} pubBFiles
- * @returns {Promise<number>}
  */
 export async function compare(pubAFiles, pubBFiles) {
     try {
-        //const start = performance.now();
+        let filesToUpdateA
+        let pubAText = new Set()
+        let filesToUpdateB
+        let pubBText = new Set()
 
-        const pubAText = Array.isArray(pubAFiles) ? await getPubText(pubAFiles) : new Set();
-        const pubBText = Array.isArray(pubBFiles) ? await getPubText(pubBFiles) : new Set();
+
+        if (Array.isArray(pubAFiles)) {
+            const resultA = await getPubText(pubAFiles);
+            ({ finalText: pubAText, filesToUpdate: filesToUpdateA } = resultA);
+        }
+
+        if (Array.isArray(pubBFiles)) {
+            const resultB = await getPubText(pubBFiles);
+            ({ finalText: pubBText, filesToUpdate: filesToUpdateB } = resultB);
+        }
+
+
+        //const pubAText = Array.isArray(pubAFiles) ? await getPubText(pubAFiles) : new Set();
+        //const pubBText = Array.isArray(pubBFiles) ? await getPubText(pubBFiles) : new Set();
 
         const combinedList = Array.from(new Set([...pubAText, ...pubBText]))
             .sort((first, second) => (first > second ? -1 : 1));
@@ -77,7 +91,7 @@ export async function compare(pubAFiles, pubBFiles) {
         });
 
         // sum weights
-        const sumWeights = weights.reduce((a, b) => a + b);
+        const sumWeights = weights.reduce((a, b) => a + b, 0);
 
         let weightedSimilarities = 0;
 
@@ -90,28 +104,55 @@ export async function compare(pubAFiles, pubBFiles) {
             similarity = 0;
         } else similarity = Number((weightedSimilarities / sumWeights).toPrecision(3));
 
-        //console.log(`\n\nCosine Similarity: ${similarity}\n\n`);
+        return {
+            similarity: similarity,
+            filesToUpdate: Array.from([...filesToUpdateA, ...filesToUpdateB])
+        };
 
-        return similarity;
-
-        // const end = performance.now();
-        //
-        // console.log(`took ${end - start}`)
     } catch (error) {
         console.error('Error comparing files:', error);
-        return 0;
+        return {
+            similarity: 0,
+            filesToUpdate: []
+        };
     }
 }
 
 /**
  * Helper method that reads text from a list of File entities
  * @param {Array} pubFiles
- * @returns {Promise<Set<string>>}
  */
-async function getPubText(pubFiles) {
-    const pubAPromises = pubFiles.map(file => reader(path.join(basePath, file.path)));
-    const pubAContents = await Promise.all(pubAPromises);
-    const validContents = pubAContents.filter(content => content !== null);
+export async function getPubText(pubFiles) {
+    for (let i = 0; i<pubFiles.length; i++){
+        if (pubFiles[i].text) {
+            // file.text could be undefined/null in Prisma, otherwise we have info
+            pubFiles[i] = {filePath: pubFiles[i].path, tokens: pubFiles[i].text, skip: true}
+        } else {
+            // returns Promise<string> or Promise<null>, need to await to avoid sudden memory spikes
+            const createdTokens = await reader(path.join(basePath, pubFiles[i].path))
+            pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false}
+        }
+    }
 
-    return new Set(validContents);
+    // if file is not considered for parsing
+    const validContents = pubFiles.filter(content => content.tokens !== null);
+
+    const finalText = new Set()
+    const filesToUpdate = []
+
+     validContents.forEach(content => {
+        // if file has not undergone parsing before
+        if (content.skip === false){
+            const text = preprocessText(content.tokens)
+            finalText.add(text)
+            filesToUpdate.push({filePath: content.filePath, tokens: text})
+        }
+        // otherwise we already have the tokens, skip it
+        else finalText.add(content.tokens);
+    });
+
+    return {
+        finalText: finalText,
+        filesToUpdate: filesToUpdate
+    }
 }

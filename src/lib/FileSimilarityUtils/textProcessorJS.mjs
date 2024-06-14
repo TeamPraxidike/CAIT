@@ -12,7 +12,7 @@ const ni = new NounInflector();
 /**
  * Preprocesses and tokenizes text, used for TF-IDF
  * @param {string} text
- * @returns {string[]}
+ * @returns {string}
  */
 export function preprocessText(text) {
     // trim the string to remove leading and trailing whitespace
@@ -43,7 +43,7 @@ export function preprocessText(text) {
     // get stems
     tokens = tokens.map(token => stemmer.stem(token));
 
-    return tokens;
+    return tokens.join(' ');
 }
 
 /**
@@ -55,8 +55,12 @@ export function preprocessText(text) {
 export function calculateTfIdf(text1, text2) {
     const tfIdf = new TfIdf();
 
-    const procText1 = preprocessText(text1);
-    const procText2 = preprocessText(text2);
+    // const procText1 = preprocessText(text1);
+    // const procText2 = preprocessText(text2);
+
+    // BYPASS 'natural' preprocessor (using string[] instead of string)
+    const procText1 = text1.split(" ");
+    const procText2 = text2.split(" ");
 
     tfIdf.addDocument(procText1);
     tfIdf.addDocument(procText2);

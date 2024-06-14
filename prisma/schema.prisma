@@ -196,6 +196,7 @@ model File {
   path  String @id
   title String
   type  String
+  text String?
 
   userId     String? @unique
   profilePic User?   @relation("ProfilePic", fields: [userId], references: [id], onDelete: Cascade)

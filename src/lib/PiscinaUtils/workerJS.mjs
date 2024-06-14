@@ -1,4 +1,4 @@
-import {compare} from "../FileSimilarityUtils/mainFileSim.mjs";
+import {compare, getPubText} from "../FileSimilarityUtils/mainFileSim.mjs";
 import {
     compareDifficulties,
     comparePrereqOrLO,
@@ -26,6 +26,19 @@ export async function compareNodes({pubANodes, pubBNodes}) {
 export async function compareFiles({pubAFiles, pubBFiles}) {
     // return compare(pubAFiles, pubBFiles);
     return (pubAFiles && pubBFiles) ? compare(pubAFiles, pubBFiles) : 0;
+}
+
+/**
+ * Initial parse
+ * @param {Array} pubAFiles
+ * @returns {Promise<any>}
+ */
+export async function initialParse({pubFiles}) {
+    if (pubFiles){
+        const {filesToUpdate} = await getPubText(pubFiles)
+        return filesToUpdate;
+    }
+    else return [];
 }
 
 /**
@@ -74,6 +87,7 @@ const handlers = {
     compareNodes,
     compareFiles,
     compareMeta,
+    initialParse
 };
 
 // Export the object as the default export

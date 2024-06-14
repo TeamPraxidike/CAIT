@@ -108,6 +108,11 @@ export async function ipynbReader(filePath) {
     try {
         const data = fs.readFileSync(filePath).toString('utf8');
 
+        // check if the data is an empty string
+        if (!data || data.trim() === '') {
+            return '';
+        }
+
         const notebook = JSON.parse(data);
 
         let textContent = '';

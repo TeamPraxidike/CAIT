@@ -325,3 +325,24 @@ export async function updateFiles(
 		await editFile(file.path, file.title, buffer, prismaContext);
 	}
 }
+
+/**
+ * Method that updates file tokens
+ * @param filesToUpdate
+ * @param prismaContext
+ */
+export async function handleFileTokens(
+	filesToUpdate: {filePath: string, tokens: string}[],
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	for (const data of filesToUpdate) {
+		await prismaContext.file.update({
+			where: {
+				path: data.filePath
+			},
+			data: {
+				text: data.tokens,
+			}
+		});
+	}
+}
