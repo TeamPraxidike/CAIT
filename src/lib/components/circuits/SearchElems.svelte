@@ -209,6 +209,8 @@
 													 on:removed={removeCard} imgSrc={'data:image;base64,' + p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher}/>
 				{/each}
 			{/if}
-
-	</Grid>
+			<div class="col-span-full mt-8 mb-4 flex">
+				<button type="button" class=" ml-auto rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
+			</div>
+		</Grid>
 </div>
