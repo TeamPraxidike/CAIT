@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import {
 		Difficulty,
@@ -17,8 +17,10 @@
 	import html2canvas from 'html2canvas';
 	import type { NodeDiffActions } from '$lib/database';
 	import { fly } from 'svelte/transition';
+	import Icon from '@iconify/svelte';
+	import TextThingy from '$lib/components/circuits/TextThingy.svelte';
 
-	const mapGetTo: Map<number, Set<number>> = new Map();
+
 	async function captureScreenshot () : Promise<string> {
 		const container = document.getElementById('cy');
 		try{
@@ -665,7 +667,6 @@
 						}
 					},
 				)
-				mapGetTo.set(pubId, new Set());
 				startY += 110;
 			})
 			.catch(error => {
@@ -688,6 +689,12 @@
 
 
 
+	let modalRegistryHelp: Record<string, ModalComponent> = {
+		// Set a unique modal ID, then pass the component reference
+		TextThingy: {
+			ref: TextThingy,
+		}
+	};
 	/**
 	 * Removes all selected nodes
 	 */
@@ -701,6 +708,13 @@
 				removeSelected();
 			}
 		}
+	};
+
+	const modalHelp: ModalSettings = {
+		type: 'component',
+		title: 'Instructions for Creating a Circuit',
+		component: 'TextThingy',
+		buttonTextCancel: "Close",
 	};
 
 	const removeSelected = () => {
@@ -910,13 +924,14 @@
 </style>
 <div class="flex-col mt-10 col-span-7">
 	{#if publishing}
-		<div class="flex justify justify-between">
-			<div class="flex gap-2">
-				{#if (selected || edgeSelected)}
-					<button type="button" class="btn variant-filled bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
-				{:else}
-					<button type="button" class="btn variant-filled bg-success-500" on:click={fetchElements}>Insert Publications</button>
-				{/if}
+	<div class = "flex justify-between">
+			<div class="flex justify justify-between">
+				<div class="flex gap-2">
+					{#if (selected || edgeSelected)}
+						<button type="button" class="btn variant-filled bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
+					{:else}
+						<button type="button" class="btn variant-filled bg-success-500" on:click={fetchElements}>Insert Publications</button>
+					{/if}
 
 					{#if (numSelected < 2)}
 						{#if prereqActive}
@@ -933,8 +948,14 @@
 					{/if}
 
 
+				</div>
 			</div>
+		<div>
+			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 rounded-full h-full">
+				<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center"/>
+			</button>
 		</div>
+	</div>
 	{/if}
 
 
@@ -957,6 +978,12 @@
 	<div class="fixed bottom-[8%] left-1/2 right-1/2 whitespace-nowrap  z-999 flex items-center justify-center" transition:fly={{ duration: 750 }} ><span class=" bg-surface-50 py-2 px-4 shadow-lg text-primary-600 rounded-full">Click on a publication to add/remove edges from the source</span></div>
 {/if}
 
+<div class="card p-4 w-72 shadow-lg bg-surface-200" data-popup="pp">
+	<div><p>Demo Content</p></div>
+	<div class="arrow bg-surface-200" />
+</div>
+
+<Modal components={modalRegistryHelp}/>
 
 
 
