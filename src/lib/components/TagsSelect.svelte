@@ -56,6 +56,8 @@
                 tags = [...tags,newTag];
                 newTag = '';
                 enterTag = false;
+            }else{
+                triggerRepeatInput('Tag', newTag);
             }
         }else{
             enterTag=true;
