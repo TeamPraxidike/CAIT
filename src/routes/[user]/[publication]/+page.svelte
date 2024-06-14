@@ -221,8 +221,12 @@
 	};
 	const tagFilter = (event: CustomEvent) => {
 		const tagContent = event.detail.text;
-		goto(`/browse/?tags=${tagContent}`)
+		if(isMaterial){
+			goto(`/browse?type=materials&tags=${tagContent}`)
+		}else{
+			goto(`/browse?type=circuits&tags=${tagContent}`)
 
+		}
 	}
 </script>
 

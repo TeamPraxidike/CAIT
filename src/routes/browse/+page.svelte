@@ -5,6 +5,7 @@
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
 	import type { File as PrismaFile, Material, Publication, Tag, User } from '@prisma/client';
+		import { onMount } from 'svelte';
 
 
 	//TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
@@ -183,7 +184,7 @@
               // Handle the response data from the API
               if (s === "material") {
                   materials = data.materials;
-              } else {
+							} else {
                   circuits = data;
 
               }
@@ -203,7 +204,21 @@
         if(pageType === "people")
             resetFilters();
     }
-    $: deleteFilters(pageType)
+
+		$: deleteFilters(pageType)
+
+		onMount(()=>{
+			if (data.selectedTag !== ''){
+				console.log('apply tag filter from pub card')
+				console.log(data.selectedTag);
+				applyActive = true;
+				selectedTags = [];
+				selectedTags.push({id:'0', content: data.selectedTag});
+				sendFiltersToAPI();
+			}
+		})
+
+
 </script>
 
 <div class="flex justify-between col-span-full mt-32">
@@ -321,7 +336,7 @@
 </div>
 
 {#if pageType === "materials"}
-    {#each materials as material}
+    {#each materials as material (material.id)}
         <PublicationCard extensions="{getExtensions(material)}"
                          imgSrc={'data:image;base64,' + material.coverPicData}
                          publication={material.publication}
@@ -332,12 +347,12 @@
         />
     {/each}
 {:else if pageType === "people"}
-	{#each users as person}
+	{#each users as person (person.id)}
 		<UserProp view="search" posts="{person.posts.length}"
 				  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
 	{/each}
 {:else if pageType === "circuits"}
-    {#each circuits as circuit}
+    {#each circuits as circuit (circuit.id)}
         <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} liked={liked.includes(circuit.publication.id)} saved={saved.includes(circuit.publication.id)} publisher={circuit.publisher}/>
     {/each}
 {/if}
