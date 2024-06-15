@@ -61,6 +61,41 @@ paths:
         '500':
           description: Server Error
 
+  /publication/{publicationId}/reported:
+    get:
+      tags:
+        - Publication
+      summary: If the request is made from an admin, this returns the number of reports this publication has. Otherwise it returns whether the current user has reported this publication in particular.
+      parameters:
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication
+
+      responses:
+        '200':
+          description: Successfully retrieved courses
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: number
+                    example: 4
+                  - type: boolean
+                    example: true
+
+        '400':
+          description: Bad request
+        '401':
+          description: User not authorized or not an admin
+        '404':
+          description: This publication does not exist
+        '500':
+          description: Server Error
+
   /user:
     post:
       tags:
@@ -597,6 +632,38 @@ paths:
       responses:
         '200':
           description: Successfully marked usage of publication
+        '400':
+          description: Bad request
+        '401':
+          description: Cannot perform action
+        '404':
+          description: User/Publication not found
+        '500':
+          description: Server Error
+
+  /user/{userId}/report/{publicationId}:
+    post:
+      tags:
+        - User
+      summary: Report a publication
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: Numeric ID of the user
+        - in: path
+          name: publicationId
+          schema:
+            type: number
+            format: long
+          required: true
+          description: Numeric ID of the publication (could be material or circuit)
+
+      responses:
+        '200':
+          description: Successfully marked reported a publication
         '400':
           description: Bad request
         '401':

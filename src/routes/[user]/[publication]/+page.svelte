@@ -1,16 +1,17 @@
 <script lang="ts">
-	import type { LayoutServerData } from './$types';
+	import type { LayoutServerData, PageServerData } from './$types';
 	import {
 		AddInteractionForm,
 		Circuit,
 		Comment,
 		DiffBar,
 		FileTable,
-		getDateDifference,
+		getDateDifference, HorizontalScroll,
 		Meta,
 		Tag, TheoryAppBar,
 		UserProp
 	} from '$lib';
+	import { fly } from 'svelte/transition';
 
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
@@ -24,10 +25,11 @@
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
-	export let data: LayoutServerData;
+	export let data: LayoutServerData & PageServerData;
 	const userId = $page.data.session?.user.id;
 
 	const pubView: PublicationView = data.pubView;
+	console.log(pubView);
 	const isMaterial: boolean = pubView.isMaterial;
 
 	let likedComments = data.likedComments as number[];
@@ -40,11 +42,22 @@
 
 	let liked: boolean = data.userSpecificInfo.liked;
 	let likes = pubView.publication.likes;
+	let circuitsPubAppearIn = data.circuitsPubAppearIn;
+	let likedPublications = data.liked as number[];
+	let savedPublications = data.saved.saved as number[];
+	let reported = data.reported;
+
+
 
 	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
+	const toggleReport = async () => {
+		await fetch(`/api/user/${userId}/report/${pubView.publication.id}`, {
+			method: 'POST'
+		}).then(() => reported = !reported);
+	};
 	const toggleLike = async () => {
 		likes = liked ? likes - 1 : likes + 1;
 		await fetch(`/api/user/${userId}/liked/${pubView.publication.id}`, {
@@ -192,30 +205,41 @@
 		}
 	};
 
-	const generateCourses = (courses: string[]): string => {
-		if (courses.length === 0) {
-			return '';
-		}
-		let out = `Material is used in `;
-		for (let i = 0; i < Math.min(courses.length, 2); i++) {
-			if (courses.length === i + 1) {
-				out += ' and ';
-			}
-			out += '\'' + courses[i] + '\' ';
-			if (!(courses.length === i + 2 || courses.length === i + 1)) {
-				out += ', ';
-			}
-		}
-		if (courses.length > 2) {
-			out += ' and ' + (courses.length - 2) + ' more';
-		}
-		return out + '!';
-	};
-
 	const getFileExtension = (filePath: string): string => {
 		const index = filePath.lastIndexOf('.');
 		return index !== -1 ? filePath.substring(index + 1) : '';
 	};
+	const tagFilter = (event: CustomEvent) => {
+		const tagContent = event.detail.text;
+		if(isMaterial){
+			goto(`/browse?type=materials&tags=${tagContent}`)
+		}else{
+			goto(`/browse?type=circuits&tags=${tagContent}`)
+
+		}
+	}
+
+	let hoverDivReport: HTMLDivElement;
+	let isHoveredReport = false;
+	let hoverDiv: HTMLDivElement;
+	let isHovered = false;
+	const handleHoverReport = () => isHoveredReport = !isHoveredReport;
+	const handleHover = () => isHovered = !isHovered;
+	onMount(() => {
+		if (hoverDivReport && hoverDiv) {
+			hoverDivReport.addEventListener('mouseenter', handleHoverReport);
+			hoverDivReport.addEventListener('mouseleave', handleHoverReport);
+			hoverDiv.addEventListener('mouseenter', handleHover);
+			hoverDiv.addEventListener('mouseleave', handleHover);
+
+			return () => {
+				hoverDivReport.removeEventListener('mouseenter', handleHoverReport);
+				hoverDivReport.removeEventListener('mouseleave', handleHoverReport);
+				hoverDiv.removeEventListener('mouseenter', handleHover);
+				hoverDiv.removeEventListener('mouseleave', handleHover);
+			};
+		}
+	});
 </script>
 
 <Meta title={pubView.publication.title} description="CAIT" type="site" />
@@ -224,6 +248,28 @@
 	<div class="flex flex-row items-top justify-between w-full">
 		<div class="flex flex-col gap-2 w-1/2">
 			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
+
+			<div class="grid grid-cols-6">
+				<div bind:this={hoverDiv} class="col-span-2">
+					{#if pubView.publication.usedInCourse.length === 1}
+						<p class="text-sm opacity-85 break-words max-w-full hover:font-bold underline" >Material is used in {pubView.publication.usedInCourse.length} course</p>
+					{:else if pubView.publication.usedInCourse.length > 1}
+						<p class="text-sm opacity-85 break-words max-w-full hover:font-bold underline" >Material is used in {pubView.publication.usedInCourse.length} courses</p>
+					{/if}
+
+					{#if isHovered}
+						<div
+								class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300 flex-col"
+								style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+							{#each pubView.publication.usedInCourse.map(x => x.course) as course}
+								<p class="text-sm opacity-85 break-words max-w-full">{course}</p>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			</div>
+
+
 			{#if pubView.publication.publisherId === $page.data.session?.user.id
 			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
 			|| $page.data.session?.user.isAdmin}
@@ -251,7 +297,9 @@
 					{:else}
 						<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
 					{/if}
-					<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+					<div class="self-center">
+						<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+					</div>
 				{:else }
 					<Icon icon="mdi:graph" class="text-xl text-primary-500" />
 				{/if}
@@ -260,7 +308,7 @@
 
 			<div class="flex flex-wrap gap-2 my-2">
 				{#each tags as tag}
-					<Tag tagText={tag} removable={false} />
+					<Tag tagText={tag} removable={false} onView={true} on:FilterTag={tagFilter} />
 				{/each}
 			</div>
 			<div class="w-full">
@@ -274,7 +322,7 @@
 				{/if}
 			</div>
 		</div>
-		<p class="text-sm opacity-85 pl-5 break-words max-w-full">{generateCourses(pubView.publication.usedInCourse.map(x => x.course))}</p>
+
 
 		<div class="flex flex-col gap-2">
 			{#if isMaterial && pubView.publication.materials.theoryPractice}
@@ -298,24 +346,46 @@
 
 <div class="col-span-full flex flex-col items-start mt-2">
 
-	<div class="flex items-center text-3xl rounded-lg border mt-4">
-		<button type="button"
-				class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
-				on:click={() => toggleLike()}>
-			<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
-			<span>{likes}</span>
-		</button>
-		{#if isMaterial}
-			<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-					on:click={downloadFiles}>
-				<Icon class="xl:text-2xl" icon="material-symbols:download" />
+	<div class="flex ">
+		<div class="flex items-center text-3xl rounded-lg border mt-4">
+			<button type="button"
+					class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
+					on:click={() => toggleLike()}>
+				<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
+				<span>{likes}</span>
 			</button>
-		{/if}
-		<button type="button"
-				class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-				on:click={() => toggleSave()}>
-			<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
-		</button>
+			{#if isMaterial}
+				<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+						on:click={downloadFiles}>
+					<Icon class="xl:text-2xl" icon="material-symbols:download" />
+				</button>
+			{/if}
+			<button type="button"
+					class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+					on:click={() => toggleSave()}>
+				<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
+			</button>
+
+			<div bind:this={hoverDivReport}>
+				<button on:click={toggleReport} class="pl-2 pr-1">
+					{#if reported}
+						<Icon icon="material-symbols:flag" class="self-center size-6 text-surface-600" />
+					{:else}
+						<Icon icon="material-symbols:flag-outline" class="self-center size-6 text-surface-600" />
+					{/if}
+				</button>
+				{#if isHoveredReport}
+					<div
+							class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+							style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+						<p class="text-xs">Report publication</p>
+					</div>
+				{/if}
+			</div>
+
+		</div>
+
+
 	</div>
 
 	{#if isMaterial}
@@ -354,11 +424,48 @@
 
 	{:else}
 		<div class="w-full">
+			<Accordion class="mt-7 " regionPanel="space-y-8" padding="p-3">
+				<AccordionItem class="variant-soft-primary rounded-lg">
+					<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+					<svelte:fragment slot="content">
+						{#if pubView.publication.learningObjectives.length === 0}
+							<span>No learning objectives have been indicated</span>
+						{:else}
+							{#each pubView.publication.learningObjectives as LO}
+								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
+							{/each}
+						{/if  }
+					</svelte:fragment>
+				</AccordionItem>
+				<AccordionItem class="variant-soft-primary rounded-lg">
+					<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+					<svelte:fragment slot="content">
+						{#if pubView.publication.prerequisites.length === 0}
+							<span>No prior knowledge has been indicated</span>
+						{:else}
+							{#each pubView.publication.prerequisites as PK}
+								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
+							{/each}
+						{/if}
+
+					</svelte:fragment>
+				</AccordionItem>
+			</Accordion>
 			<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}" />
 		</div>
 	{/if}
 
 </div>
+
+{#if circuitsPubAppearIn.length > 0}
+	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
+		<h2 class="text-2xl">This publication appears in:</h2>
+		<hr>
+	</div>
+	<div class="col-span-full">
+		<HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
+	</div>
+{/if}
 
 
 <div class="col-span-full flex flex-col mb-1 gap-1 mt-10">

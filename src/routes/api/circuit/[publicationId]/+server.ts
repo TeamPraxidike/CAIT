@@ -104,7 +104,7 @@ export async function PUT({ request, params, locals }) {
 			await handleConnections(
 				tags,
 				maintainers,
-				body.circuitId,
+				publicationId,
 				prismaTransaction,
 			);
 

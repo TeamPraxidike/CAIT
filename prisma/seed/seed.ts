@@ -92,13 +92,13 @@ const main = async () => {
 	const circuitTitles = ['Machine Learning for beginners'];
 
 	const types = [
-		MaterialType.information,
-		MaterialType.presentation,
-		MaterialType.exam,
-		MaterialType.code,
+		MaterialType.assignment,
+		MaterialType.slides,
 		MaterialType.other,
-		MaterialType.code,
-		MaterialType.presentation,
+		MaterialType.video,
+		MaterialType.examQuestions,
+		MaterialType.lectureNotes,
+		MaterialType.lectureNotes
 	];
 
 	const difficulties = [

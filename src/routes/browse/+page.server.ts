@@ -23,6 +23,8 @@ export async function load({ url, fetch, locals }) {
 	};
 	let tags: { content: string }[] = [];
 
+	const selectedTag = url.searchParams.get('tags') || '';
+
 	if (session !== null) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
 		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
@@ -44,6 +46,7 @@ export async function load({ url, fetch, locals }) {
 	}
 
 	return {
+		selectedTag,
 		type,
 		materials,
 		users,

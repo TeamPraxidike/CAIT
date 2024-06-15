@@ -267,10 +267,10 @@ export const IconMapExtension: Map<string, string> = new Map([
 ]);
 
 export const PublicationTypeIconMap: Map<string, string> = new Map([
-	['information', 'flowbite:book-outline'],
-	['presentation', 'mdi:presentation'],
+	['video', 'akar-icons:video'],
+	['lectureNotes', 'icon-park-solid:notes'],
 	['assignment', 'material-symbols:assignment'],
 	['other', 'mage:dots-horizontal-circle'],
-	['exam', 'healthicons:i-exam-multiple-choice'],
-	['code', 'ph:code-fill'],
+	['slides', 'mdi:presentation'],
+	['examQuestions', 'healthicons:i-exam-multiple-choice'],
 ]);

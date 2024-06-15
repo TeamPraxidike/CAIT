@@ -4,7 +4,7 @@
 	import type { Difficulty, Publication, Tag as PrismaTag, User } from '@prisma/client';
 	import { Circuit, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
-		Autocomplete, type AutocompleteOption, FileButton, FileDropzone, getToastStore, InputChip
+		FileButton, FileDropzone, getToastStore
 	} from '@skeletonlabs/skeleton';
 	import { appendFile, base64ToFile, concatFileList, createFileList } from '$lib/util/file';
 	import type { PublicationView } from '../+layout.server';
@@ -58,7 +58,7 @@
 	if (isMaterial){
 		coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 	}
-	let allTypes: {id:number, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+	let allTypes: {id:string, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 
 	function chooseCover(e: Event) {
@@ -75,26 +75,8 @@
 	}
 
 
-	let inputChip: InputChip;
 	let allTags: PrismaTag[] = data.tags;
 
-	type TagOption = AutocompleteOption<string, { content: string }>;
-
-	let flavorOptions: TagOption[] = allTags.map(tag => {
-		return {
-			value: tag.content,
-			label: tag.content
-		};
-	});
-
-	let tagInput = '';
-
-	function onInputChipSelect(e: CustomEvent<TagOption>): void {
-		if (!tags.includes(e.detail.value)) {
-			inputChip.addChip(e.detail.value);
-			tagInput = '';
-		}
-	}
 
 	export let form: ActionData;
 	const toastStore = getToastStore();
@@ -129,32 +111,16 @@
 		}
 	}
 	let newTags: string[] = [];
-	const handleInvalid = () => {
-		if(tagInput.length>0 && !tags.includes(tagInput)) {
-			tags=[...tags,tagInput];
-			newTags=[...newTags,tagInput];
-			tagInput='';
-		}
-		else {
-			triggerRepeatInput("Tag",tagInput);
-		}
-	}
 
-	const triggerRepeatInput = (type: string,input: string)=>{
-		toastStore.trigger({
-			message: `${type} ${input} Already Added`,
-			background: 'bg-warning-200'
-		});
-	}
 
 	let circuitRef : InstanceType<typeof Circuit>;
-	let nodeActions:NodeDiffActions;
-	onMount(async () => {
-		if (circuitRef) {
-			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
-			nodeActions = nodeDiffActions;
-		}
-	});
+	let nodeActions:NodeDiffActions = {add:[], delete:[], edit:[], numNodes:0, next:[]}
+
+	nodeActions.numNodes = serverData.publication.circuit.numNodes;
+	for (const node of serverData.publication.circuit.nodes){
+		nodeActions.add.push(({ publicationId: node.publicationId, x: node.posX, y: node.posY }));
+		nodeActions.next.push({fromId: node.publicationId, toId: node.next.map(x=>x.toPublicationId)});
+	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
@@ -212,31 +178,31 @@
 
 		if(circuitRef){
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
-			let oldAdd = nodeActions.add;
-			let newAdd = nodeDiffActions.add;
-			let add = [];
-			let edit = [];
-			for (const node of newAdd){
-				let found = false;
-				for (const old of oldAdd){
-					if(old.publicationId === node.publicationId ){
-						found = true;
-						if((node.y !== old.y || node.x !== old.x)){
-								edit.push(node);
-						}
-					}
-				}
-				if (!found){
-					add.push(node);
-				}else{
-					oldAdd = oldAdd.filter(x=>x.publicationId !== node.publicationId);
-				}
-			}
+            let oldAdd = nodeActions.add;
+            let newAdd = nodeDiffActions.add;
+            let add = [];
+            let edit = [];
+            for (const node of newAdd){
+                let found = false;
+                for (const old of oldAdd){
+                    if(old.publicationId === node.publicationId ){
+                        found = true;
+                        if((node.y !== old.y || node.x !== old.x)){
+                                edit.push(node);
+                        }
+                    }
+                }
+                if (!found){
+                    add.push(node);
+                }else{
+                    oldAdd = oldAdd.filter(x=>x.publicationId !== node.publicationId);
+                }
+            }
 
-			const del = oldAdd;
-			const number = nodeDiffActions.numNodes;
-			const next = nodeDiffActions.next;
-			let finalDiffActions = {number, add, delete:del, edit,next }
+            const del = oldAdd;
+            const number = nodeDiffActions.numNodes;
+            const next = nodeDiffActions.next;
+            let finalDiffActions = {number, add, delete:del, edit,next }
 			formData.append('circuitData', JSON.stringify(finalDiffActions));
 			formData.append('circuitCoverPic', JSON.stringify(coverPic));
 		}

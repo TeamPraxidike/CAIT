@@ -19,6 +19,7 @@
 	} from '@prisma/client';
 	import { onMount } from 'svelte';
 
+
 	export let data: PageServerData;
 
 	let circuitRef : InstanceType<typeof Circuit>;
@@ -77,13 +78,17 @@
 		});
 	}
 	const onNextHandler = async (event: CustomEvent) => {
+			window.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			});
 		if (event.detail.step === 0) {
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 
 			nodeActions = nodeDiffActions;
+			console.log(nodeActions);
 			circuitCoverPic = coverPic;
 
-			console.log(circuitNodesPlaceholder);
 		}
 	}
 	let circuitNodesPlaceholder: (PrismaNode & {
@@ -91,6 +96,7 @@
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: User & {profilePicData:string},
+			coverPicData: string
 		}
 		next: {
 			circuitId: number,
@@ -164,7 +170,7 @@
 
 				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} adding="{true}"/>
 
-				<div class="flex flex-col w-full">
+				<div class="flex flex-col w-1/2">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
 						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} bind:newTags={newTags}/>
 				</div>

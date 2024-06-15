@@ -212,3 +212,33 @@ export async function updateCircuitByPublicationId(
 		},
 	});
 }
+
+export async function getCircuitsContainingPublication(publicationId: number) {
+	return prisma.circuit.findMany({
+		where: {
+			nodes: {
+				some: {
+					publicationId: publicationId,
+				},
+			},
+		},
+		include: {
+			publication: {
+				include: {
+					tags: true,
+					coverPic: true,
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+					},
+					publisher: {
+						include: {
+							profilePic: true,
+						},
+					},
+				},
+			},
+		},
+	});
+}

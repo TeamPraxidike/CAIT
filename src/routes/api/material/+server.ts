@@ -15,6 +15,22 @@ import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
 
+import type { Tag } from '@prisma/client';
+
+const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
+	const tagsC = tags.map((x) => x.content);
+	const targetTags: Tag[] = [];
+	const nonTargetTags: Tag[] = [];
+	for (const t of tagsC) {
+		if (search.includes(t)) {
+			targetTags.push({ content: t });
+		} else {
+			nonTargetTags.push({ content: t });
+		}
+	}
+	return targetTags.concat(nonTargetTags);
+};
+
 /**
  * Convert a difficulty string to difficulty enum
  */
@@ -48,6 +64,13 @@ export const GET: RequestHandler = async ({ url }) => {
 			sort,
 			query,
 		);
+
+		for (const material of materials) {
+			material.publication.tags = reorderTags(
+				material.publication.tags,
+				tags,
+			);
+		}
 
 		materials = materials.map((material) => {
 			return {

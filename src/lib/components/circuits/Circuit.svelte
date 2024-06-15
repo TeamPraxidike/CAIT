@@ -2,14 +2,24 @@
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
 	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { Difficulty, type Node as PrismaNode, type Publication, PublicationType, type User } from '@prisma/client';
+	import {
+		Difficulty,
+		type Node as PrismaNode,
+		type Publication,
+		PublicationType,
+		type User
+	} from '@prisma/client';
 	import nodeHtmlLabel from 'cytoscape-node-html-label';
 	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
 	import { PublicationCard } from '$lib';
 	import html2canvas from 'html2canvas';
 	import type { NodeDiffActions } from '$lib/database';
+	import { fly } from 'svelte/transition';
+	import Icon from '@iconify/svelte';
+	import TextThingy from '$lib/components/circuits/TextThingy.svelte';
+
 
 	async function captureScreenshot () : Promise<string> {
 		const container = document.getElementById('cy');
@@ -26,6 +36,8 @@
 				return ""
 			}
 	}
+
+
 
 	const getFileExtension = (filePath: string): string =>  {
 		const index = filePath.lastIndexOf('.');
@@ -45,7 +57,8 @@
 							data: data.label,
 							selected: selected,
 							extensions : data.extensions,
-							isMaterial : data.isMaterial
+							isMaterial : data.isMaterial,
+							dummyNode: data.dummyNode,
 						}
 					});
 					return container.outerHTML;
@@ -76,6 +89,7 @@
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: (User & {profilePicData: string})
+			coverPicData: string,
 		}
 		next: {
 			circuitId: number,
@@ -84,6 +98,7 @@
 		}[]
 	})[];
 
+	let startY: number = 100;
 
 	const removePopupDiv = (event: MouseEvent) => {
 		let rect = document.getElementById('cy')?.getBoundingClientRect()
@@ -106,9 +121,6 @@
 		}
 	}
 
-	//onDestroy(() => {document.removeEventListener('mousemove', removePopupDiv)})
-
-
 
 	let edges: Edge[] = [];
 	let cy: any;
@@ -116,45 +128,24 @@
 	let selectedId: string = '';
 	let prereqActive: boolean = false;
 	let nodeClicked: boolean = false;
+	let edgeSelected: boolean = false;
 	let numSelected: number = 0;
 	let selectedNodePrereqs: Set<number> = new Set();
-	// const createBendPoints = (sourcePos: { posX: number; posY: number; publicationId: number; publication: { title: string } }, targetPos: { posX: number; posY: number; publicationId: number; publication: { title: string } }) =>{
-	// 	const midY = (sourcePos.posY + targetPos.posY) / 2;
-	//
-	// 	return [
-	// 		{ x: sourcePos.posX, y: midY },
-	// 		{ x: targetPos.posX, y: midY },
-	// 	];
-	// }
-	let mappedNodes = nodes.map(node => ({
-		data: { id: node.publicationId.toString(), label: node.publication.title, extensions : node.extensions, isMaterial:node.publication.type === PublicationType.Material,
-	},
-		position: { x: node.posX, y: node.posY }
-	}));
+	let dummyNodeClicked: boolean = false;
+	let cursorInsideNode: boolean = false;
+	let hoveredNodeId : number = -1;
+	let popupPrereq1: boolean = false;
+	let popupPrereq2: boolean = false;
+	let stage1: boolean = false;
 
 
-	nodes.forEach(node => {
-		let curNext = node.next.map(nextNode =>
-			({
-				data: {
-					id: (node.publicationId.toString()).concat(nextNode.toPublicationId.toString()),
-					source:node.publicationId.toString(),
-					target:nextNode.toPublicationId.toString(),
-				//	controlPoints: createBendPoints(node, nodes.find(node => node.publicationId === nextNode.toPublicationId)!)
-				}
-			}));
-		edges.push(...curNext);
-	});
 
 	onMount(async () => {
-
 
 		// Initialize Cytoscape
 		cy = cytoscape({
 			container: document.getElementById('cy'),
 			elements: [
-				...mappedNodes,
-				...edges
 			],
 			style: [
 				 {
@@ -181,13 +172,22 @@
 						'line-color': '#646478',
 						'target-arrow-color': '#646478',
 						'target-arrow-shape': 'triangle',
+
 					},
 				},
+
+				{
+					selector: 'edge:selected',
+					style: {
+						'line-color': '#00A6D6',
+						'target-arrow-color': '#00A6D6'
+					}
+				}
+
 			],
 			layout: {
 				name: 'preset'
 			},
-
 			minZoom: 0.5,
 			maxZoom: 2,
 		});
@@ -196,18 +196,46 @@
 
 		addHtmlLabel("node", false);
 
+		cy.on('select', 'edge', () => {
+			if(publishing)
+			{
+				numSelected++;
+				edgeSelected = true;
+			}
+		});
+
+		cy.on('unselect', 'edge', () => {
+			if(publishing){
+				numSelected--;
+				edgeSelected = false;
+			}
+		});
+
+
 
 		cy.on('select', 'node', (event: any) => {
 			numSelected++;
 			let node = event.target;
+
+			//If the dummy node is selected, unselect it and
+			// restore the previous selected node
+
+			if (node.id() === 'edgeStart')
+			{
+				node.unselect();
+				if (selectedId !== '')
+				{
+					dummyNodeClicked = false
+					cy.$(`#${selectedId}`).select();
+				}
+				return;
+			}
 			if (!publishing) {
 				node.unselect()
 				return;
 			}
 
-			if (!publishing) {
-				cy.$(`#${node.id()}`).unselect();
-			}
+			//Change the background color of the selected node
 			node.style({
 				'background-color': '#4C4C5C',
 				'color': '#F9F9FA'
@@ -215,36 +243,51 @@
 
 			addHtmlLabel(`#${node.id()}`, true);
 
-
-
+			//If a node is already selected, add an edge between the two nodes
 			if (selected && prereqActive) {
-				let edgeId = 'e'.concat(node.id().toString().concat(selectedId.toString()));
+				let edgeId = `en${selectedId.toString()}n${node.id()}`;
 				if (cy.getElementById(edgeId).length > 0) {
 					cy.remove(cy.$(`#${edgeId}`));
 					selectedNodePrereqs.delete(Number(node.id()))
 				} else {
-					cy.add({
-						group: 'edges',
-						data: { id: `${edgeId}`, source: `${node.id()}`, target: `${selectedId}` }
-					});
-					selectedNodePrereqs.add(Number(node.id()))
-
+						cy.add({
+							group: 'edges',
+							data: { id: `${edgeId}`, source: `${selectedId}`, target: `${node.id()}` }
+						});
+						if (loopDetection(node.id()))
+						{
+							modalStore.trigger(modalAlert);
+							cy.remove(cy.$(`#${edgeId}`));
+						}
+						else {
+							selectedNodePrereqs.add(Number(node.id()));
+						}
 				}
 
 				cy.$(`#${node.id()}`).unselect();
 				selected = false;
 				cy.$(`#${selectedId}`).select();
 			} else {
-
-				if (prereqActive) {
+					if (stage1)
+					{
+						stage1 = false
+						cy.nodes().style({
+							'border-width': '1px' // new border width
+						});
+						popupPrereq2 = true;
+						setTimeout(() => {
+							popupPrereq2 = false;
+						}, 1500)
+					}
+					if (prereqActive) {
 					cy.edges().forEach((edge: any) => {
-						if (edge.target().id() === selectedId) {
-							edge.source().style({
+						if (edge.source().id() === selectedId) {
+							edge.target().style({
 								'background-color': '#9E9EAE',
 								'color': '#F9F9FA'
 							});
 
-							addHtmlLabel(`#${edge.source().id()}`, true)
+							addHtmlLabel(`#${edge.target().id()}`, true);
 						}
 					});
 
@@ -262,8 +305,13 @@
 		 * Deals with the unselecting of nodes. Restores the background
 		 * of every node in case more have been coloured
 		 */
-		cy.on('unselect', 'node', () => {
+		cy.on('unselect', 'node', (event:any) => {
 			numSelected--;
+			if (event.target.id() === 'edgeStart')
+			{
+
+				return;
+			}
 			//let node = event.target;
 			cy.nodes().forEach((n: any) => {
 				n.style({
@@ -278,7 +326,7 @@
 			if (!nodeClicked) {
 				prereqActive = false;
 			}
-			if (!prereqActive) {
+			if (!prereqActive && !dummyNodeClicked) {
 				selectedNodePrereqs = new Set()
 				selected = false;
 				selectedId = '';
@@ -291,13 +339,17 @@
 		 * is Click -> Unselect -> Selected. This is needed to make sure that node is properly unselected.
 		 */
 		cy.on('click', 'node', (event: any) => {
+			if (event.target.id() === 'edgeStart')
+			{
+				dummyNodeClicked = true;
+				return;
+			}
 			if (publishing) {
 				const nodeId = event.target.id();
 				if (selectedId !== nodeId) {
 					nodeClicked = true;
 				}
 			} else {
-
 				let cur = nodes.find(node => node.publicationId === Number(event.target.id()));
 
 				if (cur) {
@@ -315,6 +367,10 @@
 		 * Same as the above but activated on tap for mobile
 		 */
 		cy.on('tap', 'node', (event: any) => {
+			if (event.target.id() === 'edgeStart')
+			{
+				return;
+			}
 			if (publishing) {
 				const nodeId = event.target.id();
 				if (selectedId !== nodeId) {
@@ -334,116 +390,161 @@
 
 		});
 
-		let cursorInsideNode: boolean = false;
-		let hoveredNodeId : number = -1;
+
 		/**
 		 * The two methods below are used to simulate hover effect on a node
 		 */
 		cy.on('mouseover', 'node',  (event: any) => {
+
 			const node = event.target;
+
+			if (event.target.id() === 'edgeStart')
+			{
+				return;
+			}
+
 			cursorInsideNode = true;
 			hoveredNodeId = Number(node.id());
+
 			if(!publishing)
 			{
 				setTimeout(() => {
 					// Check if cursor is still inside the node
-					if (cursorInsideNode && hoveredNodeId === Number(node.id())) {
-						const htmlElement = document.getElementById(node.id());
-						if (htmlElement) {
-							const divElement = document.createElement('div');
-							let publication = nodes.find(n => n.publicationId === Number(node.id()));
-
-							if (publication) {
-								 let coverPicData = '';
-								// if (
-								// 	publication.publication.type === PublicationType.Material &&
-								// 	publication.publication.materials
-								// ) {
-								// 	coverPicData = coverPicFetcher(
-								// 		publication.publication.materials.encapsulatingType,
-								// 		publication.publication.coverPic,
-								// 	).data;
-								// } else {
-								// 	const filePath = publication.publication.coverPic!.path;
-								// 	const currentFileData = fileSystem.readFile(filePath);
-								// 	coverPicData = currentFileData.toString('base64');
-								// }
-
-								const publicationCard = new PublicationCard({
-									target: divElement,
-									props: {
-										publication: publication.publication,
-										inCircuits: false,
-										imgSrc: 'data:image;base64,' + coverPicData,
-										forArrow: true,
-										extensions: node.data().extensions,
-										publisher: publication.publication.publisher,
-										liked: liked.includes(publication.publicationId),
-										saved: saved.includes(publication.publicationId)
-									}
-								});
-								publicationCard.$on('liked', likedToggled);
-								publicationCard.$on('saved', savedToggled);
-
-
-							}
-
-							divElement.id = 'PublicationCardDiv';
-							divElement.className = 'w-[300px]';
-							divElement.style.position = 'fixed';
-							divElement.style.transition = 'transform 0.5s';
-
-
-							document.body.appendChild(divElement);
-
-							divElement.style.left = `${htmlElement.getBoundingClientRect().left + htmlElement.getBoundingClientRect().width}px`;
-							divElement.style.top = `${htmlElement.getBoundingClientRect().top + htmlElement.getBoundingClientRect().height / 2 - divElement.getBoundingClientRect().height / 2}px`;
-						}
-
-					}
+					makePopUp(cursorInsideNode, hoveredNodeId, node)
 				}, 700);
 			}
+			else {
+			if (cy.getElementById('edgeStart').length === 0 && !prereqActive && !(node.id() === 'edgeStart')) {
+					cy.add({
+						group: 'nodes',
+						data: { id: "edgeStart", label: "", extensions : [], isMaterial: true, dummyNode: true},
+						position: { x: node.position().x, y: node.position().y + 50 },
+						style: {
+							'border-width': '0px',
+							'width' : 10,
+							'height' : 10,
+							'shape' : 'ellipse',
+						}
+					});
+					cy.add({
+						group: 'edges',
+						data: { id: `temp`, source: `${hoveredNodeId}`, target: `edgeStart` }
+					});
+				}
 
 
 
-
-			if (!node.selected() && !prereqActive) {
-				node.style({
-					'background-color': '#4C4C5C',
-					'color': '#F9F9FA',
-					'border': '1px solid #F9F9FA'
-				});
 			}
 
-			else if(!node.selected()){
+
+
+			// if (!node.selected() && !prereqActive && !(node.id() === 'edgeStart')) {
+			// 	node.style({
+			// 		'background-color': '#4C4C5C',
+			// 		'color': '#F9F9FA',
+			// 	});
+			// }
+
+			if(prereqActive && !node.selected() && !(node.id() === 'edgeStart')){
 				node.style({
 					'background-color': '#9E9EAE',
 					'color': '#F9F9FA'
 				});
+				addHtmlLabel(`#${node.id()}`, true);
+
 			}
 		});
 
 
+
+		cy.on('drag', 'node', (event : any) => {
+			startY = 250;
+			const nodeA = event.target;
+			if (nodeA.id() === 'edgeStart')
+			{
+				return;
+			}
+			else{
+				const positionA = nodeA.position();
+				const nodeB = cy.getElementById('edgeStart');
+
+				// Update the position of node 'b' to match node 'a'
+				nodeB.position({
+					x: positionA.x, // Adjust the offset as needed
+					y: positionA.y + 50
+				});
+			}
+
+		});
+
+		cy.on('free', 'node', (event:any) => {
+			const nodeA = event.target;
+			if (nodeA.id() !== 'edgeStart')
+			{
+				placeMentAlgorithm(nodeA, nodeA.position().x, nodeA.position().y)
+				return;
+			}
+
+
+			const positionA = nodeA.position();
+			cy.nodes().forEach((node : {id : () => string, position : () => {x : number, y:number}}) => {
+				if (node.id() !== 'edgeStart' && node.id() !== hoveredNodeId.toString())
+				{
+					const positionB = node.position();
+					if (positionA.x >= positionB.x - 90 && positionA.x <= positionB.x + 90 && positionA.y >= positionB.y - 90 && positionA.y <= positionB.y + 90)
+					{
+						if (cy.getElementById(`en${hoveredNodeId}n${node.id()}`).length === 0) {
+								cy.add({
+									group: 'edges',
+									data: { id: `en${hoveredNodeId}n${node.id()}`, source: `${hoveredNodeId}`, target: `${node.id()}` }
+								});
+								if (loopDetection(node.id()))
+								{
+									modalStore.trigger(modalAlert);
+									cy.remove(cy.$(`#en${hoveredNodeId}n${node.id()}`));
+								}
+						}
+
+					}
+				}
+
+			})
+			cy.remove(cy.$('#edgeStart'));
+		})
+
+
 		cy.on('mouseout', 'node', (event: any) => {
 			const node = event.target;
+			if (event.target.id() === 'edgeStart')
+			{
+				removeDummyNode(event.position.x, event.position.y, 'edgeStart')
+				return;
+			}
+
 			cursorInsideNode = false;
 			const divToRemove = document.getElementById('PublicationCardDiv');
 			if (divToRemove) {
 				document.body.removeChild(divToRemove);
 			}
 
-			if (!node.selected() && !prereqActive) {
+			if (!node.selected() && !prereqActive && !(node.id() === 'edgeStart')) {
 				node.style({
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
+				addHtmlLabel(`#${node.id()}`, false);
+
 			}
-			else if (!node.selected() && !selectedNodePrereqs.has(Number(node.id()))) {
+			else if (!node.selected() && !selectedNodePrereqs.has(Number(node.id())) && !(node.id() === 'edgeStart')) {
 				node.style({
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
+				addHtmlLabel(`#${node.id()}`, false);
+
 			}
+			removeDummyNode(event.position.x, event.position.y, hoveredNodeId.toString())
+
 		});
 
 		/**
@@ -455,26 +556,34 @@
 						node.lock()
 			});
 
-		cy.fit();
+
 
 		document.addEventListener('mousemove', removePopupDiv)
-		// cy.edges().forEach((edge:any) => {
-		// 		const controlPoints = edge.data('controlPoints');
-		// 		if (controlPoints) {
-		// 			edge.style({
-		// 				'segment-distances': controlPoints.map((point: { x: number; y: number; }) => {
-		// 					// Calculate the distance from the source to each control point
-		// 					const srcPos = edge.source().position();
-		// 					const dist = Math.sqrt(Math.pow(point.x - srcPos.x, 2) + Math.pow(point.y - srcPos.y, 2));
-		// 					return dist;
-		// 				}),
-		// 				'segment-weights': controlPoints.map((_: any, index: number) => (index + 1) / (controlPoints.length + 1)),
-		// 				'segment-endpoints': controlPoints
-		// 			});
-		// 		}
-		// 	});
+		document.addEventListener('keydown', (event:KeyboardEvent) => {
+			if (event.key === 'Delete' || event.key === 'Backspace') {
+				removeSelected();
+			}
+		})
+
+		nodes.forEach(node => {
+			cy.add({
+				group: 'nodes',
+				data: { id: node.publicationId, label: node.publication.title, extensions : node.extensions, isMaterial: node.publication.type === PublicationType.Material, dummyNode: false},
+				position: { x: node.posX, y: node.posY}
+			})
+		})
 
 
+
+		nodes.forEach(node => {
+			node.next.forEach(nextNode => {
+					cy.add({
+						group: 'edges',
+						data: { id: `en${node.publicationId}n${nextNode.toPublicationId.toString()}`, source: node.publicationId.toString(), target: nextNode.toPublicationId.toString() }
+					})
+				});
+		});
+			cy.fit();
 
 		});
 
@@ -515,7 +624,6 @@
 	const addNode = async (event: CustomEvent) => {
 		let pubId = event.detail.id;
 
-
 		await fetch(`/api/publication/${pubId}`)
 			.then(response => {
 				if (!response.ok) {
@@ -530,9 +638,15 @@
 				}
 				cy.add({
 					group: 'nodes',
-					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial},
+					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial, dummyNode: false},
 					position: { x: 100, y: 100 }
 				});
+
+				const node = cy.getElementById(data.publication.id);
+				placeMentAlgorithm(node, node.position().x, node.position().y )
+
+
+
 				nodes.push(
 					{
 						next: [],
@@ -540,7 +654,7 @@
 						publicationId: pubId,
 						extensions: extensions,
 						posX: 100,
-						posY: 100,
+						posY: startY,
 						publication: {
 							id: pubId as number,
 							title: data.publication.title as string,
@@ -552,12 +666,12 @@
 							createdAt: new Date(),
 							updatedAt: new Date(),
 							publisherId: '1',
-							reports: 2,
 							type: data.publication.type,
 							savedByAllTime: ['1'],
 							tags: [{content: 'haha'}],
 							usedInCourse: [{ course: '1' }],
 							publisher: data.publication.publisher,
+							coverPicData: data.publication.coverPicData,
 						}
 					},
 				)
@@ -582,35 +696,136 @@
 
 
 
+	let modalRegistryHelp: Record<string, ModalComponent> = {
+		// Set a unique modal ID, then pass the component reference
+		TextThingy: {
+			ref: TextThingy,
+		}
+	};
 	/**
 	 * Removes all selected nodes
 	 */
 	const modal: ModalSettings = {
 		type: 'confirm',
-		// Data
 		title: 'Please Confirm',
 		body: 'Are you sure you wish to proceed?',
 		// TRUE if confirm pressed, FALSE if cancel pressed
 		response: (r: boolean) => {
 			if (r) {
-				cy.nodes().forEach((node: any) => {
-					if (node.selected()) {
-						node.unselect()
-						cy.remove(cy.$(`#${node.id()}`));
-						pubIds.delete(Number(node.id()));
-						numSelected--
-						nodes = nodes.filter(x=>x.publicationId !== Number(node.id()))
-					}
-				});
-				selectedId = '';
-				selected = false;
-				prereqActive = false;
-
+				removeSelected();
 			}
 		}
 	};
 
-	export const publishCircuit = async () => {
+	const modalHelp: ModalSettings = {
+		type: 'component',
+		title: 'Instructions for Creating a Circuit',
+		component: 'TextThingy',
+		buttonTextCancel: "Close",
+	};
+
+	const modalAlert: ModalSettings = {
+		type: 'alert',
+		title: 'Loop Detected',
+		body: 'You cannot add this edge because it will create a loop! Please reconsider your circuit design.',
+		buttonTextCancel: "Got it",
+	};
+
+	const collisionDetection = (x1: number, y1: number, x2: number, y2: number) => {
+
+		let offset = 15
+		let dx = 180 - Math.abs(x2 - x1);
+		if (dx < 0)
+			return null
+		if (x1 > x2)
+			dx = -dx - offset
+		else
+			dx += offset
+
+		let dy = 100 - Math.abs(y1 - y2); // 17
+		if (dy < 0)
+			return null
+		if (y2 > y1)
+			dy = dy + offset
+		else
+			dy = -dy - offset
+
+		if (Math.abs(dy) > Math.abs(dx))
+			dx = 0
+		else
+			dy = 0
+		return [dx, dy];
+	}
+	const placeMentAlgorithm = (node : any, positionX : number, positionY:number) => {
+		if (cy.nodes().length === 1)
+		{
+			return
+		}
+
+		cy.nodes().forEach((n: any) => {
+
+			if (n.id() !== node.id() && n.id() !== "edgeStart"){
+				const vector = collisionDetection(positionX, positionY, n.position().x, n.position().y);
+				if(vector){
+					const data = n.data();
+					const edges : {id: string, source: string, target: string} [] = []
+
+
+					cy.edges().forEach((edge:any) => {
+							edges.push({ id: `en${edge.source().id()}n${edge.target().id()}`, source: `${edge.source().id()}`, target: `${edge.target().id()}` })
+					})
+					console.log(edges)
+					cy.remove(cy.$(`#${n.id()}`));
+					cy.add({
+						group: 'nodes',
+						data: data,
+						position: {x: n.position().x + vector[0], y: n.position().y + vector[1]}
+					});
+
+					addHtmlLabel(`#${n.id()}`, false);
+					edges.forEach((edge:any) => {
+						if (cy.getElementById(edge.id).length === 0)
+						{
+							cy.add({
+								group: 'edges',
+								data: { id: `${edge.id}`, source: `${edge.source}`, target: `${edge.target}` }
+							});
+						}
+
+					})
+
+
+					placeMentAlgorithm(n, n.position().x + vector[0], n.position().y + vector[1])
+				}
+			}
+		});
+	}
+
+	const removeSelected = () => {
+		cy.nodes().forEach((node: any) => {
+			if (node.selected()) {
+				node.unselect()
+				cy.remove(cy.$(`#${node.id()}`));
+				pubIds.delete(Number(node.id()));
+				numSelected--
+				nodes = nodes.filter(x=>x.publicationId !== Number(node.id()))
+			}
+		});
+		cy.edges().forEach((edge: any) => {
+			if (edge.selected()) {
+				cy.remove(cy.$(`#${edge.id()}`));
+				edges.filter(x=>x.data.id !== edge.id())
+				numSelected--;
+			}
+		});
+
+		selectedId = '';
+		selected = false;
+		edgeSelected = false
+		prereqActive = false;
+	}
+
+	export const publishCircuit =  async() => {
 
 		let nodeDiffActions: NodeDiffActions;
 		const numNodes = cy.nodes().length;
@@ -641,11 +856,6 @@
 		})
 		nodeDiffActions = {numNodes, add, delete:del, edit, next };
 
-		// cy.fit();
-		// addHtmlLabel("node", false)
-		// generate a png, could also use cy.jpg
-		// base64uri by default, using base64 for now
-		//const cover = cy.png({output: 'base64'});
 		const cover = await captureScreenshot()
 		const coverPic = {
 			type: 'image/png',
@@ -655,22 +865,82 @@
 
 	}
 
+		const makePopUp = (cursorInsideNode: boolean, hoveredNodeId: number, node:{id : () => string, data : () => {extensions:string[]}}) => {
+			if (cursorInsideNode && hoveredNodeId === Number(node.id())) {
+				const htmlElement = document.getElementById(node.id());
+				if (htmlElement) {
+					const divElement = document.createElement('div');
+					let publication = nodes.find(n => n.publicationId === Number(node.id()));
+
+					if (publication) {
+						const coverPicData = publication.publication.coverPicData;
+						const publicationCard = new PublicationCard({
+							target: divElement,
+							props: {
+								publication: publication.publication,
+								inCircuits: false,
+								imgSrc: 'data:image;base64,' +  coverPicData,
+								forArrow: true,
+								extensions: node.data().extensions,
+								publisher: publication.publication.publisher,
+								liked: liked.includes(publication.publicationId),
+								saved: saved.includes(publication.publicationId)
+							}
+						});
+						publicationCard.$on('liked', likedToggled);
+						publicationCard.$on('saved', savedToggled);
+
+
+					}
+
+					divElement.id = 'PublicationCardDiv';
+					divElement.className = 'w-[300px]';
+					divElement.style.position = 'fixed';
+					divElement.style.transition = 'transform 0.5s';
+
+
+					document.body.appendChild(divElement);
+
+					divElement.style.left = `${htmlElement.getBoundingClientRect().left + htmlElement.getBoundingClientRect().width}px`;
+					divElement.style.top = `${htmlElement.getBoundingClientRect().top + htmlElement.getBoundingClientRect().height / 2 - divElement.getBoundingClientRect().height / 2}px`;
+				}
+
+			}
+		}
+
 
 	/**
 	 * Highlights all prerequisites of the selected node and activates the ability to add edges
 	 */
 	const addPrereq = () => {
 		cy.edges().forEach((edge: any) => {
-			if (edge.target().id() === selectedId) {
-				edge.source().style({
+			if (edge.source().id() === selectedId) {
+				edge.target().style({
 					'background-color': '#9E9EAE',
 					'color': '#F9F9FA'
 				});
-				selectedNodePrereqs.add(Number(edge.source().id()));
-				addHtmlLabel(`#${edge.source().id()}`, true);
+				selectedNodePrereqs.add(Number(edge.target().id()));
+				addHtmlLabel(`#${edge.target().id()}`, true);
 			}
 		});
 		prereqActive = true;
+		if(!selected)
+		{
+			cy.nodes().style({
+				'border-width': '3px' // new border width
+			});
+			stage1 = true
+			popupPrereq1 = true;
+			setTimeout(() => {
+				popupPrereq1 = false;
+			}, 2500);
+		}
+		else {
+			popupPrereq2 = true;
+			setTimeout(() => {
+				popupPrereq2 = false;
+			}, 2500);
+		}
 
 	};
 
@@ -679,7 +949,16 @@
 	 */
 	const savePrereq = () => {
 		prereqActive = false;
-		cy.$(`#${selectedId}`).unselect();
+		if (stage1)
+		{
+			stage1 = false
+			cy.nodes().style({
+				'border-width': '1px' // new border width
+			});
+		}
+		else {
+			cy.$(`#${selectedId}`).unselect();
+		}
 
 	};
 
@@ -702,6 +981,46 @@
 		}
 	};
 
+	const loopDetection = (startingNodeId: string) => {
+
+		const visited = new Set();
+		const queue = [startingNodeId];
+		while (queue.length > 0) {
+			const nodeId = queue.pop();
+			if (visited.has(nodeId)) {
+				return true;
+			}
+			visited.add(nodeId);
+			const node = cy.getElementById(nodeId);
+			if (node) {
+				const edges = node.connectedEdges();
+				for (const edge of edges) {
+					if (edge.source() === node) {
+						queue.push(edge.target().id());
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+	const removeDummyNode = (mouseX:number, mouseY:number, id:string) => {
+
+		const edgeStartNode = cy.getElementById(id);
+		if (edgeStartNode.length > 0) {
+			const nx = edgeStartNode.position().x;
+			const ny = edgeStartNode.position().y;
+			const diffX = id === 'edgeStart' ? 5 : 90;
+			const diffY = id === 'edgeStart' ? 5 : 50;
+			if (mouseX >= nx-diffX && mouseX <= nx+diffX &&
+				mouseY >= ny-diffY && mouseY <= ny+diffY) {
+				return; // Mouse is still over edgeStart node, do not remove it
+			}
+
+		}
+		cy.remove(cy.$('#edgeStart'));
+	}
+
 
 
 </script>
@@ -715,29 +1034,41 @@
 </style>
 <div class="flex-col mt-10 col-span-7">
 	{#if publishing}
-		<div class="flex justify justify-between">
-			<div class="flex gap-2">
-				{#if !selected}
-					<button type="button" class="btn variant-filled" on:click={fetchElements}>Add</button>
-				{/if}
-				{#if selected}
+	<div class = "flex justify-between">
+			<div class="flex justify justify-between">
+				<div class="flex gap-2">
+					{#if (selected || edgeSelected)}
+						<button type="button" class="btn variant-filled bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
+					{:else}
+						<button type="button" class="btn variant-filled bg-success-500" on:click={fetchElements}>Insert Publications</button>
+					{/if}
+
 					{#if (numSelected < 2)}
 						{#if prereqActive}
-							<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes
-							</button>
+							{#if stage1}
+								<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Cancel</button>
+							{:else}
+								<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes</button>
+
+							{/if}
 						{:else}
-							<button type="button" class="btn variant-filled bg-surface-600" on:click={addPrereq}>Select
-								Prerequisites
-							</button>
+							{#if nodes.length > 1}
+								<button type="button" class=" relative btn variant-filled bg-surface-600" on:click={addPrereq}>Connect Publications</button>
+							{/if}
+
 						{/if}
 					{/if}
-					<button type="button" class="btn variant-filled bg-error-400" on:click={() => {	modalStore.trigger(modal);}}>
-						Remove From
-						Circuit
-					</button>
-				{/if}
+
+
+				</div>
 			</div>
+		<div class="flex gap-4">
+			<button type="button" class="btn variant-filled bg-surface-600" on:click="{() => {cy.center()}}"> Recentre </button>
+			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 rounded-full h-full">
+				<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center"/>
+			</button>
 		</div>
+	</div>
 	{/if}
 
 
@@ -751,6 +1082,18 @@
 								 on:selFurther={addNode} on:remFurther={removeNode} bind:liked={liked} bind:saved={saved}/>
 	</div>
 {/if}
+
+{#if popupPrereq1}
+	<div class="fixed bottom-[8%] left-1/2 right-1/2 whitespace-nowrap  z-999 flex items-center justify-center" transition:fly={{ duration: 750 }} ><span class=" bg-surface-50 py-2 px-4 shadow-lg text-primary-600 rounded-full">Click on a publication to select the source</span></div>
+{/if}
+
+{#if popupPrereq2}
+	<div class="fixed bottom-[8%] left-1/2 right-1/2 whitespace-nowrap  z-999 flex items-center justify-center" transition:fly={{ duration: 750 }} ><span class=" bg-surface-50 py-2 px-4 shadow-lg text-primary-600 rounded-full">Click on a publication to add/remove edges from the source</span></div>
+{/if}
+
+
+<Modal components={modalRegistryHelp}/>
+
 
 
 

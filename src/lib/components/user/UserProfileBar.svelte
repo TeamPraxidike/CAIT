@@ -4,7 +4,6 @@
 
     export let user:User;
     export let userPhotoUrl: string;
-    export let about = '';
 
 
     /**
@@ -34,9 +33,9 @@
         <div class="hidden md:flex items-start flex-col gap-4 text-surface-700 dark:text-surface-200 ">
             <p class="lg:text-sm 2xl:text-base">Email: {user.email}</p>
             <hr class="w-11/12">
-            {#if about !== ''}
+            {#if user.aboutMe !== ''}
                 <p class="text-surface-700 text-sm dark:text-surface-400">
-                    {about}
+                    {user.aboutMe}
                 </p>
             {/if}
             <div class="flex gap-2 flex-wrap">
@@ -59,7 +58,7 @@
                 md:hidden">
         <p>Email: {user.email}</p>
         <p class="text-surface-700 dark:text-surface-400">
-            {about}
+            {user.aboutMe}
         </p>
         {#if currentlyAuth()}
             <div class="flex gap-4">

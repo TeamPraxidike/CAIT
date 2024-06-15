@@ -42,6 +42,7 @@ export const load: LayoutServerLoad = async ({
 	const likedComments = cRes.status === 200 ? await cRes.json() : [];
 	const likedReplies = rRes.status === 200 ? await rRes.json() : [];
 
+	console.log(pubView);
 	return {
 		userSpecificInfo,
 		pubView,
@@ -79,18 +80,19 @@ export type PublicationView = {
 		materials: Material & {
 			files: PrismaFile[];
 		};
-
 		circuit: Circuit & {
 			nodes: (PrismaNode & {
 				publication: Publication & {
 					tags: Tag[];
 					usedInCourse: { course: string }[];
 					publisher: UserPfp;
+					coverPicData: string;
 				};
 				prerequisites: Edge[];
 				next: Edge[];
 			})[];
 		};
+		coverPicData: string;
 	};
 	coverFileData: FetchedFileItem;
 };

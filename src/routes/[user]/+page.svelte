@@ -18,7 +18,7 @@
 
 
     // let saved = data.saved;
-    let savedFileData = data.savedFileData;
+    // let savedFileData = data.savedFileData;
 
     let liked = data.liked;
 
@@ -41,11 +41,9 @@
 
 <Meta title="Profile" description="CAIT" type="site" />
 
-<div class="col-span-full xl:flex xl:flex-row xl:space-x-5
-                            lg:flex lg:flex-row lg:space-x-5">
+<UserProfileBar user={user} userPhotoUrl={'data:image;base64,' + profilePic.data} />
 
-	<UserProfileBar user={user} userPhotoUrl={'data:image;base64,' + profilePic.data} />
-
+<div class="col-span-8">
     {#if $page.data.session?.user.id === user.id}
         <TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
             <Tab bind:group={tabSet} name="tab1" value={0}>
@@ -56,59 +54,52 @@
             </Tab>
             <svelte:fragment slot="panel">
                 {#if tabSet === 0}
-                    <div class="grid grid-cols-4 gap-4 mb-20">
+                    <div class="grid grid-cols-2 gap-4">
                         {#if saved.length !== 0}
                             {#each saved as publication}
-                                <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
+                                <div class="col-span-1">
                                     <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} markAsUsed={true} courses={publication.usedInCourse.map(x => x.course)} publisher={publication.publisher}/>
                                 </div>
                             {/each}
                         {/if}
                     </div>
                 {:else if tabSet === 1}
-                    <div class="grid grid-cols-4 gap-4 mb-20">
-                        {#if posts.length === 0}
-                            <p class="col-span-4 text-center">So empty... There are no publications here </p>
-                        {:else}
-                            {#each posts as publication, i}
-                                <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
-                                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
-                                                     publication={publication}
-                                                     liked={liked.includes(publication.id)}
-                                                     courses={posts[i].usedInCourse.map(x => x.course)}
-                                                     saved={data.savedByUser.includes(publication.id)}
-													 publisher={publication.publisher}/>
-
-                                </div>
-                            {/each}
-                        {/if}
-                    </div>
+                    {#if posts.length === 0}
+                        <p class="col-span-2 text-center">So empty... There are no publications here </p>
+                    {:else}
+                        <div class="grid grid-cols-2 gap-4">
+                        {#each posts as publication, i}
+                            <div class="col-span-1">
+                            <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
+                                             publication={publication}
+                                             liked={liked.includes(publication.id)}
+                                             courses={posts[i].usedInCourse.map(x => x.course)}
+                                             saved={data.savedByUser.includes(publication.id)}
+                                             publisher={publication.publisher}/>
+                            </div>
+                        {/each}
+                        </div>
+                    {/if}
                 {/if}
             </svelte:fragment>
         </TabGroup>
     {:else}
-        <div class="grid grid-cols-4 gap-4 mb-20
-               md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4">
             <h3 class="text-xl mt-8 text-surface-900 col-span-full text-center dark:text-surface-50">
                 {user.firstName}'s Publications
             </h3>
             {#if posts.length === 0}
                 <p class="col-span-full text-center">So empty... There are no publications here</p>
             {:else}
+                <div class="grid grid-cols-2 gap-4">
                 {#each posts as publication, i}
-                    <div class="col-span-4 md:col-span-2 lg:col-span-2 xl:col-span-2">
-                        <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
-                                         publication={publication}
-                                         liked={liked.includes(publication.id)}
-                                         courses={posts[i].usedInCourse.map(x => x.course)}
-                                         saved={data.savedByUser.includes(publication.id)}
-										 publisher={publication.publisher}/>
-                    </div>
-
+                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
+                                     publication={publication}
+                                     liked={liked.includes(publication.id)}
+                                     courses={posts[i].usedInCourse.map(x => x.course)}
+                                     saved={data.savedByUser.includes(publication.id)}
+                                     publisher={publication.publisher}/>
                 {/each}
+                </div>
             {/if}
-        </div>
     {/if}
 </div>
-
-

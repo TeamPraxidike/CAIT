@@ -21,7 +21,7 @@ import Filter from '$lib/components/Filter.svelte';
 import Circuit from '$lib/components/circuits/Circuit.svelte';
 import CircuitPureHTML from '$lib/components/circuits/CircuitPureHTML.svelte';
 import Download from '$lib/components/generic/Download.svelte';
-
+import HorizontalScroll from '$lib/components/HorizontalScroll.svelte';
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
 import UsedInCourse from '$lib/components/UsedInCourse.svelte';
@@ -30,7 +30,7 @@ import PublishReview from '$lib/components/PublishReview.svelte';
 // util
 import { getDateDifference } from '$lib/util/date';
 
-import { mapToType, mapToDifficulty } from '$lib/util/types';
+import { mapToType, mapToDifficulty, MaterialTypes } from '$lib/util/types';
 
 const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
@@ -68,4 +68,6 @@ export {
 	AddInteractionForm,
 	UsedInCourse,
 	PublishReview,
+	HorizontalScroll,
+	MaterialTypes
 };

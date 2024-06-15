@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { DiffBar, DifficultySelection, FileTable, Filter, Meta, PublishReview, TheoryAppBar } from '$lib';
+	import {
+		DiffBar,
+		DifficultySelection,
+		FileTable,
+		Filter,
+		MaterialTypes,
+		Meta,
+		PublishReview,
+		TheoryAppBar
+	} from '$lib';
 	import {
 		FileButton,
 		FileDropzone,
@@ -48,7 +57,7 @@
 	let copyright: string = '';
 	let theoryApplicationRatio = 0.5;
 	let selectedType = "Select Type";
-	let allTypes: {id:number, content:string }[] = ["Presentation", "Information", "Code", "Assignment", "Exam", "Other"].map(x => ({id : 0, content : x})); //array with all the tags MOCK
+	let allTypes: {id:string, content:string }[] = MaterialTypes.map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 	let typeActive = false;
 	// cover
@@ -122,6 +131,35 @@
 		};
 	});
 
+	const onNextHandler = () => {
+		window.scrollTo({
+			top: 0,
+			behavior: 'smooth'
+		});
+	}
+	let warning1: string = "";
+	const generateWarningStep1 = (title: string, description: string, selectedType: string): string => {
+		let warning = "You are missing ";
+		if (title.length < 1) warning += "a title";
+		if (description.length < 1 && title.length < 1) warning += ", a description";
+		else if(description.length < 1) warning += "a description";
+		if ((title.length < 1 || description.length < 1) && selectedType === "Select Type") warning += " and a material type";
+		else if (selectedType === "Select Type") warning += "a material type";
+		warning += ".";
+		return warning;
+	}
+	$: warning1 = generateWarningStep1(title, description, selectedType);
+
+	let warning2: string = "";
+	const generateWarningStep2 = (tags: number, LOs: number) => {
+		let warning = "You are missing ";
+		if (tags < 1) warning += "a tag";
+		if (LOs < 1 && tags < 1) warning += " and a Learning objective";
+		else if (LOs < 1) warning += "a Learning objective";
+		return warning += ".";
+	}
+	$: warning2 = generateWarningStep2(tags.length, LOs.length);
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -154,7 +192,7 @@
 				formData.append('newTags', JSON.stringify(newTags));
 				formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
-	<Stepper buttonCompleteType="submit">
+	<Stepper buttonCompleteType="submit"  on:step={onNextHandler}>
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
@@ -178,6 +216,10 @@
 
 			{#if coverPic}
 				<img src={URL.createObjectURL(coverPic)} alt="coverPicture" class="border-2 border-surface-700 w-1/2">
+			{/if}
+
+			{#if locks[1]}
+				<p class="text-error-300 dark:text-error-400">{warning1}</p>
 			{/if}
 		</Step>
 		<Step locked={locks[2]}>
@@ -213,8 +255,10 @@
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
 					<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 				</div>
-
 			</div>
+			{#if locks[2]}
+				<p class="text-error-300 dark:text-error-400">{warning2}</p>
+			{/if}
 		</Step>
 		<Step>
 			<svelte:fragment slot="header">Review</svelte:fragment>

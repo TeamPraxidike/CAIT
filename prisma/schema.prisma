@@ -20,11 +20,11 @@ enum Difficulty {
 }
 
 enum MaterialType {
-  information
-  presentation
+  video
+  lectureNotes
+  slides
   assignment
-  exam
-  code
+  examQuestions
   other
 }
 
@@ -42,10 +42,12 @@ model User {
   emailVerified DateTime?
   reputation    Int       @default(0)
   password      String? // hashed password
+  aboutMe       String    @default("")
 
   saved            Publication[]             @relation("saved")
   posts            Publication[]
   liked            Publication[]             @relation("liked")
+  reported         Publication[]             @relation("reported")
   usedPublications PublicationUsedInCourse[]
 
   likedComments Comment[] @relation("likedComments")
@@ -152,8 +154,8 @@ model Publication {
   savedBy     User[] @relation("saved")
   likedBy     User[] @relation("liked")
 
-  reports Int             @default(0)
-  type    PublicationType
+  reportedBy User[]          @relation("reported")
+  type       PublicationType
 
   node Node[]
 
@@ -183,7 +185,7 @@ model SimilarContent {
 model Material {
   id                Int          @id @default(autoincrement())
   copyright         Boolean
-  encapsulatingType MaterialType @default(presentation)
+  encapsulatingType MaterialType
   timeEstimate      Int?
   theoryPractice    Float?
   files             File[]       @relation("Files")
