@@ -36,7 +36,6 @@ export const load: PageServerLoad = async ({
 	}
 	const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
 	const circuitsPubAppearIn = await circuitRes.json();
-	console.log(reported);
 	return { circuitsPubAppearIn, liked, saved, reported };
 };
 

@@ -166,8 +166,6 @@ export async function PUT({ request, params, locals }) {
 export async function DELETE({ params }) {
 	const id = parseInt(params.publicationId);
 
-	console.log(id);
-
 	if (isNaN(id) || id <= 0) {
 		return new Response(
 			JSON.stringify({

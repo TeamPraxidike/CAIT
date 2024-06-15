@@ -42,7 +42,6 @@ export const load: LayoutServerLoad = async ({
 	const likedComments = cRes.status === 200 ? await cRes.json() : [];
 	const likedReplies = rRes.status === 200 ? await rRes.json() : [];
 
-	console.log(pubView);
 	return {
 		userSpecificInfo,
 		pubView,

@@ -92,7 +92,6 @@ export const GET: RequestHandler = async ({ url }) => {
 			status: 200,
 		});
 	} catch (error) {
-		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
