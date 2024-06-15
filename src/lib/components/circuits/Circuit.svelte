@@ -37,6 +37,8 @@
 			}
 	}
 
+
+
 	const getFileExtension = (filePath: string): string =>  {
 		const index = filePath.lastIndexOf('.');
 		return index !== -1 ? filePath.substring(index + 1) : '';
@@ -186,7 +188,6 @@
 			layout: {
 				name: 'preset'
 			},
-
 			minZoom: 0.5,
 			maxZoom: 2,
 		});
@@ -249,17 +250,18 @@
 					cy.remove(cy.$(`#${edgeId}`));
 					selectedNodePrereqs.delete(Number(node.id()))
 				} else {
-					if (cy.getElementById(`en${node.id()}n${selectedId}`).length === 0) {
 						cy.add({
 							group: 'edges',
 							data: { id: `${edgeId}`, source: `${selectedId}`, target: `${node.id()}` }
 						});
-						selectedNodePrereqs.add(Number(node.id()));
-
-					} else {
-						alert('The reverse edge already exists, adding this edge will create a loop');
-					}
-
+						if (loopDetection(node.id()))
+						{
+							modalStore.trigger(modalAlert);
+							cy.remove(cy.$(`#${edgeId}`));
+						}
+						else {
+							selectedNodePrereqs.add(Number(node.id()));
+						}
 				}
 
 				cy.$(`#${node.id()}`).unselect();
@@ -479,6 +481,7 @@
 			const nodeA = event.target;
 			if (nodeA.id() !== 'edgeStart')
 			{
+				placeMentAlgorithm(nodeA, nodeA.position().x, nodeA.position().y)
 				return;
 			}
 
@@ -491,14 +494,15 @@
 					if (positionA.x >= positionB.x - 90 && positionA.x <= positionB.x + 90 && positionA.y >= positionB.y - 90 && positionA.y <= positionB.y + 90)
 					{
 						if (cy.getElementById(`en${hoveredNodeId}n${node.id()}`).length === 0) {
-							if (cy.getElementById(`en${node.id()}n${hoveredNodeId}`).length === 0) {
 								cy.add({
 									group: 'edges',
 									data: { id: `en${hoveredNodeId}n${node.id()}`, source: `${hoveredNodeId}`, target: `${node.id()}` }
 								});
-							} else {
-								alert('The reverse edge already exists, adding this edge will create a loop');
-							}
+								if (loopDetection(node.id()))
+								{
+									modalStore.trigger(modalAlert);
+									cy.remove(cy.$(`#en${hoveredNodeId}n${node.id()}`));
+								}
 						}
 
 					}
@@ -569,6 +573,8 @@
 			})
 		})
 
+
+
 		nodes.forEach(node => {
 			node.next.forEach(nextNode => {
 					cy.add({
@@ -633,8 +639,14 @@
 				cy.add({
 					group: 'nodes',
 					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial, dummyNode: false},
-					position: { x: 100, y: startY }
+					position: { x: 100, y: 100 }
 				});
+
+				const node = cy.getElementById(data.publication.id);
+				placeMentAlgorithm(node, node.position().x, node.position().y )
+
+
+
 				nodes.push(
 					{
 						next: [],
@@ -664,7 +676,6 @@
 						}
 					},
 				)
-				startY += 110;
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -713,6 +724,83 @@
 		component: 'TextThingy',
 		buttonTextCancel: "Close",
 	};
+
+	const modalAlert: ModalSettings = {
+		type: 'alert',
+		title: 'Loop Detected',
+		body: 'You cannot add this edge because it will create a loop! Please reconsider your circuit design.',
+		buttonTextCancel: "Got it",
+	};
+
+	const collisionDetection = (x1: number, y1: number, x2: number, y2: number) => {
+
+		let offset = 15
+		let dx = 180 - Math.abs(x2 - x1);
+		if (dx < 0)
+			return null
+		if (x1 > x2)
+			dx = -dx - offset
+		else
+			dx += offset
+
+		let dy = 100 - Math.abs(y1 - y2); // 17
+		if (dy < 0)
+			return null
+		if (y2 > y1)
+			dy = dy + offset
+		else
+			dy = -dy - offset
+
+		if (Math.abs(dy) > Math.abs(dx))
+			dx = 0
+		else
+			dy = 0
+		return [dx, dy];
+	}
+	const placeMentAlgorithm = (node : any, positionX : number, positionY:number) => {
+		if (cy.nodes().length === 1)
+		{
+			return
+		}
+
+		cy.nodes().forEach((n: any) => {
+
+			if (n.id() !== node.id() && n.id() !== "edgeStart"){
+				const vector = collisionDetection(positionX, positionY, n.position().x, n.position().y);
+				if(vector){
+					const data = n.data();
+					const edges : {id: string, source: string, target: string} [] = []
+
+
+					cy.edges().forEach((edge:any) => {
+							edges.push({ id: `en${edge.source().id()}n${edge.target().id()}`, source: `${edge.source().id()}`, target: `${edge.target().id()}` })
+					})
+					console.log(edges)
+					cy.remove(cy.$(`#${n.id()}`));
+					cy.add({
+						group: 'nodes',
+						data: data,
+						position: {x: n.position().x + vector[0], y: n.position().y + vector[1]}
+					});
+
+					addHtmlLabel(`#${n.id()}`, false);
+					edges.forEach((edge:any) => {
+						if (cy.getElementById(edge.id).length === 0)
+						{
+							cy.add({
+								group: 'edges',
+								data: { id: `${edge.id}`, source: `${edge.source}`, target: `${edge.target}` }
+							});
+						}
+
+					})
+
+
+					placeMentAlgorithm(n, n.position().x + vector[0], n.position().y + vector[1])
+				}
+			}
+		});
+	}
 
 	const removeSelected = () => {
 		cy.nodes().forEach((node: any) => {
@@ -846,13 +934,13 @@
 			popupPrereq1 = true;
 			setTimeout(() => {
 				popupPrereq1 = false;
-			}, 1500);
+			}, 2500);
 		}
 		else {
 			popupPrereq2 = true;
 			setTimeout(() => {
 				popupPrereq2 = false;
-			}, 1500);
+			}, 2500);
 		}
 
 	};
@@ -893,6 +981,29 @@
 			saved.push(id);
 		}
 	};
+
+	const loopDetection = (startingNodeId: string) => {
+
+		const visited = new Set();
+		const queue = [startingNodeId];
+		while (queue.length > 0) {
+			const nodeId = queue.pop();
+			if (visited.has(nodeId)) {
+				return true;
+			}
+			visited.add(nodeId);
+			const node = cy.getElementById(nodeId);
+			if (node) {
+				const edges = node.connectedEdges();
+				for (const edge of edges) {
+					if (edge.source() === node) {
+						queue.push(edge.target().id());
+						}
+					}
+				}
+			}
+			return false;
+		}
 
 	const removeDummyNode = (mouseX:number, mouseY:number, id:string) => {
 
@@ -942,7 +1053,9 @@
 
 							{/if}
 						{:else}
-							<button type="button" class=" relative btn variant-filled bg-surface-600" on:click={addPrereq}>Connect Publications</button>
+							{#if nodes.length > 1}
+								<button type="button" class=" relative btn variant-filled bg-surface-600" on:click={addPrereq}>Connect Publications</button>
+							{/if}
 
 						{/if}
 					{/if}
