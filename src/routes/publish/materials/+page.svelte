@@ -131,6 +131,12 @@
 		};
 	});
 
+	const onNextHandler = () => {
+		window.scrollTo({
+			top: 0,
+			behavior: 'smooth'
+		});
+	}
 	let warning1: string = "";
 	const generateWarningStep1 = (title: string, description: string, selectedType: string): string => {
 		let warning = "You are missing ";
@@ -186,7 +192,7 @@
 				formData.append('newTags', JSON.stringify(newTags));
 				formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
-	<Stepper buttonCompleteType="submit">
+	<Stepper buttonCompleteType="submit"  on:step={onNextHandler}>
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />

@@ -209,6 +209,15 @@
 		const index = filePath.lastIndexOf('.');
 		return index !== -1 ? filePath.substring(index + 1) : '';
 	};
+	const tagFilter = (event: CustomEvent) => {
+		const tagContent = event.detail.text;
+		if(isMaterial){
+			goto(`/browse?type=materials&tags=${tagContent}`)
+		}else{
+			goto(`/browse?type=circuits&tags=${tagContent}`)
+
+		}
+	}
 
 	let hoverDivReport: HTMLDivElement;
 	let isHoveredReport = false;
@@ -299,7 +308,7 @@
 
 			<div class="flex flex-wrap gap-2 my-2">
 				{#each tags as tag}
-					<Tag tagText={tag} removable={false} />
+					<Tag tagText={tag} removable={false} onView={true} on:FilterTag={tagFilter} />
 				{/each}
 			</div>
 			<div class="w-full">

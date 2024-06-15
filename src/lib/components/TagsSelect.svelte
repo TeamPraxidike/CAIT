@@ -44,12 +44,42 @@
             tagInput = '';
         }
     }
+    let newTag = '';
+    let enterTag = false;
+    const createTag = () =>{
+        if(enterTag){
+            if(allTags.includes({ content: newTag })){
+                tagInput=newTag;
+                enterTag = false;
+            }else if(!tags.includes(newTag.toLowerCase()) && newTag !== ''){
+                newTags = [...newTags, newTag];
+                tags = [...tags,newTag];
+                newTag = '';
+                enterTag = false;
+            }else{
+                triggerRepeatInput('Tag', newTag.toLowerCase());
+            }
+        }else{
+            enterTag=true;
+        }
+    }
+    const enterNewTag = (event: KeyboardEvent) =>{
+        if(event.key === 'Enter'){
+            createTag()
+        }
+    }
+    let buttonText = 'Add New Tag';
+    $: buttonText = enterTag ? 'Create Tag' : 'Add New Tag';
 </script>
 
 <label class="pl-3" for="tags_input">Tags (at least one)<span class="text-error-300">*</span>:</label>
 <div class="text-token space-y-2 pl-3">
-    <InputChip bind:this={inputChip} whitelist={allTags.map(t => t.content)}
+    <InputChip  bind:this={inputChip} whitelist={allTags.map(t => t.content)}
                bind:input={tagInput} bind:value={tags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
+    {#if enterTag}
+        <input on:keypress={enterNewTag} bind:value={newTag} placeholder="Enter tag text" class="w-full border-o focus:border-primary-400 focus:ring-0 rounded-lg" />
+    {/if}
+    <button type="button" class="w-full bg-surface-300 rounded-lg py-2" on:click={createTag}>{buttonText}</button>
     <div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
         <Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
                       on:selection={onInputChipSelect} emptyState="No Tags Found. Press Enter to Create New Tag." />

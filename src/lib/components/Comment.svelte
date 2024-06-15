@@ -258,21 +258,21 @@
 <AddInteractionForm on:addedReply={sendReplyEvent}  on:cancelEventForum={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
 
 <div data-popup="{popupName}">
-    <div class="flex flex-col w-12 h-12 gap-2 bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">
+    <div class="flex flex-col bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">
         <button id="copyButton" on:click={copyToClipboard}
-                class="rounded-lg hover:bg-surface-300 dark:hover:bg-surface-700">
+                class="btn rounded-lg hover:bg-surface-300 dark:hover:bg-surface-700">
             Copy
         </button>
         <!--		only visible when user is the one who published, don't know how would work yey, just a setup-->
         {#if browsingUser === user}
             <button id="editButton" on:click={startEditing}
-                    class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
+                    class=" btn hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
                 Edit
             </button>
         {/if}
         {#if user === $page.data.session?.user.id || $page.data.session?.user.isAdmin}
             <button on:click={handleDelete} id="deleteButton"
-                    class="hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
+                    class=" btn hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
                 Delete
             </button>
         {/if}

@@ -78,6 +78,10 @@
 		});
 	}
 	const onNextHandler = async (event: CustomEvent) => {
+			window.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			});
 		if (event.detail.step === 0) {
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 
@@ -166,7 +170,7 @@
 
 				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} adding="{true}"/>
 
-				<div class="flex flex-col w-full">
+				<div class="flex flex-col w-1/2">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
 						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} bind:newTags={newTags}/>
 				</div>

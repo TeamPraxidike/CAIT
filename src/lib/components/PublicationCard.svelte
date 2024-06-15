@@ -187,13 +187,20 @@
 		closeQuery: '#close, #remove'
 	};
 
+	let isClickedTags = false;
+	const viewTags = () => {
+		isClickedTags = !isClickedTags;
+		if(isClickedTags){
+			setTimeout(()=>{isClickedTags=false},2000);
+		}
+	}
 </script>
 <div class="{className} flex items-center">
 	{#if forArrow}
 		<div class="carrow shadow-lg"/>
 	{/if}
 	<div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-50 dark:bg-surface-800 border dark:border-none">
-		<div class="w-full relative h-3/6 rounded-t-lg">
+		<div class="w-full relative h-2/5 rounded-t-lg">
 			{#if used === 1}
 				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
 					Used in {used} course</p>
@@ -201,14 +208,16 @@
 				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
 					Used in {used} courses</p>
 			{/if}
-			<img class="w-full h-full object-cover" src={imgSrc} alt="" />
+			<a href="../{publication.publisherId}/{publication.id}" class="flex-none " >
+				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc} alt="" />
+			</a>
 		</div>
-		<div class="flex flex-col justify-between px-2 py-2 w-full h-3/6 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
+		<div class="flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
 			<!-- Title and difficulty -->
 			<div class="w-full">
 				<div class="flex justify-between items-start">
-					<a href="../{publication.publisherId}/{publication.id}"
-						 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center"> {publication.title}
+					<a href="{publication.publisherId}/{publication.id}"
+						 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center hover:text-surface-500"> {publication.title}
 					</a>
 					<div class="flex gap-2">
 						{#if publication.type === PublicationType.Circuit}
@@ -251,16 +260,21 @@
 
 
 			<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
-				<div class="flex gap-1">
+				<div class="flex gap-1 relative">
 					{#each tags.slice(0, maxTags) as tag, i}
 						<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
 					{/each}
 				</div>
-				<div class=" self-center">
-					{#if (tags.length > maxTags)}
-						<p class="text-sm text-primary-500">+{tags.length - maxTags}</p>
+					{#if (tags.length > maxTags) }
+						<button on:click={viewTags} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
 					{/if}
-				</div>
+				{#if isClickedTags}
+					<div class="absolute ml-48 flex flex-col gap-1 z-[9999]" transition:fly={{ x:8 , duration: 400 }}>
+						{#each tags.slice(maxTags, tags.length) as tag, i}
+							<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
+						{/each}
+					</div>
+				{/if}
 			</div>
 			<div class="w-full space-y-2">
 				<hr class="opacity-50">
