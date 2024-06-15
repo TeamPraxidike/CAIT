@@ -197,13 +197,13 @@
 	{#if forArrow}
 		<div class="carrow shadow-lg"/>
 	{/if}
-	<div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-100 dark:bg-surface-800 border dark:border-none">
-		<div class="w-full relative h-2/5 rounded-t-lg">
-			{#if used > 5}
-				<p class="fixed mt-2 right-1 text-xs p-1 bg-secondary-500 rounded-md bg-opacity-50 text-surface-700 dark:text-surface-200">
-					Used in {used} courses</p>
+	<div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-50 dark:bg-surface-800 border dark:border-none">
+		<div class="w-full relative h-3/6 rounded-t-lg">
+			{#if used === 1}
+				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
+					Used in {used} course</p>
 			{:else if used > 0}
-				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface">
+				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
 					Used in {used} courses</p>
 			{/if}
 			<a href="../{publication.publisherId}/{publication.id}" class="flex-none " >
