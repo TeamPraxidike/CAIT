@@ -41,7 +41,6 @@ describe('Filter Component', () => {
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					publisherId: 'hello',
-					reports: 2,
 					type: 'Material',
 					tags: [{ content: 'tag1' }],
 					usedInCourse: [],
