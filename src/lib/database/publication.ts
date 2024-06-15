@@ -186,3 +186,18 @@ export async function updateAllTimeSaved(id: string, publicationId: number) {
 		return 'User saved previously';
 	}
 }
+
+export async function getReportsPublication(publicationId: number) {
+	return prisma.publication.findUnique({
+		where: {
+			id: publicationId,
+		},
+		select: {
+			_count: {
+				select: {
+					reportedBy: true,
+				},
+			},
+		},
+	});
+}

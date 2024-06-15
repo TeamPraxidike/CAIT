@@ -105,6 +105,7 @@ export async function PUT({ params, request, locals }) {
 				firstName: body.metaData.firstName,
 				lastName: body.metaData.lastName,
 				email: body.metaData.email,
+				aboutMe: body.metaData.aboutMe,
 			};
 
 			const user = await editUser(userData, prismaTransaction);

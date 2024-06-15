@@ -15,6 +15,7 @@ export const load: PageServerLoad = async ({
 		saved: [],
 		savedFileData: [],
 	};
+	let reported: boolean = false;
 
 	if (session !== null) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
@@ -27,10 +28,16 @@ export const load: PageServerLoad = async ({
 			savedResponse.status === 200
 				? await savedResponse.json()
 				: { saved: [], savedFileData: [] };
+
+		const reportedResponse = await fetch(
+			`/api/publication/${params.publication}/reported`,
+		);
+		reported = await reportedResponse.json();
 	}
 	const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
 	const circuitsPubAppearIn = await circuitRes.json();
-	return { circuitsPubAppearIn, liked, saved };
+	console.log(reported);
+	return { circuitsPubAppearIn, liked, saved, reported };
 };
 
 export const actions = {

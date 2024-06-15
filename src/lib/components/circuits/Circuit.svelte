@@ -666,7 +666,6 @@
 							createdAt: new Date(),
 							updatedAt: new Date(),
 							publisherId: '1',
-							reports: 2,
 							type: data.publication.type,
 							savedByAllTime: ['1'],
 							tags: [{content: 'haha'}],

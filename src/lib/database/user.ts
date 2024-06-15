@@ -138,6 +138,7 @@ export type userEditData = {
 	firstName: string;
 	lastName: string;
 	email: string;
+	aboutMe: string;
 };
 
 /**
@@ -158,6 +159,7 @@ export async function editUser(
 			lastName: user.lastName,
 			email: user.email,
 			username: await generateUsername(user.firstName, user.lastName),
+			aboutMe: user.aboutMe,
 		},
 	});
 }
@@ -512,6 +514,91 @@ export async function getLikedReplies(userId: string) {
 		},
 		select: {
 			likedReplies: true,
+		},
+	});
+}
+
+export async function isReported(userId: string, publicationId: number){
+	return prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			reported: {
+				where: {
+					id: publicationId,
+				},
+				select: {
+					id: true,
+				},
+			},
+		}
+	}).then(reported => {
+		if(reported === null) throw new Error("Unable to fetch reported applications")
+		return reported.reported.map(x => x.id).includes(publicationId);
+	});
+}
+
+export async function reportPublication(userId: string, publicationId: number) {
+	const reported = await prisma.publication.findUnique({
+		where: {
+			id: publicationId
+		},
+		select: {
+			reportedBy: true
+		}
+	});
+	if (reported === null) throw Error('Reported publications were not found');
+	if (reported.reportedBy.map((x) => x.id).includes(userId)) {
+		await unreport(userId, publicationId);
+		return 'Publication unreported successfully';
+	} else {
+		await report(userId, publicationId);
+		return 'Publication reported successfully';
+	}
+}
+
+
+/**
+ * Method for liking a reply, adds it to the user's likedReplies and increases the counter in the reply atomically
+ * Does not check whether the user has already liked it, so should not be used just by itself
+ *
+ * @param userId
+ * @param publicationId
+ */
+async function report(userId: string, publicationId: number) {
+	await prisma.user.update({
+		where: {
+			id: userId,
+		},
+		data: {
+			reported: {
+				connect: {
+					id: publicationId,
+				},
+			},
+		},
+	});
+}
+
+/**
+ * Method for unliking a reply, removes it from the user's likedReplies and decreases the counter in the reply atomically
+ * Does not check whether the user has already liked it, so should not be used just by itself
+ *
+ * @param userId
+ * @param publicationId
+ */
+async function unreport(userId: string, publicationId: number) {
+	await prisma.user.update({
+		where: {
+			id: userId,
+		},
+		data: {
+			reported: {
+				disconnect: {
+					id: publicationId,
+				},
+			},
 		},
 	});
 }

@@ -132,10 +132,12 @@ type UserCreateForm = {
 };
 
 type UserForm = {
+
 	metaData: {
 		firstName: string;
 		lastName: string;
 		email: string;
+		aboutMe: string;
 	};
 	profilePic: { type: string; info: string } | null;
 };

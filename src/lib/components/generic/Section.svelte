@@ -2,12 +2,16 @@
     export let title: string;
     export let subtitle: string;
     export let description: string;
+    export let colour = 'text-surface-700';
+    export let onAbout = false;
+    export let img = '';
+    export let mdFlex = 'md:flex-row'
 </script>
 
 
-<div class="flex flex-col-reverse md:flex-row text-surface-700
-            gap-4 xl:gap-6">
-    <div class="flex flex-col gap-8 md:w-1/2 md:justify-center">
+<div class="flex flex-col-reverse {mdFlex} {colour}
+            gap-4 xl:gap-6 justify-between">
+    <div class="flex flex-col gap-8 md:justify-center">
         <div class="gap-4">
             <div class="gap-2">
                 <h6 class="mb-1 text-surface-700 dark:text-surface-100 text-sm font-light">{subtitle}</h6>
@@ -15,9 +19,11 @@
             </div>
             <p class="text-surface-400">{description}</p>
         </div>
+        {#if !onAbout}
         <a href={`/about`} class="font-bold xl:font-extrabold underline underline-offset-4 max-md:text-[12px]">
             Go to
         </a>
+            {/if}
     </div>
-    <div class="md:w-1/2 rounded-lg h-64 bg-surface-200"></div>
+    <img src="{img}" alt="{title}" class="md:w-1/3 rounded-lg  h-64 object-fill"/>
 </div>

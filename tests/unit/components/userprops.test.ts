@@ -19,6 +19,7 @@ describe('User Components', () => {
 		lastName: 'Guenov',
 		email: 'kitajski@gmail.com',
 		username: 'ivanguenov',
+		aboutMe: "Hello I am a user",
 		// profilePic: '',
 		password: 'password',
 		reputation: 5,

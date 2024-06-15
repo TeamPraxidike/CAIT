@@ -1,5 +1,7 @@
 import { Difficulty, MaterialType } from '@prisma/client';
 
+export const MaterialTypes = ["Video", "Lecture Notes", "Slides", "Assignment", "Exam Questions", "Other"];
+
 export function mapToDifficulty(difficulty: string): Difficulty {
 	switch (difficulty.toLowerCase()) {
 		case 'easy':
@@ -15,19 +17,20 @@ export function mapToDifficulty(difficulty: string): Difficulty {
 
 export function mapToType(mt: string): MaterialType {
 	switch (mt.toLowerCase()) {
-		case 'information':
-			return MaterialType.information;
-		case 'presentation':
-			return MaterialType.presentation;
+		case 'exam questions':
+			return MaterialType.examQuestions;
+		case 'lecture notes':
+			return MaterialType.lectureNotes;
+		case 'slides':
+			return MaterialType.slides;
 		case 'assignment':
 			return MaterialType.assignment;
 		case 'other':
 			return MaterialType.other;
-		case 'exam':
-			return MaterialType.exam;
-		case 'code':
-			return MaterialType.code;
+		case 'video':
+			return MaterialType.video;
 		default:
-			throw new Error(`Invalid material type: ${mt}`);
+			// Handle invalid input if necessary
+			return MaterialType.other;
 	}
 }
