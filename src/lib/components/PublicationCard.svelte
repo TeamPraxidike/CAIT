@@ -46,6 +46,8 @@
 	export let materialType: string = "information";
 	export let forArrow: boolean = false;
 
+
+
 	const userId = $page.data?.session?.user?.id || '0';
 
 	//used to differentiate if it's used in a normal browse or in the circuit browse

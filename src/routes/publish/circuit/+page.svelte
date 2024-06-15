@@ -19,6 +19,7 @@
 	} from '@prisma/client';
 	import { onMount } from 'svelte';
 
+
 	export let data: PageServerData;
 
 	let circuitRef : InstanceType<typeof Circuit>;
@@ -81,9 +82,9 @@
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 
 			nodeActions = nodeDiffActions;
+			console.log(nodeActions);
 			circuitCoverPic = coverPic;
 
-			console.log(circuitNodesPlaceholder);
 		}
 	}
 	let circuitNodesPlaceholder: (PrismaNode & {
@@ -91,6 +92,7 @@
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: User & {profilePicData:string},
+			coverPicData: string
 		}
 		next: {
 			circuitId: number,
