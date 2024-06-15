@@ -86,6 +86,7 @@ export type PublicationView = {
 					tags: Tag[];
 					usedInCourse: { course: string }[];
 					publisher: UserPfp;
+					coverPicData: string;
 				};
 				prerequisites: Edge[];
 				next: Edge[];

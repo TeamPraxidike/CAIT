@@ -92,6 +92,7 @@
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: User & {profilePicData:string},
+			coverPicData: string
 		}
 		next: {
 			circuitId: number,
