@@ -44,14 +44,19 @@
 	let circuitsPubAppearIn = data.circuitsPubAppearIn;
 	let likedPublications = data.liked as number[];
 	let savedPublications = data.saved.saved as number[];
+	let reported = data.reported;
 
-	let isHovered = false;
-	let hoverDiv: HTMLDivElement;
+
 
 	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
+	const toggleReport = async () => {
+		await fetch(`/api/user/${userId}/report/${pubView.publication.id}`, {
+			method: 'POST'
+		}).then(() => reported = !reported);
+	};
 	const toggleLike = async () => {
 		likes = liked ? likes - 1 : likes + 1;
 		await fetch(`/api/user/${userId}/liked/${pubView.publication.id}`, {
@@ -213,16 +218,24 @@
 		}
 	}
 
+	let hoverDivReport: HTMLDivElement;
+	let isHoveredReport = false;
+	let hoverDiv: HTMLDivElement;
+	let isHovered = false;
+	const handleHoverReport = () => isHoveredReport = !isHoveredReport;
+	const handleHover = () => isHovered = !isHovered;
 	onMount(() => {
-		const handleHover = () => isHovered = !isHovered;
-		if (hoverDiv) {
+		if (hoverDivReport && hoverDiv) {
+			hoverDivReport.addEventListener('mouseenter', handleHoverReport);
+			hoverDivReport.addEventListener('mouseleave', handleHoverReport);
 			hoverDiv.addEventListener('mouseenter', handleHover);
 			hoverDiv.addEventListener('mouseleave', handleHover);
 
 			return () => {
+				hoverDivReport.removeEventListener('mouseenter', handleHoverReport);
+				hoverDivReport.removeEventListener('mouseleave', handleHoverReport);
 				hoverDiv.removeEventListener('mouseenter', handleHover);
 				hoverDiv.removeEventListener('mouseleave', handleHover);
-
 			};
 		}
 	});
@@ -332,24 +345,46 @@
 
 <div class="col-span-full flex flex-col items-start mt-2">
 
-	<div class="flex items-center text-3xl rounded-lg border mt-4">
-		<button type="button"
-				class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
-				on:click={() => toggleLike()}>
-			<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
-			<span>{likes}</span>
-		</button>
-		{#if isMaterial}
-			<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-					on:click={downloadFiles}>
-				<Icon class="xl:text-2xl" icon="material-symbols:download" />
+	<div class="flex ">
+		<div class="flex items-center text-3xl rounded-lg border mt-4">
+			<button type="button"
+					class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
+					on:click={() => toggleLike()}>
+				<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
+				<span>{likes}</span>
 			</button>
-		{/if}
-		<button type="button"
-				class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-				on:click={() => toggleSave()}>
-			<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
-		</button>
+			{#if isMaterial}
+				<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+						on:click={downloadFiles}>
+					<Icon class="xl:text-2xl" icon="material-symbols:download" />
+				</button>
+			{/if}
+			<button type="button"
+					class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+					on:click={() => toggleSave()}>
+				<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
+			</button>
+
+			<div bind:this={hoverDivReport}>
+				<button on:click={toggleReport} class="pl-2 pr-1">
+					{#if reported}
+						<Icon icon="material-symbols:flag" class="self-center size-6 text-surface-600" />
+					{:else}
+						<Icon icon="material-symbols:flag-outline" class="self-center size-6 text-surface-600" />
+					{/if}
+				</button>
+				{#if isHoveredReport}
+					<div
+							class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+							style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+						<p class="text-xs">Report publication</p>
+					</div>
+				{/if}
+			</div>
+
+		</div>
+
+
 	</div>
 
 	{#if isMaterial}
