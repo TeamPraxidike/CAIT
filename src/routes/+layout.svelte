@@ -65,7 +65,7 @@
 
 <Header />
 
-<div class="w-screen dark:text-surface-50 text-surface-900">
+<div class="w-full dark:text-surface-50 text-surface-900 overflow-x-hidden">
 	<Grid pageGrid="{true}">
 		<slot />
 	</Grid>
