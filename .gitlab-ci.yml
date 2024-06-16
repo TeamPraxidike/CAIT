@@ -23,7 +23,7 @@ variables:
   AUTH_GITHUB_ID: REDACTED
   AUTH_GITHUB_SECRET: REDACTED
   AUTH_TRUST_HOST: true
-  AUTH_URL: http://localhost:4173
+  AUTH_URL: http://localhost:5173
 
 stages:          # List of stages for jobs, and their order of execution
   - build
@@ -47,12 +47,18 @@ eslint:
   stage: lint
   script:
     - npm run lint
+  cache:
+    paths:
+      - node_modules/
 
 svelte-check:
   stage: lint
   script:
     - npx prisma generate
     - npm run check
+  cache:
+    paths:
+      - node_modules/
 
 test-unit:
   stage: test-light

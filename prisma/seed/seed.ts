@@ -12,7 +12,7 @@ import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 const main = async () => {
 	const seed = await createSeedClient();
 
-	// Truncate all tables in the database
+	//Truncate all tables in the database
 	await seed.$resetDatabase();
 
 	const users = [

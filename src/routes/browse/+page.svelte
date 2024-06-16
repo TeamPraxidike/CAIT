@@ -209,8 +209,6 @@
 
 		onMount(()=>{
 			if (data.selectedTag !== ''){
-				console.log('apply tag filter from pub card')
-				console.log(data.selectedTag);
 				applyActive = true;
 				selectedTags = [];
 				selectedTags.push({id:'0', content: data.selectedTag});

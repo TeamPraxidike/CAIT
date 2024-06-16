@@ -39,7 +39,6 @@
 	const calcAllowedAmount = () => {
 		const screenSize = window.matchMedia('(min-width: 1024px)').matches ? 'lg' : window.matchMedia('(min-width: 640px)').matches ? 'md' : 'sm';
 		allowedAmount = screenSize === 'lg' ? 4 : screenSize === 'sm' ? 1 : 2;
-		console.log(allowedAmount);
 	};
 	let allowedAmount : number;
 

@@ -94,7 +94,6 @@
 
 		if (event.detail.option === 0)
 		{
-			console.log("All Materials")
 			chosenOption = 0
 			userIds = []
 			urlParam = "material"
@@ -115,7 +114,6 @@
 			if ($page.data.session?.user.id)
 				userIds = [$page.data.session?.user.id]
 			urlParam = `user/${$page.data.session?.user.id}/saved`
-			console.log(urlParam)
 		}
 
 		searchAPI();

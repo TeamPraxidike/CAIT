@@ -774,7 +774,6 @@
 					cy.edges().forEach((edge:any) => {
 							edges.push({ id: `en${edge.source().id()}n${edge.target().id()}`, source: `${edge.source().id()}`, target: `${edge.target().id()}` })
 					})
-					console.log(edges)
 					cy.remove(cy.$(`#${n.id()}`));
 					cy.add({
 						group: 'nodes',

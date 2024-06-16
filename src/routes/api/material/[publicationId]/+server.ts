@@ -15,7 +15,9 @@ import {
 } from '$lib/database';
 import { type File as PrismaFile, Prisma } from '@prisma/client';
 import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
-import { profilePicFetcher } from '$lib/database/file';
+
+import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -139,6 +141,8 @@ export async function PUT({ request, params, locals }) {
 
 		const id = updatedMaterial.id;
 
+		enqueueMaterialComparison(publicationId).catch(error => console.error(error))
+
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
 		console.error(error);
@@ -161,8 +165,6 @@ export async function PUT({ request, params, locals }) {
 
 export async function DELETE({ params }) {
 	const id = parseInt(params.publicationId);
-
-	console.log(id);
 
 	if (isNaN(id) || id <= 0) {
 		return new Response(

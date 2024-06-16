@@ -10,8 +10,11 @@ import {
 	updateReputation,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
+import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
+
 import type { Tag } from '@prisma/client';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
@@ -89,7 +92,6 @@ export const GET: RequestHandler = async ({ url }) => {
 			status: 200,
 		});
 	} catch (error) {
-		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
@@ -145,6 +147,8 @@ export async function POST({ request }) {
 		await updateReputation(userId, 30);
 
 		const id = createdMaterial.publicationId;
+
+		enqueueMaterialComparison(id).catch(error => console.error(error))
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

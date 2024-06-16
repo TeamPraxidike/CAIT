@@ -12,7 +12,11 @@ import {
 	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+
+import {enqueueCircuitComparison, enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+
 import { profilePicFetcher } from '$lib/database/file';
+
 
 export async function GET({ locals, url }) {
 	const authError = await verifyAuth(locals);
@@ -128,6 +132,8 @@ export async function POST({ request, locals }) {
 		await updateReputation(userId, 50);
 
 		const id = createdCircuit.publicationId;
+
+		enqueueCircuitComparison(id).catch(error => console.error(error))
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

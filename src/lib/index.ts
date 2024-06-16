@@ -37,6 +37,7 @@ const lorem =
 
 import AddInteractionForm from '$lib/components/AddInteractionForm.svelte';
 
+
 export {
 	mapToType,
 	mapToDifficulty,
