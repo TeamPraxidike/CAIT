@@ -10,6 +10,7 @@ export const actions = {
 		const lastName = formData.get('lastName')?.toString();
 		const email = formData.get('email')?.toString();
 		const aboutMe = formData.get('aboutMe')?.toString();
+		const pfpChange = formData.get('pfpChange')?.toString();
 
 		if (!id || !firstName || !lastName || !email || !aboutMe)
 			return {

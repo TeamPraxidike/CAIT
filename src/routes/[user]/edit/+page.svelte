@@ -19,7 +19,7 @@
 	} = data.user;
 
 	$:profilePic = data.profilePicData;
-
+	let changePfp = false;
 
 	const toastStore = getToastStore();
 	$: if (form?.status === 200) {
@@ -44,7 +44,9 @@
 	 * Function to handle the profile picture upload
 	 */
 	async function choosePfp(e: Event) {
+		changePfp = true;
 		const eventFiles = (e.target as HTMLInputElement).files;
+
 		if (eventFiles) {
 			if (eventFiles[0].type === 'image/jpeg' || eventFiles[0].type === 'image/png') {
 				const buffer = await eventFiles[0].arrayBuffer();
@@ -57,6 +59,7 @@
 				});
 		}
 	}
+
 </script>
 
 <Meta title="Profile" description="CAIT" type="site" />
@@ -68,6 +71,7 @@
 <form enctype="multipart/form-data" method="POST" action="?/edit" class="col-span-6 flex flex-col gap-8"
 	  use:enhance={({formData}) => {
 		formData.append('userId', user.id);
+		formData.append('pfpChange', changePfp.toString());
 	  }}>
 
 	<div class="flex gap-8 items-center">
@@ -77,31 +81,31 @@
 			</h4>
 			<img src={'data:image;base64,' + profilePic.data} alt="" class="w-32 h-32 rounded-full" />
 		</div>
-		<FileButton on:click={choosePfp} name="profilePic" accept="image/*" />
+		<FileButton on:click={choosePfp} name="profilePic" accept="image/*"/>
 	</div>
 	<div>
 		<label for="firstName" class="text-surface-900 dark:text-surface-50">
 			First name
 		</label>
-		<input type="text" name="firstName" id="firstName" class="input" value={user.firstName} />
+		<input type="text" name="firstName" id="firstName" class="input" bind:value={user.firstName} />
 	</div>
 	<div>
 		<label for="lastName" class="text-surface-900 dark:text-surface-50">
 			Last name
 		</label>
-		<input type="text" name="lastName" id="lastName" class="input" value={user.lastName} />
+		<input type="text" name="lastName" id="lastName" class="input" bind:value={user.lastName} />
 	</div>
 	<div>
 		<label for="email" class="text-surface-900 dark:text-surface-50">
 			Email
 		</label>
-		<input type="text" name="email" id="email" class="input" value={user.email} />
+		<input type="text" name="email" id="email" class="input" bind:value={user.email} />
 	</div>
 	<div>
 		<label for="aboutMe" class="text-surface-900 dark:text-surface-50">
 			About me
 		</label>
-		<input type="text" name="aboutMe" id="aboutMe" class="input" value={user.aboutMe} />
+		<textarea name="aboutMe" id="aboutMe" class="rounded-lg w-full" rows="3" bind:value={user.aboutMe} />
 	</div>
-	<button type="submit" class="btn">Edit</button>
+	<button type="submit" class="btn">Save</button>
 </form>

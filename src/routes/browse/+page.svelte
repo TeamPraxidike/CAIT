@@ -99,8 +99,6 @@
         typeActive = false;
     };
 
-
-
     const resetFilters = () => {
         selectedTags = [];
         selectedTypes = [];
@@ -201,8 +199,9 @@
     $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
 
     const deleteFilters = (pageType: string) => {
-        if(pageType === "people")
+        if(pageType !== "materials")
             resetFilters();
+
     }
 
 		$: deleteFilters(pageType)

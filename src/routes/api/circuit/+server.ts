@@ -15,9 +15,6 @@ import { verifyAuth } from '$lib/database/auth';
 import { profilePicFetcher } from '$lib/database/file';
 
 export async function GET({ locals, url }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	try {
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
