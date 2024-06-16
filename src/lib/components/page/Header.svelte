@@ -122,13 +122,19 @@
                     </div>
 
                     {#if $page.data.session}
-                        <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                            {#if $page.data.session.user && $page.data.session.userPfp.data !== ''}
-                                <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user?.name}/>
-                            {:else}
-                                <div class="w-8 h-8 placeholder-circle" />
-                            {/if}
+                        <div class="flex gap-2 items-center">
+                            <a on:click={confirmPublishReset} href="/publish" class="btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
+                                Publish
+                            </a>
+                            <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
+                                {#if $page.data.session.user && $page.data.session.userPfp.data !== ''}
+                                    <img class="h-8 w-8 rounded-full object-cover self-center" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user?.name}/>
+                                {:else}
+                                    <div class="w-8 h-8 placeholder-circle self-center" />
+                                {/if}
+                            </div>
                         </div>
+
                     {:else}
                         <button on:click={() => signIn()} type="button" class="btn rounded-lg variant-ghost-primary">
                             Sign In
