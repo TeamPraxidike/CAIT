@@ -129,7 +129,7 @@
 <!--<Node></Node>-->
 <Meta title="Publish Circuit" description="Organize publications into a circuits" type="site" />
 <!--<div class="col-span-9 h-[256px]"><CircuitManual isDraggable="{true}"/></div>-->
-<form method="POST" action="?/publish" class="col-start-2 col-span-10 my-20 pr-10 shadow p-4"
+<form method="POST" action="?/publish" class="col-span-full my-20 pr-10 shadow p-4"
 			use:enhance={({ formData }) => {
 
 				formData.append('publisherId', uid.toString());

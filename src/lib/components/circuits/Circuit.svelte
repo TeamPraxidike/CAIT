@@ -1034,9 +1034,9 @@
 </style>
 <div class="flex-col mt-10 col-span-7">
 	{#if publishing}
-	<div class = "flex justify-between">
+	<div class = "flex flex-col md:flex-row gap-2 justify-between">
 			<div class="flex justify justify-between">
-				<div class="flex gap-2">
+				<div class="flex flex-col md:flex-row gap-2 gap-2 ">
 					{#if (selected || edgeSelected)}
 						<button type="button" class="btn variant-filled bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
 					{:else}
@@ -1064,7 +1064,7 @@
 			</div>
 		<div class="flex gap-4">
 			<button type="button" class="btn variant-filled bg-surface-600" on:click="{() => {cy.center()}}"> Recentre </button>
-			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 rounded-full h-full">
+			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 rounded-full h-full self-center">
 				<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center"/>
 			</button>
 		</div>
