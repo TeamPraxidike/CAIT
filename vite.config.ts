@@ -5,9 +5,4 @@ import { enhancedImages } from '@sveltejs/enhanced-img';
 
 export default defineConfig({
 	plugins: [sveltekit(), purgeCss(), enhancedImages()],
-	build: {
-		rollupOptions: {
-			external: ['piscina']
-		}
-	}
 });
