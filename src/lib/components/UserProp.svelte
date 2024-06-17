@@ -10,7 +10,6 @@
 	export let posts = 0;
 	export let userPhotoUrl: string;
 	export let role: 'Maintainer' | 'Publisher' | null;
-	export let department = 'AE';
 
 	let userId = user.id;
 	let rep = user.reputation;
@@ -63,7 +62,6 @@
 						 use:popup={popupHoverTop}>{name}</div>
 					<hr class="dark:bg-surface-50 bg-surface-300" />
 				</div>
-				<p class="dark:text-surface-50 dark:opacity-80 text-surface-400 hover:line-clamp-2 max-w-full line-clamp-1 md:text-lg">{department}</p>
 			</div>
 			<div class="flex justify-between items-start w-full">
 				<span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Rep: {rep}</span>
