@@ -19,6 +19,7 @@
 	} from '@skeletonlabs/skeleton';
     import {IconMapExtension, PublicationTypeIconMap} from '$lib/util/file';
 	import { coursesStore } from '$lib/stores/courses';
+	import {typeToHumanString} from "$lib/util/types";
 
 	export let publication: Publication & {
 		tags: { content: string }[],
@@ -232,10 +233,15 @@
 									<div
 										class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
 										style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-										{#each extensions as e}
-											<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
-										{/each}
 
+										<div class="flex flex-col items-center">
+											<p>{typeToHumanString(materialType)}</p>
+											<div class="flex flex-row">
+												{#each extensions as e}
+													<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
+												{/each}
+											</div>
+										</div>
 									</div>
 								{/if}
 
