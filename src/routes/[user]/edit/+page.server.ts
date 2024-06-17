@@ -8,10 +8,10 @@ export const actions = {
 		const id = formData.get('userId');
 		const firstName = formData.get('firstName')?.toString();
 		const lastName = formData.get('lastName')?.toString();
-		const email = formData.get('email')?.toString();
-		const aboutMe = formData.get('aboutMe')?.toString();
+		const aboutMe = formData.get('aboutMe')?.toString() || '';
+		const email = formData.get('email')?.toString() || '';
 
-		if (!id || !firstName || !lastName || !email || !aboutMe)
+		if (!id || !firstName || !lastName)
 			return {
 				status: 400,
 				message:
@@ -21,12 +21,10 @@ export const actions = {
 							? 'firstName'
 							: '' + !lastName
 								? 'lastName'
-								: '' + !email
-									? 'email'
-									: '',
+								: '',
 			};
 
-		const profilePicFile = formData.get('profilePic');
+		const profilePicFile = formData.get('profilePicSet');
 		let profilePic = null;
 
 		if (profilePicFile instanceof File) {

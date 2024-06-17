@@ -152,6 +152,7 @@ export async function PUT({ request, params, locals }) {
 
 			return await updateCircuitByPublicationId(
 				publicationId,
+				nodeInfo.numNodes,
 				metaData,
 				prismaTransaction,
 			);

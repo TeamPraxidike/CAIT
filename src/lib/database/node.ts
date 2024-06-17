@@ -1,6 +1,6 @@
 import { getPublicationById, prisma } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
-import { PublicationType } from '@prisma/client';
+import { type Edge, PublicationType } from '@prisma/client';
 
 /**
  * Gets the extensions needed for the frontend icons within the node cards
@@ -41,6 +41,31 @@ export async function handleEdges(
 			toPublicationId: toIdValue,
 		})),
 	);
+
+	const existing: Edge[] = await prismaContext.edge.findMany({
+		where: {
+			circuitId: circuitId,
+		},
+	});
+	for (const e of existing) {
+		if (
+			!edgeData.includes({
+				circuitId: e.circuitId,
+				fromPublicationId: e.fromPublicationId,
+				toPublicationId: e.toPublicationId,
+			})
+		) {
+			await prismaContext.edge.delete({
+				where: {
+					circuitId_fromPublicationId_toPublicationId: {
+						circuitId: e.circuitId,
+						fromPublicationId: e.fromPublicationId,
+						toPublicationId: e.toPublicationId,
+					},
+				},
+			});
+		}
+	}
 
 	await prismaContext.edge.createMany({
 		data: edgeData,
