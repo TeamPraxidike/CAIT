@@ -269,7 +269,7 @@
 						<button on:click={viewTags} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
 					{/if}
 				{#if isClickedTags}
-					<div class="absolute ml-48 flex flex-col gap-1 z-[9999]" transition:fly={{ x:8 , duration: 400 }}>
+					<div class="absolute ml-48 flex flex-col gap-1 z-[9999] bg-surface-100" transition:fly={{ x:8 , duration: 400 }}>
 						{#each tags.slice(maxTags, tags.length) as tag, i}
 							<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
 						{/each}
