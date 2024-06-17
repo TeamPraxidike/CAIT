@@ -547,16 +547,6 @@
 
 		});
 
-		/**
-		 * Locks all nodes if not in editing mode making it impossible to move them
-		 */
-		if (!publishing)
-			cy.nodes().forEach((node: any) => {
-					if (node)
-						node.lock()
-			});
-
-
 
 		document.addEventListener('mousemove', removePopupDiv)
 		document.addEventListener('keydown', (event:KeyboardEvent) => {
@@ -574,18 +564,33 @@
 		})
 
 
-
+		let repEdges:string[] = [];
 		nodes.forEach(node => {
 			node.next.forEach(nextNode => {
-					cy.add({
-						group: 'edges',
-						data: { id: `en${node.publicationId}n${nextNode.toPublicationId.toString()}`, source: node.publicationId.toString(), target: nextNode.toPublicationId.toString() }
-					})
+					const id = `en${node.publicationId}n${nextNode.toPublicationId.toString()}`;
+					if(!repEdges.includes(id))
+					{
+						repEdges.push(id);
+						cy.add({
+							group: 'edges',
+							data: { id: id, source: node.publicationId.toString(), target: nextNode.toPublicationId.toString() }
+						})
+					}
 				});
 		});
+
+		/**
+		 * Locks all nodes if not in editing mode making it impossible to move them
+		 */
+		if (!publishing)
+			cy.nodes().forEach((node: any) => {
+				if (node)
+					node.lock()
+			});
 			cy.fit();
 
 		});
+
 
 
 
@@ -774,7 +779,6 @@
 					cy.edges().forEach((edge:any) => {
 							edges.push({ id: `en${edge.source().id()}n${edge.target().id()}`, source: `${edge.source().id()}`, target: `${edge.target().id()}` })
 					})
-					console.log(edges)
 					cy.remove(cy.$(`#${n.id()}`));
 					cy.add({
 						group: 'nodes',
@@ -842,6 +846,8 @@
 			let curNode = nodes.filter(x=>x.publicationId === Number(node.id()))[0]
 			curNode.posY = Number(node.position().y);
 			curNode.posX = Number(node.position().x);
+
+			console.log(cy.edges());
 
 			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => {
 				const targetId = Number(edge.target().id());
