@@ -3,6 +3,7 @@
 
 	import { DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
 
+	import { goto } from '\$app/navigation';
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import { createEventDispatcher, onMount } from 'svelte';
@@ -281,8 +282,8 @@
 				<div class="w-full flex justify-between">
 					<div class="w-full flex justify-left space-x-4">
 						{#if !inCircuits}
-							<a href="{publication.publisherId}/{publication.id}"
-								 class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+							<a data-sveltekit-reload href="/{publication.publisherId}/{publication.id}"
+							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
 						{:else if !selected}
 							<button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
 											on:click="{select}">Select

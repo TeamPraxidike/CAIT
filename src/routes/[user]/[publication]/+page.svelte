@@ -13,12 +13,12 @@
 	} from '$lib';
 	import { fly } from 'svelte/transition';
 
-	import { onMount } from 'svelte';
+	import {onDestroy, onMount} from 'svelte';
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
 	import type { PublicationView } from './+layout.server';
 	import { Accordion, AccordionItem, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import { goto } from '$app/navigation';
+	import {goto, invalidate, invalidateAll} from '$app/navigation';
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
@@ -42,11 +42,11 @@
 	let liked: boolean = data.userSpecificInfo.liked;
 	let likes = pubView.publication.likes;
 	let circuitsPubAppearIn = data.circuitsPubAppearIn;
+	let similarPublications = data.similarPublications;
+
 	let likedPublications = data.liked as number[];
 	let savedPublications = data.saved.saved as number[];
 	let reported = data.reported;
-
-
 
 	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
@@ -73,6 +73,17 @@
 
 	let created: string;
 	$:created = getDateDifference(pubView.publication.createdAt, new Date());
+
+	// let previousParams = { userId: pubView.publication.publisherId, pubId: pubView.publication.id };
+	//
+	// $: {
+	// 	$page.params; // Reactively watch URL parameters
+	// 	const { newUserId, newPubId } = $page.params;
+	//
+	// 	if (newUserId !== previousParams.userId || parseInt(newPubId) !== previousParams.pubId) {
+	// 		invalidateAll()
+	// 	}
+	// }
 
 	onMount(() => {
 		created = getDateDifference(pubView.publication.createdAt, new Date());
@@ -456,6 +467,7 @@
 
 </div>
 
+<!--SHOW CIRCUITS THAT INCLUDE THIS PUBLICATION-->
 {#if circuitsPubAppearIn.length > 0}
 	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
 		<h2 class="text-2xl">This publication appears in:</h2>
@@ -463,6 +475,17 @@
 	</div>
 	<div class="col-span-full">
 		<HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
+	</div>
+{/if}
+
+<!--SHOW SIMILAR PUBLICATIONS-->
+{#if similarPublications.length > 0}
+	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
+		<h2 class="text-2xl">Other publications similar to this:</h2>
+		<hr>
+	</div>
+	<div class="col-span-full">
+		<HorizontalScroll publications="{similarPublications}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
 	</div>
 {/if}
 
