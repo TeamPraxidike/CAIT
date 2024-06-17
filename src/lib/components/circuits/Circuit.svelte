@@ -847,20 +847,23 @@
 			curNode.posY = Number(node.position().y);
 			curNode.posX = Number(node.position().x);
 
-			console.log(cy.edges());
 
+			curNode.next = [];
 			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => {
 				const targetId = Number(edge.target().id());
 				curNode.next.push({
 					circuitId: 1,
-					fromPublicationId: node.id(),
+					fromPublicationId: Number(node.id()),
 					toPublicationId: targetId,
 				})
 				return targetId;
 			});
 			next.push(({ fromId: Number(node.id()), toId: toID }));
 		})
+
+
 		nodeDiffActions = {numNodes, add, delete:del, edit, next };
+
 
 		const cover = await captureScreenshot()
 		const coverPic = {
