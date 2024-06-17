@@ -17,7 +17,14 @@
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
 	import type { PublicationView } from './+layout.server';
-	import { Accordion, AccordionItem, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
+	import {
+		Accordion,
+		AccordionItem,
+		getModalStore,
+		getToastStore,
+		type ModalSettings,
+		type ToastSettings
+	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
@@ -52,10 +59,31 @@
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
-	const toggleReport = async () => {
+	const successfulReport: ToastSettings = {
+		message: 'Publication successfully reported',
+		background: 'variant-filled-success'
+	};
+	const successfulUnreport: ToastSettings = {
+		message: 'Publication successfully unreported',
+		background: 'variant-filled-success'
+	};
+
+
+	const sendReportRequest = async () => {
 		await fetch(`/api/user/${userId}/report/${pubView.publication.id}`, {
 			method: 'POST'
 		}).then(() => reported = !reported);
+		if(reported) {
+			toastStore.trigger(successfulReport);
+		} else {
+			toastStore.trigger(successfulUnreport);
+		}
+	}
+	const toggleReport = async () => {
+		if(!reported)
+			modalStore.trigger(modal);
+		else
+			await sendReportRequest();
 	};
 	const toggleLike = async () => {
 		likes = liked ? likes - 1 : likes + 1;
@@ -217,6 +245,17 @@
 
 		}
 	}
+
+	const modal: ModalSettings = {
+		type: 'confirm',
+		title: 'Are you sure you want to report this publication?',
+		body: 'You can unreport it later if you decide to.',
+		response: async (r: boolean) => {
+			if(r) {
+				await sendReportRequest();
+			}
+		},
+	};
 
 	let hoverDivReport: HTMLDivElement;
 	let isHoveredReport = false;
