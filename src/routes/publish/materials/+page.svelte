@@ -167,7 +167,7 @@
 <form method="POST"
 	  enctype="multipart/form-data"
 	  action="?/publish"
-	  class="col-start-2 col-span-10 my-20 pr-10 shadow p-4"
+	  class="col-span-full my-20 pr-10 shadow p-4"
 	  use:enhance={({ formData }) => {
         Array.from(files).forEach(file => {
           if (file.size > 1024 * 1024 * 100) {
@@ -203,10 +203,10 @@
 			<div class="flex flex-col gap-2">
 				<label for="title" >Title<span class="text-error-300">*</span></label>
 				<input type="text" name="title" placeholder="Title" bind:value={title}
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
 					<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive} on:clearSettings={() => {typeActive=false}}/>
 				<textarea name="description" placeholder="Description..." bind:value={description}
-						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
+						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
 			</div>
 			{#if coverPic}
 				<button on:click={() => coverPic = undefined} type="button" class="btn py-2 px-4 bg-error-400 text-surface-50 rounded-full hover:bg-opacity-85">Remove Cover Picture</button>
