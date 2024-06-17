@@ -173,11 +173,13 @@ export async function createCircuitPublication(
 /**
  * [PUT] Returns an updated publication of type Circuit with the given id.
  * @param publicationId
+ * @param numNodes
  * @param metaData
  * @param prismaContext
  */
 export async function updateCircuitByPublicationId(
 	publicationId: number,
+	numNodes: number,
 	metaData: {
 		title: string;
 		description: string;
@@ -190,6 +192,7 @@ export async function updateCircuitByPublicationId(
 	return prismaContext.circuit.update({
 		where: { publicationId: publicationId },
 		data: {
+			numNodes: numNodes,
 			publication: {
 				update: {
 					where: {
