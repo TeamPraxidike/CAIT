@@ -47,7 +47,7 @@
 
 
 <button type="button"
-	class="w-full h-full flex items-center gap-2 text-xs p-1 text-left dark:text-surface-400 text-surface-800 {roundingMenuItem(row, display.length)} {background(idValue)}"
+	class="w-full h-full flex items-center gap-2 text-xs p-1 text-left dark:text-surface-200 text-surface-800 {roundingMenuItem(row, display.length)} {background(idValue)}"
 	on:click={update}>
 	{#if profilePic}
 		<img src={'data:image;base64,' + profilePicData} alt="userProfile" class="size-6 rounded-full" >
