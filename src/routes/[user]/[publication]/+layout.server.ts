@@ -9,7 +9,7 @@ import type {
 	Material,
 	Node as PrismaNode,
 	Publication,
-	Reply, SimilarContent,
+	Reply,
 	Tag,
 	User,
 } from '@prisma/client';

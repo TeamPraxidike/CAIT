@@ -37,7 +37,9 @@ export const load: PageServerLoad = async ({
 	const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
 	const circuitsPubAppearIn = await circuitRes.json();
 
-	const similarRes = await fetch(`/api/publication/${params.publication}/similar`);
+	const similarRes = await fetch(
+		`/api/publication/${params.publication}/similar`,
+	);
 	const similarPublications = await similarRes.json();
 
 	return { circuitsPubAppearIn, similarPublications, liked, saved, reported };

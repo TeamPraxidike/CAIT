@@ -18,46 +18,176 @@
 	import Icon from '@iconify/svelte';
 	import type { PublicationView } from './+layout.server';
 	import { Accordion, AccordionItem, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import {goto} from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
-	import type { Reply, User } from '@prisma/client';
+	import type { Comment as PrismaComment, Difficulty, Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
+
 	export let data: LayoutServerData & PageServerData;
 	const userId = $page.data.session?.user.id;
 
-	// const pubView: PublicationView = data.pubView;
-	$: pubView = data.pubView as PublicationView;
-	$: userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
-	$: likedComments = data.likedComments as number[];
-	$: likedReplies = data.likedReplies as number[];
+	//
+	// let pubView = data.pubView as PublicationView;
+	// let userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+	// let likedComments = data.likedComments as number[];
+	// let likedReplies = data.likedReplies as number[];
+	// // const pubView: PublicationView = data.pubView;
+	// $: pubView = data.pubView as PublicationView;
+	//
+	// $: ()=>{console.log('-------------------------------\n', pubView.publication)};
+	//
+	// $: if (data) {
+	// 	console.log('Data changed here are new tags')
+	// 	console.log(data.pubView.publication.tags);
+	// }
+	//
+	// $: userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+	// $: likedComments = data.likedComments as number[];
+	// $: likedReplies = data.likedReplies as number[];
+	//
+	//
+	// $: isMaterial = data.pubView.isMaterial;
+	//
+	// $: files = data.pubView.isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
+	// if (isMaterial) {
+	// 	files = createFileList(pubView.fileData, pubView.publication.materials.files);
+	// }
 
-	const isMaterial: boolean = pubView.isMaterial;
-
-	let files: FileList;
-	if (isMaterial) {
-		files = createFileList(pubView.fileData, pubView.publication.materials.files);
-	}
-
-	let liked: boolean = userSpecificInfo.liked;
-	let likes = pubView.publication.likes;
+	// $: liked = data.userSpecificInfo.liked;
+	// $: likes = data.pubView.publication.likes;
+	// // let cirecuitsPubAppearIn = data.circuitsPubAppearIn;
+	// // let similarPublications = data.similarPublications;
 	// let circuitsPubAppearIn = data.circuitsPubAppearIn;
 	// let similarPublications = data.similarPublications;
-	$: circuitsPubAppearIn = data.circuitsPubAppearIn;
-	$: similarPublications = data.similarPublications;
+	// // let likedPublications = data.liked as number[];
+	// // let savedPublications = data.saved.saved as number[];
+	// // let reported = data.reported;
 	// let likedPublications = data.liked as number[];
 	// let savedPublications = data.saved.saved as number[];
 	// let reported = data.reported;
-	$: likedPublications = data.liked as number[];
-	$: savedPublications = data.saved.saved as number[];
-	$: reported = data.reported;
-	let saved: boolean = userSpecificInfo.saved;
-	let comments = pubView.publication.comments;
-	let tags: string[] = pubView.publication.tags.map(tag => tag.content);
-	let created: string;
 
+	// $: circuitsPubAppearIn = data.circuitsPubAppearIn;
+	// $: similarPublications = data.similarPublications;
+	// // let likedPublications = data.liked as number[];
+	// // let savedPublications = data.saved.saved as number[];
+	// // let reported = data.reported;
+	// $: likedPublications = data.liked as number[];
+	// $: savedPublications = data.saved.saved as number[];
+	// $: reported = data.reported;
+	//
+	// $: saved = data.userSpecificInfo.saved;
+	// $: comments = data.pubView.publication.comments ;
+	// $: tags = data.pubView.publication.tags.map(tag => tag.content) as string[];
+	// $: created as string;
+	let pubView: PublicationView;
+	let isMaterial: boolean;
+	let likedComments: number[] = [];
+	let likedReplies: number[] = [];
+	let files: FileList|[];
+	let liked: boolean = false;
+	let likes: number;
+	let circuitsPubAppearIn: any[] = [];
+	let similarPublications: any[] = [];
+	let likedPublications: number[] = [];
+	let savedPublications: number[] = [];
+	let reported: boolean = false;
+	let saved: boolean = false;
+	let tags: string[] = [];
+	let created: string;
+	let comments: (PrismaComment & { replies: (Reply & { user: User & { profilePicData: string } })[]; user: User & { profilePicData: string } })[] = [];
+	let userSpecificInfo: { liked: boolean; saved: boolean };
+	let diff : Difficulty = data.pubView.publication.difficulty
+
+	pubView = data.pubView as PublicationView;
+
+	userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+	likedComments = data.likedComments as number[];
+	likedReplies = data.likedReplies as number[];
+
+
+	isMaterial = pubView.isMaterial;
+
+	files = isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
+	// if (isMaterial) {
+	// 	files = createFileList(pubView.fileData, pubView.publication.materials.files);
+	// }
+
+	liked = userSpecificInfo.liked;
+	likes = pubView.publication.likes;
+	// // let cirecuitsPubAppearIn = data.circuitsPubAppearIn;
+	// // let similarPublications = data.similarPublications;
+	// let circuitsPubAppearIn = data.circuitsPubAppearIn;
+	// let similarPublications = data.similarPublications;
+	// // let likedPublications = data.liked as number[];
+	// // let savedPublications = data.saved.saved as number[];
+	// // let reported = data.reported;
+	// let likedPublications = data.liked as number[];
+	// let savedPublications = data.saved.saved as number[];
+	// let reported = data.reported;
+
+	circuitsPubAppearIn = data.circuitsPubAppearIn;
+	similarPublications = data.similarPublications;
+	// let likedPublications = data.liked as number[];
+	// let savedPublications = data.saved.saved as number[];
+	// let reported = data.reported;
+	likedPublications = data.liked as number[];
+	savedPublications = data.saved.saved as number[];
+	reported = data.reported;
+
+	saved = userSpecificInfo.saved;
+	comments = pubView.publication.comments ;
+	tags = pubView.publication.tags.map(tag => tag.content) as string[];
+	created = getDateDifference(pubView.publication.createdAt, new Date()) as string;
+
+
+
+	$: if (data){
+		console.log('--------------------------------------------\n', data.pubView);
+		pubView = data.pubView as PublicationView;
+
+		userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+		likedComments = data.likedComments as number[];
+		likedReplies = data.likedReplies as number[];
+		diff = data.pubView.publication.difficulty
+
+		isMaterial = data.pubView.isMaterial;
+
+		files = isMaterial ? createFileList(data.pubView.fileData, data.pubView.publication.materials.files) : [];
+		// if (isMaterial) {
+		// 	files = createFileList(pubView.fileData, pubView.publication.materials.files);
+		// }
+
+		liked = data.userSpecificInfo.liked;
+		likes = data.pubView.publication.likes;
+		// // let cirecuitsPubAppearIn = data.circuitsPubAppearIn;
+		// // let similarPublications = data.similarPublications;
+		// let circuitsPubAppearIn = data.circuitsPubAppearIn;
+		// let similarPublications = data.similarPublications;
+		// // let likedPublications = data.liked as number[];
+		// // let savedPublications = data.saved.saved as number[];
+		// // let reported = data.reported;
+		// let likedPublications = data.liked as number[];
+		// let savedPublications = data.saved.saved as number[];
+		// let reported = data.reported;
+
+		 circuitsPubAppearIn = data.circuitsPubAppearIn;
+		 similarPublications = data.similarPublications;
+		// let likedPublications = data.liked as number[];
+		// let savedPublications = data.saved.saved as number[];
+		// let reported = data.reported;
+		 likedPublications = data.liked as number[];
+		 savedPublications = data.saved.saved as number[];
+		 reported = data.reported;
+
+		 saved = data.userSpecificInfo.saved;
+		 comments = data.pubView.publication.comments ;
+		 tags = pubView.publication.tags.map(tag => tag.content) as string[];
+		 created = getDateDifference(data.pubView.publication.createdAt, new Date()) as string;
+
+	}
 
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
@@ -80,7 +210,7 @@
 	};
 
 
-	$:created = getDateDifference(pubView.publication.createdAt, new Date());
+	//$:created = getDateDifference(pubView.publication.createdAt, new Date());
 
 	// let previousParams = { userId: pubView.publication.publisherId, pubId: pubView.publication.id };
 	//
@@ -313,7 +443,7 @@
 						<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
 					{/if}
 					<div class="self-center">
-						<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+						<DiffBar bind:diff="{diff}" className="w-4 h-4" />
 					</div>
 				{:else }
 					<Icon icon="mdi:graph" class="text-xl text-primary-500" />
@@ -345,7 +475,7 @@
 			{/if}
 			<div class="flex gap-2">
 				<UserProp role="Publisher" userPhotoUrl={'data:image;base64,' + pubView.publication.publisher.profilePicData} view="material"
-						  user={pubView.publication.publisher} />
+						  bind:user={pubView.publication.publisher} />
 				{#each pubView.publication.maintainers as maintainer}
 					<UserProp role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} view="material" user={maintainer} />
 				{/each}
