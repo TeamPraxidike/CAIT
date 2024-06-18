@@ -13,12 +13,12 @@
 	} from '$lib';
 	import { fly } from 'svelte/transition';
 
-	import {onDestroy, onMount} from 'svelte';
+	import {onMount} from 'svelte';
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
 	import type { PublicationView } from './+layout.server';
 	import { Accordion, AccordionItem, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import {goto, invalidate, invalidateAll} from '$app/navigation';
+	import {goto} from '$app/navigation';
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
@@ -28,27 +28,37 @@
 	export let data: LayoutServerData & PageServerData;
 	const userId = $page.data.session?.user.id;
 
-	const pubView: PublicationView = data.pubView;
-	const isMaterial: boolean = pubView.isMaterial;
+	// const pubView: PublicationView = data.pubView;
+	$: pubView = data.pubView as PublicationView;
+	$: userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+	$: likedComments = data.likedComments as number[];
+	$: likedReplies = data.likedReplies as number[];
 
-	let likedComments = data.likedComments as number[];
-	let likedReplies = data.likedReplies as number[];
+	const isMaterial: boolean = pubView.isMaterial;
 
 	let files: FileList;
 	if (isMaterial) {
 		files = createFileList(pubView.fileData, pubView.publication.materials.files);
 	}
 
-	let liked: boolean = data.userSpecificInfo.liked;
+	let liked: boolean = userSpecificInfo.liked;
 	let likes = pubView.publication.likes;
-	let circuitsPubAppearIn = data.circuitsPubAppearIn;
-	let similarPublications = data.similarPublications;
+	// let circuitsPubAppearIn = data.circuitsPubAppearIn;
+	// let similarPublications = data.similarPublications;
+	$: circuitsPubAppearIn = data.circuitsPubAppearIn;
+	$: similarPublications = data.similarPublications;
+	// let likedPublications = data.liked as number[];
+	// let savedPublications = data.saved.saved as number[];
+	// let reported = data.reported;
+	$: likedPublications = data.liked as number[];
+	$: savedPublications = data.saved.saved as number[];
+	$: reported = data.reported;
+	let saved: boolean = userSpecificInfo.saved;
+	let comments = pubView.publication.comments;
+	let tags: string[] = pubView.publication.tags.map(tag => tag.content);
+	let created: string;
 
-	let likedPublications = data.liked as number[];
-	let savedPublications = data.saved.saved as number[];
-	let reported = data.reported;
 
-	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
@@ -69,9 +79,7 @@
 		}).then(() => saved = !saved);
 	};
 
-	let tags: string[] = pubView.publication.tags.map(tag => tag.content);
 
-	let created: string;
 	$:created = getDateDifference(pubView.publication.createdAt, new Date());
 
 	// let previousParams = { userId: pubView.publication.publisherId, pubId: pubView.publication.id };
@@ -138,9 +146,6 @@
 		const zipBlob = await zip.generateAsync({ type: 'blob' });
 		saveFile(zipBlob, pubView.publication.title + '.zip');
 	}
-
-
-	let comments = pubView.publication.comments;
 
 	/**
 	 * add placeholder comment to make it smoother
