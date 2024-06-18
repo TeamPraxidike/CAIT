@@ -261,8 +261,18 @@
 	let isHoveredReport = false;
 	let hoverDiv: HTMLDivElement;
 	let isHovered = false;
+	let hoverEdit: HTMLButtonElement;
+	let isHoveredEdit = false;
+	let hoverDelete: HTMLButtonElement;
+	let isHoveredDelete = false;
 	const handleHoverReport = () => isHoveredReport = !isHoveredReport;
 	const handleHover = () => isHovered = !isHovered;
+	const handleHoverDelete = () => isHoveredDelete = !isHoveredDelete;
+	const handleHoverEdit = () => isHoveredEdit = !isHoveredEdit;
+
+	$: deleteIcon = isHoveredDelete ? "mdi:trash-can" : "mdi:trash-can-outline";
+	$: editIcon = isHoveredEdit ? "mdi:pencil" : "mdi:pencil-outline";
+
 	onMount(() => {
 		if (hoverDivReport && hoverDiv) {
 			hoverDivReport.addEventListener('mouseenter', handleHoverReport);
@@ -270,11 +280,21 @@
 			hoverDiv.addEventListener('mouseenter', handleHover);
 			hoverDiv.addEventListener('mouseleave', handleHover);
 
+			hoverEdit.addEventListener('mouseenter', handleHoverEdit);
+			hoverEdit.addEventListener('mouseleave', handleHoverEdit);
+			hoverDelete.addEventListener('mouseenter', handleHoverDelete);
+			hoverDelete.addEventListener('mouseleave', handleHoverDelete);
+
 			return () => {
 				hoverDivReport.removeEventListener('mouseenter', handleHoverReport);
 				hoverDivReport.removeEventListener('mouseleave', handleHoverReport);
 				hoverDiv.removeEventListener('mouseenter', handleHover);
 				hoverDiv.removeEventListener('mouseleave', handleHover);
+
+				hoverEdit.removeEventListener('mouseenter', handleHoverEdit);
+				hoverDelete.removeEventListener('mouseenter', handleHoverDelete);
+				hoverEdit.removeEventListener('mouseleave', handleHoverEdit);
+				hoverDelete.removeEventListener('mouseleave', handleHoverDelete);
 			};
 		}
 	});
@@ -285,7 +305,27 @@
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex flex-row items-top justify-between w-full">
 		<div class="flex flex-col gap-2 w-1/2">
-			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
+			<div class="flex flex-row justify-start">
+				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words pr-6 self-center">{pubView.publication.title}</h2>
+			</div>
+			{#if pubView.publication.publisherId === $page.data.session?.user.id
+			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
+			|| $page.data.session?.user.isAdmin}
+				<div class="space-x-1">
+					{#if pubView.publication.publisherId === $page.data.session?.user.id
+					|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
+						<button bind:this={hoverEdit}
+								on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
+								type="button" class="btn self-center p-0 m-0">
+							<Icon icon={editIcon} width="24" class="text-surface-700"/>
+						</button>
+					{/if}
+					<button on:click={promptForDeletion} type="button" class="btn p-0 m-0" bind:this={hoverDelete}>
+						<Icon icon={deleteIcon} width="24" class="text-error-400"/>
+					</button>
+				</div>
+			{/if}
+
 
 			<div class="grid grid-cols-6">
 				<div bind:this={hoverDiv} class="col-span-2">
@@ -307,23 +347,6 @@
 				</div>
 			</div>
 
-
-			{#if pubView.publication.publisherId === $page.data.session?.user.id
-			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
-			|| $page.data.session?.user.isAdmin}
-				<div class="flex gap-2 mt-4">
-					{#if pubView.publication.publisherId === $page.data.session?.user.id
-					|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
-						<button
-							on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
-							type="button" class="btn rounded-lg variant-filled-primary">Edit
-						</button>
-					{/if}
-					<button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">
-						Delete
-					</button>
-				</div>
-			{/if}
 			<div class="flex gap-2">
 				<p class="text-sm text-surface-500">{created}</p>
 
