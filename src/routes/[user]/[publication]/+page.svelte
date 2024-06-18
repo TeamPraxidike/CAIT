@@ -29,59 +29,6 @@
 	export let data: LayoutServerData & PageServerData;
 	const userId = $page.data.session?.user.id;
 
-	//
-	// let pubView = data.pubView as PublicationView;
-	// let userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
-	// let likedComments = data.likedComments as number[];
-	// let likedReplies = data.likedReplies as number[];
-	// // const pubView: PublicationView = data.pubView;
-	// $: pubView = data.pubView as PublicationView;
-	//
-	// $: ()=>{console.log('-------------------------------\n', pubView.publication)};
-	//
-	// $: if (data) {
-	// 	console.log('Data changed here are new tags')
-	// 	console.log(data.pubView.publication.tags);
-	// }
-	//
-	// $: userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
-	// $: likedComments = data.likedComments as number[];
-	// $: likedReplies = data.likedReplies as number[];
-	//
-	//
-	// $: isMaterial = data.pubView.isMaterial;
-	//
-	// $: files = data.pubView.isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
-	// if (isMaterial) {
-	// 	files = createFileList(pubView.fileData, pubView.publication.materials.files);
-	// }
-
-	// $: liked = data.userSpecificInfo.liked;
-	// $: likes = data.pubView.publication.likes;
-	// // let cirecuitsPubAppearIn = data.circuitsPubAppearIn;
-	// // let similarPublications = data.similarPublications;
-	// let circuitsPubAppearIn = data.circuitsPubAppearIn;
-	// let similarPublications = data.similarPublications;
-	// // let likedPublications = data.liked as number[];
-	// // let savedPublications = data.saved.saved as number[];
-	// // let reported = data.reported;
-	// let likedPublications = data.liked as number[];
-	// let savedPublications = data.saved.saved as number[];
-	// let reported = data.reported;
-
-	// $: circuitsPubAppearIn = data.circuitsPubAppearIn;
-	// $: similarPublications = data.similarPublications;
-	// // let likedPublications = data.liked as number[];
-	// // let savedPublications = data.saved.saved as number[];
-	// // let reported = data.reported;
-	// $: likedPublications = data.liked as number[];
-	// $: savedPublications = data.saved.saved as number[];
-	// $: reported = data.reported;
-	//
-	// $: saved = data.userSpecificInfo.saved;
-	// $: comments = data.pubView.publication.comments ;
-	// $: tags = data.pubView.publication.tags.map(tag => tag.content) as string[];
-	// $: created as string;
 	let pubView: PublicationView;
 	let isMaterial: boolean;
 	let likedComments: number[] = [];
@@ -111,28 +58,14 @@
 	isMaterial = pubView.isMaterial;
 
 	files = isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
-	// if (isMaterial) {
-	// 	files = createFileList(pubView.fileData, pubView.publication.materials.files);
-	// }
 
 	liked = userSpecificInfo.liked;
 	likes = pubView.publication.likes;
-	// // let cirecuitsPubAppearIn = data.circuitsPubAppearIn;
-	// // let similarPublications = data.similarPublications;
-	// let circuitsPubAppearIn = data.circuitsPubAppearIn;
-	// let similarPublications = data.similarPublications;
-	// // let likedPublications = data.liked as number[];
-	// // let savedPublications = data.saved.saved as number[];
-	// // let reported = data.reported;
-	// let likedPublications = data.liked as number[];
-	// let savedPublications = data.saved.saved as number[];
-	// let reported = data.reported;
+
 
 	circuitsPubAppearIn = data.circuitsPubAppearIn;
 	similarPublications = data.similarPublications;
-	// let likedPublications = data.liked as number[];
-	// let savedPublications = data.saved.saved as number[];
-	// let reported = data.reported;
+
 	likedPublications = data.liked as number[];
 	savedPublications = data.saved.saved as number[];
 	reported = data.reported;
@@ -145,7 +78,6 @@
 
 
 	$: if (data){
-		console.log('--------------------------------------------\n', data.pubView);
 		pubView = data.pubView as PublicationView;
 
 		userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
@@ -156,28 +88,14 @@
 		isMaterial = data.pubView.isMaterial;
 
 		files = isMaterial ? createFileList(data.pubView.fileData, data.pubView.publication.materials.files) : [];
-		// if (isMaterial) {
-		// 	files = createFileList(pubView.fileData, pubView.publication.materials.files);
-		// }
+
 
 		liked = data.userSpecificInfo.liked;
 		likes = data.pubView.publication.likes;
-		// // let cirecuitsPubAppearIn = data.circuitsPubAppearIn;
-		// // let similarPublications = data.similarPublications;
-		// let circuitsPubAppearIn = data.circuitsPubAppearIn;
-		// let similarPublications = data.similarPublications;
-		// // let likedPublications = data.liked as number[];
-		// // let savedPublications = data.saved.saved as number[];
-		// // let reported = data.reported;
-		// let likedPublications = data.liked as number[];
-		// let savedPublications = data.saved.saved as number[];
-		// let reported = data.reported;
 
 		 circuitsPubAppearIn = data.circuitsPubAppearIn;
 		 similarPublications = data.similarPublications;
-		// let likedPublications = data.liked as number[];
-		// let savedPublications = data.saved.saved as number[];
-		// let reported = data.reported;
+
 		 likedPublications = data.liked as number[];
 		 savedPublications = data.saved.saved as number[];
 		 reported = data.reported;
@@ -185,7 +103,7 @@
 		 saved = data.userSpecificInfo.saved;
 		 comments = data.pubView.publication.comments ;
 		 tags = pubView.publication.tags.map(tag => tag.content) as string[];
-		 created = getDateDifference(data.pubView.publication.createdAt, new Date()) as string;
+		 created = getDateDifference(data.pubView.publication.updatedAt, new Date()) as string;
 
 	}
 
@@ -208,20 +126,6 @@
 			method: 'POST'
 		}).then(() => saved = !saved);
 	};
-
-
-	//$:created = getDateDifference(pubView.publication.createdAt, new Date());
-
-	// let previousParams = { userId: pubView.publication.publisherId, pubId: pubView.publication.id };
-	//
-	// $: {
-	// 	$page.params; // Reactively watch URL parameters
-	// 	const { newUserId, newPubId } = $page.params;
-	//
-	// 	if (newUserId !== previousParams.userId || parseInt(newPubId) !== previousParams.pubId) {
-	// 		invalidateAll()
-	// 	}
-	// }
 
 	onMount(() => {
 		created = getDateDifference(pubView.publication.createdAt, new Date());
