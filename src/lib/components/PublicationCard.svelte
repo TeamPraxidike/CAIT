@@ -191,7 +191,7 @@
 	const viewTags = () => {
 		isClickedTags = !isClickedTags;
 		if(isClickedTags){
-			setTimeout(()=>{isClickedTags=false},2000);
+			setTimeout(()=>{isClickedTags=false},10000);
 		}
 	}
 </script>
@@ -226,11 +226,11 @@
 						{:else}
 
 
-							<div class="py-1" bind:this={hoverDiv}>
+							<div class="py-1 relative" bind:this={hoverDiv}>
 								<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
 								{#if isHovered}
 									<div
-										class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+										class="absolute bg-surface-50 dark:bg-surface-800 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
 										style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 										{#each extensions as e}
 											<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
