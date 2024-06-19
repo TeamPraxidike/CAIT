@@ -583,7 +583,7 @@
 					}
 				});
 		});
-
+		 
 		/**
 		 * Locks all nodes if not in editing mode making it impossible to move them
 		 */
