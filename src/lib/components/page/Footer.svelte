@@ -14,7 +14,8 @@
                     md:row-start-1 md:col-span-8
                     xl:col-start-1 xl:col-span-4">
             <h4>CAIT</h4>
-            <p class="text-surface-400">Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore est dolores enim autem corrupti placeat repellendus, perferendis praesentium nam nesciunt facere harum natus earum distinctio dolorem iure. Voluptate, dolorum accusantium.</p>
+            <p class="text-surface-400">Community for AI Teachers: Contribute and search for
+                lecture materials, assignments, exam questions and more!</p>
             <div class="flex flex-row gap-2">
                 <Icon color="grey" height="25" icon="mdi:facebook" />
                 <Icon color="grey" height="25" icon="mdi:twitter" />
@@ -32,11 +33,6 @@
                     <a href="/about">About</a>
                     <a href="/browse">Browse</a>
                 </div>
-                <div class="flex flex-col gap-2">
-                    <a href="/contact">Contact</a>
-                    <a href="/terms">Terms</a>
-                    <a href="/privacy">Privacy</a>
-                </div>
             </div>
         </div>
 
@@ -46,7 +42,6 @@
                     xl:row-start-1 xl:col-start-9 xl:col-span-4">
             <h4>Contact</h4>
             <p class="flex gap-2"><Icon color="grey" height="25" icon="mdi:email" /> teampraxidike@protonmail.com</p>
-            <p class="flex gap-2"><Icon color="grey" height="25" icon="mdi:phone" /> +088maikatanarosen</p>
         </div>
     </Grid>
 </footer>
