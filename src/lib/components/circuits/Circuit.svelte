@@ -5,7 +5,7 @@
 	import { Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import {
-		Difficulty,
+		Difficulty, type Material, MaterialType,
 		type Node as PrismaNode,
 		type Publication,
 		PublicationType,
@@ -83,13 +83,14 @@
 	export let saved : number[] = []
 	export let publishing: boolean;
 
-
+	export let publishingView = false;
 	export let nodes: (PrismaNode & {
 		publication: Publication & {
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: (User & {profilePicData: string})
 			coverPicData: string,
+			materials: Material,
 		}
 		next: {
 			circuitId: number,
@@ -97,6 +98,7 @@
 			toPublicationId: number
 		}[]
 	})[];
+
 
 	let startY: number = 100;
 
@@ -406,12 +408,15 @@
 			cursorInsideNode = true;
 			hoveredNodeId = Number(node.id());
 
-			if(!publishing)
+			if(!publishing )
 			{
-				setTimeout(() => {
-					// Check if cursor is still inside the node
-					makePopUp(cursorInsideNode, hoveredNodeId, node)
-				}, 700);
+				if(!publishingView){
+					setTimeout(() => {
+						// Check if cursor is still inside the node
+						makePopUp(cursorInsideNode, hoveredNodeId, node)
+					}, 700);
+				}
+
 			}
 			else {
 			if (cy.getElementById('edgeStart').length === 0 && !prereqActive && !(node.id() === 'edgeStart')) {
@@ -650,8 +655,6 @@
 				const node = cy.getElementById(data.publication.id);
 				placeMentAlgorithm(node, node.position().x, node.position().y )
 
-
-
 				nodes.push(
 					{
 						next: [],
@@ -677,6 +680,14 @@
 							usedInCourse: [{ course: '1' }],
 							publisher: data.publication.publisher,
 							coverPicData: data.publication.coverPicData,
+							materials: {
+								id:1,
+								copyright:true,
+								theoryPractice:15,
+								publicationId:2,
+								timeEstimate:5,
+								encapsulatingType: data.isMaterial ? data.publication.materials.encapsulatingType: MaterialType.other,
+							},
 						}
 					},
 				)
@@ -886,6 +897,7 @@
 						const publicationCard = new PublicationCard({
 							target: divElement,
 							props: {
+								materialType: publication.publication.materials.encapsulatingType,
 								publication: publication.publication,
 								inCircuits: false,
 								imgSrc: 'data:image;base64,' +  coverPicData,

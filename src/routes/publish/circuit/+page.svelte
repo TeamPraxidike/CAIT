@@ -2,7 +2,7 @@
 	import { Circuit, Meta, PublishReview } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
-	import type { Publication, Tag as PrismaTag, User } from '@prisma/client';
+	import type { Material, Publication, Tag as PrismaTag, User } from '@prisma/client';
 	import {
 		getToastStore,
 		Step,
@@ -95,7 +95,8 @@
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: User & {profilePicData:string},
-			coverPicData: string
+			coverPicData: string,
+			materials: Material,
 		}
 		next: {
 			circuitId: number,
@@ -180,7 +181,7 @@
 			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
 			/>
-			<Circuit nodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
+			<Circuit nodes={circuitNodesPlaceholder} publishingView={true}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
 		</Step>
 	</Stepper>
 

@@ -5,7 +5,7 @@
 	import { page } from '$app/stores';
 
 	import { scale } from 'svelte/transition';
-	import { type Material, MaterialType, type Publication, PublicationType } from '@prisma/client';
+	import { MaterialType, PublicationType } from '@prisma/client';
 	import { getExtensions } from '$lib/util/file';
 	export let materials : any = [];
 	let circuits : any = [];
