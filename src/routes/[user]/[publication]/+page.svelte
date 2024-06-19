@@ -448,39 +448,43 @@
 
 
 	</div>
+	<div class="flex flex-row col-span-full mt-7 w-full gap-2">
+		<Accordion regionPanel="space-y-8" padding="p-3">
+			<AccordionItem class="variant-soft-primary rounded-lg">
+				<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+				<svelte:fragment slot="content">
+					{#if pubView.publication.learningObjectives.length === 0}
+						<span>No learning objectives have been indicated</span>
+					{:else}
+						{#each pubView.publication.learningObjectives as LO}
+							<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
+						{/each}
+					{/if  }
+				</svelte:fragment>
+			</AccordionItem>
+		</Accordion>
+		<Accordion regionPanel="space-y-8" padding="p-3">
+			<AccordionItem class="variant-soft-primary rounded-lg">
+				<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+				<svelte:fragment slot="content">
+					{#if pubView.publication.prerequisites.length === 0}
+						<span>No prior knowledge has been indicated</span>
+					{:else}
+						{#each pubView.publication.prerequisites as PK}
+							<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
+						{/each}
+					{/if}
+
+				</svelte:fragment>
+			</AccordionItem>
+		</Accordion>
+	</div>
 
 	{#if isMaterial}
-		<div class="flex justify-between w-full gap-4">
+		<div class="flex justify-between w-full gap-4 mt-7">
 			<div class="w-full">
 				<FileTable operation="download" {files} />
 			</div>
-			<Accordion class="mt-7 " regionPanel="space-y-8" padding="p-3">
-				<AccordionItem class="variant-soft-primary rounded-lg">
-					<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
-					<svelte:fragment slot="content">
-						{#if pubView.publication.learningObjectives.length === 0}
-							<span>No learning objectives have been indicated</span>
-						{:else}
-							{#each pubView.publication.learningObjectives as LO}
-								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
-							{/each}
-						{/if  }
-					</svelte:fragment>
-				</AccordionItem>
-				<AccordionItem class="variant-soft-primary rounded-lg">
-					<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
-					<svelte:fragment slot="content">
-						{#if pubView.publication.prerequisites.length === 0}
-							<span>No prior knowledge has been indicated</span>
-						{:else}
-							{#each pubView.publication.prerequisites as PK}
-								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
-							{/each}
-						{/if}
-
-					</svelte:fragment>
-				</AccordionItem>
-			</Accordion>
 		</div>
 
 	{:else}
