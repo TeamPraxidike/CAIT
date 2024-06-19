@@ -195,7 +195,7 @@
 				formData.append('newTags', JSON.stringify(newTags));
 				formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
-	<Stepper buttonCompleteType="submit"  on:step={onNextHandler}>
+	<Stepper buttonCompleteType="submit"  on:step={onNextHandler} buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500" buttonNext="btn dark:bg-surface-200">
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />

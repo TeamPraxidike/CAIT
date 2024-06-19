@@ -1036,24 +1036,24 @@
 	{#if publishing}
 	<div class = "flex flex-col md:flex-row gap-2 justify-between">
 			<div class="flex justify justify-between">
-				<div class="flex flex-col md:flex-row gap-2 gap-2 ">
+				<div class="flex flex-col md:flex-row gap-2 ">
 					{#if (selected || edgeSelected)}
-						<button type="button" class="btn variant-filled bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
+						<button type="button" class="btn text-surface-50 bg-error-500 dark:bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
 					{:else}
-						<button type="button" class="btn variant-filled bg-success-500" on:click={fetchElements}>Insert Publications</button>
+						<button type="button" class="btn text-surface-50 bg-success-500 dark:bg-success-500" on:click={fetchElements}>Insert Publications</button>
 					{/if}
 
 					{#if (numSelected < 2)}
 						{#if prereqActive}
 							{#if stage1}
-								<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Cancel</button>
+								<button type="button" class="btn text-surface-50 dark:bg-surface-600 bg-surface-600" on:click={savePrereq}>Cancel</button>
 							{:else}
-								<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes</button>
+								<button type="button" class="btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click={savePrereq}>Save Changes</button>
 
 							{/if}
 						{:else}
 							{#if nodes.length > 1}
-								<button type="button" class=" relative btn variant-filled bg-surface-600" on:click={addPrereq}>Connect Publications</button>
+								<button type="button" class=" relative btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click={addPrereq}>Connect Publications</button>
 							{/if}
 
 						{/if}
@@ -1063,16 +1063,16 @@
 				</div>
 			</div>
 		<div class="flex gap-4">
-			<button type="button" class="btn variant-filled bg-surface-600" on:click="{() => {cy.center()}}"> Recentre </button>
-			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 rounded-full h-full self-center">
-				<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center"/>
+			<button type="button" class="btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click="{() => {cy.center()}}"> Recentre </button>
+			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 dark:bg-transparent rounded-full h-full self-center">
+				<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center dark:text-surface"/>
 			</button>
 		</div>
 	</div>
 	{/if}
 
 
-	<div class="mt-2 w-full" id="cy"></div>
+	<div class="mt-2 w-full dark:border-surface-50" id="cy"></div>
 </div>
 
 

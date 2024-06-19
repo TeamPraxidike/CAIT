@@ -5,7 +5,7 @@
     import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
-    import { signIn } from '@auth/sveltekit/client';
+    import { signIn, signOut } from '@auth/sveltekit/client';
 
     type NavOption = {
         text: string;
@@ -37,6 +37,17 @@
                 return;
             }
 
+        }
+    }
+    const handleSignOut = () => {
+        const url = $page.url.pathname;
+        if(url.includes('publish/') || url.includes('edit')){
+            const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+            if (confirmation) {
+                signOut()
+            }
+        } else {
+            signOut()
         }
     }
 </script>
@@ -116,25 +127,24 @@
                     <UserMenu device="mobile" />
                 {/if}
 
-                <div class="flex justify-between p-4 items-center">
-                    <div class="xl:col-start-12">
-                        <LightSwitch />
-                    </div>
+                <div class="flex justify-between p-2 items-center">
 
-                    {#if $page.data.session}
-                        <div class="flex gap-2 items-center">
+                    <div class="flex items-center gap-2">
+                        {#if $page.data.session}
                             <a on:click={confirmPublishReset} href="/publish" class="btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
                                 Publish
                             </a>
-                            <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                                {#if $page.data.session.user && $page.data.session.userPfp.data !== ''}
-                                    <img class="h-8 w-8 rounded-full object-cover self-center" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user?.name}/>
-                                {:else}
-                                    <div class="w-8 h-8 placeholder-circle self-center" />
-                                {/if}
-                            </div>
+                        {/if}
+                        <div class="xl:col-start-12">
+                            <LightSwitch />
                         </div>
+                    </div>
 
+
+                    {#if $page.data.session}
+                        <div class="flex gap-2 items-center">
+                            <button on:click={handleSignOut} class="anchor col-start-2">Log out</button>
+                        </div>
                     {:else}
                         <button on:click={() => signIn()} type="button" class="btn rounded-lg variant-ghost-primary">
                             Sign In
