@@ -39,7 +39,6 @@
 	const calcAllowedAmount = () => {
 		const screenSize = window.matchMedia('(min-width: 1024px)').matches ? 'lg' : window.matchMedia('(min-width: 640px)').matches ? 'md' : 'sm';
 		allowedAmount = screenSize === 'lg' ? 4 : screenSize === 'sm' ? 1 : 2;
-		console.log(allowedAmount);
 	};
 	let allowedAmount : number;
 
@@ -80,7 +79,7 @@
 
 		<!-- Carousel -->
 		<div bind:this={elemPub} class="snap-x snap-mandatory scroll-smooth flex gap-2 pb-2 overflow-x-auto">
-			{#each publications as publication}
+			{#each publications as publication (publication.publication.id)}
 				<div class="min-w-[100%] max-w-[100%] md:min-w-[48%] md:max-w-[32%] lg:min-w-[24%] lg:max-w-[24%]">
 					<PublicationCard publication="{publication.publication}" imgSrc={'data:image;base64,' + publication.coverPicData}
 													 liked={liked.includes(publication.publication.id)} saved={saved.includes(publication.publication.id)}
@@ -96,7 +95,7 @@
 
 {:else}
 	<div bind:this={elemPub} class="snap-x snap-mandatory scroll-smooth flex gap-2 pb-2 overflow-x-auto">
-		{#each publications as publication}
+		{#each publications as publication (publication.publication.id)}
 			<div class="min-w-[100%] max-w-[100%] md:min-w-[48%] md:max-w-[32%] xl:min-w-[24%] xl:max-w-[24%]">
 				<PublicationCard publication="{publication.publication}" imgSrc={'data:image;base64,' + publication.coverPicData}
 												 liked={liked.includes(publication.publication.id)} saved={saved.includes(publication.publication.id)}

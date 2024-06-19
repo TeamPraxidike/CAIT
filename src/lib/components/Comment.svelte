@@ -208,7 +208,7 @@
 
             <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-300 dark:hover:bg-surface-800"
                     use:popup={popupMenu}>
-                <Icon icon="ph:dots-three-vertical" height="20" style="color: #7F7F94"/>
+                <Icon icon="mdi:dots-vertical" height="24" class="text-surface-900"/>
             </button>
         </div>
 

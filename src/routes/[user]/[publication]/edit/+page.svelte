@@ -204,9 +204,10 @@
             }
 
             const del = oldAdd;
-            const number = nodeDiffActions.numNodes;
+            const numNodes = nodeDiffActions.numNodes;
             const next = nodeDiffActions.next;
-            let finalDiffActions = {number, add, delete:del, edit,next }
+            let finalDiffActions = {numNodes, add, delete:del, edit,next }
+
 			formData.append('circuitData', JSON.stringify(finalDiffActions));
 			formData.append('circuitCoverPic', JSON.stringify(coverPic));
 		}

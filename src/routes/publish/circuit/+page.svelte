@@ -90,7 +90,6 @@
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 
 			nodeActions = nodeDiffActions;
-			console.log(nodeActions);
 			circuitCoverPic = coverPic;
 
 		}
@@ -185,6 +184,7 @@
 			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
 			/>
+			<Circuit nodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
 		</Step>
 	</Stepper>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Meta, PublicationCard, UserProfileBar } from '$lib';
 	import type { LayoutData, PageServerData } from './$types';
-	import { type Publication, type Tag, type User } from '@prisma/client';
+    import {type Publication, PublicationType, type Tag, type User} from '@prisma/client';
 	import type { FetchedFileItem } from '$lib/database';
 	import { page } from '$app/stores';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
@@ -22,21 +22,23 @@
 
     let liked = data.liked;
 
-    let saved:(Publication & {
-            tags: Tag[];
-            usedInCourse: {course: string}[];
-            coverPicData: string;
-			publisher: User & {profilePicData: string};
-        })[] = data.saved;
-
-    let posts : (Publication & {
+    type publication = (Publication & {
         tags: Tag[];
-        usedInCourse: {course: string}[]
-        coverPicData: string
-		    publisher: User & {profilePicData: string}
-    })[] = data.publications.publications;
+        usedInCourse: {course: string}[];
+        coverPicData: string;
+        publisher: User & {profilePicData: string};
+    });
+
+    let saved: publication[] = data.saved;
+    let posts : publication[] = data.publications.publications;
 
     let tabSet: number = 0;
+
+    const getEncapsulatingType = (publication: any): string => {
+        if(publication.type === PublicationType.Material) return publication.materials.encapsulatingType;
+        else return PublicationType.Circuit;
+    }
+    saved.forEach((x) => console.log(getEncapsulatingType(x)))
 </script>
 
 <Meta title="Profile" description="CAIT" type="site" />
@@ -58,7 +60,12 @@
                         {#if saved.length !== 0}
                             {#each saved as publication}
                                 <div class="col-span-1">
-                                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData} {publication} liked={liked.includes(publication.id)} markAsUsed={true} courses={publication.usedInCourse.map(x => x.course)} publisher={publication.publisher}/>
+                                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
+                                                     {publication} liked={liked.includes(publication.id)}
+                                                     markAsUsed={true}
+                                                     courses={publication.usedInCourse.map(x => x.course)}
+                                                     publisher={publication.publisher}
+                                                     materialType={getEncapsulatingType(publication)}/>
                                 </div>
                             {/each}
                         {/if}
@@ -75,7 +82,8 @@
                                              liked={liked.includes(publication.id)}
                                              courses={posts[i].usedInCourse.map(x => x.course)}
                                              saved={data.savedByUser.includes(publication.id)}
-                                             publisher={publication.publisher}/>
+                                             publisher={publication.publisher}
+                                             materialType={getEncapsulatingType(publication)}/>
                             </div>
                         {/each}
                         </div>

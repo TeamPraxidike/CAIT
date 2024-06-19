@@ -19,6 +19,7 @@
 	} from '@skeletonlabs/skeleton';
     import {IconMapExtension, PublicationTypeIconMap} from '$lib/util/file';
 	import { coursesStore } from '$lib/stores/courses';
+	import {typeToHumanString} from "$lib/util/types";
 
 	export let publication: Publication & {
 		tags: { content: string }[],
@@ -45,8 +46,6 @@
 	export let extensions: string[] = [];
 	export let materialType: string = "information";
 	export let forArrow: boolean = false;
-
-
 
 	const userId = $page.data?.session?.user?.id || '0';
 
@@ -122,19 +121,26 @@
 	};
 
 
+	let isHoveredPfp = false;
+	let pfpElement: HTMLDivElement;
+	const handlePfpHover = () => isHoveredPfp = !isHoveredPfp;
 	onMount(() => {
 		containerWidth = container.getBoundingClientRect().width;
 		window.addEventListener('resize', updateContainerWidth);
 
         maxTags = calcMaxTags();
-        if (hoverDiv) {
+        if (hoverDiv && pfpElement) {
             hoverDiv.addEventListener('mouseenter', handleHover);
             hoverDiv.addEventListener('mouseleave', handleHover);
 
+			pfpElement.addEventListener('mouseenter', handlePfpHover);
+			pfpElement.addEventListener('mouseleave', handlePfpHover);
 			return () => {
 				hoverDiv.removeEventListener('mouseenter', handleHover);
 				hoverDiv.removeEventListener('mouseleave', handleHover);
 
+				pfpElement.removeEventListener('mouseenter', handlePfpHover);
+				pfpElement.removeEventListener('mouseleave', handlePfpHover);
 			};
 		}
 	});
@@ -216,7 +222,7 @@
 			<!-- Title and difficulty -->
 			<div class="w-full">
 				<div class="flex justify-between items-start">
-					<a href="{publication.publisherId}/{publication.id}"
+					<a href="/{publication.publisherId}/{publication.id}"
 						 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center hover:text-surface-500"> {publication.title}
 					</a>
 					<div class="flex gap-2">
@@ -232,10 +238,15 @@
 									<div
 										class="absolute bg-surface-50 dark:bg-surface-800 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
 										style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-										{#each extensions as e}
-											<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
-										{/each}
 
+										<div class="flex flex-col items-center">
+											<p>{typeToHumanString(materialType)}</p>
+											<div class="flex flex-row">
+												{#each extensions as e}
+													<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
+												{/each}
+											</div>
+										</div>
 									</div>
 								{/if}
 
@@ -277,15 +288,21 @@
 							{/if}
 						</div>
 					{/if}
-
+				{#if isClickedTags}
+					<div class="absolute ml-48 flex flex-col gap-1 z-[9999] bg-surface-100" transition:fly={{ x:8 , duration: 400 }}>
+						{#each tags.slice(maxTags, tags.length) as tag, i}
+							<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
+						{/each}
+					</div>
+				{/if}
 			</div>
 			<div class="w-full space-y-2">
 				<hr class="opacity-50">
 				<div class="w-full flex justify-between">
 					<div class="w-full flex justify-left space-x-4">
 						{#if !inCircuits}
-							<a href="{publication.publisherId}/{publication.id}"
-								 class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+							<a href="/{publication.publisherId}/{publication.id}"
+							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
 						{:else if !selected}
 							<button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
 											on:click="{select}">Select
@@ -329,13 +346,22 @@
 								<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>
 							</button>
 						</div>
-							<a href="../{publication.publisherId}" class="flex-none" >
-								<img class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
+							<div bind:this={pfpElement} class="relative inline-flex items-center">
+								<a href="/{publication.publisherId}" class="flex-none">
+									<img class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
 										 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
+								</a>
+								{#if isHoveredPfp}
+									<div
+											class="absolute top-full mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+											style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 
-							</a>
-
-
+										<div class="flex flex-col items-center">
+											<p>{publisher.firstName + " " + publisher.lastName}</p>
+										</div>
+									</div>
+								{/if}
+							</div>
 					</div>
 				</div>
 			</div>

@@ -54,8 +54,6 @@ export async function GET({ params, url, locals }) {
 	let saved;
 	const fileData: FetchedFileArray = [];
 
-	console.log(savedResponse.saved);
-
 	if (url.searchParams.get('fullPublications') === 'true') {
 		saved = savedResponse.saved;
 		const temp = [];

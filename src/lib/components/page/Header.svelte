@@ -14,8 +14,7 @@
     const navOptions : NavOption[] = [
         { text: 'Home', link: '/' },
         { text: 'About', link: '/about' },
-        { text: 'Browse Materials', link: '/browse?type=materials' },
-        { text: 'Browse Circuits', link: '/browse?type=circuits' },
+        { text: 'Browse', link: '/browse?type=materials' },
     ]
 
     const popupHover: PopupSettings = {
@@ -59,7 +58,7 @@
             <enhanced:img class="h-16 w-16 hidden md:block" src="/static/Logo.webp" alt="CAIT Logo"/>
         </a>
 
-        <div class="hidden col-start-2 col-span-7 gap-4 lg:gap-8 items-center md:flex">
+        <div class="hidden col-start-2 col-span-7 gap-6 lg:gap-12 items-center md:flex">
             {#each navOptions as opt}
                 <a class="group transition text-surface-800 dark:text-surface-50 h-full flex items-center" href={opt.link} on:click={confirmPublishReset}>
                     <span class="bg-left-bottom bg-gradient-to-r from-primary-400 to-primary-400 bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-300 ease-in">
