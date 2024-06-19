@@ -252,9 +252,9 @@
 			<div class="grid grid-cols-6">
 				<div bind:this={hoverDiv} class="col-span-2">
 					{#if pubView.publication.usedInCourse.length === 1}
-						<p class="text-sm opacity-85 break-words max-w-full hover:font-bold underline" >Material is used in {pubView.publication.usedInCourse.length} course</p>
+						<p class="text-sm opacity-85 break-words max-w-full underline" >Material is used in {pubView.publication.usedInCourse.length} course</p>
 					{:else if pubView.publication.usedInCourse.length > 1}
-						<p class="text-sm opacity-85 break-words max-w-full hover:font-bold underline" >Material is used in {pubView.publication.usedInCourse.length} courses</p>
+						<p class="text-sm opacity-85 break-words max-w-full underline" >Material is used in {pubView.publication.usedInCourse.length} courses</p>
 					{/if}
 
 					{#if isHovered}
