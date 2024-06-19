@@ -34,9 +34,9 @@ describe('tagService', () => {
 	});
 
 	it('should multiple tags to a publication', async () => {
-		await addTag('a test tag1');
-		await addTag('a test tag2');
-		await addTag('a test tag3');
+		await addTag('a test tag4');
+		await addTag('a test tag5');
+		await addTag('a test tag6');
 		const tags = await getAllTags();
 		expect(tags).toContainEqual({ content: 'a test tag1' });
 		expect(tags).toContainEqual({ content: 'a test tag2' });

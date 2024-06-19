@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client/extension';
 import { Difficulty, PublicationType } from '@prisma/client';
 import Fuse from 'fuse.js';
 
-const sortSwitch = (sort: string) => {
+export const sortSwitch = (sort: string) => {
 	let orderBy: any;
 	switch (sort) {
 		case 'Most Liked':
