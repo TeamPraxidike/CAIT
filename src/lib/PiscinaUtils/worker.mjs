@@ -4,7 +4,7 @@ import {
     comparePrereqOrLO,
     compareTitleOrDescription,
     jaccardComparison
-} from '../MetadataSimilarityUtils/similarityUtilsJS.mjs';
+} from '../MetadataSimilarityUtils/similarityUtils.mjs';
 
 /**
  * Does jaccard similarity on two lists of publication ids (contained within a node)

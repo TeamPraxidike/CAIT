@@ -346,3 +346,11 @@ export async function handleFileTokens(
 		});
 	}
 }
+
+export async function getFilesForMaterial(
+	materialId: number
+) {
+	return prisma.file.findMany({
+		where: { materialId: materialId },
+	})
+}

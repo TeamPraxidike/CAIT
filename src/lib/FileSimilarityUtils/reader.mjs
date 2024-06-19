@@ -2,7 +2,7 @@ import fs from 'fs';
 import { getTextExtractor } from 'office-text-extractor';
 import WordExtractor from 'word-extractor';
 import removeMd from 'remove-markdown';
-import { pythonKeywords } from './pythonKeywordsJS.mjs';
+import { pythonKeywords } from './pythonKeywords.mjs';
 
 export async function reader(filePath) {
     switch(filePath.split('.').pop()) {
