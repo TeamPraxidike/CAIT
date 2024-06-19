@@ -4,8 +4,9 @@
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-	import type { File as PrismaFile, Material, Publication, Tag, User } from '@prisma/client';
+	import type { Publication, Tag, User } from '@prisma/client';
 		import { onMount } from 'svelte';
+    import {getExtensions} from "$lib/util/file";
 
 
 	//TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
@@ -112,21 +113,6 @@
         sendFiltersToAPI()
     }
 
-    const getFileExtension = (filePath: string): string =>  {
-        const index = filePath.lastIndexOf('.');
-        return index !== -1 ? filePath.substring(index + 1) : '';
-    }
-
-    const getExtensions = (material : Material & {
-        publication: Publication & {
-            tags: Tag[];
-            usedInCourse: {course: string}[]
-        }
-        files: PrismaFile[]
-    }) => (
-        material.files.map((f: { title: string; }) => getFileExtension(f.title))
-    )
-
 
     const sendFiltersToAPI = async () => {
 
@@ -214,8 +200,6 @@
 				sendFiltersToAPI();
 			}
 		})
-
-
 </script>
 
 <div class="flex justify-between col-span-full mt-32">
@@ -333,6 +317,9 @@
 </div>
 
 {#if pageType === "materials"}
+    {#if materials.length === 0}
+        <h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
+    {/if}
     {#each materials as material (material.id)}
         <PublicationCard extensions="{getExtensions(material)}"
                          imgSrc={'data:image;base64,' + material.coverPicData}
@@ -349,7 +336,14 @@
 				  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
 	{/each}
 {:else if pageType === "circuits"}
+    {#if materials.length === 0}
+        <h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
+    {/if}
     {#each circuits as circuit (circuit.id)}
-        <PublicationCard  publication="{circuit.publication}" imgSrc= {'data:image;base64,' + circuit.coverPicData} liked={liked.includes(circuit.publication.id)} saved={saved.includes(circuit.publication.id)} publisher={circuit.publisher}/>
+        <PublicationCard  publication="{circuit.publication}"
+                          imgSrc= {'data:image;base64,' + circuit.coverPicData}
+                          liked={liked.includes(circuit.publication.id)}
+                          saved={saved.includes(circuit.publication.id)}
+                          publisher={circuit.publisher}/>
     {/each}
 {/if}

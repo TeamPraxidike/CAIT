@@ -79,7 +79,7 @@
     {#if enterTag}
         <input on:keypress={enterNewTag} bind:value={newTag} placeholder="Enter tag text" class="w-full border-o focus:border-primary-400 focus:ring-0 rounded-lg" />
     {/if}
-    <button type="button" class="w-full bg-surface-300 rounded-lg py-2" on:click={createTag}>{buttonText}</button>
+<!--    <button type="button" class="w-full bg-surface-300 rounded-lg py-2" on:click={createTag}>{buttonText}</button>-->
     <div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
         <Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
                       on:selection={onInputChipSelect} emptyState="No Tags Found. Press Enter to Create New Tag." />

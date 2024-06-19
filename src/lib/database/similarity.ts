@@ -52,3 +52,39 @@ export async function handleSimilarity(
         })
     ));
 }
+
+export async function getSimilarPublications(
+    publicationId: number
+) {
+    return prisma.similarContent.findMany({
+        where: {
+            similarFromId: publicationId,
+            similarity: {
+                gte: 0.4,
+            },
+        },
+        orderBy: {
+            similarity: 'desc',
+        },
+        include: {
+            similarTo: {
+                include: {
+                    tags: true,
+                    coverPic: true,
+                    materials: true,
+                    circuit: true,
+                    usedInCourse: {
+                        select: {
+                            course: true,
+                        },
+                    },
+                    publisher: {
+                        include: {
+                            profilePic: true,
+                        },
+                    },
+                },
+            },
+        }
+    });
+}

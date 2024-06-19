@@ -34,3 +34,23 @@ export function mapToType(mt: string): MaterialType {
 			return MaterialType.other;
 	}
 }
+
+export function typeToHumanString(mt: string): string {
+	switch (mt) {
+		case 'examQuestions':
+			return 'Exam Questions';
+		case 'lectureNotes':
+			return 'Lecture Notes';
+		case 'slides':
+			return 'Slides';
+		case 'assignment':
+			return 'Assignment';
+		case 'other':
+			return 'Other';
+		case 'video':
+			return 'Video';
+		default:
+			// Handle invalid input if necessary
+			return 'Other';
+	}
+}
