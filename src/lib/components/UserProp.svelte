@@ -11,11 +11,8 @@
 	export let userPhotoUrl: string;
 	export let role: 'Maintainer' | 'Publisher' | null;
 
-	let userId = user.id;
-	let rep = user.reputation;
-	let name = user.firstName + ' ' + user.lastName;
 
-	let link = `/${userId}`;
+
 
 	const randomNumber = Math.floor(Math.random() * 1000);
 	let hoverName = '' + user.id + randomNumber;
@@ -44,11 +41,11 @@
 <span
 	class="group-hover:block hidden rounded dark:bg-surface-600 dark:text-surface-50 bg-surface-50 text-surface-800 bg-opacity-100 shadow-md"
 	style="z-index:9999" data-popup={hoverName}>
-    {name}
+    {user.firstName + " " + user.lastName}
 </span>
 
 {#if view === "search"}
-	<a href={link} style="height:fit-content"
+	<a href='/{user.id}' style="height:fit-content"
 	   class="col-span-2 flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow">
 		<div class="flex flex-col space-y-1 items-start w-full md:pb-2">
 			<div class="w-full flex flex-col items-center">
@@ -58,13 +55,13 @@
 					<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
 				{/if}
 				<div class="max-w-full items-center">
-					<div class="dark:text-surface-50 text-surface-900 max-w-full truncate md:text-2xl"
-						 use:popup={popupHoverTop}>{name}</div>
+					<span class="dark:text-surface-50 text-surface-900 max-w-full truncate md:text-2xl"
+						 use:popup={popupHoverTop}>{user.firstName.slice(0,1) + ". " + user.lastName}</span>
 					<hr class="dark:bg-surface-50 bg-surface-300" />
 				</div>
 			</div>
 			<div class="flex justify-between items-start w-full">
-				<span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Rep: {rep}</span>
+				<span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Rep: {user.reputation}</span>
 				<span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Posts: {posts}</span>
 			</div>
 		</div>
@@ -72,7 +69,7 @@
 
 {:else if view === "material"}
 
-	<a href={link} type="button" style="height:fit-content" use:popup={popupHoverBottom}
+	<a href='/{user.id}' type="button" style="height:fit-content" use:popup={popupHoverBottom}
 		 class="flex-none [&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
 		<div class="flex flex-col items-center justify-center space-y-1 flex-none">
 			{#if userPhotoUrl !== ''}
@@ -81,7 +78,7 @@
 				<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
 			{/if}
 			<div class="max-w-full items-center flex-none">
-				<div class="dark:text-surface-50 text-surface-900 max-w-full truncate flex-none">{name}</div>
+				<span class="dark:text-surface-50 text-surface-900 max-w-full truncate flex-none">{user.firstName.slice(0,1) + ". " + user.lastName}</span>
 				<hr class="dark:bg-surface-50 bg-surface-300" />
 			</div>
 			<div class="text-sm md:text-md ">{role}</div>
@@ -111,14 +108,14 @@
 				<div class=" w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />
 			{/if}
 			<div class="max-w-full items-center">
-				<div class="dark:text-surface-50 text-surface-900 max-w-full truncate">{name}</div>
+				<span class="dark:text-surface-50 text-surface-900 max-w-full truncate">{user.firstName.slice(0,1) + ". " + user.lastName}</span>
 				<hr class="dark:bg-surface-50 bg-surface-300" />
 			</div>
 		</div>
 	</div>
 
 {:else }
-	<a href={link} use:popup={popupHoverTop}
+	<a href='/{user.id}' use:popup={popupHoverTop}
 	   class="[&>*]:pointer-events-none flex-none col-span-2 h-20 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 pl-2 pr-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
 		<div class="flex space-x-2 items-center w-full">
 			{#if userPhotoUrl !== ''}
@@ -128,10 +125,10 @@
 			{/if}
 			<div class="flex flex-col items-start w-4/5">
 				<div class="w-full items-center">
-					<div class="dark:text-surface-50 text-surface-900 max-w-[80%] truncate">{name}</div>
+					<span class="dark:text-surface-50 text-surface-900 max-w-[80%] truncate">{user.firstName.slice(0,1) + ". " + user.lastName}</span>
 					<hr class="dark:bg-surface-50 bg-surface-300 max-w-[80%]" />
 				</div>
-				<span>Rep: {rep}</span>
+				<span>Rep: {user.reputation}</span>
 				<span>Posts: {posts}</span>
 			</div>
 		</div>

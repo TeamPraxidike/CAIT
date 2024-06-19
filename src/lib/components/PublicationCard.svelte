@@ -222,7 +222,7 @@
 			<!-- Title and difficulty -->
 			<div class="w-full">
 				<div class="flex justify-between items-start">
-					<a href="{publication.publisherId}/{publication.id}"
+					<a href="/{publication.publisherId}/{publication.id}"
 						 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center hover:text-surface-500"> {publication.title}
 					</a>
 					<div class="flex gap-2">
@@ -292,8 +292,8 @@
 				<div class="w-full flex justify-between">
 					<div class="w-full flex justify-left space-x-4">
 						{#if !inCircuits}
-							<a href="{publication.publisherId}/{publication.id}"
-								 class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+							<a href="/{publication.publisherId}/{publication.id}"
+							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
 						{:else if !selected}
 							<button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
 											on:click="{select}">Select
@@ -338,7 +338,7 @@
 							</button>
 						</div>
 							<div bind:this={pfpElement} class="relative inline-flex items-center">
-								<a href="../{publication.publisherId}" class="flex-none">
+								<a href="/{publication.publisherId}" class="flex-none">
 									<img class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
 										 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
 								</a>

@@ -6,7 +6,7 @@
 	import { slide } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
-	export let files: FileList;
+	export let files: FileList | any[];
 
 	export let operation: 'download' | 'view' | 'edit' = 'view';
 	const ms = getModalStore();

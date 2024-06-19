@@ -13,7 +13,7 @@
 	} from '$lib';
 	import { fly } from 'svelte/transition';
 
-	import { onMount } from 'svelte';
+	import {onMount} from 'svelte';
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
 	import type { PublicationView } from './+layout.server';
@@ -27,35 +27,93 @@
 	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
-	import type { Reply, User } from '@prisma/client';
+	import type { Comment as PrismaComment, Difficulty, Reply, User } from '@prisma/client';
 	import { page } from '$app/stores';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
+
 	export let data: LayoutServerData & PageServerData;
 	const userId = $page.data.session?.user.id;
 
-	const pubView: PublicationView = data.pubView;
-	const isMaterial: boolean = pubView.isMaterial;
+	let pubView: PublicationView;
+	let isMaterial: boolean;
+	let likedComments: number[] = [];
+	let likedReplies: number[] = [];
+	let files: FileList|[];
+	let liked: boolean = false;
+	let likes: number;
+	let circuitsPubAppearIn: any[] = [];
+	let similarPublications: any[] = [];
+	let likedPublications: number[] = [];
+	let savedPublications: number[] = [];
+	let reported: boolean = false;
+	let saved: boolean = false;
+	let tags: string[] = [];
+	let created: string;
+	let comments: (PrismaComment & { replies: (Reply & { user: User & { profilePicData: string } })[]; user: User & { profilePicData: string } })[] = [];
+	let userSpecificInfo: { liked: boolean; saved: boolean };
+	let diff : Difficulty = data.pubView.publication.difficulty
 
-	let likedComments = data.likedComments as number[];
-	let likedReplies = data.likedReplies as number[];
+	pubView = data.pubView as PublicationView;
 
-	let files: FileList;
-	if (isMaterial) {
-		files = createFileList(pubView.fileData, pubView.publication.materials.files);
+	userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+	likedComments = data.likedComments as number[];
+	likedReplies = data.likedReplies as number[];
+
+
+	isMaterial = pubView.isMaterial;
+
+	files = isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
+
+	liked = userSpecificInfo.liked;
+	likes = pubView.publication.likes;
+
+
+	circuitsPubAppearIn = data.circuitsPubAppearIn;
+	similarPublications = data.similarPublications;
+
+	likedPublications = data.liked as number[];
+	savedPublications = data.saved.saved as number[];
+	reported = data.reported;
+
+	saved = userSpecificInfo.saved;
+	comments = pubView.publication.comments ;
+	tags = pubView.publication.tags.map(tag => tag.content) as string[];
+	created = getDateDifference(pubView.publication.createdAt, new Date()) as string;
+
+
+
+	$: if (data){
+		pubView = data.pubView as PublicationView;
+
+		userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+		likedComments = data.likedComments as number[];
+		likedReplies = data.likedReplies as number[];
+		diff = data.pubView.publication.difficulty
+
+		isMaterial = data.pubView.isMaterial;
+
+		files = isMaterial ? createFileList(data.pubView.fileData, data.pubView.publication.materials.files) : [];
+
+
+		liked = data.userSpecificInfo.liked;
+		likes = data.pubView.publication.likes;
+
+		 circuitsPubAppearIn = data.circuitsPubAppearIn;
+		 similarPublications = data.similarPublications;
+
+		 likedPublications = data.liked as number[];
+		 savedPublications = data.saved.saved as number[];
+		 reported = data.reported;
+
+		 saved = data.userSpecificInfo.saved;
+		 comments = data.pubView.publication.comments ;
+		 tags = pubView.publication.tags.map(tag => tag.content) as string[];
+		 created = getDateDifference(data.pubView.publication.updatedAt, new Date()) as string;
+
 	}
 
-	let liked: boolean = data.userSpecificInfo.liked;
-	let likes = pubView.publication.likes;
-	let circuitsPubAppearIn = data.circuitsPubAppearIn;
-	let likedPublications = data.liked as number[];
-	let savedPublications = data.saved.saved as number[];
-	let reported = data.reported;
-
-
-
-	let saved: boolean = data.userSpecificInfo.saved;
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
@@ -96,11 +154,6 @@
 			method: 'POST'
 		}).then(() => saved = !saved);
 	};
-
-	let tags: string[] = pubView.publication.tags.map(tag => tag.content);
-
-	let created: string;
-	$:created = getDateDifference(pubView.publication.createdAt, new Date());
 
 	onMount(() => {
 		created = getDateDifference(pubView.publication.createdAt, new Date());
@@ -155,9 +208,6 @@
 		const zipBlob = await zip.generateAsync({ type: 'blob' });
 		saveFile(zipBlob, pubView.publication.title + '.zip');
 	}
-
-
-	let comments = pubView.publication.comments;
 
 	/**
 	 * add placeholder comment to make it smoother
@@ -359,7 +409,7 @@
 						<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
 					{/if}
 					<div class="self-center">
-						<DiffBar diff="{pubView.publication.difficulty}" className="w-4 h-4" />
+						<DiffBar bind:diff="{diff}" className="w-4 h-4" />
 					</div>
 				{:else }
 					<Icon icon="mdi:graph" class="text-xl text-primary-500" />
@@ -391,7 +441,7 @@
 			{/if}
 			<div class="flex gap-2">
 				<UserProp role="Publisher" userPhotoUrl={'data:image;base64,' + pubView.publication.publisher.profilePicData} view="material"
-						  user={pubView.publication.publisher} />
+						  bind:user={pubView.publication.publisher} />
 				{#each pubView.publication.maintainers as maintainer}
 					<UserProp role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} view="material" user={maintainer} />
 				{/each}
@@ -522,6 +572,7 @@
 
 </div>
 
+<!--SHOW CIRCUITS THAT INCLUDE THIS PUBLICATION-->
 {#if circuitsPubAppearIn.length > 0}
 	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
 		<h2 class="text-2xl">This publication appears in:</h2>
@@ -529,6 +580,17 @@
 	</div>
 	<div class="col-span-full">
 		<HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
+	</div>
+{/if}
+
+<!--SHOW SIMILAR PUBLICATIONS-->
+{#if similarPublications.length > 0}
+	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
+		<h2 class="text-2xl">Other publications similar to this:</h2>
+		<hr>
+	</div>
+	<div class="col-span-full">
+		<HorizontalScroll publications="{similarPublications}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
 	</div>
 {/if}
 

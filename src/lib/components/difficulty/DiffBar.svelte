@@ -6,7 +6,7 @@
     export let className:string = "h-6 w-6";
 
     let colour:string;
-    switch(diff) {
+    $: switch(diff) {
         case 'hard':
             colour = "bg-error-400"
             break
@@ -18,11 +18,15 @@
             break
     }
 
+
+
     let hoverDiff: HTMLDivElement;
     let isHovered = false;
     const handleHover = () => {
         isHovered = !isHovered;
     }
+
+    $: third = diff === 'hard' ? colour : 'bg-none'
 
     onMount(()=>{
         if(hoverDiff){
@@ -37,7 +41,7 @@
     <div bind:this={hoverDiff} role="figure" class="flex items-end justify-between space-x-0.5 {className}"  >
         <div class="flex-auto border dark:border-surface-50 border-surface-900 dark:border-opacity-60 border-opacity-60 {colour} h-1/2 rounded-lg"></div>
         <div class="flex-auto border dark:border-surface-50 border-surface-900 dark:border-opacity-60 border-opacity-60 {diff === 'hard' || diff==='medium' ? colour : 'bg-none'} h-3/4 rounded-lg"></div>
-        <div class="flex-auto border dark:border-surface-50 border-surface-900 {diff === 'hard' ? colour : 'bg-none'} dark:border-opacity-60 border-opacity-60 h-full rounded-lg"></div>
+        <div class="flex-auto border dark:border-surface-50 border-surface-900 {third} dark:border-opacity-60 border-opacity-60 h-full rounded-lg"></div>
     </div>
 
     {#if isHovered}
