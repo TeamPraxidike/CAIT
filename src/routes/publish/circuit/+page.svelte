@@ -68,13 +68,17 @@
 	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Circuit Added successfully',
-			background: 'bg-success-200'
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
+
 		});
 		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-error-200'
+			background: 'bg-error-200',
+			classes: 'text-surface-900',
+
 		});
 	}
 	const onNextHandler = async (event: CustomEvent) => {

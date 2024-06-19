@@ -92,7 +92,9 @@
 			}).then(() => {
 				toastStore.trigger({
 					message: 'Publication deleted successfully',
-					background: 'bg-success-200'
+					background: 'bg-success-200',
+					classes: 'text-surface-900',
+
 				});
 				if (isMaterial) {
 					goto('/browse');

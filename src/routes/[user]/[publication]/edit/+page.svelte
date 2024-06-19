@@ -84,7 +84,8 @@
 	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Publication Edited successfully',
-			background: 'bg-success-200'
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
 		});
 		goto(`/${publication.publisherId}/${publication.id}`);
 	} else if (form?.status === 400) {
