@@ -16,7 +16,17 @@
         }
 
         // check the width and assign the percentage value
-        value = Number(clamp(slider ? (e.clientX - slider.left) / slider.width : 0).toFixed(2));
+        let val = Number(clamp(slider ? (e.clientX - slider.left) / slider.width : 0).toFixed(2));
+        if (val < 0.125)
+            value = 0
+        else if (val < 0.375)
+            value = 0.25
+        else if(val < 0.625)
+            value = 0.50
+        else if (val < 0.875)
+            value = 0.75
+        else
+            value=1
     }
 
     const handleOnMoveTouch = (e: TouchEvent) => {
@@ -24,7 +34,17 @@
         if (!isDragging || !editable) {
             return;
         }
-        value = Number(clamp(slider ? (e.touches[0].clientX - slider.left) / slider.width : 0).toFixed(2));
+        let val = Number(clamp(slider ? (e.touches[0].clientX - slider.left) / slider.width : 0).toFixed(2));
+        if (val < 12.5)
+            value = 0
+        else if (val < 37.5)
+            value = 25
+        else if(val < 62.5)
+            value = 50
+        else if (val < 87.5)
+            value = 75
+        else
+            value=100
     }
 
 

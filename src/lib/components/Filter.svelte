@@ -60,7 +60,7 @@
 			nodes?.blur();
 		}
 	};
-	$: text = active ? 'text-primary-800 font-semibold' : 'text-surface-800';
+	$: text = active ? 'text-primary-800 dark:text-primary-100 font-semibold' : 'text-surface-800 dark:text-surface-50';
 
 
 	/*
@@ -114,15 +114,15 @@
 
 <div bind:this={targetDiv}   class="space-y-1 relative">
 	{#if type}
-		<button class="flex rounded-lg py-2 px-2 gap-1 items-center shadow-md border-none hover:font-semibold" on:click={() => {nodes.focus()}}>
+		<button class="flex rounded-lg py-2 px-2 gap-1 dark:bg-surface-800 bg-surface-50 items-center shadow-md border-none hover:font-semibold" on:click={() => {nodes.focus()}}>
 			<span class="text-xs {text}">{label}:</span>
-			<input  bind:this={nodes} class="text-xs h-4 bg-surface-50 border-none w-4 focus:ring-0 px-0"
+			<input  bind:this={nodes} class="text-xs h-4 dark:bg-surface-800 border-none w-4 focus:ring-0 px-0"
 						 type="number" name="nodes" bind:value={num} min="0" on:input={() => {dispatch("filterSelected")}}/>
 		</button>
 
 	{:else}
 		<button bind:this={targetButton}  type = "button"
-						class=" hover:font-semibold text-xs rounded-lg py-2 px-2 h-full flex items-center justify-between gap-2 shadow-md"
+						class=" hover:font-semibold text-xs rounded-lg dark:bg-surface-800 py-2 px-2 h-full flex items-center justify-between gap-2 shadow-md"
 						on:click={toggle}>
 			<span class="flex-grow {text}">{oneAllowed ? selectedOption : label}</span>
 			{#if active}
@@ -133,10 +133,10 @@
 		</button>
 	{/if}
 	{#if active}
-		<div class="absolute  min-w-32 flex flex-col rounded-lg shadow-lg bg-surface-50"
+		<div class="absolute  min-w-32 flex flex-col rounded-lg shadow-lg bg-surface-50 dark:bg-surface-800"
 				 transition:fly={{ y: -8, duration: 300 }} style="z-index: 9999;">
 			{#if all.length > 10}
-				<input  bind:this={input} class="text-xs dark:text-surface-600 border-none rounded-lg focus:ring-0"
+				<input  bind:this={input} class="text-xs dark:bg-surface-700 dark:text-surface-600 border-none rounded-lg focus:ring-0"
 							 on:input={updateFilter} placeholder="Search for {label.toLowerCase()}" />
 			{/if}
 

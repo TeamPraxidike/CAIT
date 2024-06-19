@@ -98,18 +98,21 @@
 	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Publication Added successfully',
-			background: 'bg-success-200'
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
 		});
 		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-warning-200'
+			background: 'bg-warning-200',
+			classes: 'text-surface-900',
 		});
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
-			background: 'bg-error-200'
+			background: 'bg-error-200',
+			classes: 'text-surface-900',
 		});
 	}
 
@@ -167,7 +170,7 @@
 <form method="POST"
 	  enctype="multipart/form-data"
 	  action="?/publish"
-	  class="col-start-2 col-span-10 my-20 pr-10 shadow p-4"
+	  class="col-span-full my-20 pr-10 shadow p-4"
 	  use:enhance={({ formData }) => {
         Array.from(files).forEach(file => {
           if (file.size > 1024 * 1024 * 100) {
@@ -192,7 +195,7 @@
 				formData.append('newTags', JSON.stringify(newTags));
 				formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
-	<Stepper buttonCompleteType="submit"  on:step={onNextHandler}>
+	<Stepper buttonCompleteType="submit"  on:step={onNextHandler} buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500" buttonNext="btn dark:bg-surface-200">
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
@@ -203,10 +206,10 @@
 			<div class="flex flex-col gap-2">
 				<label for="title" >Title<span class="text-error-300">*</span></label>
 				<input type="text" name="title" placeholder="Title" bind:value={title}
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400">
+					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
 					<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive} on:clearSettings={() => {typeActive=false}}/>
 				<textarea name="description" placeholder="Description..." bind:value={description}
-						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400" />
+						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
 			</div>
 			{#if coverPic}
 				<button on:click={() => coverPic = undefined} type="button" class="btn py-2 px-4 bg-error-400 text-surface-50 rounded-full hover:bg-opacity-85">Remove Cover Picture</button>
@@ -224,36 +227,38 @@
 		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-			<div class="flex flex-row p-6 justify-between">
+			<div class="flex flex-col gap-8 p-6 justify-between">
 				<div class="flex gap-4 items-center">
 					<DifficultySelection bind:difficulty={difficulty} />
 				</div>
-				<div class="flex flex-col gap-2 items-start">
-					<label for="theoryRatio">Theory Application Ratio</label>
+				<div class="flex flex-row gap-4 md:gap-2 items-center">
+					<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>
 					<TheoryAppBar bind:value={theoryApplicationRatio}/>
 				</div>
 			</div>
 
-			<div class="grid grid-cols-2 gap-4 p-3">
-				<div class="flex col-span-2 items-center gap-4 p-3">
-					<div class="w-1/2">
+			<div class="flex flex-col gap-4 p-3">
+				<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
+					<div class="w-full md:w-1/2 flex-col gap-2">
 						<label for="estimate">Time Estimate (in minutes):</label>
 						<input type="number" name="estimate" bind:value={estimate} placeholder="How much time do the materials take"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
 					</div>
-					<div class="w-1/2">
-						<label for="copyright">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
+					<div class="w-full md:w-1/2	">
+						<label for="copyright md-2">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
 						class="text-tertiary-700" > Check here how this applies to you</a>):</label>
 						<input type="text" name="copyright" bind:value={copyright} placeholder="Leave blank if material is your own"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
 					</div>
 				</div>
-				<div class="col-span-2">
+				<div class="w-full">
 					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
 				</div>
 				<div class="flex flex-col w-full">
 					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
-					<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
+					<div class="lg:w-1/2">
+						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
+					</div>
 				</div>
 			</div>
 			{#if locks[2]}
