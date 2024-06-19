@@ -17,7 +17,14 @@
 	import JSZip from 'jszip';
 	import Icon from '@iconify/svelte';
 	import type { PublicationView } from './+layout.server';
-	import { Accordion, AccordionItem, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
+	import {
+		Accordion,
+		AccordionItem,
+		getModalStore,
+		getToastStore,
+		type ModalSettings,
+		type ToastSettings
+	} from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Reply, User } from '@prisma/client';
@@ -52,10 +59,31 @@
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
 
-	const toggleReport = async () => {
+	const successfulReport: ToastSettings = {
+		message: 'Publication successfully reported',
+		background: 'variant-filled-success'
+	};
+	const successfulUnreport: ToastSettings = {
+		message: 'Publication successfully unreported',
+		background: 'variant-filled-success'
+	};
+
+
+	const sendReportRequest = async () => {
 		await fetch(`/api/user/${userId}/report/${pubView.publication.id}`, {
 			method: 'POST'
 		}).then(() => reported = !reported);
+		if(reported) {
+			toastStore.trigger(successfulReport);
+		} else {
+			toastStore.trigger(successfulUnreport);
+		}
+	}
+	const toggleReport = async () => {
+		if(!reported)
+			modalStore.trigger(modal);
+		else
+			await sendReportRequest();
 	};
 	const toggleLike = async () => {
 		likes = liked ? likes - 1 : likes + 1;
@@ -218,12 +246,33 @@
 		}
 	}
 
+	const modal: ModalSettings = {
+		type: 'confirm',
+		title: 'Are you sure you want to report this publication?',
+		body: 'You can unreport it later if you decide to.',
+		response: async (r: boolean) => {
+			if(r) {
+				await sendReportRequest();
+			}
+		},
+	};
+
 	let hoverDivReport: HTMLDivElement;
 	let isHoveredReport = false;
 	let hoverDiv: HTMLDivElement;
 	let isHovered = false;
+	let hoverEdit: HTMLButtonElement;
+	let isHoveredEdit = false;
+	let hoverDelete: HTMLButtonElement;
+	let isHoveredDelete = false;
 	const handleHoverReport = () => isHoveredReport = !isHoveredReport;
 	const handleHover = () => isHovered = !isHovered;
+	const handleHoverDelete = () => isHoveredDelete = !isHoveredDelete;
+	const handleHoverEdit = () => isHoveredEdit = !isHoveredEdit;
+
+	$: deleteIcon = isHoveredDelete ? "mdi:trash-can" : "mdi:trash-can-outline";
+	$: editIcon = isHoveredEdit ? "mdi:pencil" : "mdi:pencil-outline";
+
 	onMount(() => {
 		if (hoverDivReport && hoverDiv) {
 			hoverDivReport.addEventListener('mouseenter', handleHoverReport);
@@ -231,11 +280,21 @@
 			hoverDiv.addEventListener('mouseenter', handleHover);
 			hoverDiv.addEventListener('mouseleave', handleHover);
 
+			hoverEdit.addEventListener('mouseenter', handleHoverEdit);
+			hoverEdit.addEventListener('mouseleave', handleHoverEdit);
+			hoverDelete.addEventListener('mouseenter', handleHoverDelete);
+			hoverDelete.addEventListener('mouseleave', handleHoverDelete);
+
 			return () => {
 				hoverDivReport.removeEventListener('mouseenter', handleHoverReport);
 				hoverDivReport.removeEventListener('mouseleave', handleHoverReport);
 				hoverDiv.removeEventListener('mouseenter', handleHover);
 				hoverDiv.removeEventListener('mouseleave', handleHover);
+
+				hoverEdit.removeEventListener('mouseenter', handleHoverEdit);
+				hoverDelete.removeEventListener('mouseenter', handleHoverDelete);
+				hoverEdit.removeEventListener('mouseleave', handleHoverEdit);
+				hoverDelete.removeEventListener('mouseleave', handleHoverDelete);
 			};
 		}
 	});
@@ -246,7 +305,27 @@
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex flex-row items-top justify-between w-full">
 		<div class="flex flex-col gap-2 w-1/2">
-			<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words w-full max-w-full">{pubView.publication.title}</h2>
+			<div class="flex flex-row justify-start">
+				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words pr-6 self-center">{pubView.publication.title}</h2>
+			</div>
+			{#if pubView.publication.publisherId === $page.data.session?.user.id
+			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
+			|| $page.data.session?.user.isAdmin}
+				<div class="space-x-1">
+					{#if pubView.publication.publisherId === $page.data.session?.user.id
+					|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
+						<button bind:this={hoverEdit}
+								on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
+								type="button" class="btn self-center p-0 m-0">
+							<Icon icon={editIcon} width="24" class="text-surface-700"/>
+						</button>
+					{/if}
+					<button on:click={promptForDeletion} type="button" class="btn p-0 m-0" bind:this={hoverDelete}>
+						<Icon icon={deleteIcon} width="24" class="text-error-400"/>
+					</button>
+				</div>
+			{/if}
+
 
 			<div class="grid grid-cols-6">
 				<div bind:this={hoverDiv} class="col-span-2">
@@ -268,23 +347,6 @@
 				</div>
 			</div>
 
-
-			{#if pubView.publication.publisherId === $page.data.session?.user.id
-			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
-			|| $page.data.session?.user.isAdmin}
-				<div class="flex gap-2 mt-4">
-					{#if pubView.publication.publisherId === $page.data.session?.user.id
-					|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
-						<button
-							on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
-							type="button" class="btn rounded-lg variant-filled-primary">Edit
-						</button>
-					{/if}
-					<button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">
-						Delete
-					</button>
-				</div>
-			{/if}
 			<div class="flex gap-2">
 				<p class="text-sm text-surface-500">{created}</p>
 
@@ -386,39 +448,43 @@
 
 
 	</div>
+	<div class="flex flex-row col-span-full mt-7 w-full gap-2">
+		<Accordion regionPanel="space-y-8" padding="p-3">
+			<AccordionItem class="variant-soft-primary rounded-lg">
+				<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+				<svelte:fragment slot="content">
+					{#if pubView.publication.learningObjectives.length === 0}
+						<span>No learning objectives have been indicated</span>
+					{:else}
+						{#each pubView.publication.learningObjectives as LO}
+							<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
+						{/each}
+					{/if  }
+				</svelte:fragment>
+			</AccordionItem>
+		</Accordion>
+		<Accordion regionPanel="space-y-8" padding="p-3">
+			<AccordionItem class="variant-soft-primary rounded-lg">
+				<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+				<svelte:fragment slot="content">
+					{#if pubView.publication.prerequisites.length === 0}
+						<span>No prior knowledge has been indicated</span>
+					{:else}
+						{#each pubView.publication.prerequisites as PK}
+							<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
+						{/each}
+					{/if}
+
+				</svelte:fragment>
+			</AccordionItem>
+		</Accordion>
+	</div>
 
 	{#if isMaterial}
-		<div class="flex justify-between w-full gap-4">
+		<div class="flex justify-between w-full gap-4 mt-7">
 			<div class="w-full">
 				<FileTable operation="download" {files} />
 			</div>
-			<Accordion class="mt-7 " regionPanel="space-y-8" padding="p-3">
-				<AccordionItem class="variant-soft-primary rounded-lg">
-					<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
-					<svelte:fragment slot="content">
-						{#if pubView.publication.learningObjectives.length === 0}
-							<span>No learning objectives have been indicated</span>
-						{:else}
-							{#each pubView.publication.learningObjectives as LO}
-								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
-							{/each}
-						{/if  }
-					</svelte:fragment>
-				</AccordionItem>
-				<AccordionItem class="variant-soft-primary rounded-lg">
-					<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
-					<svelte:fragment slot="content">
-						{#if pubView.publication.prerequisites.length === 0}
-							<span>No prior knowledge has been indicated</span>
-						{:else}
-							{#each pubView.publication.prerequisites as PK}
-								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
-							{/each}
-						{/if}
-
-					</svelte:fragment>
-				</AccordionItem>
-			</Accordion>
 		</div>
 
 	{:else}
