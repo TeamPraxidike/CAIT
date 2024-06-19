@@ -68,13 +68,17 @@
 	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Circuit Added successfully',
-			background: 'bg-success-200'
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
+
 		});
 		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-error-200'
+			background: 'bg-error-200',
+			classes: 'text-surface-900',
+
 		});
 	}
 	const onNextHandler = async (event: CustomEvent) => {
@@ -129,7 +133,7 @@
 <!--<Node></Node>-->
 <Meta title="Publish Circuit" description="Organize publications into a circuits" type="site" />
 <!--<div class="col-span-9 h-[256px]"><CircuitManual isDraggable="{true}"/></div>-->
-<form method="POST" action="?/publish" class="col-start-2 col-span-10 my-20 pr-10 shadow p-4"
+<form method="POST" action="?/publish" class="col-span-full my-20 pr-10 shadow p-4"
 			use:enhance={({ formData }) => {
 
 				formData.append('publisherId', uid.toString());
@@ -144,7 +148,7 @@
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
-	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
+	<Stepper on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
 			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>

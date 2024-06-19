@@ -107,7 +107,7 @@
 
 
 
-<div class="flex flex-row justify-between">
+<div class="flex flex-col md:flex-row justify-between">
 
     <div class="flex flex-col space-y-1 w-full p-3 max-w-full">
         <label for="learningObjective" >Learning Objectives {#if adding}(at least one)<span class="text-error-300">*</span>{/if} :</label>
@@ -130,20 +130,20 @@
                 {#each LOs as LO, index}
 
                     {#if editingLO && index === editingIndexLO}
-                        <input class="focus:border-primary-400 bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md"
+                        <input class="focus:border-primary-400 dark:bg-surface-700 bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md"
                                bind:value={editingLOText} on:keypress={handleLOEdit}/>
                     {:else }
 
-                        <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center text-wrap shrink break-words" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
+                        <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between dark:bg-surface-700 bg-surface-200 items-center text-wrap shrink break-words" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
                             <p class="right-1 text-base p-1 rounded-md break-words max-w-4/5">{LO}</p>
 
                             {#if !editingLO && displayButtonLO && hoverIndexLO ===index && adding}
                                 <div class=" items-end flex gap-2" >
                                     <button type="button" class="self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
-                                        <Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 ml-auto hover:text-opacity-85" />
+                                        <Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 dark:text-surface-200 ml-auto hover:text-opacity-85" />
                                     </button>
                                     <button type="button" class=" self-center rounded-lg" on:click={() => {LOs = LOs.filter(x=>x!==LO)}}>
-                                        <Icon icon="mdi:trash-can" width="20" height="20" class="text-error-300 ml-auto hover:text-opacity-85" />
+                                        <Icon icon="mdi:trash-can" width="20" height="20" class="text-error-300 ml-auto dark:text-error-600 hover:text-opacity-85" />
                                     </button>
                                 </div>
                             {/if}
@@ -178,17 +178,17 @@
         <div class="overflow-y-auto max-h-56 mt-1 space-y-1 flex flex-col max-w-full">
             {#each priorKnowledge as pk, index}
                 {#if editingPK && index === editingIndexPK}
-                    <input class="focus:border-primary-400 bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
+                    <input class="focus:border-primary-400 bg-surface-200 dark:bg-surface-700 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
                 {:else }
-                    <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 items-center text-wrap shrink break-words" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
+                    <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between bg-surface-200 dark:bg-surface-700 items-center text-wrap shrink break-words" on:mouseenter={()=>{displayButton=true; hoverIndexPK=index}} on:mouseleave={()=>{displayButton=false;}}>
                         <p class="right-1 text-base p-1 rounded-md break-words max-w-full">{pk}</p>
                         {#if !editingPK && displayButton && hoverIndexPK === index && adding }
                             <div class="items-end flex gap-2" >
                                 <button type="button" class="self-center rounded-lg" on:click={() => {editingPK=true; editingIndexPK=index; editingPKText=pk;}}>
-                                    <Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 ml-auto hover:text-opacity-85" />
+                                    <Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 dark:text-surface-200 ml-auto hover:text-opacity-85" />
                                 </button>
                                 <button type="button" class=" self-center rounded-lg" on:click={() => {priorKnowledge = priorKnowledge.filter(x=>x!==pk)}}>
-                                    <Icon icon="mdi:trash-can" width="20" height="20" class="text-error-300 ml-auto hover:text-opacity-85" />
+                                    <Icon icon="mdi:trash-can" width="20" height="20" class="text-error-300 dark:text-error-600 ml-auto hover:text-opacity-85" />
                                 </button>
                             </div>
                         {/if}
