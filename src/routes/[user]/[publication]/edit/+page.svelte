@@ -116,10 +116,13 @@
 	let circuitRef : InstanceType<typeof Circuit>;
 	let nodeActions:NodeDiffActions = {add:[], delete:[], edit:[], numNodes:0, next:[]}
 
-	nodeActions.numNodes = serverData.publication.circuit.numNodes;
-	for (const node of serverData.publication.circuit.nodes){
-		nodeActions.add.push(({ publicationId: node.publicationId, x: node.posX, y: node.posY }));
-		nodeActions.next.push({fromId: node.publicationId, toId: node.next.map(x=>x.toPublicationId)});
+	if (!isMaterial) {
+		nodeActions.numNodes = serverData.publication.circuit.numNodes;
+		for (const node of serverData.publication.circuit.nodes){
+			nodeActions.add.push(({ publicationId: node.publicationId, x: node.posX, y: node.posY }));
+			nodeActions.next.push({fromId: node.publicationId, toId: node.next.map(x=>x.toPublicationId)});
+
+		}
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -142,7 +145,6 @@
 
 
 </script>
-
 
 <Meta title={publication.title} description="CAIT" type="site" />
 

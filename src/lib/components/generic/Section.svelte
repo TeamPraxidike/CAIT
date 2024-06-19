@@ -14,13 +14,14 @@
     <div class="flex flex-col gap-8 md:justify-center">
         <div class="gap-4">
             <div class="gap-2">
-                <h6 class="mb-1 text-surface-700 dark:text-surface-100 text-sm font-light">{subtitle}</h6>
+                <span class="mb-1 text-surface-800 dark:text-surface-100 text-sm font-light">{subtitle}</span>
                 <h3 class="mb-2 font-semibold text-surface-800 dark:text-surface-100 text-xl">{title}</h3>
             </div>
-            <p class="text-surface-400">{description}</p>
+            <p class="text-surface-700 dark:text-surface-200">{description}</p>
         </div>
         {#if !onAbout}
-        <a href={`/about`} class="font-bold xl:font-extrabold underline underline-offset-4 max-md:text-[12px]">
+        <a href={`/about`} class="font-bold xl:font-extrabold underline underline-offset-4 max-md:text-[12px]
+            dark:text-surface-100">
             Go to
         </a>
             {/if}

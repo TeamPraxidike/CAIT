@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Filter, MaterialTypes, PublicationCard, SearchBar, UserProp} from '$lib';
+	import { Filter, MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
@@ -202,6 +202,8 @@
 		})
 </script>
 
+<Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
+
 <div class="flex justify-between col-span-full mt-32">
 	<div class="flex gap-2 w-full lg:w-7/12 xl:w-1/2">
 		<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch} />
@@ -320,6 +322,7 @@
     {#if materials.length === 0}
         <h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
     {/if}
+
     {#each materials as material (material.id)}
         <PublicationCard extensions="{getExtensions(material)}"
                          imgSrc={'data:image;base64,' + material.coverPicData}
