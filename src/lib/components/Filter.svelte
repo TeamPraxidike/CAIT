@@ -5,6 +5,7 @@
 	import { fly } from 'svelte/transition';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import type { User } from '@prisma/client';
+	import {PublicationTypeIconMap} from "$lib/util/file";
 
 	export let people: (User & {profilePicData: string})[] = []
 	export let label: string;
@@ -108,8 +109,6 @@
 		else
 			display = all.filter(x => x.content.toLowerCase().includes(text ?? ''));
 	};
-
-
 </script>
 
 <div bind:this={targetDiv}   class="space-y-1 relative">
@@ -146,13 +145,41 @@
 				<div class="max-h-64 {overflow}">
 					{#if label === 'Publisher'}
 						{#each people as dis, i}
-							<FilterButton profilePicData={dis.profilePicData} bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={{id: dis.id, content: dis.firstName + " " + dis.lastName  }} bind:display={display} on:update={update}/>
+							<FilterButton profilePicData={dis.profilePicData}
+										  bind:label={label}
+										  bind:selectedIds={selectedIds}
+										  bind:selectedVals={selectedVals}
+										  bind:profilePic="{profilePic}"
+										  row={i}
+										  idValue={{id: dis.id, content: dis.firstName + " " + dis.lastName  }}
+										  bind:display={display} on:update={update}
+							/>
 						{/each}
-						{:else }
-					{#each display as dis, i}
-						<FilterButton bind:label={label} bind:selectedIds={selectedIds} bind:selectedVals={selectedVals} bind:profilePic="{profilePic}" row={i} idValue={ dis } bind:display={display} on:update={update}/>
-					{/each}
-						{/if}
+					{:else if label === 'Types'}
+						{#each display as dis, i}
+							<FilterButton icon={PublicationTypeIconMap.get(dis.content)}
+										  bind:label={label}
+										  bind:selectedIds={selectedIds}
+										  bind:selectedVals={selectedVals}
+										  bind:profilePic="{profilePic}"
+										  row={i}
+										  idValue={{id: dis.id, content: dis.content }}
+										  bind:display={display} on:update={update}
+										  hasIcon={true}
+							/>
+						{/each}
+					{:else}
+						{#each display as dis, i}
+							<FilterButton bind:label={label}
+										  bind:selectedIds={selectedIds}
+										  bind:selectedVals={selectedVals}
+										  bind:profilePic="{profilePic}"
+										  row={i} idValue={ dis }
+										  bind:display={display}
+										  on:update={update}
+							/>
+						{/each}
+					{/if}
 				</div>
 			{/if}
 		</div>

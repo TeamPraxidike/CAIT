@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { page } from '$app/stores';
 
 	export let idValue : {id:string, content:string} ;
 	export let row:number;
@@ -15,7 +14,10 @@
 
 	export let profilePicData: string = '';
 
+	export let hasIcon = false;
+	export let icon = '';
 
+	console.log(icon)
 
 	export let display: {id:string, content:string } [];
 
@@ -52,6 +54,9 @@
 	{#if profilePic}
 		<img src={'data:image;base64,' + profilePicData} alt="userProfile" class="size-6 rounded-full" >
 <!--		<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />-->
+	{/if}
+	{#if hasIcon}
+		<Icon icon={icon} class="text-xl text-primary-500"/>
 	{/if}
 	<span class="w-full h-full">{idValue.content}</span>
 </button>
