@@ -173,18 +173,19 @@
 
 <div class="fixed top-0 left-0 w-full h-full bg-surface-800 bg-opacity-70"/>
 	<div bind:this={targetDiv}
-			 class="fixed top-1/2 left-1/2 w-4/5 h-4/5 bg-surface-100 rounded-lg shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex overflow-auto items-start"  transition:scale={{ delay: 0, duration: 200, start:0.9}} style="z-index: 999">
+			 class="fixed top-1/2 left-1/2 w-4/5 h-4/5 bg-surface-100 dark:bg-surface-900 rounded-lg shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex overflow-auto items-start"  transition:scale={{ delay: 0, duration: 200, start:0.9}} style="z-index: 999">
 		<Grid pageGrid="{false}">
+			<button type="button" class="col-start-4 mt-4 md:hidden rounded-lg py-1 px-3 bg-surface-800 dark:bg-surface-600 hover:bg-opacity-75 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
 
 			<div class="flex-col col-span-full mt-8 ">
 				<div class="flex justify-between w-full">
-					<h2 class="text-surface-700 font-bold mb-4">Select Publications to Add to Your Circuit</h2>
-					<button type="button" class="rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
+					<h2 class="text-surface-700 dark:text-surface-300 font-bold mb-4">Select Publications to Add to Your Circuit</h2>
+					<button type="button" class="hidden md:block rounded-lg py-1 px-3 bg-surface-800 dark:bg-surface-600 hover:bg-opacity-75 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
 				</div>
 				<div class = "w-full lg:w-7/12 xl:w-1/2 mb-2">
 					<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
 				</div>
-				<div class="hidden rounded-lg lg:flex w-full lg:w-7/12 xl:w-1/2 h-8 mb-8">
+				<div class=" rounded-lg flex w-full lg:w-7/12 xl:w-1/2 h-8 mb-8">
 					<ToggleComponent page="{false}" pageType="All Materials" options={["All Materials", "All Circuits", "My Publications", "Saved Publications"]}
 													 labels={["All Materials", "All Circuits", "My Publications", "Saved Publications"]} on:reset={newMaterials} />
 				</div>
@@ -212,8 +213,7 @@
 
 				{/each}
 			{/if}
-			<div class="col-span-full mt-8 mb-4 flex">
-				<button type="button" class=" ml-auto rounded-lg py-1 px-3 bg-surface-800 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
-			</div>
+			<button type="button" class="col-start-4 my-4 md:hidden rounded-lg py-1 px-3 bg-surface-800 dark:bg-surface-600 hover:bg-opacity-75 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
+
 		</Grid>
 </div>

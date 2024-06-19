@@ -13,13 +13,15 @@
 	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Registration successful',
-			background: 'bg-success-200'
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
 		});
 		goto('/signin');
 	} else if(form && form?.status !== 200){
 		toastStore.trigger({
 			message: `Registration failed: ${form?.message}`,
-			background: 'bg-error-200'
+			background: 'bg-error-200',
+			classes: 'text-surface-900',
 		});
 	}
 

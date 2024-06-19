@@ -25,19 +25,22 @@
 			if (url.includes('error=CredentialsSignin')) {
 				toastStore.trigger({
 					message: 'Login fail, wrong email or password',
-					background: 'bg-error-200'
+					background: 'bg-error-200',
+					classes: 'text-surface-900',
 				});
 			} else {
 				toastStore.trigger({
 					message: 'Login successful',
-					background: 'bg-success-200'
+					background: 'bg-success-200',
+					classes: 'text-surface-900',
 				});
 				window.location.href = '/browse';
 			}
 		} catch (error:any) {
 			toastStore.trigger({
 				message: 'An unexpected error occurred',
-				background: 'bg-error-200'
+				background: 'bg-error-200',
+				classes: 'text-surface-900',
 			});
 		}
 	}
