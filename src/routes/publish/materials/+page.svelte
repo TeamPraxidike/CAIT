@@ -163,6 +163,11 @@
 	}
 	$: warning2 = generateWarningStep2(tags.length, LOs.length);
 
+	const handleInputEnter = (event: KeyboardEvent) => {
+		if(event.key === 'Enter'){
+			event.preventDefault();
+		}
+	}
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -195,7 +200,7 @@
 				formData.append('newTags', JSON.stringify(newTags));
 				formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
-	<Stepper buttonCompleteType="submit"  on:step={onNextHandler} buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500" buttonNext="btn dark:bg-surface-200">
+	<Stepper buttonCompleteType="submit"  on:step={onNextHandler} buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
@@ -205,7 +210,7 @@
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
 			<div class="flex flex-col gap-2">
 				<label for="title" >Title<span class="text-error-300">*</span></label>
-				<input type="text" name="title" placeholder="Title" bind:value={title}
+				<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
 					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
 					<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive} on:clearSettings={() => {typeActive=false}}/>
 				<textarea name="description" placeholder="Description..." bind:value={description}
@@ -241,13 +246,13 @@
 				<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
 					<div class="w-full md:w-1/2 flex-col gap-2">
 						<label for="estimate">Time Estimate (in minutes):</label>
-						<input type="number" name="estimate" bind:value={estimate} placeholder="How much time do the materials take"
+						<input type="number" name="estimate" bind:value={estimate} on:keydown={handleInputEnter} min="0" placeholder="How much time do the materials take"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
 					</div>
 					<div class="w-full md:w-1/2	">
 						<label for="copyright md-2">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
 						class="text-tertiary-700" > Check here how this applies to you</a>):</label>
-						<input type="text" name="copyright" bind:value={copyright} placeholder="Leave blank if material is your own"
+						<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter} placeholder="Leave blank if material is your own"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
 					</div>
 				</div>
