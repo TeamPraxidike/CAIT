@@ -55,11 +55,13 @@
                 newTags = [...newTags, newTag];
                 tags = [...tags,newTag];
                 newTag = '';
+                tagInput='';
                 enterTag = false;
             }else{
                 triggerRepeatInput('Tag', newTag.toLowerCase());
             }
         }else{
+            newTag = tagInput;
             enterTag=true;
         }
     }
