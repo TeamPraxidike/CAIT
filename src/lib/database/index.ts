@@ -115,7 +115,7 @@ type MaterialForm = {
 		learningObjectives: string[];
 		prerequisites: string[];
 		materialType: MaterialType;
-		copyright: boolean;
+		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
 		tags: string[];

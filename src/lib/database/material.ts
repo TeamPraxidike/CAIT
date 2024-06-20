@@ -180,7 +180,7 @@ export async function createMaterialPublication(
 		learningObjectives: string[];
 		prerequisites: string[];
 		materialType: MaterialType;
-		copyright: boolean;
+		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
 	},
@@ -225,7 +225,7 @@ export async function updateMaterialByPublicationId(
 		learningObjectives: string[];
 		prerequisites: string[];
 		materialType: MaterialType;
-		copyright: boolean;
+		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
 	},

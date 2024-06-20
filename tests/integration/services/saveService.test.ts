@@ -30,7 +30,7 @@ describe('Liking publications', () => {
 			learningObjectives: ['lo1'],
 			prerequisites: ['p1'],
 			materialType: 'assignment',
-			copyright: true,
+			copyright: "true",
 			timeEstimate: 300,
 			theoryPractice: 0.5,
 		});

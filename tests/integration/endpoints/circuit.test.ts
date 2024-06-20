@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 // 	return {
 // 		title: 'Vasko and Friends',
 // 		description: 'Vasko falls in love with Travis Scott',
-// 		copyright: true,
+// 		copyright: "true",
 // 		difficulty: Difficulty.easy,
 // 		userId: userData.user.id,
 // 	};
@@ -185,7 +185,7 @@ describe('Circuits', async () => {
 // 		// 		userId: circuitdata.userId,
 // 		// 		timeEstimate: 1000,
 // 		// 		theoryPractice: 9,
-// 		// 		copyright: true,
+// 		// 		copyright: "true",
 // 		// 		paths: ['./vasko/nqma/kraka15.txt'],
 // 		// 		titles: ['vaskoGoworiNaKitaiski.txt'],
 // 		// 	};

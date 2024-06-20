@@ -268,11 +268,19 @@ export const IconMapExtension: Map<string, string> = new Map([
 
 export const PublicationTypeIconMap: Map<string, string> = new Map([
 	['video', 'akar-icons:video'],
+	['Video', 'akar-icons:video'],
 	['lectureNotes', 'icon-park-solid:notes'],
+	['Lecture Notes', 'icon-park-solid:notes'],
+	['lecturenotes', 'icon-park-solid:notes'],
 	['assignment', 'material-symbols:assignment'],
+	['Assignment', 'material-symbols:assignment'],
 	['other', 'mage:dots-horizontal-circle'],
+	['Other', 'mage:dots-horizontal-circle'],
 	['slides', 'mdi:presentation'],
+	['Slides', 'mdi:presentation'],
 	['examQuestions', 'healthicons:i-exam-multiple-choice'],
+	['examquestions', 'healthicons:i-exam-multiple-choice'],
+	['Exam Questions', 'healthicons:i-exam-multiple-choice']
 ]);
 
 const getFileExtension = (filePath: string): string =>  {
