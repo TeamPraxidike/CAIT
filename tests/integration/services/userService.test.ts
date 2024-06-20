@@ -106,7 +106,7 @@ describe('Liking publications', () => {
 		publication = await createMaterialPublication(user.id, {
 			title: 'cool publication',
 			description: 'This publication has description',
-			copyright: true,
+			copyright: "true",
 			difficulty: Difficulty.easy,
 			learningObjectives: [],
 			prerequisites: [],

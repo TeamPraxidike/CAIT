@@ -27,7 +27,7 @@ describe('Comments CRUD', () => {
 			description: 'This publication has description',
 			difficulty: Difficulty.easy,
 			materialType: 'assignment',
-			copyright: true,
+			copyright: "true",
 			timeEstimate: 4,
 			theoryPractice: 9,
 			learningObjectives: [],

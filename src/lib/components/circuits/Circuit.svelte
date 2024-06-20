@@ -5,7 +5,7 @@
 	import { Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import {
-		Difficulty,
+		Difficulty, type Material, MaterialType,
 		type Node as PrismaNode,
 		type Publication,
 		PublicationType,
@@ -83,13 +83,14 @@
 	export let saved : number[] = []
 	export let publishing: boolean;
 
-
+	export let publishingView = false;
 	export let nodes: (PrismaNode & {
 		publication: Publication & {
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: (User & {profilePicData: string})
 			coverPicData: string,
+			materials: Material,
 		}
 		next: {
 			circuitId: number,
@@ -97,6 +98,7 @@
 			toPublicationId: number
 		}[]
 	})[];
+
 
 	let startY: number = 100;
 
@@ -406,12 +408,15 @@
 			cursorInsideNode = true;
 			hoveredNodeId = Number(node.id());
 
-			if(!publishing)
+			if(!publishing )
 			{
-				setTimeout(() => {
-					// Check if cursor is still inside the node
-					makePopUp(cursorInsideNode, hoveredNodeId, node)
-				}, 700);
+				if(!publishingView){
+					setTimeout(() => {
+						// Check if cursor is still inside the node
+						makePopUp(cursorInsideNode, hoveredNodeId, node)
+					}, 700);
+				}
+
 			}
 			else {
 			if (cy.getElementById('edgeStart').length === 0 && !prereqActive && !(node.id() === 'edgeStart')) {
@@ -578,7 +583,7 @@
 					}
 				});
 		});
-
+		 
 		/**
 		 * Locks all nodes if not in editing mode making it impossible to move them
 		 */
@@ -650,8 +655,6 @@
 				const node = cy.getElementById(data.publication.id);
 				placeMentAlgorithm(node, node.position().x, node.position().y )
 
-
-
 				nodes.push(
 					{
 						next: [],
@@ -677,6 +680,14 @@
 							usedInCourse: [{ course: '1' }],
 							publisher: data.publication.publisher,
 							coverPicData: data.publication.coverPicData,
+							materials: {
+								id:1,
+								copyright:true,
+								theoryPractice:15,
+								publicationId:2,
+								timeEstimate:5,
+								encapsulatingType: data.isMaterial ? data.publication.materials.encapsulatingType: MaterialType.other,
+							},
 						}
 					},
 				)
@@ -886,6 +897,7 @@
 						const publicationCard = new PublicationCard({
 							target: divElement,
 							props: {
+								materialType: publication.publication.materials.encapsulatingType,
 								publication: publication.publication,
 								inCircuits: false,
 								imgSrc: 'data:image;base64,' +  coverPicData,
@@ -1043,26 +1055,26 @@
 </style>
 <div class="flex-col mt-10 col-span-7">
 	{#if publishing}
-	<div class = "flex justify-between">
+	<div class = "flex flex-col md:flex-row gap-2 justify-between">
 			<div class="flex justify justify-between">
-				<div class="flex gap-2">
+				<div class="flex flex-col md:flex-row gap-2 ">
 					{#if (selected || edgeSelected)}
-						<button type="button" class="btn variant-filled bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
+						<button type="button" class="btn text-surface-50 bg-error-500 dark:bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>
 					{:else}
-						<button type="button" class="btn variant-filled bg-success-500" on:click={fetchElements}>Insert Publications</button>
+						<button type="button" class="btn text-surface-50 bg-success-500 dark:bg-success-500" on:click={fetchElements}>Insert Publications</button>
 					{/if}
 
 					{#if (numSelected < 2)}
 						{#if prereqActive}
 							{#if stage1}
-								<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Cancel</button>
+								<button type="button" class="btn text-surface-50 dark:bg-surface-600 bg-surface-600" on:click={savePrereq}>Cancel</button>
 							{:else}
-								<button type="button" class="btn variant-filled bg-surface-600" on:click={savePrereq}>Save Changes</button>
+								<button type="button" class="btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click={savePrereq}>Save Changes</button>
 
 							{/if}
 						{:else}
 							{#if nodes.length > 1}
-								<button type="button" class=" relative btn variant-filled bg-surface-600" on:click={addPrereq}>Connect Publications</button>
+								<button type="button" class=" relative btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click={addPrereq}>Connect Publications</button>
 							{/if}
 
 						{/if}
@@ -1072,16 +1084,16 @@
 				</div>
 			</div>
 		<div class="flex gap-4">
-			<button type="button" class="btn variant-filled bg-surface-600" on:click="{() => {cy.center()}}"> Recentre </button>
-			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 rounded-full h-full">
-				<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center"/>
+			<button type="button" class="btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click="{() => {cy.center()}}"> Recentre </button>
+			<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 dark:bg-transparent rounded-full h-full self-center">
+				<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center dark:text-surface"/>
 			</button>
 		</div>
 	</div>
 	{/if}
 
 
-	<div class="mt-2 w-full" id="cy"></div>
+	<div class="mt-2 w-full dark:border-surface-50" id="cy"></div>
 </div>
 
 

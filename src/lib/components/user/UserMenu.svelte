@@ -28,21 +28,11 @@
         }
     }
 
-    const settingsReset = (event: CustomEvent) => {
-        const url = $page.url.pathname;
-        if(url.includes('publish/') || url.includes('edit')){
-            const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
-            if (!confirmation) {
-                event.preventDefault();
-                return;
-            }
-
-        }
-    }
 </script>
 
 {#if device === 'mobile'}
     <div class="grid grid-cols-2">
+
         <a href="/{$page.data.session?.user.id}"  on:click={confirmPublishReset}
            class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
             {#if $page.data.session && $page.data.session.userPfp.data !== ''}
@@ -58,9 +48,11 @@
 <!--        <IconLink p="p-4" icon="ion:person-sharp" href="/{$page.data.session?.user.id}" link="Profile"/>-->
 <!--        <IconLink p="p-4" icon="ion:bookmark-sharp" href="/{$page.data.session?.user.id}/saved" link="Saved"/>-->
 <!--        <IconLink p="p-4" icon="ion:book" href="/{$page.data.session?.user.id}/publications" link="Publications"/>-->
-        <IconLink on:click={settingsReset}  p="p-4" icon="ion:settings-sharp" href="/settings" link="Settings"/>
-        <button on:click={handleSignOut} class="anchor">Log out</button>
+<!--        <IconLink on:click={settingsReset}  p="p-4" icon="ion:settings-sharp" href="/settings" link="Settings"/>-->
+<!--        <button on:click={handleSignOut} class="anchor col-start-2">Log out</button>-->
+
     </div>
+
 {:else}
     <div class="card relative z-20 bg-surface-50 border border-surface-300 p-4 w-64
                             dark:text-surface-50 dark:border-none">
@@ -80,10 +72,6 @@
             </a>
             <hr class="my-2">
             <IconLink icon="ion:person-sharp" href="/{$page.data.session?.user.id}" link="Profile"/>
-            <IconLink icon="ion:bookmark-sharp" href="/{$page.data.session?.user.id}/saved" link="Saved"/>
-            <IconLink icon="ion:book" href="/{$page.data.session?.user.id}/publications" link="Publications"/>
-            <hr class="my-2">
-            <IconLink on:click={settingsReset} icon="ion:settings-sharp" href="/settings" link="Settings"/>
             <hr class="my-2">
         </div>
         <button on:click={handleSignOut} class="anchor">Log out</button>

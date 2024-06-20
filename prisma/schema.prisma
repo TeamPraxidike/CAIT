@@ -163,8 +163,8 @@ model Publication {
 
   coverPic File? @relation("CoverPic")
 
-  similarToThis  SimilarContent[] @relation("ThatSimilarToThis") // like an incoming edge
-  thisSimilarTo  SimilarContent[] @relation("ThisSimilarToThat") // like an outgoing edge
+  similarToThis SimilarContent[] @relation("ThatSimilarToThis") // like an incoming edge
+  thisSimilarTo SimilarContent[] @relation("ThisSimilarToThat") // like an outgoing edge
 
   materials    Material?
   circuit      Circuit?
@@ -174,17 +174,17 @@ model Publication {
 model SimilarContent {
   similarFromId Int
   similarFrom   Publication @relation("ThisSimilarToThat", fields: [similarFromId], references: [id], onDelete: Cascade)
-  similarToId  Int
-  similarTo   Publication @relation("ThatSimilarToThis", fields: [similarToId], references: [id], onDelete: Cascade)
+  similarToId   Int
+  similarTo     Publication @relation("ThatSimilarToThis", fields: [similarToId], references: [id], onDelete: Cascade)
 
-  similarity  Float
+  similarity Float
 
   @@id([similarFromId, similarToId])
 }
 
 model Material {
   id                Int          @id @default(autoincrement())
-  copyright         Boolean
+  copyright         String
   encapsulatingType MaterialType
   timeEstimate      Int?
   theoryPractice    Float?
@@ -195,10 +195,10 @@ model Material {
 }
 
 model File {
-  path  String @id
+  path  String  @id
   title String
   type  String
-  text String?
+  text  String?
 
   userId     String? @unique
   profilePic User?   @relation("ProfilePic", fields: [userId], references: [id], onDelete: Cascade)

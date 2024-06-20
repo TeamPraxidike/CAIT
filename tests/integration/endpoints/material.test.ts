@@ -15,7 +15,7 @@ it("should be AEY", () => {
 //     return {
 //         title: 'Vasko and Friends',
 //         description: 'Vasko falls in love with Travis Scott',
-//         copyright: true,
+//         copyright: "true",
 //         difficulty: Difficulty.easy,
 //         timeEstimate: 5,
 //         theoryPractice: 2,
@@ -182,7 +182,7 @@ it("should be AEY", () => {
 //                 userId: user.id,
 //                 timeEstimate: 1000,
 //                 theoryPractice: 9,
-//                 copyright: true,
+//                 copyright: "true",
 //                 paths: ['./vasko/nqma/kraka.txt'],
 //                 titles: ['vaskoGoworiNaKitaiski.txt'],
 //             });
@@ -228,7 +228,7 @@ it("should be AEY", () => {
 //             userId: user.id,
 //             timeEstimate: 1000,
 //             theoryPractice: 9,
-//             copyright: true,
+//             copyright: "true",
 //             paths: ['./vasko/nqma/kraka5.txt'],
 //             titles: ['vaskoGoworiNaKitaiski.txt'],
 //         };

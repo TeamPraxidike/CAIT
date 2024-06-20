@@ -114,7 +114,7 @@ export const actions = {
 				prerequisites: JSON.parse(
 					data.get('prerequisites')?.toString() || '',
 				),
-				copyright: Boolean(data.get('copyright')),
+				copyright: data.get('copyright')?.toString() || '',
 				timeEstimate: Number(data.get('estimate')?.toString()),
 				theoryPractice: Number(data.get('theoryToApplication')),
 				tags: JSON.parse(tagsDataEntry.toString()),
