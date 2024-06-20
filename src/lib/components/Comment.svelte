@@ -197,7 +197,7 @@
 
 
     <div bind:this={commentDiv}
-     class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full relative rounded-lg flex gap-2 p-1 ">
+     class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full  rounded-lg flex gap-2 p-1 ">
         <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />
         <div class="flex flex-col w-full">
 
@@ -206,7 +206,7 @@
             <span class="text-surface-400 text-sm">{created}</span>
 
 
-            <button class="[&>*]:pointer-events-none absolute right-0 hover:shadow-lg rounded-lg hover:bg-surface-300 dark:hover:bg-surface-800"
+            <button class="[&>*]:pointer-events-none hover:shadow-lg rounded-lg hover:bg-surface-300 dark:hover:bg-surface-800"
                     use:popup={popupMenu}>
                 <Icon icon="mdi:dots-vertical" height="24" class="text-surface-900"/>
             </button>
