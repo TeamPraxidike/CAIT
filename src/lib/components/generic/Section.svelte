@@ -28,12 +28,12 @@
 
         {#if iconList}
             <div class="gap-32">
-                <p class="text-surface-400">Material publications can be of several types:</p>
+                <p class="text-surface-600">Material publications can be of several types:</p>
                 <div>
                     {#each icons as icon, i}
                         <div class="flex flex-row">
                             <Icon icon={icon} class="self-center text-xl text-primary-500"/>
-                            <p class="ml-2 text-surface-400"> - {types[i]}</p>
+                            <p class="ml-2 text-surface-600"> - {types[i]}</p>
                         </div>
                     {/each}
                 </div>
