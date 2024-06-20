@@ -344,12 +344,15 @@
         />
     {/each}
 {:else if pageType === "people"}
+	{#if users.length === 0}
+		<h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
+	{/if}
 	{#each users as person (person.id)}
 		<UserProp view="search" posts="{person.posts.length}"
 				  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
 	{/each}
 {:else if pageType === "circuits"}
-    {#if materials.length === 0}
+    {#if circuits.length === 0}
         <h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
     {/if}
     {#each circuits as circuit (circuit.id)}

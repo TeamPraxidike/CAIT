@@ -86,6 +86,7 @@ export type PublicationView = {
 					usedInCourse: { course: string }[];
 					publisher: UserPfp;
 					coverPicData: string;
+					materials: Material;
 				};
 				prerequisites: Edge[];
 				next: Edge[];
