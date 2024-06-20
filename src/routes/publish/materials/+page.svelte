@@ -30,6 +30,8 @@
 	export let form: ActionData;
 	export let data: PageServerData;
 
+	$: isSubmitting = false;
+
 	// tags
 	let tags: string[] = [];
 	$: tags = tags;
@@ -172,13 +174,17 @@
 	  action="?/publish"
 	  class="col-span-full my-20 pr-10 shadow p-4"
 	  use:enhance={({ formData }) => {
+	    isSubmitting = true;
+		let willSubmit = true;
         Array.from(files).forEach(file => {
           if (file.size > 1024 * 1024 * 100) {
             alert('File size exceeds 100MB');
+			willSubmit = false;
           } else {
             formData.append('file', file);
           }
         });
+		if (!willSubmit) return;
 
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
@@ -195,7 +201,8 @@
 				formData.append('newTags', JSON.stringify(newTags));
 				formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
-	<Stepper buttonCompleteType="submit"  on:step={onNextHandler} buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500" buttonNext="btn dark:bg-surface-200">
+	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
+			 buttonNext="btn dark:bg-surface-200" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
@@ -265,7 +272,7 @@
 				<p class="text-error-300 dark:text-error-400">{warning2}</p>
 			{/if}
 		</Step>
-		<Step>
+		<Step locked={isSubmitting}>
 			<svelte:fragment slot="header">Review</svelte:fragment>
 			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={PKs} bind:tags={tags}  bind:maintainers={maintainers}
