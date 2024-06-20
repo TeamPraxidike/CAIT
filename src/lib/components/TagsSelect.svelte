@@ -68,18 +68,23 @@
             createTag()
         }
     }
-    let buttonText = 'Add New Tag';
-    $: buttonText = enterTag ? 'Create Tag' : 'Add New Tag';
+    let buttonText = 'Create New Tag';
+    $: buttonText = enterTag ? 'Add Tag' : 'Create New Tag';
 </script>
 
 <label class="pl-3" for="tags_input">Tags (at least one)<span class="text-error-300">*</span>:</label>
 <div class="text-token space-y-2 pl-3">
-    <InputChip  bind:this={inputChip} whitelist={allTags.map(t => t.content)}
-               bind:input={tagInput} bind:value={tags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
-    {#if enterTag}
+
+        {#if enterTag}
         <input on:keypress={enterNewTag} bind:value={newTag} placeholder="Enter tag text" class="w-full border-o focus:border-primary-400 focus:ring-0 rounded-lg" />
-    {/if}
+            <button type="button" class="w-full bg-error-300 rounded-lg py-2 dark-primary-700 text-surface-50" on:click={()=>{enterTag=false}}>Cancel</button>
+
+        {:else}
+            <InputChip  bind:this={inputChip} whitelist={allTags.map(t => t.content)}
+                        bind:input={tagInput} bind:value={tags} name="chips" on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
+        {/if}
     <button type="button" class="w-full bg-primary-300 rounded-lg py-2 dark-primary-700 text-surface-50" on:click={createTag}>{buttonText}</button>
+
     <div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
         <Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}
                       on:selection={onInputChipSelect} emptyState="No Tags Found. Press Enter to Create New Tag." />
