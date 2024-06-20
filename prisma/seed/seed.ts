@@ -8,6 +8,7 @@ import { createSeedClient } from '@snaplet/seed';
 import { coverPic, files } from './files';
 import { addNode, handleEdges, prisma } from '../../src/lib/database';
 import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
+import { enqueueCircuitComparison, enqueueMaterialComparison } from '../../src/lib/PiscinaUtils/runner';
 
 const main = async () => {
 	const seed = await createSeedClient();
@@ -173,6 +174,9 @@ const main = async () => {
 				},
 			},
 		});
+
+		await enqueueMaterialComparison(mat.publicationId, mat.id)
+
 		materials.push(mat);
 	}
 
@@ -229,6 +233,8 @@ const main = async () => {
 		{ fromId: nodes[0].publicationId, toId: [nodes[1].publicationId] },
 	];
 	await handleEdges(circuit.id, edges);
+
+	await enqueueCircuitComparison(circuit.publicationId)
 
 	process.exit();
 };
