@@ -214,49 +214,59 @@
 						 labels={["Materials", "People", "Circuits"]} />
 	</div>
 </div>
+<div class="col-span-full">
+	<div class="flex lg:hidden rounded-lg w-3/4 min-h-6">
+		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
+										 labels={["Materials", "People", "Circuits"]}  />
+	</div>
+</div>
+
 
 <div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
 	{#if pageType !== "people"}
-		<div class="flex gap-1 items-center">
+		<div class="flex flex-col md:flex-row gap-1 md:items-center">
+					<div class="flex gap-1">
+						<Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
+										profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
+										on:filterSelected={() => {applyActive = true}} num="{0}" />
+						<Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
+										bind:display="{displayPublishers}" profilePic="{true}"  bind:active="{publisherActive}"
+										on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}" people="{users}"/>
+						{#if pageType === "materials"}
+							<Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
+											profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
+											on:filterSelected={() => {applyActive = true}} num="{0}" />
+							<Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
+											profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
+											on:filterSelected={() => {applyActive = true}} num="{0}" />
+						{:else}
+							<Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
+											profilePic="{false}" on:filterSelected={() => {applyActive = true}} bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
+						{/if}
+					</div>
 
-            <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
-                    profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
-                    on:filterSelected={() => {applyActive = true}} num="{0}" />
-            <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
-                    bind:display="{displayPublishers}" profilePic="{true}"  bind:active="{publisherActive}"
-                    on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}" people="{users}"/>
-            {#if pageType === "materials"}
-                <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
-                        profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
-                        on:filterSelected={() => {applyActive = true}} num="{0}" />
-                <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
-                        profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
-                        on:filterSelected={() => {applyActive = true}} num="{0}" />
-            {:else}
-                <Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
-                        profilePic="{false}" on:filterSelected={() => {applyActive = true}} bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
-            {/if}
-            <div class = "w-px h-4/5 bg-surface-600" ></div>
-            <Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:active={sortByActive} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}}/>
+					<div class="flex gap-1 h-full">
+						<div class = "hidden md:block w-px h-4/5 bg-surface-600 self-center" ></div>
+						<Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:active={sortByActive} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}}/>
+						<button class="rounded-lg text-xs py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
+										on:click={sendFiltersToAPI} disabled="{!applyActive}"  >Apply</button>
+						{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
+							<button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
+											on:click={resetFilters}>
+								Reset Filters
+							</button>
+						{/if}
+					</div>
 
 
-            <button class="rounded-lg text-xs py-1.5 px-3 text-surface-100 dark:text-surface-800 shadow-lg {applyBackground}"
-                    on:click={sendFiltersToAPI} disabled="{!applyActive}"  >Apply</button>
+
         </div>
     {/if}
 
 
-    <div class="flex rounded-lg lg:hidden w-1/4">
-        <ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-                         labels={["Materials", "People", "Circuits"]}  />
-    </div>
 
-	{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
-		<button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
-				on:click={resetFilters}>
-			Reset Filters
-		</button>
-	{/if}
+
+
 </div>
 
 

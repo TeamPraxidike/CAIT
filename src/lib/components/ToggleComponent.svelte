@@ -8,7 +8,7 @@
 
 	export let page: boolean;
 	$: text = (option: string) => {
-		return pageType === option ? 'text-surface-50 dark:text-surface-900' : 'text-primary-700';
+		return pageType === option ? 'text-surface-50' : 'text-primary-700';
 	};
 	$: bg = (option: string) => {
 		return pageType === option ? 'bg-primary-700 dark:bg-primary-600 hover:bg-primary-700 hover:dark:bg-primary-600 hover:text-surface-50 dark:hover:text-surface-900 ' : 'hover:bg-primary-50 dark:hover:bg-primary-800';

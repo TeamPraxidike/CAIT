@@ -197,7 +197,7 @@
 	const viewTags = () => {
 		isClickedTags = !isClickedTags;
 		if(isClickedTags){
-			setTimeout(()=>{isClickedTags=false},2000);
+			setTimeout(()=>{isClickedTags=false},10000);
 		}
 	}
 </script>
@@ -229,11 +229,13 @@
 						{#if publication.type === PublicationType.Circuit}
 							<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
 						{:else}
-							<div class="py-1" bind:this={hoverDiv}>
+
+
+							<div class="py-1 relative" bind:this={hoverDiv}>
 								<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
 								{#if isHovered}
 									<div
-										class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+										class="absolute bg-surface-50 dark:bg-surface-800 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
 										style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 
 										<div class="flex flex-col items-center">
@@ -259,14 +261,23 @@
 			<p class="w-full line-clamp-3 text-xs text-surface-700 dark:text-surface-400">{publication.description}</p>
 
 
-			<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
+			<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-visible">
 				<div class="flex gap-1 relative">
 					{#each tags.slice(0, maxTags) as tag, i}
 						<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
 					{/each}
 				</div>
 					{#if (tags.length > maxTags) }
-						<button on:click={viewTags} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
+						<div class="relative overflow-visible">
+							<button on:click={viewTags} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
+							{#if isClickedTags}
+								<div class="absolute rounded-lg p-2 ml-6 mt-[-24px] flex flex-col gap-1 z-[9999] bg-surface-50 dark:bg-surface-800" transition:fly={{ x:8 , duration: 400 }}>
+									{#each tags.slice(maxTags, tags.length) as tag, i}
+										<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
+									{/each}
+								</div>
+							{/if}
+						</div>
 					{/if}
 				{#if isClickedTags}
 					<div class="absolute ml-48 flex flex-col gap-1 z-[9999] bg-surface-100" transition:fly={{ x:8 , duration: 400 }}>

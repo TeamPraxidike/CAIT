@@ -84,7 +84,8 @@
 	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Publication Edited successfully',
-			background: 'bg-success-200'
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
 		});
 		goto(`/${publication.publisherId}/${publication.id}`);
 	} else if (form?.status === 400) {
@@ -116,12 +117,11 @@
 	let circuitRef : InstanceType<typeof Circuit>;
 	let nodeActions:NodeDiffActions = {add:[], delete:[], edit:[], numNodes:0, next:[]}
 
-	if (!isMaterial) {
+	if (!isMaterial){
 		nodeActions.numNodes = serverData.publication.circuit.numNodes;
 		for (const node of serverData.publication.circuit.nodes){
 			nodeActions.add.push(({ publicationId: node.publicationId, x: node.posX, y: node.posY }));
 			nodeActions.next.push({fromId: node.publicationId, toId: node.next.map(x=>x.toPublicationId)});
-
 		}
 	}
 
@@ -145,6 +145,7 @@
 
 
 </script>
+
 
 <Meta title={publication.title} description="CAIT" type="site" />
 
@@ -237,13 +238,13 @@
 				<label for="practice"> Theory to Practice Ratio: <br></label>
 				<TheoryAppBar bind:value={theoryApp}/>
 			</div>
-			<div class="flex col-span-2 items-center gap-4">
-				<div class="w-1/2">
+			<div class="flex flex-col md:flex-row col-span-full items-center gap-4">
+				<div class="w-full md:w-1/2">
 					<label for="estimate">Time Estimate (in minutes):</label>
 					<input min="0" type="number" name="estimate" bind:value={time} placeholder="How much time do the materials take"
 								 class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
 				</div>
-				<div class="w-1/2">
+				<div class="w-full md:w-1/2">
 					<label for="copyright">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
 																											 class="text-tertiary-700" > Check here how this applies to you</a>):</label>
 					<input type="text" name="copyright" bind:value={copyright} placeholder="Leave blank if material is your own"
@@ -256,7 +257,7 @@
 	<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
 	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
 
-	<div class="text-token w-1/2 space-y-2 pl-3">
+	<div class="text-token w-full md:w-1/2 space-y-2 pl-3">
 		<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 	</div>
 

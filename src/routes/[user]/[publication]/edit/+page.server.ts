@@ -163,7 +163,7 @@ export const actions = {
 						(difficulty.toLowerCase() as Difficulty) || 'easy',
 					learningObjectives: JSON.parse(LOs),
 					prerequisites: JSON.parse(prior),
-					copyright: Boolean(copyright),
+					copyright: data.get('copyright')?.toString() || '',
 					timeEstimate: Number(time),
 					theoryPractice: Number(theoryApp),
 					tags: JSON.parse(selectedTags),

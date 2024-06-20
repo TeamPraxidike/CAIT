@@ -146,7 +146,7 @@ const main = async () => {
 
 		const mat = await prisma.material.create({
 			data: {
-				copyright: false,
+				copyright: "MIT License",
 				encapsulatingType: types[i],
 				publication: {
 					create: {
