@@ -9,10 +9,7 @@
     import {getExtensions} from "$lib/util/file";
 
 
-	//TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
-	//TODO: fix tags on pubCard fix the icon to be the encapsulating type of the publication
-	//TODO: add animation on loading
-	//TODO: Fix the browsing on other pages as well
+	let fetchPromise:Promise<any> = new Promise<null>(resolve => resolve(null));
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -108,10 +105,10 @@
         sendFiltersToAPI();
     };
 
-    const onSearch = (event : CustomEvent) => {
-        searchWord = event.detail.value.inputKeywords
-        sendFiltersToAPI()
-    }
+	const onSearch = (event : CustomEvent) => {
+		searchWord = event.detail.value.inputKeywords;
+		fetchPromise = sendFiltersToAPI();
+	}
 
 
     const sendFiltersToAPI = async () => {
@@ -157,25 +154,24 @@
         materials = [];
         circuits = [];
         //Make a GET request to the API
-        await fetch(url)
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Network response was not ok');
-              }
-              return response.json();
-          })
-          .then(data => {
-              // Handle the response data from the API
-              if (s === "material") {
-                  materials = data.materials;
-							} else {
-                  circuits = data;
-
-              }
-          })
-          .catch(error => {
-              console.error('There was a problem with the fetch operation:', error);
-          });
+		return fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				// Handle the response data from the API
+				if (s === "material") {
+					materials = data.materials;
+				} else {
+					circuits = data;
+				}
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
     };
 
 
@@ -328,38 +324,42 @@
     </div>
 </div>
 
-{#if pageType === "materials"}
-    {#if materials.length === 0}
-        <h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
-    {/if}
 
-    {#each materials as material (material.id)}
-        <PublicationCard extensions="{getExtensions(material)}"
-                         imgSrc={'data:image;base64,' + material.coverPicData}
-                         publication={material.publication}
-                         liked={liked.includes(material.publication.id)}
-                         saved={saved.includes(material.publication.id)}
-                         materialType={material.encapsulatingType}
-												 publisher={material.publisher}
-        />
-    {/each}
-{:else if pageType === "people"}
-	{#if users.length === 0}
-		<h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
-	{/if}
-	{#each users as person (person.id)}
-		<UserProp view="search" posts="{person.posts.length}"
-				  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
-	{/each}
-{:else if pageType === "circuits"}
-    {#if circuits.length === 0}
-        <h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
-    {/if}
-    {#each circuits as circuit (circuit.id)}
-        <PublicationCard  publication="{circuit.publication}"
-                          imgSrc= {'data:image;base64,' + circuit.coverPicData}
-                          liked={liked.includes(circuit.publication.id)}
-                          saved={saved.includes(circuit.publication.id)}
-                          publisher={circuit.publisher}/>
-    {/each}
+
+{#if fetchPromise !== null}
+	{#await fetchPromise}
+		<div class="col-span-full flex flex-col justify-center items-center">
+			<Icon icon="line-md:loading-loop" width="12.2rem" height="12.2rem" className="text-center" />
+			<p>Loading</p>
+		</div>
+	{:then response}
+		<!-- Display the data when the promise is resolved -->
+		{#if pageType === "materials"}
+			{#each materials as material (material.id)}
+				<PublicationCard extensions="{getExtensions(material)}"
+								 imgSrc={'data:image;base64,' + material.coverPicData}
+								 publication={material.publication}
+								 liked={liked.includes(material.publication.id)}
+								 saved={saved.includes(material.publication.id)}
+								 materialType={material.encapsulatingType}
+								 publisher={material.publisher}
+				/>
+			{/each}
+		{:else if pageType === "people"}
+			{#each users as person (person.id)}
+				<UserProp view="search" posts="{person.posts.length}"
+						  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
+			{/each}
+		{:else if pageType === "circuits"}
+			{#each circuits as circuit (circuit.id)}
+				<PublicationCard  publication="{circuit.publication}"
+								  imgSrc= {'data:image;base64,' + circuit.coverPicData}
+								  liked={liked.includes(circuit.publication.id)}
+								  saved={saved.includes(circuit.publication.id)}
+								  publisher={circuit.publisher}/>
+			{/each}
+		{/if}
+	{:catch error}
+		<p>There was an error: {error.message}</p>
+	{/await}
 {/if}
