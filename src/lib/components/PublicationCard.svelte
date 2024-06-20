@@ -129,16 +129,14 @@
 		window.addEventListener('resize', updateContainerWidth);
 
         maxTags = calcMaxTags();
-        if (hoverDiv && pfpElement) {
-            hoverDiv.addEventListener('mouseenter', handleHover);
-            hoverDiv.addEventListener('mouseleave', handleHover);
-
+		if (hoverDiv && pfpElement) {
+			hoverDiv.addEventListener('mouseenter', handleHover);
+      hoverDiv.addEventListener('mouseleave', handleHover);
 			pfpElement.addEventListener('mouseenter', handlePfpHover);
 			pfpElement.addEventListener('mouseleave', handlePfpHover);
 			return () => {
 				hoverDiv.removeEventListener('mouseenter', handleHover);
 				hoverDiv.removeEventListener('mouseleave', handleHover);
-
 				pfpElement.removeEventListener('mouseenter', handlePfpHover);
 				pfpElement.removeEventListener('mouseleave', handlePfpHover);
 			};
@@ -228,7 +226,6 @@
 					<div class="flex gap-2">
 						{#if publication.type === PublicationType.Circuit}
 							<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
-
 						{:else}
 
 

@@ -5,7 +5,8 @@
 	import { page } from '$app/stores';
 
 	import { scale } from 'svelte/transition';
-	import type { Material, Publication } from '@prisma/client';
+	import { MaterialType, PublicationType } from '@prisma/client';
+	import { getExtensions } from '$lib/util/file';
 	export let materials : any = [];
 	let circuits : any = [];
 	let publications: any = [];
@@ -166,6 +167,7 @@
 			});
 	};
 
+	console.log(materials);
 
 </script>
 
@@ -192,8 +194,9 @@
 			{#if chosenOption === 0}
 				{#each materials as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
+													 extensions="{getExtensions(m)}"
 													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
+													 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher} materialType={m.encapsulatingType}/>
 				{/each}
 				{:else if chosenOption===1}
 					{#each circuits as m}
@@ -204,8 +207,10 @@
 			{:else if (chosenOption===2 || chosenOption===3)}
 				{#each publications as p}
 					<PublicationCard publication="{p}" inCircuits="{true}"
+													 extensions="{getExtensions(p.materials)}"
 													 selected="{selectedIds.has(p.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher}/>
+													 on:removed={removeCard} imgSrc={'data:image;base64,' + p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher} materialType={p.type === PublicationType.Circuit ? MaterialType.other: p.materials.encapsulatingType}/>
+
 				{/each}
 			{/if}
 			<button type="button" class="col-start-4 my-4 md:hidden rounded-lg py-1 px-3 bg-surface-800 dark:bg-surface-600 hover:bg-opacity-75 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
