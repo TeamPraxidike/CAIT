@@ -398,23 +398,6 @@
 				</div>
 			</div>
 
-
-			{#if pubView.publication.publisherId === $page.data.session?.user.id
-			|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
-			|| $page.data.session?.user.isAdmin}
-				<div class="flex gap-2 mt-4">
-					{#if pubView.publication.publisherId === $page.data.session?.user.id
-					|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
-						<button
-							on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
-							type="button" class="btn rounded-lg variant-filled-primary">Edit
-						</button>
-					{/if}
-					<button on:click={promptForDeletion} type="button" class="btn rounded-lg variant-filled-error">
-						Delete
-					</button>
-				</div>
-			{/if}
 			<div class="flex gap-2">
 				<p class="text-sm text-surface-500">{created}</p>
 

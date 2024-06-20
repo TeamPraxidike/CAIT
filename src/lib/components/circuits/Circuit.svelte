@@ -682,7 +682,7 @@
 							coverPicData: data.publication.coverPicData,
 							materials: {
 								id:1,
-								copyright:true,
+								copyright:'true',
 								theoryPractice:15,
 								publicationId:2,
 								timeEstimate:5,
