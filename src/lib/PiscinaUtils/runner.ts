@@ -8,6 +8,7 @@ import {
 } from "$lib/database";
 import type {Difficulty, File as PrismaFile} from "@prisma/client";
 import {getFilesForMaterial, handleFileTokens} from "$lib/database/file";
+import path from 'path';
 
 export type PublicationMeta = {
     title: string;
@@ -35,7 +36,8 @@ export type ResultFile = {
 };
 
 const piscina = new Piscina({
-    filename: new URL('./worker.mjs', import.meta.url).href,
+    //filename: new URL('./worker.mjs', import.meta.url).href,
+    filename: path.join("src", "lib", "PiscinaUtils", "worker.mjs"),
     minThreads: 1, // Minimum number of threads to start with
     maxThreads: 1, // Max number of concurrent workers
     idleTimeout: 60000 // Keep idle workers alive for 60 seconds
