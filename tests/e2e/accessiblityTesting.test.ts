@@ -25,16 +25,4 @@ test.describe('pages', () => {
 
 		expect(accessibilityScanResults.violations).toEqual([]);
 	});
-
-	// test('should not have any automatically detectable accessibility issues in browse page', async ({
-	// 	page,
-	// }) => {
-	// 	await page.goto('/browse');
-	//
-	// 	const accessibilityScanResults = await new AxeBuilder({
-	// 		page,
-	// 	}).analyze();
-	//
-	// 	expect(accessibilityScanResults.violations).toEqual([]);
-	// });
 });
