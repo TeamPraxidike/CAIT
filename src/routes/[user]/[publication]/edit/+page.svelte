@@ -143,6 +143,12 @@
 		};
 	});
 
+	const handleInputEnter = (event: KeyboardEvent) => {
+		if(event.key === 'Enter'){
+			event.preventDefault();
+		}
+	}
+
 
 </script>
 
@@ -220,7 +226,7 @@
 
 	<div class="flex flex-col gap-2 pl-3">
 		<label for="title"> Title</label>
-		<input minlength="3" type="text" id="title" name="title" bind:value={title}
+		<input minlength="3" type="text" id="title" name="title" bind:value={title} on:keydown={handleInputEnter}
 			   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
 		{#if isMaterial}
 			<label for="type"> Type</label>
@@ -241,13 +247,13 @@
 			<div class="flex flex-col md:flex-row col-span-full items-center gap-4">
 				<div class="w-full md:w-1/2">
 					<label for="estimate">Time Estimate (in minutes):</label>
-					<input min="0" type="number" name="estimate" bind:value={time} placeholder="How much time do the materials take"
+					<input min="0" type="number" name="estimate" bind:value={time} on:keydown={handleInputEnter} placeholder="How much time do the materials take"
 								 class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
 				</div>
 				<div class="w-full md:w-1/2">
 					<label for="copyright">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
 																											 class="text-tertiary-700" > Check here how this applies to you</a>):</label>
-					<input type="text" name="copyright" bind:value={copyright} placeholder="Leave blank if material is your own"
+					<input type="text" name="copyright" on:keydown={handleInputEnter} bind:value={copyright} placeholder="Leave blank if material is your own"
 								 class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
 				</div>
 			</div>

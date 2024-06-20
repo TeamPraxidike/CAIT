@@ -19,7 +19,7 @@ export function getDateDifference(startDate: Date, endDate: Date): string {
 	const months = differenceInMonths(endDate, startDate);
 	const years = Math.floor(months / 12);
 
-	if(years >= 1) {
+	if (years >= 1) {
 		return `${years} year${years > 1 ? 's' : ''} ago`;
 	} else if (months >= 1) {
 		return `${months} month${months > 1 ? 's' : ''} ago`;
