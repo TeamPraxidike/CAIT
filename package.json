@@ -21,6 +21,7 @@
 		"test:e2e:generator": "npx playwright codegen localhost:5173/"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.9.1",
 		"@eslint/js": "^9.1.1",
 		"@iconify/svelte": "^4.0.2",
 		"@iconify/tailwind": "^1.1.1",

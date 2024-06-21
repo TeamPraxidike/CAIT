@@ -74,7 +74,7 @@
                     Publish
                 </a>
             {:else}
-                <button on:click={() => signIn()} type="button" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
+                <button on:click={() => signIn()} type="button" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-700 text-surface-50 hover:opacity-60 transition duration-400">
                     Sign In
                 </button>
             {/if}

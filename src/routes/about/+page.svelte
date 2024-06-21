@@ -12,7 +12,12 @@
 <Meta title="About" description="CAIT" type="site" />
 
 
-<main class="col-span-full flex flex-col gap-10 my-20">
+<section class="col-span-full" aria-label="About me page heading">
+	<h1 class="font-extrabold lg:font-bold md:text-2xl lg:text-3xl xl:text-4xl mt-20">About</h1>
+	<h2>Community for AI Teachers: Contribute and search for lecture materials, assignments, exam questions and more!</h2>
+</section>
+
+<main class="col-span-full flex flex-col gap-10 mb-20">
 	<Section title="CAIT Initiative" description={initiative} subtitle="How it started" onAbout={true} img="/sectionImages/cait_logo_big.png"/>
 	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/sectionImages/publicationCard.png" mdFlex="md:flex-row-reverse" iconList={true}/>
 	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/sectionImages/circuit.png"/>

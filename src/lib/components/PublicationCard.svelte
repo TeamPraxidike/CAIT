@@ -212,7 +212,7 @@
 				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
 					Used in {used} courses</p>
 			{/if}
-			<a href="../{publication.publisherId}/{publication.id}" class="flex-none " >
+			<a href="../{publication.publisherId}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}" >
 				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc} alt="" />
 			</a>
 		</div>
@@ -246,25 +246,17 @@
 										</div>
 									</div>
 								{/if}
-
 							</div>
 							<div class="self-center">
 								<DiffBar className="size-5" diff={publication.difficulty}></DiffBar>
 							</div>
-
 						{/if}
-
-
 					</div>
 				</div>
-
-
-				<p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
-
-
+				<p class="w-full line-clamp-2 text-xs text-surface-600 dark:text-surface-600">{lastUpdated}</p>
 			</div>
 
-			<p class="w-full line-clamp-3 text-xs text-surface-500  dark:text-surface-400">{publication.description}</p>
+			<p class="w-full line-clamp-3 text-xs text-surface-700 dark:text-surface-400">{publication.description}</p>
 
 
 			<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-visible">
@@ -319,7 +311,7 @@
 
 						{#if markAsUsed}
 							<button type="button" on:click={() => modalStore.trigger(modal)}>
-								<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</span>
+								<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>
 							</button>
 						{/if}
 					</div>
@@ -337,7 +329,7 @@
 							<div class="h-2/3 w-px bg-surface-200"></div>
 
 							<button
-								type="button"
+								type="button" aria-label="Save publication {publication.title}"
 								class="flex items-center text-xl text-surface-500 h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
 								on:click={() => toggleSave()}>
 								<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>

@@ -125,7 +125,6 @@
 		}
 	}
 
-
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
 
