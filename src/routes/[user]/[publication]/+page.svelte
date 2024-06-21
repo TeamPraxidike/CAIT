@@ -100,17 +100,17 @@
 		liked = data.userSpecificInfo.liked;
 		likes = data.pubView.publication.likes;
 
-		 circuitsPubAppearIn = data.circuitsPubAppearIn;
-		 similarPublications = data.similarPublications;
+		circuitsPubAppearIn = data.circuitsPubAppearIn;
+		similarPublications = data.similarPublications;
 
-		 likedPublications = data.liked as number[];
-		 savedPublications = data.saved.saved as number[];
-		 reported = data.reported;
+		likedPublications = data.liked as number[];
+		savedPublications = data.saved.saved as number[];
+		reported = data.reported;
 
-		 saved = data.userSpecificInfo.saved;
-		 comments = data.pubView.publication.comments ;
-		 tags = pubView.publication.tags.map(tag => tag.content) as string[];
-		 created = getDateDifference(data.pubView.publication.updatedAt, new Date()) as string;
+		saved = data.userSpecificInfo.saved;
+		comments = data.pubView.publication.comments ;
+		tags = pubView.publication.tags.map(tag => tag.content) as string[];
+		created = getDateDifference(data.pubView.publication.updatedAt, new Date()) as string;
 
 	}
 
@@ -143,6 +143,7 @@
 		else
 			await sendReportRequest();
 	};
+
 	const toggleLike = async () => {
 		likes = liked ? likes - 1 : likes + 1;
 		await fetch(`/api/user/${userId}/liked/${pubView.publication.id}`, {
@@ -172,7 +173,9 @@
 			}).then(() => {
 				toastStore.trigger({
 					message: 'Publication deleted successfully',
-					background: 'bg-success-200'
+					background: 'bg-success-200',
+					classes: 'text-surface-900',
+
 				});
 				if (isMaterial) {
 					goto('/browse');
@@ -295,7 +298,6 @@
 
 		}
 	}
-
 	const modal: ModalSettings = {
 		type: 'confirm',
 		title: 'Are you sure you want to report this publication?',
@@ -324,7 +326,7 @@
 	$: editIcon = isHoveredEdit ? "mdi:pencil" : "mdi:pencil-outline";
 
 	onMount(() => {
-		if (hoverDivReport && hoverDiv) {
+		if (hoverDivReport && hoverDiv && hoverEdit && hoverDelete) {
 			hoverDivReport.addEventListener('mouseenter', handleHoverReport);
 			hoverDivReport.addEventListener('mouseleave', handleHoverReport);
 			hoverDiv.addEventListener('mouseenter', handleHover);
@@ -355,6 +357,7 @@
 <div class="col-span-full flex flex-col items-start mt-20">
 	<div class="flex flex-row items-top justify-between w-full">
 		<div class="flex flex-col gap-2 w-1/2">
+
 			<div class="flex flex-row justify-start">
 				<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold break-words pr-6 self-center">{pubView.publication.title}</h2>
 			</div>
@@ -365,8 +368,8 @@
 					{#if pubView.publication.publisherId === $page.data.session?.user.id
 					|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
 						<button bind:this={hoverEdit}
-								on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
-								type="button" class="btn self-center p-0 m-0">
+										on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
+										type="button" class="btn self-center p-0 m-0">
 							<Icon icon={editIcon} width="24" class="text-surface-700"/>
 						</button>
 					{/if}
@@ -375,20 +378,18 @@
 					</button>
 				</div>
 			{/if}
-
-
 			<div class="grid grid-cols-6">
 				<div bind:this={hoverDiv} class="col-span-2">
 					{#if pubView.publication.usedInCourse.length === 1}
-						<p class="text-sm opacity-85 break-words max-w-full hover:font-bold underline" >Material is used in {pubView.publication.usedInCourse.length} course</p>
+						<p class="text-sm opacity-85 break-words max-w-full underline" >Material is used in {pubView.publication.usedInCourse.length} course</p>
 					{:else if pubView.publication.usedInCourse.length > 1}
-						<p class="text-sm opacity-85 break-words max-w-full hover:font-bold underline" >Material is used in {pubView.publication.usedInCourse.length} courses</p>
+						<p class="text-sm opacity-85 break-words max-w-full underline" >Material is used in {pubView.publication.usedInCourse.length} courses</p>
 					{/if}
 
 					{#if isHovered}
 						<div
-								class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300 flex-col"
-								style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+							class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300 flex-col"
+							style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 							{#each pubView.publication.usedInCourse.map(x => x.course) as course}
 								<p class="text-sm opacity-85 break-words max-w-full">{course}</p>
 							{/each}
@@ -441,7 +442,7 @@
 			{/if}
 			<div class="flex gap-2">
 				<UserProp role="Publisher" userPhotoUrl={'data:image;base64,' + pubView.publication.publisher.profilePicData} view="material"
-						  bind:user={pubView.publication.publisher} />
+									bind:user={pubView.publication.publisher} />
 				{#each pubView.publication.maintainers as maintainer}
 					<UserProp role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} view="material" user={maintainer} />
 				{/each}
@@ -460,20 +461,20 @@
 	<div class="flex ">
 		<div class="flex items-center text-3xl rounded-lg border mt-4">
 			<button type="button"
-					class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
-					on:click={() => toggleLike()}>
+							class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
+							on:click={() => toggleLike()}>
 				<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
 				<span>{likes}</span>
 			</button>
 			{#if isMaterial}
 				<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-						on:click={downloadFiles}>
+								on:click={downloadFiles}>
 					<Icon class="xl:text-2xl" icon="material-symbols:download" />
 				</button>
 			{/if}
 			<button type="button"
-					class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
-					on:click={() => toggleSave()}>
+							class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+							on:click={() => toggleSave()}>
 				<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
 			</button>
 
@@ -487,8 +488,8 @@
 				</button>
 				{#if isHoveredReport}
 					<div
-							class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
-							style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+						class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+						style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 						<p class="text-xs">Report publication</p>
 					</div>
 				{/if}
@@ -498,74 +499,46 @@
 
 
 	</div>
-	<div class="flex flex-row col-span-full mt-7 w-full gap-2">
-		<Accordion regionPanel="space-y-8" padding="p-3">
-			<AccordionItem class="variant-soft-primary rounded-lg">
-				<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
-				<svelte:fragment slot="content">
-					{#if pubView.publication.learningObjectives.length === 0}
-						<span>No learning objectives have been indicated</span>
-					{:else}
-						{#each pubView.publication.learningObjectives as LO}
-							<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
-						{/each}
-					{/if  }
-				</svelte:fragment>
-			</AccordionItem>
-		</Accordion>
-		<Accordion regionPanel="space-y-8" padding="p-3">
-			<AccordionItem class="variant-soft-primary rounded-lg">
-				<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
-				<svelte:fragment slot="content">
-					{#if pubView.publication.prerequisites.length === 0}
-						<span>No prior knowledge has been indicated</span>
-					{:else}
-						{#each pubView.publication.prerequisites as PK}
-							<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
-						{/each}
-					{/if}
 
-				</svelte:fragment>
-			</AccordionItem>
-		</Accordion>
-	</div>
+		<div class="flex justify-between w-full gap-4">
+			<div class="flex flex-row col-span-full mt-7 w-full gap-2">
+				<Accordion regionPanel="space-y-8" padding="p-3">
+					<AccordionItem class="variant-soft-primary rounded-lg">
+						<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+						<svelte:fragment slot="content">
+							{#if pubView.publication.learningObjectives.length === 0}
+								<span>No learning objectives have been indicated</span>
+							{:else}
+								{#each pubView.publication.learningObjectives as LO}
+									<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
+								{/each}
+							{/if  }
+						</svelte:fragment>
+					</AccordionItem>
+				</Accordion>
+				<Accordion regionPanel="space-y-8" padding="p-3">
+					<AccordionItem class="variant-soft-primary rounded-lg">
+						<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+						<svelte:fragment slot="content">
+							{#if pubView.publication.prerequisites.length === 0}
+								<span>No prior knowledge has been indicated</span>
+							{:else}
+								{#each pubView.publication.prerequisites as PK}
+									<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
+								{/each}
+							{/if}
 
-	{#if isMaterial}
-		<div class="flex justify-between w-full gap-4 mt-7">
-			<div class="w-full">
-				<FileTable operation="download" {files} />
+						</svelte:fragment>
+					</AccordionItem>
+				</Accordion>
 			</div>
 		</div>
-
-	{:else}
+	{#if isMaterial}
 		<div class="w-full">
-			<Accordion class="mt-7 " regionPanel="space-y-8" padding="p-3">
-				<AccordionItem class="variant-soft-primary rounded-lg">
-					<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
-					<svelte:fragment slot="content">
-						{#if pubView.publication.learningObjectives.length === 0}
-							<span>No learning objectives have been indicated</span>
-						{:else}
-							{#each pubView.publication.learningObjectives as LO}
-								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
-							{/each}
-						{/if  }
-					</svelte:fragment>
-				</AccordionItem>
-				<AccordionItem class="variant-soft-primary rounded-lg">
-					<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
-					<svelte:fragment slot="content">
-						{#if pubView.publication.prerequisites.length === 0}
-							<span>No prior knowledge has been indicated</span>
-						{:else}
-							{#each pubView.publication.prerequisites as PK}
-								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
-							{/each}
-						{/if}
-
-					</svelte:fragment>
-				</AccordionItem>
-			</Accordion>
+			<FileTable operation="download" {files} />
+		</div>
+		{:else}
+		<div class="w-full">
 			<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}" />
 		</div>
 	{/if}
@@ -602,18 +575,18 @@
 
 {#if $page.data.session?.user}
 	<AddInteractionForm on:addedReply={addComment} addComment='{true}' commentId="{1}"
-						publicationId="{pubView.publication.id}" />
+											publicationId="{pubView.publication.id}" />
 {/if}
 
 {#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
 	<Comment on:likeUpdate={updateLikes} on:ReplyAction={addReply} interaction={comment}
-			 photoUrl={comment.user.profilePicData}
-			 isReply={false} userName="{comment.user.firstName} {comment.user.lastName}"
-			 liked='{likedComments.includes(comment.id)}'
+					 photoUrl={comment.user.profilePicData}
+					 isReply={false} userName="{comment.user.firstName} {comment.user.lastName}"
+					 liked='{likedComments.includes(comment.id)}'
 	/>
 	{#each comment.replies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) as reply (reply.id)}
 		<Comment on:likeUpdate={updateLikes} interaction={reply} isReply={true} photoUrl={reply.user.profilePicData}
-				 userName="{reply.user.firstName} {reply.user.lastName}" liked='{likedReplies.includes(reply.id)}' />
+						 userName="{reply.user.firstName} {reply.user.lastName}" liked='{likedReplies.includes(reply.id)}' />
 	{/each}
 
 {/each}

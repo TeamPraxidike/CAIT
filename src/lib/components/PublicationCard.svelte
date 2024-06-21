@@ -129,16 +129,14 @@
 		window.addEventListener('resize', updateContainerWidth);
 
         maxTags = calcMaxTags();
-        if (hoverDiv && pfpElement) {
-            hoverDiv.addEventListener('mouseenter', handleHover);
-            hoverDiv.addEventListener('mouseleave', handleHover);
-
+		if (hoverDiv && pfpElement) {
+			hoverDiv.addEventListener('mouseenter', handleHover);
+      hoverDiv.addEventListener('mouseleave', handleHover);
 			pfpElement.addEventListener('mouseenter', handlePfpHover);
 			pfpElement.addEventListener('mouseleave', handlePfpHover);
 			return () => {
 				hoverDiv.removeEventListener('mouseenter', handleHover);
 				hoverDiv.removeEventListener('mouseleave', handleHover);
-
 				pfpElement.removeEventListener('mouseenter', handlePfpHover);
 				pfpElement.removeEventListener('mouseleave', handlePfpHover);
 			};
@@ -197,7 +195,7 @@
 	const viewTags = () => {
 		isClickedTags = !isClickedTags;
 		if(isClickedTags){
-			setTimeout(()=>{isClickedTags=false},2000);
+			setTimeout(()=>{isClickedTags=false},10000);
 		}
 	}
 </script>
@@ -214,7 +212,7 @@
 				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
 					Used in {used} courses</p>
 			{/if}
-			<a href="../{publication.publisherId}/{publication.id}" class="flex-none " >
+			<a href="../{publication.publisherId}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}" >
 				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc} alt="" />
 			</a>
 		</div>
@@ -228,15 +226,14 @@
 					<div class="flex gap-2">
 						{#if publication.type === PublicationType.Circuit}
 							<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
-
 						{:else}
 
 
-							<div class="py-1" bind:this={hoverDiv}>
+							<div class="py-1 relative" bind:this={hoverDiv}>
 								<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
 								{#if isHovered}
 									<div
-										class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
+										class="absolute bg-surface-50 dark:bg-surface-800 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
 										style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 
 										<div class="flex flex-col items-center">
@@ -249,35 +246,36 @@
 										</div>
 									</div>
 								{/if}
-
 							</div>
 							<div class="self-center">
 								<DiffBar className="size-5" diff={publication.difficulty}></DiffBar>
 							</div>
-
 						{/if}
-
-
 					</div>
 				</div>
-
-
-				<p class="w-full line-clamp-2 text-xs text-surface-300  dark:text-surface-600">{lastUpdated}</p>
-
-
+				<p class="w-full line-clamp-2 text-xs text-surface-600 dark:text-surface-600">{lastUpdated}</p>
 			</div>
 
-			<p class="w-full line-clamp-3 text-xs text-surface-500  dark:text-surface-400">{publication.description}</p>
+			<p class="w-full line-clamp-3 text-xs text-surface-700 dark:text-surface-400">{publication.description}</p>
 
 
-			<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-hidden">
+			<div bind:this={container} class="flex w-full mt-2 gap-1 flex-nowrap overflow-visible">
 				<div class="flex gap-1 relative">
 					{#each tags.slice(0, maxTags) as tag, i}
 						<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
 					{/each}
 				</div>
 					{#if (tags.length > maxTags) }
-						<button on:click={viewTags} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
+						<div class="relative overflow-visible">
+							<button on:click={viewTags} class="text-sm text-primary-500 hover:underline">+{tags.length - maxTags}</button>
+							{#if isClickedTags}
+								<div class="absolute rounded-lg p-2 ml-6 mt-[-24px] flex flex-col gap-1 z-[9999] bg-surface-50 dark:bg-surface-800" transition:fly={{ x:8 , duration: 400 }}>
+									{#each tags.slice(maxTags, tags.length) as tag, i}
+										<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
+									{/each}
+								</div>
+							{/if}
+						</div>
 					{/if}
 				{#if isClickedTags}
 					<div class="absolute ml-48 flex flex-col gap-1 z-[9999] bg-surface-100" transition:fly={{ x:8 , duration: 400 }}>
@@ -313,7 +311,7 @@
 
 						{#if markAsUsed}
 							<button type="button" on:click={() => modalStore.trigger(modal)}>
-								<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400" >Mark as used in a course</span>
+								<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>
 							</button>
 						{/if}
 					</div>
@@ -331,7 +329,7 @@
 							<div class="h-2/3 w-px bg-surface-200"></div>
 
 							<button
-								type="button"
+								type="button" aria-label="Save publication {publication.title}"
 								class="flex items-center text-xl text-surface-500 h-full w-full bg-surface-300 bg-opacity-0 hover:bg-opacity-25 rounded-r-lg"
 								on:click={() => toggleSave()}>
 								<Icon class="text-lg {savedColor}" icon="ic:baseline-bookmark"/>

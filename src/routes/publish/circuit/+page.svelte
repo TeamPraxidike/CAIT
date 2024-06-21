@@ -2,7 +2,7 @@
 	import { Circuit, Meta, PublishReview } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
-	import type { Publication, Tag as PrismaTag, User } from '@prisma/client';
+	import type { Material, Publication, Tag as PrismaTag, User } from '@prisma/client';
 	import {
 		getToastStore,
 		Step,
@@ -68,13 +68,17 @@
 	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Circuit Added successfully',
-			background: 'bg-success-200'
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
+
 		});
 		goto(`/${$page.data.session?.user.id}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-error-200'
+			background: 'bg-error-200',
+			classes: 'text-surface-900',
+
 		});
 	}
 	const onNextHandler = async (event: CustomEvent) => {
@@ -95,7 +99,8 @@
 			tags: { content: string }[],
 			usedInCourse: { course: string }[],
 			publisher: User & {profilePicData:string},
-			coverPicData: string
+			coverPicData: string,
+			materials: Material,
 		}
 		next: {
 			circuitId: number,
@@ -115,6 +120,12 @@
 
 	};
 
+	const handleInputEnter = (event: KeyboardEvent) => {
+		if(event.key === 'Enter'){
+			event.preventDefault();
+		}
+	}
+
 	onMount(() => {
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
@@ -128,7 +139,7 @@
 <!--<Node></Node>-->
 <Meta title="Publish Circuit" description="Organize publications into a circuits" type="site" />
 <!--<div class="col-span-9 h-[256px]"><CircuitManual isDraggable="{true}"/></div>-->
-<form method="POST" action="?/publish" class="col-start-2 col-span-10 my-20 pr-10 shadow p-4"
+<form method="POST" action="?/publish" class="col-span-full my-20 pr-10 shadow p-4"
 			use:enhance={({ formData }) => {
 
 				formData.append('publisherId', uid.toString());
@@ -143,7 +154,7 @@
 				formData.append('circuitData', JSON.stringify(nodeActions));
 				formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
-	<Stepper on:next={onNextHandler} buttonCompleteType="submit">
+	<Stepper on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
 			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
@@ -154,11 +165,11 @@
 			<div class="flex flex-col gap-5 col-span-full">
 				<div class="w-full space-y-1">
 					<label for="circuitTitle" >Title<span class="text-error-300">*</span></label>
-					<input bind:value={title} id="circuitTitle" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Enter title" required/>
+					<input on:keydown={handleInputEnter} bind:value={title} id="circuitTitle" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Enter title" required/>
 				</div>
 				<div class="w-full space-y-1">
 					<label for="circuitDescription">Description<span class="text-error-300">*</span></label>
-					<textarea bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Explain your circuit" required />
+					<textarea  bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Explain your circuit" required />
 				</div>
 			</div>
 
@@ -180,7 +191,7 @@
 			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
 			/>
-			<Circuit nodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
+			<Circuit nodes={circuitNodesPlaceholder} publishingView={true}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
 		</Step>
 	</Stepper>
 

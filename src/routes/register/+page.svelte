@@ -13,13 +13,15 @@
 	$: if (form?.status === 200) {
 		toastStore.trigger({
 			message: 'Registration successful',
-			background: 'bg-success-200'
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
 		});
 		goto('/signin');
 	} else if(form && form?.status !== 200){
 		toastStore.trigger({
 			message: `Registration failed: ${form?.message}`,
-			background: 'bg-error-200'
+			background: 'bg-error-200',
+			classes: 'text-surface-900',
 		});
 	}
 
@@ -64,12 +66,15 @@
 		</div>
 		<button class="btn rounded-lg mt-4 variant-soft-primary">Register</button>
 		<hr class="my-4 text-surface-200">
-		<SignIn provider="github" signInPage="signin">
-			<button slot="submitButton" class="btn rounded-lg bg-surface-800 text-surface-50">
-				<Icon icon="mdi:github" class="text-2xl mr-2" />
-				Register with GitHub
-			</button>
-		</SignIn>
+		<div class="self-center">
+			<SignIn provider="github" signInPage="signin">
+				<button slot="submitButton" class="btn rounded-lg bg-surface-800 text-surface-50">
+					<Icon icon="mdi:github" class="text-2xl mr-2" />
+					Register with GitHub
+				</button>
+			</SignIn>
+		</div>
+
 		<p class="text-center text-sm mt-2">Already have an account? <a class="anchor text-primary-600" href="/signin">Login</a></p>
 		<!--{#if form && form.status !== 200}-->
 		<!--	<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">-->

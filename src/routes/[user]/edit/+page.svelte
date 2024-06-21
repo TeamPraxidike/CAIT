@@ -25,19 +25,25 @@
 	const toastStore = getToastStore();
 	$: if (form?.status === 200) {
 		toastStore.trigger({
-			message: 'User Edited successfully',
-			background: 'bg-success-200'
+			message: 'User Edited Successfully',
+			background: 'bg-success-200',
+			classes: 'text-surface-900',
+
 		});
 		goto(`/${$page.data.session?.user.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-warning-200'
+			background: 'bg-warning-200',
+			classes: 'text-surface-900',
+
 		});
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
-			background: 'bg-error-200'
+			background: 'bg-error-200',
+			classes: 'text-surface-900',
+
 		});
 	}
 
@@ -55,8 +61,15 @@
 			} else
 				toastStore.trigger({
 					message: 'Invalid file type, please upload a .jpg or .png file',
-					background: 'bg-warning-200'
+					background: 'bg-warning-200',
+					classes: 'text-surface-900',
+
 				});
+		}
+	}
+	const handleInputEnter = (event: KeyboardEvent) => {
+		if(event.key === 'Enter'){
+			event.preventDefault();
 		}
 	}
 
@@ -90,13 +103,13 @@
 		<label for="firstName" class="text-surface-900 dark:text-surface-50">
 			First name
 		</label>
-		<input minlength="1" type="text" name="firstName" id="firstName" class="input" bind:value={user.firstName} />
+		<input on:keydown={handleInputEnter} minlength="1" type="text" name="firstName" id="firstName" class="input" bind:value={user.firstName} />
 	</div>
 	<div>
 		<label for="lastName" class="text-surface-900 dark:text-surface-50">
 			Last name
 		</label>
-		<input minlength="1" type="text" name="lastName" id="lastName" class="input" bind:value={user.lastName} />
+		<input on:keydown={handleInputEnter} minlength="1" type="text" name="lastName" id="lastName" class="input" bind:value={user.lastName} />
 	</div>
 	<div>
 		<label for="email" class="text-surface-900 dark:text-surface-50">

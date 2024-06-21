@@ -2,7 +2,6 @@ import {calculateCosineSimilarity} from "../similarityIndex.mjs";
 import {reader} from './reader.mjs';
 import {calculateTfIdf, preprocessText} from './textProcessor.mjs';
 import path from 'path';
-//import { basePath } from '$lib/database';
 
 const basePath = path.join('static', 'uploadedFiles');
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Filter, MaterialTypes, PublicationCard, SearchBar, UserProp} from '$lib';
+	import { Filter, MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
     import TagComponent from '$lib/components/generic/TagComponent.svelte';
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
@@ -9,10 +9,7 @@
     import {getExtensions} from "$lib/util/file";
 
 
-	//TODO:Redesign Dropdown, Add different filters for users and for circuits, implement filtering for circuits, and users
-	//TODO: fix tags on pubCard fix the icon to be the encapsulating type of the publication
-	//TODO: add animation on loading
-	//TODO: Fix the browsing on other pages as well
+	let fetchPromise:Promise<any> = new Promise<null>(resolve => resolve(null));
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -108,10 +105,10 @@
         sendFiltersToAPI();
     };
 
-    const onSearch = (event : CustomEvent) => {
-        searchWord = event.detail.value.inputKeywords
-        sendFiltersToAPI()
-    }
+	const onSearch = (event : CustomEvent) => {
+		searchWord = event.detail.value.inputKeywords;
+		fetchPromise = sendFiltersToAPI();
+	}
 
 
     const sendFiltersToAPI = async () => {
@@ -157,25 +154,24 @@
         materials = [];
         circuits = [];
         //Make a GET request to the API
-        await fetch(url)
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Network response was not ok');
-              }
-              return response.json();
-          })
-          .then(data => {
-              // Handle the response data from the API
-              if (s === "material") {
-                  materials = data.materials;
-							} else {
-                  circuits = data;
-
-              }
-          })
-          .catch(error => {
-              console.error('There was a problem with the fetch operation:', error);
-          });
+		return fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				// Handle the response data from the API
+				if (s === "material") {
+					materials = data.materials;
+				} else {
+					circuits = data;
+				}
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
     };
 
 
@@ -202,6 +198,8 @@
 		})
 </script>
 
+<Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
+
 <div class="flex justify-between col-span-full mt-32">
 	<div class="flex gap-2 w-full lg:w-7/12 xl:w-1/2">
 		<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch} />
@@ -212,49 +210,59 @@
 						 labels={["Materials", "People", "Circuits"]} />
 	</div>
 </div>
+<div class="col-span-full">
+	<div class="flex lg:hidden rounded-lg w-3/4 min-h-6">
+		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
+										 labels={["Materials", "People", "Circuits"]}  />
+	</div>
+</div>
+
 
 <div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
 	{#if pageType !== "people"}
-		<div class="flex gap-1 items-center">
+		<div class="flex flex-col md:flex-row gap-1 md:items-center">
+					<div class="flex gap-1">
+						<Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
+										profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
+										on:filterSelected={() => {applyActive = true}} num="{0}" />
+						<Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
+										bind:display="{displayPublishers}" profilePic="{true}"  bind:active="{publisherActive}"
+										on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}" people="{users}"/>
+						{#if pageType === "materials"}
+							<Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
+											profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
+											on:filterSelected={() => {applyActive = true}} num="{0}" />
+							<Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
+											profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
+											on:filterSelected={() => {applyActive = true}} num="{0}" />
+						{:else}
+							<Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
+											profilePic="{false}" on:filterSelected={() => {applyActive = true}} bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
+						{/if}
+					</div>
 
-            <Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
-                    profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
-                    on:filterSelected={() => {applyActive = true}} num="{0}" />
-            <Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
-                    bind:display="{displayPublishers}" profilePic="{true}"  bind:active="{publisherActive}"
-                    on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}" people="{users}"/>
-            {#if pageType === "materials"}
-                <Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
-                        profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
-                        on:filterSelected={() => {applyActive = true}} num="{0}" />
-                <Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
-                        profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
-                        on:filterSelected={() => {applyActive = true}} num="{0}" />
-            {:else}
-                <Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
-                        profilePic="{false}" on:filterSelected={() => {applyActive = true}} bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
-            {/if}
-            <div class = "w-px h-4/5 bg-surface-600" ></div>
-            <Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:active={sortByActive} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}}/>
+					<div class="flex gap-1 h-full">
+						<div class = "hidden md:block w-px h-4/5 bg-surface-600 self-center" ></div>
+						<Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:active={sortByActive} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}}/>
+						<button class="rounded-lg text-xs py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
+										on:click={sendFiltersToAPI} disabled="{!applyActive}"  >Apply</button>
+						{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
+							<button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
+											on:click={resetFilters}>
+								Reset Filters
+							</button>
+						{/if}
+					</div>
 
 
-            <button class="rounded-lg text-xs py-1.5 px-3 text-surface-100 dark:text-surface-800 shadow-lg {applyBackground}"
-                    on:click={sendFiltersToAPI} disabled="{!applyActive}"  >Apply</button>
+
         </div>
     {/if}
 
 
-    <div class="flex rounded-lg lg:hidden w-1/4">
-        <ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-                         labels={["Materials", "People", "Circuits"]}  />
-    </div>
 
-	{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
-		<button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
-				on:click={resetFilters}>
-			Reset Filters
-		</button>
-	{/if}
+
+
 </div>
 
 
@@ -316,34 +324,42 @@
     </div>
 </div>
 
-{#if pageType === "materials"}
-    {#if materials.length === 0}
-        <h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
-    {/if}
-    {#each materials as material (material.id)}
-        <PublicationCard extensions="{getExtensions(material)}"
-                         imgSrc={'data:image;base64,' + material.coverPicData}
-                         publication={material.publication}
-                         liked={liked.includes(material.publication.id)}
-                         saved={saved.includes(material.publication.id)}
-                         materialType={material.encapsulatingType}
-												 publisher={material.publisher}
-        />
-    {/each}
-{:else if pageType === "people"}
-	{#each users as person (person.id)}
-		<UserProp view="search" posts="{person.posts.length}"
-				  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
-	{/each}
-{:else if pageType === "circuits"}
-    {#if materials.length === 0}
-        <h1 class="col-span-full text-2xl self-center py-10 opacity-30 font-bold">There is nothing here... Try adjusting the filters</h1>
-    {/if}
-    {#each circuits as circuit (circuit.id)}
-        <PublicationCard  publication="{circuit.publication}"
-                          imgSrc= {'data:image;base64,' + circuit.coverPicData}
-                          liked={liked.includes(circuit.publication.id)}
-                          saved={saved.includes(circuit.publication.id)}
-                          publisher={circuit.publisher}/>
-    {/each}
+
+
+{#if fetchPromise !== null}
+	{#await fetchPromise}
+		<div class="col-span-full flex flex-col justify-center items-center">
+			<Icon icon="line-md:loading-loop" width="12.2rem" height="12.2rem" className="text-center" />
+			<p>Loading</p>
+		</div>
+	{:then response}
+		<!-- Display the data when the promise is resolved -->
+		{#if pageType === "materials"}
+			{#each materials as material (material.id)}
+				<PublicationCard extensions="{getExtensions(material)}"
+								 imgSrc={'data:image;base64,' + material.coverPicData}
+								 publication={material.publication}
+								 liked={liked.includes(material.publication.id)}
+								 saved={saved.includes(material.publication.id)}
+								 materialType={material.encapsulatingType}
+								 publisher={material.publisher}
+				/>
+			{/each}
+		{:else if pageType === "people"}
+			{#each users as person (person.id)}
+				<UserProp view="search" posts="{person.posts.length}"
+						  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
+			{/each}
+		{:else if pageType === "circuits"}
+			{#each circuits as circuit (circuit.id)}
+				<PublicationCard  publication="{circuit.publication}"
+								  imgSrc= {'data:image;base64,' + circuit.coverPicData}
+								  liked={liked.includes(circuit.publication.id)}
+								  saved={saved.includes(circuit.publication.id)}
+								  publisher={circuit.publisher}/>
+			{/each}
+		{/if}
+	{:catch error}
+		<p>There was an error: {error.message}</p>
+	{/await}
 {/if}
