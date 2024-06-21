@@ -10,7 +10,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
-import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
 
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
@@ -146,11 +146,12 @@ export async function POST({ request }) {
 
 		await updateReputation(userId, 30);
 
-		const id = createdMaterial.publicationId;
+		const publicationId = createdMaterial.publicationId;
+		const materialId = createdMaterial.id;
 
-		enqueueMaterialComparison(id).catch(error => console.error(error))
+		enqueueMaterialComparison(publicationId, materialId).catch(error => console.error(error))
 
-		return new Response(JSON.stringify({ id }), { status: 200 });
+		return new Response(JSON.stringify({ id: publicationId }), { status: 200 });
 	} catch (error) {
 		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {

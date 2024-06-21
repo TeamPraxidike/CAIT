@@ -13,7 +13,8 @@ export default mergeConfig(viteConfig, defineConfig({
             reporter: ['text'],
             provider: 'istanbul',
             reportsDirectory: './reports/coverage',
-            include: ['src/lib/**/*.ts']
+            include: ['src/lib/**/*.ts',
+                'src/lib/**/*.mjs']
         },
     }
 }));

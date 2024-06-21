@@ -7,7 +7,8 @@ import {
     handleSimilarity
 } from "$lib/database";
 import type {Difficulty, File as PrismaFile} from "@prisma/client";
-import {handleFileTokens} from "$lib/database/file";
+import {getFilesForMaterial, handleFileTokens} from "$lib/database/file";
+import path from 'path';
 
 export type PublicationMeta = {
     title: string;
@@ -35,7 +36,8 @@ export type ResultFile = {
 };
 
 const piscina = new Piscina({
-    filename: new URL('./workerJS.mjs', import.meta.url).href,
+    //filename: new URL('./worker.mjs', import.meta.url).href,
+    filename: path.join("src", "lib", "PiscinaUtils", "worker.mjs"),
     minThreads: 1, // Minimum number of threads to start with
     maxThreads: 1, // Max number of concurrent workers
     idleTimeout: 60000 // Keep idle workers alive for 60 seconds
@@ -77,18 +79,20 @@ async function initialMaterialFileParseInBackground(pubFiles: PrismaFile[]): Pro
     return piscina.run({ pubFiles }, {name: 'initialParse'});
 }
 
-export async function enqueueMaterialComparison(publicationId: number): Promise<void> {
+export async function enqueueMaterialComparison(publicationId: number, materialId: number): Promise<void> {
     try{
+        const currentFiles: PrismaFile[] = await getFilesForMaterial(materialId)
+
+        // INITIALLY PARSE CURRENT PUBLICATION FILES IN ORDER TO REUSE TOKENS LATER ON
+        const initialParsing = await initialMaterialFileParseInBackground(currentFiles);
+
+        await handleFileTokens(initialParsing)
+
         const materials = await getAllMaterials([],[],[],[],'','');
         const currentMaterial = await getMaterialByPublicationId(publicationId)
         const comparisons: {fromPubId: number, toPubId: number,
             similarityFile: Promise<ResultFile>, similarityMeta: Promise<ResultMeta>}[] = [];
         const filesToUpdatePrisma: FileTokenInfo = []
-
-        // INITIALLY PARSE CURRENT PUBLICATION FILES IN ORDER TO REUSE TOKENS LATER ON
-        const initialParsing = await initialMaterialFileParseInBackground(currentMaterial.files);
-
-        await handleFileTokens(initialParsing)
 
         const pubAMeta: PublicationMeta = {
             title: currentMaterial!.publication.title,

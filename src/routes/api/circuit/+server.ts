@@ -13,7 +13,7 @@ import {
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
-import {enqueueCircuitComparison, enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+import {enqueueCircuitComparison, enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
 
 import { profilePicFetcher } from '$lib/database/file';
 

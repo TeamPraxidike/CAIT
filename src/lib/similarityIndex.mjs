@@ -1,4 +1,4 @@
-import SBERTSingletonJS from "./MetadataSimilarityUtils/SBERTSingletonJS.mjs";
+import SBERTSingletonJS from "./MetadataSimilarityUtils/SBERTSingleton.mjs";
 
 export const model = await SBERTSingletonJS.getInstance();
 

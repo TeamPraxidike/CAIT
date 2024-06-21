@@ -15,6 +15,8 @@ fi
 npx prisma migrate dev --name init                                         # run the migrations
 npm run build                                                              # build the project
 npm run preview &                                                          # start the server in the background - port 4173
+#npx vite build
+#npx vite preview &
 SERVER_PID=$!                                                              # save the server PID so we can kill it later
 echo "Server started with PID: $SERVER_PID"
 npx vitest -c ./vitest.config.integration.ts                                   # run your tests

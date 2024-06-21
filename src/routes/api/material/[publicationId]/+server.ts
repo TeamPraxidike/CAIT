@@ -16,7 +16,7 @@ import {
 import { type File as PrismaFile, Prisma } from '@prisma/client';
 import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
 
-import {enqueueMaterialComparison} from "$lib/PiscinaUtils/main";
+import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
 
 
 export async function GET({ params, locals }) {
@@ -139,11 +139,12 @@ export async function PUT({ request, params, locals }) {
 			},
 		);
 
-		const id = updatedMaterial.id;
+		const materialId = updatedMaterial.id;
 
-		enqueueMaterialComparison(publicationId).catch(error => console.error(error))
+		enqueueMaterialComparison(publicationId, materialId).catch(error => console.error(error))
 
-		return new Response(JSON.stringify({ id }), { status: 200 });
+
+		return new Response(JSON.stringify({ id: materialId }), { status: 200 });
 	} catch (error) {
 		console.error(error);
 		if (
