@@ -38,10 +38,12 @@ describe('get specific material', () => {
 		expect(material).toMatchObject({ content: 'new tag' });
 	});
 	it('should delete a tag by content', async () => {
-		prisma.tag.delete = vi.fn().mockResolvedValue({ content: 'new tag' });
+		prisma.tag.deleteMany = vi
+			.fn()
+			.mockResolvedValue({ content: 'new tag' });
 
 		const material = await deleteTagByContent('new tag');
-		expect(material).toMatchObject({ count: 0 });
+		expect(material).toMatchObject({ content: 'new tag' });
 	});
 });
 
