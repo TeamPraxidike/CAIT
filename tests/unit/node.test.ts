@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
 	addNode,
 	deleteNode,
+	editNode,
 	fetchExtensions,
 	handleEdges,
 	prisma,
@@ -86,6 +87,62 @@ describe('node actions', () => {
 		expect(node).toMatchObject({
 			publicationId: 2,
 			circuitId: 1,
+		});
+	});
+
+	it('should update node position successfully', async () => {
+		// Mocking the update method to resolve successfully
+		prisma.node.update = vi.fn().mockResolvedValue({
+			circuitId: 1,
+			publicationId: 2,
+			posX: 3,
+			posY: 4,
+		});
+
+		const result = await editNode(1, 2, 3, 4, prisma);
+
+		expect(result).toEqual({
+			circuitId: 1,
+			publicationId: 2,
+			posX: 3,
+			posY: 4,
+		});
+
+		expect(prisma.node.update).toHaveBeenCalledWith({
+			where: {
+				circuitId_publicationId: {
+					circuitId: 1,
+					publicationId: 2,
+				},
+			},
+			data: {
+				posX: 3,
+				posY: 4,
+			},
+		});
+	});
+
+	it('should throw an error if updating node position fails', async () => {
+		// Mocking the update method to reject
+		prisma.node.update = vi
+			.fn()
+			.mockRejectedValue(new Error('Error while updating node position'));
+
+		await expect(editNode(1, 2, 3, 4, prisma)).rejects.toThrowError(
+			new Error('Error while updating node position'),
+		);
+
+		expect(prisma.node.update).toHaveBeenCalledWith({
+			where: {
+				circuitId_publicationId: {
+					circuitId: 1,
+					publicationId: 2,
+				},
+			},
+			data: {
+				posX: 3,
+				posY: 4,
+			},
 		});
 	});
 });
