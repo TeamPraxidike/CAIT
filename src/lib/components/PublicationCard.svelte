@@ -237,7 +237,7 @@
 										style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 
 										<div class="flex flex-col items-center">
-											<p>{typeToHumanString(materialType)}</p>
+											<p class="whitespace-nowrap text-xs">{typeToHumanString(materialType)}</p>
 											<div class="flex flex-row">
 												{#each extensions as e}
 													<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />

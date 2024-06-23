@@ -1,17 +1,16 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { coverPicFetcher, fileSystem } from '$lib/database';
-import { getAllPublications } from '$lib/database/db';
+import { getAllPublications, getAllPublicationsByIds } from '$lib/database/db';
 import { PublicationType } from '@prisma/client';
+import { coverPicFetcher, fileSystem } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
 
 export const GET: RequestHandler = async ({ url }) => {
 	try {
-		const p = url.searchParams.get('publishers');
-		const publishers = p ? p.split(',') : [];
-		const query: string = url.searchParams.get('q') || '';
-		const amount: number = Number(url.searchParams.get('amount')) || 8;
-
-		let publications = await getAllPublications(publishers, query);
+		console.log('Here');
+		const p = url.searchParams.get('ids');
+		const ids = (p ? p.split(',') : []).map((n) => Number(n));
+		console.log(ids);
+		let publications = await getAllPublicationsByIds(ids);
 
 		publications = publications.map((publication) => {
 			let coverPicData = '';
@@ -44,15 +43,9 @@ export const GET: RequestHandler = async ({ url }) => {
 				},
 			};
 		});
-		return new Response(
-			JSON.stringify({
-				publications: publications.slice(0, amount),
-				ids: publications.map((x) => x.id),
-			}),
-			{
-				status: 200,
-			},
-		);
+		return new Response(JSON.stringify({ publications }), {
+			status: 200,
+		});
 	} catch (error) {
 		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {

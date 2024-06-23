@@ -4,9 +4,10 @@
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-	import type { Publication, Tag, User } from '@prisma/client';
+	import type { Circuit, Material, Publication, Tag, User } from '@prisma/client';
 		import { onMount } from 'svelte';
     import {getExtensions} from "$lib/util/file";
+	import { type PaginationSettings, Paginator } from '@skeletonlabs/skeleton';
 
 
 	let fetchPromise:Promise<any> = new Promise<null>(resolve => resolve(null));
@@ -15,14 +16,19 @@
 	let searchWord: string = '';
 	$: materials = data.materials;
 	$: circuits = data.circuits;
+	$:console.log(circuits)
+
+
 
 	let users: (User & {posts: Publication[], profilePicData:string})[] = data.users;
 	let tags = data.tags;
+	console.log(tags)
 	//let profilePics:FetchedFileArray = data.profilePics;
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
 
 	$: pageType = data.type;
+
 
 	//Variables needed to deal with Sort and Difficulty
 	let sortOptions: {
@@ -166,13 +172,57 @@
 				if (s === "material") {
 					materials = data.materials;
 				} else {
-					circuits = data;
+					circuits = data.circuits;
 				}
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
 			});
     };
+
+	let page = 0
+	let amount = 8
+	function onPageChange(e: CustomEvent): void {
+		page = e.detail;
+		changePage(amount, page)
+	}
+
+	function onAmountChange(e: CustomEvent): void {
+		amount = e.detail;
+		changePage(amount, page)
+	}
+
+	const changePage = async(amount: number, pageNum:number) => {
+			const ids = pageType === "materials" ? data.idsMat : data.idsCirc
+			const queryParams = new URLSearchParams({
+				type: pageType,
+				ids: ids.slice(pageNum * amount, (pageNum+1)*amount)
+			});
+		const s = pageType === "materials" ? "material" : "circuit";
+		const url = `/api/publication/set?${queryParams.toString()}`;
+		materials = [];
+		circuits = [];
+		//Make a GET request to the API
+		return fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				console.log(data)
+				// Handle the response data from the API
+				if (s === "material") {
+					materials = data.publications.map((x:Publication&{materials: Material & {files:string[]}, coverPicData:string, publisher:User & { profilePicData: string }}) => ({id: x.materials.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher, files:x.materials.files, encapsulatingType:x.materials.encapsulatingType}));
+				} else {
+					circuits = data.map((x : Publication&{circuit: Circuit, coverPicData:string, publisher:User & { profilePicData: string }})=> ({id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher}));
+				}
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
+		}
 
 
 
@@ -196,6 +246,13 @@
 				sendFiltersToAPI();
 			}
 		})
+
+	let paginationSettings = {
+		page: 0,
+		limit: amount,
+		size: "materials" ? data.idsMat.length : data.idsCirc.length,
+		amounts: [4,8,12,16,32],
+	} satisfies PaginationSettings;
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
@@ -363,3 +420,12 @@
 		<p>There was an error: {error.message}</p>
 	{/await}
 {/if}
+
+<div class="col-span-full">
+	<Paginator
+		bind:settings={paginationSettings}
+		showFirstLastButtons="{true}"
+		showPreviousNextButtons="{true}"
+		on:page={onPageChange} on:amount={onAmountChange}
+	/>
+</div>
