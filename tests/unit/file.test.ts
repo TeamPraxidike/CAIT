@@ -6,13 +6,8 @@ import {
 	coverPicFetcher,
 	addCoverPic,
 	addProfilePic,
-	updateProfilePic,
-	updateCoverPic,
-	updateCircuitCoverPic,
 	addFile,
 	deleteFile,
-	editFile,
-	updateFiles,
 	handleFileTokens,
 	getFilesForMaterial,
 } from '$lib/database/file';
