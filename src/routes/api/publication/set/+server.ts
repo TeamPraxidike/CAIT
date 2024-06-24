@@ -6,10 +6,8 @@ import { profilePicFetcher } from '$lib/database/file';
 
 export const GET: RequestHandler = async ({ url }) => {
 	try {
-		console.log('Here');
 		const p = url.searchParams.get('ids');
 		const ids = (p ? p.split(',') : []).map((n) => Number(n));
-		console.log(ids);
 		let publications = await getAllPublicationsByIds(ids);
 
 		publications = publications.map((publication) => {

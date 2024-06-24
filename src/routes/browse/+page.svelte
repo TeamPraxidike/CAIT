@@ -14,15 +14,21 @@
 
 	export let data: PageServerData;
 	let searchWord: string = '';
+	let materials = data.materials
+	let circuits = data.circuits
+	let idsMat = data.idsMat
+	let idsCirc = data.idsCirc
 	$: materials = data.materials;
 	$: circuits = data.circuits;
-	$:console.log(circuits)
+	$: idsMat = data.idsMat
+	$: idsCirc = data.idsCirc
+	let amount = data.amount
+
 
 
 
 	let users: (User & {posts: Publication[], profilePicData:string})[] = data.users;
 	let tags = data.tags;
-	console.log(tags)
 	//let profilePics:FetchedFileArray = data.profilePics;
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
@@ -171,9 +177,12 @@
 				// Handle the response data from the API
 				if (s === "material") {
 					materials = data.materials;
+					idsMat = data.idsMat
 				} else {
 					circuits = data.circuits;
+					idsCirc = data.idsCirc
 				}
+				paginationSettings.size = amount
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -181,7 +190,7 @@
     };
 
 	let page = 0
-	let amount = 8
+
 	function onPageChange(e: CustomEvent): void {
 		page = e.detail;
 		changePage(amount, page)
@@ -193,7 +202,7 @@
 	}
 
 	const changePage = async(amount: number, pageNum:number) => {
-			const ids = pageType === "materials" ? data.idsMat : data.idsCirc
+			const ids = pageType === "materials" ? idsMat : idsCirc
 			const queryParams = new URLSearchParams({
 				type: pageType,
 				ids: ids.slice(pageNum * amount, (pageNum+1)*amount)
@@ -216,7 +225,7 @@
 				if (s === "material") {
 					materials = data.publications.map((x:Publication&{materials: Material & {files:string[]}, coverPicData:string, publisher:User & { profilePicData: string }}) => ({id: x.materials.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher, files:x.materials.files, encapsulatingType:x.materials.encapsulatingType}));
 				} else {
-					circuits = data.map((x : Publication&{circuit: Circuit, coverPicData:string, publisher:User & { profilePicData: string }})=> ({id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher}));
+					circuits = data.publications.map((x : Publication&{circuit: Circuit, coverPicData:string, publisher:User & { profilePicData: string }})=> ({id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher}));
 				}
 			})
 			.catch(error => {
@@ -250,7 +259,7 @@
 	let paginationSettings = {
 		page: 0,
 		limit: amount,
-		size: "materials" ? data.idsMat.length : data.idsCirc.length,
+		size: "materials" ? idsMat.length : idsCirc.length,
 		amounts: [4,8,12,16,32],
 	} satisfies PaginationSettings;
 </script>
@@ -421,11 +430,13 @@
 	{/await}
 {/if}
 
-<div class="col-span-full">
-	<Paginator
-		bind:settings={paginationSettings}
-		showFirstLastButtons="{true}"
-		showPreviousNextButtons="{true}"
-		on:page={onPageChange} on:amount={onAmountChange}
-	/>
-</div>
+{#if pageType !== 'people'}
+	<div class="col-span-full">
+		<Paginator
+			bind:settings={paginationSettings}
+			showFirstLastButtons="{true}"
+			showPreviousNextButtons="{true}"
+			on:page={onPageChange} on:amount={onAmountChange}
+		/>
+	</div>
+{/if}
