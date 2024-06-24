@@ -23,6 +23,9 @@
 	$: idsMat = data.idsMat
 	$: idsCirc = data.idsCirc
 	let amount = data.amount
+	let source = data.type === "circuits" ? idsCirc : idsMat
+	$: source = data.type === "circuits" ? idsCirc : idsMat
+	$: paginationSettings.size = source.length
 
 
 
@@ -259,9 +262,15 @@
 	let paginationSettings = {
 		page: 0,
 		limit: amount,
-		size: "materials" ? idsMat.length : idsCirc.length,
+		size: source.length,
 		amounts: [4,8,12,16,32],
 	} satisfies PaginationSettings;
+
+		const switchPage = () => {
+			amount = 8
+			paginationSettings.limit = amount
+			paginationSettings.page = 0
+		}
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
@@ -273,13 +282,13 @@
 
 	<div class="hidden rounded-lg lg:flex w-1/4">
 		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-						 labels={["Materials", "People", "Circuits"]} />
+						 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
 	</div>
 </div>
 <div class="col-span-full">
 	<div class="flex lg:hidden rounded-lg w-3/4 min-h-6">
 		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-										 labels={["Materials", "People", "Circuits"]}  />
+										 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
 	</div>
 </div>
 
