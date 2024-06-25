@@ -2,7 +2,7 @@ import { prisma } from '$lib/database';
 import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
 import { Prisma } from '@prisma/client/extension';
 
-const sortSwitch = (sort: string) => {
+export const sortSwitch = (sort: string) => {
 	let orderBy: any;
 	switch (sort) {
 		case 'Most Liked':
