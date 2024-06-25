@@ -1,4 +1,9 @@
-import {type File as PrismaFile, type Material, type Publication, type Tag} from '@prisma/client';
+import {
+	type File as PrismaFile,
+	type Material,
+	type Publication,
+	type Tag,
+} from '@prisma/client';
 
 /**
  * A FileList object that is created from a list of fetched files and a list of prisma files
@@ -280,20 +285,27 @@ export const PublicationTypeIconMap: Map<string, string> = new Map([
 	['Slides', 'mdi:presentation'],
 	['examQuestions', 'healthicons:i-exam-multiple-choice'],
 	['examquestions', 'healthicons:i-exam-multiple-choice'],
-	['Exam Questions', 'healthicons:i-exam-multiple-choice']
+	['Exam Questions', 'healthicons:i-exam-multiple-choice'],
 ]);
 
-const getFileExtension = (filePath: string): string =>  {
+const getFileExtension = (filePath: string): string => {
 	const index = filePath.lastIndexOf('.');
 	return index !== -1 ? filePath.substring(index + 1) : '';
-}
+};
 
-export const getExtensions = (material : Material & {
-	publication: Publication & {
-		tags: Tag[];
-		usedInCourse: {course: string}[]
+export const getExtensions = (
+	material: Material & {
+		publication: Publication & {
+			tags: Tag[];
+			usedInCourse: { course: string }[];
+		};
+		files: PrismaFile[];
+	},
+) => {
+	console.log(material);
+	if (material) {
+		material.files.map((f: { title: string }) => getFileExtension(f.title));
+	} else {
+		return [];
 	}
-	files: PrismaFile[]
-}) => (
-	material.files.map((f: { title: string; }) => getFileExtension(f.title))
-)
+};

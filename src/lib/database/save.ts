@@ -72,7 +72,11 @@ export async function getSavedPublications(userId: string) {
 			saved: {
 				include: {
 					tags: true,
-					materials: true,
+					materials: {
+						include: {
+							files: true,
+						},
+					},
 					circuit: true,
 					coverPic: true,
 					usedInCourse: {
