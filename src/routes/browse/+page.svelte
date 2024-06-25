@@ -176,16 +176,21 @@
 				}
 				return response.json();
 			})
-			.then(data => {
+			.then(d => {
 				// Handle the response data from the API
 				if (s === "material") {
-					materials = data.materials;
-					idsMat = data.idsMat
+
+					data.materials = d.materials
+					data.idsMat = d.idsMat
 				} else {
-					circuits = data.circuits;
-					idsCirc = data.idsCirc
+					data.circuits = d.circuits;
+					data.idsCirc = d.idsCirc
 				}
+				amount = 8
+				page = 0
 				paginationSettings.size = amount
+				paginationSettings.page = 0
+
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -196,10 +201,14 @@
 
 	function onPageChange(e: CustomEvent): void {
 		page = e.detail;
+		data.materials = []
+		data.circuits = []
 		changePage(amount, page)
 	}
 
 	function onAmountChange(e: CustomEvent): void {
+		data.materials = []
+		data.circuits = []
 		amount = e.detail;
 		changePage(amount, page)
 	}
