@@ -13,10 +13,12 @@ import {
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
-import {enqueueCircuitComparison, enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
+import {
+	enqueueCircuitComparison,
+	enqueueMaterialComparison,
+} from '$lib/PiscinaUtils/runner';
 
 import { profilePicFetcher } from '$lib/database/file';
-
 
 export async function GET({ locals, url }) {
 	try {
@@ -29,6 +31,7 @@ export async function GET({ locals, url }) {
 		const limit = Number(url.searchParams.get('limit')) || 0;
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
+		const amount: number = Number(url.searchParams.get('amount')) || 8;
 
 		let circuits = await getAllCircuits(
 			tags,
@@ -54,7 +57,13 @@ export async function GET({ locals, url }) {
 				coverPicData: currentFileData.toString('base64'),
 			};
 		});
-		return new Response(JSON.stringify(circuits), { status: 200 });
+		return new Response(
+			JSON.stringify({
+				circuits: circuits.slice(0, amount),
+				idsCirc: circuits.map((c) => c.publicationId),
+			}),
+			{ status: 200 },
+		);
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
@@ -130,7 +139,7 @@ export async function POST({ request, locals }) {
 
 		const id = createdCircuit.publicationId;
 
-		enqueueCircuitComparison(id).catch(error => console.error(error))
+		enqueueCircuitComparison(id).catch((error) => console.error(error));
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

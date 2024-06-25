@@ -5,17 +5,15 @@ export async function load({ url, fetch, locals }) {
 	const session = await locals.auth();
 
 	const type = url.searchParams.get('type') || 'materials';
-
-	const { materials } =
+	const { materials, idsMat } =
 		type === 'materials'
 			? await (await fetch(`/api/material`)).json()
-			: { materials: [] };
-	const circuits =
+			: { materials: [], idsMat: [] };
+	const { circuits, idsCirc } =
 		type === 'circuits'
 			? await (await fetch(`/api/circuit`)).json()
-			: { circuits: [] };
+			: { circuits: [], idsCirc: [] };
 	const { users } = await (await fetch(`/api/user`)).json();
-
 	let liked: number[] = [];
 	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
 		saved: [],
@@ -54,6 +52,9 @@ export async function load({ url, fetch, locals }) {
 		tags,
 		liked,
 		saved,
+		idsMat,
+		idsCirc,
+		amount: 8,
 	};
 }
 

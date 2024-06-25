@@ -10,7 +10,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import type { RequestHandler } from '@sveltejs/kit';
-import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
+import { enqueueMaterialComparison } from '$lib/PiscinaUtils/runner';
 
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
@@ -55,6 +55,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
+		const amount: number = Number(url.searchParams.get('amount')) || 8;
 
 		let materials = await getAllMaterials(
 			tags,
@@ -88,9 +89,15 @@ export const GET: RequestHandler = async ({ url }) => {
 			};
 		});
 
-		return new Response(JSON.stringify({ materials }), {
-			status: 200,
-		});
+		return new Response(
+			JSON.stringify({
+				materials: materials.slice(0, amount),
+				idsMat: materials.map((m) => m.publicationId),
+			}),
+			{
+				status: 200,
+			},
+		);
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
@@ -149,9 +156,13 @@ export async function POST({ request }) {
 		const publicationId = createdMaterial.publicationId;
 		const materialId = createdMaterial.id;
 
-		enqueueMaterialComparison(publicationId, materialId).catch(error => console.error(error))
+		enqueueMaterialComparison(publicationId, materialId).catch((error) =>
+			console.error(error),
+		);
 
-		return new Response(JSON.stringify({ id: publicationId }), { status: 200 });
+		return new Response(JSON.stringify({ id: publicationId }), {
+			status: 200,
+		});
 	} catch (error) {
 		console.log(error);
 		return new Response(JSON.stringify({ error: 'Server Error' }), {

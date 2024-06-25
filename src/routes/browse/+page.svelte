@@ -4,17 +4,31 @@
     import Icon from '@iconify/svelte';
     import type { PageServerData } from './$types';
     import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-	import type { Publication, Tag, User } from '@prisma/client';
+	import type { Circuit, Material, Publication, Tag, User } from '@prisma/client';
 		import { onMount } from 'svelte';
     import {getExtensions} from "$lib/util/file";
+	import { type PaginationSettings, Paginator } from '@skeletonlabs/skeleton';
 
 
 	let fetchPromise:Promise<any> = new Promise<null>(resolve => resolve(null));
 
 	export let data: PageServerData;
 	let searchWord: string = '';
+	let materials = data.materials
+	let circuits = data.circuits
+	let idsMat = data.idsMat
+	let idsCirc = data.idsCirc
 	$: materials = data.materials;
 	$: circuits = data.circuits;
+	$: idsMat = data.idsMat
+	$: idsCirc = data.idsCirc
+	let amount = data.amount
+	let source = data.type === "circuits" ? idsCirc : idsMat
+	$: source = data.type === "circuits" ? idsCirc : idsMat
+	$: paginationSettings.size = source.length
+
+
+
 
 	let users: (User & {posts: Publication[], profilePicData:string})[] = data.users;
 	let tags = data.tags;
@@ -23,6 +37,7 @@
 	let saved = data.saved.saved as number[];
 
 	$: pageType = data.type;
+
 
 	//Variables needed to deal with Sort and Difficulty
 	let sortOptions: {
@@ -98,6 +113,10 @@
     };
 
     const resetFilters = () => {
+			page  = 0
+			amount = 8
+			paginationSettings.page = 0
+			paginationSettings.limit = amount
         selectedTags = [];
         selectedTypes = [];
         selectedPublishers = [];
@@ -161,18 +180,74 @@
 				}
 				return response.json();
 			})
-			.then(data => {
+			.then(d => {
 				// Handle the response data from the API
 				if (s === "material") {
-					materials = data.materials;
+
+					data.materials = d.materials
+					data.idsMat = d.idsMat
 				} else {
-					circuits = data;
+					data.circuits = d.circuits;
+					data.idsCirc = d.idsCirc
 				}
+				amount = 8
+				page = 0
+				paginationSettings.size = amount
+				paginationSettings.page = 0
+
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
 			});
     };
+
+	let page = 0
+
+	function onPageChange(e: CustomEvent): void {
+		page = e.detail;
+		data.materials = []
+		data.circuits = []
+		changePage(amount, page)
+	}
+
+	function onAmountChange(e: CustomEvent): void {
+		data.materials = []
+		data.circuits = []
+		amount = e.detail;
+		changePage(amount, page)
+	}
+
+	const changePage = async(amount: number, pageNum:number) => {
+			const ids = pageType === "materials" ? idsMat : idsCirc
+			const queryParams = new URLSearchParams({
+				type: pageType,
+				ids: ids.slice(pageNum * amount, (pageNum+1)*amount)
+			});
+		const s = pageType === "materials" ? "material" : "circuit";
+		const url = `/api/publication/set?${queryParams.toString()}`;
+		materials = [];
+		circuits = [];
+		//Make a GET request to the API
+		return fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				console.log(data)
+				// Handle the response data from the API
+				if (s === "material") {
+					materials = data.publications.map((x:Publication&{materials: Material & {files:string[]}, coverPicData:string, publisher:User & { profilePicData: string }}) => ({id: x.materials.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher, files:x.materials.files, encapsulatingType:x.materials.encapsulatingType}));
+				} else {
+					circuits = data.publications.map((x : Publication&{circuit: Circuit, coverPicData:string, publisher:User & { profilePicData: string }})=> ({id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher}));
+				}
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
+		}
 
 
 
@@ -196,6 +271,19 @@
 				sendFiltersToAPI();
 			}
 		})
+
+	let paginationSettings = {
+		page: 0,
+		limit: amount,
+		size: source.length,
+		amounts: [4,8,12,16,32],
+	} satisfies PaginationSettings;
+
+		const switchPage = () => {
+			amount = 8
+			paginationSettings.limit = amount
+			paginationSettings.page = 0
+		}
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
@@ -207,13 +295,13 @@
 
 	<div class="hidden rounded-lg lg:flex w-1/4">
 		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-						 labels={["Materials", "People", "Circuits"]} />
+						 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
 	</div>
 </div>
 <div class="col-span-full">
 	<div class="flex lg:hidden rounded-lg w-3/4 min-h-6">
 		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-										 labels={["Materials", "People", "Circuits"]}  />
+										 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
 	</div>
 </div>
 
@@ -362,4 +450,15 @@
 	{:catch error}
 		<p>There was an error: {error.message}</p>
 	{/await}
+{/if}
+
+{#if pageType !== 'people'}
+	<div class="col-span-full">
+		<Paginator
+			bind:settings={paginationSettings}
+			showFirstLastButtons="{true}"
+			showPreviousNextButtons="{true}"
+			on:page={onPageChange} on:amount={onAmountChange}
+		/>
+	</div>
 {/if}
