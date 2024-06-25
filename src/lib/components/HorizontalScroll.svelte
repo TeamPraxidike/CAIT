@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Publication, User } from '@prisma/client';
+	import type { Material, Publication, User } from '@prisma/client';
 	import { PublicationCard } from '$lib';
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
@@ -9,6 +9,7 @@
 
 	export let publications: {
 		publication: Publication & {
+			materials: Material,
 			tags: { content: string }[],
 			usedInCourse: { course: string }[]
 			publisher: User & {
