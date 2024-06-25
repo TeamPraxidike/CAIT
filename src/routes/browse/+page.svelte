@@ -113,6 +113,10 @@
     };
 
     const resetFilters = () => {
+			page  = 0
+			amount = 8
+			paginationSettings.page = 0
+			paginationSettings.limit = amount
         selectedTags = [];
         selectedTypes = [];
         selectedPublishers = [];

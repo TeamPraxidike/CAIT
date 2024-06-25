@@ -277,13 +277,6 @@
 							{/if}
 						</div>
 					{/if}
-				{#if isClickedTags}
-					<div class="absolute ml-48 flex flex-col gap-1 z-[9999] bg-surface-100" transition:fly={{ x:8 , duration: 400 }}>
-						{#each tags.slice(maxTags, tags.length) as tag, i}
-							<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
-						{/each}
-					</div>
-				{/if}
 			</div>
 			<div class="w-full space-y-2">
 				<hr class="opacity-50">
