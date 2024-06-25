@@ -6,7 +6,7 @@
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { type Publication, PublicationType, type User } from '@prisma/client';
+	import { type Material, type Publication, PublicationType, type User } from '@prisma/client';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import {
@@ -22,6 +22,7 @@
 	import {typeToHumanString} from "$lib/util/types";
 
 	export let publication: Publication & {
+		materials : Material
 		tags: { content: string }[],
 		usedInCourse: { course: string }[]
 	};
@@ -130,15 +131,21 @@
 
         maxTags = calcMaxTags();
 		if (hoverDiv && pfpElement) {
-			hoverDiv.addEventListener('mouseenter', handleHover);
-      hoverDiv.addEventListener('mouseleave', handleHover);
+			if (publication.type === PublicationType.Material){
+				hoverDiv.addEventListener('mouseenter', handleHover);
+				hoverDiv.addEventListener('mouseleave', handleHover);
+			}
 			pfpElement.addEventListener('mouseenter', handlePfpHover);
 			pfpElement.addEventListener('mouseleave', handlePfpHover);
 			return () => {
-				hoverDiv.removeEventListener('mouseenter', handleHover);
-				hoverDiv.removeEventListener('mouseleave', handleHover);
-				pfpElement.removeEventListener('mouseenter', handlePfpHover);
-				pfpElement.removeEventListener('mouseleave', handlePfpHover);
+				if (hoverDiv && pfpElement) {
+					if (publication.type === PublicationType.Material) {
+						hoverDiv.removeEventListener('mouseenter', handleHover);
+						hoverDiv.removeEventListener('mouseleave', handleHover);
+					}
+					pfpElement.removeEventListener('mouseenter', handlePfpHover);
+					pfpElement.removeEventListener('mouseleave', handlePfpHover);
+				}
 			};
 		}
 	});

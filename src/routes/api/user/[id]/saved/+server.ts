@@ -8,6 +8,7 @@ import {
 import { verifyAuth } from '$lib/database/auth';
 import { profilePicFetcher } from '$lib/database/file';
 import Fuse from 'fuse.js';
+import type { Publication } from '@prisma/client';
 
 function filterSaved(saved: any, query: string) {
 	if (query !== '') {
@@ -97,7 +98,11 @@ export async function GET({ params, url, locals }) {
 	if (saved.length === 0) return new Response(null, { status: 204 });
 
 	return new Response(
-		JSON.stringify({ saved: saved, savedFileData: fileData }),
+		JSON.stringify({
+			saved: saved,
+			savedFileData: fileData,
+			ids: saved.map((x: Publication) => x.id),
+		}),
 		{
 			status: 200,
 		},

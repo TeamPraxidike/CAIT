@@ -5,9 +5,19 @@
 	import { page } from '$app/stores';
 
 	import { scale } from 'svelte/transition';
-	import { MaterialType, PublicationType } from '@prisma/client';
+	import {
+		type Circuit,
+		type Material,
+		MaterialType,
+		type Publication,
+		PublicationType,
+		type User
+	} from '@prisma/client';
 	import { getExtensions } from '$lib/util/file';
+	import { type PaginationSettings, Paginator } from '@skeletonlabs/skeleton';
 	export let materials : any = [];
+	export let source : number[] = []
+	$: console.log(materials)
 	let circuits : any = [];
 	let publications: any = [];
 	export let addActive: boolean = false;
@@ -18,6 +28,7 @@
 	let searchWord : string = ""
 	let urlParam = "material"
 	let chosenOption = 0
+
 
 	export let liked: number[];
 	export let saved: number[];
@@ -92,7 +103,6 @@
 	};
 
 	const newMaterials = (event: CustomEvent) => {
-
 		if (event.detail.option === 0)
 		{
 			chosenOption = 0
@@ -142,32 +152,97 @@
 				{
 					materials = []
 					materials = data.materials
+					source = data.idsMat
 				}
 				if (chosenOption === 1)
 				{
 					circuits = []
-					circuits = data
+					circuits = data.circuits
+					source = data.idsCirc
+
 				}
 				if (chosenOption === 2)
 				{
+
 					publications = []
 					publications = data.publications
+					source = data.ids
 				}
 				if (chosenOption === 3)
 				{
 					publications = []
 					publications = data.saved
+					source = data.ids
+					console.log(data)
 				}
-
-
-
+				amount = 8
+				p = 0
+				paginationSettings.limit = amount
+				paginationSettings.size = source.length
+				paginationSettings.page = 0
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
 			});
 	};
 
-	console.log(materials);
+	function onPageChange(e: CustomEvent): void {
+		p = e.detail;
+		changePage(amount, p)
+	}
+
+	function onAmountChange(e: CustomEvent): void {
+
+		amount = e.detail;
+		changePage(amount, p)
+	}
+
+	const changePage = async(amount: number, pageNum:number) => {
+		const queryParams = new URLSearchParams();
+		queryParams.set("ids", source.slice(pageNum * amount, (pageNum+1)*amount).join(','))
+		const url = `/api/publication/set?${queryParams.toString()}`;
+		materials = [];
+		circuits = [];
+		//Make a GET request to the API
+		return fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				// Handle the response data from the API
+				if (chosenOption === 0) {
+					materials = data.publications.map((x:Publication&{materials: Material & {files:string[]}, coverPicData:string, publisher:User & { profilePicData: string }}) => ({id: x.materials.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher, files:x.materials.files, encapsulatingType:x.materials.encapsulatingType}));
+				} else if (chosenOption === 1){
+					circuits = data.publications.map((x : Publication&{circuit: Circuit, coverPicData:string, publisher:User & { profilePicData: string }})=> ({id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher}));
+				}
+				else {
+					publications = data.publications
+				}
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
+	}
+
+	let amount = 8
+	let p = 0
+
+	let paginationSettings = {
+		page: 0,
+		limit: amount,
+		size: source.length,
+		amounts: [4,8,12,16,32],
+	} satisfies PaginationSettings;
+
+	const switchPage = () => {
+		amount = 8
+		paginationSettings.limit = amount
+		paginationSettings.page = 0
+	}
+
 
 </script>
 
@@ -214,6 +289,17 @@
 				{/each}
 			{/if}
 			<button type="button" class="col-start-4 my-4 md:hidden rounded-lg py-1 px-3 bg-surface-800 dark:bg-surface-600 hover:bg-opacity-75 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
+			{#if source.length > 4}
+				<div class="col-span-full">
+					<Paginator
+						bind:settings={paginationSettings}
+						showFirstLastButtons="{true}"
+						showPreviousNextButtons="{true}"
+						on:page={onPageChange} on:amount={onAmountChange}
+					/>
+				</div>
+			{/if}
 
 		</Grid>
+
 </div>

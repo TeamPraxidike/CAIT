@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Meta, PublicationCard, UserProfileBar } from '$lib';
 	import type { LayoutData, PageServerData } from './$types';
-    import {type Publication, PublicationType, type Tag, type User} from '@prisma/client';
+  import { type Material, type Publication, PublicationType, type Tag, type User } from '@prisma/client';
 	import type { FetchedFileItem } from '$lib/database';
 	import { page } from '$app/stores';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
@@ -23,6 +23,7 @@
     let liked = data.liked;
 
     type publication = (Publication & {
+        materials: Material,
         tags: Tag[];
         usedInCourse: {course: string}[];
         coverPicData: string;
