@@ -602,6 +602,7 @@
 
 	let addActive: boolean = false;
 	let displayedMaterials: any = [];
+	let displayIds : number[] = []
 	let pubIds: Set<number> = new Set();
 	nodes.map(node => pubIds.add(node.publicationId));
 
@@ -619,7 +620,9 @@
 			})
 			.then(data => {
 				// Handle the response data from the API
+				console.log(data)
 				displayedMaterials = data.materials;
+				displayIds = data.idsMat
 				addActive = true;
 			})
 			.catch(error => {
@@ -1099,7 +1102,7 @@
 
 {#if addActive}
 	<div>
-		<SearchElems bind:addActive={addActive} bind:selectedIds={pubIds} bind:materials={displayedMaterials}
+		<SearchElems bind:addActive={addActive} bind:selectedIds={pubIds} bind:source={displayIds} bind:materials={displayedMaterials}
 								 on:selFurther={addNode} on:remFurther={removeNode} bind:liked={liked} bind:saved={saved}/>
 	</div>
 {/if}

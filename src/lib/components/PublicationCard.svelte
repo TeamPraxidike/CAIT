@@ -6,7 +6,7 @@
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { type Publication, PublicationType, type User } from '@prisma/client';
+	import { type Material, type Publication, PublicationType, type User } from '@prisma/client';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import {
@@ -22,6 +22,7 @@
 	import {typeToHumanString} from "$lib/util/types";
 
 	export let publication: Publication & {
+		materials : Material
 		tags: { content: string }[],
 		usedInCourse: { course: string }[]
 	};
@@ -130,15 +131,21 @@
 
         maxTags = calcMaxTags();
 		if (hoverDiv && pfpElement) {
-			hoverDiv.addEventListener('mouseenter', handleHover);
-      hoverDiv.addEventListener('mouseleave', handleHover);
+			if (publication.type === PublicationType.Material){
+				hoverDiv.addEventListener('mouseenter', handleHover);
+				hoverDiv.addEventListener('mouseleave', handleHover);
+			}
 			pfpElement.addEventListener('mouseenter', handlePfpHover);
 			pfpElement.addEventListener('mouseleave', handlePfpHover);
 			return () => {
-				hoverDiv.removeEventListener('mouseenter', handleHover);
-				hoverDiv.removeEventListener('mouseleave', handleHover);
-				pfpElement.removeEventListener('mouseenter', handlePfpHover);
-				pfpElement.removeEventListener('mouseleave', handlePfpHover);
+				if (hoverDiv && pfpElement) {
+					if (publication.type === PublicationType.Material) {
+						hoverDiv.removeEventListener('mouseenter', handleHover);
+						hoverDiv.removeEventListener('mouseleave', handleHover);
+					}
+					pfpElement.removeEventListener('mouseenter', handlePfpHover);
+					pfpElement.removeEventListener('mouseleave', handlePfpHover);
+				}
 			};
 		}
 	});
@@ -237,7 +244,7 @@
 										style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
 
 										<div class="flex flex-col items-center">
-											<p>{typeToHumanString(materialType)}</p>
+											<p class="whitespace-nowrap text-xs">{typeToHumanString(materialType)}</p>
 											<div class="flex flex-row">
 												{#each extensions as e}
 													<Icon icon={IconMapExtension.get(e) || 'vscode-icons:file-type-text'} class="size-5 self-center" />
@@ -277,13 +284,6 @@
 							{/if}
 						</div>
 					{/if}
-				{#if isClickedTags}
-					<div class="absolute ml-48 flex flex-col gap-1 z-[9999] bg-surface-100" transition:fly={{ x:8 , duration: 400 }}>
-						{#each tags.slice(maxTags, tags.length) as tag, i}
-							<Tag bind:width={tagWidths[i]} tagText={tag} removable="{false}"/>
-						{/each}
-					</div>
-				{/if}
 			</div>
 			<div class="w-full space-y-2">
 				<hr class="opacity-50">

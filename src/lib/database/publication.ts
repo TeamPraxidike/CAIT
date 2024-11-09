@@ -31,7 +31,7 @@ export async function handleConnections(
  * Checks list for correctness in maintainerIds
  * @param list
  */
-export async function checkMaintainerList(list: string[]) {
+export async function checkMaintainerList(list: (string | undefined)[]) {
 	for (const id of list) {
 		if (id === undefined) {
 			throw new Error(`Invalid id in list ${id}`);
@@ -59,7 +59,7 @@ export async function checkTagList(list: string[]) {
  */
 export async function connectMaintainers(
 	publicationId: number,
-	maintainerConnect: string[],
+	maintainerConnect: (string | undefined)[],
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<void> {
 	try {
@@ -105,7 +105,7 @@ export async function connectTags(
  */
 export async function updatePublicationConnectMaintainers(
 	publicationId: number,
-	maintainerConnect: string[],
+	maintainerConnect: (string | undefined)[],
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// wipe all connections

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getDateDifference, mapToDifficulty, mapToType } from '$lib';
 import { Difficulty, MaterialType } from '@prisma/client';
+import { typeToHumanString } from '$lib/util/types';
 
 describe('date difference method', () => {
 	it('should return correct difference string', async () => {
@@ -54,5 +55,14 @@ describe('type methods', () => {
 		expect(mapToType('other')).toEqual(MaterialType.other);
 		expect(mapToType('video')).toEqual(MaterialType.video);
 		expect(mapToType('invalid input')).toEqual(MaterialType.other); // Testing the default case
+	});
+	it('should return correct string', async () => {
+		expect(typeToHumanString('examQuestions')).toEqual('Exam Questions');
+		expect(typeToHumanString('lectureNotes')).toEqual('Lecture Notes');
+		expect(typeToHumanString('slides')).toEqual('Slides');
+		expect(typeToHumanString('assignment')).toEqual('Assignment');
+		expect(typeToHumanString('other')).toEqual('Other');
+		expect(typeToHumanString('video')).toEqual('Video');
+		expect(typeToHumanString('invalid input')).toEqual('Other'); // Testing the default case
 	});
 });
