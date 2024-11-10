@@ -436,7 +436,7 @@
 		</div>
 
 
-		<div class="flex flex-col gap-2">
+		<div class="flex flex-col items-center gap-2">
 			{#if isMaterial && pubView.publication.materials.theoryPractice}
 				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}" />
 			{/if}
@@ -545,17 +545,6 @@
 
 </div>
 
-<!--SHOW CIRCUITS THAT INCLUDE THIS PUBLICATION-->
-{#if circuitsPubAppearIn.length > 0}
-	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
-		<h2 class="text-2xl">This publication appears in:</h2>
-		<hr>
-	</div>
-	<div class="col-span-full">
-		<HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
-	</div>
-{/if}
-
 <!--SHOW SIMILAR PUBLICATIONS-->
 {#if similarPublications.length > 0}
 	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
@@ -567,6 +556,16 @@
 	</div>
 {/if}
 
+<!--SHOW CIRCUITS THAT INCLUDE THIS PUBLICATION-->
+{#if circuitsPubAppearIn.length > 0}
+	<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
+		<h2 class="text-2xl">This publication appears in:</h2>
+		<hr>
+	</div>
+	<div class="col-span-full">
+		<HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}" bind:saved="{savedPublications}"/>
+	</div>
+{/if}
 
 <div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
 	<h2 class="text-2xl">Discussion Forum</h2>
