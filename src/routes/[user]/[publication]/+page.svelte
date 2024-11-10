@@ -313,6 +313,13 @@
         },
     };
 
+    // Assures currently displayed tab is 0 (materials/circuit)
+    function handleTabEvent(event) {
+        const {tabValue} = event.detail
+        console.log(tabValue)
+        tabSet = tabValue
+    }
+
     let hoverDivReport: HTMLDivElement;
     let isHoveredReport = false;
     let hoverDiv: HTMLDivElement;
@@ -537,18 +544,6 @@
 
                 {:else if tabSet === 2}
 
-                    <!--    RELATED CONTENT -->
-                    {#if circuitsPubAppearIn.length > 0}
-                        <div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
-                            <h2 class="text-2xl">This publication appears in:</h2>
-                            <hr>
-                        </div>
-                        <div class="col-span-full">
-                            <HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}"
-                                              bind:saved="{savedPublications}"/>
-                        </div>
-                    {/if}
-
                     <!--SHOW SIMILAR PUBLICATIONS-->
                     {#if similarPublications.length > 0}
                         <div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
@@ -557,57 +552,74 @@
                         </div>
                         <div class="col-span-full">
                             <HorizontalScroll publications="{similarPublications}" bind:liked="{likedPublications}"
-                                              bind:saved="{savedPublications}"/>
+                                              bind:saved="{savedPublications}"
+                                              on:resetTab={handleTabEvent}/>
                         </div>
                     {/if}
+
+                    <!--    RELATED CONTENT -->
+                    {#if circuitsPubAppearIn.length > 0}
+                        <div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
+                            <h2 class="text-2xl">This publication appears in:</h2>
+                            <hr>
+                        </div>
+                        <div class="col-span-full">
+                            <HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}"
+                                              bind:saved="{savedPublications}"
+                                              on:resetTab={handleTabEvent}/>
+                        </div>
+                    {/if}
+
                 {/if}
             </svelte:fragment>
         </TabGroup>
     </div>
 
-    <!--   RIGHT SINGLE 1/4 COLUMN   -->
-    <div class="flex flex-col gap-2">
-        {#if isMaterial && pubView.publication.materials.theoryPractice}
-            <TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}"/>
-        {/if}
-        <div class="flex gap-2">
-            <UserProp role="Publisher"
-                      userPhotoUrl={'data:image;base64,' + pubView.publication.publisher.profilePicData}
-                      view="material"
-                      bind:user={pubView.publication.publisher}/>
-            {#each pubView.publication.maintainers as maintainer}
-                <UserProp role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData}
-                          view="material" user={maintainer}/>
-            {/each}
-        </div>
-        <Accordion regionPanel="space-y-8" padding="p-3">
-            <AccordionItem class="variant-soft-primary rounded-lg">
-                <svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
-                <svelte:fragment slot="content">
-                    {#if pubView.publication.learningObjectives.length === 0}
-                        <span>No learning objectives have been indicated</span>
-                    {:else}
-                        {#each pubView.publication.learningObjectives as LO}
-                            <p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
-                        {/each}
-                    {/if        }
-                </svelte:fragment>
-            </AccordionItem>
-        </Accordion>
-        <Accordion regionPanel="space-y-8" padding="p-3">
-            <AccordionItem class="variant-soft-primary rounded-lg">
-                <svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
-                <svelte:fragment slot="content">
-                    {#if pubView.publication.prerequisites.length === 0}
-                        <span>No prior knowledge has been indicated</span>
-                    {:else}
-                        {#each pubView.publication.prerequisites as PK}
-                            <p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
-                        {/each}
-                    {/if}
+    {#key pubView.publication.id}
+        <!--   RIGHT SINGLE 1/4 COLUMN   -->
+        <div class="flex flex-col items-center gap-2">
+            {#if isMaterial && pubView.publication.materials.theoryPractice}
+                <TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}"/>
+            {/if}
+            <div class="flex gap-2">
+                <UserProp role="Publisher"
+                          userPhotoUrl={'data:image;base64,' + pubView.publication.publisher.profilePicData}
+                          view="material"
+                          bind:user={pubView.publication.publisher}/>
+                {#each pubView.publication.maintainers as maintainer}
+                    <UserProp role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData}
+                              view="material" user={maintainer}/>
+                {/each}
+            </div>
+            <Accordion regionPanel="space-y-8" padding="p-3">
+                <AccordionItem class="variant-soft-primary rounded-lg">
+                    <svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
+                    <svelte:fragment slot="content">
+                        {#if pubView.publication.learningObjectives.length === 0}
+                            <span>No learning objectives have been indicated</span>
+                        {:else}
+                            {#each pubView.publication.learningObjectives as LO}
+                                <p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
+                            {/each}
+                        {/if        }
+                    </svelte:fragment>
+                </AccordionItem>
+            </Accordion>
+            <Accordion regionPanel="space-y-8" padding="p-3">
+                <AccordionItem class="variant-soft-primary rounded-lg">
+                    <svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
+                    <svelte:fragment slot="content">
+                        {#if pubView.publication.prerequisites.length === 0}
+                            <span>No prior knowledge has been indicated</span>
+                        {:else}
+                            {#each pubView.publication.prerequisites as PK}
+                                <p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
+                            {/each}
+                        {/if}
 
-                </svelte:fragment>
-            </AccordionItem>
-        </Accordion>
-    </div>
+                    </svelte:fragment>
+                </AccordionItem>
+            </Accordion>
+        </div>
+    {/key}
 </div>

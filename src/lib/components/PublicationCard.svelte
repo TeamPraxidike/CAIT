@@ -160,6 +160,11 @@
 		dispatch('removed', { id: publication.id });
 	};
 
+	// Assures currently displayed tab is 0 (materials/circuit)
+	const resetTab = () => {
+		dispatch('resetTab', { tabValue: 0 });
+	};
+
 	let modalRegistry: Record<string, ModalComponent> = {
 		// Set a unique modal ID, then pass the component reference
 		useInCourseComponent: {
@@ -219,7 +224,8 @@
 				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
 					Used in {used} courses</p>
 			{/if}
-			<a href="../{publication.publisherId}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}" >
+			<a href="../{publication.publisherId}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}"
+			   on:click={resetTab}>
 				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc} alt="" />
 			</a>
 		</div>
@@ -228,7 +234,8 @@
 			<div class="w-full">
 				<div class="flex justify-between items-start">
 					<a href="/{publication.publisherId}/{publication.id}"
-						 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center hover:text-surface-500"> {publication.title}
+						 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center hover:text-surface-500" on:click={resetTab}>
+						{publication.title}
 					</a>
 					<div class="flex gap-2">
 						{#if publication.type === PublicationType.Circuit}
@@ -291,7 +298,8 @@
 					<div class="w-full flex justify-left space-x-4">
 						{#if !inCircuits}
 							<a href="/{publication.publisherId}/{publication.id}"
-							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85">View</a>
+							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"
+							   on:click={resetTab}>View</a>
 						{:else if !selected}
 							<button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
 											on:click="{select}">Select

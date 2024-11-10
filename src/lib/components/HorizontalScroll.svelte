@@ -2,7 +2,7 @@
 	import type { Material, Publication, User } from '@prisma/client';
 	import { PublicationCard } from '$lib';
 	import Icon from '@iconify/svelte';
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 
 	export let saved: number[];
 	export let liked: number[];
@@ -68,6 +68,13 @@
 		}
 	};
 
+	const dispatch = createEventDispatcher();
+
+	// Assures currently displayed tab is 0 (materials/circuit)
+	const resetTab = () => {
+		dispatch('resetTab', { tabValue: 0 });
+	};
+
 </script>
 
 {#if allowedAmount < publications.length}
@@ -84,7 +91,8 @@
 				<div class="min-w-[100%] max-w-[100%] md:min-w-[48%] md:max-w-[32%] lg:min-w-[24%] lg:max-w-[24%]">
 					<PublicationCard publication="{publication.publication}" imgSrc={'data:image;base64,' + publication.coverPicData}
 													 liked={liked.includes(publication.publication.id)} saved={saved.includes(publication.publication.id)}
-													 publisher={publication.publisher} />
+													 publisher={publication.publisher}
+					on:resetTab={resetTab}/>
 				</div>
 			{/each}
 		</div>
@@ -100,7 +108,8 @@
 			<div class="min-w-[100%] max-w-[100%] md:min-w-[48%] md:max-w-[32%] xl:min-w-[24%] xl:max-w-[24%]">
 				<PublicationCard publication="{publication.publication}" imgSrc={'data:image;base64,' + publication.coverPicData}
 												 liked={liked.includes(publication.publication.id)} saved={saved.includes(publication.publication.id)}
-												 publisher={publication.publisher} on:liked={likedToggled} on:saved={savedToggled} />
+												 publisher={publication.publisher} on:liked={likedToggled} on:saved={savedToggled}
+								 on:resetTab={resetTab}/>
 			</div>
 		{/each}
 	</div>
