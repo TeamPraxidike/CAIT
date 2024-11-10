@@ -13,3 +13,4 @@ reports
 prisma/migrations
 .snaplet
 static/uploadedFiles
+/seed.ts
