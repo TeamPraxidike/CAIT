@@ -8,7 +8,7 @@
 	"scripts": {
 		"setup": "npm install && npx prisma generate",
 		"dev": "scripts/dev.sh && vite dev",
-		"prebuild": "sudo chmod +x ./dirname.sh",
+		"prebuild": "sudo chmod +x ./dirname.sh && npx prisma generate && prisma migrate dev && prisma migrate deploy",
 		"build": "npm run prebuild && vite build && ./dirname.sh",
 		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
