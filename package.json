@@ -8,7 +8,7 @@
 	"scripts": {
 		"setup": "npm install && npx prisma generate",
 		"dev": "scripts/dev.sh && vite dev",
-		"build": "vite build",
+		"build": "vite build && ./dirname.sh",
 		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
