@@ -72,7 +72,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@auth/core": "^0.31.0",
+		"@auth/core": "0.37.4",
 		"@auth/prisma-adapter": "^2.1.0",
 		"@auth/sveltekit": "^1.1.0",
 		"@floating-ui/dom": "^1.6.4",
