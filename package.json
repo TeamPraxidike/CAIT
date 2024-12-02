@@ -2,9 +2,6 @@
 	"name": "ml-teachers",
 	"version": "0.0.1",
 	"private": true,
-	"prisma": {
-		"seed": "tsx prisma/seed/seed.ts"
-	},
 	"scripts": {
 		"setup": "npm install && npx prisma generate",
 		"dev": "scripts/dev.sh && vite dev",
