@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Difficulty {
@@ -34,7 +35,7 @@ enum PublicationType {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(dbgenerated("gen_random_uuid()"))
   firstName     String
   lastName      String
   username      String    @unique @default(uuid())
@@ -59,66 +60,6 @@ model User {
   isAdmin     Boolean       @default(false)
 
   profilePic File? @relation("ProfilePic")
-
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  Authenticator Authenticator[]
-}
-
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@id([identifier, token])
-}
-
-model Authenticator {
-  credentialID         String  @unique
-  userId               String
-  providerAccountId    String
-  credentialPublicKey  String
-  counter              Int
-  credentialDeviceType String
-  credentialBackedUp   Boolean
-  transports           String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([userId, credentialID])
 }
 
 model PublicationUsedInCourse {
