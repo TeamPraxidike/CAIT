@@ -7,6 +7,4 @@ echo '🟡 - Waiting for database to be ready...'                            # w
 "$DIR"/wait-for-it.sh "${DATABASE_URL}" -- echo '🟢 - Database is ready!'  # wait for the database to be ready
 
 npx prisma migrate dev --name dev                                          # run the migrations
-npx @snaplet/seed init                                                     # initialize the seed
-npx prisma db seed                                                         # seed the database
 npx vite dev                                                               # start the development server
