@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({
 	locals,
 }) => {
 	await parent();
-	const session = await locals.auth();
+	const session = await locals.safeGetSession();
 
 	let liked: number[] = [];
 	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({
 	};
 	let reported: boolean = false;
 
-	if (session !== null) {
+	if (session && session.user) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
 		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
 

@@ -5,7 +5,7 @@ import type { UserCreateForm } from '$lib/database';
 import { hashPassword } from '$lib/util/auth';
 
 export const load: PageServerLoad = async (event) => {
-	const session = await event.locals.auth();
+	const session = await event.locals.safeGetSession();
 	if (session?.user) throw redirect(303, '/browse');
 	return { session };
 };

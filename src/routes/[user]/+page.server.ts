@@ -11,8 +11,8 @@ export const load: PageServerLoad = async ({
 }) => {
 	await parent();
 
-	const session = await locals.auth();
-	if (!session) throw redirect(303, '/signin');
+	const session = await locals.safeGetSession();
+	if (!session || !session.user) throw redirect(303, '/signin');
 
 	const pubsRes = await fetch(`/api/publication?publishers=${params.user}`);
 
