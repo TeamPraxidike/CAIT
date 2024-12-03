@@ -80,7 +80,7 @@
 	<link rel="icon" href="/images/favicons/favicon-128.png" sizes="128x128" type="image/png">
 </svelte:head>
 
-<Header />
+<Header supabase={supabase} />
 
 <div class="w-screen dark:text-surface-50 text-surface-900 overflow-x-hidden">
 	<Grid pageGrid="{true}">

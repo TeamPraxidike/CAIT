@@ -78,7 +78,7 @@
 <!--			</SignIn>-->
 <!--		</div>-->
 
-		<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/signup">Create one</a></p>
+		<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/register">Create one</a></p>
 		<div class="{display} text-sm px-2 rounded-lg variant-soft-error text-wrap">
 			<span>{$errorMessage}</span>
 		</div>

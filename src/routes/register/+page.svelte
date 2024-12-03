@@ -3,7 +3,6 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import { goto } from '$app/navigation';
-	import { SignIn } from "@auth/sveltekit/components"
 	import { getToastStore } from '@skeletonlabs/skeleton';
 
 	export let form: ActionData;
@@ -67,12 +66,12 @@
 		<button class="btn rounded-lg mt-4 variant-soft-primary">Register</button>
 		<hr class="my-4 text-surface-200">
 		<div class="self-center">
-			<SignIn provider="github" signInPage="signin">
-				<button slot="submitButton" class="btn rounded-lg bg-surface-800 text-surface-50">
-					<Icon icon="mdi:github" class="text-2xl mr-2" />
-					Register with GitHub
-				</button>
-			</SignIn>
+<!--			<SignIn provider="github" signInPage="signin">-->
+<!--				<button slot="submitButton" class="btn rounded-lg bg-surface-800 text-surface-50">-->
+<!--					<Icon icon="mdi:github" class="text-2xl mr-2" />-->
+<!--					Register with GitHub-->
+<!--				</button>-->
+<!--			</SignIn>-->
 		</div>
 
 		<p class="text-center text-sm mt-2">Already have an account? <a class="anchor text-primary-600" href="/signin">Login</a></p>
