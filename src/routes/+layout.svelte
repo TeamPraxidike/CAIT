@@ -22,7 +22,7 @@
 	import { onMount } from 'svelte';
 
 	export let data;
-	$: ({ session, supabase } = data);
+	$: ({ session, supabase, loggedUser } = data);
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
@@ -80,7 +80,7 @@
 	<link rel="icon" href="/images/favicons/favicon-128.png" sizes="128x128" type="image/png">
 </svelte:head>
 
-<Header supabase={supabase} />
+<Header supabase={supabase} loggedUser={loggedUser} />
 
 <div class="w-screen dark:text-surface-50 text-surface-900 overflow-x-hidden">
 	<Grid pageGrid="{true}">
