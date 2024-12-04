@@ -6,8 +6,16 @@
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
     import type { SupabaseClient } from '@supabase/supabase-js';
+    import type { User } from '@prisma/client';
 
-    export let supabase:SupabaseClient;
+    export let supabase: SupabaseClient;
+    export let loggedUser: {
+        user: User,
+        profilePicData: {
+            data: string;
+            fileId: string;
+        }
+    } | null;
 
     type NavOption = {
         text: string;
@@ -79,9 +87,6 @@
                 <a href="/signin" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
                     Sign In
                 </a>
-<!--                <button on:click={() =>} type="button" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-700 text-surface-50 hover:opacity-60 transition duration-400">-->
-<!--                    Sign In-->
-<!--                </button>-->
             {/if}
             <div class="border-l border-surface-300 h-8"/>
             <div>
@@ -90,21 +95,20 @@
 
             {#if $page.data.session}
                 <div class="border-l border-surface-300 h-8"/>
-<!--                todo: fix profile picture -->
-<!--                <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">-->
-<!--                    {#if $page.data.session}-->
-<!--                        {#if $page.data.session.user.data.startsWith('http')}-->
-<!--                            <img class="h-8 w-8 rounded-full object-cover" src={$page.data.session.userPfp.data} alt={$page.data.session.user.id}/>-->
-<!--                        {:else}-->
-<!--                            <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user.name}/>-->
-<!--                        {/if}-->
-<!--                    {:else}-->
-<!--                        <div class="w-8 h-8 placeholder-circle" />-->
-<!--                    {/if}-->
-<!--                </div>-->
+                <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
+                    {#if loggedUser}
+                        {#if loggedUser.profilePicData.data.startsWith("http")}
+                            <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData.data} alt={$page.data.session.user.id}/>
+                        {:else}
+                            <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData.data} alt={loggedUser.user.firstName}/>
+                        {/if}
+                    {:else}
+                        <div class="w-8 h-8 placeholder-circle" />
+                    {/if}
+                </div>
                 <div data-popup="popupHover">
                     <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
-                    <UserMenu supabase={supabase} device="desktop" />
+                    <UserMenu supabase={supabase} loggedUser={loggedUser} device="desktop" />
                 </div>
             {/if}
         </div>
@@ -129,7 +133,7 @@
 
                 {#if $page.data.session}
                     <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
-                    <UserMenu supabase={supabase} device="mobile" />
+                    <UserMenu supabase={supabase} loggedUser={loggedUser} device="mobile" />
                 {/if}
 
                 <div class="flex justify-between p-2 items-center">
@@ -154,9 +158,6 @@
                         <a href="/signin" class="btn rounded-lg variant-ghost-primary">
                             Sign In
                         </a>
-<!--                        <button on:click={() => signIn()} type="button" class="btn rounded-lg variant-ghost-primary">-->
-<!--                            Sign In-->
-<!--                        </button>-->
                     {/if}
                 </div>
             </div>
