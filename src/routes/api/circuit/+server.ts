@@ -15,19 +15,17 @@ import { verifyAuth } from '$lib/database/auth';
 
 import {
 	enqueueCircuitComparison,
-	enqueueMaterialComparison,
 } from '$lib/PiscinaUtils/runner';
 
 import { profilePicFetcher } from '$lib/database/file';
 
-export async function GET({ locals, url }) {
+export async function GET({ url }) {
 	try {
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
 
 		const p = url.searchParams.get('publishers');
 		const publishers = p ? p.split(',') : [];
-		// const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
 		const limit = Number(url.searchParams.get('limit')) || 0;
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
@@ -41,7 +39,7 @@ export async function GET({ locals, url }) {
 			query,
 		);
 
-		circuits = circuits.map((circuit) => {
+		circuits = circuits.map(circuit => {
 			const filePath = circuit.publication.coverPic!.path;
 
 			const currentFileData = fileSystem.readFile(filePath);
@@ -60,7 +58,7 @@ export async function GET({ locals, url }) {
 		return new Response(
 			JSON.stringify({
 				circuits: circuits.slice(0, amount),
-				idsCirc: circuits.map((c) => c.publicationId),
+				idsCirc: circuits.map(c => c.publicationId),
 			}),
 			{ status: 200 },
 		);
@@ -91,7 +89,7 @@ export async function POST({ request, locals }) {
 
 	try {
 		const createdCircuit = await prisma.$transaction(
-			async (prismaTransaction) => {
+			async (prismaTransaction: any) => {
 				const circuit = await createCircuitPublication(
 					userId,
 					numNodes,

@@ -81,6 +81,7 @@
 		"cytoscape-node-html-label": "^1.2.2",
 		"cytoscape-popper": "^4.0.0",
 		"dotenv": "^16.4.7",
+		"date-fns": "^4.1.0",
 		"fuse.js": "^7.0.0",
 		"fuzzy-search": "^3.2.1",
 		"highlight.js": "11.9.0",

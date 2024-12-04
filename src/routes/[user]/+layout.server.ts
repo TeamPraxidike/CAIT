@@ -8,7 +8,7 @@ import { error, redirect } from '@sveltejs/kit';
  * Examples of slugs: 'john-doe', 'jane-doe', 'jane-smith'
  */
 export const load: LayoutServerLoad = async ({ params, fetch, locals }) => {
-	const session = await locals.auth();
+	const session = await locals.safeGetSession();
 	if (!session) throw redirect(303, '/signin');
 
 	const uRes = await fetch(`/api/user/${params.user}`);

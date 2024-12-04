@@ -12,9 +12,9 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 		savedFileData: [],
 	};
 
-	const session = await locals.auth();
+	const session = await locals.safeGetSession();
 
-	if (session !== null) {
+	if (session && session.user) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
 		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
 
@@ -26,6 +26,7 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 				? await savedResponse.json()
 				: { saved: [], savedFileData: [] };
 	}
+
 	return { tags, users, liked: liked, saved: saved };
 };
 

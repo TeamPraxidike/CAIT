@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { enhance, applyAction } from '$app/forms';
-	import { page } from '$app/stores';
+	import type { User } from '@prisma/client';
 
 	let isFocused = false;
 	let originalHeight: string;
@@ -11,10 +11,11 @@
 	export let commentId = 0;
 	export let display = 'flex';
 	export let publicationId = 0;
+	export let publisher: User & { profilePicData: string };
 
-	let userId = $page.data.session?.user.id || 0;
+	let userId = publisher.id || 0;
 
-	let text = addComment ? 'Comment':'Reply'
+	let text = addComment ? 'Comment' : 'Reply';
 	let commentText = '';
 	let textarea: HTMLTextAreaElement;
 
@@ -47,7 +48,7 @@
 		dispatch an event with info needed to create a placeholder comment and save comment in the database
 	 */
 	function addCommentHandle(content: any) {
-		dispatch('addedReply', {content:content});
+		dispatch('addedReply', { content: content });
 
 		commentText = '';
 		isFocused = false;
@@ -63,7 +64,8 @@
 
 
 <div class="{addComment ? 'col-start-1':'col-start-2'} {display} mb-2 gap-2 col-span-full items-top">
-	<img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + $page.data.session?.userPfp.data} alt="CAIT Logo" />
+	<img class="w-10 h-10 md:w-14 md:h-14 rounded-full border"
+		 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
 	<form method="POST" class="flex-grow" use:enhance={({ formData }) => {
         formData.append('userId',userId.toString());
 				formData.append('isComment', addComment.toString());

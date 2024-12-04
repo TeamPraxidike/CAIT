@@ -5,7 +5,11 @@
     import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
     import { quartOut } from 'svelte/easing';
-    import { signIn, signOut } from '@auth/sveltekit/client';
+    import type { SupabaseClient } from '@supabase/supabase-js';
+    import type { User } from '@prisma/client';
+
+    export let supabase: SupabaseClient;
+    export let loggedUser: User & { profilePicData: string }
 
     type NavOption = {
         text: string;
@@ -43,10 +47,10 @@
         if(url.includes('publish/') || url.includes('edit')){
             const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
             if (confirmation) {
-                signOut()
+                supabase.auth.signOut()
             }
         } else {
-            signOut()
+            supabase.auth.signOut()
         }
     }
 </script>
@@ -74,9 +78,9 @@
                     Publish
                 </a>
             {:else}
-                <button on:click={() => signIn()} type="button" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-700 text-surface-50 hover:opacity-60 transition duration-400">
+                <a href="/signin" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
                     Sign In
-                </button>
+                </a>
             {/if}
             <div class="border-l border-surface-300 h-8"/>
             <div>
@@ -86,11 +90,11 @@
             {#if $page.data.session}
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
-                    {#if $page.data.session}
-                        {#if $page.data.session.userPfp.data.startsWith('http')}
-                            <img class="h-8 w-8 rounded-full object-cover" src={$page.data.session.userPfp.data} alt={$page.data.session.user.name}/>
+                    {#if loggedUser}
+                        {#if loggedUser.profilePicData.startsWith("http")}
+                            <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData} alt={$page.data.session.user.id}/>
                         {:else}
-                            <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user.name}/>
+                            <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>
                         {/if}
                     {:else}
                         <div class="w-8 h-8 placeholder-circle" />
@@ -98,7 +102,7 @@
                 </div>
                 <div data-popup="popupHover">
                     <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
-                    <UserMenu device="desktop" />
+                    <UserMenu supabase={supabase} loggedUser={loggedUser} device="desktop" />
                 </div>
             {/if}
         </div>
@@ -123,7 +127,7 @@
 
                 {#if $page.data.session}
                     <!-- INNER DIV IS NEEDED TO AVOID STYLING CONFLICTS WITH THE data-popup  -->
-                    <UserMenu device="mobile" />
+                    <UserMenu supabase={supabase} loggedUser={loggedUser} device="mobile" />
                 {/if}
 
                 <div class="flex justify-between p-2 items-center">
@@ -145,9 +149,9 @@
                             <button on:click={handleSignOut} class="anchor col-start-2">Log out</button>
                         </div>
                     {:else}
-                        <button on:click={() => signIn()} type="button" class="btn rounded-lg variant-ghost-primary">
+                        <a href="/signin" class="btn rounded-lg variant-ghost-primary">
                             Sign In
-                        </button>
+                        </a>
                     {/if}
                 </div>
             </div>
