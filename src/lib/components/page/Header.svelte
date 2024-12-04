@@ -9,13 +9,7 @@
     import type { User } from '@prisma/client';
 
     export let supabase: SupabaseClient;
-    export let loggedUser: {
-        user: User,
-        profilePicData: {
-            data: string;
-            fileId: string;
-        }
-    } | null;
+    export let loggedUser: User & { profilePicData: string }
 
     type NavOption = {
         text: string;
@@ -97,10 +91,10 @@
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                     {#if loggedUser}
-                        {#if loggedUser.profilePicData.data.startsWith("http")}
-                            <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData.data} alt={$page.data.session.user.id}/>
+                        {#if loggedUser.profilePicData.startsWith("http")}
+                            <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData} alt={$page.data.session.user.id}/>
                         {:else}
-                            <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData.data} alt={loggedUser.user.firstName}/>
+                            <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>
                         {/if}
                     {:else}
                         <div class="w-8 h-8 placeholder-circle" />

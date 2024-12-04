@@ -4,14 +4,8 @@
     import type { SupabaseClient } from '@supabase/supabase-js';
     import type { User } from '@prisma/client';
 
-    export let supabase:SupabaseClient;
-    export let loggedUser: {
-        user: User,
-        profilePicData: {
-            data: string;
-            fileId: string;
-        }
-    } | null;
+    export let supabase: SupabaseClient;
+    export let loggedUser: User & { profilePicData: string };
 
     export let device: 'mobile' | 'desktop';
 
@@ -44,13 +38,13 @@
     <div class="grid grid-cols-2">
         <a href="/{$page.data.session?.user.id}"  on:click={confirmPublishReset}
            class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
-            {#if $page.data.session && loggedUser?.profilePicData.data !== ''}
-                <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser?.profilePicData.data} alt={loggedUser?.user.firstName}/>
+            {#if $page.data.session && loggedUser?.profilePicData !== ''}
+                <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser?.profilePicData} alt={loggedUser?.firstName}/>
             {:else}
                 <div class="h-16 w-16 placeholder-circle object-cover" />
             {/if}
             <div class="flex flex-col">
-                <span>{loggedUser?.user.firstName}</span>
+                <span>{loggedUser?.firstName}</span>
                 <span class="text-sm">Go to profile</span>
             </div>
         </a>
@@ -68,12 +62,12 @@
                class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1
                   dark:hover:bg-surface-700">
                 {#if $page.data.session}
-                    <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser?.profilePicData.data} alt={loggedUser?.user.firstName}/>
+                    <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser?.profilePicData} alt={loggedUser?.firstName}/>
                 {:else}
                     <div class="h-16 w-16 placeholder-circle" />
                 {/if}
                 <div class="flex flex-col">
-                    <span>{loggedUser?.user.firstName}</span>
+                    <span>{loggedUser?.firstName}</span>
                     <span class="text-sm">Go to profile</span>
                 </div>
             </a>

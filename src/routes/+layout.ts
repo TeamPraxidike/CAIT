@@ -41,11 +41,14 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 	} = await supabase.auth.getUser();
 
 	const loggedUserResp = await fetch(`/api/user/${session?.user.id}`);
+	const loggedUserBody = loggedUserResp.status === 200 ? await loggedUserResp.json() : null;
 
-	const loggedUser: {
-		user: User;
-		profilePicData: { data: string; fileId: string }
-	} | null = (loggedUserResp.status !== 200) ? null : await loggedUserResp.json();
-
+	const loggedUser: (User & { profilePicData: string }) | null = loggedUserBody
+		? {
+			...loggedUserBody.user,
+			profilePicData: loggedUserBody.profilePicData.data
+		}
+		: null;
+	
 	return { session, supabase, user, loggedUser };
 };
