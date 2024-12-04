@@ -16,6 +16,7 @@ import { verifyAuth } from '$lib/database/auth';
 /**
  * Returns a user by id
  * @param params
+ * @param locals
  */
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -45,6 +46,7 @@ export async function GET({ params, locals }) {
 /**
  * Deletes a user by id
  * @param params
+ * @param locals
  */
 export async function DELETE({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -53,7 +55,7 @@ export async function DELETE({ params, locals }) {
 	const { id: userId } = params;
 
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction) => {
+		const user = await prisma.$transaction(async (prismaTransaction: any) => {
 			const user = await deleteUser(userId, prismaTransaction);
 
 			// check if user has profilePic
@@ -92,6 +94,7 @@ export async function DELETE({ params, locals }) {
  * Edits a user by id
  * @param params
  * @param request
+ * @param locals
  */
 export async function PUT({ params, request, locals }) {
 	const authError = await verifyAuth(locals);
@@ -99,7 +102,7 @@ export async function PUT({ params, request, locals }) {
 
 	const body: UserForm = await request.json();
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction) => {
+		const user = await prisma.$transaction(async (prismaTransaction: any) => {
 			const userData: userEditData = {
 				id: params.id,
 				firstName: body.metaData.firstName,
