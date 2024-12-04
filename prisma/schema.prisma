@@ -35,11 +35,12 @@ enum PublicationType {
 }
 
 model User {
-  id            String    @id @default(dbgenerated("gen_random_uuid()"))
+  id            String    @id @default(uuid()) @db.Uuid
   firstName     String
   lastName      String
-  username      String    @unique @default(uuid())
-  email         String    @unique
+  kurva         String?
+  username      String    @unique @default(dbgenerated("gen_random_uuid()"))
+  email         String    @unique @default("noemail@abv.bg")
   emailVerified DateTime?
   reputation    Int       @default(0)
   password      String? // hashed password
@@ -64,7 +65,7 @@ model User {
 
 model PublicationUsedInCourse {
   // the user that is using the publication
-  userId String
+  userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int
@@ -91,7 +92,7 @@ model Publication {
   comments Comment[]
 
   publisher   User   @relation(fields: [publisherId], references: [id], onDelete: Cascade)
-  publisherId String
+  publisherId String @db.Uuid
   savedBy     User[] @relation("saved")
   likedBy     User[] @relation("liked")
 
@@ -141,7 +142,7 @@ model File {
   type  String
   text  String?
 
-  userId     String? @unique
+  userId     String? @unique @db.Uuid
   profilePic User?   @relation("ProfilePic", fields: [userId], references: [id], onDelete: Cascade)
 
   publicationId Int?         @unique
@@ -201,7 +202,7 @@ model Comment {
   publicationId Int
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
-  userId String
+  userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   replies   Reply[]
@@ -218,7 +219,7 @@ model Reply {
   commentId Int
   comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
-  userId String
+  userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   likes   Int    @default(0)

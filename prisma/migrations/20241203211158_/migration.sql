@@ -9,7 +9,7 @@ CREATE TYPE "PublicationType" AS ENUM ('Material', 'Circuit');
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "username" TEXT NOT NULL,
