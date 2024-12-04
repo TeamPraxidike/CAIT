@@ -11,17 +11,27 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-  register: async ({ request, locals: { supabase } }) => {
-    const formData = await request.formData()
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
+	register: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = formData.get('email') as string;
+		const password = formData.get('password') as string;
 
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      console.error(error)
-      redirect(303, '/signin/error')
-    } else {
-      redirect(303, '/')
-    }
-  },
-}
+		const { error } = await supabase.auth.signUp({
+			email,
+			password,
+			options: {
+				data: {
+					firstName: formData.get('firstName'),
+					lastName: formData.get('lastName')
+				}
+			}
+		});
+
+		if (error) {
+			console.error(error);
+			redirect(303, '/signin/error');
+		} else {
+			redirect(303, '/');
+		}
+	}
+};
