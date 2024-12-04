@@ -6,5 +6,5 @@ ENV=$(grep -v '^#' .env | xargs)                                           # loa
 #echo '🟡 - Waiting for database to be ready...'                            # wait for the database to be ready
 #"$DIR"/wait-for-it.sh "${DATABASE_URL}" -- echo '🟢 - Database is ready!'  # wait for the database to be ready
 
-npx prisma migrate dev --name dev                                          # run the migrations
+npx prisma migrate dev && npx tsx ./scripts/seedTriggers.ts                        # run the migrations
 npx vite dev                                                               # start the development server

@@ -20,8 +20,8 @@ async function main() {
         VALUES (
                    NEW.id,
                    NEW.email,
-                   'opa',
-                   'bratlenceto'
+                   new.raw_user_meta_data ->> 'firstName',
+				   new.raw_user_meta_data ->> 'lastName'
                );
         RETURN NEW;
         END;
