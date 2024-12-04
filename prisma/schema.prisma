@@ -39,10 +39,10 @@ model User {
   firstName     String
   lastName      String
   username      String    @unique @default(uuid())
-  email         String    @unique
-  emailVerified DateTime?
+  email         String    @unique // TODO: REMOVE THIS
+  emailVerified DateTime? // TODO: REMOVE THIS
   reputation    Int       @default(0)
-  password      String? // hashed password
+  password      String? // hashed password    // TODO: REMOVE THIS
   aboutMe       String    @default("")
 
   saved            Publication[]             @relation("saved")

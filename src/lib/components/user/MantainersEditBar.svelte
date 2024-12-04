@@ -13,7 +13,8 @@
 	let uid = $page.data.session?.user.id || 0;
 	type UserWithProfilePic = User & { profilePicData: string };
 	export let publisher: UserWithProfilePic
-
+	
+	// todo: ask bobby and remove if unnecessary.
 	// let p = $page.data.session?.user as User & {profilePic: string};
 	// let publisher = {
 	// 	id: p.id,

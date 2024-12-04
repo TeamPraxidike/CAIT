@@ -13,6 +13,7 @@
 	export let maintainers: UserWithProfilePic[];
 	export let publisher: UserWithProfilePic;
 
+	// todo: ask bobby and remove if unnecessary.
 	// let p = $page.data.session?.user as User & {profilePic: string};
 	// let publisher = {
 	// 	id: p.id,

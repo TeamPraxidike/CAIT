@@ -7,7 +7,7 @@ export const verifyAuth = async (locals: App.Locals) => {
 	return null;
 };
 
-// TODO: ALLOW MAINTAINERS AND ADMINS TO EDIT, RIGHT NOW EVERYONE CAN!
+// TODO: ALLOW MAINTAINERS TO EDIT
 export const canEdit = async (locals: App.Locals, ownerId: string) => {
 	if (process.env.NODE_ENV === 'test') return true;
 
@@ -23,7 +23,7 @@ export const canRemove = async (locals: App.Locals, ownerId: string) => {
 	const session = await locals.safeGetSession();
 	if (!session || !session.user) return false;
 
-	// supabase admin check
+	// supabase check if admin
 	// if (session.user.role) return true;
 
 	return session.user.id === ownerId;
