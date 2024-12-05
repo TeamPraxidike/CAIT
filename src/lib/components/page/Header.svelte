@@ -53,6 +53,8 @@
             supabase.auth.signOut()
         }
     }
+
+    const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
 </script>
 
 <header class="w-screen shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none overflow-x-hidden">
@@ -90,10 +92,11 @@
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                     {#if loggedUser}
+                        <!--????????-->
                         {#if loggedUser.profilePicData.startsWith("http")}
                             <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData} alt={$page.data.session.user.id}/>
                         {:else}
-                            <img class="h-8 w-8 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>
+                            <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData ? `data:image;base64,${loggedUser.profilePicData}` : defaultProfilePicturePath} alt={loggedUser.firstName}/>
                         {/if}
                     {:else}
                         <div class="w-8 h-8 placeholder-circle" />

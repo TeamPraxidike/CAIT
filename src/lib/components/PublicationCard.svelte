@@ -40,7 +40,7 @@
 	export let liked: boolean = true;
 	export let saved: boolean = true;
 	export let tags: string[] = publication.tags.map(tag => tag.content);
-	export let imgSrc: string;
+	export let imgSrc: string | null;
 	export let markAsUsed: boolean = false;
 	export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
@@ -210,7 +210,11 @@
 			setTimeout(()=>{isClickedTags=false},10000);
 		}
 	}
+
+	const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
+	const defaultCoverPicturePath = "/static/defaultCoverPic/assignment.jpg"
 </script>
+
 <div class="{className} flex items-center">
 	{#if forArrow}
 		<div class="carrow shadow-lg"/>
@@ -226,7 +230,7 @@
 			{/if}
 			<a href="../{publication.publisherId}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}"
 			   on:click={resetTab}>
-				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc} alt="" />
+				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc ? `data:image;base64,${imgSrc}` : defaultCoverPicturePath } alt="" />
 			</a>
 		</div>
 		<div class="flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
@@ -346,7 +350,7 @@
 							<div bind:this={pfpElement} class="relative inline-flex items-center">
 								<a href="/{publication.publisherId}" class="flex-none">
 									<img class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
-										 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
+										 src={publisher.profilePicData ? `data:image;base64,${publisher.profilePicData}` : defaultProfilePicturePath} alt="CAIT Logo" />
 								</a>
 								{#if isHoveredPfp}
 									<div

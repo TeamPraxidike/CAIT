@@ -60,12 +60,15 @@
 	})
 	;
 
+	const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
+
 </script>
 
 
 <div class="{addComment ? 'col-start-1':'col-start-2'} {display} mb-2 gap-2 col-span-full items-top">
 	<img class="w-10 h-10 md:w-14 md:h-14 rounded-full border"
-		 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
+		 src={publisher.profilePicData ? `data:image;base64,${publisher.profilePicData}` : defaultProfilePicturePath}
+		 alt="CAIT Logo" />
 	<form method="POST" class="flex-grow" use:enhance={({ formData }) => {
         formData.append('userId',userId.toString());
 				formData.append('isComment', addComment.toString());

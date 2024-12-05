@@ -48,10 +48,10 @@
 
 <p class="text-lg pl-3">Maintainers:</p>
 <div class="flex flex-wrap gap-2 pl-3">
-	<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={'data:image;base64,' + publisher.profilePicData}/>
+	<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={publisher.profilePicData}/>
 	{#each maintainers as maintainer (maintainer.id)}
 		<UserProp user={maintainer} view="publish"
-							role="Publisher" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
+							role="Publisher" userPhotoUrl={maintainer.profilePicData} />
 	{/each}
 </div>
 

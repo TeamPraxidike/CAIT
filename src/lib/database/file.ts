@@ -9,6 +9,8 @@ import type { File as PrismaFile } from '@prisma/client';
 import path from 'path';
 import fs from 'fs';
 
+
+// TODO: This seems to be useless, could remove if nothing breaks
 export async function bufToBase64(files: FetchedFileArray) {
 	// If JSON stringify cannot handle raw Buffer, use this:
 	return files.map((file) => ({
@@ -22,13 +24,18 @@ export function profilePicFetcher(profilePic: PrismaFile | null) {
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
 	if (!profilePic) {
+
+		// TODO: Let frontend handle this, just return null and use static content as usual
+
 		filePath = path.join('static', 'defaultProfilePic', 'profile.jpg');
 
-		const currentFileData = fs.readFileSync(filePath);
+		//const currentFileData = fs.readFileSync(filePath);
+		//const currentFileData = fileSystem.readFile(filePath);
 
 		return {
 			fileId: filePath,
-			data: currentFileData.toString('base64'),
+			//data: currentFileData.toString('base64'),
+			data: null
 		};
 	} else {
 		// since photo is defined, read the file based on the path (just like a File)
@@ -55,17 +62,24 @@ export function coverPicFetcher(
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
 	if (!coverPic) {
+
+		// TODO: Figure out if this picture is good enough for default
+
+		// TODO: Let frontend handle this, just return null and use static content as usual
+
 		filePath = path.join(
 			'static',
 			'defaultCoverPic',
 			'assignment' + '.jpg',
 		);
 
-		const currentFileData = fs.readFileSync(filePath);
+		//const currentFileData = fs.readFileSync(filePath);
+		//const currentFileData = fileSystem.readFile(filePath);
 
 		return {
 			fileId: filePath,
-			data: currentFileData.toString('base64'),
+			//data: currentFileData.toString('base64'),
+			data: null
 		};
 	} else {
 		// since photo is defined, read the file based on the path (just like a File)

@@ -11,7 +11,7 @@
     export let interaction: Comment | Reply;
     export let isReply: boolean;
     export let liked:boolean;
-    export let photoUrl: string;
+    export let photoUrl: string | null;
     export let commenter: User & { profilePicData: string };
 
     //for now, here, we need to fetch it for each comment, which is kind of pain, but sure
@@ -194,12 +194,17 @@
         },
         closeQuery: '#copyButton'
     }
+
+    const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
 </script>
 
 
     <div bind:this={commentDiv}
      class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full  rounded-lg flex gap-2 p-1 ">
-        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />
+<!--        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />-->
+        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border"
+             src={photoUrl ? `data:image;base64,${photoUrl}` : defaultProfilePicturePath}
+             alt="Profile Picture" />
         <div class="flex flex-col w-full">
 
         <div class="flex gap-3 items-center max-w-full">

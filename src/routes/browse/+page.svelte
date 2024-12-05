@@ -284,6 +284,8 @@
 			paginationSettings.limit = amount
 			paginationSettings.page = 0
 		}
+
+		const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
@@ -372,7 +374,13 @@
                 <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Publishers:</p>
                 {#each selectedPublishers as sp}
                     <div class="flex gap-1 items-center">
-												<img src="{'data:image;base64,' + users.filter(x =>x.id === sp.id)[0].profilePicData}" alt="user profile" class="size-4 rounded-full"/>
+<!--												<img src="{'data:image;base64,' + users.filter(x =>x.id === sp.id)[0].profilePicData}" -->
+<!--													 alt="user profile" class="size-4 rounded-full"/>-->
+<!--					 TODO: please change                                                             -->
+						<img src={users.filter(x =>x.id === sp.id)[0].profilePicData
+						? 'data:image;base64,' + users.filter(x =>x.id === sp.id)[0].profilePicData
+						: defaultProfilePicturePath}
+							 alt="user profile" class="size-4 rounded-full"/>
                         <p class="text-xs">{sp.content}</p>
                         <button class="h-full" on:click={() => removePublisher(sp)}>
                             <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
@@ -425,7 +433,7 @@
 		{#if pageType === "materials"}
 			{#each materials as material (material.id)}
 				<PublicationCard extensions="{getExtensions(material)}"
-								 imgSrc={'data:image;base64,' + material.coverPicData}
+								 imgSrc={material.coverPicData}
 								 publication={material.publication}
 								 liked={liked.includes(material.publication.id)}
 								 saved={saved.includes(material.publication.id)}
@@ -436,12 +444,12 @@
 		{:else if pageType === "people"}
 			{#each users as person (person.id)}
 				<UserProp view="search" posts="{person.posts.length}"
-						  userPhotoUrl={'data:image;base64,' +  person.profilePicData} role="Maintainer" user={person} />
+						  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
 			{/each}
 		{:else if pageType === "circuits"}
 			{#each circuits as circuit (circuit.id)}
 				<PublicationCard  publication="{circuit.publication}"
-								  imgSrc= {'data:image;base64,' + circuit.coverPicData}
+								  imgSrc= {circuit.coverPicData}
 								  liked={liked.includes(circuit.publication.id)}
 								  saved={saved.includes(circuit.publication.id)}
 								  publisher={circuit.publisher}/>

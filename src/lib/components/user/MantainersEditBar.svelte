@@ -11,7 +11,7 @@
 	export let searchableUsers = users;
 	let display = 'hidden';
 	let uid = $page.data.session?.user.id || 0;
-	type UserWithProfilePic = User & { profilePicData: string };
+	type UserWithProfilePic = User & { profilePicData: string | null};
 	export let publisher: UserWithProfilePic
 	
 	// todo: ask bobby and remove if unnecessary.
@@ -92,10 +92,10 @@
 <div class="flex flex-col gap-2 w-full p-3">
 	<span>Maintainers:</span>
 	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
-		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={'data:image;base64,' + publisher.profilePicData}/>
+		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={publisher.profilePicData}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
-								role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData} />
+								role="Maintainer" userPhotoUrl={maintainer.profilePicData} />
 		{/each}
 
 		<button type="button" name="add_maintainer" use:popup={popupAdd} class="btn rounded-lg hover:bg-opacity-85 text-center" >

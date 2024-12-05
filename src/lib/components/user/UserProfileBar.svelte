@@ -10,6 +10,8 @@
      * Check if the current user is the same as the user being viewed.
      */
     const currentlyAuth = () => $page.data.session?.user.id === user.id;
+
+    const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
 </script>
 
 <div class="col-span-4 flex flex-col items-center gap-2 text-surface-800 rounded-b-lg pb-4 border border-surface-300 border-t-0 self-start
@@ -18,11 +20,13 @@
             lg:col-span-12 lg:px-4
             xl:col-span-3
             dark:bg-surface-800 dark:text-surface-50 dark:border-none">
-    {#if userPhotoUrl !== ''}
-        <img src={userPhotoUrl} alt="User Profile" class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full object-cover" />
-    {:else}
-        <div class="w-20 h-20 md:w-40 md:h-40 rounded-full bg-surface-500 placeholder-circle" />
-    {/if}
+    <!--{#if userPhotoUrl !== ''}-->
+    <!--    <img src={userPhotoUrl} alt="User Profile" class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full object-cover" />-->
+    <!--{:else}-->
+    <!--    <div class="w-20 h-20 md:w-40 md:h-40 rounded-full bg-surface-500 placeholder-circle" />-->
+    <!--{/if}-->
+    <img src={userPhotoUrl ? `data:image;base64,${userPhotoUrl}` : defaultProfilePicturePath }
+         class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full object-cover" />
     <div class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
                 sm:flex-col sm:items-start
                 md:w-7/12 md:justify-start

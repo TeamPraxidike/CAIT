@@ -587,11 +587,11 @@
 			{/if}
 			<div class="flex gap-2">
 				<UserProp role="Publisher"
-						  userPhotoUrl={'data:image;base64,' + pubView.publication.publisher.profilePicData}
+						  userPhotoUrl={pubView.publication.publisher.profilePicData}
 						  view="material"
 						  bind:user={pubView.publication.publisher} />
 				{#each pubView.publication.maintainers as maintainer}
-					<UserProp role="Maintainer" userPhotoUrl={'data:image;base64,' + maintainer.profilePicData}
+					<UserProp role="Maintainer" userPhotoUrl={maintainer.profilePicData}
 							  view="material" user={maintainer} />
 				{/each}
 			</div>

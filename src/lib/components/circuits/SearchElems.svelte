@@ -271,20 +271,20 @@
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
 													 extensions="{getExtensions(m)}"
 													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher} materialType={m.encapsulatingType}/>
+													 on:removed={removeCard} imgSrc={m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher} materialType={m.encapsulatingType}/>
 				{/each}
 				{:else if chosenOption===1}
 					{#each circuits as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
 					selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
-					on:removed={removeCard} imgSrc={'data:image;base64,' + m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
+					on:removed={removeCard} imgSrc={m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
 					{/each}
 			{:else if (chosenOption===2 || chosenOption===3)}
 				{#each publications as p}
 					<PublicationCard publication="{p}" inCircuits="{true}"
 													 extensions="{getExtensions(p.materials)}"
 													 selected="{selectedIds.has(p.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={'data:image;base64,' + p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher} materialType={p.type === PublicationType.Circuit ? MaterialType.other: p.materials.encapsulatingType}/>
+													 on:removed={removeCard} imgSrc={p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher} materialType={p.type === PublicationType.Circuit ? MaterialType.other: p.materials.encapsulatingType}/>
 
 				{/each}
 			{/if}

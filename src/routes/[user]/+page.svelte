@@ -44,7 +44,7 @@
 
 <Meta title="Profile" description="CAIT" type="site" />
 
-<UserProfileBar user={user} userPhotoUrl={'data:image;base64,' + profilePic.data} />
+<UserProfileBar user={user} userPhotoUrl={profilePic.data} />
 
 <div class="col-span-8">
     {#if $page.data.session?.user.id === user.id}
@@ -61,7 +61,7 @@
                         {#if saved.length !== 0}
                             {#each saved as publication}
                                 <div class="col-span-1">
-                                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
+                                    <PublicationCard imgSrc={publication.coverPicData}
                                                      {publication} liked={liked.includes(publication.id)}
                                                      markAsUsed={true}
                                                      courses={publication.usedInCourse.map(x => x.course)}
@@ -78,7 +78,7 @@
                         <div class="grid grid-cols-2 gap-4">
                         {#each posts as publication, i}
                             <div class="col-span-1">
-                            <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
+                            <PublicationCard imgSrc={publication.coverPicData}
                                              publication={publication}
                                              liked={liked.includes(publication.id)}
                                              courses={posts[i].usedInCourse.map(x => x.course)}
@@ -101,7 +101,7 @@
             {:else}
                 <div class="grid grid-cols-2 gap-4">
                 {#each posts as publication, i}
-                    <PublicationCard imgSrc={'data:image;base64,' + publication.coverPicData}
+                    <PublicationCard imgSrc={publication.coverPicData}
                                      publication={publication}
                                      liked={liked.includes(publication.id)}
                                      courses={posts[i].usedInCourse.map(x => x.course)}
