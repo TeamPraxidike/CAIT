@@ -54,13 +54,13 @@
         }
     }
 
-    const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
+    const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 <header class="w-screen shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none overflow-x-hidden">
     <Grid>
         <a href="/" class = "col-start-1" on:click={confirmPublishReset}>
-            <enhanced:img class="h-16 w-16 md:hidden" src="/static/images/favicons/favicon-128.png" alt="CAIT Logo"/>
+            <enhanced:img class="h-16 w-16" src="/static/images/favicons/favicon-128.png" alt="CAIT Logo"/>
         </a>
 
         <div class="hidden col-start-2 col-span-7 gap-6 lg:gap-12 items-center md:flex">
@@ -93,11 +93,14 @@
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                     {#if loggedUser}
                         <!--????????-->
-                        {#if loggedUser.profilePicData.startsWith("http")}
-                            <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData} alt={$page.data.session.user.id}/>
-                        {:else}
-                            <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData ? `data:image;base64,${loggedUser.profilePicData}` : defaultProfilePicturePath} alt={loggedUser.firstName}/>
-                        {/if}
+                        <!--{#if loggedUser.profilePicData.startsWith("http")}-->
+                        <!--    <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData} alt={$page.data.session.user.id}/>-->
+                        <!--{:else}-->
+                        <!--    <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData ? `data:image;base64,${loggedUser.profilePicData}` : defaultProfilePicturePath} alt={loggedUser.firstName}/>-->
+                        <!--{/if}-->
+                        <img class="h-8 w-8 rounded-full object-cover" src={loggedUser.profilePicData
+                        ? `data:image;base64,${loggedUser.profilePicData}`
+                        : defaultProfilePicturePath} alt={loggedUser.firstName}/>
                     {:else}
                         <div class="w-8 h-8 placeholder-circle" />
                     {/if}

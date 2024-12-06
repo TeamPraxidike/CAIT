@@ -11,7 +11,7 @@
 	export let userPhotoUrl: string | null;
 	export let role: 'Maintainer' | 'Publisher' | null;
 
-	const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
+	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 
 	const randomNumber = Math.floor(Math.random() * 1000);
 	let hoverName = '' + user.id + randomNumber;

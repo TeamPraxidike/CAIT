@@ -200,7 +200,8 @@ type NodeDiffActions = {
 	next: { fromId: number; toId: number[] }[];
 };
 
-export const basePath = path.join('static', 'uploadedFiles');
+//export const basePath = path.join('static', 'uploadedFiles');
+export const basePath = "uploadedFiles"
 export const fileSystem = new LocalFileSystem(basePath);
 
 export {

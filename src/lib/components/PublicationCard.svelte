@@ -211,8 +211,8 @@
 		}
 	}
 
-	const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
-	const defaultCoverPicturePath = "/static/defaultCoverPic/assignment.jpg"
+	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
+	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
 </script>
 
 <div class="{className} flex items-center">

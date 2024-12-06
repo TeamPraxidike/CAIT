@@ -195,7 +195,7 @@
         closeQuery: '#copyButton'
     }
 
-    const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
+    const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 

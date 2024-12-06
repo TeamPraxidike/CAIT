@@ -11,7 +11,7 @@
      */
     const currentlyAuth = () => $page.data.session?.user.id === user.id;
 
-    const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
+    const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 <div class="col-span-4 flex flex-col items-center gap-2 text-surface-800 rounded-b-lg pb-4 border border-surface-300 border-t-0 self-start

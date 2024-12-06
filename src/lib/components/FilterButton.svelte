@@ -46,7 +46,7 @@
 		dispatch("update", {idval : idValue})
 	}
 
-	const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
+	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 

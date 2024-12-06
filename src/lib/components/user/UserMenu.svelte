@@ -5,7 +5,7 @@
     import type { User } from '@prisma/client';
 
     export let supabase: SupabaseClient;
-    export let loggedUser: User & { profilePicData: string };
+    export let loggedUser: User & { profilePicData: string | null };
 
     export let device: 'mobile' | 'desktop';
 
@@ -32,6 +32,8 @@
         }
     }
 
+    const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
+
 </script>
 
 {#if loggedUser}
@@ -39,11 +41,14 @@
         <div class="grid grid-cols-2">
             <a href="/{loggedUser.id}"  on:click={confirmPublishReset}
                class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
-                {#if loggedUser.profilePicData !== ''}
-                    <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>
-                {:else}
-                    <div class="h-16 w-16 placeholder-circle object-cover" />
-                {/if}
+                <!--{#if loggedUser.profilePicData !== ''}-->
+                <!--    <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>-->
+                <!--{:else}-->
+                <!--    <div class="h-16 w-16 placeholder-circle object-cover" />-->
+                <!--{/if}-->
+                <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
+                ? `data:image;base64,${loggedUser.profilePicData}`
+                : defaultProfilePicturePath} alt={loggedUser.firstName}/>
                 <div class="flex flex-col">
                     <span>{loggedUser.firstName}</span>
                     <span class="text-sm">Go to profile</span>
@@ -63,9 +68,15 @@
                    class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1
                       dark:hover:bg-surface-700">
                     {#if $page.data.session}
-                        <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>
+<!--                        <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>-->
+                        <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
+                        ? `data:image;base64,${loggedUser.profilePicData}`
+                        : defaultProfilePicturePath} alt={loggedUser.firstName}/>
                     {:else}
-                        <div class="h-16 w-16 placeholder-circle" />
+<!--                        <div class="h-16 w-16 placeholder-circle" />-->
+                        <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
+                        ? `data:image;base64,${loggedUser.profilePicData}`
+                        : defaultProfilePicturePath} alt={loggedUser.firstName}/>
                     {/if}
                     <div class="flex flex-col">
                         <span>{loggedUser.firstName}</span>

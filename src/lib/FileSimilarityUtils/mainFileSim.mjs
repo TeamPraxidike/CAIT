@@ -3,7 +3,8 @@ import {reader} from './reader.mjs';
 import {calculateTfIdf, preprocessText} from './textProcessor.mjs';
 import path from 'path';
 
-const basePath = path.join('static', 'uploadedFiles');
+//const basePath = path.join('static', 'uploadedFiles');
+const basePath = "uploadedFiles"
 
 /**
  * Main method that returns the similarity between two sets of files

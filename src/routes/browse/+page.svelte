@@ -285,7 +285,7 @@
 			paginationSettings.page = 0
 		}
 
-		const defaultProfilePicturePath = "/static/defaultProfilePic/profile.jpg"
+		const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
