@@ -1,5 +1,8 @@
 import { getPublicationById } from './db';
 
+import { SERVICE_ROLE_KEY } from '$env/static/private';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+
 import {
 	getMaterialByPublicationId,
 	getAllMaterials,
@@ -100,6 +103,7 @@ import { prisma } from './prisma';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { Difficulty, MaterialType } from '@prisma/client';
 import path from 'path';
+import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 
 /**
  * MaterialForm is the type of the form data that is sent to the server when creating a new material.
@@ -201,7 +205,8 @@ type NodeDiffActions = {
 
 //export const basePath = path.join('static', 'uploadedFiles');
 export const basePath = "uploadedFiles"
-export const fileSystem = new LocalFileSystem(basePath);
+//export const fileSystem = new LocalFileSystem(basePath);
+export const fileSystem = new SupabaseFileSystem(PUBLIC_SUPABASE_URL, SERVICE_ROLE_KEY, basePath)
 
 export {
 	prisma,

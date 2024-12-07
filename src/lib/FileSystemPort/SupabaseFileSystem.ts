@@ -8,7 +8,7 @@ export class SupabaseFileSystem implements FileSystem {
 	private readonly bucketName: string;
 	private supabase: ReturnType<typeof createClient>;
 
-	constructor(supabaseUrl: string, supabaseKey: string, bucketName = 'uploadedFiles') {
+	constructor(supabaseUrl: string, supabaseKey: string, bucketName: string) {
 		this.supabaseUrl = supabaseUrl;
 		this.supabaseKey = supabaseKey;
 		this.bucketName = bucketName;

@@ -64,7 +64,7 @@ type UserPfp = User & {
  */
 export type PublicationView = {
 	isMaterial: boolean;
-	fileData: FetchedFileArray;
+	//fileData: Promise<FetchedFileArray>;
 	publication: Publication & {
 		usedInCourse: { course: string }[];
 		tags: Tag[];

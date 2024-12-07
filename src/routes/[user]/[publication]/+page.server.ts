@@ -1,5 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
 import type { FetchedFileArray } from '$lib/database';
+import { createFileList } from '$lib/util/file';
 
 export const load: PageServerLoad = async ({
 	parent,
@@ -16,6 +17,8 @@ export const load: PageServerLoad = async ({
 		savedFileData: [],
 	};
 	let reported: boolean = false;
+
+	// TODO: review this if statement -> does it need to encapsulate the methods below it too?
 
 	if (session && session.user) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
@@ -34,15 +37,57 @@ export const load: PageServerLoad = async ({
 		);
 		reported = await reportedResponse.json();
 	}
-	const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
-	const circuitsPubAppearIn = await circuitRes.json();
 
-	const similarRes = await fetch(
-		`/api/publication/${params.publication}/similar`,
-	);
-	const similarPublications = await similarRes.json();
+	// Gets circuits that contain the current publication
+	// Todo: change hideous api path -> what does "all" mean??
+	async function getCircuitsThatContainPub() {
+		const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
+		const circuitsPubAppearIn = await circuitRes.json();
 
-	return { circuitsPubAppearIn, similarPublications, liked, saved, reported };
+		return circuitsPubAppearIn
+	}
+
+
+	// Gets similar publications
+	async function getSimilar(){
+		const similarRes = await fetch(
+			`/api/publication/${params.publication}/similar`,
+		);
+		const similarPublications = await similarRes.json();
+
+		return similarPublications
+	}
+
+
+	// This fetches the files for a material publication
+	// Utilizes "Streaming with promises" in SvelteKit
+	async function fetchFiles() {
+		try {
+			const res = await fetch(`/api/material/${params.publication}/files`);
+			if (!res.ok && res.status === 404) {
+				// it is not a material publication, possible so we handle gracefully
+				return null;
+			}
+			else if (!res.ok){
+				// something definitely went wrong here
+				throw new Error(`Failed to load files: ${res.statusText}`);
+			}
+			const fileData = await res.json();
+
+			return fileData;
+		} catch (err) {
+			console.error('Error while getting files, page.server:\n', err);
+		}
+	}
+
+	return {
+		circuitsPubAppearIn: getCircuitsThatContainPub(),
+		similarPublications: getSimilar(),
+		fetchedFiles: fetchFiles(),
+		liked: liked,
+		saved: saved,
+		reported: reported
+	};
 };
 
 export const actions = {

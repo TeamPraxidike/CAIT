@@ -68,15 +68,25 @@ export async function GET({ params }) {
 		}));
 
 		if (publication.materials) {
-			const fileData: FetchedFileArray = [];
+			//const fileData: FetchedFileArray = [];
 
-			for (const file of publication.materials.files) {
-				const currentFileData = await fileSystem.readFile(file.path);
-				fileData.push({
-					fileId: file.path,
-					data: currentFileData.toString('base64'),
-				});
-			}
+			//for (const file of publication.materials.files) {
+				//const currentFileData = await fileSystem.readFile(file.path);
+				// fileData.push({
+				// 	fileId: file.path,
+				// 	data: currentFileData.toString('base64'),
+				// });
+			//}
+
+			// const fileData = publication.materials.files.map((file) => {
+			// 	return fileSystem.readFile(file.path)
+			// 		.then(buffer => {
+			// 			return {
+			// 				fileId: file.path,
+			// 				data: buffer.toString('base64')
+			// 			};
+			// 		});
+			// });
 
 			// coverPic return
 			const coverFileData: FetchedFileItem = await coverPicFetcher(
@@ -88,7 +98,7 @@ export async function GET({ params }) {
 				JSON.stringify({
 					isMaterial: true,
 					publication: publication,
-					fileData,
+					//fileData,
 					coverFileData,
 				}),
 				{
@@ -131,7 +141,7 @@ export async function GET({ params }) {
 				JSON.stringify({
 					isMaterial: false,
 					publication: publication,
-					fileData: [],
+					//fileData: [],
 					coverFileData: {},
 				}),
 				{

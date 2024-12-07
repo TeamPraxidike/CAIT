@@ -70,7 +70,41 @@
 
 	isMaterial = pubView.isMaterial;
 
-	files = isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
+	//files = isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
+
+	// let loading: boolean = false;
+	// let error: string | null = null;
+
+	// // Function to fetch files
+	// async function fetchFiles() {
+	// 	if (!isMaterial) {
+	// 		files = [];
+	// 		return;
+	// 	}
+	//
+	// 	loading = true;
+	// 	error = null;
+	//
+	// 	try {
+	// 		const res = await fetch(`/api/material/${pubView.publication.id}/files`);
+	// 		if (!res.ok) {
+	// 			throw new Error(`Failed to load files: ${res.statusText}`);
+	// 		}
+	// 		const fileData = await res.json();
+	//
+	// 		files = await createFileList(fileData, pubView.publication.materials.files);
+	// 	} catch (err) {
+	// 		console.error('Error creating file list:', err);
+	// 		error = 'Failed to load files.';
+	// 	} finally {
+	// 		loading = false;
+	// 	}
+	// }
+	//
+	// // Fetch files when the component mounts or when dependencies change
+	// onMount(() => {
+	// 	fetchFiles();
+	// });
 
 	liked = userSpecificInfo.liked;
 	likes = pubView.publication.likes;
@@ -99,8 +133,8 @@
 
 		isMaterial = data.pubView.isMaterial;
 
-		files = isMaterial ? createFileList(data.pubView.fileData, data.pubView.publication.materials.files) : [];
-
+		//files = isMaterial ? createFileList(data.pubView.fileData, data.pubView.publication.materials.files) : [];
+		//fetchFiles()
 
 		liked = data.userSpecificInfo.liked;
 		likes = data.pubView.publication.likes;
@@ -392,6 +426,10 @@
 			<p class="text-sm text-surface-500">{created}</p>
 
 			{#if isMaterial}
+				<!--{#if loading}-->
+				<!--	<p>Loading files...</p>-->
+				<!--{:else if error}-->
+				<!--	<p class="error">{error}</p>-->
 				{#if pubView.publication.materials.files.length === 1}
 					<Icon
 						icon={IconMapExtension.get(pubView.publication.materials.files.map((f => getFileExtension(f.title)))[0]) || 'vscode-icons:file-type-text'}
@@ -512,9 +550,16 @@
 					<!--    FILES -->
 
 					{#if isMaterial}
-						<div class="w-full">
-							<FileTable operation="download" {files} />
-						</div>
+						{#await data.fetchedFiles}
+							<p>Loading files...</p>
+						{:then files}
+							<div class="w-full">
+								<FileTable operation="download" files={createFileList(files, pubView.publication.materials.files)} />
+							</div>
+						{:catch error}
+							<!--TODO: Change color-->
+							<p style="color: red">Error while loading files. Reload the page to try again</p>
+						{/await}
 					{:else}
 						<div class="w-full">
 							<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}" />
@@ -549,31 +594,44 @@
 				{:else if tabSet === 2}
 
 					<!--SHOW SIMILAR PUBLICATIONS-->
-					{#if similarPublications.length > 0}
-						<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
-							<h2 class="text-2xl">Other publications similar to this:</h2>
-							<hr>
-						</div>
-						<div class="col-span-full">
-							<HorizontalScroll publications="{similarPublications}" bind:liked="{likedPublications}"
-											  bind:saved="{savedPublications}"
-											  on:resetTab={handleTabEvent} />
-						</div>
-					{/if}
+					{#await similarPublications}
+						<p>Loading similar publications...</p>
+					{:then similar}
+						{#if similar > 0}
+							<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
+								<h2 class="text-2xl">Other publications similar to this:</h2>
+								<hr>
+							</div>
+							<div class="col-span-full">
+								<HorizontalScroll publications="{similar}" bind:liked="{likedPublications}"
+												  bind:saved="{savedPublications}"
+												  on:resetTab={handleTabEvent} />
+							</div>
+						{/if}
+					{:catch error}
+						<!--TODO: Change color-->
+						<p style="color: red">Error while loading similar publications. Reload the page to try again</p>
+					{/await}
 
-					<!--    RELATED CONTENT -->
-					{#if circuitsPubAppearIn.length > 0}
-						<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
-							<h2 class="text-2xl">This publication appears in:</h2>
-							<hr>
-						</div>
-						<div class="col-span-full">
-							<HorizontalScroll publications="{circuitsPubAppearIn}" bind:liked="{likedPublications}"
-											  bind:saved="{savedPublications}"
-											  on:resetTab={handleTabEvent} />
-						</div>
-					{/if}
-
+					<!--    CIRCUITS THAT INCLUDE THIS CONTENT -->
+					{#await circuitsPubAppearIn}
+						<p>Loading circuits that feature this publication...</p>
+					{:then cPAI}
+						{#if cPAI.length > 0}
+							<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
+								<h2 class="text-2xl">This publication appears in:</h2>
+								<hr>
+							</div>
+							<div class="col-span-full">
+								<HorizontalScroll publications="{cPAI}" bind:liked="{likedPublications}"
+												  bind:saved="{savedPublications}"
+												  on:resetTab={handleTabEvent} />
+							</div>
+						{/if}
+					{:catch error}
+						<!--TODO: Change color-->
+						<p style="color: red">Error while loading circuits. Reload the page to try again</p>
+					{/await}
 				{/if}
 			</svelte:fragment>
 		</TabGroup>
