@@ -110,8 +110,8 @@
 	likes = pubView.publication.likes;
 
 
-	circuitsPubAppearIn = data.circuitsPubAppearIn;
-	similarPublications = data.similarPublications;
+	// circuitsPubAppearIn = data.circuitsPubAppearIn;
+	// similarPublications = data.similarPublications;
 
 	likedPublications = data.liked as number[];
 	savedPublications = data.saved.saved as number[];
@@ -139,8 +139,8 @@
 		liked = data.userSpecificInfo.liked;
 		likes = data.pubView.publication.likes;
 
-		circuitsPubAppearIn = data.circuitsPubAppearIn;
-		similarPublications = data.similarPublications;
+		// circuitsPubAppearIn = data.circuitsPubAppearIn;
+		// similarPublications = data.similarPublications;
 
 		likedPublications = data.liked as number[];
 		savedPublications = data.saved.saved as number[];
@@ -594,10 +594,10 @@
 				{:else if tabSet === 2}
 
 					<!--SHOW SIMILAR PUBLICATIONS-->
-					{#await similarPublications}
+					{#await data.similarPublications}
 						<p>Loading similar publications...</p>
 					{:then similar}
-						{#if similar > 0}
+						{#if similar.length > 0}
 							<div class="col-span-full flex flex-col mb-1 gap-1 mt-10">
 								<h2 class="text-2xl">Other publications similar to this:</h2>
 								<hr>
@@ -614,7 +614,7 @@
 					{/await}
 
 					<!--    CIRCUITS THAT INCLUDE THIS CONTENT -->
-					{#await circuitsPubAppearIn}
+					{#await data.circuitsPubAppearIn}
 						<p>Loading circuits that feature this publication...</p>
 					{:then cPAI}
 						{#if cPAI.length > 0}

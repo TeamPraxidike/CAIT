@@ -103,7 +103,6 @@ import { prisma } from './prisma';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { Difficulty, MaterialType } from '@prisma/client';
 import path from 'path';
-import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 
 /**
  * MaterialForm is the type of the form data that is sent to the server when creating a new material.
@@ -202,6 +201,9 @@ type NodeDiffActions = {
 	// from publicationId, to (many) other publicationIds
 	next: { fromId: number; toId: number[] }[];
 };
+
+import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
+//import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystemJS.mjs';
 
 //export const basePath = path.join('static', 'uploadedFiles');
 export const basePath = "uploadedFiles"
