@@ -82,7 +82,7 @@ export async function GET({ params, url, locals }) {
 			saved = temp;
 		}
 
-		saved = saved.map(async (x) => {
+		saved = await Promise.all(saved.map(async (x) => {
 			return {
 				...x,
 				publisher: {
@@ -91,7 +91,7 @@ export async function GET({ params, url, locals }) {
 						.data,
 				},
 			};
-		});
+		}));
 	} else saved = savedResponse.saved.map((x) => x.id);
 
 	saved = filterSaved(saved, query);

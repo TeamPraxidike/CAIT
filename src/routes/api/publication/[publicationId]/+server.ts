@@ -38,7 +38,7 @@ export async function GET({ params }) {
 				.data,
 		};
 
-		publication.comments = publication.comments.map(async (comment) => {
+		publication.comments = await Promise.all(publication.comments.map(async (comment) => {
 			return {
 				...comment,
 				user: {
@@ -46,7 +46,7 @@ export async function GET({ params }) {
 					profilePicData: (await profilePicFetcher(comment.user.profilePic))
 						.data,
 				},
-				replies: comment.replies.map(async (reply) => {
+				replies: await Promise.all(comment.replies.map(async (reply) => {
 					return {
 						...reply,
 						user: {
@@ -56,16 +56,16 @@ export async function GET({ params }) {
 							)).data,
 						},
 					};
-				}),
+				})),
 			};
-		});
+		}));
 
-		publication.maintainers = publication.maintainers.map(async (user) => {
+		publication.maintainers = await Promise.all(publication.maintainers.map(async (user) => {
 			return {
 				...user,
 				profilePicData: (await profilePicFetcher(user.profilePic)).data,
 			};
-		});
+		}));
 
 		if (publication.materials) {
 			const fileData: FetchedFileArray = [];
@@ -96,7 +96,7 @@ export async function GET({ params }) {
 				},
 			);
 		} else if (publication.circuit) {
-			publication.circuit.nodes = publication.circuit.nodes.map(
+			publication.circuit.nodes = await Promise.all(publication.circuit.nodes.map(
 				async (node) => {
 					let coverPicData: string | null;
 					if (
@@ -126,7 +126,7 @@ export async function GET({ params }) {
 						},
 					};
 				},
-			);
+			));
 			return new Response(
 				JSON.stringify({
 					isMaterial: false,

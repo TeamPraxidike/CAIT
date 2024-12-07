@@ -15,7 +15,7 @@ export async function GET({ locals, params }) {
 
         const similarPublications = similarContentObjects.map(similarContentObject => similarContentObject.similarTo);
 
-        const similarPublicationsFetchedProfile = similarPublications.map(async (publication) => {
+        const similarPublicationsFetchedProfile = await Promise.all(similarPublications.map(async (publication) => {
             return {
                 publication,
                 publisher: {
@@ -25,8 +25,8 @@ export async function GET({ locals, params }) {
                     )).data,
                 },
             };
-        });
-        const similarPublicationsFinalData = similarPublicationsFetchedProfile.map(async (info) => {
+        }));
+        const similarPublicationsFinalData = await Promise.all(similarPublicationsFetchedProfile.map(async (info) => {
             let coverPicData;
             if (
                 info.publication.type === PublicationType.Material &&
@@ -45,7 +45,7 @@ export async function GET({ locals, params }) {
                 ...info,
                 coverPicData: coverPicData,
             };
-        });
+        }));
         return new Response(JSON.stringify(similarPublicationsFinalData), {
             status: 200,
         });

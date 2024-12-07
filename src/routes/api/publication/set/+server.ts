@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		const ids = (p ? p.split(',') : []).map((n) => Number(n));
 		let publications = await getAllPublicationsByIds(ids);
 
-		publications = publications.map(async (publication) => {
+		publications = await Promise.all(publications.map(async (publication) => {
 			let coverPicData: string | null;
 			if (
 				publication.type === PublicationType.Material &&
@@ -29,8 +29,8 @@ export const GET: RequestHandler = async ({ url }) => {
 				...publication,
 				coverPicData: coverPicData,
 			};
-		});
-		publications = publications.map(async (publication) => {
+		}));
+		publications = await Promise.all(publications.map(async (publication) => {
 			return {
 				...publication,
 				publisher: {
@@ -40,7 +40,7 @@ export const GET: RequestHandler = async ({ url }) => {
 					)).data,
 				},
 			};
-		});
+		}));
 		return new Response(JSON.stringify({ publications }), {
 			status: 200,
 		});

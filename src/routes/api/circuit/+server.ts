@@ -39,7 +39,7 @@ export async function GET({ url }) {
 			query,
 		);
 
-		circuits = circuits.map(async circuit => {
+		circuits = await Promise.all(circuits.map(async circuit => {
 			const filePath = circuit.publication.coverPic!.path;
 
 			const currentFileData = await fileSystem.readFile(filePath);
@@ -54,7 +54,7 @@ export async function GET({ url }) {
 				},
 				coverPicData: currentFileData.toString('base64'),
 			};
-		});
+		}));
 		return new Response(
 			JSON.stringify({
 				circuits: circuits.slice(0, amount),

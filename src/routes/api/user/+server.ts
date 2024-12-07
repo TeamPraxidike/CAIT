@@ -43,12 +43,12 @@ export async function GET() {
 			},
 		});
 
-		users = users.map(async (user) => {
+		users = await Promise.all(users.map(async (user) => {
 			return {
 				...user,
 				profilePicData: (await profilePicFetcher(user.profilePic)).data,
 			};
-		});
+		}));
 		return new Response(JSON.stringify({ users }), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error }), { status: 500 });

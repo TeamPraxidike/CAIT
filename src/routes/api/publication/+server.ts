@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { coverPicFetcher, fileSystem } from '$lib/database';
 import { getAllPublications } from '$lib/database/db';
-import { PublicationType } from '@prisma/client';
+import { type Publication, PublicationType } from '@prisma/client';
 import { profilePicFetcher } from '$lib/database/file';
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -13,7 +13,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		let publications = await getAllPublications(publishers, query);
 
-		publications = publications.map(async (publication) => {
+		publications = await Promise.all(publications.map(async (publication: any) => {
 			let coverPicData: string | null;
 			if (
 				publication.type === PublicationType.Material &&
@@ -32,8 +32,8 @@ export const GET: RequestHandler = async ({ url }) => {
 				...publication,
 				coverPicData: coverPicData,
 			};
-		});
-		publications = publications.map(async (publication) => {
+		}));
+		publications = await Promise.all(publications.map(async (publication: any) => {
 			return {
 				...publication,
 				publisher: {
@@ -43,11 +43,11 @@ export const GET: RequestHandler = async ({ url }) => {
 					)).data,
 				},
 			};
-		});
+		}));
 		return new Response(
 			JSON.stringify({
 				publications: publications.slice(0, amount),
-				ids: publications.map((x) => x.id),
+				ids: publications.map((x: { id: any; }) => x.id),
 			}),
 			{
 				status: 200,

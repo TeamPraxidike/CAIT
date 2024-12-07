@@ -73,7 +73,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			);
 		}
 
-		materials = materials.map(async (material) => {
+		materials = await Promise.all(materials.map(async (material) => {
 			return {
 				...material,
 				publisher: {
@@ -87,7 +87,7 @@ export const GET: RequestHandler = async ({ url }) => {
 					material.publication.coverPic,
 				)).data,
 			};
-		});
+		}));
 
 		return new Response(
 			JSON.stringify({
