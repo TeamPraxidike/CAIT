@@ -10,19 +10,19 @@ export const GET: RequestHandler = async ({ url }) => {
 		const ids = (p ? p.split(',') : []).map((n) => Number(n));
 		let publications = await getAllPublicationsByIds(ids);
 
-		publications = publications.map((publication) => {
-			let coverPicData = '';
+		publications = publications.map(async (publication) => {
+			let coverPicData: string | null;
 			if (
 				publication.type === PublicationType.Material &&
 				publication.materials
 			) {
-				coverPicData = coverPicFetcher(
+				coverPicData = (await coverPicFetcher(
 					publication.materials.encapsulatingType,
 					publication.coverPic,
-				).data;
+				)).data;
 			} else {
 				const filePath = publication.coverPic!.path;
-				const currentFileData = fileSystem.readFile(filePath);
+				const currentFileData = await fileSystem.readFile(filePath);
 				coverPicData = currentFileData.toString('base64');
 			}
 			return {
@@ -30,14 +30,14 @@ export const GET: RequestHandler = async ({ url }) => {
 				coverPicData: coverPicData,
 			};
 		});
-		publications = publications.map((publication) => {
+		publications = publications.map(async (publication) => {
 			return {
 				...publication,
 				publisher: {
 					...publication.publisher,
-					profilePicData: profilePicFetcher(
+					profilePicData: (await profilePicFetcher(
 						publication.publisher.profilePic,
-					).data,
+					)).data,
 				},
 			};
 		});

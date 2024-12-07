@@ -87,7 +87,6 @@ import {
 	addFile,
 	deleteFile,
 	editFile,
-	bufToBase64,
 	addCoverPic,
 	coverPicFetcher,
 	updateCoverPic,
@@ -179,7 +178,7 @@ type FileDiffActions = {
  */
 type FetchedFileItem = {
 	fileId: string;
-	data: string;
+	data: string | null;
 };
 
 /**
@@ -222,7 +221,6 @@ export {
 	addFile,
 	editFile,
 	deleteFile,
-	bufToBase64,
 	createUser,
 	getUserById,
 	getPublicationById,

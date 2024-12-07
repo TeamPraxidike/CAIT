@@ -49,7 +49,7 @@ export async function GET({ params, locals }) {
 
 		const filePath = circuit.publication.coverPic!.path;
 
-		const currentFileData = fileSystem.readFile(filePath);
+		const currentFileData = await fileSystem.readFile(filePath);
 
 		const circuitInfo = {
 			...circuit,

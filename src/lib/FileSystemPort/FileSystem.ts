@@ -7,6 +7,6 @@
 export default interface FileSystem {
 	saveFile(file: Buffer, name: string): Promise<string>;
 	deleteFile(path: string): void;
-	readFile(path: string): Buffer;
+	readFile(path: string): Promise<Buffer>;
 	editFile(path: string, file: Buffer): Promise<string>;
 }

@@ -15,30 +15,30 @@ export async function GET({ locals, params }) {
 
         const similarPublications = similarContentObjects.map(similarContentObject => similarContentObject.similarTo);
 
-        const similarPublicationsFetchedProfile = similarPublications.map((publication) => {
+        const similarPublicationsFetchedProfile = similarPublications.map(async (publication) => {
             return {
                 publication,
                 publisher: {
                     ...publication.publisher,
-                    profilePicData: profilePicFetcher(
+                    profilePicData: (await profilePicFetcher(
                         publication.publisher.profilePic,
-                    ).data,
+                    )).data,
                 },
             };
         });
-        const similarPublicationsFinalData = similarPublicationsFetchedProfile.map((info) => {
+        const similarPublicationsFinalData = similarPublicationsFetchedProfile.map(async (info) => {
             let coverPicData;
             if (
                 info.publication.type === PublicationType.Material &&
                 info.publication.materials
             ) {
-                coverPicData = coverPicFetcher(
+                coverPicData = (await coverPicFetcher(
                     info.publication.materials.encapsulatingType,
                     info.publication.coverPic,
-                ).data;
+                )).data;
             } else {
                 const filePath = info.publication.coverPic!.path;
-                const currentFileData = fileSystem.readFile(filePath);
+                const currentFileData = await fileSystem.readFile(filePath);
                 coverPicData = currentFileData.toString('base64');
             }
             return {

@@ -41,12 +41,16 @@ export class LocalFileSystem implements FileSystem {
 	 * This function might be better to avoid, as if you are calling it from a server file you can directly access the file system.
 	 * @param pathArg the path to the file
 	 */
-	readFile(pathArg: string): Buffer {
-		try {
-			return fs.readFileSync(path.join(this.basePath, pathArg));
-		} catch (error) {
-			throw error;
-		}
+	async readFile(pathArg: string): Promise<Buffer> {
+		return new Promise((resolve, reject) => {
+			fs.readFile(path.join(this.basePath, pathArg), (err, data) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(data);
+				}
+			});
+		});
 	}
 
 	/**

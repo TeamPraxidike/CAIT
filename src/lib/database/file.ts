@@ -10,16 +10,16 @@ import path from 'path';
 import fs from 'fs';
 
 
-// TODO: This seems to be useless, could remove if nothing breaks
-export async function bufToBase64(files: FetchedFileArray) {
-	// If JSON stringify cannot handle raw Buffer, use this:
-	return files.map((file) => ({
-		...file,
-		data: file.data.toString(),
-	}));
-}
+// // TODO: This seems to be useless, could remove if nothing breaks
+// export async function bufToBase64(files: FetchedFileArray) {
+// 	// If JSON stringify cannot handle raw Buffer, use this:
+// 	return files.map((file) => ({
+// 		...file,
+// 		data: file.data.toString(),
+// 	}));
+// }
 
-export function profilePicFetcher(profilePic: PrismaFile | null) {
+export async function profilePicFetcher(profilePic: PrismaFile | null) {
 	let filePath;
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
@@ -41,7 +41,7 @@ export function profilePicFetcher(profilePic: PrismaFile | null) {
 		// since photo is defined, read the file based on the path (just like a File)
 		filePath = profilePic.path;
 
-		const currentFileData = fileSystem.readFile(filePath);
+		const currentFileData = await fileSystem.readFile(filePath);
 		return {
 			fileId: filePath,
 			data: currentFileData.toString('base64'),
@@ -54,7 +54,7 @@ export function profilePicFetcher(profilePic: PrismaFile | null) {
  * @param encapsulatingType
  * @param coverPic
  */
-export function coverPicFetcher(
+export async function coverPicFetcher(
 	encapsulatingType: string,
 	coverPic: PrismaFile | null,
 ) {
@@ -85,7 +85,7 @@ export function coverPicFetcher(
 		// since photo is defined, read the file based on the path (just like a File)
 		filePath = coverPic.path;
 
-		const currentFileData = fileSystem.readFile(filePath);
+		const currentFileData = await fileSystem.readFile(filePath);
 		return {
 			fileId: filePath,
 			data: currentFileData.toString('base64'),

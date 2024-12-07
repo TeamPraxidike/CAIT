@@ -49,7 +49,7 @@ export async function GET({ params, locals }) {
 		const fileData: FetchedFileArray = [];
 
 		for (const file of material.files) {
-			const currentFileData = fileSystem.readFile(file.path);
+			const currentFileData = await fileSystem.readFile(file.path);
 			fileData.push({
 				fileId: file.path,
 				data: currentFileData.toString('base64'),
@@ -57,7 +57,7 @@ export async function GET({ params, locals }) {
 		}
 
 		// coverPic return
-		const coverFileData: FetchedFileItem = coverPicFetcher(
+		const coverFileData: FetchedFileItem = await coverPicFetcher(
 			material.encapsulatingType,
 			material.publication.coverPic,
 		);

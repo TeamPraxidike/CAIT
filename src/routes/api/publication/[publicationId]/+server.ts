@@ -34,36 +34,36 @@ export async function GET({ params }) {
 		publication.publisher = {
 			...publication.publisher,
 			// @ts-ignore
-			profilePicData: profilePicFetcher(publication.publisher.profilePic)
+			profilePicData: (await profilePicFetcher(publication.publisher.profilePic))
 				.data,
 		};
 
-		publication.comments = publication.comments.map((comment) => {
+		publication.comments = publication.comments.map(async (comment) => {
 			return {
 				...comment,
 				user: {
 					...comment.user,
-					profilePicData: profilePicFetcher(comment.user.profilePic)
+					profilePicData: (await profilePicFetcher(comment.user.profilePic))
 						.data,
 				},
-				replies: comment.replies.map((reply) => {
+				replies: comment.replies.map(async (reply) => {
 					return {
 						...reply,
 						user: {
 							...reply.user,
-							profilePicData: profilePicFetcher(
+							profilePicData: (await profilePicFetcher(
 								reply.user.profilePic,
-							).data,
+							)).data,
 						},
 					};
 				}),
 			};
 		});
 
-		publication.maintainers = publication.maintainers.map((user) => {
+		publication.maintainers = publication.maintainers.map(async (user) => {
 			return {
 				...user,
-				profilePicData: profilePicFetcher(user.profilePic).data,
+				profilePicData: (await profilePicFetcher(user.profilePic)).data,
 			};
 		});
 
@@ -71,7 +71,7 @@ export async function GET({ params }) {
 			const fileData: FetchedFileArray = [];
 
 			for (const file of publication.materials.files) {
-				const currentFileData = fileSystem.readFile(file.path);
+				const currentFileData = await fileSystem.readFile(file.path);
 				fileData.push({
 					fileId: file.path,
 					data: currentFileData.toString('base64'),
@@ -79,7 +79,7 @@ export async function GET({ params }) {
 			}
 
 			// coverPic return
-			const coverFileData: FetchedFileItem = coverPicFetcher(
+			const coverFileData: FetchedFileItem = await coverPicFetcher(
 				publication.materials.encapsulatingType,
 				publication.coverPic,
 			);
@@ -97,19 +97,19 @@ export async function GET({ params }) {
 			);
 		} else if (publication.circuit) {
 			publication.circuit.nodes = publication.circuit.nodes.map(
-				(node) => {
-					let coverPicData = '';
+				async (node) => {
+					let coverPicData: string | null;
 					if (
 						node.publication.type === PublicationType.Material &&
 						node.publication.materials
 					) {
-						coverPicData = coverPicFetcher(
+						coverPicData = (await coverPicFetcher(
 							node.publication.materials.encapsulatingType,
 							node.publication.coverPic,
-						).data;
+						)).data;
 					} else {
 						const filePath = node.publication.coverPic!.path;
-						const currentFileData = fileSystem.readFile(filePath);
+						const currentFileData = await fileSystem.readFile(filePath);
 						coverPicData = currentFileData.toString('base64');
 					}
 					return {
@@ -118,9 +118,9 @@ export async function GET({ params }) {
 							...node.publication,
 							publisher: {
 								...node.publication.publisher,
-								profilePicData: profilePicFetcher(
+								profilePicData: (await profilePicFetcher(
 									node.publication.publisher.profilePic,
-								).data,
+								)).data,
 							},
 							coverPicData: coverPicData,
 						},

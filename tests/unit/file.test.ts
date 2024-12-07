@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prisma, fileSystem } from '$lib/database';
 import {
-	bufToBase64,
 	profilePicFetcher,
 	coverPicFetcher,
 	addCoverPic,
@@ -16,14 +15,14 @@ import path from 'path';
 
 vi.mock('fs');
 vi.mock('path');
-
-describe('bufToBase64', () => {
-	it('should convert buffer data to base64', async () => {
-		const files = [{ fileId: '1', data: 'test' }];
-		const result = await bufToBase64(files);
-		expect(result[0].data).toBe('test');
-	});
-});
+//
+// describe('bufToBase64', () => {
+// 	it('should convert buffer data to base64', async () => {
+// 		const files = [{ fileId: '1', data: 'test' }];
+// 		const result = await bufToBase64(files);
+// 		expect(result[0].data).toBe('test');
+// 	});
+// });
 
 describe('profilePicFetcher', () => {
 	beforeEach(() => {

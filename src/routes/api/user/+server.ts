@@ -43,10 +43,10 @@ export async function GET() {
 			},
 		});
 
-		users = users.map((user) => {
+		users = users.map(async (user) => {
 			return {
 				...user,
-				profilePicData: profilePicFetcher(user.profilePic).data,
+				profilePicData: (await profilePicFetcher(user.profilePic)).data,
 			};
 		});
 		return new Response(JSON.stringify({ users }), { status: 200 });

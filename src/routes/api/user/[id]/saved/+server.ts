@@ -61,33 +61,33 @@ export async function GET({ params, url, locals }) {
 		for (const publication of saved) {
 			if (publication.materials === null) {
 				const filePath = publication.coverPic!.path;
-				const currentFileData = fileSystem.readFile(filePath);
+				const currentFileData = await fileSystem.readFile(filePath);
 				const coverPicData = currentFileData.toString('base64');
 				temp.push({ ...publication, coverPicData: coverPicData });
 			} else {
 				temp.push({
 					...publication,
-					coverPicData: coverPicFetcher(
+					coverPicData: (await coverPicFetcher(
 						publication.materials.encapsulatingType,
 						publication.coverPic,
-					).data,
+					)).data,
 				});
-				fileData.push(
+				fileData.push(await(
 					coverPicFetcher(
 						publication.materials.encapsulatingType,
 						publication.coverPic,
-					),
+					)),
 				);
 			}
 			saved = temp;
 		}
 
-		saved = saved.map((x) => {
+		saved = saved.map(async (x) => {
 			return {
 				...x,
 				publisher: {
 					...x.publisher,
-					profilePicData: profilePicFetcher(x.publisher.profilePic)
+					profilePicData: (await profilePicFetcher(x.publisher.profilePic))
 						.data,
 				},
 			};

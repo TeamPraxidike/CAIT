@@ -73,19 +73,19 @@ export const GET: RequestHandler = async ({ url }) => {
 			);
 		}
 
-		materials = materials.map((material) => {
+		materials = materials.map(async (material) => {
 			return {
 				...material,
 				publisher: {
 					...material.publication.publisher,
-					profilePicData: profilePicFetcher(
+					profilePicData: (await profilePicFetcher(
 						material.publication.publisher.profilePic,
-					).data,
+					)).data,
 				},
-				coverPicData: coverPicFetcher(
+				coverPicData: (await coverPicFetcher(
 					material.encapsulatingType,
 					material.publication.coverPic,
-				).data,
+				)).data,
 			};
 		});
 
