@@ -19,7 +19,7 @@ import PublicationCard from '$lib/components/PublicationCard.svelte';
 import Comment from '$lib/components/Comment.svelte';
 import Filter from '$lib/components/Filter.svelte';
 import Circuit from '$lib/components/circuits/Circuit.svelte';
-import CircuitPureHTML from '$lib/components/circuits/CircuitPureHTML.svelte';
+import CircuitComponent from '$lib/components/circuits/CircuitComponent.svelte';
 import Download from '$lib/components/generic/Download.svelte';
 import HorizontalScroll from '$lib/components/HorizontalScroll.svelte';
 import FileTable from '$lib/components/FileTable.svelte';
@@ -64,7 +64,7 @@ export {
 	lorem,
 	Filter,
 	Circuit,
-	CircuitPureHTML,
+	CircuitComponent,
 	AddInteractionForm,
 	UsedInCourse,
 	PublishReview,

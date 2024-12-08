@@ -2,7 +2,7 @@
     import type {LayoutServerData, PageServerData} from './$types';
     import {
         AddInteractionForm,
-        Circuit,
+        Circuit, CircuitComponent,
         Comment,
         DiffBar,
         FileTable,
@@ -515,7 +515,7 @@
                         </div>
                     {:else}
                         <div class="w-full">
-                            <Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}"/>
+                            <CircuitComponent publishing="{false}" dbNodes="{pubView.publication.circuit.nodes}"/>
                         </div>
                     {/if}
 
@@ -578,7 +578,7 @@
     {#key pubView.publication.id}
         <!--   RIGHT SINGLE 1/4 COLUMN   -->
         <div class="flex flex-col items-center gap-2">
-            {#if isMaterial && pubView.publication.materials.theoryPractice}
+            {#if isMaterial}
                 <TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}"/>
             {/if}
             <div class="flex gap-2">
