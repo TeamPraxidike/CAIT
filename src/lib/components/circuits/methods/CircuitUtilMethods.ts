@@ -6,8 +6,7 @@ export const getFileExtension = (filePath: string): string =>  {
 }
 
 export const collisionDetection = (x1: number, y1: number, x2: number, y2: number) => {
-
-	let offset = 15
+	const offset = 15
 	let dx = 180 - Math.abs(x2 - x1);
 	if (dx < 0)
 		return null

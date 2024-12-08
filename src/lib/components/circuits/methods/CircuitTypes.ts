@@ -1,4 +1,4 @@
-import type { Material, Node as PrismaNode, Publication, User } from '@prisma/client';
+import { type Material, type Node as PrismaNode, type Publication, PublicationType, type User } from '@prisma/client';
 
 
 export type CircuitNode = PrismaNode & {
@@ -41,4 +41,15 @@ export type NodeInfo = {
 	title : string,
 	isMaterial : boolean,
 	extensions : string []
+}
+
+export type NodeTemplateData = {
+	id: number,
+	label: string,
+	extensions: string[],
+	isMaterial: boolean,
+	dummyNode: boolean,
+	selected:boolean,
+	publishing:boolean,
+	publisherId : number
 }

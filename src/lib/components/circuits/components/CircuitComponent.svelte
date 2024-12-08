@@ -62,7 +62,14 @@
 		dbNodes.forEach(node => {
 			$nodes.push({
 				id: node.publication.id.toString(),
-				data: { label: node.publication.title, extensions: node.extensions, isMaterial: node.publication.type === PublicationType.Material, dummyNode: false, selected:false},
+				data: {
+					id: node.publication.id,
+					label: node.publication.title,
+					extensions: node.extensions,
+					isMaterial: node.publication.type === PublicationType.Material,
+					dummyNode: false, selected:false,
+					publisherId : node.publication.publisher.id,
+					publishing:publishing},
 				position: { x: node.posX, y: node.posY },
 				type: "custom"
 			});
@@ -99,7 +106,16 @@
 		const nodeInfo : NodeInfo = await fetchNode(pubId)
 		const node = {
 			id: nodeInfo.id.toString(),
-			data: { label: nodeInfo.title, extensions: nodeInfo.extensions, isMaterial: nodeInfo.isMaterial, dummyNode: false, selected:false},
+			data: {
+				id : nodeInfo.id,
+				label: nodeInfo.title,
+				extensions: nodeInfo.extensions,
+				isMaterial: nodeInfo.isMaterial,
+				dummyNode: false,
+				selected:false,
+				publishing:publishing,
+				publisherId:-1
+			},
 			position: { x: 0, y: 0 },
 			type: "custom"
 		}
