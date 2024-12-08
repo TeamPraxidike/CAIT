@@ -1,24 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import cytoscape from 'cytoscape';
-	import SearchElems from '$lib/components/circuits/SearchElems.svelte';
-	import { Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import SearchElems from '$lib/components/circuits/components/SearchElems.svelte';
+	import { getModalStore, Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import {
-		Difficulty, type Edge, type Material, MaterialType,
+		Difficulty,
+		type Edge,
+		type Material,
+		MaterialType,
 		type Node as PrismaNode,
 		type Publication,
 		PublicationType,
 		type User
 	} from '@prisma/client';
 	import nodeHtmlLabel from 'cytoscape-node-html-label';
-	import NodeTemplate from '$lib/components/circuits/NodeTemplate.svelte';
 	import { PublicationCard } from '$lib';
 	import html2canvas from 'html2canvas';
 	import type { NodeDiffActions } from '$lib/database';
 	import { fly } from 'svelte/transition';
 	import Icon from '@iconify/svelte';
-	import TextThingy from '$lib/components/circuits/TextThingy.svelte';
+	import TextThingy from '$lib/components/circuits/components/TextThingy.svelte';
+	import type { CircuitNode, CyNode } from '$lib/components/circuits/methods/CircuitTypes';
+	import NodeTemplate from '$lib/components/circuits/components/NodeTemplate.svelte';
 
 
 	async function captureScreenshot () : Promise<string> {
@@ -43,29 +46,7 @@
 		const index = filePath.lastIndexOf('.');
 		return index !== -1 ? filePath.substring(index + 1) : '';
 	}
-	const addHtmlLabel = (selector:string, selected: boolean) => {
-		cy.nodeHtmlLabel([
-			{
-				query: selector,
-				tpl: function(data : any) {
-					const container = document.createElement('div');
-					container.id = data.id;
 
-					new NodeTemplate({
-						target: container,
-						props: {
-							data: data.label,
-							selected: selected,
-							extensions : data.extensions,
-							isMaterial : data.isMaterial,
-							dummyNode: data.dummyNode,
-						}
-					});
-					return container.outerHTML;
-				}
-			}
-		]);
-	}
 
 	nodeHtmlLabel(cytoscape)
 	const modalStore = getModalStore();
@@ -111,6 +92,297 @@
 				}
 			}
 		}
+	}
+
+	export const collisionDetection = (x1: number, y1: number, x2: number, y2: number) => {
+
+		let offset = 15
+		let dx = 180 - Math.abs(x2 - x1);
+		if (dx < 0)
+			return null
+		if (x1 > x2)
+			dx = -dx - offset
+		else
+			dx += offset
+
+		let dy = 100 - Math.abs(y1 - y2); // 17
+		if (dy < 0)
+			return null
+		if (y2 > y1)
+			dy = dy + offset
+		else
+			dy = -dy - offset
+
+		if (Math.abs(dy) > Math.abs(dx))
+			dx = 0
+		else
+			dy = 0
+		return [dx, dy];
+	}
+	export const placeMentAlgorithm = (node : any, positionX : number, positionY:number, cy:any) => {
+		if (cy.nodes().length === 1)
+		{
+			return
+		}
+
+		cy.nodes().forEach((n: any) => {
+
+			if (n.id() !== node.id() && n.id() !== "edgeStart"){
+				const vector = collisionDetection(positionX, positionY, n.position().x, n.position().y);
+				if(vector){
+					const data = n.data();
+					const edges : {id: string, source: string, target: string} [] = []
+
+
+					cy.edges().forEach((edge:any) => {
+						edges.push({ id: `en${edge.source().id()}n${edge.target().id()}`, source: `${edge.source().id()}`, target: `${edge.target().id()}` })
+					})
+					cy.remove(cy.$(`#${n.id()}`));
+					cy.add({
+						group: 'nodes',
+						data: data,
+						position: {x: n.position().x + vector[0], y: n.position().y + vector[1]}
+					});
+
+					addHtmlLabel(`#${n.id()}`, false, cy);
+					edges.forEach((edge:any) => {
+						if (cy.getElementById(edge.id).length === 0)
+						{
+							cy.add({
+								group: 'edges',
+								data: { id: `${edge.id}`, source: `${edge.source}`, target: `${edge.target}` }
+							});
+						}
+
+					})
+
+
+					placeMentAlgorithm(n, n.position().x + vector[0], n.position().y + vector[1], cy)
+				}
+			}
+		});
+	}
+
+	export const addHtmlLabel = (selector:string, selected: boolean, cy : any) => {
+		cy.nodeHtmlLabel([
+			{
+				query: selector,
+				tpl: function(data : any) {
+					const container = document.createElement('div');
+					container.id = data.id;
+
+					new NodeTemplate({
+						target: container,
+						props: {
+							data: data.label,
+							selected: selected,
+							extensions : data.extensions,
+							isMaterial : data.isMaterial,
+							dummyNode: data.dummyNode,
+						}
+					});
+					return container.outerHTML;
+				}
+			}
+		]);
+	}
+
+	export const makePopUp = (cursorInsideNode: boolean, hoveredNodeId: number, node: CyNode, likedToggled: any, savedToggled : any) => {
+		if (cursorInsideNode && hoveredNodeId === Number(node.id())) {
+			const htmlElement = document.getElementById(node.id());
+			if (htmlElement) {
+				const divElement = document.createElement('div');
+				let publication = nodes.find( (n : CircuitNode) => n.publicationId === Number(node.id()));
+
+				if (publication) {
+					const coverPicData = publication.publication.coverPicData;
+					const publicationCard = new PublicationCard({
+						target: divElement,
+						props: {
+							materialType: publication.publication.materials.encapsulatingType,
+							publication: publication.publication,
+							inCircuits: false,
+							imgSrc: 'data:image;base64,' +  coverPicData,
+							forArrow: true,
+							extensions: node.data().extensions,
+							publisher: publication.publication.publisher,
+							liked: liked.includes(publication.publicationId),
+							saved: saved.includes(publication.publicationId)
+						}
+					});
+					publicationCard.$on('liked', likedToggled);
+					publicationCard.$on('saved', savedToggled);
+
+
+				}
+				divElement.id = 'PublicationCardDiv';
+				divElement.className = 'w-[300px]';
+				divElement.style.position = 'fixed';
+				divElement.style.transition = 'transform 0.5s';
+				document.body.appendChild(divElement);
+				divElement.style.left = `${htmlElement.getBoundingClientRect().left + htmlElement.getBoundingClientRect().width}px`;
+				divElement.style.top = `${htmlElement.getBoundingClientRect().top + htmlElement.getBoundingClientRect().height / 2 - divElement.getBoundingClientRect().height / 2}px`;
+			}
+		}
+	}
+
+	export const loopDetection = (startingNodeId: string, cy : any) => {
+		const visited = new Set();
+		const queue = [startingNodeId];
+		while (queue.length > 0) {
+			const nodeId = queue.pop();
+			if (visited.has(nodeId)) {
+				return true;
+			}
+			visited.add(nodeId);
+			const node = cy.getElementById(nodeId);
+			if (node) {
+				const edges = node.connectedEdges();
+				for (const edge of edges) {
+					if (edge.source() === node) {
+						queue.push(edge.target().id());
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+
+	/**
+	 * Fetches all materials
+	 */
+	const fetchElements = async () => {
+		await fetch('/api/material')
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				// Handle the response data from the API
+				displayedMaterials = data.materials;
+				displayIds = data.idsMat
+				addActive = true;
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
+	};
+
+	/**
+	 * Adds a node selected from the browsing page
+	 * @param event -> Custom event dispatched from the browsing page containing the publication's id
+	 */
+	const addNode = async (event: CustomEvent) => {
+		let pubId = event.detail.id;
+
+		await fetch(`/api/publication/${pubId}`)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				let extensions = [];
+				if (data.isMaterial) {
+					extensions = data.publication.materials.files.map((f: { title: string; }) => getFileExtension(f.title));
+				}
+				cy.add({
+					group: 'nodes',
+					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial, dummyNode: false},
+					position: { x: 100, y: 100 }
+				});
+
+				const node = cy.getElementById(data.publication.id);
+				placeMentAlgorithm(node, node.position().x, node.position().y, cy);
+
+				nodes.push(
+					{
+						next: [],
+						circuitId: 1,
+						publicationId: pubId,
+						extensions: extensions,
+						posX: 100,
+						posY: startY,
+						publication: {
+							id: pubId as number,
+							title: data.publication.title as string,
+							description:"",
+							difficulty: Difficulty.easy,
+							likes: 0,
+							learningObjectives: ['1'],
+							prerequisites: ['1'],
+							createdAt: new Date(),
+							updatedAt: new Date(),
+							publisherId: '1',
+							type: data.publication.type,
+							savedByAllTime: ['1'],
+							tags: [{content: 'haha'}],
+							usedInCourse: [{ course: '1' }],
+							publisher: data.publication.publisher,
+							coverPicData: data.publication.coverPicData,
+							materials: {
+								id:1,
+								copyright:'true',
+								theoryPractice:15,
+								publicationId:2,
+								timeEstimate:5,
+								encapsulatingType: data.isMaterial ? data.publication.materials.encapsulatingType: MaterialType.other,
+							},
+						}
+					},
+				)
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
+	};
+
+	export const publishCircuit =  async() => {
+
+		let nodeDiffActions: NodeDiffActions;
+		const numNodes = cy.nodes().length;
+		const add: ({ publicationId: number; x: number; y: number }[]) = [];
+		const del: ({ publicationId: number }[]) = [];
+		const edit: ({ publicationId: number; x: number; y: number }[]) = [];
+		const next: { fromId: number; toId: number[] }[] = [];
+		//
+		cy.nodes().forEach((node: any) => {
+			add.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
+			del.push(({ publicationId: Number(node.id()) }));
+			edit.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
+
+			let curNode = nodes.filter(x=>x.publicationId === Number(node.id()))[0]
+			curNode.posY = Number(node.position().y);
+			curNode.posX = Number(node.position().x);
+
+
+			curNode.next = [];
+			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => {
+				const targetId = Number(edge.target().id());
+				curNode.next.push({
+					circuitId: 1,
+					fromPublicationId: Number(node.id()),
+					toPublicationId: targetId,
+				})
+				return targetId;
+			});
+			next.push(({ fromId: Number(node.id()), toId: toID }));
+		})
+
+
+		nodeDiffActions = {numNodes, add, delete:del, edit, next };
+
+
+		const cover = await captureScreenshot()
+		const coverPic = {
+			type: 'image/png',
+			info: cover
+		}
+		return { nodeDiffActions, coverPic };
 	}
 
 
@@ -183,8 +455,7 @@
 		});
 
 
-
-		addHtmlLabel("node", false);
+		addHtmlLabel('node', false, cy);
 
 		cy.on('select', 'edge', () => {
 			if(publishing)
@@ -231,7 +502,7 @@
 				'color': '#F9F9FA'
 			});
 
-			addHtmlLabel(`#${node.id()}`, true);
+			addHtmlLabel(`#${node.id()}`, true, cy);
 
 			//If a node is already selected, add an edge between the two nodes
 			if (selected && prereqActive) {
@@ -244,7 +515,7 @@
 							group: 'edges',
 							data: { id: `${edgeId}`, source: `${selectedId}`, target: `${node.id()}` }
 						});
-						if (loopDetection(node.id()))
+						if (loopDetection(node.id(), cy))
 						{
 							modalStore.trigger(modalAlert);
 							cy.remove(cy.$(`#${edgeId}`));
@@ -277,7 +548,7 @@
 								'color': '#F9F9FA'
 							});
 
-							addHtmlLabel(`#${edge.target().id()}`, true);
+							addHtmlLabel(`#${edge.target().id()}`, true, cy);
 						}
 					});
 
@@ -309,7 +580,7 @@
 					'color': '#4C4C5C'
 				});
 
-				addHtmlLabel(`#${n.id()}`, false);
+				addHtmlLabel(`#${n.id()}`, false, cy);
 			});
 
 
@@ -401,7 +672,7 @@
 				if(!publishingView){
 					setTimeout(() => {
 						// Check if cursor is still inside the node
-						makePopUp(cursorInsideNode, hoveredNodeId, node)
+						makePopUp(cursorInsideNode, hoveredNodeId, node, likedToggled(event), savedToggled(event))
 					}, 700);
 				}
 			} else {
@@ -422,9 +693,6 @@
 						data: { id: `temp`, source: `${hoveredNodeId}`, target: `edgeStart` }
 					});
 				}
-
-
-
 			}
 
 
@@ -441,12 +709,9 @@
 					'background-color': '#9E9EAE',
 					'color': '#F9F9FA'
 				});
-				addHtmlLabel(`#${node.id()}`, true);
-
+				addHtmlLabel(`#${node.id()}`, true, cy);
 			}
 		});
-
-
 
 		cy.on('drag', 'node', (event : any) => {
 			startY = 250;
@@ -465,40 +730,36 @@
 					y: positionA.y + 50
 				});
 			}
-
 		});
 
 		cy.on('free', 'node', (event:any) => {
 			const nodeA = event.target;
-			if (nodeA.id() !== 'edgeStart')
-			{
-				placeMentAlgorithm(nodeA, nodeA.position().x, nodeA.position().y)
+			if (nodeA.id() !== 'edgeStart') {
+				placeMentAlgorithm(nodeA, nodeA.position().x, nodeA.position().y, cy);
 				return;
 			}
 
-
 			const positionA = nodeA.position();
 			cy.nodes().forEach((node : {id : () => string, position : () => {x : number, y:number}}) => {
-				if (node.id() !== 'edgeStart' && node.id() !== hoveredNodeId.toString())
-				{
+				if (node.id() !== 'edgeStart' && node.id() !== hoveredNodeId.toString()) {
 					const positionB = node.position();
-					if (positionA.x >= positionB.x - 90 && positionA.x <= positionB.x + 90 && positionA.y >= positionB.y - 90 && positionA.y <= positionB.y + 90)
-					{
+					if (positionA.x >= positionB.x - 90 && positionA.x <= positionB.x + 90 && positionA.y >= positionB.y - 90 && positionA.y <= positionB.y + 90) {
 						if (cy.getElementById(`en${hoveredNodeId}n${node.id()}`).length === 0) {
-								cy.add({
-									group: 'edges',
-									data: { id: `en${hoveredNodeId}n${node.id()}`, source: `${hoveredNodeId}`, target: `${node.id()}` }
-								});
-								if (loopDetection(node.id()))
-								{
-									modalStore.trigger(modalAlert);
-									cy.remove(cy.$(`#en${hoveredNodeId}n${node.id()}`));
+							cy.add({
+								group: 'edges',
+								data: {
+									id: `en${hoveredNodeId}n${node.id()}`,
+									source: `${hoveredNodeId}`,
+									target: `${node.id()}`
 								}
+							});
+							if (loopDetection(node.id(), cy)) {
+								modalStore.trigger(modalAlert);
+								cy.remove(cy.$(`#en${hoveredNodeId}n${node.id()}`));
+							}
 						}
-
 					}
 				}
-
 			})
 			cy.remove(cy.$('#edgeStart'));
 		})
@@ -506,8 +767,7 @@
 
 		cy.on('mouseout', 'node', (event: any) => {
 			const node = event.target;
-			if (event.target.id() === 'edgeStart')
-			{
+			if (event.target.id() === 'edgeStart') {
 				removeDummyNode(event.position.x, event.position.y, 'edgeStart')
 				return;
 			}
@@ -523,7 +783,7 @@
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
-				addHtmlLabel(`#${node.id()}`, false);
+				addHtmlLabel(`#${node.id()}`, false, cy);
 
 			}
 			else if (!node.selected() && !selectedNodePrereqs.has(Number(node.id())) && !(node.id() === 'edgeStart')) {
@@ -531,14 +791,10 @@
 					'background-color': '#FCFCFD',
 					'color': '#4C4C5C'
 				});
-				addHtmlLabel(`#${node.id()}`, false);
-
+				addHtmlLabel(`#${node.id()}`, false, cy);
 			}
 			removeDummyNode(event.position.x, event.position.y, hoveredNodeId.toString())
-
 		});
-
-
 		document.addEventListener('mousemove', removePopupDiv)
 		document.addEventListener('keydown', (event:KeyboardEvent) => {
 			if (event.key === 'Delete' || event.key === 'Backspace') {
@@ -554,20 +810,18 @@
 			})
 		})
 
-
 		let repEdges:string[] = [];
 		nodes.forEach(node => {
 			node.next.forEach(nextNode => {
-					const id = `en${node.publicationId}n${nextNode.toPublicationId.toString()}`;
-					if(!repEdges.includes(id))
-					{
-						repEdges.push(id);
-						cy.add({
-							group: 'edges',
-							data: { id: id, source: node.publicationId.toString(), target: nextNode.toPublicationId.toString() }
-						})
-					}
-				});
+				const id = `en${node.publicationId}n${nextNode.toPublicationId.toString()}`;
+				if(!repEdges.includes(id)){
+					repEdges.push(id);
+					cy.add({
+						group: 'edges',
+						data: { id: id, source: node.publicationId.toString(), target: nextNode.toPublicationId.toString() }
+					})
+				}
+			});
 		});
 		 
 		/**
@@ -579,12 +833,7 @@
 					node.lock()
 			});
 			cy.fit();
-
 		});
-
-
-
-
 
 	let addActive: boolean = false;
 	let displayedMaterials: any = [];
@@ -592,99 +841,7 @@
 	let pubIds: Set<number> = new Set();
 	nodes.map(node => pubIds.add(node.publicationId));
 
-	/**
-	 * Fetches all materials
-	 */
-	const fetchElements = async () => {
 
-		await fetch('/api/material')
-			.then(response => {
-				if (!response.ok) {
-					throw new Error('Network response was not ok');
-				}
-				return response.json();
-			})
-			.then(data => {
-				// Handle the response data from the API
-				console.log(data)
-				displayedMaterials = data.materials;
-				displayIds = data.idsMat
-				addActive = true;
-			})
-			.catch(error => {
-				console.error('There was a problem with the fetch operation:', error);
-			});
-	};
-
-	/**
-	 * Adds a node selected from the browsing page
-	 * @param event -> Custom event dispatched from the browsing page containing the publication's id
-	 */
-	const addNode = async (event: CustomEvent) => {
-		let pubId = event.detail.id;
-
-		await fetch(`/api/publication/${pubId}`)
-			.then(response => {
-				if (!response.ok) {
-					throw new Error('Network response was not ok');
-				}
-				return response.json();
-			})
-			.then(data => {
-				let extensions = [];
-				if (data.isMaterial) {
-					extensions = data.publication.materials.files.map((f: { title: string; }) => getFileExtension(f.title));
-				}
-				cy.add({
-					group: 'nodes',
-					data: { id: data.publication.id, label: data.publication.title, extensions : extensions, isMaterial: data.isMaterial, dummyNode: false},
-					position: { x: 100, y: 100 }
-				});
-
-				const node = cy.getElementById(data.publication.id);
-				placeMentAlgorithm(node, node.position().x, node.position().y )
-
-				nodes.push(
-					{
-						next: [],
-						circuitId: 1,
-						publicationId: pubId,
-						extensions: extensions,
-						posX: 100,
-						posY: startY,
-						publication: {
-							id: pubId as number,
-							title: data.publication.title as string,
-							description:"",
-							difficulty: Difficulty.easy,
-							likes: 0,
-							learningObjectives: ['1'],
-							prerequisites: ['1'],
-							createdAt: new Date(),
-							updatedAt: new Date(),
-							publisherId: '1',
-							type: data.publication.type,
-							savedByAllTime: ['1'],
-							tags: [{content: 'haha'}],
-							usedInCourse: [{ course: '1' }],
-							publisher: data.publication.publisher,
-							coverPicData: data.publication.coverPicData,
-							materials: {
-								id:1,
-								copyright:'true',
-								theoryPractice:15,
-								publicationId:2,
-								timeEstimate:5,
-								encapsulatingType: data.isMaterial ? data.publication.materials.encapsulatingType: MaterialType.other,
-							},
-						}
-					},
-				)
-			})
-			.catch(error => {
-				console.error('There was a problem with the fetch operation:', error);
-			});
-	};
 
 	/**
 	 * Removes a node through the browsing page
@@ -736,74 +893,6 @@
 		buttonTextCancel: "Got it",
 	};
 
-	const collisionDetection = (x1: number, y1: number, x2: number, y2: number) => {
-
-		let offset = 15
-		let dx = 180 - Math.abs(x2 - x1);
-		if (dx < 0)
-			return null
-		if (x1 > x2)
-			dx = -dx - offset
-		else
-			dx += offset
-
-		let dy = 100 - Math.abs(y1 - y2); // 17
-		if (dy < 0)
-			return null
-		if (y2 > y1)
-			dy = dy + offset
-		else
-			dy = -dy - offset
-
-		if (Math.abs(dy) > Math.abs(dx))
-			dx = 0
-		else
-			dy = 0
-		return [dx, dy];
-	}
-	const placeMentAlgorithm = (node : any, positionX : number, positionY:number) => {
-		if (cy.nodes().length === 1)
-		{
-			return
-		}
-
-		cy.nodes().forEach((n: any) => {
-
-			if (n.id() !== node.id() && n.id() !== "edgeStart"){
-				const vector = collisionDetection(positionX, positionY, n.position().x, n.position().y);
-				if(vector){
-					const data = n.data();
-					const edges : {id: string, source: string, target: string} [] = []
-
-
-					cy.edges().forEach((edge:any) => {
-							edges.push({ id: `en${edge.source().id()}n${edge.target().id()}`, source: `${edge.source().id()}`, target: `${edge.target().id()}` })
-					})
-					cy.remove(cy.$(`#${n.id()}`));
-					cy.add({
-						group: 'nodes',
-						data: data,
-						position: {x: n.position().x + vector[0], y: n.position().y + vector[1]}
-					});
-
-					addHtmlLabel(`#${n.id()}`, false);
-					edges.forEach((edge:any) => {
-						if (cy.getElementById(edge.id).length === 0)
-						{
-							cy.add({
-								group: 'edges',
-								data: { id: `${edge.id}`, source: `${edge.source}`, target: `${edge.target}` }
-							});
-						}
-
-					})
-
-
-					placeMentAlgorithm(n, n.position().x + vector[0], n.position().y + vector[1])
-				}
-			}
-		});
-	}
 
 	const removeSelected = () => {
 		cy.nodes().forEach((node: any) => {
@@ -829,95 +918,6 @@
 		prereqActive = false;
 	}
 
-	export const publishCircuit =  async() => {
-
-		let nodeDiffActions: NodeDiffActions;
-		const numNodes = cy.nodes().length;
-		const add: ({ publicationId: number; x: number; y: number }[]) = [];
-		const del: ({ publicationId: number }[]) = [];
-		const edit: ({ publicationId: number; x: number; y: number }[]) = [];
-		const next: { fromId: number; toId: number[] }[] = [];
-		//
-		cy.nodes().forEach((node: any) => {
-			add.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
-			del.push(({ publicationId: Number(node.id()) }));
-			edit.push(({ publicationId: Number(node.id()), x: Number(node.position().x), y: Number(node.position().y) }));
-
-			let curNode = nodes.filter(x=>x.publicationId === Number(node.id()))[0]
-			curNode.posY = Number(node.position().y);
-			curNode.posX = Number(node.position().x);
-
-
-			curNode.next = [];
-			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => {
-				const targetId = Number(edge.target().id());
-				curNode.next.push({
-					circuitId: 1,
-					fromPublicationId: Number(node.id()),
-					toPublicationId: targetId,
-				})
-				return targetId;
-			});
-			next.push(({ fromId: Number(node.id()), toId: toID }));
-		})
-
-
-		nodeDiffActions = {numNodes, add, delete:del, edit, next };
-
-
-		const cover = await captureScreenshot()
-		const coverPic = {
-			type: 'image/png',
-			info: cover
-		}
-		return { nodeDiffActions, coverPic };
-
-	}
-
-		const makePopUp = (cursorInsideNode: boolean, hoveredNodeId: number, node:{id : () => string, data : () => {extensions:string[]}}) => {
-			if (cursorInsideNode && hoveredNodeId === Number(node.id())) {
-				const htmlElement = document.getElementById(node.id());
-				if (htmlElement) {
-					const divElement = document.createElement('div');
-					let publication = nodes.find(n => n.publicationId === Number(node.id()));
-
-					if (publication) {
-						const coverPicData = publication.publication.coverPicData;
-						const publicationCard = new PublicationCard({
-							target: divElement,
-							props: {
-								materialType: publication.publication.materials.encapsulatingType,
-								publication: publication.publication,
-								inCircuits: false,
-								imgSrc: 'data:image;base64,' +  coverPicData,
-								forArrow: true,
-								extensions: node.data().extensions,
-								publisher: publication.publication.publisher,
-								liked: liked.includes(publication.publicationId),
-								saved: saved.includes(publication.publicationId)
-							}
-						});
-						publicationCard.$on('liked', likedToggled);
-						publicationCard.$on('saved', savedToggled);
-
-
-					}
-
-					divElement.id = 'PublicationCardDiv';
-					divElement.className = 'w-[300px]';
-					divElement.style.position = 'fixed';
-					divElement.style.transition = 'transform 0.5s';
-
-
-					document.body.appendChild(divElement);
-
-					divElement.style.left = `${htmlElement.getBoundingClientRect().left + htmlElement.getBoundingClientRect().width}px`;
-					divElement.style.top = `${htmlElement.getBoundingClientRect().top + htmlElement.getBoundingClientRect().height / 2 - divElement.getBoundingClientRect().height / 2}px`;
-				}
-
-			}
-		}
-
 
 	/**
 	 * Highlights all prerequisites of the selected node and activates the ability to add edges
@@ -930,7 +930,7 @@
 					'color': '#F9F9FA'
 				});
 				selectedNodePrereqs.add(Number(edge.target().id()));
-				addHtmlLabel(`#${edge.target().id()}`, true);
+				addHtmlLabel(`#${edge.target().id()}`, true, cy);
 			}
 		});
 		prereqActive = true;
@@ -990,29 +990,6 @@
 			saved.push(id);
 		}
 	};
-
-	const loopDetection = (startingNodeId: string) => {
-
-		const visited = new Set();
-		const queue = [startingNodeId];
-		while (queue.length > 0) {
-			const nodeId = queue.pop();
-			if (visited.has(nodeId)) {
-				return true;
-			}
-			visited.add(nodeId);
-			const node = cy.getElementById(nodeId);
-			if (node) {
-				const edges = node.connectedEdges();
-				for (const edge of edges) {
-					if (edge.source() === node) {
-						queue.push(edge.target().id());
-						}
-					}
-				}
-			}
-			return false;
-		}
 
 	const removeDummyNode = (mouseX:number, mouseY:number, id:string) => {
 
