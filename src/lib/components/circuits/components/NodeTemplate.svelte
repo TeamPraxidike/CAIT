@@ -39,15 +39,23 @@
 
 	type $$Props = NodeProps;
 
-	export let data: any;
+	export let data : any;
+	const pubId = data.id
 
 	let text = data.selected ? 'text-surface-50' : 'text-surface-700';
+
+	const clicked = () => {
+		if(!data.publushing && data.publisherId !== -1) {
+			const url = `/${data.publisherId}/${pubId}`;
+			window.open(url, '_blank'); // Open the URL in a new tab
+		}
+	}
 </script>
 
-<div class="custom">
+<button class="custom" on:click="{clicked}">
 	<Handle type="target" position={Position.Top} />
 	<div style="  overflow-wrap: break-word;"
-			class=" {text} border border-primary-500 w-[180px] h-[100px] rounded-lg flex flex-col items-center justify-center gap-2 p-1">
+			class=" {text} border border-primary-500 hover:ring-2 hover:ring-primary-100 w-[180px] h-[100px] rounded-lg flex flex-col items-center justify-center gap-2 p-1 ">
 		<span class="line-clamp-3 text-xs max-w-full break-word">{data.label}</span>
 		<div class="flex gap-2">
 			{#if data.isMaterial}
@@ -61,4 +69,4 @@
 	</div>
 	<Handle type="source" position={Position.Bottom} id="a" style="left: 10px;" />
 	<Handle type="source" position={Position.Bottom} id="b" style="left: auto; right: 10px;" />
-</div>
+</button>
