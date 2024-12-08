@@ -209,10 +209,9 @@
 </div>
 
 <div style:height="100vh">
-	<SvelteFlow {nodes} {edges} {nodeTypes} fitView>
-		<Controls />
+	<SvelteFlow {nodes} {edges} {nodeTypes} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}">
+		<Controls showLock={publishing}/>
 		<Background />
-		<MiniMap />
 	</SvelteFlow>
 </div>
 
