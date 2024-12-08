@@ -1,18 +1,18 @@
 <script lang="ts">
-	import type { LayoutServerData, PageServerData } from './$types';
-	import {
-		AddInteractionForm,
-		Circuit,
-		Comment,
-		DiffBar,
-		FileTable,
-		getDateDifference, HorizontalScroll,
-		Meta,
-		Tag, TheoryAppBar,
-		UserProp
-	} from '$lib';
-	import { fly } from 'svelte/transition';
-	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
+    import type {LayoutServerData, PageServerData} from './$types';
+    import {
+        AddInteractionForm,
+        Circuit, CircuitComponent,
+        Comment,
+        DiffBar,
+        FileTable,
+        getDateDifference, HorizontalScroll,
+        Meta,
+        Tag, TheoryAppBar,
+        UserProp
+    } from '$lib';
+    import {fly} from 'svelte/transition';
+    import {TabGroup, Tab} from '@skeletonlabs/skeleton';
 
 	import { onMount } from 'svelte';
 	import JSZip from 'jszip';
@@ -558,7 +558,7 @@
 						{/await}
 					{:else}
 						<div class="w-full">
-							<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}" />
+							<CircuitComponent publishing="{false}" dbNodes="{pubView.publication.circuit.nodes}"/>
 						</div>
 					{/if}
 

@@ -5,7 +5,7 @@
 	import { Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import {
-		Difficulty, type Material, MaterialType,
+		Difficulty, type Edge, type Material, MaterialType,
 		type Node as PrismaNode,
 		type Publication,
 		PublicationType,
@@ -70,15 +70,6 @@
 	nodeHtmlLabel(cytoscape)
 	const modalStore = getModalStore();
 
-	type Edge = {
-		data: {
-			id: string,
-			source: string,
-			target: string
-		}
-	}
-
-
 	export let liked : number[] = []
 	export let saved : number[] = []
 	export let publishing: boolean;
@@ -98,7 +89,6 @@
 			toPublicationId: number
 		}[]
 	})[];
-
 
 	let startY: number = 100;
 
@@ -139,8 +129,6 @@
 	let popupPrereq1: boolean = false;
 	let popupPrereq2: boolean = false;
 	let stage1: boolean = false;
-
-
 
 	onMount(async () => {
 
@@ -416,9 +404,7 @@
 						makePopUp(cursorInsideNode, hoveredNodeId, node)
 					}, 700);
 				}
-
-			}
-			else {
+			} else {
 			if (cy.getElementById('edgeStart').length === 0 && !prereqActive && !(node.id() === 'edgeStart')) {
 					cy.add({
 						group: 'nodes',

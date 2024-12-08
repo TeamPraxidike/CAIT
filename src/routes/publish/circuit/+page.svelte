@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Circuit, Meta, PublishReview } from '$lib';
+	import { Circuit, CircuitComponent, Meta, PublishReview } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Material, Publication, Tag as PrismaTag, User } from '@prisma/client';
@@ -23,7 +23,7 @@
 
 	export let data: PageServerData;
 
-	let circuitRef : InstanceType<typeof Circuit>;
+	let circuitRef : InstanceType<typeof CircuitComponent>;
 	type UserWithProfilePic = User & { profilePicData: string };
 
 	let title = '';
@@ -158,8 +158,8 @@
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
-
+<!--			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>-->
+			<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
