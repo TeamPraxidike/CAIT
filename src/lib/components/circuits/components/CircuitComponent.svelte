@@ -54,6 +54,10 @@
 	let displayIds : number[] = []
 	let pubIds: Set<number> = new Set();
 
+	//set of variables needed to deal with selected nodes
+	let selected = false
+	let selectedId = ''
+
 	onMount(async () => {
 		dbNodes.forEach(node => {
 			$nodes.push({
@@ -105,18 +109,25 @@
 
 	}
 
-	const removeNode = async(event : CustomEvent) => {
-
-	}
+	/**
+	 * Removes a node through the browsing page
+	 * @param event -> event activated from the browsing page
+	 */
+	const removeNode = (event: CustomEvent) => {
+		const pubId = event.detail.id.toString()
+		selectedId = '';
+		selected = false;
+		pubIds.delete(event.detail.id);
+		$nodes = $nodes.filter(x=> x.id !== pubId)
+		dbNodes = dbNodes.filter(x=>x.publicationId !== event.detail.id)
+	};
 
 
 
 	export const placementAlgorithm = (node : any, positionX : number, positionY:number) => {
 		if ($nodes.length === 1) return
 
-
 		$nodes.forEach((n: any) => {
-
 			if (n.id !== node.id){
 				const vector = collisionDetection(positionX, positionY, n.position.x, n.position.y);
 				if(vector){
