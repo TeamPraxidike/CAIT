@@ -72,13 +72,11 @@ export class SupabaseFileSystem{
 	 * @returns {Promise<Buffer>}
 	 */
 	async readFile(pathArg) {
-		console.log("\nIN READ FILE\n")
 		const { data, error } = await this.supabase
 			.storage
 			.from(this.bucketName)
 			.download(pathArg);
 
-		console.log("\nAFTER AWAIT supabase\n")
 		if (error) throw error;
 		const arrayBuffer = await data.arrayBuffer();
 		return Buffer.from(new Uint8Array(arrayBuffer));

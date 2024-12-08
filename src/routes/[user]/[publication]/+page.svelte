@@ -426,10 +426,6 @@
 			<p class="text-sm text-surface-500">{created}</p>
 
 			{#if isMaterial}
-				<!--{#if loading}-->
-				<!--	<p>Loading files...</p>-->
-				<!--{:else if error}-->
-				<!--	<p class="error">{error}</p>-->
 				{#if pubView.publication.materials.files.length === 1}
 					<Icon
 						icon={IconMapExtension.get(pubView.publication.materials.files.map((f => getFileExtension(f.title)))[0]) || 'vscode-icons:file-type-text'}
@@ -548,7 +544,7 @@
 				{#if tabSet === 0}
 
 					<!--    FILES -->
-
+					<!--Uses the "Streaming" feature in SvelteKit-->
 					{#if isMaterial}
 						{#await data.fetchedFiles}
 							<p>Loading files...</p>
@@ -594,6 +590,7 @@
 				{:else if tabSet === 2}
 
 					<!--SHOW SIMILAR PUBLICATIONS-->
+					<!--Uses the "Streaming" feature in SvelteKit-->
 					{#await data.similarPublications}
 						<p>Loading similar publications...</p>
 					{:then similar}
@@ -614,6 +611,7 @@
 					{/await}
 
 					<!--    CIRCUITS THAT INCLUDE THIS CONTENT -->
+					<!--Uses the "Streaming" feature in SvelteKit-->
 					{#await data.circuitsPubAppearIn}
 						<p>Loading circuits that feature this publication...</p>
 					{:then cPAI}

@@ -100,7 +100,6 @@ import {
 import {handleSimilarity} from "$lib/database/similarity";
 
 import { prisma } from './prisma';
-import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { Difficulty, MaterialType } from '@prisma/client';
 import path from 'path';
 
@@ -202,16 +201,29 @@ type NodeDiffActions = {
 	next: { fromId: number; toId: number[] }[];
 };
 
-import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
-//import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystemJS.mjs';
 
-//export const basePath = path.join('static', 'uploadedFiles');
+/////////////////////////////////////////////////////////
+/// SELECT FILESYSTEM TYPE BASED ON .ENV VARIABLE
+////////////////////////////////////////////////////////
+
+import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
+import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
+
 export const basePath = "uploadedFiles"
-//export const fileSystem = new LocalFileSystem(basePath);
-export const fileSystem = new SupabaseFileSystem(PUBLIC_SUPABASE_URL, SERVICE_ROLE_KEY, basePath)
+let fileSystem: SupabaseFileSystem | LocalFileSystem;
+
+if (process.env.FILESYSTEM === "SUPABASE") {
+	fileSystem = new SupabaseFileSystem(PUBLIC_SUPABASE_URL,
+		SERVICE_ROLE_KEY, basePath)
+}
+else fileSystem = new LocalFileSystem(basePath);
+
+
+////////////////////////////////////////////////////////
 
 export {
 	prisma,
+	fileSystem,
 	type UserForm,
 	type MaterialForm,
 	type CircuitForm,
