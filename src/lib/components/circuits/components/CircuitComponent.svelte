@@ -15,6 +15,7 @@
 	import SearchElems from '$lib/components/circuits/components/SearchElems.svelte';
 	import TextThingy from '$lib/components/circuits/components/TextThingy.svelte';
 	import { fetchMaterials, fetchNode } from '$lib/components/circuits/methods/CircuitApiCalls';
+	import { collisionDetection } from '$lib/components/circuits/methods/CircuitUtilMethods';
 
 	const modalStore = getModalStore();
 	let modalRegistryHelp: Record<string, ModalComponent> = {
@@ -91,18 +92,65 @@
 
 	const addNode = async (event: CustomEvent) => {
 		const pubId = event.detail.id;
-		const node : NodeInfo = await fetchNode(pubId)
-		$nodes.push({
-			id: node.id.toString(),
-			data: { label: node.title, extensions: node.extensions, isMaterial: node.isMaterial, dummyNode: false, selected:false},
+		const nodeInfo : NodeInfo = await fetchNode(pubId)
+		const node = {
+			id: nodeInfo.id.toString(),
+			data: { label: nodeInfo.title, extensions: nodeInfo.extensions, isMaterial: nodeInfo.isMaterial, dummyNode: false, selected:false},
 			position: { x: 0, y: 0 },
 			type: "custom"
-		});
+		}
+		$nodes.push(node);
 		$nodes = $nodes
+		placementAlgorithm(node, 0, 0)
+
 	}
 
 	const removeNode = async(event : CustomEvent) => {
 
+	}
+
+
+
+	export const placementAlgorithm = (node : any, positionX : number, positionY:number) => {
+		if ($nodes.length === 1) return
+
+
+		$nodes.forEach((n: any) => {
+
+			if (n.id !== node.id){
+				const vector = collisionDetection(positionX, positionY, n.position.x, n.position.y);
+				if(vector){
+					const data = n.data;
+					const removedEdges : {id: string, source: string, target: string} [] = []
+
+					$edges.forEach((edge:any) => {
+						removedEdges.push({ id: `en${edge.source().id()}n${edge.target().id()}`, source: `${edge.source().id()}`, target: `${edge.target().id()}` })
+					})
+					$nodes = $nodes.filter(x => x.id !== n.id)
+					$nodes.push({
+						id: n.id,
+						data: data,
+						position: {x: n.position.x + vector[0], y: n.position.y + vector[1]},
+						type: "custom"
+					});
+
+					removedEdges.forEach((edge:any) => {
+
+						if ($edges.filter(x => x.id === edge.id).length === 0)
+						{
+							$edges.push({
+								 id: `${edge.id}`,
+								source: `${edge.source}`,
+								target: `${edge.target}`
+							});
+						}
+					})
+					$nodes = $nodes
+					$edges = $edges
+					placementAlgorithm(n, n.position.x + vector[0], n.position.y + vector[1])
+				}
+			}
+		});
 	}
 </script>
 
