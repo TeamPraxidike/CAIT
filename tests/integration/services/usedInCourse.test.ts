@@ -14,7 +14,7 @@ describe('Using in a course', () => {
 
 	beforeEach(async () => {
 		user = await createUser({
-			firstName: 'Marti2323',
+			firstName: 'Marti2323' + Math.random(),
 			lastName: 'Parti',
 			email: 'email@gmail' + Math.random(),
 			password: 'password',
@@ -55,12 +55,12 @@ describe('Using in a course', () => {
 	});
 
 	it('should add multiple records to the list', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.id, [
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, [
 			'ADS',
 			'CPL',
 			'ACC',
 		]);
-		const courses = await coursesUsingPublication(publication.id);
+		const courses = await coursesUsingPublication(publication.publicationId);
 		expect(courses).toHaveLength(3);
 		expect(courses).toContain('ADS');
 		expect(courses).toContain('CPL');
@@ -72,21 +72,21 @@ describe('Using in a course', () => {
 			'ADS',
 		]);
 		const publications = (await publicationsAUserUses(user.id)).map(
-			(x) => x.id,
+			(x:any) => x.id,
 		);
 		expect(publications).toHaveLength(1);
 		expect(publications).toContain(publication.publicationId);
 	});
 
 	it('should add to the list of what users use across multiple publications', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.id, ['ADS']);
-		await addPublicationToUsedInCourse(user.id, publication2.id, ['CPL']);
-		await addPublicationToUsedInCourse(user.id, publication.id, ['CG']);
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, ['ADS']);
+		await addPublicationToUsedInCourse(user.id, publication2.publicationId, ['CPL']);
+		await addPublicationToUsedInCourse(user.id, publication.publicationId, ['CG']);
 		const publications = (await publicationsAUserUses(user.id)).map(
-			(x) => x.id,
+			(x:any) => x.id,
 		);
 		expect(publications).toHaveLength(2);
-		expect(publications).toContain(publication.id);
-		expect(publications).toContain(publication2.id);
+		expect(publications).toContain(publication.publicationId);
+		expect(publications).toContain(publication2.publicationId);
 	});
 });
