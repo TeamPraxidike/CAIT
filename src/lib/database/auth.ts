@@ -98,6 +98,12 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 
 				if (!userAndPfp) throw new Error('User not found');
 				session.userPfp = profilePicFetcher(userAndPfp.profilePic);
+
+				// could be better to do session.user = userAndPfp but I am scared because I dont know how typescript will handle that
+				// because session has more fields and userAndPfp has fields session doesnt have
+				session.user.firstName = userAndPfp.firstName;
+				session.user.lastName = userAndPfp.lastName;
+				session.user.username = userAndPfp.username;
 			}
 			return session;
 		},

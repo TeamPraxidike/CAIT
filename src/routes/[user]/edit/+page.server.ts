@@ -55,7 +55,6 @@ export const actions = {
 			body: JSON.stringify(user),
 		});
 		const newUser = await res.json();
-		session.user = newUser;
 
 		return { status: res.status, id: newUser.id };
 	},

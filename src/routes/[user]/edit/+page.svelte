@@ -28,9 +28,8 @@
 			message: 'User Edited Successfully',
 			background: 'bg-success-200',
 			classes: 'text-surface-900',
-
 		});
-		goto(`/${$page.data.session?.user.id}`);
+		goto(`/${$page.data.session?.user.username}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
