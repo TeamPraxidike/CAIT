@@ -41,6 +41,7 @@ export async function GET({ params, url, locals }) {
 	const { id } = params;
 
 	const user = await getUserById(id);
+
 	if (!user)
 		return new Response(JSON.stringify({ error: 'User not found' }), {
 			status: 404,
@@ -51,7 +52,6 @@ export async function GET({ params, url, locals }) {
 		return new Response(JSON.stringify({ error: 'Server error' }), {
 			status: 500,
 		});
-
 	let saved;
 	const fileData: FetchedFileArray = [];
 

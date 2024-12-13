@@ -29,7 +29,6 @@
         coverPicData: string;
         publisher: User & {profilePicData: string};
     });
-
     let saved: publication[] = data.saved;
     let posts : publication[] = data.publications.publications;
 

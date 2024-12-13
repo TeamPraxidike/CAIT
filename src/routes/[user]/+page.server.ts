@@ -9,12 +9,12 @@ export const load: PageServerLoad = async ({
 	parent,
 	locals,
 }) => {
-	await parent();
+	const layoutData = await parent();
 
 	const session = await locals.auth();
 	if (!session) throw redirect(303, '/signin');
 
-	const pubsRes = await fetch(`/api/publication?publishers=${params.user}`);
+	const pubsRes = await fetch(`/api/publication?publishers=${layoutData.user.id}`);
 
 	if (pubsRes.status !== 200) {
 		return {
@@ -24,9 +24,9 @@ export const load: PageServerLoad = async ({
 	}
 
 	let savedRes = null;
-	if (params.user === session.user.id) {
+	if (params.user === session.user.username) {
 		savedRes = await fetch(
-			`/api/user/${params.user}/saved?fullPublications=true`,
+			`/api/user/${session.user.id}/saved?fullPublications=true`,
 		);
 		if (![200, 204].includes(savedRes.status)) {
 			throw new Error('Failed to fetch saved materials');

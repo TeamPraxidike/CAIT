@@ -1,8 +1,12 @@
 import type { UserForm } from '$lib/database';
 import type { Actions } from './$types';
+import { redirect } from '@sveltejs/kit';
 
 export const actions = {
-	edit: async ({ request, fetch }) => {
+	edit: async ({ request, fetch, locals }) => {
+		const session = await locals.auth();
+		if (!session) throw redirect(303, '/signin');
+
 		const formData = await request.formData();
 
 		const id = formData.get('userId');
@@ -50,7 +54,9 @@ export const actions = {
 			method: 'PUT',
 			body: JSON.stringify(user),
 		});
+		const newUser = await res.json();
+		session.user = newUser;
 
-		return { status: res.status, id: (await res.json()).id };
+		return { status: res.status, id: newUser.id };
 	},
 } satisfies Actions;

@@ -33,7 +33,7 @@
 {#if device === 'mobile'}
     <div class="grid grid-cols-2">
 
-        <a href="/{$page.data.session?.user.id}"  on:click={confirmPublishReset}
+        <a href="/{$page.data.session?.user.username}"  on:click={confirmPublishReset}
            class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1 dark:hover:bg-surface-700 col-span-2">
             {#if $page.data.session && $page.data.session.userPfp.data !== ''}
                 <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + $page.data.session.userPfp.data} alt={$page.data.session.user?.firstName}/>
@@ -57,7 +57,7 @@
     <div class="card relative z-20 bg-surface-50 border border-surface-300 p-4 w-64
                             dark:text-surface-50 dark:border-none">
         <div class="flex flex-col">
-            <a href="/{$page.data.session?.user.id}" on:click={confirmPublishReset}
+            <a href="/{$page.data.session?.user.username}" on:click={confirmPublishReset}
                class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1
                   dark:hover:bg-surface-700">
                 {#if $page.data.session}

@@ -42,7 +42,7 @@
                 <p class="variant-soft-primary hidden md:block p-2 rounded-lg">Reputation: {user.reputation}</p>
                 {#if currentlyAuth()}
                     <div class="flex gap-2">
-                        <a type="button" href="/{user.id}/edit"  class="btn bg-surface-800 text-surface-50 rounded-lg
+                        <a type="button" href="/{user.username}/edit"  class="btn bg-surface-800 text-surface-50 rounded-lg
                            dark:bg-surface-700">Edit Profile</a>
                         <button class="btn bg-surface-800 text-surface-50 rounded-lg
                            dark:bg-surface-700">Settings</button>

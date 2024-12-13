@@ -11,7 +11,7 @@ export const load: LayoutServerLoad = async ({ params, fetch, locals }) => {
 	const session = await locals.auth();
 	if (!session) throw redirect(303, '/signin');
 
-	const uRes = await fetch(`/api/user/${params.user}`);
+	const uRes = await fetch(`/api/user/username/${params.user}`);
 
 	if (uRes.status !== 200) {
 		error(uRes.status, uRes.statusText);

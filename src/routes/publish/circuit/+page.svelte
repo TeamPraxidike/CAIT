@@ -72,7 +72,7 @@
 			classes: 'text-surface-900',
 
 		});
-		goto(`/${$page.data.session?.user.id}/${form?.id}`);
+		goto(`/${$page.data.session?.user.username}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
