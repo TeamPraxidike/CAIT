@@ -74,7 +74,7 @@
         </div>
 
         <div class="hidden md:flex col-start-11 col-span-2 md:gap-2 xl:gap-4 items-center justify-self-end">
-            {#if $page.data.session?.user}
+            {#if loggedUser}
                 <a on:click={confirmPublishReset} href="/publish" class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-primary-600 text-surface-50 hover:opacity-60 transition duration-400">
                     Publish
                 </a>
@@ -88,7 +88,7 @@
                 <LightSwitch />
             </div>
 
-            {#if $page.data.session?.user}
+            {#if loggedUser}
                 <div class="border-l border-surface-300 h-8"/>
                 <div data-testid="profile-picture" use:popup={popupHover} class="cursor-pointer w-8 [&>*]:pointer-events-none">
                     {#if loggedUser}
