@@ -30,7 +30,7 @@ export const canRemove = async (locals: App.Locals, ownerId: string) => {
 };
 
 export const unauthResponse = () => {
-	return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+	return new Response(JSON.stringify({ error: 'Unauthorized pederas' }), {
 		status: 401,
 	});
 };

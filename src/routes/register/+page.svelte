@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import { goto } from '$app/navigation';
@@ -75,10 +74,10 @@
 		</div>
 
 		<p class="text-center text-sm mt-2">Already have an account? <a class="anchor text-primary-600" href="/signin">Login</a></p>
-		<!--{#if form && form.status !== 200}-->
-		<!--	<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">-->
-		<!--		<span>{form.message}</span>-->
-		<!--	</div>-->
-		<!--{/if}-->
+		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
+			{#if form?.incorrect}
+				<p>Error logging in: {form.error}</p>
+			{/if}
+		</div>
 	</form>
 </div>

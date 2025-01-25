@@ -1,5 +1,5 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 // todo: put schema
 // import { signOnSchema } from '$lib/util/zod';
 // import type { UserCreateForm } from '$lib/database';
@@ -15,21 +15,19 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
+		const firstName = formData.get('firstName');
+		const lastName = formData.get('lastName');
 
 		const { error } = await supabase.auth.signUp({
 			email,
 			password,
 			options: {
-				data: {
-					firstName: formData.get('firstName'),
-					lastName: formData.get('lastName')
-				}
+				data: { firstName, lastName }
 			}
 		});
 
 		if (error) {
-			console.error(error);
-			redirect(303, '/signin/error');
+			return fail(400, { email, firstName, lastName, incorrect: true, error: error.message });
 		} else {
 			redirect(303, '/');
 		}
