@@ -263,9 +263,11 @@ export async function addFile(
 			});
 		} catch (errorDatabase) {
 			fileSystem.deleteFile(path);
+			console.error(errorDatabase);
 			throw new Error('Rollback');
 		}
 	} catch (errorFileSystem) {
+		console.error(errorFileSystem);
 		throw new Error('Rollback');
 	}
 }
@@ -297,9 +299,11 @@ export async function editFile(
 		try {
 			await fileSystem.editFile(path, info);
 		} catch (errorFileSystem) {
+			console.error(errorFileSystem);
 			throw new Error('Rollback');
 		}
 	} catch (errorDatabase) {
+		console.error(errorDatabase);
 		throw new Error('Rollback');
 	}
 }
@@ -314,9 +318,11 @@ export async function deleteFile(
 		try {
 			fileSystem.deleteFile(path);
 		} catch (errorFileSystem) {
+			console.error(errorFileSystem);
 			throw new Error('Rollback');
 		}
 	} catch (errorDatabase) {
+		console.error(errorDatabase);
 		throw new Error('Rollback');
 	}
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import { insertOwnerId } from './insertOwnerId';
 import type FileSystem from '$lib/FileSystemPort/FileSystem';
 
 export class SupabaseFileSystem implements FileSystem {
@@ -42,6 +43,7 @@ export class SupabaseFileSystem implements FileSystem {
 				});
 
 			if (error) throw error;
+			await insertOwnerId(data!.id, ownerId);
 			return data.path;
 		}
 		catch (error) {
