@@ -74,18 +74,19 @@ describe('Editing users', () => {
 			password: 'password',
 		});
 
+		const email = 'l' + Math.random();
 		await editUser({
 			id: user.id,
 			firstName: 'Kiro',
 			lastName: 'Breika',
-			email: 'l',
+			email: email,
 			aboutMe: "hello I am Kiro"
 		});
 
 		const editedUser = await getUserById(user.id);
 		expect(editedUser).toHaveProperty('firstName', 'Kiro');
 		expect(editedUser).toHaveProperty('lastName', 'Breika');
-		expect(editedUser).toHaveProperty('email', 'l');
+		expect(editedUser).toHaveProperty('email', email);
 
 		expect(editedUser).toHaveProperty('username', 'KiroBreika');
 	});
