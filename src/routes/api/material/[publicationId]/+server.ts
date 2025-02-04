@@ -90,6 +90,15 @@ export async function PUT({ request, params, locals }) {
 		materialId: number;
 	} = await request.json();
 
+	if ((await locals.safeGetSession()).user!.id !== body.userId) {
+		return new Response(
+			JSON.stringify({
+				error: 'Bad Request - User IDs not matching',
+			}),
+			{ status: 401 },
+		);
+	}
+
 	const material: MaterialForm = body;
 	const metaData = material.metaData;
 	// const userId = material.userId;

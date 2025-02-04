@@ -9,6 +9,17 @@ if (!dbUrl) {
 const sql = postgres(dbUrl);
 
 async function main() {
+
+	await sql`
+        CREATE OR REPLACE FUNCTION is_admin()
+		  RETURNS boolean AS
+		$$
+		BEGIN
+			return exists(select from public."User" where auth.uid() = id and isAdmin = TRUE);
+		END;
+		$$ language plpgsql security definer;
+	`
+
 	await sql`
         CREATE OR REPLACE FUNCTION public.insert_profile_for_new_user()
 		 RETURNS trigger

@@ -16,6 +16,7 @@ import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
 
 import type { Tag } from '@prisma/client';
+import { verifyAuth } from '$lib/database/auth';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -110,12 +111,25 @@ export const GET: RequestHandler = async ({ url }) => {
  * @param request
  * @param params
  */
-export async function POST({ request }) {
+export async function POST({ request , locals}) {
 	// Authentication step
 	// return 401 if user not authenticated
 	// Add 400 Bad Request check
 
+	const authError = await verifyAuth(locals);
+	if (authError) return authError;
+
 	const body: MaterialForm = await request.json();
+
+	if ((await locals.safeGetSession()).user!.id !== body.userId) {
+		return new Response(
+			JSON.stringify({
+				error: 'Bad Request - User IDs not matching',
+			}),
+			{ status: 401 },
+		);
+	}
+
 	const tags = body.metaData.tags;
 	const maintainers = body.metaData.maintainers;
 	const metaData = body.metaData;

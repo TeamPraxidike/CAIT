@@ -81,6 +81,15 @@ export async function PUT({ request, params, locals }) {
 		circuitId: number;
 	} = await request.json();
 
+	if ((await locals.safeGetSession()).user!.id !== body.userId) {
+		return new Response(
+			JSON.stringify({
+				error: 'Bad Request - User IDs not matching',
+			}),
+			{ status: 401 },
+		);
+	}
+
 	const metaData = body.metaData;
 	// const userId = circuit.userId;
 	const nodeInfo: NodeDiffActions = body.nodeDiff;
