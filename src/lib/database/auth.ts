@@ -23,6 +23,7 @@ export const canRemove = async (locals: App.Locals, ownerId: string) => {
 	const session = await locals.safeGetSession();
 	if (!session || !session.user) return false;
 
+	// TODO:
 	// supabase check if admin
 	// if (session.user.role) return true;
 
