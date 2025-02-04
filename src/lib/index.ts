@@ -29,7 +29,7 @@ import PublishReview from '$lib/components/PublishReview.svelte';
 
 // util
 import { getDateDifference } from '$lib/util/date';
-
+import { formatFileSize } from "$lib/util/file"
 import { mapToType, mapToDifficulty, MaterialTypes } from '$lib/util/types';
 
 const lorem =
@@ -39,6 +39,7 @@ import AddInteractionForm from '$lib/components/AddInteractionForm.svelte';
 
 
 export {
+	formatFileSize,
 	mapToType,
 	mapToDifficulty,
 	Download,
