@@ -92,6 +92,8 @@ async function main() {
 					-- Enable Row-Level Security (RLS) on storage.objects if not already enabled
 					ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 			
+					-- ALLOWED FOR ALL AUTH USERS
+					-- Existing table rows are checked against the expression specified in USING
 					-- SELECT Policy
 					CREATE POLICY "Allow SELECT on uploadedFiles for authenticated users"
 					ON storage.objects
@@ -100,7 +102,10 @@ async function main() {
 					   auth.role() = 'authenticated'
 					   AND storage.objects.bucket_id = bucket_id
 					);
-			
+
+            		-- ALLOWED FOR ALL AUTH USERS
+					-- New rows that would be created via INSERT  are checked against 
+					-- the expression specified in WITH CHECK
 					-- INSERT Policy
 					CREATE POLICY "Allow INSERT on uploadedFiles for authenticated users"
 					ON storage.objects
@@ -110,19 +115,27 @@ async function main() {
 						AND storage.objects.bucket_id = bucket_id
 					);
 			
+					-- ALLOWED FOR ALL AUTH USERS (IF FILE BELONGS TO USER)
+					-- New rows that would be created via UPDATE are checked against 
+					-- the expression specified in WITH CHECK
+					-- Existing table rows are checked against the expression specified in USING
 					-- UPDATE Policy
 					CREATE POLICY "Allow UPDATE on uploadedFiles for authenticated users"
 					ON storage.objects
 					FOR UPDATE
 					USING (
-					  auth.role() = 'authenticated'
-					  AND storage.objects.bucket_id = bucket_id
-					  )
+						auth.role() = 'authenticated'
+						AND storage.objects.bucket_id = bucket_id
+						AND auth.uid() = owner_id::uuid
+					)
 					WITH CHECK (
-					  auth.role() = 'authenticated'
-					  AND storage.objects.bucket_id = bucket_id
-					  );
-			
+						auth.role() = 'authenticated'
+						AND storage.objects.bucket_id = bucket_id
+						AND auth.uid() = owner_id::uuid
+					);
+
+            		-- ALLOWED FOR ALL AUTH USERS (IF FILE BELONGS TO USER)
+					-- Existing table rows are checked against the expression specified in USING
 					-- DELETE Policy
 					CREATE POLICY "Allow DELETE on uploadedFiles for authenticated users"
 					ON storage.objects
@@ -130,6 +143,7 @@ async function main() {
 					USING (
 						auth.role() = 'authenticated'
 						AND storage.objects.bucket_id = bucket_id
+					    AND auth.uid() = owner_id::uuid
 					);
 			
 					RAISE NOTICE 'Policies for "uploadedFiles" bucket have been created.';
