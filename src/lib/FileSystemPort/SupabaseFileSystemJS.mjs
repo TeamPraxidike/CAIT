@@ -27,9 +27,10 @@ export class SupabaseFileSystem{
 	 *
 	 * @param {Buffer} file - Binary data of the file
 	 * @param {string} name - The name of the file
+	 * @param {string} ownerId - File owner uuid
 	 * @returns {Promise<string>} The path/key of the saved file in the bucket
 	 */
-	async saveFile(file, name) {
+	async saveFile(file, name, ownerId) {
 		if (!file) throw new Error('No file provided');
 
 		try {
@@ -41,6 +42,9 @@ export class SupabaseFileSystem{
 				.from(this.bucketName)
 				.upload(pathFileNameGenerated, file, {
 					cacheControl: '3600', // 60 minutes
+					metadata: {
+						"ownerId": ownerId,
+					}
 				});
 
 			if (error) throw error;

@@ -135,10 +135,11 @@ export async function PUT({ request, params, locals }) {
 				await updateCoverPic(
 					coverPic,
 					publicationId,
+					body.userId,
 					prismaTransaction,
 				);
 
-				await updateFiles(fileInfo, body.materialId, prismaTransaction);
+				await updateFiles(fileInfo, body.materialId, body.userId, prismaTransaction);
 
 				return await updateMaterialByPublicationId(
 					publicationId,

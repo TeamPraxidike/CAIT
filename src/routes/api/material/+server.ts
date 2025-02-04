@@ -156,10 +156,11 @@ export async function POST({ request , locals}) {
 				await updateCoverPic(
 					coverPic,
 					material.publicationId,
+					userId,
 					prismaTransaction,
 				);
 
-				await updateFiles(fileInfo, material.id, prismaTransaction);
+				await updateFiles(fileInfo, material.id, userId, prismaTransaction);
 
 				return material;
 			},

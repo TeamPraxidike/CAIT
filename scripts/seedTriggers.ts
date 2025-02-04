@@ -21,6 +21,31 @@ async function main() {
 	`
 
 	await sql`
+        CREATE OR REPLACE FUNCTION set_owner_id_from_metadata()
+		RETURNS TRIGGER AS 
+        $$
+		BEGIN
+			-- Ensure owner_id is NOT NULL, reject the insert if missing
+			IF NEW.metadata->>'ownerId' IS NULL THEN
+				RAISE EXCEPTION 'Metadata must contain a valid ownerId';
+        	END IF;
+        	
+		  	-- Extract ownerId from metadata and set it as owner_id
+			NEW.owner := (NEW.metadata->>'ownerId')::UUID;
+			
+			RETURN NEW;
+		END;
+		$$ LANGUAGE plpgsql;
+	`
+
+	await sql`
+        CREATE OR REPLACE TRIGGER on_object_inserted
+			AFTER INSERT ON storage.objects
+			FOR EACH ROW EXECUTE PROCEDURE insert_profile_for_new_user();
+	`;
+
+
+	await sql`
         CREATE OR REPLACE FUNCTION public.insert_profile_for_new_user()
 		 RETURNS trigger
 		 LANGUAGE plpgsql

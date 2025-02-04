@@ -96,12 +96,13 @@ export async function coverPicFetcher(
 export async function addCoverPic(
 	title: string,
 	type: string,
+	ownerId: string,
 	info: Buffer,
 	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
-		const path = await fileSystem.saveFile(info, title);
+		const path = await fileSystem.saveFile(info, title, ownerId);
 		try {
 			return prismaContext.file.create({
 				data: {
@@ -128,7 +129,7 @@ export async function addProfilePic(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
-		const path = await fileSystem.saveFile(info, title);
+		const path = await fileSystem.saveFile(info, title, userId);
 		try {
 			return prismaContext.file.create({
 				data: {
@@ -181,6 +182,7 @@ export async function updateProfilePic(
 export async function updateCoverPic(
 	coverPic: { type: string; info: string } | null,
 	publicationId: number,
+	userId: string,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// check if the publication already has a coverPic
@@ -202,6 +204,7 @@ export async function updateCoverPic(
 		await addCoverPic(
 			'cover.jpg',
 			coverPic.type,
+			userId,
 			buffer,
 			publicationId,
 			prismaContext,
@@ -212,6 +215,7 @@ export async function updateCoverPic(
 export async function updateCircuitCoverPic(
 	coverPic: { type: string; info: string },
 	publicationId: number,
+	userId: string,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// check if the circuit already has a coverPic
@@ -231,6 +235,7 @@ export async function updateCircuitCoverPic(
 	await addCoverPic(
 		'cover.jpg',
 		coverPic.type,
+		userId,
 		buffer,
 		publicationId,
 		prismaContext,
@@ -240,12 +245,13 @@ export async function updateCircuitCoverPic(
 export async function addFile(
 	title: string,
 	type: string,
+	ownerId: string,
 	info: Buffer,
 	materialId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
-		const path = await fileSystem.saveFile(info, title);
+		const path = await fileSystem.saveFile(info, title, ownerId);
 		try {
 			return prismaContext.file.create({
 				data: {
@@ -318,13 +324,14 @@ export async function deleteFile(
 export async function updateFiles(
 	fileInfo: FileDiffActions,
 	materialId: number,
+	userId: string,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// add files
 	for (const file of fileInfo.add) {
 		const buffer: Buffer = Buffer.from(file.info, 'base64');
 
-		await addFile(file.title, file.type, buffer, materialId, prismaContext);
+		await addFile(file.title, file.type, userId, buffer, materialId, prismaContext);
 	}
 
 	// delete files

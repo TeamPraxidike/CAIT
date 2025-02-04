@@ -119,6 +119,7 @@ export async function POST({ request, locals }) {
 					await updateCircuitCoverPic(
 						coverPic,
 						circuit.publicationId,
+						userId,
 						prismaTransaction,
 					);
 				} else {

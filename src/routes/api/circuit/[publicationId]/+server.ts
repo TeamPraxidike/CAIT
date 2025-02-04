@@ -122,6 +122,7 @@ export async function PUT({ request, params, locals }) {
 				await updateCircuitCoverPic(
 					coverPic,
 					publicationId,
+					body.userId,
 					prismaTransaction,
 				);
 			}
