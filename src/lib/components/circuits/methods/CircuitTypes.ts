@@ -51,5 +51,6 @@ export type NodeTemplateData = {
 	dummyNode: boolean,
 	selected:boolean,
 	publishing:boolean,
-	publisherId : number
+	publisherId : number,
+	remove: () => void;
 }

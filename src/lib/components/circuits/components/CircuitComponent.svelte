@@ -60,6 +60,7 @@
 
 	onMount(async () => {
 		dbNodes.forEach(node => {
+			const remove = () => removeNode(node.publication.id)
 			$nodes.push({
 				id: node.publication.id.toString(),
 				data: {
@@ -69,7 +70,9 @@
 					isMaterial: node.publication.type === PublicationType.Material,
 					dummyNode: false, selected:false,
 					publisherId : node.publication.publisher.id,
-					publishing:publishing},
+					publishing:publishing,
+					remove:remove
+				},
 				position: { x: node.posX, y: node.posY },
 				type: "custom"
 			});
@@ -104,6 +107,8 @@
 	const addNode = async (event: CustomEvent) => {
 		const pubId = event.detail.id;
 		const nodeInfo : NodeInfo = await fetchNode(pubId)
+		const remove = () => removeNode(nodeInfo.id)
+
 		const node = {
 			id: nodeInfo.id.toString(),
 			data: {
@@ -114,7 +119,8 @@
 				dummyNode: false,
 				selected:false,
 				publishing:publishing,
-				publisherId:-1
+				publisherId:-1,
+				remove: remove
 			},
 			position: { x: 0, y: 0 },
 			type: "custom"
@@ -122,23 +128,24 @@
 		$nodes.push(node);
 		$nodes = $nodes
 		placementAlgorithm(node, 0, 0)
-
 	}
 
 	/**
 	 * Removes a node through the browsing page
 	 * @param event -> event activated from the browsing page
 	 */
-	const removeNode = (event: CustomEvent) => {
-		const pubId = event.detail.id.toString()
-		selectedId = '';
-		selected = false;
-		pubIds.delete(event.detail.id);
-		$nodes = $nodes.filter(x=> x.id !== pubId)
-		dbNodes = dbNodes.filter(x=>x.publicationId !== event.detail.id)
+	const removeNodeFromBrowsing = (event: CustomEvent) => {
+		const pubId = event.detail.id
+		removeNode(pubId)
 	};
 
-
+	const removeNode = (pubId : number) => {
+		selectedId = '';
+		selected = false;
+		pubIds.delete(pubId);
+		$nodes = $nodes.filter(x=> x.id !== pubId.toString())
+		dbNodes = dbNodes.filter(x=>x.publicationId !== pubId)
+	}
 
 	export const placementAlgorithm = (node : any, positionX : number, positionY:number) => {
 		if ($nodes.length === 1) return
@@ -234,7 +241,7 @@
 {#if addActive}
 	<div>
 		<SearchElems bind:addActive={addActive} bind:selectedIds={pubIds} bind:source={displayIds} bind:materials={displayedMaterials}
-					 on:selFurther={addNode} on:remFurther={removeNode} bind:liked={liked} bind:saved={saved}/>
+					 on:selFurther={addNode} on:remFurther={removeNodeFromBrowsing} bind:liked={liked} bind:saved={saved}/>
 	</div>
 {/if}
 
