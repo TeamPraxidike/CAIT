@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
-	import { Background, Controls, MiniMap, SvelteFlow,  type Edge, type Node, type OnConnectEnd } from '@xyflow/svelte';
+	import {
+		Background,
+		Controls,
+		MiniMap,
+		SvelteFlow,
+		useSvelteFlow,
+		type Edge,
+		type Node,
+		type FitViewOptions, MarkerType
+	} from '@xyflow/svelte';
 
 	import '@xyflow/svelte/dist/style.css';
 	import NodeTemplate from '$lib/components/circuits/components/NodeTemplate.svelte';
@@ -24,6 +33,8 @@
 			ref: TextThingy,
 		}
 	};
+
+	const { fitView } = useSvelteFlow();
 	const modalHelp: ModalSettings = {
 		type: 'component',
 		title: 'Instructions for Creating a Circuit',
@@ -46,6 +57,14 @@
 	const edges = writable<Edge[]>([]);
 	const nodeTypes = {
 		'custom': NodeTemplate
+	};
+	const defaultEdgeOptions = {
+		style: 'stroke: #00A6D6;',
+		type: 'smoothstep',
+		markerEnd: {
+			type: MarkerType.ArrowClosed,
+			color: '#00A6D6'
+		}
 	};
 
 	//Set of variables needed for the add menu
@@ -87,7 +106,8 @@
 					$edges.push({
 						id: id,
 						source: node.publicationId.toString(),
-						target: nextNode.toPublicationId.toString()
+						target: nextNode.toPublicationId.toString(),
+						type:'smoothstep'
 					});
 				}
 			});
@@ -128,6 +148,11 @@
 		$nodes.push(node);
 		$nodes = $nodes
 		placementAlgorithm(node, 0, 0)
+		const options : FitViewOptions = {
+			nodes: $nodes,
+		}
+		await fitView(options)
+
 	}
 
 	/**
@@ -232,7 +257,7 @@
 </div>
 
 <div style:height="100vh">
-	<SvelteFlow {nodes} {edges} {nodeTypes} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}">
+	<SvelteFlow {nodes} {edges} {nodeTypes} {defaultEdgeOptions} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}">
 		<Controls showLock={publishing}/>
 		<Background />
 	</SvelteFlow>

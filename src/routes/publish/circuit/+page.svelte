@@ -18,6 +18,7 @@
 		Node as PrismaNode
 	} from '@prisma/client';
 	import { onMount } from 'svelte';
+	import { SvelteFlowProvider } from '@xyflow/svelte';
 
 	$: ({loggedUser} = data)
 
@@ -159,7 +160,9 @@
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
 <!--			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>-->
-			<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
+			<SvelteFlowProvider>
+				<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
+			</SvelteFlowProvider>
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>

@@ -14,22 +14,23 @@
     import {fly} from 'svelte/transition';
     import {TabGroup, Tab} from '@skeletonlabs/skeleton';
 
-	import { onMount } from 'svelte';
-	import JSZip from 'jszip';
-	import Icon from '@iconify/svelte';
-	import type { PublicationView } from './+layout.server';
-	import {
-		Accordion,
-		AccordionItem,
-		getModalStore,
-		getToastStore,
-		type ModalSettings,
-		type ToastSettings
-	} from '@skeletonlabs/skeleton';
-	import { goto } from '$app/navigation';
-	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
-	import type { Comment as PrismaComment, Difficulty, Reply, User } from '@prisma/client';
-	import { page } from '$app/stores';
+    import {onMount} from 'svelte';
+    import JSZip from 'jszip';
+    import Icon from '@iconify/svelte';
+    import type {PublicationView} from './+layout.server';
+    import {
+        Accordion,
+        AccordionItem,
+        getModalStore,
+        getToastStore,
+        type ModalSettings,
+        type ToastSettings
+    } from '@skeletonlabs/skeleton';
+    import {goto} from '$app/navigation';
+    import {createFileList, IconMapExtension, saveFile} from '$lib/util/file';
+    import type {Comment as PrismaComment, Difficulty, Reply, User} from '@prisma/client';
+    import {page} from '$app/stores';
+    import { SvelteFlowProvider } from '@xyflow/svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -558,8 +559,9 @@
 						{/await}
 					{:else}
 						<div class="w-full">
-							<CircuitComponent publishing="{false}" dbNodes="{pubView.publication.circuit.nodes}"/>
-						</div>
+							<SvelteFlowProvider>
+								<CircuitComponent publishing="{false}" dbNodes="{pubView.publication.circuit.nodes}"/>
+							</SvelteFlowProvider>						</div>
 					{/if}
 
 				{:else if tabSet === 1}
