@@ -11,7 +11,7 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-	register: async ({ request, locals: { supabase } }) => {
+	register: async ({ request, locals: { supabase }, fetch }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
@@ -24,6 +24,16 @@ export const actions: Actions = {
 			options: {
 				data: { firstName, lastName }
 			}
+		});
+		const user = await supabase.auth.getUser();
+		if (user.data.user == null) {
+			return fail(400, { email, firstName, lastName, incorrect: true, error: 'Error logging in' });
+		}
+
+		// The default supabase signup method does not care about our custom usernames
+		// We need this to update the username after the user is created otherwise it is just an uuid
+		await fetch(`/api/user/${user.data.user.id}/username`, {
+			method: 'PUT',
 		});
 
 		if (error) {
