@@ -30,6 +30,7 @@
     import {createFileList, IconMapExtension, saveFile} from '$lib/util/file';
     import type {Comment as PrismaComment, Difficulty, Reply, User} from '@prisma/client';
     import {page} from '$app/stores';
+    import { SvelteFlowProvider } from '@xyflow/svelte';
 
     const toastStore = getToastStore();
     const modalStore = getModalStore();
@@ -515,7 +516,9 @@
                         </div>
                     {:else}
                         <div class="w-full">
-                            <CircuitComponent publishing="{false}" dbNodes="{pubView.publication.circuit.nodes}"/>
+                            <SvelteFlowProvider>
+                                <CircuitComponent publishing="{false}" dbNodes="{pubView.publication.circuit.nodes}"/>
+                            </SvelteFlowProvider>
                         </div>
                     {/if}
 
