@@ -49,7 +49,7 @@ export async function GET({ params, locals }) {
 		const fileData: FetchedFileArray = [];
 
 		for (const file of material.files) {
-			const currentFileData = fileSystem.readFile(file.path);
+			const currentFileData = await fileSystem.readFile(file.path);
 			fileData.push({
 				fileId: file.path,
 				data: currentFileData.toString('base64'),
@@ -57,7 +57,7 @@ export async function GET({ params, locals }) {
 		}
 
 		// coverPic return
-		const coverFileData: FetchedFileItem = coverPicFetcher(
+		const coverFileData: FetchedFileItem = await coverPicFetcher(
 			material.encapsulatingType,
 			material.publication.coverPic,
 		);
@@ -89,6 +89,15 @@ export async function PUT({ request, params, locals }) {
 	const body: MaterialForm & {
 		materialId: number;
 	} = await request.json();
+
+	if ((await locals.safeGetSession()).user!.id !== body.userId) {
+		return new Response(
+			JSON.stringify({
+				error: 'Bad Request - User IDs not matching',
+			}),
+			{ status: 401 },
+		);
+	}
 
 	const material: MaterialForm = body;
 	const metaData = material.metaData;
@@ -126,10 +135,11 @@ export async function PUT({ request, params, locals }) {
 				await updateCoverPic(
 					coverPic,
 					publicationId,
+					body.userId,
 					prismaTransaction,
 				);
 
-				await updateFiles(fileInfo, body.materialId, prismaTransaction);
+				await updateFiles(fileInfo, body.materialId, body.userId, prismaTransaction);
 
 				return await updateMaterialByPublicationId(
 					publicationId,

@@ -2,7 +2,7 @@ import type { FetchedFileArray } from '$lib/database';
 import type { User } from '@prisma/client';
 
 export async function load({ url, fetch, locals }) {
-	const session = await locals.auth();
+	const session = await locals.safeGetSession();
 
 	const type = url.searchParams.get('type') || 'materials';
 	const { materials, idsMat } =
@@ -23,7 +23,7 @@ export async function load({ url, fetch, locals }) {
 
 	const selectedTag = url.searchParams.get('tags') || '';
 
-	if (session !== null) {
+	if (session && session.user) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
 		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
 

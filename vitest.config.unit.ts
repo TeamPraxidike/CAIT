@@ -8,6 +8,7 @@ export default mergeConfig(
 		plugins: [svelteTesting()],
 		test: {
 			include: ['tests/unit/**/*.test.ts'],
+			exclude: ['DOCKER/**'],
 			environment: 'jsdom',
 			setupFiles: ['tests/unit/setup.ts'],
 			coverage: {

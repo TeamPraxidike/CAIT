@@ -3,7 +3,9 @@ import {reader} from './reader.mjs';
 import {calculateTfIdf, preprocessText} from './textProcessor.mjs';
 import path from 'path';
 
-const basePath = path.join('static', 'uploadedFiles');
+//const basePath = path.join('static', 'uploadedFiles');
+//const basePath = "uploadedFiles"
+//const basePath = path.join("docker", "volumes", "storage", "uploadedFiles")
 
 /**
  * Main method that returns the similarity between two sets of files
@@ -128,7 +130,8 @@ export async function getPubText(pubFiles) {
             pubFiles[i] = {filePath: pubFiles[i].path, tokens: pubFiles[i].text, skip: true}
         } else {
             // returns Promise<string> or Promise<null>, need to await to avoid sudden memory spikes
-            const createdTokens = await reader(path.join(basePath, pubFiles[i].path))
+            // const createdTokens = await reader(path.join(basePath, pubFiles[i].path))
+            const createdTokens = await reader(pubFiles[i].path)
             pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false}
         }
     }

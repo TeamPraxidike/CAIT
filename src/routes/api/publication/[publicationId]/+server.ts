@@ -34,52 +34,62 @@ export async function GET({ params }) {
 		publication.publisher = {
 			...publication.publisher,
 			// @ts-ignore
-			profilePicData: profilePicFetcher(publication.publisher.profilePic)
+			profilePicData: (await profilePicFetcher(publication.publisher.profilePic))
 				.data,
 		};
 
-		publication.comments = publication.comments.map((comment) => {
+		publication.comments = await Promise.all(publication.comments.map(async (comment) => {
 			return {
 				...comment,
 				user: {
 					...comment.user,
-					profilePicData: profilePicFetcher(comment.user.profilePic)
+					profilePicData: (await profilePicFetcher(comment.user.profilePic))
 						.data,
 				},
-				replies: comment.replies.map((reply) => {
+				replies: await Promise.all(comment.replies.map(async (reply) => {
 					return {
 						...reply,
 						user: {
 							...reply.user,
-							profilePicData: profilePicFetcher(
+							profilePicData: (await profilePicFetcher(
 								reply.user.profilePic,
-							).data,
+							)).data,
 						},
 					};
-				}),
+				})),
 			};
-		});
+		}));
 
-		publication.maintainers = publication.maintainers.map((user) => {
+		publication.maintainers = await Promise.all(publication.maintainers.map(async (user) => {
 			return {
 				...user,
-				profilePicData: profilePicFetcher(user.profilePic).data,
+				profilePicData: (await profilePicFetcher(user.profilePic)).data,
 			};
-		});
+		}));
 
 		if (publication.materials) {
-			const fileData: FetchedFileArray = [];
+			//const fileData: FetchedFileArray = [];
 
-			for (const file of publication.materials.files) {
-				const currentFileData = fileSystem.readFile(file.path);
-				fileData.push({
-					fileId: file.path,
-					data: currentFileData.toString('base64'),
-				});
-			}
+			//for (const file of publication.materials.files) {
+				//const currentFileData = await fileSystem.readFile(file.path);
+				// fileData.push({
+				// 	fileId: file.path,
+				// 	data: currentFileData.toString('base64'),
+				// });
+			//}
+
+			// const fileData = publication.materials.files.map((file) => {
+			// 	return fileSystem.readFile(file.path)
+			// 		.then(buffer => {
+			// 			return {
+			// 				fileId: file.path,
+			// 				data: buffer.toString('base64')
+			// 			};
+			// 		});
+			// });
 
 			// coverPic return
-			const coverFileData: FetchedFileItem = coverPicFetcher(
+			const coverFileData: FetchedFileItem = await coverPicFetcher(
 				publication.materials.encapsulatingType,
 				publication.coverPic,
 			);
@@ -88,7 +98,7 @@ export async function GET({ params }) {
 				JSON.stringify({
 					isMaterial: true,
 					publication: publication,
-					fileData,
+					//fileData,
 					coverFileData,
 				}),
 				{
@@ -96,20 +106,20 @@ export async function GET({ params }) {
 				},
 			);
 		} else if (publication.circuit) {
-			publication.circuit.nodes = publication.circuit.nodes.map(
-				(node) => {
-					let coverPicData = '';
+			publication.circuit.nodes = await Promise.all(publication.circuit.nodes.map(
+				async (node) => {
+					let coverPicData: string | null;
 					if (
 						node.publication.type === PublicationType.Material &&
 						node.publication.materials
 					) {
-						coverPicData = coverPicFetcher(
+						coverPicData = (await coverPicFetcher(
 							node.publication.materials.encapsulatingType,
 							node.publication.coverPic,
-						).data;
+						)).data;
 					} else {
 						const filePath = node.publication.coverPic!.path;
-						const currentFileData = fileSystem.readFile(filePath);
+						const currentFileData = await fileSystem.readFile(filePath);
 						coverPicData = currentFileData.toString('base64');
 					}
 					return {
@@ -118,20 +128,20 @@ export async function GET({ params }) {
 							...node.publication,
 							publisher: {
 								...node.publication.publisher,
-								profilePicData: profilePicFetcher(
+								profilePicData: (await profilePicFetcher(
 									node.publication.publisher.profilePic,
-								).data,
+								)).data,
 							},
 							coverPicData: coverPicData,
 						},
 					};
 				},
-			);
+			));
 			return new Response(
 				JSON.stringify({
 					isMaterial: false,
 					publication: publication,
-					fileData: [],
+					//fileData: [],
 					coverFileData: {},
 				}),
 				{

@@ -3,6 +3,7 @@ import { getTextExtractor } from 'office-text-extractor';
 import WordExtractor from 'word-extractor';
 import removeMd from 'remove-markdown';
 import { pythonKeywords } from './pythonKeywords.mjs';
+import { fileSystem } from '../indexJS.mjs';
 
 export async function reader(filePath) {
     switch(filePath.split('.').pop()) {
@@ -39,7 +40,8 @@ export async function reader(filePath) {
  */
 export async function txtReader(filePath) {
     try {
-        return fs.readFileSync(filePath).toString('utf8');
+        //return fs.readFileSync(filePath).toString('utf8');
+        return await fileSystem.readFile(filePath).toString('utf8');
     } catch (err) {
         console.error('Error reading the file:', err);
         return '';
@@ -53,7 +55,8 @@ export async function txtReader(filePath) {
  */
 export async function mdReader(filePath) {
     try {
-        const text = fs.readFileSync(filePath).toString('utf8');
+        //const text = fs.readFileSync(filePath).toString('utf8');
+        const text = await fileSystem.readFile(filePath).toString('utf8');
         return removeMd(text);
     } catch (err) {
         console.error('Error reading the file:', err);
@@ -91,7 +94,8 @@ export function pythonCodeParser(source) {
  */
 export async function pyReader(filePath) {
     try {
-        const code = fs.readFileSync(filePath).toString('utf8');
+        //const code = fs.readFileSync(filePath).toString('utf8');
+        const code = await fileSystem.readFile(filePath).toString('utf8');
         return pythonCodeParser(code);
     } catch (err) {
         console.error('Error reading the file:', err);
@@ -106,7 +110,8 @@ export async function pyReader(filePath) {
  */
 export async function ipynbReader(filePath) {
     try {
-        const data = fs.readFileSync(filePath).toString('utf8');
+        //const data = fs.readFileSync(filePath).toString('utf8');
+        const data = await fileSystem.readFile(filePath).toString('utf8');
 
         // check if the data is an empty string
         if (!data || data.trim() === '') {
@@ -152,7 +157,8 @@ export async function ipynbReader(filePath) {
 export async function wordReader(filePath) {
     const extractor = new WordExtractor();
     try {
-        const doc = await extractor.extract(filePath);
+        const data = await fileSystem.readFile(filePath);
+        const doc = await extractor.extract(data);
         return doc.getBody();
     } catch (error) {
         console.error(`Error extracting text from document: ${error}`);
@@ -167,7 +173,9 @@ export async function wordReader(filePath) {
  */
 export async function officeReader(filePath) {
     const extractor = getTextExtractor();
-    return await extractor.extractText({ input: filePath, type: 'file' });
+    //return await extractor.extractText({ input: filePath, type: 'file' });
+    const data = await fileSystem.readFile(filePath);
+    return await extractor.extractText({ input: data, type: null });
 }
 
 /**

@@ -17,7 +17,6 @@ export async function createUser(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	const username = await generateUsername(data.firstName, data.lastName);
-
 	return prismaContext.user.create({
 		data: {
 			firstName: data.firstName,

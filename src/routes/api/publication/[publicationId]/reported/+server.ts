@@ -13,12 +13,13 @@ export async function GET({ params, locals }) {
     const authError = await verifyAuth(locals);
     if (authError) return authError;
 
-    const session = await locals.auth();
-    if(session === null) return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    const session = await locals.safeGetSession();
+    if(!session || !session.user) return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
     });
     const { publicationId } = params;
-    if(!session.user.isAdmin) return isPublicationReported(parseInt(publicationId), session.user.id)
+    // todo: supabase admin check
+    // if(!session.user.isAdmin) return isPublicationReported(parseInt(publicationId), session.user.id)
 
     const publication = await getPublicationById(parseInt(publicationId));
     if (!publication)

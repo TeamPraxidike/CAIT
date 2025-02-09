@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { CodeBlock, getModalStore } from '@skeletonlabs/skeleton';
 	import Icon from '@iconify/svelte';
-	import { Download } from '$lib';
+	import { Download, formatFileSize } from '$lib';
 
 	export let file: File;
 
@@ -69,7 +69,7 @@
 		{/if}
 	</div>
 	<div class="self-end flex items-center gap-2">
-		<span class="text-surface-600">Size: {file.size}</span>
+		<span class="text-surface-600">Size: {formatFileSize(file.size)}</span>
 		<button type="button" on:click={closeModal} class="btn rounded-lg variant-soft-surface mt-4">Close</button>
 		<Download {file} className="btn rounded-lg bg-surface-600 text-surface-50 mt-4">Download</Download>
 	</div>

@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { coverPicFetcher, fileSystem } from '$lib/database';
 import { getAllPublications } from '$lib/database/db';
-import { PublicationType } from '@prisma/client';
+import { type Publication, PublicationType } from '@prisma/client';
 import { profilePicFetcher } from '$lib/database/file';
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -13,41 +13,41 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		let publications = await getAllPublications(publishers, query);
 
-		publications = publications.map((publication) => {
-			let coverPicData = '';
+		publications = await Promise.all(publications.map(async (publication: any) => {
+			let coverPicData: string | null;
 			if (
 				publication.type === PublicationType.Material &&
 				publication.materials
 			) {
-				coverPicData = coverPicFetcher(
+				coverPicData = (await coverPicFetcher(
 					publication.materials.encapsulatingType,
 					publication.coverPic,
-				).data;
+				)).data;
 			} else {
 				const filePath = publication.coverPic!.path;
-				const currentFileData = fileSystem.readFile(filePath);
+				const currentFileData = await fileSystem.readFile(filePath);
 				coverPicData = currentFileData.toString('base64');
 			}
 			return {
 				...publication,
 				coverPicData: coverPicData,
 			};
-		});
-		publications = publications.map((publication) => {
+		}));
+		publications = await Promise.all(publications.map(async (publication: any) => {
 			return {
 				...publication,
 				publisher: {
 					...publication.publisher,
-					profilePicData: profilePicFetcher(
+					profilePicData: (await profilePicFetcher(
 						publication.publisher.profilePic,
-					).data,
+					)).data,
 				},
 			};
-		});
+		}));
 		return new Response(
 			JSON.stringify({
 				publications: publications.slice(0, amount),
-				ids: publications.map((x) => x.id),
+				ids: publications.map((x: { id: any; }) => x.id),
 			}),
 			{
 				status: 200,

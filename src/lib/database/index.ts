@@ -1,5 +1,8 @@
 import { getPublicationById } from './db';
 
+import { SERVICE_ROLE_KEY } from '$env/static/private';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+
 import {
 	getMaterialByPublicationId,
 	getAllMaterials,
@@ -87,7 +90,6 @@ import {
 	addFile,
 	deleteFile,
 	editFile,
-	bufToBase64,
 	addCoverPic,
 	coverPicFetcher,
 	updateCoverPic,
@@ -98,7 +100,6 @@ import {
 import {handleSimilarity} from "$lib/database/similarity";
 
 import { prisma } from './prisma';
-import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { Difficulty, MaterialType } from '@prisma/client';
 import path from 'path';
 
@@ -179,7 +180,7 @@ type FileDiffActions = {
  */
 type FetchedFileItem = {
 	fileId: string;
-	data: string;
+	data: string | null;
 };
 
 /**
@@ -200,11 +201,29 @@ type NodeDiffActions = {
 	next: { fromId: number; toId: number[] }[];
 };
 
-export const basePath = path.join('static', 'uploadedFiles');
-export const fileSystem = new LocalFileSystem(basePath);
+
+/////////////////////////////////////////////////////////
+/// SELECT FILESYSTEM TYPE BASED ON .ENV VARIABLE
+////////////////////////////////////////////////////////
+
+import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
+import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
+
+export const basePath = "uploadedFiles"
+let fileSystem: SupabaseFileSystem | LocalFileSystem;
+
+if (process.env.FILESYSTEM === "SUPABASE") {
+	fileSystem = new SupabaseFileSystem(PUBLIC_SUPABASE_URL,
+		SERVICE_ROLE_KEY, basePath)
+}
+else fileSystem = new LocalFileSystem(basePath);
+
+
+////////////////////////////////////////////////////////
 
 export {
 	prisma,
+	fileSystem,
 	type UserForm,
 	type MaterialForm,
 	type CircuitForm,
@@ -221,7 +240,6 @@ export {
 	addFile,
 	editFile,
 	deleteFile,
-	bufToBase64,
 	createUser,
 	getUserById,
 	getPublicationById,

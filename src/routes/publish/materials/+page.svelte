@@ -30,6 +30,7 @@
 	export let form: ActionData;
 	export let data: PageServerData;
 
+	$: ({loggedUser} = data);
 	$: isSubmitting = false;
 
 	// tags
@@ -267,7 +268,7 @@
 					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
 				</div>
 				<div class="flex flex-col w-full">
-					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
+					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
 					<div class="lg:w-1/2">
 						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 					</div>
@@ -279,7 +280,7 @@
 		</Step>
 		<Step locked={isSubmitting}>
 			<svelte:fragment slot="header">Review</svelte:fragment>
-			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
+			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={PKs} bind:tags={tags}  bind:maintainers={maintainers}
 										 />
 			<div class="flex gap-2  pl-3">

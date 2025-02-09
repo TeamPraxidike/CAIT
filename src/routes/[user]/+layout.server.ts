@@ -7,11 +7,16 @@ import { error, redirect } from '@sveltejs/kit';
  * It could be a user id which is bad for SEO or a slug from their name which is much preferable!
  * Examples of slugs: 'john-doe', 'jane-doe', 'jane-smith'
  */
-export const load: LayoutServerLoad = async ({ params, fetch, locals }) => {
-	const session = await locals.auth();
+export const load: LayoutServerLoad = async ({ params, fetch, locals, depends }) => {
+	depends('supabase:auth')
+	const session = await locals.safeGetSession();
 	if (!session) throw redirect(303, '/signin');
 
 	const uRes = await fetch(`/api/user/username/${params.user}`);
+
+	if (uRes.status === 401) {
+		throw redirect(303, '/signin')
+	}
 
 	if (uRes.status !== 200) {
 		error(uRes.status, uRes.statusText);

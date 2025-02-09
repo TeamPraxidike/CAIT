@@ -28,15 +28,15 @@
 		</a>
 	</div>
 	<section class="w-full sm:w-1/2 md:col-span-3 md:w-full lg:col-start-7 lg:col-span-6 xl:p-4" aria-label="Hero image">
-		<img alt="Hero welcoming art" data-testid="xl-hero" class="w-full" src="/heroArt.png">
+		<img alt="Hero welcoming art" data-testid="xl-hero" class="w-full" src="/images/home/heroArt.png">
 	</section>
 	<hr class="col-span-full row-start-2">
 </section>
 
 <main class="col-span-full flex flex-col gap-10 my-20">
 	<Section title="Materials" description={'Learn more about the content you can find on this platform'}
-			 subtitle="What you can expect to find" img='/sectionImages/materials.svg' />
+			 subtitle="What you can expect to find" img='/images/home/materials.svg' />
 	<Section title="Circuits"
 			 description={'Learn more about how to organize publications and give an order to them in a circuit'}
-			 subtitle="Define your learning workflow" img='/sectionImages/circuit.png' />
+			 subtitle="Define your learning workflow" img='/images/home/circuit.png' />
 </main>

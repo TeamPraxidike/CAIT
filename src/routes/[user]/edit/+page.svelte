@@ -19,7 +19,10 @@
 		}[]
 	} = data.user;
 
-	let profilePic = base64ToFile(data.profilePicData.data, 'cover.jpg', 'image/jpeg');
+
+	let profilePic = data.profilePicData.data
+		? base64ToFile(data.profilePicData.data, 'cover.jpg', 'image/jpeg')
+		: null
 	//$:profilePic = data.profilePicData;
 
 	const toastStore = getToastStore();
@@ -72,6 +75,8 @@
 		}
 	}
 
+	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg";
+
 </script>
 
 <Meta title="Profile" description="CAIT" type="site"/>
@@ -92,9 +97,11 @@
 			<h4 class="text-lg text-surface-900 col-span-3 dark:text-surface-50">
 				Profile Picture
 			</h4>
-			{#if profilePic}
-				<img src={URL.createObjectURL(profilePic)} class="w-32 h-32 rounded-full" alt="profilePic">
-			{/if}
+			<!--{#if profilePic}-->
+			<!--	<img src={URL.createObjectURL(profilePic)} class="w-32 h-32 rounded-full" alt="profilePic">-->
+			<!--{/if}-->
+			<img src={profilePic ? URL.createObjectURL(profilePic) : defaultProfilePicturePath}
+				 class="w-32 h-32 rounded-full" alt="profilePic">
 		</div>
 		<FileButton on:change={choosePfp} name="profilePic" accept="image/*"/>
 	</div>

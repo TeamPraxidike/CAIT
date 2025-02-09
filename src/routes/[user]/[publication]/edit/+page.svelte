@@ -19,6 +19,7 @@
 
 
 
+	$: ({loggedUser} = data);
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationView = data.pubView;
 	let publication: Publication = serverData.publication;
@@ -261,7 +262,7 @@
 	</div>
 
 	<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
-	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
+	<MantainersEditBar publisher={loggedUser} bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
 
 	<div class="text-token w-full md:w-1/2 space-y-2 pl-3">
 		<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>

@@ -49,7 +49,7 @@ export async function GET({ params, locals }) {
 
 		const filePath = circuit.publication.coverPic!.path;
 
-		const currentFileData = fileSystem.readFile(filePath);
+		const currentFileData = await fileSystem.readFile(filePath);
 
 		const circuitInfo = {
 			...circuit,
@@ -80,6 +80,15 @@ export async function PUT({ request, params, locals }) {
 	const body: CircuitForm & {
 		circuitId: number;
 	} = await request.json();
+
+	if ((await locals.safeGetSession()).user!.id !== body.userId) {
+		return new Response(
+			JSON.stringify({
+				error: 'Bad Request - User IDs not matching',
+			}),
+			{ status: 401 },
+		);
+	}
 
 	const metaData = body.metaData;
 	// const userId = circuit.userId;
@@ -113,6 +122,7 @@ export async function PUT({ request, params, locals }) {
 				await updateCircuitCoverPic(
 					coverPic,
 					publicationId,
+					body.userId,
 					prismaTransaction,
 				);
 			}

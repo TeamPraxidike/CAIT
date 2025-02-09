@@ -19,6 +19,7 @@
 	} from '@prisma/client';
 	import { onMount } from 'svelte';
 
+	$: ({loggedUser} = data)
 
 	export let data: PageServerData;
 
@@ -181,14 +182,14 @@
 				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} adding="{true}"/>
 
 				<div class="flex flex-col w-1/2">
-					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
+					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
 						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} bind:newTags={newTags}/>
 				</div>
 			</div>
 		</Step>
 		<Step>
 			<svelte:fragment slot="header">Review</svelte:fragment>
-			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
+			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
 			/>
 			<Circuit nodes={circuitNodesPlaceholder} publishingView={true}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>

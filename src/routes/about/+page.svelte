@@ -18,8 +18,8 @@
 </section>
 
 <main class="col-span-full flex flex-col gap-10 mb-20">
-	<Section title="CAIT Initiative" description={initiative} subtitle="How it started" onAbout={true} img="/sectionImages/cait_logo_big.png"/>
-	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/sectionImages/publicationCard.png" mdFlex="md:flex-row-reverse" iconList={true}/>
-	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/sectionImages/circuit.png"/>
-	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} img="/sectionImages/reputation.png" mdFlex="md:flex-row-reverse"/>
+	<Section title="CAIT Initiative" description={initiative} subtitle="How it started" onAbout={true} img="/images/about/cait_logo_big.png"/>
+	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publicationCard.png" mdFlex="md:flex-row-reverse" iconList={true}/>
+	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/images/about/circuit.png"/>
+	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} img="/images/about/reputation.png" mdFlex="md:flex-row-reverse"/>
 </main>

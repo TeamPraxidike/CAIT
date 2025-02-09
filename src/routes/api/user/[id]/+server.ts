@@ -16,6 +16,7 @@ import { verifyAuth } from '$lib/database/auth';
 /**
  * Returns a user by id
  * @param params
+ * @param locals
  */
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -30,7 +31,7 @@ export async function GET({ params, locals }) {
 			});
 
 		// profilePic return
-		const profilePicData: FetchedFileItem = profilePicFetcher(
+		const profilePicData: FetchedFileItem = await profilePicFetcher(
 			user.profilePic,
 		);
 
@@ -42,10 +43,10 @@ export async function GET({ params, locals }) {
 	}
 }
 
-
 /**
  * Deletes a user by id
  * @param params
+ * @param locals
  */
 export async function DELETE({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -93,6 +94,7 @@ export async function DELETE({ params, locals }) {
  * Edits a user by id
  * @param params
  * @param request
+ * @param locals
  */
 export async function PUT({ params, request, locals }) {
 	const authError = await verifyAuth(locals);

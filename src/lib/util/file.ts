@@ -5,6 +5,28 @@ import {
 	type Tag,
 } from '@prisma/client';
 
+export function formatFileSize(bytes:number):string {
+	if (bytes < 0) return "0 B";
+
+	let appendix = 'B';
+
+	let kilo = 0;
+	let k = Math.floor(bytes/1000);
+	while (k !== 0) {
+		k = Math.floor(k/1000);
+		kilo++;
+	}
+
+	if (kilo === 1) appendix = ' KB';
+	else if (kilo === 2) appendix = ' MB';
+	else if (kilo >= 3) {
+		appendix = ' GB';
+		kilo = 3;
+	} else return bytes + ' B';
+
+	return (bytes/Math.pow(1000, kilo)).toFixed(1) + appendix;
+}
+
 /**
  * A FileList object that is created from a list of fetched files and a list of prisma files
  * @param fetchedFiles the list of fetched files
@@ -302,7 +324,7 @@ export const getExtensions = (
 		files: PrismaFile[];
 	},
 ) => {
-	console.log(material);
+	//console.log(material);
 	if (material) {
 		material.files.map((f: { title: string }) => getFileExtension(f.title));
 	} else {

@@ -22,8 +22,8 @@ export const load: LayoutServerLoad = async ({
 }) => {
 	await parent();
 
-	const session = await locals.auth();
-	if (!session) throw redirect(303, '/signin');
+	const session = await locals.safeGetSession();
+	if (!session || !session.user) throw redirect(303, '/signin');
 
 	const pRes = await fetch(`/api/publication/${params.publication}`);
 	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
@@ -64,7 +64,7 @@ type UserPfp = User & {
  */
 export type PublicationView = {
 	isMaterial: boolean;
-	fileData: FetchedFileArray;
+	//fileData: Promise<FetchedFileArray>;
 	publication: Publication & {
 		usedInCourse: { course: string }[];
 		tags: Tag[];
