@@ -41,6 +41,14 @@ export type NodeInfo = {
 	title : string,
 	isMaterial : boolean,
 	extensions : string []
+	publisherId: string,
+	posX : number,
+	posY : number,
+	next: {
+		circuitId: number,
+		fromPublicationId: number,
+		toPublicationId: number
+	}[]
 }
 
 export type NodeTemplateData = {

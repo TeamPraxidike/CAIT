@@ -3,7 +3,6 @@
 	import {
 		Background,
 		Controls,
-		MiniMap,
 		SvelteFlow,
 		useSvelteFlow,
 		type Edge,
@@ -52,9 +51,9 @@
 	export let saved: number[] = [];
 	export let publishing: boolean;
 	export let publishingView = false;
-	export let dbNodes: CircuitNode[];
-	const nodes = writable<Node[]>([]);
-	const edges = writable<Edge[]>([]);
+	export let dbNodes: NodeInfo[];
+	export const nodes = writable<Node[]>([]);
+	export const edges = writable<Edge[]>([]);
 	const nodeTypes = {
 		'custom': NodeTemplate
 	};
@@ -79,16 +78,16 @@
 
 	onMount(async () => {
 		dbNodes.forEach(node => {
-			const remove = () => removeNode(node.publication.id)
+			const remove = () => removeNode(node.id)
 			$nodes.push({
-				id: node.publication.id.toString(),
+				id: node.id.toString(),
 				data: {
-					id: node.publication.id,
-					label: node.publication.title,
+					id: node.id,
+					label: node.title,
 					extensions: node.extensions,
-					isMaterial: node.publication.type === PublicationType.Material,
+					isMaterial: node.isMaterial,
 					dummyNode: false, selected:false,
-					publisherId : node.publication.publisher.id,
+					publisherId : node.publisherId,
 					publishing:publishing,
 					remove:remove
 				},
@@ -100,12 +99,12 @@
 		let repEdges: string[] = [];
 		dbNodes.forEach(node => {
 			node.next.forEach(nextNode => {
-				const id = `en${node.publicationId}n${nextNode.toPublicationId.toString()}`;
+				const id = `en${node.id}n${nextNode.toPublicationId.toString()}`;
 				if (!repEdges.includes(id)) {
 					repEdges.push(id);
 					$edges.push({
 						id: id,
-						source: node.publicationId.toString(),
+						source: node.id.toString(),
 						target: nextNode.toPublicationId.toString(),
 						type:'smoothstep'
 					});
@@ -152,7 +151,6 @@
 			nodes: $nodes,
 		}
 		await fitView(options)
-
 	}
 
 	/**
@@ -169,7 +167,7 @@
 		selected = false;
 		pubIds.delete(pubId);
 		$nodes = $nodes.filter(x=> x.id !== pubId.toString())
-		dbNodes = dbNodes.filter(x=>x.publicationId !== pubId)
+		dbNodes = dbNodes.filter(x=>x.id !== pubId)
 	}
 
 	export const placementAlgorithm = (node : any, positionX : number, positionY:number) => {
