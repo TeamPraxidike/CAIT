@@ -19,6 +19,7 @@
 	} from '@prisma/client';
 	import { onMount } from 'svelte';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
+	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
 	$: ({loggedUser} = data)
 
@@ -96,20 +97,7 @@
 
 		}
 	}
-	let circuitNodesPlaceholder: (PrismaNode & {
-		publication: Publication & {
-			tags: { content: string }[],
-			usedInCourse: { course: string }[],
-			publisher: User & {profilePicData:string},
-			coverPicData: string,
-			materials: Material,
-		}
-		next: {
-			circuitId: number,
-			fromPublicationId: number,
-			toPublicationId: number
-		}[]
-	})[] = [];
+	let circuitNodesPlaceholder: NodeInfo[] = [];
 
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -148,13 +136,13 @@
         formData.append('title', title);
         formData.append('description', description);
         formData.append('selectedTags', JSON.stringify(addedTags));
-				formData.append('newTags', JSON.stringify(newTags))
+		formData.append('newTags', JSON.stringify(newTags))
         formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
-				formData.append('prior', JSON.stringify(priorKnowledge));
+		formData.append('prior', JSON.stringify(priorKnowledge));
 
-				formData.append('circuitData', JSON.stringify(nodeActions));
-				formData.append('coverPic', JSON.stringify(circuitCoverPic));
+		formData.append('circuitData', JSON.stringify(nodeActions));
+		formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step >
@@ -195,7 +183,9 @@
 			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
 			/>
-			<Circuit nodes={circuitNodesPlaceholder} publishingView={true}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
+			<SvelteFlowProvider>
+				<CircuitComponent dbNodes={circuitNodesPlaceholder} publishingView={true}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
+			</SvelteFlowProvider>
 		</Step>
 	</Stepper>
 

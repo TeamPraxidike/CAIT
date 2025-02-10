@@ -41,7 +41,11 @@ export const fetchNode = async (pubId : number) => {
 		id : -1,
 		title : "",
 		extensions : [],
-		isMaterial : false
+		isMaterial : false,
+		publisherId: -1,
+		posX : 0,
+		posY : 0,
+		next : []
 	}
 	await fetch(`/api/publication/${pubId}`)
 		.then(response => {
@@ -60,7 +64,11 @@ export const fetchNode = async (pubId : number) => {
 				id: pubId,
 				title: data.publication.title,
 				isMaterial: data.isMaterial,
-				extensions: extensions
+				extensions: extensions,
+				publisherId: data.publication.publisherId,
+				posX : 0,
+				posY : 0,
+				next:[]
 			}
 		})
 		.catch(error => {

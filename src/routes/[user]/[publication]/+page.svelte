@@ -28,9 +28,16 @@
     } from '@skeletonlabs/skeleton';
     import {goto} from '$app/navigation';
     import {createFileList, IconMapExtension, saveFile} from '$lib/util/file';
-    import type {Comment as PrismaComment, Difficulty, Reply, User} from '@prisma/client';
+    import {
+        type Comment as PrismaComment,
+        type Difficulty,
+        PublicationType,
+        type Reply,
+        type User
+    } from '@prisma/client';
     import {page} from '$app/stores';
     import { SvelteFlowProvider } from '@xyflow/svelte';
+    import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -62,14 +69,24 @@
 	let userSpecificInfo: { liked: boolean; saved: boolean };
 	let diff: Difficulty = data.pubView.publication.difficulty;
 
-	pubView = data.pubView as PublicationView;
+    pubView = data.pubView as PublicationView;
+    isMaterial = pubView.isMaterial;
+    const nodes : NodeInfo[] = isMaterial ? [] : pubView.publication.circuit.nodes.map(node => ({
+        id: node.publication.id,
+        title: node.publication.title,
+        isMaterial: isMaterial,
+        next: node.next,
+        posX: node.posX,
+        posY: node.posY,
+        extensions: node.extensions,
+        publisherId: node.publication.publisherId
+    }))
+    userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+    likedComments = data.likedComments as number[];
+    likedReplies = data.likedReplies as number[];
 
-	userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean };
-	likedComments = data.likedComments as number[];
-	likedReplies = data.likedReplies as number[];
 
 
-	isMaterial = pubView.isMaterial;
 
 	//files = isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
 
