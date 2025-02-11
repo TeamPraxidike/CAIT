@@ -17,7 +17,6 @@ export async function createUser(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	const username = await generateUsername(data.firstName, data.lastName);
-
 	return prismaContext.user.create({
 		data: {
 			firstName: data.firstName,
@@ -97,6 +96,28 @@ export async function getUserById(
 	});
 }
 
+export async function getUserByUsername(
+	username: string,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	return prismaContext.user.findUnique({
+		where: { username },
+		include: {
+			posts: {
+				include: {
+					tags: true,
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+					},
+				},
+			},
+			profilePic: true,
+		},
+	});
+}
+
 export async function getUserByEmail(
 	email: string,
 	prismaContext: Prisma.TransactionClient = prisma,
@@ -150,6 +171,8 @@ export async function editUser(
 	user: userEditData,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
+	const username: string = await generateUsername(user.firstName, user.lastName);
+
 	return prismaContext.user.update({
 		where: {
 			id: user.id,
@@ -158,7 +181,7 @@ export async function editUser(
 			firstName: user.firstName,
 			lastName: user.lastName,
 			email: user.email,
-			username: await generateUsername(user.firstName, user.lastName),
+			username: username,
 			aboutMe: user.aboutMe,
 		},
 	});

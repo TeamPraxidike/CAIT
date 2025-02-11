@@ -55,7 +55,7 @@ export async function DELETE({ params, locals }) {
 	const { id: userId } = params;
 
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction: any) => {
+		const user = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 			const user = await deleteUser(userId, prismaTransaction);
 
 			// check if user has profilePic
@@ -102,7 +102,7 @@ export async function PUT({ params, request, locals }) {
 
 	const body: UserForm = await request.json();
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction: any) => {
+		const user = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 			const userData: userEditData = {
 				id: params.id,
 				firstName: body.metaData.firstName,

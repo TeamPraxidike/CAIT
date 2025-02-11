@@ -12,7 +12,7 @@ export const load: LayoutServerLoad = async ({ params, fetch, locals, depends })
 	const session = await locals.safeGetSession();
 	if (!session) throw redirect(303, '/signin');
 
-	const uRes = await fetch(`/api/user/${params.user}`);
+	const uRes = await fetch(`/api/user/username/${params.user}`);
 
 	if (uRes.status === 401) {
 		throw redirect(303, '/signin')
