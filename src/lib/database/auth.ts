@@ -79,6 +79,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 	},
 	trustHost: true,
 	secret: AUTH_SECRET,
+	basePath: '/',
 	callbacks: {
 		async jwt({ token, user }) {
 			if (user) {
