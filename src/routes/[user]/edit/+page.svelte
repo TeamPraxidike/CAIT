@@ -4,10 +4,9 @@
 	import type { ActionData } from './$types';
 	import type { Publication, Tag, User } from '@prisma/client';
 	import { FileButton, getToastStore } from '@skeletonlabs/skeleton';
-	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
 	import { base64ToFile } from '$lib/util/file';
+	import { goto } from '$app/navigation';
 
 	/* This is the data that was returned from the server */
 	export let data: LayoutData;
@@ -32,7 +31,7 @@
 			background: 'bg-success-200',
 			classes: 'text-surface-900',
 		});
-		goto(`/${$page.data.session?.user.username}`);
+		goto(`/${form?.username}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
