@@ -42,7 +42,7 @@ export const fetchNode = async (pubId : number) => {
 		title : "",
 		extensions : [],
 		isMaterial : false,
-		publisherId: -1,
+		publisherId: "",
 		posX : 0,
 		posY : 0,
 		next : []
