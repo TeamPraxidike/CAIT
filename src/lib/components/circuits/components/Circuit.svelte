@@ -359,7 +359,6 @@
 			curNode.posY = Number(node.position().y);
 			curNode.posX = Number(node.position().x);
 
-
 			curNode.next = [];
 			let toID: number[] = cy.edges().filter((edge: any) => edge.source().id() === node.id()).map((edge: any) => {
 				const targetId = Number(edge.target().id());

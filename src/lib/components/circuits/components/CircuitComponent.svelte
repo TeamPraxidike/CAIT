@@ -7,7 +7,7 @@
 		useSvelteFlow,
 		type Edge,
 		type Node,
-		type FitViewOptions, MarkerType
+		type FitViewOptions, MarkerType, addEdge
 	} from '@xyflow/svelte';
 
 	import '@xyflow/svelte/dist/style.css';
@@ -24,6 +24,8 @@
 	import TextThingy from '$lib/components/circuits/components/TextThingy.svelte';
 	import { fetchMaterials, fetchNode } from '$lib/components/circuits/methods/CircuitApiCalls';
 	import { collisionDetection } from '$lib/components/circuits/methods/CircuitUtilMethods';
+	import type { NodeDiffActions } from '$lib/database';
+	import html2canvas from 'html2canvas';
 
 	const modalStore = getModalStore();
 	let modalRegistryHelp: Record<string, ModalComponent> = {
@@ -52,8 +54,10 @@
 	export let publishing: boolean;
 	export let publishingView = false;
 	export let dbNodes: NodeInfo[];
+	console.log(dbNodes)
 	export const nodes = writable<Node[]>([]);
 	export const edges = writable<Edge[]>([]);
+	let edgesIds : Edge[] = []
 	const nodeTypes = {
 		'custom': NodeTemplate
 	};
@@ -114,7 +118,97 @@
 
 		$nodes = $nodes;
 		$edges = $edges;
+
+		nodes.subscribe(_ => {
+			convertNodesAndEdges()
+		})
+
+		edges.subscribe(_ => {
+			convertNodesAndEdges()
+		})
 	});
+
+	const convertNodesAndEdges = () => {
+		dbNodes = $nodes.map(x => ({
+			id: Number(x.data.id),
+			title: String(x.data.label),
+			extensions: x.data.extensions as string[],
+			isMaterial: Boolean(x.data.isMaterial),
+			publisherId: String(x.data.publisherId),
+			posX: x.position.x,
+			posY: x.position.y,
+			next: [] as {circuitId: number,
+				fromPublicationId: number,
+				toPublicationId: number}[]
+		}))
+		$edges.forEach(x => {
+			const source = dbNodes.find(y => y.id === Number(x.source))
+			source?.next.push({
+				circuitId: -1,
+				toPublicationId: Number(x.target),
+				fromPublicationId: Number(x.source)
+			})
+		})
+	}
+
+	export const publishCircuit =  async() => {
+
+		let nodeDiffActions: NodeDiffActions;
+		const numNodes = $nodes.length;
+		const add: ({ publicationId: number; x: number; y: number }[]) = [];
+		const del: ({ publicationId: number }[]) = [];
+		const edit: ({ publicationId: number; x: number; y: number }[]) = [];
+		const next: { fromId: number; toId: number[] }[] = [];
+		//
+		$nodes.forEach(node => {
+			add.push(({ publicationId: Number(node.id), x: Number(node.position.x), y: Number(node.position.y) }));
+			del.push(({ publicationId: Number(node.id) }));
+			edit.push(({ publicationId: Number(node.id), x: Number(node.position.x), y: Number(node.position.y) }));
+
+			let curNode = dbNodes.filter(x=>x.id === Number(node.id))[0]
+			curNode.posY = Number(node.position.y);
+			curNode.posX = Number(node.position.x);
+
+			curNode.next = [];
+			let toID: number[] = $edges.filter(edge => edge.source === node.id).map(edge => {
+				const targetId = Number(edge.target);
+				curNode.next.push({
+					circuitId: 1,
+					fromPublicationId: Number(node.id),
+					toPublicationId: targetId,
+				})
+				return targetId;
+			});
+			next.push(({ fromId: Number(node.id), toId: toID }));
+		})
+
+
+		nodeDiffActions = {numNodes, add, delete:del, edit, next };
+
+
+		const cover = await captureScreenshot()
+		const coverPic = {
+			type: 'image/png',
+			info: cover
+		}
+		return { nodeDiffActions, coverPic };
+	}
+
+	async function captureScreenshot () : Promise<string> {
+		const container = document.getElementById('flow');
+		try{
+			if (container) {
+				const result = await html2canvas(container)
+				const imgData = result.toDataURL('image/png');
+				return imgData.split(",")[1];
+			}
+			return ''
+		}
+		catch(error)  {
+			console.error('Error capturing screenshot:', error);
+			return ""
+		}
+	}
 
 	const fetchElements = async () => {
 		const fetchedMaterials: DisplayedMaterials = await fetchMaterials()
@@ -138,7 +232,7 @@
 				dummyNode: false,
 				selected:false,
 				publishing:publishing,
-				publisherId:-1,
+				publisherId:nodeInfo.publisherId,
 				remove: remove
 			},
 			position: { x: 0, y: 0 },
@@ -254,7 +348,7 @@
 	<div class="mt-2 w-full dark:border-surface-50" id="cy"></div>
 </div>
 
-<div style:height="100vh">
+<div id="flow" style:height="100vh">
 	<SvelteFlow {nodes} {edges} {nodeTypes} {defaultEdgeOptions} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}">
 		<Controls showLock={publishing}/>
 		<Background />
