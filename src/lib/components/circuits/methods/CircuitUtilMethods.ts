@@ -1,3 +1,4 @@
+import html2canvas from 'html2canvas';
 
 
 export const getFileExtension = (filePath: string): string =>  {
@@ -28,4 +29,20 @@ export const collisionDetection = (x1: number, y1: number, x2: number, y2: numbe
 	else
 		dy = 0
 	return [dx, dy];
+}
+
+export async function captureScreenshot () : Promise<string> {
+	const container = document.getElementById('flow');
+	try{
+		if (container) {
+			const result = await html2canvas(container)
+			const imgData = result.toDataURL('image/png');
+			return imgData.split(",")[1];
+		}
+		return ''
+	}
+	catch(error)  {
+		console.error('Error capturing screenshot:', error);
+		return ""
+	}
 }

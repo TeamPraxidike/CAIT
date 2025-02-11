@@ -23,9 +23,10 @@
 	import SearchElems from '$lib/components/circuits/components/SearchElems.svelte';
 	import TextThingy from '$lib/components/circuits/components/TextThingy.svelte';
 	import { fetchMaterials, fetchNode } from '$lib/components/circuits/methods/CircuitApiCalls';
-	import { collisionDetection } from '$lib/components/circuits/methods/CircuitUtilMethods';
+	import { captureScreenshot, collisionDetection } from '$lib/components/circuits/methods/CircuitUtilMethods';
 	import type { NodeDiffActions } from '$lib/database';
 	import html2canvas from 'html2canvas';
+	import DeletableEdge from '$lib/components/circuits/components/DeletableEdge.svelte';
 
 	const modalStore = getModalStore();
 	let modalRegistryHelp: Record<string, ModalComponent> = {
@@ -61,6 +62,11 @@
 	const nodeTypes = {
 		'custom': NodeTemplate
 	};
+
+	const edgeTypes = {
+		buttonedge: DeletableEdge
+	};
+
 	const defaultEdgeOptions = {
 		style: 'stroke: #00A6D6;',
 		type: 'smoothstep',
@@ -123,8 +129,17 @@
 			convertNodesAndEdges()
 		})
 
-		edges.subscribe(_ => {
+		edges.subscribe(newEdges => {
 			convertNodesAndEdges()
+			if (publishing){
+				if (newEdges.filter(x => x.type !== "buttonedge").length > 0)
+				{
+					$edges = newEdges.map(x => {
+						x.type = "buttonedge"
+						return x
+					})
+				}
+			}
 		})
 	});
 
@@ -192,22 +207,6 @@
 			info: cover
 		}
 		return { nodeDiffActions, coverPic };
-	}
-
-	async function captureScreenshot () : Promise<string> {
-		const container = document.getElementById('flow');
-		try{
-			if (container) {
-				const result = await html2canvas(container)
-				const imgData = result.toDataURL('image/png');
-				return imgData.split(",")[1];
-			}
-			return ''
-		}
-		catch(error)  {
-			console.error('Error capturing screenshot:', error);
-			return ""
-		}
 	}
 
 	const fetchElements = async () => {
@@ -349,7 +348,7 @@
 </div>
 
 <div id="flow" style:height="100vh">
-	<SvelteFlow {nodes} {edges} {nodeTypes} {defaultEdgeOptions} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}">
+	<SvelteFlow {nodes} {edges} {nodeTypes} {edgeTypes} {defaultEdgeOptions} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}">
 		<Controls showLock={publishing}/>
 		<Background />
 	</SvelteFlow>
