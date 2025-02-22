@@ -49,9 +49,9 @@ async function main() {
 				CREATE POLICY "Allow SELECT on uploadedFiles for authenticated users"
 				ON storage.objects
 				FOR SELECT
+				TO authenticated
 				USING (
-				   (SELECT auth.role()) = 'authenticated'
-				   AND storage.objects.bucket_id = bucket_id
+				   storage.objects.bucket_id = bucket_id
 				);
 
 				-- ALLOWED FOR ALL AUTH USERS
@@ -61,9 +61,9 @@ async function main() {
 				CREATE POLICY "Allow INSERT on uploadedFiles for authenticated users"
 				ON storage.objects
 				FOR INSERT
+				TO authenticated
 				WITH CHECK (
-					(SELECT auth.role()) = 'authenticated'
-					AND storage.objects.bucket_id = bucket_id
+					storage.objects.bucket_id = bucket_id
 				);
 				
 				-- ALLOWED FOR ALL AUTH USERS (IF FILE BELONGS TO USER)
@@ -74,14 +74,13 @@ async function main() {
 				CREATE POLICY "Allow UPDATE on uploadedFiles for authenticated users"
 				ON storage.objects
 				FOR UPDATE
+				TO authenticated
 				USING (
-					(SELECT auth.role()) = 'authenticated'
-					AND storage.objects.bucket_id = bucket_id
+				    storage.objects.bucket_id = bucket_id
 					AND ((SELECT is_admin()) OR ((SELECT auth.uid()) = owner_id::uuid))
 				)
 				WITH CHECK (
-					(SELECT auth.role()) = 'authenticated'
-					AND storage.objects.bucket_id = bucket_id
+					storage.objects.bucket_id = bucket_id
 					AND ((SELECT is_admin()) OR ((SELECT auth.uid()) = owner_id::uuid))
 				);
 
@@ -91,9 +90,9 @@ async function main() {
 				CREATE POLICY "Allow DELETE on uploadedFiles for authenticated users"
 				ON storage.objects
 				FOR DELETE
+				TO authenticated
 				USING (
-					(SELECT auth.role()) = 'authenticated'
-					AND storage.objects.bucket_id = bucket_id
+					storage.objects.bucket_id = bucket_id
 					AND ((SELECT is_admin()) OR ((SELECT auth.uid()) = owner_id::uuid))
 				);
 				

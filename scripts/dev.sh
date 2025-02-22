@@ -2,7 +2,8 @@
 ENV=$(grep -v '^#' .env | xargs)                                           # load the environment variables
 #source .env
 
-npx prisma migrate dev && npx tsx ./scripts/seedTriggers.ts               # run the migrations
+npx prisma migrate dev                                                              # run the migrations
+npx tsx ./scripts/seedTriggers.ts && npx tsx ./scripts/publicSchemaRLSPolicies.ts   # auth-public user connection + pub schema policies
 
 echo 'Checking type of Filesystem...'
 
