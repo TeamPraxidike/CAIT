@@ -202,7 +202,7 @@ export async function getReportsPublication(publicationId: number) {
 	});
 }
 
-export async function getPublisherId(publicationId: number): Promise<string> {
+export async function getPublisherId(publicationId: number) {
 	return prisma.publication.findUnique({
 		where: {
 			id: publicationId,
@@ -210,5 +210,5 @@ export async function getPublisherId(publicationId: number): Promise<string> {
 		select: {
 			publisherId: true
 		}
-	})
+	});
 }

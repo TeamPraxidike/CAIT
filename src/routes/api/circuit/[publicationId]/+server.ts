@@ -99,7 +99,7 @@ export async function PUT({ request, params, locals }) {
 	}
 
 	try {
-		const circuit = await prisma.$transaction(async (prismaTransaction) => {
+		const circuit = await prisma.$transaction(async (prismaTransaction: any) => {
 			await handleConnections(
 				tags,
 				maintainers,
@@ -184,6 +184,7 @@ export async function PUT({ request, params, locals }) {
 
 export async function DELETE({ locals, params }) {
 	const id = parseInt(params.publicationId);
+	console.log("Id found");
 	if (isNaN(id) || id <= 0) {
 		return new Response(
 			JSON.stringify({
@@ -192,9 +193,9 @@ export async function DELETE({ locals, params }) {
 			{ status: 400 },
 		);
 	}
-	const publisherId = await getPublisherId(id);
 
-	const authError = await verifyAuth(locals, publisherId);
+	const publication = await getPublisherId(id);
+	const authError = await verifyAuth(locals, publication.publisherId);
 	if (authError) return authError;
 
 	try {
