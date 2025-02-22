@@ -5,13 +5,13 @@ import {
 	deleteNode,
 	editNode,
 	fileSystem,
-	getCircuitByPublicationId,
+	getCircuitByPublicationId, getPublisherId,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
 	prisma,
 	updateCircuitByPublicationId,
-	updateCircuitCoverPic,
+	updateCircuitCoverPic
 } from '$lib/database';
 import { Prisma } from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
@@ -73,22 +73,12 @@ export async function GET({ params, locals }) {
 export async function PUT({ request, params, locals }) {
 	// Authentication step
 	// return 401 if user not authenticated
-
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const body: CircuitForm & {
 		circuitId: number;
 	} = await request.json();
 
-	if ((await locals.safeGetSession()).user!.id !== body.userId) {
-		return new Response(
-			JSON.stringify({
-				error: 'Bad Request - User IDs not matching',
-			}),
-			{ status: 401 },
-		);
-	}
+	const authError = await verifyAuth(locals, body.userId);
+	if (authError) return authError;
 
 	const metaData = body.metaData;
 	// const userId = circuit.userId;
@@ -192,7 +182,7 @@ export async function PUT({ request, params, locals }) {
 	}
 }
 
-export async function DELETE({ params }) {
+export async function DELETE({ locals, params }) {
 	const id = parseInt(params.publicationId);
 	if (isNaN(id) || id <= 0) {
 		return new Response(
@@ -202,8 +192,13 @@ export async function DELETE({ params }) {
 			{ status: 400 },
 		);
 	}
+	const publisherId = await getPublisherId(id);
+
+	const authError = await verifyAuth(locals, publisherId);
+	if (authError) return authError;
+
 	try {
-		const circuit = await prisma.$transaction(async (prismaTransaction) => {
+		const circuit = await prisma.$transaction(async (prismaTransaction: any) => {
 			const publication = await deleteCircuitByPublicationId(
 				id,
 				prismaTransaction,
