@@ -28,11 +28,12 @@
 
 	let title = '';
 	let description = '';
-	let addedTags: string[] = [];
+	let tags: string[] = [];
+	$: tags = tags;
 	let newTags: string[] = [];
 	let additionalMaintainers: UserWithProfilePic[] = [];
 
-	let tagsDatabase = data.tags as PrismaTag[];
+	let allTags: PrismaTag[] = data.tags;
 	let users = data.users as UserWithProfilePic[];
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
@@ -56,7 +57,7 @@
 	const locks: boolean[] = [true, true];
 
 	$: locks[0] = title.length < 1 || description.length < 1;
-	$: locks[1] = addedTags.length < 1|| LOs.length < 1;
+	$: locks[1] = tags.length < 1|| LOs.length < 1;
 	$: priorKnowledge = priorKnowledge;
 	$: LOs = LOs;
 
@@ -148,7 +149,7 @@
 				formData.append('publisherId', uid.toString());
         formData.append('title', title);
         formData.append('description', description);
-        formData.append('selectedTags', JSON.stringify(addedTags));
+        formData.append('selectedTags', JSON.stringify(tags));
 				formData.append('newTags', JSON.stringify(newTags))
         formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
@@ -185,14 +186,14 @@
 
 				<div class="flex flex-col w-1/2">
 					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
-						<TagsSelect allTags={tagsDatabase} bind:tags={addedTags} bind:newTags={newTags}/>
+						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 				</div>
 			</div>
 		</Step>
 		<Step>
 			<svelte:fragment slot="header">Review</svelte:fragment>
 			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
-										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
+										 bind:prior={priorKnowledge} bind:tags={tags}  bind:maintainers={additionalMaintainers}
 			/>
 			<Circuit nodes={circuitNodesPlaceholder} publishingView={true}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
 		</Step>
