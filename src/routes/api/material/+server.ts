@@ -15,7 +15,7 @@ import { enqueueMaterialComparison } from '$lib/PiscinaUtils/runner';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
 
-import type { PrismaClient, Tag } from '@prisma/client';
+import type { PrismaClient, Tag} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {

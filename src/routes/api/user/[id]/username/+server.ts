@@ -12,7 +12,7 @@ import { editUser, getUserById, type userEditData } from '$lib/database';
  * @constructor
  */
 export async function PUT({ params, locals }) {
-	const authError = await verifyAuth(locals);
+	const authError = await verifyAuth(locals, params.id);
 	if (authError) return authError;
 
 	try {
