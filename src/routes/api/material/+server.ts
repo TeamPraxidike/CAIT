@@ -15,7 +15,7 @@ import { enqueueMaterialComparison } from '$lib/PiscinaUtils/runner';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
 
-import type { Tag } from '@prisma/client';
+import type { PrismaClient, Tag } from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
@@ -115,11 +115,10 @@ export async function POST({ request , locals}) {
 	// Authentication step
 	// return 401 if user not authenticated
 	// Add 400 Bad Request check
-
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const body: MaterialForm = await request.json();
+
+	const authError = await verifyAuth(locals, body.userId);
+	if (authError) return authError;
 
 	if ((await locals.safeGetSession()).user!.id !== body.userId) {
 		return new Response(
@@ -139,7 +138,7 @@ export async function POST({ request , locals}) {
 
 	try {
 		const createdMaterial = await prisma.$transaction(
-			async (prismaTransaction) => {
+			async (prismaTransaction: PrismaClient) => {
 				const material = await createMaterialPublication(
 					userId,
 					metaData,
