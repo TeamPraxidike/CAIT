@@ -41,6 +41,7 @@
 	let searchableUsers = users;
 
 	let uid = $page.data.session?.user.id || 0;
+	let loggedUser = $page.data.loggedUser;
 
 	let priorKnowledge:string[] = [];
 	$: priorKnowledge = priorKnowledge;
@@ -73,7 +74,8 @@
 			classes: 'text-surface-900',
 
 		});
-		goto(`/${$page.data.session?.user.username}/${form?.id}`);
+		//goto(`/${$page.data.session?.user.username}/${form?.id}`);
+		goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,

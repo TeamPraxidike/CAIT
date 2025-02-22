@@ -30,7 +30,8 @@
 	export let form: ActionData;
 	export let data: PageServerData;
 
-	$: ({loggedUser} = data);
+	// $: ({loggedUser} = data);
+	let loggedUser = $page.data.loggedUser;
 	$: isSubmitting = false;
 
 	// tags
@@ -104,7 +105,8 @@
 			background: 'bg-success-200',
 			classes: 'text-surface-900',
 		});
-		goto(`/${$page.data.session?.user.username}/${form?.id}`);
+		//goto(`/${$page.data.session?.user.username}/${form?.id}`);
+		goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
