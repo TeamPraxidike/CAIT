@@ -117,14 +117,6 @@
 		<input on:keydown={handleInputEnter} minlength="1" type="text" name="lastName" id="lastName" class="input" bind:value={user.lastName} />
 	</div>
 	<div>
-		<label for="email" class="text-surface-900 dark:text-surface-50">
-			Email
-		</label>
-		<p class="bg-surface-200 rounded-full border-1 border-surface-700 p-2	">
-			{user.email}
-		<p/>
-	</div>
-	<div>
 		<label for="aboutMe" class="text-surface-900 dark:text-surface-50">
 			About me
 		</label>
