@@ -57,8 +57,9 @@ export const actions = {
 		});
 		const newUser = await res.json();
 
-
 		// throw redirect(303, `/${newUser.username}`);
-		return { status: res.status, id: newUser.id, username: newUser.username};
+		// return { status: res.status, id: newUser.id, username: newUser.username};
+		throw redirect(303, `/${newUser.username}`);
 	},
+
 } satisfies Actions;
