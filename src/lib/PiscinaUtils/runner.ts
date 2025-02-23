@@ -148,7 +148,16 @@ export async function enqueueMaterialComparison(publicationId: number, materialI
         await handleFileTokens(filesToUpdatePrisma)
     }
     catch (error){
-        console.error("Error while doing comparisons\n" + error)
+        console.error('Error while doing comparisons');
+        // 'error' is of type 'unknown' here, so we need a type guard.
+        if (error instanceof Error) {
+            console.error("Name:", error.name);
+            console.error("Message:", error.message);
+            console.error("Stack:", error.stack);
+        } else {
+            // if it's not an Error, just log it directly (or handle differently).
+            console.error("Unknown error type:", error);
+        }
     }
 }
 
@@ -210,6 +219,15 @@ export async function enqueueCircuitComparison(publicationId: number): Promise<v
         await handleSimilarity(comparisonsResolved)
     }
     catch (error){
-        console.error("Error while doing comparisons\n" + error)
+        console.error('Error while doing comparisons');
+        // 'error' is of type 'unknown' here, so we need a type guard.
+        if (error instanceof Error) {
+            console.error("Name:", error.name);
+            console.error("Message:", error.message);
+            console.error("Stack:", error.stack);
+        } else {
+            // if it's not an Error, just log it directly (or handle differently).
+            console.error("Unknown error type:", error);
+        }
     }
 }

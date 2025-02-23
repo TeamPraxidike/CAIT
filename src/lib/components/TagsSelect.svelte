@@ -40,8 +40,8 @@
     }
 
     const handleInvalid = () => {
-        console.log(allTags)
-        console.log(tags)
+        // console.log(allTags)
+        // console.log(tags)
         // if it has valid length, is a valid dropdown option and has not been included yet
         if(tagInput.length>0 && allTags.includes(tagInput) && !tags.includes(tagInput)) {
             tags=[...tags,tagInput];
@@ -57,7 +57,7 @@
     }
 
     function onInputChipSelect(e: CustomEvent<TagOption>): void {
-        console.log('onInputChipSelect', e.detail);
+        //console.log('onInputChipSelect', e.detail);
         if (!tags.includes(e.detail.value)) {
             inputChip.addChip(e.detail.value);
             tagInput = '';

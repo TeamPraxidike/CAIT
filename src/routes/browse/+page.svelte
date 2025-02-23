@@ -236,7 +236,7 @@
 				return response.json();
 			})
 			.then(data => {
-				console.log(data)
+				//console.log(data)
 				// Handle the response data from the API
 				if (s === "material") {
 					materials = data.publications.map((x:Publication&{materials: Material & {files:string[]}, coverPicData:string, publisher:User & { profilePicData: string }}) => ({id: x.materials.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher, files:x.materials.files, encapsulatingType:x.materials.encapsulatingType}));

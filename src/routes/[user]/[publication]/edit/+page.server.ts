@@ -38,6 +38,7 @@ export const actions = {
 		const newTags = data.getAll('newTags') || '';
 
 		const maintainers = data.get('maintainers')?.toString() || '';
+
 		const prior = data.get('PK')?.toString() || '';
 		const LOs = data.get('learning_objectives')?.toString() || '';
 

@@ -19,12 +19,8 @@ export async function handleConnections(
 	publicationId: number,
 	prismaTransaction: Prisma.TransactionClient = prisma,
 ) {
-	if (maintainers.length > 0) {
-		await connectMaintainers(publicationId, maintainers, prismaTransaction);
-	}
-	if (tags.length > 0) {
-		await connectTags(publicationId, tags, prismaTransaction);
-	}
+	await connectMaintainers(publicationId, maintainers, prismaTransaction);
+	await connectTags(publicationId, tags, prismaTransaction);
 }
 
 /**

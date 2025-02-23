@@ -124,7 +124,7 @@
 	created = getDateDifference(pubView.publication.createdAt, new Date()) as string;
 
 
-	console.log(pubView.publication.publisher.username)
+	//console.log(pubView.publication.publisher.username)
 
 
 	$: if (data) {
@@ -355,7 +355,7 @@
 	// Assures currently displayed tab is 0 (materials/circuit)
 	function handleTabEvent(event: any) {
 		const { tabValue } = event.detail;
-		console.log(tabValue);
+		//console.log(tabValue);
 		tabSet = tabValue;
 	}
 

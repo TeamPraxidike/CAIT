@@ -23,10 +23,10 @@
 	let loggedUser = $page.data.loggedUser;
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationView = data.pubView;
-	console.log(data)
-	console.log("----------")
-	console.log(serverData);
-	console.log("----------")
+	// console.log(data)
+	// console.log("----------")
+	// console.log(serverData);
+	// console.log("----------")
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
@@ -60,15 +60,15 @@
 		selectedType = serverData.publication.materials.encapsulatingType;
 		(async () => {
 			fetchedFiles = await data.fetchedFiles;
-			console.log(fetchedFiles);
-			console.log("----------");
-			console.log("serverData.publication.materials.files")
-			console.log(serverData.publication.materials.files);
-			console.log("----------")
+			// console.log(fetchedFiles);
+			// console.log("----------");
+			// console.log("serverData.publication.materials.files")
+			// console.log(serverData.publication.materials.files);
+			// console.log("----------")
 			//files = createFileList(serverData.fileData, serverData.publication.materials.files);
 			files = createFileList(fetchedFiles, serverData.publication.materials.files);
 			oldFiles = serverData.publication.materials.files
-			console.log(oldFiles)
+			// console.log(oldFiles)
 		})();
 	}
 
@@ -77,8 +77,9 @@
 	let selectedFileList: FileList = [];
 
 	if (isMaterial){
-		// TODO: figure out why the type is a string rather than a null
-		if (serverData.coverFileData.data != 'null'){
+		// TODO: (random?) figure out why the type is a string rather than a null
+		if ((typeof serverData.coverFileData.data === "string" && serverData.coverFileData.data != 'null') ||
+			(typeof serverData.coverFileData.data !== "string" && serverData.coverFileData.data != null)){
 			coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
 		}
 	}
@@ -302,7 +303,7 @@
 	</div>
 
 	<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
-	<MantainersEditBar publisher={loggedUser} bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
+	<MantainersEditBar publisher={serverData.publication.publisher} bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
 
 	<div class="text-token w-full md:w-1/2 space-y-2 pl-3">
 		<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
