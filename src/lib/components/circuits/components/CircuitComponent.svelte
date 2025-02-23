@@ -7,7 +7,7 @@
 		useSvelteFlow,
 		type Edge,
 		type Node,
-		type FitViewOptions, MarkerType, addEdge
+		MarkerType, addEdge, getNodesBounds, getViewportForBounds, useStore
 	} from '@xyflow/svelte';
 
 	import '@xyflow/svelte/dist/style.css';
@@ -32,7 +32,7 @@
 		}
 	};
 
-	const { fitView } = useSvelteFlow();
+	const instance = useSvelteFlow();
 	const modalHelp: ModalSettings = {
 		type: 'component',
 		title: 'Instructions for Creating a Circuit',
@@ -46,12 +46,12 @@
 		body: 'You cannot add this edge because it will create a loop! Please reconsider your circuit design.',
 		buttonTextCancel: "Got it",
 	};
+	let currentFlow : SvelteFlow
 	export let liked: number[] = [];
 	export let saved: number[] = [];
 	export let publishing: boolean;
 	export let publishingView = false;
 	export let dbNodes: NodeInfo[];
-	console.log(dbNodes)
 	export const nodes = writable<Node[]>([]);
 	export const edges = writable<Edge[]>([]);
 	let edgesIds : Edge[] = []
@@ -78,9 +78,6 @@
 	let displayIds : number[] = []
 	let pubIds: Set<number> = new Set();
 
-	//set of variables needed to deal with selected nodes
-	let selected = false
-	let selectedId = ''
 
 	onMount(async () => {
 		dbNodes.forEach(node => {
@@ -236,10 +233,9 @@
 		$nodes.push(node);
 		$nodes = $nodes
 		placementAlgorithm(node, 0, 0)
-		const options : FitViewOptions = {
-			nodes: $nodes,
-		}
-		await fitView(options)
+		useStore().fitViewOptions.subscribe(options => {
+			useStore().fitView(options)
+		})
 	}
 
 	/**
@@ -252,8 +248,6 @@
 	};
 
 	const removeNode = (pubId : number) => {
-		selectedId = '';
-		selected = false;
 		pubIds.delete(pubId);
 		$nodes = $nodes.filter(x=> x.id !== pubId.toString())
 		dbNodes = dbNodes.filter(x=>x.id !== pubId)
@@ -263,48 +257,40 @@
 		if (e.detail.targetNode === null) return
 		const x: number = e.detail.targetNode.position.x;
 		const y: number = e.detail.targetNode.position.y;
-		// const event = e.detail.event
-		// if (event instanceof MouseEvent)
-		// {
-		// 	x = event.clientX
-		// 	y = event.clientY
-		// }
-		// else if (event instanceof TouchEvent){
-		// 	x = event.touches[0].clientX
-		// 	y = event.touches[0].clientY
-		// }
-		console.log(e.detail.targetNode.position.x)
 		placementAlgorithm(e.detail.targetNode, x, y)
 	}
 
 
-	export const placementAlgorithm = (node : any, positionX : number, positionY:number) => {
+	export const placementAlgorithm = (node: any, positionX: number, positionY: number) => {
 		if ($nodes.length === 1) return
 
 		$nodes.forEach((n: any) => {
-			if (n.id !== node.id){
+			if (n.id !== node.id) {
 				const vector = collisionDetection(positionX, positionY, n.position.x, n.position.y);
-				if(vector){
+				if (vector) {
 					const data = n.data;
-					const removedEdges : {id: string, source: string, target: string} [] = []
+					const removedEdges: { id: string, source: string, target: string } [] = []
 
-					$edges.forEach((edge:any) => {
-						removedEdges.push({ id: `en${edge.source().id()}n${edge.target().id()}`, source: `${edge.source().id()}`, target: `${edge.target().id()}` })
+					$edges.forEach((edge: any) => {
+						removedEdges.push({
+							id: `en${edge.source().id()}n${edge.target().id()}`,
+							source: `${edge.source().id()}`,
+							target: `${edge.target().id()}`
+						})
 					})
 					$nodes = $nodes.filter(x => x.id !== n.id)
 					$nodes.push({
 						id: n.id,
 						data: data,
-						position: {x: n.position.x + vector[0], y: n.position.y + vector[1]},
+						position: { x: n.position.x + vector[0], y: n.position.y + vector[1] },
 						type: "custom"
 					});
 
-					removedEdges.forEach((edge:any) => {
+					removedEdges.forEach((edge: any) => {
 
-						if ($edges.filter(x => x.id === edge.id).length === 0)
-						{
+						if ($edges.filter(x => x.id === edge.id).length === 0) {
 							$edges.push({
-								 id: `${edge.id}`,
+								id: `${edge.id}`,
 								source: `${edge.source}`,
 								target: `${edge.target}`
 							});
@@ -339,7 +325,17 @@
 </div>
 
 <div id="flow" style:height="100vh">
-	<SvelteFlow {nodes} {edges} {nodeTypes} {edgeTypes} {defaultEdgeOptions} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}" on:nodedragstop={placeNodes}>
+	<SvelteFlow bind:this="{currentFlow}"
+				{nodes}
+				{edges}
+				{nodeTypes}
+				{edgeTypes}
+				{defaultEdgeOptions}
+				nodesDraggable="{publishing}"
+				nodesConnectable="{publishing}"
+				elementsSelectable="{publishing}"
+				on:nodedragstop={placeNodes}
+				fitView>
 		<Controls showLock={publishing}/>
 		<Background />
 	</SvelteFlow>
