@@ -1,4 +1,3 @@
-import fs from 'fs';
 import { getTextExtractor } from 'office-text-extractor';
 import WordExtractor from 'word-extractor';
 import removeMd from 'remove-markdown';
@@ -41,7 +40,8 @@ export async function reader(filePath) {
 export async function txtReader(filePath) {
     try {
         //return fs.readFileSync(filePath).toString('utf8');
-        return await fileSystem.readFile(filePath).toString('utf8');
+        const buffer = await fileSystem.readFile(filePath);
+        return buffer.toString('utf8');
     } catch (err) {
         console.error('Error reading the file:', err);
         return '';
@@ -56,7 +56,8 @@ export async function txtReader(filePath) {
 export async function mdReader(filePath) {
     try {
         //const text = fs.readFileSync(filePath).toString('utf8');
-        const text = await fileSystem.readFile(filePath).toString('utf8');
+        const buffer = await fileSystem.readFile(filePath);
+        const text = buffer.toString('utf8');
         return removeMd(text);
     } catch (err) {
         console.error('Error reading the file:', err);
@@ -95,7 +96,8 @@ export function pythonCodeParser(source) {
 export async function pyReader(filePath) {
     try {
         //const code = fs.readFileSync(filePath).toString('utf8');
-        const code = await fileSystem.readFile(filePath).toString('utf8');
+        const buffer = await fileSystem.readFile(filePath);
+        const code = buffer.toString('utf8');
         return pythonCodeParser(code);
     } catch (err) {
         console.error('Error reading the file:', err);
@@ -111,7 +113,8 @@ export async function pyReader(filePath) {
 export async function ipynbReader(filePath) {
     try {
         //const data = fs.readFileSync(filePath).toString('utf8');
-        const data = await fileSystem.readFile(filePath).toString('utf8');
+        const buffer = await fileSystem.readFile(filePath);
+        const data = buffer.toString('utf8');
 
         // check if the data is an empty string
         if (!data || data.trim() === '') {
