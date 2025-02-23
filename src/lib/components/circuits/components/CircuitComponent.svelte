@@ -13,19 +13,15 @@
 	import '@xyflow/svelte/dist/style.css';
 	import NodeTemplate from '$lib/components/circuits/components/NodeTemplate.svelte';
 	import type {
-		CircuitNode,
 		DisplayedMaterials, FullMaterial, NodeInfo
 	} from '$lib/components/circuits/methods/CircuitTypes';
-	import { onMount } from 'svelte';
-	import { PublicationType } from '@prisma/client';
-	import Icon from '@iconify/svelte';
+	import { onMount } from 'svelte';import Icon from '@iconify/svelte';
 	import { getModalStore, Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import SearchElems from '$lib/components/circuits/components/SearchElems.svelte';
 	import TextThingy from '$lib/components/circuits/components/TextThingy.svelte';
 	import { fetchMaterials, fetchNode } from '$lib/components/circuits/methods/CircuitApiCalls';
 	import { captureScreenshot, collisionDetection } from '$lib/components/circuits/methods/CircuitUtilMethods';
 	import type { NodeDiffActions } from '$lib/database';
-	import html2canvas from 'html2canvas';
 	import DeletableEdge from '$lib/components/circuits/components/DeletableEdge.svelte';
 
 	const modalStore = getModalStore();
@@ -263,6 +259,25 @@
 		dbNodes = dbNodes.filter(x=>x.id !== pubId)
 	}
 
+	const placeNodes = (e: CustomEvent<{targetNode: Node<Record<string, unknown>, string> | null, nodes: Node<Record<string, unknown>, string>[], event: MouseEvent | TouchEvent}>) => {
+		if (e.detail.targetNode === null) return
+		const x: number = e.detail.targetNode.position.x;
+		const y: number = e.detail.targetNode.position.y;
+		// const event = e.detail.event
+		// if (event instanceof MouseEvent)
+		// {
+		// 	x = event.clientX
+		// 	y = event.clientY
+		// }
+		// else if (event instanceof TouchEvent){
+		// 	x = event.touches[0].clientX
+		// 	y = event.touches[0].clientY
+		// }
+		console.log(e.detail.targetNode.position.x)
+		placementAlgorithm(e.detail.targetNode, x, y)
+	}
+
+
 	export const placementAlgorithm = (node : any, positionX : number, positionY:number) => {
 		if ($nodes.length === 1) return
 
@@ -309,33 +324,10 @@
 		<div class = "flex flex-col md:flex-row gap-2 justify-between">
 			<div class="flex justify justify-between">
 				<div class="flex flex-col md:flex-row gap-2 ">
-					<!--{#if (selected || edgeSelected)}-->
-					<!--	<button type="button" class="btn text-surface-50 bg-error-500 dark:bg-error-500" on:click={() => {	modalStore.trigger(modal);}}>Remove From Circuit</button>-->
-					<!--{:else}-->
-						<button type="button" class="btn text-surface-50 bg-success-500 dark:bg-success-500" on:click={fetchElements}>Insert Publications</button>
-					<!--{/if}-->
-
-					<!--{#if (numSelected < 2)}-->
-					<!--	{#if prereqActive}-->
-					<!--		{#if stage1}-->
-					<!--			<button type="button" class="btn text-surface-50 dark:bg-surface-600 bg-surface-600" on:click={savePrereq}>Cancel</button>-->
-					<!--		{:else}-->
-					<!--			<button type="button" class="btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click={savePrereq}>Save Changes</button>-->
-
-					<!--		{/if}-->
-					<!--	{:else}-->
-					<!--		{#if nodes.length > 1}-->
-					<!--			<button type="button" class=" relative btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click={addPrereq}>Connect Publications</button>-->
-					<!--		{/if}-->
-
-					<!--	{/if}-->
-					<!--{/if}-->
-
-
+					<button type="button" class="btn text-surface-50 bg-success-500 dark:bg-success-500" on:click={fetchElements}>Insert Publications</button>
 				</div>
 			</div>
 			<div class="flex gap-4">
-<!--				<button type="button" class="btn text-surface-50 bg-surface-600 dark:bg-surface-600" on:click="{() => {cy.center()}}"> Recentre </button>-->
 				<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 dark:bg-transparent rounded-full h-full self-center">
 					<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center dark:text-surface"/>
 				</button>
@@ -343,12 +335,11 @@
 		</div>
 	{/if}
 
-
 	<div class="mt-2 w-full dark:border-surface-50" id="cy"></div>
 </div>
 
 <div id="flow" style:height="100vh">
-	<SvelteFlow {nodes} {edges} {nodeTypes} {edgeTypes} {defaultEdgeOptions} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}">
+	<SvelteFlow {nodes} {edges} {nodeTypes} {edgeTypes} {defaultEdgeOptions} fitView nodesDraggable="{publishing}" nodesConnectable="{publishing}" elementsSelectable="{publishing}" on:nodedragstop={placeNodes}>
 		<Controls showLock={publishing}/>
 		<Background />
 	</SvelteFlow>
@@ -360,14 +351,4 @@
 					 on:selFurther={addNode} on:remFurther={removeNodeFromBrowsing} bind:liked={liked} bind:saved={saved}/>
 	</div>
 {/if}
-
-<!--{#if popupPrereq1}-->
-<!--	<div class="fixed bottom-[8%] left-1/2 right-1/2 whitespace-nowrap  z-999 flex items-center justify-center" transition:fly={{ duration: 750 }} ><span class=" bg-surface-50 py-2 px-4 shadow-lg text-primary-600 rounded-full">Click on a publication to select the source</span></div>-->
-<!--{/if}-->
-
-<!--{#if popupPrereq2}-->
-<!--	<div class="fixed bottom-[8%] left-1/2 right-1/2 whitespace-nowrap  z-999 flex items-center justify-center" transition:fly={{ duration: 750 }} ><span class=" bg-surface-50 py-2 px-4 shadow-lg text-primary-600 rounded-full">Click on a publication to add/remove edges from the source</span></div>-->
-<!--{/if}-->
-
-
 <Modal components={modalRegistryHelp}/>
