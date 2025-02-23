@@ -11,10 +11,11 @@ import {reportPublication} from "$lib/database/user";
  * @constructor
  */
 export async function POST({ params, locals }) {
-    const authError = await verifyAuth(locals);
+    const { id, publicationId } = params;
+
+    const authError = await verifyAuth(locals, id);
     if (authError) return authError;
 
-    const { id, publicationId } = params;
     const user = await getUserById(id);
     if (!user)
         return new Response(JSON.stringify({ error: 'User not found' }), {

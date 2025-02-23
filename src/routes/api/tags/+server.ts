@@ -1,6 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { addTags, getAllTags, prisma } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import type { PrismaClient } from '@prisma/client';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	const authError = await verifyAuth(locals);
@@ -33,7 +34,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		const addTagsTransaction = await prisma.$transaction(
-			async (prismaTransaction) => {
+			async (prismaTransaction: PrismaClient) => {
 				return await addTags(tags, prismaTransaction);
 			},
 		);

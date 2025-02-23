@@ -7,10 +7,12 @@ import {
 import { verifyAuth } from '$lib/database/auth';
 
 export async function POST({ request, locals }) {
-	const authError = await verifyAuth(locals);
+	const body = await request.json();
+
+	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
 	try {
-		const body = await request.json();
+
 		const commentData: createCommentData = {
 			userId: body.userId,
 			publicationId: body.publicationId,

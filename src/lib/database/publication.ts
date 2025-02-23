@@ -201,3 +201,14 @@ export async function getReportsPublication(publicationId: number) {
 		},
 	});
 }
+
+export async function getPublisherId(publicationId: number) {
+	return prisma.publication.findUnique({
+		where: {
+			id: publicationId,
+		},
+		select: {
+			publisherId: true
+		}
+	});
+}

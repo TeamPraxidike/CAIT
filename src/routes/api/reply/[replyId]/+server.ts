@@ -1,8 +1,8 @@
 import {
 	deleteReply,
 	type editReplyData,
-	getReply,
-	updateReply,
+	getReply, getUserById,
+	updateReply
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
@@ -23,8 +23,12 @@ export async function GET({ params, locals }) {
 	}
 }
 
-export async function DELETE({ params }) {
+export async function DELETE({ params, locals }) {
 	const { replyId } = params;
+	const reply = await getReply(parseInt(replyId));
+
+	const authError = await verifyAuth(locals, reply.userId);
+	if (authError) return authError;
 
 	try {
 		const reply = await deleteReply(parseInt(replyId));
@@ -37,11 +41,13 @@ export async function DELETE({ params }) {
 }
 
 export async function PUT({ params, request, locals }) {
-	const authError = await verifyAuth(locals);
+	const body = await request.json();
+	const reply = await getReply(parseInt(body.replyId));
+
+	const authError = await verifyAuth(locals, reply.userId);
 	if (authError) return authError;
 
 	try {
-		const body = await request.json();
 		const replyData: editReplyData = {
 			id: parseInt(params.replyId),
 			content: body.content,
