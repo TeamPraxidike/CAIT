@@ -19,9 +19,14 @@
 
 
 
-	$: ({loggedUser} = data);
+	// $: ({loggedUser} = data);
+	let loggedUser = $page.data.loggedUser;
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationView = data.pubView;
+	console.log(data)
+	console.log("----------")
+	console.log(serverData);
+	console.log("----------")
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
@@ -34,6 +39,7 @@
 	let selectedType:any;
 	let files: FileList;
 	let oldFiles: any;
+	let fetchedFiles: any;
 
 
 	let LOs: string[] = serverData.publication.learningObjectives;
@@ -52,28 +58,60 @@
 		time = serverData.publication.materials.timeEstimate;
 		copyright = serverData.publication.materials.copyright;
 		selectedType = serverData.publication.materials.encapsulatingType;
-		files = createFileList(serverData.fileData, serverData.publication.materials.files);
-		oldFiles = serverData.publication.materials.files
+		(async () => {
+			fetchedFiles = await data.fetchedFiles;
+			console.log(fetchedFiles);
+			console.log("----------");
+			console.log("serverData.publication.materials.files")
+			console.log(serverData.publication.materials.files);
+			console.log("----------")
+			//files = createFileList(serverData.fileData, serverData.publication.materials.files);
+			files = createFileList(fetchedFiles, serverData.publication.materials.files);
+			oldFiles = serverData.publication.materials.files
+			console.log(oldFiles)
+		})();
 	}
-	let coverPicMat:File|undefined;
+
+	let coverPicMat:File|undefined = undefined;
+	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
+	let selectedFileList: FileList = [];
+
 	if (isMaterial){
-		coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
+		// TODO: figure out why the type is a string rather than a null
+		if (serverData.coverFileData.data != 'null'){
+			coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
+		}
 	}
 	let allTypes: {id:string, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 
 	function chooseCover(e: Event) {
-		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles) {
-			if (eventFiles[0].type === 'image/jpeg' || eventFiles[0].type === 'image/png')
-				coverPicMat = eventFiles[0];
-			else
-				toastStore.trigger({
-					message: 'Invalid file type, please upload a .jpg or .png file',
-					background: 'bg-warning-200'
-				});
+		const input = e.target as HTMLInputElement;
+		if (!input.files?.length) return;
+
+		const file = input.files[0];
+
+		// Check if file is valid
+		if (file.type === 'image/jpeg' || file.type === 'image/png') {
+			coverPicMat = file;
+
+			// If you add a picture and then remove it
+			// You cannot re-add it until you select another image (and remove it)
+			// this is a workaround, think of it as deleting some cache
+			input.value = '';
+
+			// Update the FileList using DataTransfer
+			const dataTransfer = new DataTransfer();
+			dataTransfer.items.add(file);
+			selectedFileList = dataTransfer.files;
+		} else {
+			toastStore.trigger({
+				message: 'Invalid file type, please upload a .jpg or .png file',
+				background: 'bg-warning-200'
+			});
 		}
 	}
+
 
 
 	let allTags: PrismaTag[] = data.tags;
@@ -88,7 +126,7 @@
 			background: 'bg-success-200',
 			classes: 'text-surface-900',
 		});
-		goto(`/${publication.publisherId}/${publication.id}`);
+		goto(`/${loggedUser.username}/${publication.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -168,7 +206,8 @@
 		formData.append('isMaterial', JSON.stringify(isMaterial));
 
 		formData.append('oldFiles', JSON.stringify(oldFiles));
-		formData.append('oldFilesData', JSON.stringify(serverData.fileData));
+		//formData.append('oldFilesData', JSON.stringify(serverData.fileData));
+		formData.append('oldFilesData', JSON.stringify(fetchedFiles));
 
 		formData.append('userId', $page.data.session?.user.id.toString() || '');
 		formData.append('tags', JSON.stringify(tags));
@@ -183,8 +222,9 @@
 		formData.append('type', selectedType);
 		formData.append('coverPicMat', coverPicMat || '');
 
-		formData.append('circuitId', JSON.stringify(serverData.publication.circuit?.id || 0))
-		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0))
+		formData.append('circuitId', JSON.stringify(serverData.publication.circuit?.id || 0));
+		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0));
+		formData.append('publisherId', JSON.stringify(serverData.publication.publisherId));
 
 		if(circuitRef){
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
@@ -275,10 +315,13 @@
 		</div>
 		<div class="mt-4">
 			<label for="coverPhoto">Cover Picture:</label>
-			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>
-			{#if coverPicMat}
-				<button on:click={() => coverPicMat = undefined} type="button" class="btn">Remove</button>
-				<img src={URL.createObjectURL(coverPicMat)} alt="sss">
+			<img src={coverPicMat ? URL.createObjectURL(coverPicMat) : defaultCoverPicturePath} alt="Cover image">
+			<FileButton on:change={chooseCover} bind:files={selectedFileList} name="coverPhoto">Upload File</FileButton>
+			{#if coverPicMat !== undefined}
+				<button on:click={() => {
+					coverPicMat = undefined;
+					selectedFileList = new DataTransfer().files;
+				}} type="button" class="btn">Remove</button>
 			{/if}
 		</div>
 	{:else}

@@ -35,7 +35,8 @@
 	const modalStore = getModalStore();
 
 	export let data: LayoutServerData & PageServerData;
-	$: ({ loggedUser } = data);
+	//$: ({ loggedUser } = data);
+	let loggedUser = $page.data.loggedUser;
 	const userId = $page.data.session?.user.id;
 
 	let tabSet: number = 0;
@@ -121,6 +122,9 @@
 	comments = pubView.publication.comments;
 	tags = pubView.publication.tags.map(tag => tag.content) as string[];
 	created = getDateDifference(pubView.publication.createdAt, new Date()) as string;
+
+
+	console.log(pubView.publication.publisher.username)
 
 
 	$: if (data) {
@@ -410,7 +414,7 @@
 				{#if pubView.publication.publisherId === $page.data.session?.user.id
 				|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
 					<button bind:this={hoverEdit}
-							on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
+							on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit`)}
 							type="button" class="btn self-center p-0 m-0">
 						<Icon icon={editIcon} width="24" class="text-surface-700" />
 					</button>

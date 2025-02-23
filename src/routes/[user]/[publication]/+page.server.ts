@@ -59,31 +59,31 @@ export const load: PageServerLoad = async ({
 	}
 
 
-	// This fetches the files for a material publication
-	// Utilizes "Streaming with promises" in SvelteKit
-	async function fetchFiles() {
-		try {
-			const res = await fetch(`/api/material/${params.publication}/files`);
-			if (!res.ok && res.status === 404) {
-				// it is not a material publication, possible so we handle gracefully
-				return null;
-			}
-			else if (!res.ok){
-				// something definitely went wrong here
-				throw new Error(`Failed to load files: ${res.statusText}`);
-			}
-			const fileData = await res.json();
-
-			return fileData;
-		} catch (err) {
-			console.error('Error while getting files, page.server:\n', err);
-		}
-	}
+	// // This fetches the files for a material publication
+	// // Utilizes "Streaming with promises" in SvelteKit
+	// async function fetchFiles() {
+	// 	try {
+	// 		const res = await fetch(`/api/material/${params.publication}/files`);
+	// 		if (!res.ok && res.status === 404) {
+	// 			// it is not a material publication, possible so we handle gracefully
+	// 			return null;
+	// 		}
+	// 		else if (!res.ok){
+	// 			// something definitely went wrong here
+	// 			throw new Error(`Failed to load files: ${res.statusText}`);
+	// 		}
+	// 		const fileData = await res.json();
+	//
+	// 		return fileData;
+	// 	} catch (err) {
+	// 		console.error('Error while getting files, page.server:\n', err);
+	// 	}
+	// }
 
 	return {
 		circuitsPubAppearIn: getCircuitsThatContainPub(),
 		similarPublications: getSimilar(),
-		fetchedFiles: fetchFiles(),
+		//fetchedFiles: fetchFiles(),
 		liked: liked,
 		saved: saved,
 		reported: reported

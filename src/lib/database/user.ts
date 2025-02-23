@@ -562,6 +562,14 @@ export async function isReported(userId: string, publicationId: number){
 	});
 }
 
+export async function isAdmin(userId: string): Promise<boolean> {
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { isAdmin: true },
+	});
+	return user?.isAdmin === true;
+}
+
 export async function reportPublication(userId: string, publicationId: number) {
 	const reported = await prisma.publication.findUnique({
 		where: {
