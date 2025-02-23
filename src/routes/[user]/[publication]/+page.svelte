@@ -553,9 +553,13 @@
 						{#await data.fetchedFiles}
 							<p>Loading files...</p>
 						{:then files}
-							<div class="w-full">
-								<FileTable operation="download" files={createFileList(files, pubView.publication.materials.files)} />
-							</div>
+							{#if files.length === 0}
+								<p>This publication has no files</p>
+							{:else}
+								<div class="w-full">
+									<FileTable operation="download" files={createFileList(files, pubView.publication.materials.files)} />
+								</div>
+							{/if}
 						{:catch error}
 							<!--TODO: Change color-->
 							<p style="color: red">Error while loading files. Reload the page to try again</p>

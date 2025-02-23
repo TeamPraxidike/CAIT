@@ -189,6 +189,35 @@
 		}
 	}
 
+	const locks: boolean[] = [true, true, true, true];
+	$: locks[0] = isMaterial ? files?.length === 0 : false;
+	$: locks[1] = title.length < 1 || description.length < 1 || (isMaterial && selectedType === "Select Type");
+	$: locks[2] = tags.length < 1 || LOs.length < 1;
+
+
+	// Warning messages for missing fields
+	let warning1: string = "";
+	const generateWarningStep1 = (title: string, description: string, selectedType: string): string => {
+		let warning = "You are missing ";
+		if (title.length < 1) warning += "a title";
+		if (description.length < 1 && title.length < 1) warning += ", a description";
+		else if(description.length < 1) warning += "a description";
+		if ((title.length < 1 || description.length < 1) && selectedType === "Select Type") warning += " and a material type";
+		else if (selectedType === "Select Type") warning += "a material type";
+		warning += ".";
+		return warning;
+	}
+	$: warning1 = generateWarningStep1(title, description, selectedType);
+
+	let warning2: string = "";
+	const generateWarningStep2 = (tags: number, LOs: number) => {
+		let warning = "You are missing ";
+		if (tags < 1) warning += "a tag";
+		if (LOs < 1 && tags < 1) warning += " and a Learning Objective";
+		else if (LOs < 1) warning += "a Learning Objective";
+		return warning += ".";
+	}
+	$: warning2 = generateWarningStep2(tags.length, LOs.length);
 
 </script>
 
@@ -199,8 +228,19 @@
 	  class="col-span-full my-20"
 	  use:enhance={async ({ formData }) => {
 
-		if(isMaterial)
-      Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+
+		if (locks[0] || locks[1] || locks[2]) {
+			toastStore.trigger({
+				message: "Please complete all required fields before submitting.",
+				background: "bg-warning-200"
+			});
+			return;
+		}
+
+
+		if(isMaterial){
+      		Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+		}
 
 		formData.append('title', title);
 		formData.append('description', description)
@@ -331,10 +371,18 @@
 		</div>
 	{/if}
 
-
+	{#if locks[1]}
+		<p class="text-error-300 dark:text-error-400">{warning1}</p>
+	{/if}
+	{#if locks[2]}
+		<p class="text-error-300 dark:text-error-400">{warning2}</p>
+	{/if}
 
 	<div class="flex float-right gap-2">
-		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50 mt-4">Save Changes</button>
+		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50 mt-4"
+				disabled={locks[0] || locks[1] || locks[2]}>
+			Save Changes
+		</button>
 		<button type="button" on:click={()=>{window.history.back()}} class=" flex-none float-right btn rounded-lg variant-filled-surface text-surface-50 mt-4">Cancel</button>
 	</div>
 

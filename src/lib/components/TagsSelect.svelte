@@ -93,6 +93,8 @@
     }
     const enterNewTag = (event: KeyboardEvent) =>{
         if(event.key === 'Enter'){
+            event.preventDefault(); // Prevent form submission
+            event.stopPropagation(); // Stop bubbling up to the form
             createTag()
         }
     }
@@ -104,7 +106,9 @@
 <div class="text-token space-y-2 pl-3">
 
         {#if enterTag}
-        <input on:keyup={enterNewTag} bind:value={newTag} placeholder="Enter tag text" class="w-full border-o focus:border-primary-400 focus:ring-0 rounded-lg" />
+        <input on:keyup={enterNewTag}
+               on:keydown={(e) => e.key === 'Enter' && e.preventDefault()}
+               bind:value={newTag} placeholder="Enter tag text" class="w-full border-o focus:border-primary-400 focus:ring-0 rounded-lg" />
             <button type="button" class="w-full bg-error-300 rounded-lg py-2 dark-primary-700 text-surface-50" on:click={()=>{enterTag=false}}>Cancel</button>
 
         {:else}
