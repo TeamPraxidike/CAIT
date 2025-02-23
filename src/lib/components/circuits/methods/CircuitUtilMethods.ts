@@ -25,9 +25,9 @@ export const collisionDetection = (x1: number, y1: number, x2: number, y2: numbe
 		dy = -dy - offset
 
 	if (Math.abs(dy) > Math.abs(dx))
-		dx = 0
-	else
 		dy = 0
+	else
+		dx = 0
 	return [dx, dy];
 }
 
