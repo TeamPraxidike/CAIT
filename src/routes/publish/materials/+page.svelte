@@ -25,7 +25,22 @@
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import type { Snapshot } from './$types';
+
+	import {
+		saveCover, getCover, deleteCover,
+		saveFiles, getFiles, clearFiles,
+		saveSnapshot, getSnapshot, clearSnapshot
+	} from '$lib/util/indexDB';
+	/**
+	 * Convert an array of File objects into a real FileList.
+	 */
+	export function arrayToFileList(files: File[]): FileList {
+		const dt = new DataTransfer();
+		files.forEach(file => dt.items.add(file));
+		return dt.files;
+	}
 
 	export let form: ActionData;
 	export let data: PageServerData;
@@ -35,10 +50,10 @@
 	$: isSubmitting = false;
 
 	// tags
-	let tags: string[] = [];
+	let tags: string[] = []; // persisted
 	$: tags = tags;
 	let allTags: PrismaTag[] = data.tags;
-	let newTags: string[] = [];
+	let newTags: string[] = []; // persisted
 
 	let files: FileList = [] as unknown as FileList;
 	type UserWithProfilePic = User & { profilePicData: string };
@@ -47,45 +62,53 @@
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users;
 	// learning objectives
-	let LOs: string[] = [];
+	let LOs: string[] = []; // persisted
 	$: LOs = LOs;
 
-	let PKs: string[] = [];
+	let PKs: string[] = []; // persisted
 	$: PKs = PKs;
 
 	// input data
-	let title: string = '';
-	let description: string = '';
-	let difficulty: Difficulty = 'easy';
-	let estimate: string = '';
-	let copyright: string = '';
-	let theoryApplicationRatio = 0.5;
-	let selectedType = "Select Type";
+	let title: string = ''; // persisted
+	let description: string = ''; // persisted
+	let difficulty: Difficulty = 'easy'; // persisted
+	let estimate: string = ''; // persisted
+	let copyright: string = ''; // persisted
+	let theoryApplicationRatio = 0.5; // persisted
+	let selectedType = "Select Type"; // persisted
 	let allTypes: {id:string, content:string }[] = MaterialTypes.map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 	let typeActive = false;
 	// cover
 	let coverPic: File | undefined = undefined;
+
 	function chooseCover(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles) {
-			if (eventFiles[0].type === 'image/jpeg' || eventFiles[0].type === 'image/png')
-				coverPic = eventFiles[0];
-			else
+		if (eventFiles && eventFiles[0]) {
+			const file = eventFiles[0];
+			if (file.type === 'image/jpeg' || file.type === 'image/png') {
+				coverPic = file;
+				/** 4) Persist coverPic to IndexedDB **/
+				saveCover(file);
+			} else {
 				toastStore.trigger({
 					message: 'Invalid file type, please upload a .jpg or .png file',
 					background: 'bg-warning-200'
 				});
+			}
 		}
 	}
 
 	$: uid = $page.data.session?.user.id;
 
-
 	function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles) {
+		if (eventFiles && eventFiles.length > 0) {
+			// Merge new files into the existing FileList
 			files = concatFileList(files, eventFiles);
+
+			/** 5) Convert final FileList to an array and store in IndexedDB **/
+			saveFiles(Array.from(files));
 		}
 	}
 
@@ -100,13 +123,27 @@
 	const toastStore = getToastStore();
 
 	$: if (form?.status === 200) {
-		toastStore.trigger({
-			message: 'Publication Added successfully',
-			background: 'bg-success-200',
-			classes: 'text-surface-900',
+		if (saveInterval) {
+			window.clearInterval(saveInterval);
+		}
+
+		Promise.all([
+			deleteCover(),
+			clearFiles(),
+			clearSnapshot()
+		]).then(() => {
+			// Show success message
+			toastStore.trigger({
+				message: 'Publication Added successfully',
+				background: 'bg-success-200',
+				classes: 'text-surface-900',
+			});
+
+			// Navigate away
+			goto(`/${loggedUser.username}/${form?.id}`);
+		}).catch(error => {
+				console.error('Error clearing data:', error);
 		});
-		//goto(`/${$page.data.session?.user.username}/${form?.id}`);
-		goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -122,6 +159,7 @@
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+
 		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
 
 		if (!confirmation) {
@@ -131,13 +169,79 @@
 
 	};
 
-	onMount(() => {
+	let saveInterval: number | undefined = undefined;
+
+	onMount(async () => {
+		// get coverPic
+		const storedCover = await getCover();
+		if (storedCover) {
+			coverPic = storedCover; // single file
+		}
+
+		// get multiple files (returns array<File>)
+		const storedFiles = await getFiles();
+		if (storedFiles.length > 0) {
+			// Rebuild a FileList from that array
+			files = arrayToFileList(storedFiles);
+		}
+
+		const existing = await getSnapshot();
+		if (existing) {
+			//snapshot.restore(existing);
+			title = existing.title;
+			description = existing.description;
+			tags = existing.tags;
+			newTags = existing.newTags;
+			LOs = existing.LOs;
+			PKs = existing.PKs;
+			selectedType = existing.selectedType;
+			difficulty = existing.difficulty;
+			maintainers = existing.maintainers;
+			searchableUsers = existing.searchableUsers;
+			estimate = existing.estimate;
+			copyright = existing.copyright;
+			theoryApplicationRatio = existing.theoryApplicationRatio;
+		}
+
+		saveInterval = window.setInterval(() => {
+			//snapshot.capture();
+			const data: FormSnapshot = {
+				title,
+				description,
+				tags,
+				newTags,
+				LOs,
+				PKs,
+				selectedType,
+				difficulty,
+				maintainers,
+				searchableUsers,
+				estimate,
+				copyright,
+				theoryApplicationRatio,
+			};
+
+			console.log("IN CONST SNAPSHOT")
+
+			// Store it in IndexedDB
+			saveSnapshot(data);
+		}, 2000);
+
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
 		return () => {
+			if (saveInterval) {
+				window.clearInterval(saveInterval);
+			}
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 		};
 	});
+
+	onDestroy(() => {
+		if (saveInterval) {
+			window.clearInterval(saveInterval);
+		}
+	})
 
 	const onNextHandler = () => {
 		window.scrollTo({
@@ -173,6 +277,68 @@
 			event.preventDefault();
 		}
 	}
+
+	// Actual SvelteKit snapshot
+	type FormSnapshot = {
+		title: string; // persisted
+		description: string; // persisted
+		tags: string[];
+		newTags: string[];
+		LOs: string[]; // persisted
+		PKs: string[]; // persisted
+		selectedType: string; // persisted
+		difficulty: string; // persisted
+		maintainers: UserWithProfilePic[];
+		searchableUsers: UserWithProfilePic[];
+		estimate: string; // persisted
+		copyright: string; // persisted
+		theoryApplicationRatio: number; // persisted
+	};
+
+	// export const snapshot: Snapshot<FormSnapshot> = {
+	// 	capture: () => {
+	// 		// Return a plain JS object that is JSON-serializable
+	// 		const data: FormSnapshot = {
+	// 			title,
+	// 			description,
+	// 			tags,
+	// 			newTags,
+	// 			LOs,
+	// 			PKs,
+	// 			selectedType,
+	// 			difficulty,
+	// 			maintainers,
+	// 			searchableUsers,
+	// 			estimate,
+	// 			copyright,
+	// 			theoryApplicationRatio,
+	// 		};
+	//
+	// 		console.log("IN CONST SNAPSHOT")
+	//
+	// 		// Store it in IndexedDB
+	// 		saveSnapshot(data);
+	//
+	// 		// Also return it (what SvelteKit needs)
+	// 		return data;
+	// 	},
+	// 	restore: (value) => {
+	// 		// Put your captured values back into your local state
+	// 		title = value.title;
+	// 		description = value.description;
+	// 		tags = value.tags;
+	// 		newTags = value.newTags;
+	// 		LOs = value.LOs;
+	// 		PKs = value.PKs;
+	// 		selectedType = value.selectedType;
+	// 		difficulty = value.difficulty;
+	// 		maintainers = value.maintainers;
+	// 		searchableUsers = value.searchableUsers;
+	// 		estimate = value.estimate;
+	// 		copyright = value.copyright;
+	// 		theoryApplicationRatio = value.theoryApplicationRatio;
+	// 	}
+	// };
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />

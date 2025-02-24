@@ -14,7 +14,7 @@ import {
 	updateMaterialByPublicationId,
 } from '$lib/database';
 import { type File as PrismaFile, Prisma } from '@prisma/client';
-import { canEdit, canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
+import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
 
 import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
 import { getMaintainers, getPublisher } from '$lib/database/publication';
@@ -129,7 +129,7 @@ export async function PUT({ request, params, locals }) {
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
 
-		if (!(await canEditOrRemove(locals, publisherId, maintainerIds)))
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
 			return unauthResponse();
 
 		const updatedMaterial = await prisma.$transaction(
@@ -203,7 +203,7 @@ export async function DELETE({ params, locals }) {
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
 
-		if (!(await canEditOrRemove(locals, publisherId, maintainerIds)))
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "REMOVE")))
 			return unauthResponse();
 
 		const material = await prisma.$transaction(

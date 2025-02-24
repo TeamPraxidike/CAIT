@@ -14,7 +14,7 @@ import {
 	updateCircuitCoverPic
 } from '$lib/database';
 import { Prisma } from '@prisma/client';
-import { canEdit, canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
+import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
 
 import type {File as PrismaFile} from '@prisma/client';
 import {enqueueCircuitComparison} from "$lib/PiscinaUtils/runner";
@@ -117,7 +117,7 @@ export async function PUT({ request, params, locals }) {
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
 
-		if (!(await canEditOrRemove(locals, publisherId, maintainerIds)))
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
 			return unauthResponse();
 
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {
@@ -220,7 +220,7 @@ export async function DELETE({ params, locals }) {
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
 
-		if (!(await canEditOrRemove(locals, publisherId, maintainerIds)))
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "REMOVE")))
 			return unauthResponse();
 
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {
