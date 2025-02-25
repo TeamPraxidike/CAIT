@@ -46,6 +46,56 @@
 		body: 'You cannot add this edge because it will create a loop! Please reconsider your circuit design.',
 		buttonTextCancel: "Got it",
 	};
+
+
+	function loopDetected(
+		edges: Edge[],
+		newEdge: { source: string; target: string }
+	): boolean {
+		const adjacency: Record<string, string[]> = {};
+
+		// Build adjacency list from existing edges
+		edges.forEach((edge) => {
+			adjacency[edge.source] = adjacency[edge.source] ?? [];
+			adjacency[edge.source].push(edge.target);
+		});
+
+		// Check if `newEdge` creates a cycle
+		const { source, target } = newEdge;
+		const visited = new Set<string>();
+		const queue = [target];
+
+		while (queue.length > 0) {
+			const current = queue.shift()!;
+			if (current === source) {
+				return true; // Loop detected
+			}
+			if (!visited.has(current)) {
+				visited.add(current);
+				const neighbors = adjacency[current] || [];
+				neighbors.forEach((n) => {
+					if (!visited.has(n)) {
+						queue.push(n);
+					}
+				});
+			}
+		}
+
+		return false;
+	}
+
+
+	function handleEdgeCreate(connection) {
+		const newEdge = { id: `e${connection.source}-${connection.target}`, ...connection };
+
+		if (loopDetected($edges, newEdge)) {
+			modalStore.trigger(modalAlert);
+			return null;
+		}
+
+		return newEdge;
+	}
+
 	let currentFlow : SvelteFlow
 	export let liked: number[] = [];
 	export let saved: number[] = [];
@@ -78,8 +128,11 @@
 	let displayIds : number[] = []
 	let pubIds: Set<number> = new Set();
 
+	let store;
 
 	onMount(async () => {
+		store = currentFlow?.store;
+
 		dbNodes.forEach(node => {
 			const remove = () => removeNode(node.id)
 			$nodes.push({
@@ -233,9 +286,12 @@
 		$nodes.push(node);
 		$nodes = $nodes
 		placementAlgorithm(node, 0, 0)
-		useStore().fitViewOptions.subscribe(options => {
-			useStore().fitView(options)
-		})
+		if (store) {
+			// for instance, you can subscribe to fitViewOptions or call fitView()
+			store.fitViewOptions.subscribe((options) => {
+				store.fitView(options);
+			});
+		}
 	}
 
 	/**
@@ -273,9 +329,9 @@
 
 					$edges.forEach((edge: any) => {
 						removedEdges.push({
-							id: `en${edge.source().id()}n${edge.target().id()}`,
-							source: `${edge.source().id()}`,
-							target: `${edge.target().id()}`
+							id: `en${edge.source}n${edge.target}`,
+							source: edge.source,
+							target: edge.target
 						})
 					})
 					$nodes = $nodes.filter(x => x.id !== n.id)
@@ -335,6 +391,7 @@
 				nodesConnectable="{publishing}"
 				elementsSelectable="{publishing}"
 				on:nodedragstop={placeNodes}
+				onedgecreate={handleEdgeCreate}
 				fitView>
 		<Controls showLock={publishing}/>
 		<Background />
