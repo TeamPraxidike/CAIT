@@ -5,13 +5,15 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
 }
 
 enum Difficulty {
@@ -149,6 +151,19 @@ model File {
 
   materialId Int?
   material   Material? @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)
+
+  documents Document[]
+}
+
+model Document {
+  id        BigInt                     @id @default(autoincrement())
+  content   String
+  metadata  Json
+  // Use Unsupported() to tell Prisma to treat this as a native type.
+  // (You may replace "vector(384)" with an appropriate native type if available.)
+  embedding Unsupported("vector(384)")
+  file_path String
+  file      File                       @relation(fields: [file_path], references: [path], onDelete: Cascade)
 }
 
 model Circuit {

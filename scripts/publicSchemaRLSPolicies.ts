@@ -12,7 +12,8 @@ const sql = postgres(dbUrl);
 // VIEWS are another option but I don't know how that would work
 
 async function main() {
-	await sql`
+	try {
+		await sql`
         DO $$
         BEGIN
 			-- Enable Row-Level Security (RLS) on public."User" if not already enabled
@@ -195,7 +196,11 @@ async function main() {
 				(SELECT is_admin()) = TRUE
 			);
         END $$;
-`
+        `
+	}
+	catch (error) {
+		console.error(error);
+	}
 
 	console.log(
 		"Public schema policies added successfully"

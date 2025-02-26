@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client/extension';
 import type { File as PrismaFile } from '@prisma/client';
 import path from 'path';
 import fs from 'fs';
+import type { DocumentChunks } from '$lib/PiscinaUtils/runner';
 
 
 // // TODO: This seems to be useless, could remove if nothing breaks
@@ -359,20 +360,40 @@ export async function updateFiles(
  * @param prismaContext
  */
 export async function handleFileTokens(
-	filesToUpdate: {filePath: string, tokens: string}[],
-	prismaContext: Prisma.TransactionClient = prisma,
+	filesToUpdate: { filePath: string; tokens: string; chunks: DocumentChunks }[],
+	prismaContext: Prisma.TransactionClient = prisma
 ) {
-	for (const data of filesToUpdate) {
-		await prismaContext.file.update({
-			where: {
-				path: data.filePath
-			},
-			data: {
-				text: data.tokens,
+	for (const dataCurrent of filesToUpdate) {
+		await prismaContext.$transaction(async (tx) => {
+			// Update file text
+			await tx.file.update({
+				where: { path: dataCurrent.filePath },
+				data: { text: dataCurrent.tokens }
+			});
+
+			// Delete previous documents
+			await tx.document.deleteMany({
+				where: { file_path: dataCurrent.filePath }
+			});
+
+			// Insert new documents using raw SQL for the vector type
+			for (const chunk of dataCurrent.chunks) {
+				// Use Prisma's executeRaw to handle the vector type correctly
+				await tx.$executeRaw`
+                INSERT INTO "Document" (content, metadata, embedding, file_path)
+                VALUES (
+                   ${chunk.pageContent},
+                   ${JSON.stringify(chunk.metadata)}::json,
+                   ${chunk.embedding}::vector(384),
+                   ${dataCurrent.filePath}
+                )
+             `;
 			}
 		});
 	}
 }
+
+
 
 export async function getFilesForMaterial(
 	materialId: number

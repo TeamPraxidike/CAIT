@@ -28,7 +28,15 @@ export type ResultMeta = {
     difficulty: number;
 };
 
-export type FileTokenInfo = {filePath: string, tokens: string}[]
+export type DocumentChunks = {
+    pageContent: string,
+    embedding: number[]
+    metadata:
+        { extension: string }
+}[]
+
+//export type FileTokenInfo = {filePath: string, tokens: string}[]
+export type FileTokenInfo = {filePath: string, tokens: string, chunks: DocumentChunks}[]
 
 export type ResultFile = {
     similarity: number,

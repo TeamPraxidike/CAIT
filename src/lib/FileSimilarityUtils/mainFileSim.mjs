@@ -131,8 +131,10 @@ export async function getPubText(pubFiles) {
         } else {
             // returns Promise<string> or Promise<null>, need to await to avoid sudden memory spikes
             // const createdTokens = await reader(path.join(basePath, pubFiles[i].path))
-            const createdTokens = await reader(pubFiles[i].path)
-            pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false}
+            //const createdTokens = await reader(pubFiles[i].path)
+            const { text: createdTokens, chunks: documentChunks } = await reader(pubFiles[i].path)
+            // pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false}
+            pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false, chunks: documentChunks}
         }
     }
 
@@ -147,7 +149,7 @@ export async function getPubText(pubFiles) {
         if (content.skip === false){
             const text = preprocessText(content.tokens)
             finalText.add(text)
-            filesToUpdate.push({filePath: content.filePath, tokens: text})
+            filesToUpdate.push({filePath: content.filePath, tokens: text, chunks: content.chunks})
         }
         // otherwise we already have the tokens, skip it
         else finalText.add(content.tokens);

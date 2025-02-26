@@ -3,34 +3,62 @@ import WordExtractor from 'word-extractor';
 import removeMd from 'remove-markdown';
 import { pythonKeywords } from './pythonKeywords.mjs';
 import { fileSystem } from '../indexJS.mjs';
+import { vectorStore } from '../similarityIndex.mjs';
+import { model } from '../similarityIndex.mjs';
+import CustomRecursiveCharacterTextSplitter from '../VectorStore/Splitter.mjs'
 
 export async function reader(filePath) {
-    switch(filePath.split('.').pop()) {
-        case 'txt':
-            return txtReader(filePath);
+    // Extract file extension
+    const extension = filePath.split('.').pop();
 
-        case 'md':
-            return mdReader(filePath);
+    // Map file extensions to corresponding reader functions
+    const readers = {
+        txt: txtReader,
+        md: mdReader,
+        ipynb: ipynbReader,
+        py: pyReader,
+        doc: wordReader,
+        docx: wordReader,
+        pdf: officeReader,
+        pptx: officeReader,
+        xlsx: officeReader,
+    };
 
-        case 'ipynb':
-            return ipynbReader(filePath);
+    // Get the appropriate reader function
+    const readFunction = readers[extension];
 
-        case 'py':
-            return pyReader(filePath);
+    if (!readFunction) {
+        //return null; // Unsupported file type
+        return { "text": null, "chunks": null }; // Unsupported file type
+    }
 
-        case 'doc':
-        case 'docx':
-            return wordReader(filePath);
+    try {
+        // Read the file content
+        const text = await readFunction(filePath);
 
-        case 'pdf':
-        case 'pptx':
-        case 'xlsx':
-            return officeReader(filePath);
+        // Create text splitter
+        const splitter = new CustomRecursiveCharacterTextSplitter();
+        const chunks = await splitter.splitText(text);
 
-        default:
-            return null;
+        // Format into documents
+        const documentChunks = await Promise.all(
+            chunks.map(async (content) => ({
+                pageContent: content,
+                embedding: await model.computeEmbeddingSingleText(content),
+                metadata: { extension: extension } // No need to template a string if it's just a variable
+            }))
+        );
+
+        // // Store documents in vector database
+        // await vectorStore.addDocuments(documents);
+
+        return { "text": text, "chunks": documentChunks };
+    } catch (error) {
+        console.error(`Error processing file: ${filePath}`, error);
+        return null;
     }
 }
+
 
 /**
  * Read .txt file
