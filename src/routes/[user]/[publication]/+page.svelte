@@ -108,7 +108,6 @@
 	liked = userSpecificInfo.liked;
 	likes = pubView.publication.likes;
 
-
 	// circuitsPubAppearIn = data.circuitsPubAppearIn;
 	// similarPublications = data.similarPublications;
 
