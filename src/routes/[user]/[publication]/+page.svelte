@@ -269,6 +269,19 @@
 		saveFile(zipBlob, pubView.publication.title + '.zip');
 	}
 
+	const extractNodesFromPubView  = () : NodeInfo[] => {
+		return pubView.publication.circuit.nodes.map(x => ({
+			id: x.publicationId,
+			title: x.publication.title,
+			isMaterial: x.publication.type === PublicationType.Material,
+			extensions: x.extensions,
+			username: x.publication.publisher.username,
+			posX:x.posX,
+			posY:x.posY,
+			next:x.next
+		}))
+	}
+
 	/**
 	 * add placeholder comment to make it smoother
 	 */
@@ -577,7 +590,7 @@
 					{:else}
 						<div class="w-full">
 							<SvelteFlowProvider>
-								<CircuitComponent publishing="{false}" dbNodes="{pubView.publication.circuit.nodes}"/>
+								<CircuitComponent publishing="{false}" dbNodes="{extractNodesFromPubView()}"/>
 							</SvelteFlowProvider>						</div>
 					{/if}
 

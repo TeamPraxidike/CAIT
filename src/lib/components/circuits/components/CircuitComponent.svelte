@@ -100,7 +100,6 @@
 	export let liked: number[] = [];
 	export let saved: number[] = [];
 	export let publishing: boolean;
-	export let publishingView = false;
 	export let dbNodes: NodeInfo[];
 	export const nodes = writable<Node[]>([]);
 	export const edges = writable<Edge[]>([]);
@@ -143,7 +142,7 @@
 					extensions: node.extensions,
 					isMaterial: node.isMaterial,
 					dummyNode: false, selected:false,
-					publisherId : node.publisherId,
+					username : node.username,
 					publishing:publishing,
 					remove:remove
 				},
@@ -195,7 +194,7 @@
 			title: String(x.data.label),
 			extensions: x.data.extensions as string[],
 			isMaterial: Boolean(x.data.isMaterial),
-			publisherId: String(x.data.publisherId),
+			username: String(x.data.username),
 			posX: x.position.x,
 			posY: x.position.y,
 			next: [] as {circuitId: number,
@@ -277,7 +276,7 @@
 				dummyNode: false,
 				selected:false,
 				publishing:publishing,
-				publisherId:nodeInfo.publisherId,
+				username:nodeInfo.username,
 				remove: remove
 			},
 			position: { x: 0, y: 0 },
@@ -307,6 +306,8 @@
 		pubIds.delete(pubId);
 		$nodes = $nodes.filter(x=> x.id !== pubId.toString())
 		dbNodes = dbNodes.filter(x=>x.id !== pubId)
+		$edges = $edges.filter(x=> x.source !== pubId.toString() && x.target !== pubId.toString())
+		$edges = $edges
 	}
 
 	const placeNodes = (e: CustomEvent<{targetNode: Node<Record<string, unknown>, string> | null, nodes: Node<Record<string, unknown>, string>[], event: MouseEvent | TouchEvent}>) => {

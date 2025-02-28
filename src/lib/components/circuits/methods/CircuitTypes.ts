@@ -41,7 +41,7 @@ export type NodeInfo = {
 	title : string,
 	isMaterial : boolean,
 	extensions : string []
-	publisherId: string,
+	username: string,
 	posX : number,
 	posY : number,
 	next: {
@@ -59,6 +59,6 @@ export type NodeTemplateData = {
 	dummyNode: boolean,
 	selected:boolean,
 	publishing:boolean,
-	publisherId : number,
+	username : string,
 	remove: () => void;
 }

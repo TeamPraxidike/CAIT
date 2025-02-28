@@ -184,7 +184,7 @@
 										 bind:prior={priorKnowledge} bind:tags={addedTags}  bind:maintainers={additionalMaintainers}
 			/>
 			<SvelteFlowProvider>
-				<CircuitComponent dbNodes={circuitNodesPlaceholder} publishingView={true}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
+				<CircuitComponent dbNodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
 			</SvelteFlowProvider>
 		</Step>
 	</Stepper>

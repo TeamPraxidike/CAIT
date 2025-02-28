@@ -42,7 +42,7 @@ export const fetchNode = async (pubId : number) => {
 		title : "",
 		extensions : [],
 		isMaterial : false,
-		publisherId: "",
+		username: "",
 		posX : 0,
 		posY : 0,
 		next : []
@@ -65,7 +65,7 @@ export const fetchNode = async (pubId : number) => {
 				title: data.publication.title,
 				isMaterial: data.isMaterial,
 				extensions: extensions,
-				publisherId: data.publication.publisherId,
+				username: data.publication.publisher.username,
 				posX : 0,
 				posY : 0,
 				next:[]
