@@ -86,7 +86,7 @@ export const load: PageServerLoad = async ({
 		fetchedFiles: fetchFiles(),
 		liked: liked,
 		saved: saved,
-		reported: reported
+		reported: reported,
 	};
 };
 
