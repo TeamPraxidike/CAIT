@@ -1,6 +1,5 @@
 import type { Actions, PageServerLoad } from './$types';
 import type { FetchedFileArray } from '$lib/database';
-import { createFileList } from '$lib/util/file';
 
 export const load: PageServerLoad = async ({
 	parent,
@@ -19,7 +18,6 @@ export const load: PageServerLoad = async ({
 	let reported: boolean = false;
 
 	// TODO: review this if statement -> does it need to encapsulate the methods below it too?
-
 	if (session && session.user) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
 		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
@@ -40,23 +38,14 @@ export const load: PageServerLoad = async ({
 
 	// Gets circuits that contain the current publication
 	// Todo: change hideous api path -> what does "all" mean??
-	async function getCircuitsThatContainPub() {
-		const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
-		const circuitsPubAppearIn = await circuitRes.json();
-
-		return circuitsPubAppearIn
-	}
-
+	const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
+	const circuitsContainingPub = await circuitRes.json();
 
 	// Gets similar publications
-	async function getSimilar(){
-		const similarRes = await fetch(
-			`/api/publication/${params.publication}/similar`,
-		);
-		const similarPublications = await similarRes.json();
-
-		return similarPublications
-	}
+	const similarRes = await fetch(
+		`/api/publication/${params.publication}/similar`,
+	);
+	const similar =  await similarRes.json();
 
 
 	// This fetches the files for a material publication
@@ -72,21 +61,19 @@ export const load: PageServerLoad = async ({
 				// something definitely went wrong here
 				throw new Error(`Failed to load files: ${res.statusText}`);
 			}
-			const fileData = await res.json();
-
-			return fileData;
+			return await res.json();
 		} catch (err) {
 			console.error('Error while getting files, page.server:\n', err);
 		}
 	}
 
 	return {
-		circuitsPubAppearIn: getCircuitsThatContainPub(),
-		similarPublications: getSimilar(),
+		circuitsPubAppearIn: circuitsContainingPub,
+		similarPublications: similar,
 		fetchedFiles: fetchFiles(),
 		liked: liked,
 		saved: saved,
-		reported: reported
+		reported: reported,
 	};
 };
 

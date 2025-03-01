@@ -26,6 +26,7 @@ import {
 	connectTags,
 	handleConnections,
 	updateAllTimeSaved,
+	getPublisherId
 } from './publication';
 
 import {
@@ -293,6 +294,7 @@ export {
 	deleteTagByContent,
 	updateReputation,
 	updateAllTimeSaved,
+	getPublisherId
 };
 
 export type {

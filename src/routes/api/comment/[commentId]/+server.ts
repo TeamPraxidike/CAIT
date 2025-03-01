@@ -26,8 +26,13 @@ export async function GET({ params, locals }) {
 	}
 }
 
-export async function DELETE({ params }) {
+export async function DELETE({ params, locals }) {
 	const { commentId } = params;
+
+	const comment = await getComment(parseInt(commentId));
+
+	const authError = await verifyAuth(locals, comment.userId);
+	if (authError) return authError;
 
 	try {
 		const comment = await deleteComment(parseInt(commentId));
@@ -40,10 +45,13 @@ export async function DELETE({ params }) {
 }
 
 export async function PUT({ params, request, locals }) {
-	const authError = await verifyAuth(locals);
+	const body = await request.json();
+	const comment = await getComment(parseInt(body.commentId));
+
+	const authError = await verifyAuth(locals, comment.userId);
 	if (authError) return authError;
 	try {
-		const body = await request.json();
+
 		const commentData: editCommentData = {
 			id: parseInt(params.commentId),
 			content: body.content,

@@ -5,15 +5,15 @@ import {
 	type FetchedFileItem,
 	type FileDiffActions,
 	fileSystem,
-	getMaterialByPublicationId,
+	getMaterialByPublicationId, getPublisherId,
 	handleConnections,
 	type MaterialForm,
 	prisma,
 	updateCoverPic,
 	updateFiles,
-	updateMaterialByPublicationId,
+	updateMaterialByPublicationId
 } from '$lib/database';
-import { type File as PrismaFile, Prisma } from '@prisma/client';
+import { type File as PrismaFile, Prisma, type PrismaClient } from '@prisma/client';
 import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
 
 import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
@@ -83,21 +83,12 @@ export async function GET({ params, locals }) {
 }
 
 export async function PUT({ request, params, locals }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const body: MaterialForm & {
 		materialId: number;
 	} = await request.json();
-
-	if ((await locals.safeGetSession()).user!.id !== body.userId) {
-		return new Response(
-			JSON.stringify({
-				error: 'Bad Request - User IDs not matching',
-			}),
-			{ status: 401 },
-		);
-	}
+	
+	const authError = await verifyAuth(locals, body.userId);
+	if (authError) return authError;
 
 	const material: MaterialForm = body;
 	const metaData = material.metaData;
@@ -124,7 +115,7 @@ export async function PUT({ request, params, locals }) {
 			return unauthResponse();
 
 		const updatedMaterial = await prisma.$transaction(
-			async (prismaTransaction) => {
+			async (prismaTransaction: PrismaClient) => {
 				await handleConnections(
 					tags,
 					maintainers,
@@ -139,7 +130,12 @@ export async function PUT({ request, params, locals }) {
 					prismaTransaction,
 				);
 
-				await updateFiles(fileInfo, body.materialId, body.userId, prismaTransaction);
+				await updateFiles(
+					fileInfo,
+					body.materialId,
+					body.userId,
+					prismaTransaction,
+				);
 
 				return await updateMaterialByPublicationId(
 					publicationId,
@@ -174,9 +170,8 @@ export async function PUT({ request, params, locals }) {
 	}
 }
 
-export async function DELETE({ params }) {
+export async function DELETE({ params, locals }) {
 	const id = parseInt(params.publicationId);
-
 	if (isNaN(id) || id <= 0) {
 		return new Response(
 			JSON.stringify({
@@ -185,9 +180,14 @@ export async function DELETE({ params }) {
 			{ status: 400 },
 		);
 	}
+
+	const publication = await getPublisherId(id);
+	const authError = await verifyAuth(locals, publication.publisherId);
+	if (authError) return authError;
+
 	try {
 		const material = await prisma.$transaction(
-			async (prismaTransaction) => {
+			async (prismaTransaction: PrismaClient) => {
 				const publication = await deleteMaterialByPublicationId(
 					id,
 					prismaTransaction,

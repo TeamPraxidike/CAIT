@@ -35,10 +35,9 @@ function filterSaved(saved: any, query: string) {
  * @param locals
  */
 export async function GET({ params, url, locals }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const { id } = params;
+	const authError = await verifyAuth(locals, id);
+	if (authError) return authError;
 
 	const user = await getUserById(id);
 

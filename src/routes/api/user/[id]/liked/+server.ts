@@ -7,10 +7,10 @@ import { verifyAuth } from '$lib/database/auth';
  * @param locals
  */
 export async function GET({ params, locals }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const { id } = params;
+
+	const authError = await verifyAuth(locals, id);
+	if (authError) return authError;
 
 	const user = await getUserById(id);
 	if (!user)
