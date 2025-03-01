@@ -269,22 +269,23 @@
 
 	const addReply = (event: CustomEvent) => {
 		let commentIndex = comments.findIndex(c => c.id === event.detail.content.commentId);
+		const replies = [
+			...comments[commentIndex].replies,
+			{
+				id: event.detail.content.id,
+				userId: event.detail.content.userId,
+				commentId: event.detail.content.commentId,
+				likes: 0,
+				content: event.detail.content.content,
+				createdAt: event.detail.content.createdAt,
+				updatedAt: event.detail.content.updatedAt,
+				user: loggedUser
+			}
+		]
 		if (commentIndex !== -1) {
 			comments[commentIndex] = {
 				...comments[commentIndex],
-				replies: [
-					...comments[commentIndex].replies,
-					{
-						id: event.detail.content.id,
-						userId: event.detail.content.userId,
-						commentId: event.detail.content.commentId,
-						likes: 0,
-						content: event.detail.content.content,
-						createdAt: event.detail.content.createdAt,
-						updatedAt: event.detail.content.updatedAt,
-						user: loggedUser
-					}
-				]
+				replies: replies
 			};
 			comments = [...comments];
 		}
