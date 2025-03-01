@@ -1,35 +1,43 @@
 <script lang="ts">
-	import type { LayoutServerData, PageServerData } from './$types';
-	import {
-		AddInteractionForm,
-		Circuit,
-		Comment,
-		DiffBar,
-		FileTable,
-		getDateDifference, HorizontalScroll,
-		Meta,
-		Tag, TheoryAppBar,
-		UserProp
-	} from '$lib';
-	import { fly } from 'svelte/transition';
-	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
+    import type {LayoutServerData, PageServerData} from './$types';
+    import {
+        AddInteractionForm,
+        Circuit, CircuitComponent,
+        Comment,
+        DiffBar,
+        FileTable,
+        getDateDifference, HorizontalScroll,
+        Meta,
+        Tag, TheoryAppBar,
+        UserProp
+    } from '$lib';
+    import {fly} from 'svelte/transition';
+    import {TabGroup, Tab} from '@skeletonlabs/skeleton';
 
-	import { onMount } from 'svelte';
-	import JSZip from 'jszip';
-	import Icon from '@iconify/svelte';
-	import type { PublicationView } from './+layout.server';
-	import {
-		Accordion,
-		AccordionItem,
-		getModalStore,
-		getToastStore,
-		type ModalSettings,
-		type ToastSettings
-	} from '@skeletonlabs/skeleton';
-	import { goto } from '$app/navigation';
-	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
-	import type { Comment as PrismaComment, Difficulty, Reply, User } from '@prisma/client';
-	import { page } from '$app/state';
+    import {onMount} from 'svelte';
+    import JSZip from 'jszip';
+    import Icon from '@iconify/svelte';
+    import type {PublicationView} from './+layout.server';
+    import {
+        Accordion,
+        AccordionItem,
+        getModalStore,
+        getToastStore,
+        type ModalSettings,
+        type ToastSettings
+    } from '@skeletonlabs/skeleton';
+    import {goto} from '$app/navigation';
+    import {createFileList, IconMapExtension, saveFile} from '$lib/util/file';
+    import {
+        type Comment as PrismaComment,
+        type Difficulty, MaterialType,
+        PublicationType,
+        type Reply,
+        type User
+    } from '@prisma/client';
+    import {page} from '$app/stores';
+    import { SvelteFlowProvider } from '@xyflow/svelte';
+    import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -61,13 +69,21 @@
 	let userSpecificInfo: { liked: boolean; saved: boolean };
 	let diff: Difficulty = data.pubView.publication.difficulty;
 
-	pubView = data.pubView as PublicationView;
-
-	userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean };
-	likedComments = data.likedComments as number[];
-	likedReplies = data.likedReplies as number[];
-
-	isMaterial = pubView.isMaterial;
+    pubView = data.pubView as PublicationView;
+    isMaterial = pubView.isMaterial;
+    const nodes : NodeInfo[] = isMaterial ? [] : pubView.publication.circuit.nodes.map(node => ({
+        id: node.publication.id,
+        title: node.publication.title,
+        isMaterial: node.publication.type === PublicationType.Material,
+        next: node.next,
+        posX: node.posX,
+        posY: node.posY,
+        extensions: node.extensions,
+        publisherId: node.publication.publisherId
+    }))
+    userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
+    likedComments = data.likedComments as number[];
+    likedReplies = data.likedReplies as number[];
 
 	//files = isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
 
@@ -119,7 +135,7 @@
 	$: comments = pubView.publication.comments;
 	tags = pubView.publication.tags.map(tag => tag.content) as string[];
 	created = getDateDifference(pubView.publication.createdAt, new Date()) as string;
-
+   
 
 	$: if (data) {
 		pubView = data.pubView as PublicationView;
@@ -245,6 +261,19 @@
 
 		const zipBlob = await zip.generateAsync({ type: 'blob' });
 		saveFile(zipBlob, pubView.publication.title + '.zip');
+	}
+
+	const extractNodesFromPubView  = () : NodeInfo[] => {
+		return pubView.publication.circuit.nodes.map(x => ({
+			id: x.publicationId,
+			title: x.publication.title,
+			isMaterial: x.publication.type === PublicationType.Material,
+			extensions: x.extensions,
+			username: x.publication.publisher.username,
+			posX:x.posX,
+			posY:x.posY,
+			next:x.next
+		}))
 	}
 
 	/**
@@ -548,8 +577,9 @@
 						{/await}
 					{:else}
 						<div class="w-full">
-							<Circuit publishing="{false}" nodes="{pubView.publication.circuit.nodes}" />
-						</div>
+							<SvelteFlowProvider>
+								<CircuitComponent publishing="{false}" dbNodes="{extractNodesFromPubView()}"/>
+							</SvelteFlowProvider>						</div>
 					{/if}
 
 				{:else if tabSet === 1}

@@ -245,8 +245,6 @@
 						{#if publication.type === PublicationType.Circuit}
 							<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
 						{:else}
-
-
 							<div class="py-1 relative" bind:this={hoverDiv}>
 								<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
 								{#if isHovered}
