@@ -23,5 +23,8 @@ export const load: LayoutServerLoad = async ({ params, fetch, locals, depends })
 	}
 
 	const { user, profilePicData } = await uRes.json();
-	return { user, profilePicData };
+	return {
+		user,
+		profilePicData
+	};
 };

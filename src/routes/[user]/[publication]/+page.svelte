@@ -29,14 +29,14 @@
 	import { goto } from '$app/navigation';
 	import { createFileList, IconMapExtension, saveFile } from '$lib/util/file';
 	import type { Comment as PrismaComment, Difficulty, Reply, User } from '@prisma/client';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
 
 	export let data: LayoutServerData & PageServerData;
-	$: ({ loggedUser } = data);
-	const userId = $page.data.session?.user.id;
+	const loggedUser = page.data.loggedUser;
+	const userId = page.data.session?.user.id;
 
 	let tabSet: number = 0;
 	let pubView: PublicationView;
@@ -66,7 +66,6 @@
 	userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean };
 	likedComments = data.likedComments as number[];
 	likedReplies = data.likedReplies as number[];
-
 
 	isMaterial = pubView.isMaterial;
 
@@ -109,7 +108,6 @@
 	liked = userSpecificInfo.liked;
 	likes = pubView.publication.likes;
 
-
 	// circuitsPubAppearIn = data.circuitsPubAppearIn;
 	// similarPublications = data.similarPublications;
 
@@ -118,7 +116,7 @@
 	reported = data.reported;
 
 	saved = userSpecificInfo.saved;
-	comments = pubView.publication.comments;
+	$: comments = pubView.publication.comments;
 	tags = pubView.publication.tags.map(tag => tag.content) as string[];
 	created = getDateDifference(pubView.publication.createdAt, new Date()) as string;
 
@@ -150,7 +148,6 @@
 		comments = data.pubView.publication.comments;
 		tags = pubView.publication.tags.map(tag => tag.content) as string[];
 		created = getDateDifference(data.pubView.publication.updatedAt, new Date()) as string;
-
 	}
 
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
@@ -214,7 +211,6 @@
 					message: 'Publication deleted successfully',
 					background: 'bg-success-200',
 					classes: 'text-surface-900'
-
 				});
 				if (isMaterial) {
 					goto('/browse');
@@ -265,40 +261,34 @@
 			createdAt: content.createdAt,
 			updatedAt: content.updatedAt,
 			replies: content.replies,
-			user: {
-				...$page.data.session!.user,
-				profilePicData: loggedUser.profilePicData
-			}
+			user: loggedUser
 		};
 		comments = [...comments, comment];
 	};
 
-	/*
-	add placeholder reply
-	 */
+
 	const addReply = (event: CustomEvent) => {
-		// comment = await (await fetch(`/api/comment/pubView/${pubView.material.publicationId}`)).json()
-
-		let replies = getReplies(event.detail.content.commentId);
-		replies.push({
-			id: event.detail.content.id,
-			userId: event.detail.content.userId,
-			commentId: event.detail.content.commentId,
-			likes: 0,
-			content: event.detail.content.content,
-			createdAt: event.detail.content.createdAt,
-			updatedAt: event.detail.content.updatedAt,
-			user: {
-				...$page.data.session!.user,
-				profilePicData: loggedUser.profilePicData
+		let commentIndex = comments.findIndex(c => c.id === event.detail.content.commentId);
+		const replies = [
+			...comments[commentIndex].replies,
+			{
+				id: event.detail.content.id,
+				userId: event.detail.content.userId,
+				commentId: event.detail.content.commentId,
+				likes: 0,
+				content: event.detail.content.content,
+				createdAt: event.detail.content.createdAt,
+				updatedAt: event.detail.content.updatedAt,
+				user: loggedUser
 			}
-		});
-		comments = comments;
-		// commentMap.set(event.detail.content.commentId, replies);
-	};
-
-	const getReplies = (commentId: number): (Reply & { user: User & { profilePicData: string } })[] => {
-		return comments.filter(x => x.id == commentId).map(x => x.replies)[0];
+		]
+		if (commentIndex !== -1) {
+			comments[commentIndex] = {
+				...comments[commentIndex],
+				replies: replies
+			};
+			comments = [...comments];
+		}
 	};
 
 	/*
@@ -403,12 +393,12 @@
 <div class="flex flex-col col-span-full">
 	<div class="flex flex-row justify-start items-center mt-20">
 		<h2 class="text-lg md:text-xl lg:text-2xl xl:text-4xl font-semibold break-words pr-6 self-center">{pubView.publication.title}</h2>
-		{#if pubView.publication.publisherId === $page.data.session?.user.id
-		|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
+		{#if pubView.publication.publisherId === page.data.session?.user.id
+		|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")
 		|| loggedUser.isAdmin}
 			<div class="space-x-1">
-				{#if pubView.publication.publisherId === $page.data.session?.user.id
-				|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
+				{#if pubView.publication.publisherId === page.data.session?.user.id
+				|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")}
 					<button bind:this={hoverEdit}
 							on:click={() => goto(`/${pubView.publication.publisherId}/${pubView.publication.id}/edit`)}
 							type="button" class="btn self-center p-0 m-0">
@@ -565,7 +555,7 @@
 				{:else if tabSet === 1}
 
 					<!--    DISCUSSION -->
-					{#if $page.data.session?.user}
+					{#if page.data.session?.user}
 						<AddInteractionForm publisher={loggedUser} on:addedReply={addComment} addComment='{true}'
 											commentId="{1}" publicationId="{pubView.publication.id}" />
 					{/if}

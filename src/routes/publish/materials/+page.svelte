@@ -21,7 +21,7 @@
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
@@ -30,7 +30,8 @@
 	export let form: ActionData;
 	export let data: PageServerData;
 
-	$: ({loggedUser} = data);
+	let loggedUser;
+	$: loggedUser = page.data.loggedUser;
 	$: isSubmitting = false;
 
 	// tags
@@ -78,7 +79,7 @@
 		}
 	}
 
-	$: uid = $page.data.session?.user.id;
+	$: uid = page.data.session?.user.id;
 
 
 	function appendToFileList(e: Event) {
@@ -104,7 +105,7 @@
 			background: 'bg-success-200',
 			classes: 'text-surface-900',
 		});
-		goto(`/${$page.data.session?.user.username}/${form?.id}`);
+		goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,

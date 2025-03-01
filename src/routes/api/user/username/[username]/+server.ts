@@ -16,7 +16,7 @@ export async function GET({ params, locals }) {
 			});
 
 		// profilePic return
-		const profilePicData: FetchedFileItem = profilePicFetcher(
+		const profilePicData: FetchedFileItem = await profilePicFetcher(
 			user.profilePic,
 		);
 
