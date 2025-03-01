@@ -90,8 +90,8 @@
 </div>
 
 <SemanticSearch
-	title="Material Assistant"
-	placeholder="Ask about materials..."
+	title="Semantic Search"
+	placeholder="Ask about content..."
 	apiEndpoint="/api/semanticsearch"
 />
 

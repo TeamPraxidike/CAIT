@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount, afterUpdate } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
+	import { getExtensions } from '$lib/util/file';
+	import { PublicationCard } from '$lib';
 
 	// Props
 	export let title = 'Chat Assistant';
@@ -8,11 +10,13 @@
 	export let apiEndpoint = '/api/semanticsearch'; // The endpoint to send messages to
 
 	// State
-	let messages: Array<{text: string; isUser: boolean; timestamp: Date}> = [];
+	let messages: Array<{text: string; isUser: boolean; index: number; timestamp: Date}> = [];
+	let botIndex = 0;
 	let inputMessage = '';
 	let isOpen = false;
 	let isLoading = false;
 	let chatContainer: HTMLElement;
+	let data: any[] = [];
 
 	// Handle sending a message
 	async function sendMessage() {
@@ -22,6 +26,7 @@
 		const userMessage = {
 			text: inputMessage,
 			isUser: true,
+			index: -1,
 			timestamp: new Date()
 		};
 		messages = [...messages, userMessage];
@@ -45,16 +50,32 @@
 				throw new Error('Failed to get response');
 			}
 
-			const data = await response.json();
+			const rJson = await response.json();
 
-			const t = data.results.map((r) => r.similarity + "\n" + r.content + "\n------------\n");
+			// Ensure results exist
+			if (!rJson.results || !Array.isArray(rJson.results) || rJson.results.length === 0) {
+				throw new Error('No results returned');
+			}
+
+			// Store the starting index for this batch of results
+			const startIndex = data.length;
+
+			// Add new results to the data array
+			data = [...data, ...rJson.results];
+
+			console.log(rJson.results);
+			console.log(rJson.results[0]);
 
 			// Add bot response to chat
-			messages = [...messages, {
-				text: t || 'Sorry, I couldn\'t process that request.',
-				isUser: false,
-				timestamp: new Date()
-			}];
+			rJson.results.forEach((r:any, i:number) => {
+				const currentIndex = startIndex + i; // Calculate the correct index in data array
+				messages = [...messages, {
+					text: r.content || 'Sorry, I couldn\'t process that request.',
+					isUser: false,
+					index: currentIndex,
+					timestamp: new Date()
+				}];
+			});
 		} catch (error) {
 			console.error('Error sending message:', error);
 
@@ -62,6 +83,7 @@
 			messages = [...messages, {
 				text: 'Sorry, there was an error processing your request.',
 				isUser: false,
+				index: -1,
 				timestamp: new Date()
 			}];
 		} finally {
@@ -141,7 +163,28 @@
 							transition:fade={{ duration: 150 }}
 						>
 							<div class="message">
-								<p>{message.text}</p>
+								{#if !message.isUser}
+									<!-- Check if this is a bot message with valid index -->
+									{#if message.index >= 0 && message.index < data.length}
+										<p>"...{message.text}..."</p>
+										<p>Name of file: <b>{data[message.index].fileTitle}</b></p>
+										<p><i>You can find this file in:</i></p>
+										<PublicationCard
+											extensions="{getExtensions(data[message.index])}"
+											imgSrc={data[message.index].coverPicData}
+											publication={data[message.index].publication}
+											liked={false}
+											saved={false}
+											materialType={data[message.index].encapsulatingType}
+											publisher={data[message.index].publisher}
+										/>
+									{:else}
+										<!-- For error messages or other cases with invalid index -->
+										<p>{message.text}</p>
+									{/if}
+								{:else}
+									<p>{message.text}</p>
+								{/if}
 								<span class="timestamp">{formatTime(message.timestamp)}</span>
 							</div>
 						</div>
@@ -161,13 +204,13 @@
 
 			<!-- Chat input -->
 			<div class="chat-input">
-        <textarea
-			bind:value={inputMessage}
-			on:keydown={handleKeydown}
-			placeholder={placeholder}
-			rows="1"
-			aria-label="Message input"
-		></textarea>
+				<textarea
+					bind:value={inputMessage}
+					on:keydown={handleKeydown}
+					placeholder={placeholder}
+					rows="1"
+					aria-label="Message input"
+				></textarea>
 				<button
 					class="send-button"
 					on:click={sendMessage}
@@ -218,7 +261,7 @@
         position: absolute;
         bottom: 70px;
         right: 0;
-        width: 350px;
+        width: 450px;
         height: 500px;
         background-color: white;
         border-radius: 12px;
@@ -287,7 +330,7 @@
     }
 
     .message {
-        max-width: 80%;
+        max-width: 100%;
         padding: 10px 15px;
         border-radius: 18px;
         position: relative;
@@ -403,7 +446,7 @@
     }
 
     /* Responsive adjustments */
-    @media (max-width: 500px) {
+    @media (max-width: 600px) {
         .chat-window {
             width: calc(100vw - 40px);
             height: 60vh;

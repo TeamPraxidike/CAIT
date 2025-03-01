@@ -1,6 +1,8 @@
 import { verifyAuth } from '$lib/database/auth';
 import { getDocuments } from '$lib/database/document';
 import { model } from '$lib/similarityIndex.mjs';
+import { getMaterialForFile } from '$lib/database/material';
+import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 
 export async function POST({ request , locals}) {
 	// Authentication step
@@ -29,13 +31,10 @@ export async function POST({ request , locals}) {
 
 		const embeddedText = await model.computeEmbeddingSingleText(queryText);
 
-		console.log(queryText);
-		console.log(embeddedText);
-
 		const results = []
 
 		for (const doc of documents){
-			console.log(doc)
+
 			const sim = await calculateCosineSimilarityTEMP(doc.embedding, embeddedText);
 			results.push({
 				"similarity": sim,
@@ -50,7 +49,37 @@ export async function POST({ request , locals}) {
 		// Return the top 3 most similar
 		const topResults = results.slice(0, 3);
 
-		return new Response(JSON.stringify({ results: topResults }), {
+		const topResultsWithMaterials = await Promise.all(
+			topResults.map(async (r) => {
+				const fileWithMaterial = await getMaterialForFile(r.filePath);
+				//console.log(fileWithMaterial)
+				const material = fileWithMaterial.material;
+				//console.log(material.publication);
+
+				return {
+					similarity: r.similarity,
+					content: r.content,
+					filePath: r.filePath,
+					fileTitle: fileWithMaterial.title,
+					...material,
+					publisher: {
+						...material.publication.publisher,
+						profilePicData: (await profilePicFetcher(
+							material.publication.publisher.profilePic
+						)).data,
+					},
+					coverPicData: (await coverPicFetcher(
+						material.encapsulatingType,
+						material.publication.coverPic
+					)).data,
+				};
+			})
+		);
+
+
+		console.log(topResultsWithMaterials)
+
+		return new Response(JSON.stringify({ results: topResultsWithMaterials }), {
 			status: 200,
 		});
 	} catch (error) {
