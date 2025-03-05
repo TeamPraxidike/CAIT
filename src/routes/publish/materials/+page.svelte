@@ -287,7 +287,7 @@
 		LOs: string[]; // persisted
 		PKs: string[]; // persisted
 		selectedType: string; // persisted
-		difficulty: string; // persisted
+		difficulty: Difficulty; // persisted
 		maintainers: UserWithProfilePic[];
 		searchableUsers: UserWithProfilePic[];
 		estimate: string; // persisted

@@ -132,9 +132,9 @@ export async function getPubText(pubFiles) {
             // returns Promise<string> or Promise<null>, need to await to avoid sudden memory spikes
             // const createdTokens = await reader(path.join(basePath, pubFiles[i].path))
             //const createdTokens = await reader(pubFiles[i].path)
-            const { text: createdTokens, chunks: documentChunks } = await reader(pubFiles[i].path)
+            const { text: createdTokens, chunks: fileChunks } = await reader(pubFiles[i].path)
             // pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false}
-            pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false, chunks: documentChunks}
+            pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false, chunks: fileChunks}
         }
     }
 

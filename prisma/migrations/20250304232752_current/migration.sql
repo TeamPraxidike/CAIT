@@ -1,3 +1,6 @@
+-- CreateExtension
+CREATE EXTENSION IF NOT EXISTS "vector";
+
 -- CreateEnum
 CREATE TYPE "Difficulty" AS ENUM ('easy', 'medium', 'hard');
 
@@ -82,6 +85,17 @@ CREATE TABLE "File" (
     "materialId" INTEGER,
 
     CONSTRAINT "File_pkey" PRIMARY KEY ("path")
+);
+
+-- CreateTable
+CREATE TABLE "FileChunk" (
+    "id" BIGSERIAL NOT NULL,
+    "content" TEXT NOT NULL,
+    "metadata" JSONB NOT NULL,
+    "embedding" vector(384) NOT NULL,
+    "filePath" TEXT NOT NULL,
+
+    CONSTRAINT "FileChunk_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -274,6 +288,9 @@ ALTER TABLE "File" ADD CONSTRAINT "File_publicationId_fkey" FOREIGN KEY ("public
 
 -- AddForeignKey
 ALTER TABLE "File" ADD CONSTRAINT "File_materialId_fkey" FOREIGN KEY ("materialId") REFERENCES "Material"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FileChunk" ADD CONSTRAINT "FileChunk_filePath_fkey" FOREIGN KEY ("filePath") REFERENCES "File"("path") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Circuit" ADD CONSTRAINT "Circuit_publicationId_fkey" FOREIGN KEY ("publicationId") REFERENCES "Publication"("id") ON DELETE CASCADE ON UPDATE CASCADE;

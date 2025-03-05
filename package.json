@@ -70,8 +70,6 @@
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.4",
-		"@langchain/community": "^0.3.32",
-		"@langchain/core": "^0.3.40",
 		"@supabase/ssr": "^0.5.2",
 		"@supabase/supabase-js": "^2.46.2",
 		"@sveltejs/adapter-node": "^5.2.9",

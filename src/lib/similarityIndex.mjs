@@ -1,14 +1,6 @@
 import SBERTSingleton from "./MetadataSimilarityUtils/SBERTSingleton.mjs";
-import VectorStoreSingleton from  "./VectorStore/VectorStoreSingleton.mjs"
 
 export const model = await SBERTSingleton.getInstance();
-
-// TODO: make this work for local fs too
-// if (process.env.FILESYSTEM === "SUPABASE") {
-//     export const vectorStore = await VectorStoreSingleton.getInstance(model)
-// }
-
-export const vectorStore = await VectorStoreSingleton.getInstance(model)
 
 /**
  * Calculates the cosine similarity between two vectors.

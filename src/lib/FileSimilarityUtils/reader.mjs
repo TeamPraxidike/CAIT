@@ -3,9 +3,8 @@ import WordExtractor from 'word-extractor';
 import removeMd from 'remove-markdown';
 import { pythonKeywords } from './pythonKeywords.mjs';
 import { fileSystem } from '../indexJS.mjs';
-import { vectorStore } from '../similarityIndex.mjs';
 import { model } from '../similarityIndex.mjs';
-import CustomRecursiveCharacterTextSplitter from '../VectorStore/Splitter.mjs'
+import CustomRecursiveCharacterTextSplitter from '../DocumentSplitter/Splitter.mjs'
 
 export async function reader(filePath) {
     // Extract file extension
@@ -41,18 +40,15 @@ export async function reader(filePath) {
         const chunks = await splitter.splitText(text);
 
         // Format into documents
-        const documentChunks = await Promise.all(
+        const fileChunks = await Promise.all(
             chunks.map(async (content) => ({
                 pageContent: content,
                 embedding: await model.computeEmbeddingSingleText(content),
-                metadata: { extension: extension } // No need to template a string if it's just a variable
+                metadata: { extension: extension }
             }))
         );
 
-        // // Store documents in vector database
-        // await vectorStore.addDocuments(documents);
-
-        return { "text": text, "chunks": documentChunks };
+        return { "text": text, "chunks": fileChunks };
     } catch (error) {
         console.error(`Error processing file: ${filePath}`, error);
         return null;

@@ -1,6 +1,6 @@
 import { verifyAuth } from '$lib/database/auth';
-import { getDocuments } from '$lib/database/document';
-import { model } from '$lib/similarityIndex.mjs';
+import { getFileChunks } from '$lib/database/file';
+import { calculateCosineSimilarity, model } from '$lib/similarityIndex.mjs';
 import { getMaterialForFile } from '$lib/database/material';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 
@@ -27,19 +27,20 @@ export async function POST({ request , locals}) {
 
 	try {
 
-		const documents = await getDocuments();
+		const fileChunks = await getFileChunks();
 
 		const embeddedText = await model.computeEmbeddingSingleText(queryText);
 
 		const results = []
 
-		for (const doc of documents){
+		for (const doc of fileChunks){
 
-			const sim = await calculateCosineSimilarityTEMP(doc.embedding, embeddedText);
+			// const sim = await calculateCosineSimilarityTEMP(doc.embedding, embeddedText);
+			const sim = calculateCosineSimilarity(doc.embedding, embeddedText);
 			results.push({
 				"similarity": sim,
 				"content": doc.content,
-				"filePath": doc.file_path
+				"filePath": doc.filePath
 			})
 		}
 
@@ -52,9 +53,7 @@ export async function POST({ request , locals}) {
 		const topResultsWithMaterials = await Promise.all(
 			topResults.map(async (r) => {
 				const fileWithMaterial = await getMaterialForFile(r.filePath);
-				//console.log(fileWithMaterial)
 				const material = fileWithMaterial.material;
-				//console.log(material.publication);
 
 				return {
 					similarity: r.similarity,
@@ -76,9 +75,6 @@ export async function POST({ request , locals}) {
 			})
 		);
 
-
-		console.log(topResultsWithMaterials)
-
 		return new Response(JSON.stringify({ results: topResultsWithMaterials }), {
 			status: 200,
 		});
@@ -90,29 +86,29 @@ export async function POST({ request , locals}) {
 	}
 }
 
-async function calculateCosineSimilarityTEMP(vector1: number[], vector2: number[]) {
-	if (vector1.length !== vector2.length) {
-		throw new Error("Vectors must be of the same length");
-	}
-
-	let dotProduct = 0;
-	let magnitude1 = 0;
-	let magnitude2 = 0;
-
-	for (let i = 0; i < vector1.length; i++) {
-		dotProduct += vector1[i] * vector2[i];
-		magnitude1 += vector1[i] * vector1[i];
-		magnitude2 += vector2[i] * vector2[i];
-	}
-
-	magnitude1 = Math.sqrt(magnitude1);
-	magnitude2 = Math.sqrt(magnitude2);
-
-	if (dotProduct === 0) return 0;
-	if (magnitude1 === 0 || magnitude2 === 0) {
-		return 0; // Avoid division by zero
-	}
-
-	return (dotProduct / (magnitude1 * magnitude2));
-}
+// async function calculateCosineSimilarityTEMP(vector1: number[], vector2: number[]) {
+// 	if (vector1.length !== vector2.length) {
+// 		throw new Error("Vectors must be of the same length");
+// 	}
+//
+// 	let dotProduct = 0;
+// 	let magnitude1 = 0;
+// 	let magnitude2 = 0;
+//
+// 	for (let i = 0; i < vector1.length; i++) {
+// 		dotProduct += vector1[i] * vector2[i];
+// 		magnitude1 += vector1[i] * vector1[i];
+// 		magnitude2 += vector2[i] * vector2[i];
+// 	}
+//
+// 	magnitude1 = Math.sqrt(magnitude1);
+// 	magnitude2 = Math.sqrt(magnitude2);
+//
+// 	if (dotProduct === 0) return 0;
+// 	if (magnitude1 === 0 || magnitude2 === 0) {
+// 		return 0; // Avoid division by zero
+// 	}
+//
+// 	return (dotProduct / (magnitude1 * magnitude2));
+// }
 

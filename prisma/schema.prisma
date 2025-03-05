@@ -152,18 +152,17 @@ model File {
   materialId Int?
   material   Material? @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)
 
-  documents Document[]
+  fileChunks FileChunk[]
 }
 
-model Document {
+model FileChunk {
   id        BigInt                     @id @default(autoincrement())
   content   String
   metadata  Json
   // Use Unsupported() to tell Prisma to treat this as a native type.
-  // (You may replace "vector(384)" with an appropriate native type if available.)
   embedding Unsupported("vector(384)")
-  file_path String
-  file      File                       @relation(fields: [file_path], references: [path], onDelete: Cascade)
+  filePath  String
+  file      File                       @relation(fields: [filePath], references: [path], onDelete: Cascade)
 }
 
 model Circuit {

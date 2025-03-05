@@ -39,16 +39,36 @@
         });
     }
 
+    function handleRemoveNewTag(event: CustomEvent<{ chipIndex: number; chipValue: string }>): void {
+        if (newTags.includes(event.detail.chipValue)) {
+            newTags.splice(newTags.indexOf(event.detail.chipValue), 1);
+        }
+    }
+
+    const handleEdgeCaseAllTagsEmpty = () => {
+        if (tagInput.length === 0) triggerTagMustBeAValidString('Tag');
+        else if (tagInput.length>0 && allTags.length === 0 && !newTags.includes(tagInput)) {
+            newTags=[...newTags,tagInput];
+            tagInput='';
+        }
+        else if (newTags.includes(tagInput)) {
+            triggerRepeatInput('Tag', tagInput.toLowerCase());
+        }
+    }
+
     const handleInvalid = () => {
         // console.log(allTags)
         // console.log(tags)
+        console.log(tagInput)
         // if it has valid length, is a valid dropdown option and has not been included yet
-        if(tagInput.length>0 && allTags.includes(tagInput) && !tags.includes(tagInput)) {
+        if(tagInput.length>0 && allTags.includes({content: tagInput}) && !tags.includes(tagInput)) {
+            console.log("first if")
             tags=[...tags,tagInput];
             newTags=[...newTags,tagInput];
             tagInput='';
         }
         else {
+            console.log("else")
             enterTag = true;
             newTag = tagInput;
             createTag();
@@ -114,6 +134,8 @@
         {:else}
             <InputChip  bind:this={inputChip} whitelist={allTags.map(t => t.content)}
                         bind:input={tagInput} bind:value={tags} name="chips"
+                        on:add={handleEdgeCaseAllTagsEmpty}
+                        on:remove={handleRemoveNewTag}
                         chips="items-center gap-1 inline-flex rounded-lg py-1 px-2 whitespace-nowrap variant-soft-primary"
                         on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
         {/if}

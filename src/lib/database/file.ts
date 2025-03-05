@@ -8,7 +8,7 @@ import { Prisma } from '@prisma/client/extension';
 import type { File as PrismaFile } from '@prisma/client';
 import path from 'path';
 import fs from 'fs';
-import type { DocumentChunks } from '$lib/PiscinaUtils/runner';
+import type { FileChunks } from '$lib/PiscinaUtils/runner';
 
 
 // // TODO: This seems to be useless, could remove if nothing breaks
@@ -360,7 +360,7 @@ export async function updateFiles(
  * @param prismaContext
  */
 export async function handleFileTokens(
-	filesToUpdate: { filePath: string; tokens: string; chunks: DocumentChunks }[],
+	filesToUpdate: { filePath: string; tokens: string; chunks: FileChunks }[],
 	prismaContext: Prisma.TransactionClient = prisma
 ) {
 	for (const dataCurrent of filesToUpdate) {
@@ -372,15 +372,15 @@ export async function handleFileTokens(
 			});
 
 			// Delete previous documents
-			await tx.document.deleteMany({
-				where: { file_path: dataCurrent.filePath }
+			await tx.fileChunk.deleteMany({
+				where: { filePath: dataCurrent.filePath }
 			});
 
 			// Insert new documents using raw SQL for the vector type
 			for (const chunk of dataCurrent.chunks) {
 				// Use Prisma's executeRaw to handle the vector type correctly
 				await tx.$executeRaw`
-                INSERT INTO "Document" (content, metadata, embedding, file_path)
+                INSERT INTO "FileChunk" (content, metadata, embedding, "filePath")
                 VALUES (
                    ${chunk.pageContent},
                    ${JSON.stringify(chunk.metadata)}::json,
@@ -390,6 +390,44 @@ export async function handleFileTokens(
              `;
 			}
 		});
+	}
+}
+
+// Cast the vector to a string format that can be parsed back to an array
+export async function getFileChunks() {
+	const fileChunks = await prisma.$queryRaw`
+    SELECT 
+      id, 
+      content, 
+      metadata, 
+      "filePath",
+      embedding::text as embedding_text
+    FROM "FileChunk";
+  `;
+
+	// Parse the embedding text back to arrays if needed
+	return fileChunks.map((doc: any) => ({
+		id: doc.id,
+		content: doc.content,
+		metadata: doc.metadata,
+		filePath: doc.filePath,
+		embedding: doc.embedding_text ? parseVectorString(doc.embedding_text) : null
+	}));
+}
+
+// Function to parse vector string back to array
+function parseVectorString(vectorStr: string): number[] {
+	// The format is likely [1,2,3,...], but jic
+	// need to parse because prisma cannot handle vector by default and we added it as a string
+	try {
+		return vectorStr
+			.replace('[', '')
+			.replace(']', '')
+			.split(',')
+			.map(num => parseFloat(num.trim()));
+	} catch (e) {
+		console.error('Error parsing vector string:', e);
+		return [];
 	}
 }
 
