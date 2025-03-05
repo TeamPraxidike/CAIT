@@ -45,7 +45,7 @@
 	export let form: ActionData;
 	export let data: PageServerData;
 
-	// $: ({loggedUser} = data);
+
 	let loggedUser = $page.data.loggedUser;
 	$: isSubmitting = false;
 
@@ -144,6 +144,7 @@
 		}).catch(error => {
 				console.error('Error clearing data:', error);
 		});
+		goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -171,70 +172,75 @@
 
 	let saveInterval: number | undefined = undefined;
 
-	onMount(async () => {
-		// get coverPic
-		const storedCover = await getCover();
-		if (storedCover) {
-			coverPic = storedCover; // single file
-		}
+	onMount(() => {
+		(async () => {
 
-		// get multiple files (returns array<File>)
-		const storedFiles = await getFiles();
-		if (storedFiles.length > 0) {
-			// Rebuild a FileList from that array
-			files = arrayToFileList(storedFiles);
-		}
+			// THIS IS THE SNAPSHOT CODE (using indexedDB)
 
-		const existing = await getSnapshot();
-		if (existing) {
-			//snapshot.restore(existing);
-			title = existing.title;
-			description = existing.description;
-			tags = existing.tags;
-			newTags = existing.newTags;
-			LOs = existing.LOs;
-			PKs = existing.PKs;
-			selectedType = existing.selectedType;
-			difficulty = existing.difficulty;
-			maintainers = existing.maintainers;
-			searchableUsers = existing.searchableUsers;
-			estimate = existing.estimate;
-			copyright = existing.copyright;
-			theoryApplicationRatio = existing.theoryApplicationRatio;
-		}
-
-		saveInterval = window.setInterval(() => {
-			//snapshot.capture();
-			const data: FormSnapshot = {
-				title,
-				description,
-				tags,
-				newTags,
-				LOs,
-				PKs,
-				selectedType,
-				difficulty,
-				maintainers,
-				searchableUsers,
-				estimate,
-				copyright,
-				theoryApplicationRatio,
-			};
-
-			console.log("IN CONST SNAPSHOT")
-
-			// Store it in IndexedDB
-			saveSnapshot(data);
-		}, 2000);
-
-		window.addEventListener('beforeunload', handleBeforeUnload);
-
-		return () => {
-			if (saveInterval) {
-				window.clearInterval(saveInterval);
+			// get coverPic
+			const storedCover = await getCover();
+			if (storedCover) {
+				coverPic = storedCover; // single file
 			}
-			window.removeEventListener('beforeunload', handleBeforeUnload);
-		};
+
+			// get multiple files (returns array<File>)
+			const storedFiles = await getFiles();
+			if (storedFiles.length > 0) {
+				// Rebuild a FileList from that array
+				files = arrayToFileList(storedFiles);
+			}
+
+			const existing = await getSnapshot();
+			if (existing) {
+				//snapshot.restore(existing);
+				title = existing.title;
+				description = existing.description;
+				tags = existing.tags;
+				newTags = existing.newTags;
+				LOs = existing.LOs;
+				PKs = existing.PKs;
+				selectedType = existing.selectedType;
+				difficulty = existing.difficulty;
+				maintainers = existing.maintainers;
+				searchableUsers = existing.searchableUsers;
+				estimate = existing.estimate;
+				copyright = existing.copyright;
+				theoryApplicationRatio = existing.theoryApplicationRatio;
+			}
+
+			saveInterval = window.setInterval(() => {
+				//snapshot.capture();
+				const data: FormSnapshot = {
+					title,
+					description,
+					tags,
+					newTags,
+					LOs,
+					PKs,
+					selectedType,
+					difficulty,
+					maintainers,
+					searchableUsers,
+					estimate,
+					copyright,
+					theoryApplicationRatio,
+				};
+
+				console.log("IN CONST SNAPSHOT")
+
+				// Store it in IndexedDB
+				saveSnapshot(data);
+			}, 2000);
+
+			window.addEventListener('beforeunload', handleBeforeUnload);
+
+			return () => {
+				if (saveInterval) {
+					window.clearInterval(saveInterval);
+				}
+				window.removeEventListener('beforeunload', handleBeforeUnload);
+			};
+		})();
 	});
 
 	onDestroy(() => {
@@ -280,65 +286,20 @@
 
 	// Actual SvelteKit snapshot
 	type FormSnapshot = {
-		title: string; // persisted
-		description: string; // persisted
+		title: string;
+		description: string;
 		tags: string[];
 		newTags: string[];
-		LOs: string[]; // persisted
-		PKs: string[]; // persisted
-		selectedType: string; // persisted
-		difficulty: Difficulty; // persisted
+		LOs: string[];
+		PKs: string[];
+		selectedType: string;
+		difficulty: Difficulty;
 		maintainers: UserWithProfilePic[];
 		searchableUsers: UserWithProfilePic[];
-		estimate: string; // persisted
-		copyright: string; // persisted
-		theoryApplicationRatio: number; // persisted
+		estimate: string;
+		copyright: string;
+		theoryApplicationRatio: number;
 	};
-
-	// export const snapshot: Snapshot<FormSnapshot> = {
-	// 	capture: () => {
-	// 		// Return a plain JS object that is JSON-serializable
-	// 		const data: FormSnapshot = {
-	// 			title,
-	// 			description,
-	// 			tags,
-	// 			newTags,
-	// 			LOs,
-	// 			PKs,
-	// 			selectedType,
-	// 			difficulty,
-	// 			maintainers,
-	// 			searchableUsers,
-	// 			estimate,
-	// 			copyright,
-	// 			theoryApplicationRatio,
-	// 		};
-	//
-	// 		console.log("IN CONST SNAPSHOT")
-	//
-	// 		// Store it in IndexedDB
-	// 		saveSnapshot(data);
-	//
-	// 		// Also return it (what SvelteKit needs)
-	// 		return data;
-	// 	},
-	// 	restore: (value) => {
-	// 		// Put your captured values back into your local state
-	// 		title = value.title;
-	// 		description = value.description;
-	// 		tags = value.tags;
-	// 		newTags = value.newTags;
-	// 		LOs = value.LOs;
-	// 		PKs = value.PKs;
-	// 		selectedType = value.selectedType;
-	// 		difficulty = value.difficulty;
-	// 		maintainers = value.maintainers;
-	// 		searchableUsers = value.searchableUsers;
-	// 		estimate = value.estimate;
-	// 		copyright = value.copyright;
-	// 		theoryApplicationRatio = value.theoryApplicationRatio;
-	// 	}
-	// };
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />

@@ -252,7 +252,9 @@ export async function addFile(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
+		console.log("before [path");
 		const path = await fileSystem.saveFile(info, title, ownerId);
+		console.log("afetr [path");
 		try {
 			return prismaContext.file.create({
 				data: {
@@ -265,11 +267,11 @@ export async function addFile(
 		} catch (errorDatabase) {
 			fileSystem.deleteFile(path);
 			console.error(errorDatabase);
-			throw new Error('Rollback');
+			throw new Error('Rollback Database');
 		}
 	} catch (errorFileSystem) {
 		console.error(errorFileSystem);
-		throw new Error('Rollback');
+		throw new Error('Rollback File system');
 	}
 }
 

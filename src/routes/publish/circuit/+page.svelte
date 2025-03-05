@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Circuit, Meta, PublishReview } from '$lib';
+	import { Circuit, CircuitComponent, Meta, PublishReview } from '$lib';
 	import type { PageServerData, ActionData } from './$types';
 	import {enhance} from '$app/forms';
 	import type { Material, Publication, Tag as PrismaTag, User } from '@prisma/client';
@@ -18,12 +18,14 @@
 		Node as PrismaNode
 	} from '@prisma/client';
 	import { onMount } from 'svelte';
+	import { SvelteFlowProvider } from '@xyflow/svelte';
+	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
-	$: ({loggedUser} = data)
+	// $: ({loggedUser} = data)
 
 	export let data: PageServerData;
 
-	let circuitRef : InstanceType<typeof Circuit>;
+	let circuitRef : InstanceType<typeof CircuitComponent>;
 	type UserWithProfilePic = User & { profilePicData: string };
 
 	let title = '';
@@ -98,20 +100,7 @@
 
 		}
 	}
-	let circuitNodesPlaceholder: (PrismaNode & {
-		publication: Publication & {
-			tags: { content: string }[],
-			usedInCourse: { course: string }[],
-			publisher: User & {profilePicData:string},
-			coverPicData: string,
-			materials: Material,
-		}
-		next: {
-			circuitId: number,
-			fromPublicationId: number,
-			toPublicationId: number
-		}[]
-	})[] = [];
+	let circuitNodesPlaceholder: NodeInfo[] = [];
 
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -149,20 +138,24 @@
 				formData.append('publisherId', uid.toString());
         formData.append('title', title);
         formData.append('description', description);
+
         formData.append('selectedTags', JSON.stringify(tags));
-				formData.append('newTags', JSON.stringify(newTags))
+		formData.append('newTags', JSON.stringify(newTags));
+
         formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
-				formData.append('prior', JSON.stringify(priorKnowledge));
+		formData.append('prior', JSON.stringify(priorKnowledge));
 
-				formData.append('circuitData', JSON.stringify(nodeActions));
-				formData.append('coverPic', JSON.stringify(circuitCoverPic));
+		formData.append('circuitData', JSON.stringify(nodeActions));
+		formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
 	<Stepper on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step >
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
-			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
-
+<!--			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>-->
+			<SvelteFlowProvider>
+				<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
+			</SvelteFlowProvider>
 		</Step>
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
@@ -195,7 +188,9 @@
 			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={priorKnowledge} bind:tags={tags}  bind:maintainers={additionalMaintainers}
 			/>
-			<Circuit nodes={circuitNodesPlaceholder} publishingView={true}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
+			<SvelteFlowProvider>
+				<CircuitComponent dbNodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
+			</SvelteFlowProvider>
 		</Step>
 	</Stepper>
 

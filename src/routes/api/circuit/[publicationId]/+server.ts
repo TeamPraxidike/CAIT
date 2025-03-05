@@ -5,7 +5,8 @@ import {
 	deleteNode,
 	editNode,
 	fileSystem,
-	getCircuitByPublicationId, getMaterialByPublicationId,
+	getCircuitByPublicationId,
+	getPublisherId,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
@@ -74,23 +75,13 @@ export async function GET({ params, locals }) {
 export async function PUT({ request, params, locals }) {
 	// Authentication step
 	// return 401 if user not authenticated
-
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const body: CircuitForm & {
 		circuitId: number,
 		publisherId: string
 	} = await request.json();
 
-	if ((await locals.safeGetSession()).user!.id !== body.userId) {
-		return new Response(
-			JSON.stringify({
-				error: 'Bad Request - User IDs not matching',
-			}),
-			{ status: 401 },
-		);
-	}
+	const authError = await verifyAuth(locals, body.userId);
+	if (authError) return authError;
 
 	const metaData = body.metaData;
 	// const userId = circuit.userId;
@@ -121,7 +112,6 @@ export async function PUT({ request, params, locals }) {
 			return unauthResponse();
 
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {
-
 			await handleConnections(
 				tags,
 				maintainers,
@@ -214,6 +204,11 @@ export async function DELETE({ params, locals }) {
 			{ status: 400 },
 		);
 	}
+
+	const publication = await getPublisherId(publicationId);
+	const authError = await verifyAuth(locals, publication.publisherId);
+	if (authError) return authError;
+
 	try {
 		// TODO: should we trust frontend for this info? Probably not...
 		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];

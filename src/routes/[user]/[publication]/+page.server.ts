@@ -1,6 +1,5 @@
 import type { Actions, PageServerLoad } from './$types';
 import type { FetchedFileArray } from '$lib/database';
-import { createFileList } from '$lib/util/file';
 
 export const load: PageServerLoad = async ({
 	parent,
@@ -19,7 +18,6 @@ export const load: PageServerLoad = async ({
 	let reported: boolean = false;
 
 	// TODO: review this if statement -> does it need to encapsulate the methods below it too?
-
 	if (session && session.user) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
 		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
@@ -38,24 +36,44 @@ export const load: PageServerLoad = async ({
 		reported = await reportedResponse.json();
 	}
 
-	// Gets circuits that contain the current publication
-	// Todo: change hideous api path -> what does "all" mean??
 	async function getCircuitsThatContainPub() {
-		const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
-		const circuitsPubAppearIn = await circuitRes.json();
-
-		return circuitsPubAppearIn
+		try {
+			// Gets circuits that contain the current publication
+			// Todo: change hideous api path -> what does "all" mean??
+			const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
+			if (!circuitRes.ok && circuitRes.status === 404) {
+				return null;
+			}
+			else if (!circuitRes.ok){
+				// something definitely went wrong here
+				throw new Error(`Failed to load files: ${circuitRes.statusText}`);
+			}
+			return await circuitRes.json();
+		}
+		catch (err) {
+			console.error('Error while circuits that contain pub, page.server:\n', err);
+		}
 	}
 
+	async function getSimilar() {
+		try {
+			// Gets similar publications
+			const similarRes = await fetch(
+				`/api/publication/${params.publication}/similar`,
+			);
 
-	// Gets similar publications
-	async function getSimilar(){
-		const similarRes = await fetch(
-			`/api/publication/${params.publication}/similar`,
-		);
-		const similarPublications = await similarRes.json();
-
-		return similarPublications
+			if (!similarRes.ok && similarRes.status === 404) {
+				return null;
+			}
+			else if (!similarRes.ok){
+				// something definitely went wrong here
+				throw new Error(`Failed to get similar publications: ${similarRes.statusText}`);
+			}
+			return await similarRes.json();
+		}
+		catch (err) {
+			console.error('Error while circuits that contain pub, page.server:\n', err);
+		}
 	}
 
 
@@ -86,7 +104,7 @@ export const load: PageServerLoad = async ({
 		//fetchedFiles: fetchFiles(),
 		liked: liked,
 		saved: saved,
-		reported: reported
+		reported: reported,
 	};
 };
 

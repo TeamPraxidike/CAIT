@@ -1,11 +1,11 @@
 import { isAdmin } from '$lib/database/user';
 
-export const verifyAuth = async (locals: App.Locals) => {
+export const verifyAuth = async (locals: App.Locals, userId?: string) => {
 	if (process.env.NODE_ENV === 'test') return null;
 
 	const session = await locals.safeGetSession();
 	if (!session || !session.user) return unauthResponse();
-
+	if (userId !== undefined && userId != session.user.id) return unauthResponse();
 	return null;
 };
 

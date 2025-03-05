@@ -2,15 +2,16 @@ import { getLikedReplies, getUserById } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
 /**
- * Gets the liked publications of a user
+ * Gets the liked replies of a user
  * @param params
  * @param locals
  */
 export async function GET({ params, locals }) {
-	const authError = await verifyAuth(locals);
+	const { id } = params;
+
+	const authError = await verifyAuth(locals, id);
 	if (authError) return authError;
 
-	const { id } = params;
 	const user = await getUserById(id);
 	if (!user)
 		return new Response(JSON.stringify({ error: 'User not found' }), {

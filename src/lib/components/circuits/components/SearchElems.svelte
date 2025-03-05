@@ -17,7 +17,6 @@
 	import { type PaginationSettings, Paginator } from '@skeletonlabs/skeleton';
 	export let materials : any = [];
 	export let source : number[] = []
-	$: console.log(materials)
 	let circuits : any = [];
 	let publications: any = [];
 	export let addActive: boolean = false;

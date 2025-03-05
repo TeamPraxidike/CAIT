@@ -323,10 +323,9 @@ export const getExtensions = (
 		};
 		files: PrismaFile[];
 	},
-) => {
-	//console.log(material);
+) : string[] => {
 	if (material) {
-		material.files.map((f: { title: string }) => getFileExtension(f.title));
+		return material.files.map((f: { title: string }) => getFileExtension(f.title));
 	} else {
 		return [];
 	}

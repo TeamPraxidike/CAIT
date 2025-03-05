@@ -75,19 +75,10 @@ export async function GET({ url }) {
  * @param params
  */
 export async function POST({ request, locals }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const body: CircuitForm = await request.json();
 
-	if ((await locals.safeGetSession()).user!.id !== body.userId) {
-		return new Response(
-			JSON.stringify({
-				error: 'Bad Request - User IDs not matching',
-			}),
-			{ status: 401 },
-		);
-	}
+	const authError = await verifyAuth(locals, body.userId);
+	if (authError) return authError;
 
 	const tags = body.metaData.tags;
 	const maintainers = body.metaData.maintainers;
