@@ -1,22 +1,15 @@
 <script lang="ts">
-	import { Circuit, CircuitComponent, Meta, PublishReview } from '$lib';
-	import type { PageServerData, ActionData } from './$types';
-	import {enhance} from '$app/forms';
-	import type { Material, Publication, Tag as PrismaTag, User } from '@prisma/client';
-	import {
-		getToastStore,
-		Step,
-		Stepper
-	} from '@skeletonlabs/skeleton';
+	import { CircuitComponent, Meta, PublishReview } from '$lib';
+	import type { ActionData, PageServerData } from './$types';
+	import { enhance } from '$app/forms';
+	import type { Tag as PrismaTag, User } from '@prisma/client';
+	import { getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
 	import { page } from '$app/stores';
-	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
-	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
-	import TagsSelect from "$lib/components/TagsSelect.svelte";
-	import type {
-		Node as PrismaNode
-	} from '@prisma/client';
+	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
+	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onMount } from 'svelte';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
@@ -56,10 +49,42 @@
 
 	$: additionalMaintainers = additionalMaintainers
 
-	const locks: boolean[] = [true, true];
 
-	$: locks[0] = title.length < 1 || description.length < 1;
-	$: locks[1] = tags.length < 1|| LOs.length < 1;
+	/* LOCK = TRUE => LOCKED */
+	const locks: boolean[] = [true, true, true];
+
+	$: locks[0] = circuitNodesPlaceholder ? circuitNodesPlaceholder.length <= 1 : true;
+	$: locks[1] = title.length < 1 || description.length < 1;
+	$: locks[2] = tags.length < 1|| LOs.length < 1;
+	$: locks[3] = tags.length < 1|| LOs.length < 1;
+
+	let warning0: string = "";
+	const generateWarningStep0 = (): string => {
+		return "The circuit needs at least 2 nodes";
+	}
+	$: warning0 = generateWarningStep0();
+
+	let warning1: string = "";
+	const generateWarningStep1 = (title: string, description: string): string => {
+		let warning = "You are missing ";
+		if (title.length < 1) warning += "a title";
+		if (description.length < 1 && title.length < 1) warning += ", a description";
+		else if(description.length < 1) warning += "a description";
+		warning += ".";
+		return warning;
+	}
+	$: warning1 = generateWarningStep1(title, description);
+
+	let warning2: string = "";
+	const generateWarningStep2 = (tags: number, LOs: number) => {
+		let warning = "You are missing ";
+		if (tags < 1) warning += "a tag";
+		if (LOs < 1 && tags < 1) warning += " and a Learning objective";
+		else if (LOs < 1) warning += "a Learning objective";
+		return warning += ".";
+	}
+	$: warning2 = generateWarningStep2(tags.length, LOs.length);
+
 	$: priorKnowledge = priorKnowledge;
 	$: LOs = LOs;
 
@@ -127,6 +152,8 @@
 		};
 	});
 
+	$: isSubmitting = false;
+
 </script>
 
 <!--<Node></Node>-->
@@ -134,7 +161,7 @@
 <!--<div class="col-span-9 h-[256px]"><CircuitManual isDraggable="{true}"/></div>-->
 <form method="POST" action="?/publish" class="col-span-full my-20 pr-10 shadow p-4"
 			use:enhance={({ formData }) => {
-
+				isSubmitting = true;
 				formData.append('publisherId', uid.toString());
         formData.append('title', title);
         formData.append('description', description);
@@ -149,15 +176,19 @@
 		formData.append('circuitData', JSON.stringify(nodeActions));
 		formData.append('coverPic', JSON.stringify(circuitCoverPic));
       }}>
-	<Stepper on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
-		<Step >
+	<Stepper on:submit={() => isSubmitting=true} on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
+		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
 <!--			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>-->
 			<SvelteFlowProvider>
 				<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
 			</SvelteFlowProvider>
+
+			{#if locks[0]}
+				<p class="text-error-300 dark:text-error-400">{warning0}</p>
+			{/if}
 		</Step>
-		<Step locked="{locks[0]}">
+		<Step locked="{locks[1]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
 			<div class="flex flex-col gap-5 col-span-full">
 				<div class="w-full space-y-1">
@@ -170,8 +201,12 @@
 				</div>
 			</div>
 
+			{#if locks[1]}
+				<p class="text-error-300 dark:text-error-400">{warning1}</p>
+			{/if}
+
 		</Step>
-		<Step locked="{locks[1]}">
+		<Step locked="{locks[2]}">
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
 			<div class="flex flex-col justify-between gap-3 col-span-full">
 
@@ -182,8 +217,12 @@
 						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 				</div>
 			</div>
+
+			{#if locks[2]}
+				<p class="text-error-300 dark:text-error-400">{warning2}</p>
+			{/if}
 		</Step>
-		<Step>
+		<Step locked={isSubmitting}>
 			<svelte:fragment slot="header">Review</svelte:fragment>
 			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={priorKnowledge} bind:tags={tags}  bind:maintainers={additionalMaintainers}

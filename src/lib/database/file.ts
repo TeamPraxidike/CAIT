@@ -252,9 +252,7 @@ export async function addFile(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
-		console.log("before [path");
 		const path = await fileSystem.saveFile(info, title, ownerId);
-		console.log("afetr [path");
 		try {
 			return prismaContext.file.create({
 				data: {
