@@ -1,5 +1,7 @@
 import { openDB } from 'idb';
-import type { User } from '@prisma/client';
+import type { Difficulty, User } from '@prisma/client';
+import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
+import { CircuitComponent } from '$lib';
 
 const DB_NAME = 'FileStorage';
 const DB_VERSION = 1;
@@ -9,20 +11,21 @@ const METADATA_STORE = 'metadata_snapshots';
 
 type UserWithProfilePic = User & { profilePicData: string };
 
-type FormSnapshot = {
-	title: string; // persisted
-	description: string; // persisted
-	tags: string[];
-	newTags: string[];
-	LOs: string[]; // persisted
-	PKs: string[]; // persisted
-	selectedType: string; // persisted
-	difficulty: string; // persisted
-	maintainers: UserWithProfilePic[];
-	searchableUsers: UserWithProfilePic[];
-	estimate: string; // persisted
-	copyright: string; // persisted
-	theoryApplicationRatio: number; // persisted
+export type FormSnapshot = {
+	title: string; // for materials + circuits
+	description: string; // for materials + circuits
+	tags: string[]; // for materials + circuits
+	newTags: string[]; // for materials + circuits
+	LOs: string[];  // for materials + circuits
+	PKs: string[];  // for materials + circuits
+	maintainers: UserWithProfilePic[]; // for materials + circuits
+	searchableUsers: UserWithProfilePic[]; // for materials + circuits
+	selectedType?: string; // -- for materials ONLY
+	difficulty?: Difficulty; // -- for materials ONLY
+	estimate?: string;  // -- for materials ONLY
+	copyright?: string;  // -- for materials ONLY
+	theoryApplicationRatio?: number;  // -- for materials ONLY
+	circuitNodes?: NodeInfo[]; // -- for circuits ONLY
 };
 
 export async function initDB() {
@@ -41,7 +44,8 @@ export async function initDB() {
 	});
 }
 
-/** Cover Picture **/
+// TODO: can I merge with other file operations? Should I?
+// Cover picture specific
 export async function saveCover(file: File) {
 	const db = await initDB();
 	await db.put(COVER_STORE, file, 'coverPic');
@@ -56,7 +60,7 @@ export async function deleteCover() {
 	await db.delete(COVER_STORE, 'coverPic');
 }
 
-/** Multiple Files (store as an Array<File>) **/
+// File operations, actually cool
 export async function saveFiles(files: File[]) {
 	const db = await initDB();
 	// Save under a fixed key, e.g. 'uploadedFiles'
@@ -73,7 +77,7 @@ export async function clearFiles() {
 	await db.delete(FILES_STORE, 'uploadedFiles');
 }
 
-// Save snapshot (you can parametrize the key if you want multiple forms)
+// Save snapshot
 export async function saveSnapshot(snapshotData: FormSnapshot) {
 	console.log("SAVING SNAPSHOT")
 	const db = await initDB();

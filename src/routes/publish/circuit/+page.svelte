@@ -10,15 +10,21 @@
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
 	// $: ({loggedUser} = data)
 
+	import {
+		saveSnapshot, getSnapshot, clearSnapshot, type FormSnapshot
+	} from '$lib/util/indexDB';
+
 	export let data: PageServerData;
 
 	let circuitRef : InstanceType<typeof CircuitComponent>;
+	$: circuitRef = circuitRef;
+
 	type UserWithProfilePic = User & { profilePicData: string };
 
 	let title = '';
@@ -96,13 +102,23 @@
 	const toastStore = getToastStore();
 
 	$: if (form?.status === 200) {
-		toastStore.trigger({
-			message: 'Circuit Added successfully',
-			background: 'bg-success-200',
-			classes: 'text-surface-900',
+		if (saveInterval) {
+			window.clearInterval(saveInterval);
+		}
 
+		Promise.all([
+			clearSnapshot()
+		]).then(() => {
+			toastStore.trigger({
+				message: 'Circuit Added successfully',
+				background: 'bg-success-200',
+				classes: 'text-surface-900',
+
+			});
+			goto(`/${loggedUser.username}/${form?.id}`);
+		}).catch(error => {
+			console.error('Error clearing data:', error);
 		});
-		//goto(`/${$page.data.session?.user.username}/${form?.id}`);
 		goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 500) {
 		toastStore.trigger({
@@ -126,10 +142,11 @@
 		}
 	}
 	let circuitNodesPlaceholder: NodeInfo[] = [];
+	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
 
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+		const confirmation = confirm('Data might be lost. Are you sure you want to proceed?');
 
 		if (!confirmation) {
 			event.preventDefault();
@@ -144,15 +161,70 @@
 		}
 	}
 
-	onMount(() => {
-		window.addEventListener('beforeunload', handleBeforeUnload);
+	let saveInterval: number | undefined = undefined;
+	let circuitKey = Date.now();
 
-		return () => {
-			window.removeEventListener('beforeunload', handleBeforeUnload);
-		};
+	$: circuitKey = circuitKey;
+
+	onMount(() => {
+		(async () => {
+			// THIS IS THE SNAPSHOT CODE (using indexedDB)
+
+			// if a metadata snapshot already exists, use it
+			const existing = await getSnapshot();
+			if (existing) {
+				// TODO: This ?? business is meh, redo
+				title = existing.title;
+				description = existing.description;
+				tags = existing.tags;
+				newTags = existing.newTags;
+				LOs = existing.LOs;
+				priorKnowledge = existing.PKs;
+				additionalMaintainers = existing.maintainers;
+				searchableUsers = existing.searchableUsers;
+				circuitNodesPlaceholder = existing.circuitNodes ?? [];
+			}
+
+			circuitKey = Date.now();
+
+			saveInterval = window.setInterval(() => {
+				const data: FormSnapshot = {
+					title,
+					description,
+					tags,
+					newTags,
+					LOs,
+					// TODO: PLEASE USE THE SAME VAR NAMES FOR COMMON STUFF DEEBA MAAMU
+					PKs: priorKnowledge,
+					maintainers: additionalMaintainers,
+					searchableUsers,
+					circuitNodes: circuitNodesPlaceholder
+				};
+
+				console.log("IN CONST SNAPSHOT")
+
+				// Store it in IndexedDB
+				saveSnapshot(data);
+			}, 2000);
+
+			window.addEventListener('beforeunload', handleBeforeUnload);
+
+			return () => {
+				if (saveInterval) {
+					window.clearInterval(saveInterval);
+				}
+				window.removeEventListener('beforeunload', handleBeforeUnload);
+			};
+		})();
 	});
 
 	$: isSubmitting = false;
+
+	onDestroy(() => {
+		if (saveInterval) {
+			window.clearInterval(saveInterval);
+		}
+	})
 
 </script>
 
@@ -180,10 +252,11 @@
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
 <!--			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>-->
-			<SvelteFlowProvider>
-				<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
-			</SvelteFlowProvider>
-
+			{#key circuitKey}
+				<SvelteFlowProvider>
+					<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
+				</SvelteFlowProvider>
+			{/key}
 			{#if locks[0]}
 				<p class="text-error-300 dark:text-error-400">{warning0}</p>
 			{/if}
@@ -227,9 +300,11 @@
 			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={priorKnowledge} bind:tags={tags}  bind:maintainers={additionalMaintainers}
 			/>
-			<SvelteFlowProvider>
-				<CircuitComponent dbNodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
-			</SvelteFlowProvider>
+			{#key circuitKey}
+				<SvelteFlowProvider>
+					<CircuitComponent dbNodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
+				</SvelteFlowProvider>
+			{/key}
 		</Step>
 	</Stepper>
 

@@ -31,7 +31,7 @@
 	import {
 		saveCover, getCover, deleteCover,
 		saveFiles, getFiles, clearFiles,
-		saveSnapshot, getSnapshot, clearSnapshot
+		saveSnapshot, getSnapshot, clearSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -50,10 +50,10 @@
 	$: isSubmitting = false;
 
 	// tags
-	let tags: string[] = []; // persisted
+	let tags: string[] = []; 
 	$: tags = tags;
 	let allTags: PrismaTag[] = data.tags;
-	let newTags: string[] = []; // persisted
+	let newTags: string[] = []; 
 
 	let files: FileList = [] as unknown as FileList;
 	type UserWithProfilePic = User & { profilePicData: string };
@@ -62,20 +62,20 @@
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users;
 	// learning objectives
-	let LOs: string[] = []; // persisted
+	let LOs: string[] = []; 
 	$: LOs = LOs;
 
-	let PKs: string[] = []; // persisted
+	let PKs: string[] = []; 
 	$: PKs = PKs;
 
 	// input data
-	let title: string = ''; // persisted
-	let description: string = ''; // persisted
-	let difficulty: Difficulty = 'easy'; // persisted
-	let estimate: string = ''; // persisted
-	let copyright: string = ''; // persisted
-	let theoryApplicationRatio = 0.5; // persisted
-	let selectedType = "Select Type"; // persisted
+	let title: string = ''; 
+	let description: string = ''; 
+	let difficulty: Difficulty = 'easy';
+	let estimate: string = '';
+	let copyright: string = '';
+	let theoryApplicationRatio: number = 0.5;
+	let selectedType: string = "Select Type";
 	let allTypes: {id:string, content:string }[] = MaterialTypes.map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 	let typeActive = false;
@@ -88,7 +88,7 @@
 			const file = eventFiles[0];
 			if (file.type === 'image/jpeg' || file.type === 'image/png') {
 				coverPic = file;
-				/** 4) Persist coverPic to IndexedDB **/
+				// Persist coverPic to IndexedDB 
 				saveCover(file);
 			} else {
 				toastStore.trigger({
@@ -107,7 +107,7 @@
 			// Merge new files into the existing FileList
 			files = concatFileList(files, eventFiles);
 
-			/** 5) Convert final FileList to an array and store in IndexedDB **/
+			// Convert final FileList to an array and store in IndexedDB **/
 			saveFiles(Array.from(files));
 		}
 	}
@@ -161,7 +161,7 @@
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 
-		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+		const confirmation = confirm('Data might be lost. Are you sure you want to proceed?');
 
 		if (!confirmation) {
 			event.preventDefault();
@@ -190,26 +190,27 @@
 				files = arrayToFileList(storedFiles);
 			}
 
+			// if a metadata snapshot already exists, use it
 			const existing = await getSnapshot();
 			if (existing) {
-				//snapshot.restore(existing);
+				// TODO: This ?? business is meh, redo
 				title = existing.title;
 				description = existing.description;
 				tags = existing.tags;
 				newTags = existing.newTags;
 				LOs = existing.LOs;
 				PKs = existing.PKs;
-				selectedType = existing.selectedType;
-				difficulty = existing.difficulty;
+				selectedType = existing.selectedType ?? "Select type";
+				difficulty = existing.difficulty ?? "easy";
 				maintainers = existing.maintainers;
 				searchableUsers = existing.searchableUsers;
-				estimate = existing.estimate;
-				copyright = existing.copyright;
-				theoryApplicationRatio = existing.theoryApplicationRatio;
+				estimate = existing.estimate ?? "30";
+				copyright = existing.copyright ?? "No copyright";
+				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
 			}
 
+			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {
-				//snapshot.capture();
 				const data: FormSnapshot = {
 					title,
 					description,
@@ -266,7 +267,7 @@
 		warning += ".";
 		return warning;
 	}
-	$: warning1 = generateWarningStep1(title, description, selectedType);
+	$: warning1 = generateWarningStep1(title, description, selectedType!);
 
 	let warning2: string = "";
 	const generateWarningStep2 = (tags: number, LOs: number) => {
@@ -283,23 +284,6 @@
 			event.preventDefault();
 		}
 	}
-
-	// Actual SvelteKit snapshot
-	type FormSnapshot = {
-		title: string;
-		description: string;
-		tags: string[];
-		newTags: string[];
-		LOs: string[];
-		PKs: string[];
-		selectedType: string;
-		difficulty: Difficulty;
-		maintainers: UserWithProfilePic[];
-		searchableUsers: UserWithProfilePic[];
-		estimate: string;
-		copyright: string;
-		theoryApplicationRatio: number;
-	};
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -324,7 +308,7 @@
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
-				formData.append('type', selectedType);
+		formData.append('type', selectedType);
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
@@ -420,7 +404,7 @@
 				<p class="text-lg">Theory to Application:</p>
 				<TheoryAppBar value="{theoryApplicationRatio}" editable="{false}" />
 			</div>
-			<p class="text-lg pl-3">Type: {selectedType.toUpperCase()}</p>
+			<p class="text-lg pl-3">Type: {selectedType?.toUpperCase()}</p>
 			<p class="text-lg pl-3">Time Estimate: {#if estimate !== ''} {estimate} minutes {:else} No estimate provided {/if} </p>
 			<p class="text-lg pl-3">Copyright: {copyright}</p>
 			<div class="pl-3">
