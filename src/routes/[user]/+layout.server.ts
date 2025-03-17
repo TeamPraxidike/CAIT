@@ -1,5 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { error, redirect } from '@sveltejs/kit';
+import type {TGETuser} from '../api/user/[id]/+server';
 
 /**
  * User is the slug in the parameter.
@@ -22,9 +23,9 @@ export const load: LayoutServerLoad = async ({ params, fetch, locals, depends })
 		error(uRes.status, uRes.statusText);
 	}
 
-	const { user, profilePicData } = await uRes.json();
+	const user: TGETuser = await uRes.json();
 	return {
-		user,
-		profilePicData
+		user: user,
+		profilePic: user.profilePic
 	};
 };

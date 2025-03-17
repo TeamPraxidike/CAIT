@@ -1,4 +1,5 @@
 import { prisma } from '$lib/database';
+import { Prisma } from '@prisma/client';
 
 export type editReplyData = {
 	id: number;
@@ -10,6 +11,12 @@ export type createReplyData = {
 	commentId: number;
 	content: string;
 };
+
+export type TReplyLikedBy = Prisma.ReplyGetPayload<{
+	include: { likedBy: true };
+}>;
+
+export type TReply = Prisma.ReplyGetPayload<true>;
 
 /**
  * [POST] creates a reply from the given body
@@ -27,11 +34,12 @@ export async function createReply(reply: createReplyData) {
 		},
 	});
 }
+
 /**
  * [GET] gets the reply with the given id
  * @param replyId
  */
-export async function getReply(replyId: number) {
+export async function getReply(replyId: number): Promise<TReplyLikedBy> {
 	return prisma.reply.findUnique({
 		where: {
 			id: replyId,
@@ -46,7 +54,7 @@ export async function getReply(replyId: number) {
  * [GET] gets the reply with the comment id
  * @param commentId
  */
-export async function getRepliesByCommentId(commentId: number) {
+export async function getRepliesByCommentId(commentId: number): Promise<TReply> {
 	return prisma.reply.findMany({
 		where: {
 			commentId: commentId,
@@ -58,7 +66,7 @@ export async function getRepliesByCommentId(commentId: number) {
  * [DELETE] deletes the reply with the given id
  * @param replyId
  */
-export async function deleteReply(replyId: number) {
+export async function deleteReply(replyId: number): Promise<TReply> {
 	return prisma.reply.delete({
 		where: {
 			id: replyId,

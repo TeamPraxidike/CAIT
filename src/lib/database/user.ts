@@ -1,5 +1,31 @@
 import { prisma } from '$lib/database';
-import { Prisma } from '@prisma/client/extension';
+import { Prisma } from '@prisma/client';
+import type { TReply } from '$lib/database/reply';
+
+
+export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
+	include: {
+		posts: {
+			include: {
+				tags: true;
+				usedInCourse: {
+					select: {
+						course: true;
+					};
+				};
+			};
+		};
+		profilePic: true;
+	};
+}> | null;
+
+export type TUserWithProfilePic = Prisma.UserGetPayload<{
+	include: {
+		profilePic: true,
+	}
+}> | null;
+
+export type TUser = Prisma.UserGetPayload<true>;
 
 /**
  * Adds a new user to the database. Generates a unique username based on the user's first and last name.
@@ -15,7 +41,7 @@ export async function createUser(
 		password: string;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<TUser> {
 	const username = await generateUsername(data.firstName, data.lastName);
 	return prismaContext.user.create({
 		data: {
@@ -44,7 +70,7 @@ export async function createUser(
  * @param lastName
  */
 async function generateUsername(firstName: string, lastName: string) {
-	const users = await prisma.user.findMany({
+	const users: TUser[] = await prisma.user.findMany({
 		where: {
 			firstName: firstName,
 			lastName: lastName,
@@ -69,6 +95,7 @@ async function generateUsername(firstName: string, lastName: string) {
 	return username;
 }
 
+
 /**
  * Returns the user with the given id.
  * @param id
@@ -77,7 +104,7 @@ async function generateUsername(firstName: string, lastName: string) {
 export async function getUserById(
 	id: string,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<TUserWithPostsAndProfilePic> {
 	return prismaContext.user.findUnique({
 		where: { id },
 		include: {
@@ -99,7 +126,7 @@ export async function getUserById(
 export async function getUserByUsername(
 	username: string,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<TUserWithPostsAndProfilePic | null> {
 	return prismaContext.user.findUnique({
 		where: { username },
 		include: {
@@ -118,23 +145,6 @@ export async function getUserByUsername(
 	});
 }
 
-export async function getUserByEmail(
-	email: string,
-	prismaContext: Prisma.TransactionClient = prisma,
-) {
-	return prismaContext.user.findUnique({
-		where: { email },
-		include: {
-			posts: {
-				include: {
-					tags: true,
-				},
-			},
-			profilePic: true,
-		},
-	});
-}
-
 /**
  * Deletes a user from the database
  * @param userId
@@ -143,7 +153,7 @@ export async function getUserByEmail(
 export async function deleteUser(
 	userId: string,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<TUserWithProfilePic> {
 	return await prismaContext.user.delete({
 		where: {
 			id: userId,
@@ -170,7 +180,7 @@ export type userEditData = {
 export async function editUser(
 	user: userEditData,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<TUser> {
 	const username: string = await generateUsername(user.firstName, user.lastName);
 
 	return prismaContext.user.update({
@@ -198,7 +208,7 @@ export async function updateReputation(
 	userId: string,
 	number: number,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<TUser> {
 	return prismaContext.user.update({
 		where: {
 			id: userId,
@@ -224,7 +234,6 @@ export async function likePublication(userId: string, publicationId: number) {
 	if (liked.liked.map((x) => x.id).includes(publicationId)) {
 		await unlike(userId, publicationId);
 		return 'Publication unliked successfully';
-		// return liked.liked
 	} else {
 		await like(userId, publicationId);
 		return 'Publication liked successfully';
@@ -239,7 +248,7 @@ export async function likePublication(userId: string, publicationId: number) {
  * @param publicationId
  */
 async function like(userId: string, publicationId: number) {
-	await prisma.$transaction(async (prismaTransaction) => {
+	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 		await prismaTransaction.user.update({
 			where: {
 				id: userId,
@@ -273,7 +282,7 @@ async function like(userId: string, publicationId: number) {
  * @param publicationId
  */
 async function unlike(userId: string, publicationId: number) {
-	await prisma.$transaction(async (prismaTransaction) => {
+	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 		await prismaTransaction.user.update({
 			where: {
 				id: userId,
@@ -363,7 +372,7 @@ export async function likesCommentUpdate(userId: string, commentId: number) {
  * @param commentId
  */
 async function likeComment(userId: string, commentId: number) {
-	await prisma.$transaction(async (prismaTransaction) => {
+	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 		await prismaTransaction.user.update({
 			where: {
 				id: userId,
@@ -397,7 +406,7 @@ async function likeComment(userId: string, commentId: number) {
  * @param commentId
  */
 async function unlikeComment(userId: string, commentId: number) {
-	await prisma.$transaction(async (prismaTransaction) => {
+	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 		await prismaTransaction.user.update({
 			where: {
 				id: userId,
@@ -466,7 +475,7 @@ export async function likesReplyUpdate(userId: string, replyId: number) {
  * @param replyId
  */
 async function likeReply(userId: string, replyId: number) {
-	await prisma.$transaction(async (prismaTransaction) => {
+	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 		await prismaTransaction.user.update({
 			where: {
 				id: userId,
@@ -500,7 +509,7 @@ async function likeReply(userId: string, replyId: number) {
  * @param replyId
  */
 async function unlikeReply(userId: string, replyId: number) {
-	await prisma.$transaction(async (prismaTransaction) => {
+	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 		await prismaTransaction.user.update({
 			where: {
 				id: userId,
@@ -530,7 +539,7 @@ async function unlikeReply(userId: string, replyId: number) {
  * returns a list with all liked reply of a user
  * @param userId
  */
-export async function getLikedReplies(userId: string) {
+export async function getLikedReplies(userId: string): Promise<TReply[]> {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,
@@ -541,7 +550,7 @@ export async function getLikedReplies(userId: string) {
 	});
 }
 
-export async function isReported(userId: string, publicationId: number){
+export async function isReported(userId: string, publicationId: number): Promise<boolean> {
 	return prisma.user.findUnique({
 		where: {
 			id: userId
@@ -556,7 +565,7 @@ export async function isReported(userId: string, publicationId: number){
 				},
 			},
 		}
-	}).then(reported => {
+	}).then((reported: {reported: {id: number}[]} )=> {
 		if(reported === null) throw new Error("Unable to fetch reported applications")
 		return reported.reported.map(x => x.id).includes(publicationId);
 	});
@@ -580,7 +589,7 @@ export async function reportPublication(userId: string, publicationId: number) {
 		}
 	});
 	if (reported === null) throw Error('Reported publications were not found');
-	if (reported.reportedBy.map((x) => x.id).includes(userId)) {
+	if (reported.reportedBy.map((x: TUser) => x.id).includes(userId)) {
 		await unreport(userId, publicationId);
 		return 'Publication unreported successfully';
 	} else {
