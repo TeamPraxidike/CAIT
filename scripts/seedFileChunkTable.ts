@@ -16,8 +16,10 @@ async function main() {
           create extension if not exists vector;
         
           create index if not exists metadata_extension_idx 
-          on public."Document" ((metadata->>'extension'));
-    
+          on public."FileChunk" ((metadata->>'extension'));
+
+		  create index on public."FileChunk" using hnsw (embedding vector_cosine_ops);
+     
         END $$;
 `
 

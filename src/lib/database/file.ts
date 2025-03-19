@@ -5,7 +5,7 @@ import {
 	prisma,
 } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
-import type { File as PrismaFile } from '@prisma/client';
+import type { File as PrismaFile, FileChunk } from '@prisma/client';
 import path from 'path';
 import fs from 'fs';
 import type { FileChunks } from '$lib/PiscinaUtils/runner';
@@ -364,33 +364,38 @@ export async function handleFileTokens(
 	prismaContext: Prisma.TransactionClient = prisma
 ) {
 	for (const dataCurrent of filesToUpdate) {
-		await prismaContext.$transaction(async (tx) => {
-			// Update file text
-			await tx.file.update({
-				where: { path: dataCurrent.filePath },
-				data: { text: dataCurrent.tokens }
-			});
-
-			// Delete previous documents
-			await tx.fileChunk.deleteMany({
-				where: { filePath: dataCurrent.filePath }
-			});
-
-			// Insert new documents using raw SQL for the vector type
-			for (const chunk of dataCurrent.chunks) {
-				// Use Prisma's executeRaw to handle the vector type correctly
-				await tx.$executeRaw`
-                INSERT INTO "FileChunk" (content, metadata, embedding, "filePath")
-                VALUES (
-                   ${chunk.pageContent},
-                   ${JSON.stringify(chunk.metadata)}::json,
-                   ${chunk.embedding}::vector(384),
-                   ${dataCurrent.filePath}
-                )
-             `;
-			}
+		// Update file text
+		await prisma.file.update({
+			where: { path: dataCurrent.filePath },
+			data: { text: dataCurrent.tokens }
 		});
+
+		// Delete previous documents
+		await prisma.fileChunk.deleteMany({
+			where: { filePath: dataCurrent.filePath }
+		});
+
+		// Insert new documents using raw SQL for the vector type
+		for (const chunk of dataCurrent.chunks) {
+			// Use Prisma's executeRaw to handle the vector type correctly
+			await prisma.$executeRaw`
+                INSERT INTO "FileChunk" (content, metadata, embedding, "filePath")
+                VALUES (${chunk.pageContent},
+                        ${JSON.stringify(chunk.metadata)}::json,
+                        ${chunk.embedding}::vector(384),
+                        ${dataCurrent.filePath})
+			`;
+		}
 	}
+}
+
+export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
+	return prisma.$queryRaw`
+	SELECT id, content, metadata, "filePath", embedding <-> ${embeddedUserQuery}::vector AS similarity
+	FROM public."FileChunk"
+	ORDER BY embedding <-> ${embeddedUserQuery}::vector ASC
+	LIMIT 5;
+	`;
 }
 
 // Cast the vector to a string format that can be parsed back to an array

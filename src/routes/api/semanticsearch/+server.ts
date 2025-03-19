@@ -1,5 +1,5 @@
 import { verifyAuth } from '$lib/database/auth';
-import { getFileChunks } from '$lib/database/file';
+import { getFileChunks, performCosineSimilarityWithHNSWIndex } from '$lib/database/file';
 import { calculateCosineSimilarity, model } from '$lib/similarityIndex.mjs';
 import { getMaterialForFile } from '$lib/database/material';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
@@ -27,28 +27,28 @@ export async function POST({ request , locals}) {
 
 	try {
 
-		const fileChunks = await getFileChunks();
+		// const fileChunks = await getFileChunks();
 
 		const embeddedText = await model.computeEmbeddingSingleText(queryText);
 
-		const results = []
+		const topResults = await performCosineSimilarityWithHNSWIndex(embeddedText);
 
-		for (const doc of fileChunks){
-
-			// const sim = await calculateCosineSimilarityTEMP(doc.embedding, embeddedText);
-			const sim = calculateCosineSimilarity(doc.embedding, embeddedText);
-			results.push({
-				"similarity": sim,
-				"content": doc.content,
-				"filePath": doc.filePath
-			})
-		}
-
-		// Sort in descending order (highest similarity first)
-		results.sort((a, b) => b.similarity - a.similarity);
-
-		// Return the top 3 most similar
-		const topResults = results.slice(0, 3);
+		// const results = []
+		//
+		// for (const doc of fileChunks){
+		// 	const sim = calculateCosineSimilarity(doc.embedding, embeddedText);
+		// 	results.push({
+		// 		"similarity": sim,
+		// 		"content": doc.content,
+		// 		"filePath": doc.filePath
+		// 	})
+		// }
+		//
+		// // Sort in descending order (highest similarity first)
+		// results.sort((a, b) => b.similarity - a.similarity);
+		//
+		// // Return the top 3 most similar
+		// const topResults = results.slice(0, 3);
 
 		const topResultsWithMaterials = await Promise.all(
 			topResults.map(async (r) => {
