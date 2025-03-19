@@ -33,23 +33,6 @@ export async function POST({ request , locals}) {
 
 		const topResults = await performCosineSimilarityWithHNSWIndex(embeddedText);
 
-		// const results = []
-		//
-		// for (const doc of fileChunks){
-		// 	const sim = calculateCosineSimilarity(doc.embedding, embeddedText);
-		// 	results.push({
-		// 		"similarity": sim,
-		// 		"content": doc.content,
-		// 		"filePath": doc.filePath
-		// 	})
-		// }
-		//
-		// // Sort in descending order (highest similarity first)
-		// results.sort((a, b) => b.similarity - a.similarity);
-		//
-		// // Return the top 3 most similar
-		// const topResults = results.slice(0, 3);
-
 		const topResultsWithMaterials = await Promise.all(
 			topResults.map(async (r) => {
 				const fileWithMaterial = await getMaterialForFile(r.filePath);

@@ -1,4 +1,4 @@
--- CreateExtension
+-- Create vector extension
 CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- CreateEnum
@@ -92,7 +92,7 @@ CREATE TABLE "FileChunk" (
     "id" BIGSERIAL NOT NULL,
     "content" TEXT NOT NULL,
     "metadata" JSONB NOT NULL,
-    "embedding" vector(384) NOT NULL,
+    "embedding" vector(384),
     "filePath" TEXT NOT NULL,
 
     CONSTRAINT "FileChunk_pkey" PRIMARY KEY ("id")
@@ -360,3 +360,11 @@ ALTER TABLE "_likedReplies" ADD CONSTRAINT "_likedReplies_A_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "_likedReplies" ADD CONSTRAINT "_likedReplies_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Create index for metadata->>'extension'
+CREATE INDEX IF NOT EXISTS metadata_extension_idx
+ON public."FileChunk" ((metadata->>'extension'));
+
+-- Create HNSW index for the embedding column
+CREATE INDEX IF NOT EXISTS filechunk_embedding_index
+ON public."FileChunk" USING hnsw (embedding vector_cosine_ops);
