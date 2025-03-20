@@ -14,23 +14,33 @@
 
 	export let data: PageServerData;
 	let searchWord: string = '';
-	let materials = data.materials
-	let circuits = data.circuits
-	let idsMat = data.idsMat
-	let idsCirc = data.idsCirc
-	$: materials = data.materials;
-	$: circuits = data.circuits;
-	$: idsMat = data.idsMat
-	$: idsCirc = data.idsCirc
+	// let materials = data.materials
+	// let circuits = data.circuits
+	let materials: any[] = []
+	let circuits: any[] = []
+	// let idsMat = data.idsMat
+	// let idsCirc = data.idsCirc
+	let idsMat: any[] = [];
+	let idsCirc: any[] = [];
+	// $: materials = data.materials;
+	// $: circuits = data.circuits;
+	$: data.materials.then(matData => {materials = matData.materials}).catch(e => {idsMat = []})
+	$: data.circuits.then(circData => {circuits = circData.circuits}).catch(e => {idsCirc = []})
+	// $: idsMat = data.idsMat
+	// $: idsCirc = data.idsCirc
+	$: data.materials.then(matData => {idsMat = matData.idsMat}).catch(e => {idsMat = []})
+	$: data.circuits.then(circData => {idsCirc = circData.idsCirc}).catch(e => {idsCirc = []})
 	let amount = data.amount
 	let source = data.type === "circuits" ? idsCirc : idsMat
 	$: source = data.type === "circuits" ? idsCirc : idsMat
 	$: paginationSettings.size = source.length
 
 
-
-
-	let users: (User & {posts: Publication[], profilePicData:string})[] = data.users;
+	let users: (User & {posts: Publication[], profilePicData:string})[] = [];
+	$: data.users.then(userData => {
+		console.log(userData);
+		users = userData.users;
+	})
 	let tags = data.tags;
 	//let profilePics:FetchedFileArray = data.profilePics;
 	let liked = data.liked as number[];
@@ -184,11 +194,11 @@
 				// Handle the response data from the API
 				if (s === "material") {
 
-					data.materials = d.materials
-					data.idsMat = d.idsMat
+					materials = d.materials
+					idsMat = d.idsMat
 				} else {
-					data.circuits = d.circuits;
-					data.idsCirc = d.idsCirc
+					circuits = d.circuits;
+					idsCirc = d.idsCirc
 				}
 				amount = 8
 				page = 0
@@ -205,14 +215,18 @@
 
 	function onPageChange(e: CustomEvent): void {
 		page = e.detail;
-		data.materials = []
-		data.circuits = []
+		materials = []
+		circuits = []
+		// data.materials = []
+		// data.circuits = []
 		changePage(amount, page)
 	}
 
 	function onAmountChange(e: CustomEvent): void {
-		data.materials = []
-		data.circuits = []
+		// data.materials = []
+		// data.circuits = []
+		materials = []
+		circuits = []
 		amount = e.detail;
 		changePage(amount, page)
 	}
@@ -221,7 +235,7 @@
 			const ids = pageType === "materials" ? idsMat : idsCirc
 			const queryParams = new URLSearchParams({
 				type: pageType,
-				ids: ids.slice(pageNum * amount, (pageNum+1)*amount)
+				ids: ids.slice(pageNum * amount, (pageNum+1)*amount).join(",")
 			});
 		const s = pageType === "materials" ? "material" : "circuit";
 		const url = `/api/publication/set?${queryParams.toString()}`;
@@ -256,21 +270,31 @@
     $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
 
     const deleteFilters = (pageType: string) => {
-        if(pageType !== "materials")
-            resetFilters();
+        if(pageType !== "materials"){
+			page  = 0
+			amount = 8
+			paginationSettings.page = 0
+			paginationSettings.limit = amount
+			selectedTags = [];
+			selectedTypes = [];
+			selectedPublishers = [];
+			selectedDiff = [];
+			// resetFilters();
+		}
+
 
     }
 
-		$: deleteFilters(pageType)
+	$: deleteFilters(pageType)
 
-		onMount(()=>{
-			if (data.selectedTag !== ''){
-				applyActive = true;
-				selectedTags = [];
-				selectedTags.push({id:'0', content: data.selectedTag});
-				sendFiltersToAPI();
-			}
-		})
+	onMount(()=>{
+		if (data.selectedTag !== ''){
+			applyActive = true;
+			selectedTags = [];
+			selectedTags.push({id:'0', content: data.selectedTag});
+			sendFiltersToAPI();
+		}
+	})
 
 	let paginationSettings = {
 		page: 0,
@@ -279,13 +303,13 @@
 		amounts: [4,8,12,16,32],
 	} satisfies PaginationSettings;
 
-		const switchPage = () => {
-			amount = 8
-			paginationSettings.limit = amount
-			paginationSettings.page = 0
-		}
+	const switchPage = () => {
+		amount = 8
+		paginationSettings.limit = amount
+		paginationSettings.page = 0
+	}
 
-		const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
+	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
@@ -422,43 +446,64 @@
 
 
 
-{#if fetchPromise !== null}
-	{#await fetchPromise}
-		<div class="col-span-full flex flex-col justify-center items-center">
-			<Icon icon="line-md:loading-loop" width="12.2rem" height="12.2rem" className="text-center" />
-			<p>Loading</p>
-		</div>
-	{:then response}
+<!--{#if fetchPromise !== null}-->
+<!--	{#await fetchPromise}-->
+<!--		<div class="col-span-full flex flex-col justify-center items-center">-->
+<!--			<Icon icon="line-md:loading-loop" width="12.2rem" height="12.2rem" className="text-center" />-->
+<!--			<p>Loading</p>-->
+<!--		</div>-->
+<!--	{:then response}-->
 		<!-- Display the data when the promise is resolved -->
 		{#if pageType === "materials"}
-			{#each materials as material (material.id)}
-				<PublicationCard extensions="{getExtensions(material)}"
-								 imgSrc={material.coverPicData}
-								 publication={material.publication}
-								 liked={liked.includes(material.publication.id)}
-								 saved={saved.includes(material.publication.id)}
-								 materialType={material.encapsulatingType}
-								 publisher={material.publisher}
-				/>
-			{/each}
+			{#await materials}
+				<p>Loading materials...</p>
+			{:then materialsAwaited}
+				{#each materialsAwaited as material (material.id)}
+					<PublicationCard extensions="{getExtensions(material)}"
+									 imgSrc={material.coverPicData}
+									 publication={material.publication}
+									 liked={liked.includes(material.publication.id)}
+									 saved={saved.includes(material.publication.id)}
+									 materialType={material.encapsulatingType}
+									 publisher={material.publisher}
+					/>
+				{/each}
+			{:catch error}
+				<!--TODO: Change color-->
+				<p style="color: red">Error while loading materials. Reload the page to try again</p>
+			{/await}
 		{:else if pageType === "people"}
-			{#each users as person (person.id)}
-				<UserProp view="search" posts="{person.posts.length}"
-						  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
-			{/each}
+			{#await users}
+				<p>Loading users...</p>
+			{:then usersAwaited}
+				{#each usersAwaited as person (person.id)}
+					<UserProp view="search" posts="{person.posts.length}"
+							  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
+				{/each}
+			{:catch error}
+				<!--TODO: Change color-->
+				<p style="color: red">Error while loading users. Reload the page to try again</p>
+			{/await}
 		{:else if pageType === "circuits"}
-			{#each circuits as circuit (circuit.id)}
-				<PublicationCard  publication="{circuit.publication}"
-								  imgSrc= {circuit.coverPicData}
-								  liked={liked.includes(circuit.publication.id)}
-								  saved={saved.includes(circuit.publication.id)}
-								  publisher={circuit.publisher}/>
-			{/each}
+			{#await circuits}
+				<p>Loading circuits...</p>
+			{:then circuitsAwaited}
+				{#each circuitsAwaited as circuit (circuit.id)}
+					<PublicationCard  publication="{circuit.publication}"
+									  imgSrc= {circuit.coverPicData}
+									  liked={liked.includes(circuit.publication.id)}
+									  saved={saved.includes(circuit.publication.id)}
+									  publisher={circuit.publisher}/>
+				{/each}
+			{:catch error}
+				<!--TODO: Change color-->
+				<p style="color: red">Error while loading circuits. Reload the page to try again</p>
+			{/await}
 		{/if}
-	{:catch error}
-		<p>There was an error: {error.message}</p>
-	{/await}
-{/if}
+<!--	{:catch error}-->
+<!--		<p>There was an error: {error.message}</p>-->
+<!--	{/await}-->
+<!--{/if}-->
 
 {#if pageType !== 'people'}
 	<div class="col-span-full">
