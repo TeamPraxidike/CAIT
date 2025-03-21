@@ -31,7 +31,7 @@
 	import {
 		saveCover, getCover, deleteCover,
 		saveFiles, getFiles, clearFiles,
-		saveSnapshot, getSnapshot, clearSnapshot, type FormSnapshot
+		saveMaterialSnapshot, getMaterialSnapshot, clearMaterialSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -130,7 +130,7 @@
 		Promise.all([
 			deleteCover(),
 			clearFiles(),
-			clearSnapshot()
+			clearMaterialSnapshot()
 		]).then(() => {
 			// Show success message
 			toastStore.trigger({
@@ -191,7 +191,7 @@
 			}
 
 			// if a metadata snapshot already exists, use it
-			const existing = await getSnapshot();
+			const existing = await getMaterialSnapshot();
 			if (existing) {
 				// TODO: This ?? business is meh, redo
 				title = existing.title;
@@ -230,7 +230,7 @@
 				console.log("IN CONST SNAPSHOT")
 
 				// Store it in IndexedDB
-				saveSnapshot(data);
+				saveMaterialSnapshot(data);
 			}, 2000);
 
 			window.addEventListener('beforeunload', handleBeforeUnload);

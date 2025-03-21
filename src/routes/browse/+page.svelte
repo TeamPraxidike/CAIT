@@ -504,6 +504,7 @@
 <!--		</div>-->
 <!--	{:then response}-->
 		<!-- Display the data when the promise is resolved -->
+<!--TODO: Please for the love of god refactor this-->
 		{#if fetchPromise === null}
 			{#if pageType === "materials"}
 				{#await materials}

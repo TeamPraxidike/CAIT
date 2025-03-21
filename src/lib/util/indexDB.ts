@@ -4,10 +4,11 @@ import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 import { CircuitComponent } from '$lib';
 
 const DB_NAME = 'FileStorage';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const COVER_STORE = 'cover';
 const FILES_STORE = 'files';
-const METADATA_STORE = 'metadata_snapshots';
+const MATERIAL_METADATA_STORE = 'material_metadata_snapshots';
+const CIRCUIT_METADATA_STORE = 'circuit_metadata_snapshots';
 
 type UserWithProfilePic = User & { profilePicData: string };
 
@@ -37,8 +38,11 @@ export async function initDB() {
 			if (!db.objectStoreNames.contains(FILES_STORE)) {
 				db.createObjectStore(FILES_STORE);
 			}
-			if (!db.objectStoreNames.contains(METADATA_STORE)) {
-				db.createObjectStore(METADATA_STORE);
+			if (!db.objectStoreNames.contains(MATERIAL_METADATA_STORE)) {
+				db.createObjectStore(MATERIAL_METADATA_STORE);
+			}
+			if (!db.objectStoreNames.contains(CIRCUIT_METADATA_STORE)) {
+				db.createObjectStore(CIRCUIT_METADATA_STORE);
 			}
 		}
 	});
@@ -78,21 +82,41 @@ export async function clearFiles() {
 }
 
 // Save snapshot
-export async function saveSnapshot(snapshotData: FormSnapshot) {
+export async function saveMaterialSnapshot(snapshotData: FormSnapshot) {
 	console.log("SAVING SNAPSHOT")
 	const db = await initDB();
-	await db.put(METADATA_STORE, snapshotData, 'myFormSnapshot');
+	await db.put(MATERIAL_METADATA_STORE, snapshotData, 'myFormSnapshot');
 }
 
 // Get snapshot
-export async function getSnapshot(): Promise<FormSnapshot | undefined> {
+export async function getMaterialSnapshot(): Promise<FormSnapshot | undefined> {
 	const db = await initDB();
-	return (await db.get(METADATA_STORE, 'myFormSnapshot')) as FormSnapshot;
+	return (await db.get(MATERIAL_METADATA_STORE, 'myFormSnapshot')) as FormSnapshot;
 }
 
 // Clear snapshot
-export async function clearSnapshot() {
+export async function clearMaterialSnapshot() {
 	console.log("DELETING SNAPSHOT");
 	const db = await initDB();
-	await db.delete(METADATA_STORE, 'myFormSnapshot');
+	await db.delete(MATERIAL_METADATA_STORE, 'myFormSnapshot');
+}
+
+// Save snapshot
+export async function saveCircuitSnapshot(snapshotData: FormSnapshot) {
+	console.log("SAVING SNAPSHOT")
+	const db = await initDB();
+	await db.put(CIRCUIT_METADATA_STORE, snapshotData, 'myFormSnapshot');
+}
+
+// Get snapshot
+export async function getCircuitSnapshot(): Promise<FormSnapshot | undefined> {
+	const db = await initDB();
+	return (await db.get(CIRCUIT_METADATA_STORE, 'myFormSnapshot')) as FormSnapshot;
+}
+
+// Clear snapshot
+export async function clearCircuitSnapshot() {
+	console.log("DELETING SNAPSHOT");
+	const db = await initDB();
+	await db.delete(CIRCUIT_METADATA_STORE, 'myFormSnapshot');
 }

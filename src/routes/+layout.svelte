@@ -89,10 +89,10 @@
 	</Grid>
 </div>
 
-<SemanticSearch
-	title="Semantic Search"
-	placeholder="Ask about content..."
-	apiEndpoint="/api/semanticsearch"
-/>
+<!--<SemanticSearch-->
+<!--	title="Semantic Search"-->
+<!--	placeholder="Ask about content..."-->
+<!--	apiEndpoint="/api/semanticsearch"-->
+<!--/>-->
 
 <Footer />

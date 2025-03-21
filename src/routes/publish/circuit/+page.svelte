@@ -17,7 +17,7 @@
 	// $: ({loggedUser} = data)
 
 	import {
-		saveSnapshot, getSnapshot, clearSnapshot, type FormSnapshot
+		saveCircuitSnapshot, getCircuitSnapshot, clearCircuitSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
 
 	export let data: PageServerData;
@@ -107,7 +107,7 @@
 		}
 
 		Promise.all([
-			clearSnapshot()
+			clearCircuitSnapshot()
 		]).then(() => {
 			toastStore.trigger({
 				message: 'Circuit Added successfully',
@@ -171,7 +171,7 @@
 			// THIS IS THE SNAPSHOT CODE (using indexedDB)
 
 			// if a metadata snapshot already exists, use it
-			const existing = await getSnapshot();
+			const existing = await getCircuitSnapshot();
 			if (existing) {
 				// TODO: This ?? business is meh, redo
 				title = existing.title;
@@ -204,7 +204,7 @@
 				console.log("IN CONST SNAPSHOT")
 
 				// Store it in IndexedDB
-				saveSnapshot(data);
+				saveCircuitSnapshot(data);
 			}, 2000);
 
 			window.addEventListener('beforeunload', handleBeforeUnload);
