@@ -51,10 +51,6 @@
 		}
 	}
 
-
-
-
-
 	const removePopup = (event: MouseEvent) => {
 		if (!(event.target instanceof HTMLElement)) {
 			return; // Ignore if the target is not an HTMLElement
@@ -242,6 +238,58 @@
 		paginationSettings.page = 0
 	}
 
+	let isSemanticActive = false;
+	$: isSemanticActive = isSemanticActive;
+
+	let semanticPromise: Promise<any> | null = null;
+
+	const onSemanticSearch = (event : CustomEvent) => {
+		let semanticSearchQuery = event.detail.value.inputKeywords;
+		semanticPromise = sendMessageToSemantic(semanticSearchQuery)
+	}
+
+	async function sendMessageToSemantic(inputMessage: string) {
+		if (!inputMessage.trim()) return;
+
+		//applyActive = false;
+
+		const messageToSend = inputMessage.trim();
+
+		try {
+			const response = await fetch('/api/semanticsearch', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ message: messageToSend })
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to get response');
+			}
+
+			const rJson = await response.json();
+
+			return rJson.results;
+
+			// if (!rJson.results || !Array.isArray(rJson.results) || rJson.results.length === 0) {
+			// 	throw new Error('No results returned');
+			// }
+
+
+
+		} catch (error) {
+			console.error('Error sending message:', error);
+
+		}
+	}
+
+	$: if (isSemanticActive){
+		chosenOption = 4;
+	} else {
+		chosenOption = 0;
+	}
+
 
 </script>
 
@@ -257,14 +305,14 @@
 					<button type="button" class="hidden md:block rounded-lg py-1 px-3 bg-surface-800 dark:bg-surface-600 hover:bg-opacity-75 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
 				</div>
 				<div class = "w-full lg:w-7/12 xl:w-1/2 mb-2">
-					<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch}/>
+					<SearchBar searchType="materials" bind:isSemanticActive={isSemanticActive} bind:inputKeywords={searchWord} on:SearchQuery={onSearch} on:SemanticSearchQuery={onSemanticSearch}/>
 				</div>
 				<div class=" rounded-lg flex w-full lg:w-7/12 xl:w-1/2 h-8 mb-8">
 					<ToggleComponent page="{false}" pageType="All Materials" options={["All Materials", "All Circuits", "My Publications", "Saved Publications"]}
 													 labels={["All Materials", "All Circuits", "My Publications", "Saved Publications"]} on:reset={newMaterials} />
 				</div>
 			</div>
-
+<!--TODO: Ei tuka si e ebalo maikata ot inconsistencies (compared with browse page), please fix			-->
 			{#if chosenOption === 0}
 				{#each materials as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
@@ -286,6 +334,35 @@
 													 on:removed={removeCard} imgSrc={p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher} materialType={p.type === PublicationType.Circuit ? MaterialType.other: p.materials.encapsulatingType}/>
 
 				{/each}
+			{:else if isSemanticActive && semanticPromise !== null}
+				{#await semanticPromise}
+					<p>Loading results...</p>
+				{:then semanticResultsAwaited}
+					<div class="col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+						{#each semanticResultsAwaited as message}
+							<div class="w-full flex flex-col gap-3 p-4 border border-surface-300 dark:border-surface-700 rounded-lg shadow bg-surface-100 dark:bg-surface-800">
+								<p class="italic text-surface-600 dark:text-surface-300">"...{message.content}..."</p>
+								<p class="text-sm text-surface-800 dark:text-surface-100">Name of file: <b>{message.fileTitle}</b></p>
+								<p class="text-xs text-surface-600 dark:text-surface-400"><i>You can find this file in:</i></p>
+								<PublicationCard
+									inCircuits="{true}"
+									publication="{message.publication}"
+									extensions="{getExtensions(message)}"
+									selected="{selectedIds.has(message.publication.id)}" on:selected={selectCard}
+									on:removed={removeCard} imgSrc={message.coverPicData}
+									liked={liked.includes(message.publication.id)}
+									saved={saved.includes(message.publication.id)}
+									on:liked={likedToggled} on:saved={savedToggled}
+									publisher={message.publisher} materialType={message.encapsulatingType}/>
+							</div>
+						{/each}
+					</div>
+
+
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading semantic search results. Reload the page to try again</p>
+				{/await}
 			{/if}
 			<button type="button" class="col-start-4 my-4 md:hidden rounded-lg py-1 px-3 bg-surface-800 dark:bg-surface-600 hover:bg-opacity-75 text-surface-50" on:click="{() => {addActive = false}}">Done</button>
 			{#if source.length > 4}

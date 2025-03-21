@@ -10,7 +10,7 @@
 	import { type PaginationSettings, Paginator } from '@skeletonlabs/skeleton';
 
 
-	let fetchPromise:Promise<any> = new Promise<null>(resolve => resolve(null));
+	//let fetchPromise:Promise<any> = new Promise<null>(resolve => resolve(null));
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -38,7 +38,6 @@
 
 	let users: (User & {posts: Publication[], profilePicData:string})[] = [];
 	$: data.users.then(userData => {
-		console.log(userData);
 		users = userData.users;
 	})
 	let tags = data.tags;
@@ -134,13 +133,67 @@
         sendFiltersToAPI();
     };
 
+	let fetchPromise: Promise<any> | null = null;
+
 	const onSearch = (event : CustomEvent) => {
 		searchWord = event.detail.value.inputKeywords;
 		fetchPromise = sendFiltersToAPI();
 	}
 
+	let isSemanticActive = false;
+	$: isSemanticActive = isSemanticActive;
 
-    const sendFiltersToAPI = async () => {
+	$: if (isSemanticActive){
+		pageType = 'semantic';
+	} else {
+		pageType = 'materials';
+	}
+
+	let semanticPromise: Promise<any> | null = null;
+
+	const onSemanticSearch = (event : CustomEvent) => {
+		let semanticSearchQuery = event.detail.value.inputKeywords;
+		semanticPromise = sendMessageToSemantic(semanticSearchQuery)
+	}
+
+	async function sendMessageToSemantic(inputMessage: string) {
+		if (!inputMessage.trim()) return;
+
+		applyActive = false;
+
+		const messageToSend = inputMessage.trim();
+
+		try {
+			const response = await fetch('/api/semanticsearch', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ message: messageToSend })
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to get response');
+			}
+
+			const rJson = await response.json();
+
+			return rJson.results;
+
+			// if (!rJson.results || !Array.isArray(rJson.results) || rJson.results.length === 0) {
+			// 	throw new Error('No results returned');
+			// }
+
+
+
+		} catch (error) {
+			console.error('Error sending message:', error);
+
+		}
+	}
+
+
+	async function sendFiltersToAPI() {
 
         applyActive = false;
         const queryParams = new URLSearchParams({
@@ -316,68 +369,65 @@
 
 <div class="flex justify-between col-span-full mt-32">
 	<div class="flex gap-2 w-full lg:w-7/12 xl:w-1/2">
-		<SearchBar searchType="materials" bind:inputKeywords={searchWord} on:SearchQuery={onSearch} />
+		<SearchBar searchType="materials" bind:isSemanticActive={isSemanticActive} bind:inputKeywords={searchWord} on:SearchQuery={onSearch} on:SemanticSearchQuery={onSemanticSearch} />
 	</div>
 
-	<div class="hidden rounded-lg lg:flex w-1/4">
-		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-						 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
-	</div>
+	{#if !isSemanticActive}
+		<div class="hidden rounded-lg lg:flex w-1/4">
+			<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
+							 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
+		</div>
+	{/if}
 </div>
-<div class="col-span-full">
-	<div class="flex lg:hidden rounded-lg w-3/4 min-h-6">
-		<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-										 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
+{#if !isSemanticActive}
+	<div class="col-span-full">
+		<div class="flex lg:hidden rounded-lg w-3/4 min-h-6">
+			<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
+											 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
+		</div>
 	</div>
-</div>
+{/if}
 
-
-<div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
-	{#if pageType !== "people"}
-		<div class="flex flex-col md:flex-row gap-1 md:items-center">
-					<div class="flex gap-1">
-						<Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
-										profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
-										on:filterSelected={() => {applyActive = true}} num="{0}" />
-						<Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
-										bind:display="{displayPublishers}" profilePic="{true}"  bind:active="{publisherActive}"
-										on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}" people="{users}"/>
-						{#if pageType === "materials"}
-							<Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
-											profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
+{#if !isSemanticActive}
+	<div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
+		{#if pageType !== "people"}
+			<div class="flex flex-col md:flex-row gap-1 md:items-center">
+						<div class="flex gap-1">
+							<Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
+											profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
 											on:filterSelected={() => {applyActive = true}} num="{0}" />
-							<Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
-											profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
-											on:filterSelected={() => {applyActive = true}} num="{0}" />
-						{:else}
-							<Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
-											profilePic="{false}" on:filterSelected={() => {applyActive = true}} bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
-						{/if}
-					</div>
+							<Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
+											bind:display="{displayPublishers}" profilePic="{true}"  bind:active="{publisherActive}"
+											on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}" people="{users}"/>
+							{#if pageType === "materials"}
+								<Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
+												profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
+												on:filterSelected={() => {applyActive = true}} num="{0}" />
+								<Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
+												profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
+												on:filterSelected={() => {applyActive = true}} num="{0}" />
+							{:else}
+								<Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
+												profilePic="{false}" on:filterSelected={() => {applyActive = true}} bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
+							{/if}
+						</div>
 
-					<div class="flex gap-1 h-full">
-						<div class = "hidden md:block w-px h-4/5 bg-surface-600 self-center" ></div>
-						<Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:active={sortByActive} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}}/>
-						<button class="rounded-lg text-xs py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
-										on:click={sendFiltersToAPI} disabled="{!applyActive}"  >Apply</button>
-						{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
-							<button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
-											on:click={resetFilters}>
-								Reset Filters
-							</button>
-						{/if}
-					</div>
-
-
-
-        </div>
-    {/if}
-
-
-
-
-
-</div>
+						<div class="flex gap-1 h-full">
+							<div class = "hidden md:block w-px h-4/5 bg-surface-600 self-center" ></div>
+							<Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:active={sortByActive} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}}/>
+							<button class="rounded-lg text-xs py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
+											on:click={sendFiltersToAPI} disabled="{!applyActive}"  >Apply</button>
+							{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
+								<button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
+												on:click={resetFilters}>
+									Reset Filters
+								</button>
+							{/if}
+						</div>
+			</div>
+		{/if}
+	</div>
+{/if}
 
 
 <div class="col-span-full flex flex-wrap gap-2">
@@ -454,51 +504,156 @@
 <!--		</div>-->
 <!--	{:then response}-->
 		<!-- Display the data when the promise is resolved -->
-		{#if pageType === "materials"}
-			{#await materials}
-				<p>Loading materials...</p>
-			{:then materialsAwaited}
-				{#each materialsAwaited as material (material.id)}
-					<PublicationCard extensions="{getExtensions(material)}"
-									 imgSrc={material.coverPicData}
-									 publication={material.publication}
-									 liked={liked.includes(material.publication.id)}
-									 saved={saved.includes(material.publication.id)}
-									 materialType={material.encapsulatingType}
-									 publisher={material.publisher}
-					/>
-				{/each}
-			{:catch error}
-				<!--TODO: Change color-->
-				<p style="color: red">Error while loading materials. Reload the page to try again</p>
-			{/await}
-		{:else if pageType === "people"}
-			{#await users}
-				<p>Loading users...</p>
-			{:then usersAwaited}
-				{#each usersAwaited as person (person.id)}
-					<UserProp view="search" posts="{person.posts.length}"
-							  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
-				{/each}
-			{:catch error}
-				<!--TODO: Change color-->
-				<p style="color: red">Error while loading users. Reload the page to try again</p>
-			{/await}
-		{:else if pageType === "circuits"}
-			{#await circuits}
-				<p>Loading circuits...</p>
-			{:then circuitsAwaited}
-				{#each circuitsAwaited as circuit (circuit.id)}
-					<PublicationCard  publication="{circuit.publication}"
-									  imgSrc= {circuit.coverPicData}
-									  liked={liked.includes(circuit.publication.id)}
-									  saved={saved.includes(circuit.publication.id)}
-									  publisher={circuit.publisher}/>
-				{/each}
-			{:catch error}
-				<!--TODO: Change color-->
-				<p style="color: red">Error while loading circuits. Reload the page to try again</p>
-			{/await}
+		{#if fetchPromise === null}
+			{#if pageType === "materials"}
+				{#await materials}
+					<p>Loading materials...</p>
+				{:then materialsAwaited}
+					{#each materialsAwaited as material (material.id)}
+						<PublicationCard extensions="{getExtensions(material)}"
+										 imgSrc={material.coverPicData}
+										 publication={material.publication}
+										 liked={liked.includes(material.publication.id)}
+										 saved={saved.includes(material.publication.id)}
+										 materialType={material.encapsulatingType}
+										 publisher={material.publisher}
+						/>
+					{/each}
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading materials. Reload the page to try again</p>
+				{/await}
+			{:else if pageType === "people"}
+				{#await users}
+					<p>Loading users...</p>
+				{:then usersAwaited}
+					{#each usersAwaited as person (person.id)}
+						<UserProp view="search" posts="{person.posts.length}"
+								  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
+					{/each}
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading users. Reload the page to try again</p>
+				{/await}
+			{:else if pageType === "circuits"}
+				{#await circuits}
+					<p>Loading circuits...</p>
+				{:then circuitsAwaited}
+					{#each circuitsAwaited as circuit (circuit.id)}
+						<PublicationCard  publication="{circuit.publication}"
+										  imgSrc= {circuit.coverPicData}
+										  liked={liked.includes(circuit.publication.id)}
+										  saved={saved.includes(circuit.publication.id)}
+										  publisher={circuit.publisher}/>
+					{/each}
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading circuits. Reload the page to try again</p>
+				{/await}
+			{:else if isSemanticActive && semanticPromise !== null}
+				{#await semanticPromise}
+					<p>Loading results...</p>
+				{:then semanticResultsAwaited}
+					<div class="col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+						{#each semanticResultsAwaited as message}
+							<div class="w-full flex flex-col gap-3 p-4 border border-surface-300 dark:border-surface-700 rounded-lg shadow bg-surface-100 dark:bg-surface-800">
+								<p class="italic text-surface-600 dark:text-surface-300">"...{message.content}..."</p>
+								<p class="text-sm text-surface-800 dark:text-surface-100">Name of file: <b>{message.fileTitle}</b></p>
+								<p class="text-xs text-surface-600 dark:text-surface-400"><i>You can find this file in:</i></p>
+								<PublicationCard
+									extensions="{getExtensions(message)}"
+									imgSrc={message.coverPicData}
+									publication={message.publication}
+									liked={false}
+									saved={false}
+									materialType={message.encapsulatingType}
+									publisher={message.publisher}
+								/>
+							</div>
+						{/each}
+					</div>
+
+
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading semantic search results. Reload the page to try again</p>
+				{/await}
+			{/if}
+		{:else if fetchPromise !== null}
+			{#if pageType === "materials"}
+				{#await fetchPromise}
+					<p>Loading materials...</p>
+				{:then materialsAwaited}
+					{#each materials as material (material.id)}
+						<PublicationCard extensions="{getExtensions(material)}"
+										 imgSrc={material.coverPicData}
+										 publication={material.publication}
+										 liked={liked.includes(material.publication.id)}
+										 saved={saved.includes(material.publication.id)}
+										 materialType={material.encapsulatingType}
+										 publisher={material.publisher}
+						/>
+					{/each}
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading materials. Reload the page to try again</p>
+				{/await}
+			{:else if pageType === "people"}
+				{#await fetchPromise}
+					<p>Loading users...</p>
+				{:then usersAwaited}
+					{#each users as person (person.id)}
+						<UserProp view="search" posts="{person.posts.length}"
+								  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
+					{/each}
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading users. Reload the page to try again</p>
+				{/await}
+			{:else if pageType === "circuits"}
+				{#await fetchPromise}
+					<p>Loading circuits...</p>
+				{:then circuitsAwaited}
+					{#each circuits as circuit (circuit.id)}
+						<PublicationCard  publication="{circuit.publication}"
+										  imgSrc= {circuit.coverPicData}
+										  liked={liked.includes(circuit.publication.id)}
+										  saved={saved.includes(circuit.publication.id)}
+										  publisher={circuit.publisher}/>
+					{/each}
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading circuits. Reload the page to try again</p>
+				{/await}
+			{:else if isSemanticActive && semanticPromise !== null}
+				{#await semanticPromise}
+					<p>Loading results...</p>
+				{:then semanticResultsAwaited}
+					<div class="col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+						{#each semanticResultsAwaited as message}
+							<div class="w-full flex flex-col gap-3 p-4 border border-surface-300 dark:border-surface-700 rounded-lg shadow bg-surface-100 dark:bg-surface-800">
+								<p class="italic text-surface-600 dark:text-surface-300">"...{message.content}..."</p>
+								<p class="text-sm text-surface-800 dark:text-surface-100">Name of file: <b>{message.fileTitle}</b></p>
+								<p class="text-xs text-surface-600 dark:text-surface-400"><i>You can find this file in:</i></p>
+								<PublicationCard
+									extensions="{getExtensions(message)}"
+									imgSrc={message.coverPicData}
+									publication={message.publication}
+									liked={false}
+									saved={false}
+									materialType={message.encapsulatingType}
+									publisher={message.publisher}
+								/>
+							</div>
+						{/each}
+					</div>
+
+
+				{:catch error}
+					<!--TODO: Change color-->
+					<p style="color: red">Error while loading semantic search results. Reload the page to try again</p>
+				{/await}
+			{/if}
 		{/if}
 <!--	{:catch error}-->
 <!--		<p>There was an error: {error.message}</p>-->
