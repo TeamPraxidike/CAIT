@@ -6,18 +6,20 @@ import {
 	editNode,
 	fileSystem,
 	getCircuitByPublicationId,
+	getPublisherId,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
 	prisma,
 	updateCircuitByPublicationId,
-	updateCircuitCoverPic,
+	updateCircuitCoverPic
 } from '$lib/database';
 import { Prisma } from '@prisma/client';
-import { verifyAuth } from '$lib/database/auth';
+import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
 
 import type {File as PrismaFile} from '@prisma/client';
 import {enqueueCircuitComparison} from "$lib/PiscinaUtils/runner";
+import { getMaintainers, getPublisher } from '$lib/database/publication';
 
 
 export async function GET({ params, locals }) {
@@ -49,7 +51,7 @@ export async function GET({ params, locals }) {
 
 		const filePath = circuit.publication.coverPic!.path;
 
-		const currentFileData = fileSystem.readFile(filePath);
+		const currentFileData = await fileSystem.readFile(filePath);
 
 		const circuitInfo = {
 			...circuit,
@@ -73,16 +75,17 @@ export async function GET({ params, locals }) {
 export async function PUT({ request, params, locals }) {
 	// Authentication step
 	// return 401 if user not authenticated
-
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const body: CircuitForm & {
-		circuitId: number;
+		circuitId: number,
+		publisherId: string
 	} = await request.json();
+
+	const authError = await verifyAuth(locals, body.userId);
+	if (authError) return authError;
 
 	const metaData = body.metaData;
 	// const userId = circuit.userId;
+	const publisherId = body.publisherId;
 	const nodeInfo: NodeDiffActions = body.nodeDiff;
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
@@ -100,6 +103,14 @@ export async function PUT({ request, params, locals }) {
 	}
 
 	try {
+		// TODO: should we trust frontend for this info? Probably not...
+		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
+		const publisher = await getPublisher(publicationId);
+		const publisherId = publisher?.publisher?.id;
+
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
+			return unauthResponse();
+
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {
 			await handleConnections(
 				tags,
@@ -113,6 +124,7 @@ export async function PUT({ request, params, locals }) {
 				await updateCircuitCoverPic(
 					coverPic,
 					publicationId,
+					body.userId,
 					prismaTransaction,
 				);
 			}
@@ -182,20 +194,33 @@ export async function PUT({ request, params, locals }) {
 	}
 }
 
-export async function DELETE({ params }) {
-	const id = parseInt(params.publicationId);
-	if (isNaN(id) || id <= 0) {
+export async function DELETE({ params, locals }) {
+	const publicationId = parseInt(params.publicationId);
+	if (isNaN(publicationId) || publicationId <= 0) {
 		return new Response(
 			JSON.stringify({
-				error: 'Bad Delete Request - Invalid Circuit Id',
+				error: 'Bad Delete Request - Invalid Circuit publicationId',
 			}),
 			{ status: 400 },
 		);
 	}
+
+	const publication = await getPublisherId(publicationId);
+	const authError = await verifyAuth(locals, publication.publisherId);
+	if (authError) return authError;
+
 	try {
+		// TODO: should we trust frontend for this info? Probably not...
+		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
+		const publisher = await getPublisher(publicationId);
+		const publisherId = publisher?.publisher?.id;
+
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "REMOVE")))
+			return unauthResponse();
+
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {
 			const publication = await deleteCircuitByPublicationId(
-				id,
+				publicationId,
 				prismaTransaction,
 			);
 

@@ -22,8 +22,8 @@ export const load: LayoutServerLoad = async ({
 }) => {
 	await parent();
 
-	const session = await locals.auth();
-	if (!session) throw redirect(303, '/signin');
+	const session = await locals.safeGetSession();
+	if (!session || !session.user) throw redirect(303, '/signin');
 
 	const pRes = await fetch(`/api/publication/${params.publication}`);
 	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
@@ -42,16 +42,33 @@ export const load: LayoutServerLoad = async ({
 	const likedComments = cRes.status === 200 ? await cRes.json() : [];
 	const likedReplies = rRes.status === 200 ? await rRes.json() : [];
 
+	// This fetches the files for a material publication
+	// Utilizes "Streaming with promises" in SvelteKit
+	async function fetchFiles() {
+		try {
+			const res = await fetch(`/api/material/${params.publication}/files`);
+			if (!res.ok && res.status === 404) {
+				// it is not a material publication, possible so we handle gracefully
+				return null;
+			}
+			else if (!res.ok){
+				// something definitely went wrong here
+				throw new Error(`Failed to load files: ${res.statusText}`);
+			}
+			const fileData = await res.json();
+
+			return fileData;
+		} catch (err) {
+			console.error('Error while getting files, page.server:\n', err);
+		}
+	}
+
 	return {
 		userSpecificInfo,
 		pubView,
+		fetchedFiles: fetchFiles(),
 		likedComments,
 		likedReplies,
-	} satisfies {
-		userSpecificInfo: { liked: boolean; saved: boolean };
-		pubView: PublicationView;
-		likedComments: number[];
-		likedReplies: number[];
 	};
 };
 
@@ -64,7 +81,7 @@ type UserPfp = User & {
  */
 export type PublicationView = {
 	isMaterial: boolean;
-	fileData: FetchedFileArray;
+	//fileData: Promise<FetchedFileArray>;
 	publication: Publication & {
 		usedInCourse: { course: string }[];
 		tags: Tag[];

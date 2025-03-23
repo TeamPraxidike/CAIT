@@ -9,5 +9,13 @@ export default defineConfig({
 		alias: {
 			".prisma/client/index-browser": "./node_modules/.prisma/client/index-browser.js"
 		}
+	},
+	server: {
+		hmr: {
+			overlay: true, // Enables the error overlay
+		},
+		watch: {
+			usePolling: true, // Use polling if file changes are not detected
+		},
 	}
 });

@@ -10,8 +10,6 @@ import path from 'path';
  * not with a cloud bucket storage.
  */
 export class LocalFileSystem implements FileSystem {
-	//readonly basePath = 'static\\uploadedFiles\\';
-	// readonly basePath = path.join('static', 'uploadedFiles');
 	private readonly basePath: string;
 
 	constructor(basePath: string) {
@@ -43,12 +41,16 @@ export class LocalFileSystem implements FileSystem {
 	 * This function might be better to avoid, as if you are calling it from a server file you can directly access the file system.
 	 * @param pathArg the path to the file
 	 */
-	readFile(pathArg: string): Buffer {
-		try {
-			return fs.readFileSync(path.join(this.basePath, pathArg));
-		} catch (error) {
-			throw error;
-		}
+	async readFile(pathArg: string): Promise<Buffer> {
+		return new Promise((resolve, reject) => {
+			fs.readFile(path.join(this.basePath, pathArg), (err, data) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(data);
+				}
+			});
+		});
 	}
 
 	/**
@@ -61,8 +63,10 @@ export class LocalFileSystem implements FileSystem {
 	 *
 	 * @param file the binary data of the file
 	 * @param name  the name of the file - used to determine the file extension
+	 * @param ownerId - file owner id
 	 */
-	async saveFile(file: Buffer, name: string): Promise<string> {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async saveFile(file: Buffer, name: string, ownerId: string): Promise<string> {
 		if (!file) {
 			throw new Error('No file provided');
 		}

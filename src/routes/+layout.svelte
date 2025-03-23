@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.postcss';
+	import SemanticSearch from '$lib/components/SemanticSearch.svelte';
 
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
@@ -14,8 +15,25 @@
 	import scala from 'highlight.js/lib/languages/scala';
 	import plaintext from 'highlight.js/lib/languages/plaintext';
 	import { Footer, Grid, Header } from '$lib';
+
 	// Floating UI for Popups
 	import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
+
+	import { invalidate } from '$app/navigation';
+	import { onMount } from 'svelte';
+
+	export let data;
+	$: ({ session, supabase, loggedUser } = data);
+
+	onMount(() => {
+		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
+			if (newSession?.expires_at !== session?.expires_at) {
+				invalidate('supabase:auth');
+			}
+		});
+
+		return () => data.subscription.unsubscribe();
+	});
 
 	initializeStores();
 
@@ -63,12 +81,18 @@
 	<link rel="icon" href="/images/favicons/favicon-128.png" sizes="128x128" type="image/png">
 </svelte:head>
 
-<Header />
+<Header supabase={supabase} loggedUser={loggedUser} />
 
 <div class="w-screen dark:text-surface-50 text-surface-900 overflow-x-hidden">
 	<Grid pageGrid="{true}">
 		<slot />
 	</Grid>
 </div>
+
+<!--<SemanticSearch-->
+<!--	title="Semantic Search"-->
+<!--	placeholder="Ask about content..."-->
+<!--	apiEndpoint="/api/semanticsearch"-->
+<!--/>-->
 
 <Footer />

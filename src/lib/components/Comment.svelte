@@ -1,21 +1,22 @@
 <script lang="ts">
-    import type {Comment, Reply} from "@prisma/client";
+    import type { Comment, Reply, User } from '@prisma/client';
     import {createEventDispatcher, onMount} from 'svelte';
     import Icon from '@iconify/svelte';
     import { getModalStore, getToastStore, type PopupSettings } from '@skeletonlabs/skeleton';
     import {popup} from '@skeletonlabs/skeleton';
     import { getDateDifference, AddInteractionForm } from '$lib';
-    import { page } from '$app/stores';
 
-    //assuming that you create the comment object prior to creating the components when adding a new comment, having all info available in it
+    //assuming that you create the comment object before creating the components when adding a new comment,
+    // having all info available in it
     export let interaction: Comment | Reply;
     export let isReply: boolean;
     export let liked:boolean;
-    export let photoUrl: string;
+    export let photoUrl: string | null;
+    export let commenter: User & { profilePicData: string };
 
-    //for now, here , we need to fetch it for each comment, which is kind of pain, but sure
+    //for now, here, we need to fetch it for each comment, which is kind of pain, but sure
     export let userName = ""
-    let browsingUser = $page.data.session?.user.id || 0
+    let browsingUser = commenter.id || 0
     let popupName = isReply ? `reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}` : `comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}`;
     let user = interaction.userId
     let text = interaction.content
@@ -193,12 +194,17 @@
         },
         closeQuery: '#copyButton'
     }
+
+    const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 
     <div bind:this={commentDiv}
      class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full  rounded-lg flex gap-2 p-1 ">
-        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />
+<!--        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />-->
+        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border"
+             src={photoUrl ? `data:image;base64,${photoUrl}` : defaultProfilePicturePath}
+             alt="Profile Picture" />
         <div class="flex flex-col w-full">
 
         <div class="flex gap-3 items-center max-w-full">
@@ -255,7 +261,7 @@
     </div>
 </div>
 
-<AddInteractionForm on:addedReply={sendReplyEvent}  on:cancelEventForum={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
+<AddInteractionForm publisher={commenter} on:addedReply={sendReplyEvent}  on:cancelEventForum={handleReplyCancel} addComment="{false}" commentId="{interaction.id}" display={display} />
 
 <div data-popup="{popupName}">
     <div class="flex flex-col bg-surface-200 dark:bg-surface-800 dark:text-surface-200 rounded-lg">
@@ -270,7 +276,7 @@
                 Edit
             </button>
         {/if}
-        {#if user === $page.data.session?.user.id || $page.data.session?.user.isAdmin}
+        {#if user === commenter.id || commenter.isAdmin}
             <button on:click={handleDelete} id="deleteButton"
                     class=" btn hover:bg-surface-300 dark:hover:bg-surface-700 rounded-lg">
                 Delete

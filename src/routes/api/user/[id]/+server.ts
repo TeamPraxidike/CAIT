@@ -16,6 +16,7 @@ import { verifyAuth } from '$lib/database/auth';
 /**
  * Returns a user by id
  * @param params
+ * @param locals
  */
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -30,7 +31,7 @@ export async function GET({ params, locals }) {
 			});
 
 		// profilePic return
-		const profilePicData: FetchedFileItem = profilePicFetcher(
+		const profilePicData: FetchedFileItem = await profilePicFetcher(
 			user.profilePic,
 		);
 
@@ -45,15 +46,17 @@ export async function GET({ params, locals }) {
 /**
  * Deletes a user by id
  * @param params
+ * @param locals
  */
 export async function DELETE({ params, locals }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const { id: userId } = params;
 
+	// Right now only users can delete themselves, an admin cannot do it through the API.
+	const authError = await verifyAuth(locals, params.id);
+	if (authError) return authError;
+
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction) => {
+		const user = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 			const user = await deleteUser(userId, prismaTransaction);
 
 			// check if user has profilePic
@@ -92,14 +95,15 @@ export async function DELETE({ params, locals }) {
  * Edits a user by id
  * @param params
  * @param request
+ * @param locals
  */
 export async function PUT({ params, request, locals }) {
-	const authError = await verifyAuth(locals);
+	const authError = await verifyAuth(locals, params.id);
 	if (authError) return authError;
 
 	const body: UserForm = await request.json();
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction) => {
+		const user = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 			const userData: userEditData = {
 				id: params.id,
 				firstName: body.metaData.firstName,

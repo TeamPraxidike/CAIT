@@ -19,8 +19,14 @@
 
 
 
+	// $: ({loggedUser} = data);
+	let loggedUser = $page.data.loggedUser;
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationView = data.pubView;
+	// console.log(data)
+	// console.log("----------")
+	// console.log(serverData);
+	// console.log("----------")
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
@@ -33,6 +39,7 @@
 	let selectedType:any;
 	let files: FileList;
 	let oldFiles: any;
+	let fetchedFiles: any;
 
 
 	let LOs: string[] = serverData.publication.learningObjectives;
@@ -51,28 +58,61 @@
 		time = serverData.publication.materials.timeEstimate;
 		copyright = serverData.publication.materials.copyright;
 		selectedType = serverData.publication.materials.encapsulatingType;
-		files = createFileList(serverData.fileData, serverData.publication.materials.files);
-		oldFiles = serverData.publication.materials.files
+		(async () => {
+			fetchedFiles = await data.fetchedFiles;
+			// console.log(fetchedFiles);
+			// console.log("----------");
+			// console.log("serverData.publication.materials.files")
+			// console.log(serverData.publication.materials.files);
+			// console.log("----------")
+			//files = createFileList(serverData.fileData, serverData.publication.materials.files);
+			files = createFileList(fetchedFiles, serverData.publication.materials.files);
+			oldFiles = serverData.publication.materials.files
+			// console.log(oldFiles)
+		})();
 	}
-	let coverPicMat:File|undefined;
+
+	let coverPicMat:File|undefined = undefined;
+	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
+	let selectedFileList: FileList = [];
+
 	if (isMaterial){
-		coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
+		// TODO: (random?) figure out why the type is a string rather than a null
+		if ((typeof serverData.coverFileData.data === "string" && serverData.coverFileData.data != 'null') ||
+			(typeof serverData.coverFileData.data !== "string" && serverData.coverFileData.data != null)){
+			coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
+		}
 	}
 	let allTypes: {id:string, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 
 	function chooseCover(e: Event) {
-		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles) {
-			if (eventFiles[0].type === 'image/jpeg' || eventFiles[0].type === 'image/png')
-				coverPicMat = eventFiles[0];
-			else
-				toastStore.trigger({
-					message: 'Invalid file type, please upload a .jpg or .png file',
-					background: 'bg-warning-200'
-				});
+		const input = e.target as HTMLInputElement;
+		if (!input.files?.length) return;
+
+		const file = input.files[0];
+
+		// Check if file is valid
+		if (file.type === 'image/jpeg' || file.type === 'image/png') {
+			coverPicMat = file;
+
+			// If you add a picture and then remove it
+			// You cannot re-add it until you select another image (and remove it)
+			// this is a workaround, think of it as deleting some cache
+			input.value = '';
+
+			// Update the FileList using DataTransfer
+			const dataTransfer = new DataTransfer();
+			dataTransfer.items.add(file);
+			selectedFileList = dataTransfer.files;
+		} else {
+			toastStore.trigger({
+				message: 'Invalid file type, please upload a .jpg or .png file',
+				background: 'bg-warning-200'
+			});
 		}
 	}
+
 
 
 	let allTags: PrismaTag[] = data.tags;
@@ -87,7 +127,7 @@
 			background: 'bg-success-200',
 			classes: 'text-surface-900',
 		});
-		goto(`/${publication.publisherId}/${publication.id}`);
+		goto(`/${loggedUser.username}/${publication.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -149,6 +189,35 @@
 		}
 	}
 
+	const locks: boolean[] = [true, true, true, true];
+	$: locks[0] = isMaterial ? files?.length === 0 : false;
+	$: locks[1] = title.length < 1 || description.length < 1 || (isMaterial && selectedType === "Select Type");
+	$: locks[2] = tags.length < 1 || LOs.length < 1;
+
+
+	// Warning messages for missing fields
+	let warning1: string = "";
+	const generateWarningStep1 = (title: string, description: string, selectedType: string): string => {
+		let warning = "You are missing ";
+		if (title.length < 1) warning += "a title";
+		if (description.length < 1 && title.length < 1) warning += ", a description";
+		else if(description.length < 1) warning += "a description";
+		if ((title.length < 1 || description.length < 1) && selectedType === "Select Type") warning += " and a material type";
+		else if (selectedType === "Select Type") warning += "a material type";
+		warning += ".";
+		return warning;
+	}
+	$: warning1 = generateWarningStep1(title, description, selectedType);
+
+	let warning2: string = "";
+	const generateWarningStep2 = (tags: number, LOs: number) => {
+		let warning = "You are missing ";
+		if (tags < 1) warning += "a tag";
+		if (LOs < 1 && tags < 1) warning += " and a Learning Objective";
+		else if (LOs < 1) warning += "a Learning Objective";
+		return warning += ".";
+	}
+	$: warning2 = generateWarningStep2(tags.length, LOs.length);
 
 </script>
 
@@ -159,15 +228,27 @@
 	  class="col-span-full my-20"
 	  use:enhance={async ({ formData }) => {
 
-		if(isMaterial)
-      Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+
+		if (locks[0] || locks[1] || locks[2]) {
+			toastStore.trigger({
+				message: "Please complete all required fields before submitting.",
+				background: "bg-warning-200"
+			});
+			return;
+		}
+
+
+		if(isMaterial){
+      		Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+		}
 
 		formData.append('title', title);
 		formData.append('description', description)
 		formData.append('isMaterial', JSON.stringify(isMaterial));
 
 		formData.append('oldFiles', JSON.stringify(oldFiles));
-		formData.append('oldFilesData', JSON.stringify(serverData.fileData));
+		//formData.append('oldFilesData', JSON.stringify(serverData.fileData));
+		formData.append('oldFilesData', JSON.stringify(fetchedFiles));
 
 		formData.append('userId', $page.data.session?.user.id.toString() || '');
 		formData.append('tags', JSON.stringify(tags));
@@ -182,8 +263,9 @@
 		formData.append('type', selectedType);
 		formData.append('coverPicMat', coverPicMat || '');
 
-		formData.append('circuitId', JSON.stringify(serverData.publication.circuit?.id || 0))
-		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0))
+		formData.append('circuitId', JSON.stringify(serverData.publication.circuit?.id || 0));
+		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0));
+		formData.append('publisherId', JSON.stringify(serverData.publication.publisherId));
 
 		if(circuitRef){
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
@@ -261,7 +343,7 @@
 	</div>
 
 	<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
-	<MantainersEditBar bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
+	<MantainersEditBar publisher={serverData.publication.publisher} bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
 
 	<div class="text-token w-full md:w-1/2 space-y-2 pl-3">
 		<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
@@ -274,10 +356,13 @@
 		</div>
 		<div class="mt-4">
 			<label for="coverPhoto">Cover Picture:</label>
-			<FileButton on:change={chooseCover} name="coverPhoto">Upload File</FileButton>
-			{#if coverPicMat}
-				<button on:click={() => coverPicMat = undefined} type="button" class="btn">Remove</button>
-				<img src={URL.createObjectURL(coverPicMat)} alt="sss">
+			<img src={coverPicMat ? URL.createObjectURL(coverPicMat) : defaultCoverPicturePath} alt="Cover image">
+			<FileButton on:change={chooseCover} bind:files={selectedFileList} name="coverPhoto">Upload File</FileButton>
+			{#if coverPicMat !== undefined}
+				<button on:click={() => {
+					coverPicMat = undefined;
+					selectedFileList = new DataTransfer().files;
+				}} type="button" class="btn">Remove</button>
 			{/if}
 		</div>
 	{:else}
@@ -286,10 +371,18 @@
 		</div>
 	{/if}
 
-
+	{#if locks[1]}
+		<p class="text-error-300 dark:text-error-400">{warning1}</p>
+	{/if}
+	{#if locks[2]}
+		<p class="text-error-300 dark:text-error-400">{warning2}</p>
+	{/if}
 
 	<div class="flex float-right gap-2">
-		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50 mt-4">Save Changes</button>
+		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50 mt-4"
+				disabled={locks[0] || locks[1] || locks[2]}>
+			Save Changes
+		</button>
 		<button type="button" on:click={()=>{window.history.back()}} class=" flex-none float-right btn rounded-lg variant-filled-surface text-surface-50 mt-4">Cancel</button>
 	</div>
 

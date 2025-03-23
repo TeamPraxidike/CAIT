@@ -1,50 +1,45 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect } from '@sveltejs/kit';
-import { signOnSchema } from '$lib/util/zod';
-import type { UserCreateForm } from '$lib/database';
-import { hashPassword } from '$lib/util/auth';
+import { fail, redirect } from '@sveltejs/kit';
+// todo: put schema
+// import { signOnSchema } from '$lib/util/zod';
+// import type { UserCreateForm } from '$lib/database';
 
 export const load: PageServerLoad = async (event) => {
-	const session = await event.locals.auth();
+	const session = await event.locals.safeGetSession();
 	if (session?.user) throw redirect(303, '/browse');
 	return { session };
 };
 
-export const actions = {
-	register: async ({ request, fetch }) => {
+export const actions: Actions = {
+	register: async ({ request, locals: { supabase }, fetch }) => {
 		const formData = await request.formData();
-		const formDataObj = Object.fromEntries(formData.entries());
+		const email = formData.get('email') as string;
+		const password = formData.get('password') as string;
+		const firstName = formData.get('firstName');
+		const lastName = formData.get('lastName');
 
-		const { success, error } =
-			await signOnSchema.safeParseAsync(formDataObj);
-
-		if (!success) {
-			return {
-				status: 400,
-				message: 'Bad input',
-				error: error.errors,
-			};
+		const { error } = await supabase.auth.signUp({
+			email,
+			password,
+			options: {
+				data: { firstName, lastName }
+			}
+		});
+		const user = await supabase.auth.getUser();
+		if (user.data.user == null) {
+			return fail(400, { email, firstName, lastName, incorrect: true, error: 'Error logging in' });
 		}
 
-		const sent: UserCreateForm = {
-			metaData: {
-				firstName: formDataObj.firstName.toString(),
-				lastName: formDataObj.lastName.toString(),
-				email: formDataObj.email.toString(),
-				password: hashPassword(formDataObj.password.toString()),
-			},
-		};
-
-		const res = await fetch('/api/user', {
-			method: 'POST',
-			body: JSON.stringify(sent),
-			headers: {
-				'Content-Type': 'application/json',
-			},
+		// The default supabase signup method does not care about our custom usernames
+		// We need this to update the username after the user is created otherwise it is just an uuid
+		await fetch(`/api/user/${user.data.user.id}/username`, {
+			method: 'PUT',
 		});
 
-		if (!res.ok) return { status: res.status, message: res.statusText };
-
-		return { status: 200, message: 'success' };
-	},
-} satisfies Actions;
+		if (error) {
+			return fail(400, { email, firstName, lastName, incorrect: true, error: error.message });
+		} else {
+			redirect(303, '/');
+		}
+	}
+};

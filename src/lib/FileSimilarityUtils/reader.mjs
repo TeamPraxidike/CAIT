@@ -1,36 +1,60 @@
-import fs from 'fs';
 import { getTextExtractor } from 'office-text-extractor';
 import WordExtractor from 'word-extractor';
 import removeMd from 'remove-markdown';
 import { pythonKeywords } from './pythonKeywords.mjs';
+import { fileSystem } from '../indexJS.mjs';
+import { model } from '../similarityIndex.mjs';
+import CustomRecursiveCharacterTextSplitter from '../DocumentSplitter/Splitter.mjs'
 
 export async function reader(filePath) {
-    switch(filePath.split('.').pop()) {
-        case 'txt':
-            return txtReader(filePath);
+    // Extract file extension
+    const extension = filePath.split('.').pop();
 
-        case 'md':
-            return mdReader(filePath);
+    // Map file extensions to corresponding reader functions
+    const readers = {
+        txt: txtReader,
+        md: mdReader,
+        ipynb: ipynbReader,
+        py: pyReader,
+        doc: wordReader,
+        docx: wordReader,
+        pdf: officeReader,
+        pptx: officeReader,
+        xlsx: officeReader,
+    };
 
-        case 'ipynb':
-            return ipynbReader(filePath);
+    // Get the appropriate reader function
+    const readFunction = readers[extension];
 
-        case 'py':
-            return pyReader(filePath);
+    if (!readFunction) {
+        //return null; // Unsupported file type
+        return { "text": null, "chunks": null }; // Unsupported file type
+    }
 
-        case 'doc':
-        case 'docx':
-            return wordReader(filePath);
+    try {
+        // Read the file content
+        const text = await readFunction(filePath);
 
-        case 'pdf':
-        case 'pptx':
-        case 'xlsx':
-            return officeReader(filePath);
+        // Create text splitter
+        const splitter = new CustomRecursiveCharacterTextSplitter();
+        const chunks = await splitter.splitText(text);
 
-        default:
-            return null;
+        // Format into documents
+        const fileChunks = await Promise.all(
+            chunks.map(async (content) => ({
+                pageContent: content,
+                embedding: await model.computeEmbeddingSingleText(content),
+                metadata: { extension: extension }
+            }))
+        );
+
+        return { "text": text, "chunks": fileChunks };
+    } catch (error) {
+        console.error(`Error processing file: ${filePath}`, error);
+        return null;
     }
 }
+
 
 /**
  * Read .txt file
@@ -39,7 +63,9 @@ export async function reader(filePath) {
  */
 export async function txtReader(filePath) {
     try {
-        return fs.readFileSync(filePath).toString('utf8');
+        //return fs.readFileSync(filePath).toString('utf8');
+        const buffer = await fileSystem.readFile(filePath);
+        return buffer.toString('utf8');
     } catch (err) {
         console.error('Error reading the file:', err);
         return '';
@@ -53,7 +79,9 @@ export async function txtReader(filePath) {
  */
 export async function mdReader(filePath) {
     try {
-        const text = fs.readFileSync(filePath).toString('utf8');
+        //const text = fs.readFileSync(filePath).toString('utf8');
+        const buffer = await fileSystem.readFile(filePath);
+        const text = buffer.toString('utf8');
         return removeMd(text);
     } catch (err) {
         console.error('Error reading the file:', err);
@@ -91,7 +119,9 @@ export function pythonCodeParser(source) {
  */
 export async function pyReader(filePath) {
     try {
-        const code = fs.readFileSync(filePath).toString('utf8');
+        //const code = fs.readFileSync(filePath).toString('utf8');
+        const buffer = await fileSystem.readFile(filePath);
+        const code = buffer.toString('utf8');
         return pythonCodeParser(code);
     } catch (err) {
         console.error('Error reading the file:', err);
@@ -106,7 +136,9 @@ export async function pyReader(filePath) {
  */
 export async function ipynbReader(filePath) {
     try {
-        const data = fs.readFileSync(filePath).toString('utf8');
+        //const data = fs.readFileSync(filePath).toString('utf8');
+        const buffer = await fileSystem.readFile(filePath);
+        const data = buffer.toString('utf8');
 
         // check if the data is an empty string
         if (!data || data.trim() === '') {
@@ -152,7 +184,8 @@ export async function ipynbReader(filePath) {
 export async function wordReader(filePath) {
     const extractor = new WordExtractor();
     try {
-        const doc = await extractor.extract(filePath);
+        const data = await fileSystem.readFile(filePath);
+        const doc = await extractor.extract(data);
         return doc.getBody();
     } catch (error) {
         console.error(`Error extracting text from document: ${error}`);
@@ -167,7 +200,9 @@ export async function wordReader(filePath) {
  */
 export async function officeReader(filePath) {
     const extractor = getTextExtractor();
-    return await extractor.extractText({ input: filePath, type: 'file' });
+    //return await extractor.extractText({ input: filePath, type: 'file' });
+    const data = await fileSystem.readFile(filePath);
+    return await extractor.extractText({ input: data, type: null });
 }
 
 /**

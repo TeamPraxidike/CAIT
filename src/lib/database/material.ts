@@ -259,3 +259,35 @@ export async function updateMaterialByPublicationId(
 		},
 	});
 }
+
+export async function getMaterialForFile(
+	path: string,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	return prismaContext.file.findUnique({
+		where: {path: path},
+		include: {
+			material: {
+				include: {
+					publication: {
+						include: {
+							tags: true,
+							coverPic: true,
+							usedInCourse: {
+								select: {
+									course: true,
+								},
+							},
+							publisher: {
+								include: {
+									profilePic: true,
+								},
+							},
+						},
+					},
+					files: true,
+				},
+			}
+		}
+	})
+}

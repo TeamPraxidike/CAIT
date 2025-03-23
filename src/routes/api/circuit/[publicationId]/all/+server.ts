@@ -33,22 +33,22 @@ export async function GET({ locals, params }) {
 			);
 		}
 
-		circuits = circuits.map((circuit) => {
+		circuits = await Promise.all(circuits.map(async (circuit) => {
 			const filePath = circuit.publication.coverPic!.path;
 
-			const currentFileData = fileSystem.readFile(filePath);
+			const currentFileData = await fileSystem.readFile(filePath);
 
 			return {
 				...circuit,
 				publisher: {
 					...circuit.publication.publisher,
-					profilePicData: profilePicFetcher(
+					profilePicData: (await profilePicFetcher(
 						circuit.publication.publisher.profilePic,
-					).data,
+					)).data,
 				},
 				coverPicData: currentFileData.toString('base64'),
 			};
-		});
+		}));
 		return new Response(JSON.stringify(circuits), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error: 'Server Error' }), {

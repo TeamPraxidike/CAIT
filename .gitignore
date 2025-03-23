@@ -12,3 +12,4 @@ reports
 .snaplet
 static/uploadedFiles
 /seed.ts
+.direnv/

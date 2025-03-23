@@ -1,10 +1,24 @@
-import type { Actions, PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
-import { signIn } from '$lib/database/auth';
+import { fail, redirect } from '@sveltejs/kit';
+
+import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	const session = await event.locals.auth();
+	const session = await event.locals.safeGetSession();
 	if (session?.user) throw redirect(303, '/browse');
 	return { session };
 };
-export const actions: Actions = { default: signIn };
+
+export const actions: Actions = {
+	login: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = formData.get('email') as string;
+		const password = formData.get('password') as string;
+
+		const { error } = await supabase.auth.signInWithPassword({ email, password });
+		if (error) {
+			return fail(400, { email, incorrect: true, error: error.message });
+		} else {
+			redirect(303, '/browse');
+		}
+	}
+};

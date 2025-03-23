@@ -620,7 +620,7 @@
 			})
 			.then(data => {
 				// Handle the response data from the API
-				console.log(data)
+				//console.log(data)
 				displayedMaterials = data.materials;
 				displayIds = data.idsMat
 				addActive = true;

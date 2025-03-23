@@ -18,8 +18,8 @@ import TheoryAppBar from '$lib/components/TheoryAppBar.svelte';
 import PublicationCard from '$lib/components/PublicationCard.svelte';
 import Comment from '$lib/components/Comment.svelte';
 import Filter from '$lib/components/Filter.svelte';
-import Circuit from '$lib/components/circuits/Circuit.svelte';
-import CircuitPureHTML from '$lib/components/circuits/CircuitPureHTML.svelte';
+import Circuit from '$lib/components/circuits/components/Circuit.svelte';
+import CircuitComponent from '$lib/components/circuits/components/CircuitComponent.svelte';
 import Download from '$lib/components/generic/Download.svelte';
 import HorizontalScroll from '$lib/components/HorizontalScroll.svelte';
 import FileTable from '$lib/components/FileTable.svelte';
@@ -29,7 +29,7 @@ import PublishReview from '$lib/components/PublishReview.svelte';
 
 // util
 import { getDateDifference } from '$lib/util/date';
-
+import { formatFileSize } from "$lib/util/file"
 import { mapToType, mapToDifficulty, MaterialTypes } from '$lib/util/types';
 
 const lorem =
@@ -39,6 +39,7 @@ import AddInteractionForm from '$lib/components/AddInteractionForm.svelte';
 
 
 export {
+	formatFileSize,
 	mapToType,
 	mapToDifficulty,
 	Download,
@@ -64,7 +65,7 @@ export {
 	lorem,
 	Filter,
 	Circuit,
-	CircuitPureHTML,
+	CircuitComponent,
 	AddInteractionForm,
 	UsedInCourse,
 	PublishReview,

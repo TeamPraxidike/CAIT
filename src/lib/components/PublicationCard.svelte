@@ -40,7 +40,7 @@
 	export let liked: boolean = true;
 	export let saved: boolean = true;
 	export let tags: string[] = publication.tags.map(tag => tag.content);
-	export let imgSrc: string;
+	export let imgSrc: string | null;
 	export let markAsUsed: boolean = false;
 	export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
@@ -210,7 +210,11 @@
 			setTimeout(()=>{isClickedTags=false},10000);
 		}
 	}
+
+	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
+	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
 </script>
+
 <div class="{className} flex items-center">
 	{#if forArrow}
 		<div class="carrow shadow-lg"/>
@@ -224,16 +228,16 @@
 				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
 					Used in {used} courses</p>
 			{/if}
-			<a href="../{publication.publisherId}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}"
+			<a href="../{publisher.username}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}"
 			   on:click={resetTab}>
-				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc} alt="" />
+				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc ? `data:image;base64,${imgSrc}` : defaultCoverPicturePath } alt="" />
 			</a>
 		</div>
 		<div class="flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
 			<!-- Title and difficulty -->
 			<div class="w-full">
 				<div class="flex justify-between items-start">
-					<a href="/{publication.publisherId}/{publication.id}"
+					<a href="/{publisher.username}/{publication.id}"
 						 class="line-clamp-2 font-bold text-surface-700 max-w-[80%] text-sm dark:text-surface-200 self-center hover:text-surface-500" on:click={resetTab}>
 						{publication.title}
 					</a>
@@ -241,8 +245,6 @@
 						{#if publication.type === PublicationType.Circuit}
 							<Icon icon="tabler:binary-tree-2" class="text-xl self-center text-primary-500" />
 						{:else}
-
-
 							<div class="py-1 relative" bind:this={hoverDiv}>
 								<Icon icon={PublicationTypeIconMap.get(materialType) || ""} class="text-primary-600 size-5" />
 								{#if isHovered}
@@ -297,7 +299,7 @@
 				<div class="w-full flex justify-between">
 					<div class="w-full flex justify-left space-x-4">
 						{#if !inCircuits}
-							<a href="/{publication.publisherId}/{publication.id}"
+							<a href="/{publisher.username}/{publication.id}"
 							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"
 							   on:click={resetTab}>View</a>
 						{:else if !selected}
@@ -344,9 +346,9 @@
 							</button>
 						</div>
 							<div bind:this={pfpElement} class="relative inline-flex items-center">
-								<a href="/{publication.publisherId}" class="flex-none">
+								<a href="/{publisher.username}" class="flex-none">
 									<img class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
-										 src={'data:image;base64,' + publisher.profilePicData} alt="CAIT Logo" />
+										 src={publisher.profilePicData ? `data:image;base64,${publisher.profilePicData}` : defaultProfilePicturePath} alt="CAIT Logo" />
 								</a>
 								{#if isHoveredPfp}
 									<div

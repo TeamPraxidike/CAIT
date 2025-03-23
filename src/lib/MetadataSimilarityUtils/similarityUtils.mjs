@@ -8,7 +8,7 @@ import { calculateCosineSimilarity, model} from "../similarityIndex.mjs";
  */
 export async function compareTitleOrDescription(text1, text2) {
     try {
-        const data = await model.computeEmbeddings(text1, text2);
+        const data = await model.computeEmbeddingsTextPair(text1, text2);
         return calculateCosineSimilarity(data.embeddingFirst, data.embeddingSecond);
     } catch (error) {
         console.error('Error while comparing metadata (title/desc):', error);
@@ -24,7 +24,7 @@ export async function compareTitleOrDescription(text1, text2) {
  */
 export async function comparePrereqOrLO(text1, text2) {
     try {
-        const data = await model.computeEmbeddings(text1.join('. '), text2.join('. '));
+        const data = await model.computeEmbeddingsTextPair(text1.join('. '), text2.join('. '));
         return calculateCosineSimilarity(data.embeddingFirst, data.embeddingSecond);
     } catch (error) {
         console.error('Error while comparing metadata (lo/prereq):', error);

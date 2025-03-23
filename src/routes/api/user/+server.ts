@@ -1,5 +1,6 @@
 import { createUser, prisma, type UserCreateForm } from '$lib/database';
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
+import type { PrismaClient } from '@prisma/client';
 
 /**
  * Create a new user
@@ -10,7 +11,7 @@ export async function POST({ request }) {
 	// authentication step here
 	const body: UserCreateForm = await request.json();
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction) => {
+		const user = await prisma.$transaction(async (prismaTransaction: PrismaClient) => {
 			const user = await createUser(body.metaData, prismaTransaction);
 
 			await updateProfilePic(null, user.id, prismaTransaction);
@@ -43,12 +44,12 @@ export async function GET() {
 			},
 		});
 
-		users = users.map((user) => {
+		users = await Promise.all(users.map(async (user) => {
 			return {
 				...user,
-				profilePicData: profilePicFetcher(user.profilePic).data,
+				profilePicData: (await profilePicFetcher(user.profilePic)).data,
 			};
-		});
+		}));
 		return new Response(JSON.stringify({ users }), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error }), { status: 500 });

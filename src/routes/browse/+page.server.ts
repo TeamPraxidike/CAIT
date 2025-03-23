@@ -2,18 +2,69 @@ import type { FetchedFileArray } from '$lib/database';
 import type { User } from '@prisma/client';
 
 export async function load({ url, fetch, locals }) {
-	const session = await locals.auth();
+	const session = await locals.safeGetSession();
 
 	const type = url.searchParams.get('type') || 'materials';
-	const { materials, idsMat } =
-		type === 'materials'
-			? await (await fetch(`/api/material`)).json()
-			: { materials: [], idsMat: [] };
-	const { circuits, idsCirc } =
-		type === 'circuits'
-			? await (await fetch(`/api/circuit`)).json()
-			: { circuits: [], idsCirc: [] };
-	const { users } = await (await fetch(`/api/user`)).json();
+
+	async function fetchMaterials() {
+		if (type !== 'materials') {
+			return { materials: [], idsMat: [] };
+		}
+
+		try{
+			const res = await fetch(`/api/material`);
+
+			if (!res.ok) {
+				throw new Error(`Failed to load materials in browse: ${res.statusText}`);
+			}
+
+			return res.json();
+		}
+		catch (err) {
+			console.error('Error while getting materials, page.server:\n', err);
+		}
+
+	}
+
+	async function fetchCircuits() {
+		if (type !== 'circuits') {
+			return { circuits: [], idsCirc: [] };
+		}
+
+		try{
+			const res = await fetch(`/api/circuit`);
+
+			if (!res.ok) {
+				throw new Error(`Failed to load circuits in browse: ${res.statusText}`);
+			}
+
+			return res.json();
+		}
+		catch (err) {
+			console.error('Error while getting circuits, page.server:\n', err);
+		}
+
+	}
+
+
+	async function fetchUsers() {
+
+		try{
+			const res = await fetch(`/api/user`);
+
+			if (!res.ok) {
+				throw new Error(`Failed to fetch users in browse: ${res.statusText}`);
+			}
+
+			return res.json();
+		}
+		catch (err) {
+			console.error('Error while getting users, page.server:\n', err);
+		}
+
+	}
+
+
 	let liked: number[] = [];
 	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
 		saved: [],
@@ -23,7 +74,7 @@ export async function load({ url, fetch, locals }) {
 
 	const selectedTag = url.searchParams.get('tags') || '';
 
-	if (session !== null) {
+	if (session && session.user) {
 		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
 		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
 
@@ -46,14 +97,17 @@ export async function load({ url, fetch, locals }) {
 	return {
 		selectedTag,
 		type,
-		materials,
-		users,
-		circuits,
+		// materials,
+		// users,
+		// circuits,
+		materials: fetchMaterials(),
+		users: fetchUsers(),
+		circuits: fetchCircuits(),
 		tags,
 		liked,
 		saved,
-		idsMat,
-		idsCirc,
+		// idsMat,
+		// idsCirc,
 		amount: 8,
 	};
 }

@@ -38,8 +38,11 @@ export const actions = {
 		const newTags = data.getAll('newTags') || '';
 
 		const maintainers = data.get('maintainers')?.toString() || '';
+
 		const prior = data.get('PK')?.toString() || '';
 		const LOs = data.get('learning_objectives')?.toString() || '';
+
+		const publisherId = data.get('publisherId')?.toString() || '';
 
 		//circuit data does not get carried over to the submission of the form, don't know why
 		const circuitData = data.get('circuitData')?.toString() || '';
@@ -66,8 +69,9 @@ export const actions = {
 			throw new Error('User Id was undefined');
 		}
 		if (isMaterial === 'false') {
-			const circuit: CircuitForm & { circuitId: number } = {
+			const circuit: CircuitForm & { circuitId: number, publisherId: string } = {
 				circuitId: Number(cid),
+				publisherId: publisherId,
 				userId: userId,
 				metaData: {
 					title: title,
@@ -152,9 +156,11 @@ export const actions = {
 			}
 
 			const material: MaterialForm & {
-				materialId: number;
+				materialId: number,
+				publisherId: string
 			} = {
 				materialId: Number(mid),
+				publisherId: publisherId,
 				userId: userId,
 				metaData: {
 					title: title,

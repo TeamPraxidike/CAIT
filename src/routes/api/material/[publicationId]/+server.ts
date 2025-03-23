@@ -5,18 +5,21 @@ import {
 	type FetchedFileItem,
 	type FileDiffActions,
 	fileSystem,
-	getMaterialByPublicationId,
+	getMaterialByPublicationId, getPublisherId,
 	handleConnections,
 	type MaterialForm,
 	prisma,
 	updateCoverPic,
 	updateFiles,
-	updateMaterialByPublicationId,
+	updateMaterialByPublicationId
 } from '$lib/database';
-import { type File as PrismaFile, Prisma } from '@prisma/client';
-import { canEdit, unauthResponse, verifyAuth } from '$lib/database/auth';
+
+import { type File as PrismaFile, Prisma, type PrismaClient } from '@prisma/client';
+import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
+
 
 import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
+import { getMaintainers, getPublisher } from '$lib/database/publication';
 
 
 export async function GET({ params, locals }) {
@@ -49,7 +52,7 @@ export async function GET({ params, locals }) {
 		const fileData: FetchedFileArray = [];
 
 		for (const file of material.files) {
-			const currentFileData = fileSystem.readFile(file.path);
+			const currentFileData = await fileSystem.readFile(file.path);
 			fileData.push({
 				fileId: file.path,
 				data: currentFileData.toString('base64'),
@@ -57,11 +60,12 @@ export async function GET({ params, locals }) {
 		}
 
 		// coverPic return
-		const coverFileData: FetchedFileItem = coverPicFetcher(
+		const coverFileData: FetchedFileItem = await coverPicFetcher(
 			material.encapsulatingType,
 			material.publication.coverPic,
 		);
 
+		// TODO: is the || necessary
 		material.publication.publisher = {
 			...material.publication.publisher,
 			profilePicData:
@@ -83,15 +87,18 @@ export async function GET({ params, locals }) {
 }
 
 export async function PUT({ request, params, locals }) {
-	const authError = await verifyAuth(locals);
-	if (authError) return authError;
-
 	const body: MaterialForm & {
 		materialId: number;
+		publisherId: string
 	} = await request.json();
+	
+	const authError = await verifyAuth(locals, body.userId);
+	if (authError) return authError;
 
-	const material: MaterialForm = body;
+	// TODO: cleanup
+	const material = body;
 	const metaData = material.metaData;
+	const publisherId = material.publisherId;
 	// const userId = material.userId;
 	const fileInfo: FileDiffActions = material.fileDiff;
 	const tags = metaData.tags;
@@ -110,12 +117,16 @@ export async function PUT({ request, params, locals }) {
 	}
 
 	try {
-		const material = await getMaterialByPublicationId(publicationId);
-		if (!(await canEdit(locals, material.publication.publisher.id)))
+		// TODO: should we trust frontend for this info? Probably not...
+		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
+		const publisher = await getPublisher(publicationId);
+		const publisherId = publisher?.publisher?.id;
+
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
 			return unauthResponse();
 
 		const updatedMaterial = await prisma.$transaction(
-			async (prismaTransaction) => {
+			async (prismaTransaction: PrismaClient) => {
 				await handleConnections(
 					tags,
 					maintainers,
@@ -126,10 +137,16 @@ export async function PUT({ request, params, locals }) {
 				await updateCoverPic(
 					coverPic,
 					publicationId,
+					body.userId,
 					prismaTransaction,
 				);
 
-				await updateFiles(fileInfo, body.materialId, prismaTransaction);
+				await updateFiles(
+					fileInfo,
+					body.materialId,
+					body.userId,
+					prismaTransaction,
+				);
 
 				return await updateMaterialByPublicationId(
 					publicationId,
@@ -164,22 +181,35 @@ export async function PUT({ request, params, locals }) {
 	}
 }
 
-export async function DELETE({ params }) {
-	const id = parseInt(params.publicationId);
+export async function DELETE({ params, locals }) {
+	const publicationId = parseInt(params.publicationId);
 
-	if (isNaN(id) || id <= 0) {
+	const publication = await getPublisherId(publicationId);
+	const authError = await verifyAuth(locals, publication.publisherId);
+	if (authError) return authError;
+
+	if (isNaN(publicationId) || publicationId <= 0) {
 		return new Response(
 			JSON.stringify({
-				error: 'Bad Delete Request - Invalid Material Id',
+				error: 'Bad Delete Request - Invalid Material publication Id',
 			}),
 			{ status: 400 },
 		);
 	}
+
 	try {
+		// TODO: should we trust frontend for this info? Probably not...
+		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
+		const publisher = await getPublisher(publicationId);
+		const publisherId = publisher?.publisher?.id;
+
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "REMOVE")))
+			return unauthResponse();
+
 		const material = await prisma.$transaction(
-			async (prismaTransaction) => {
+			async (prismaTransaction: PrismaClient) => {
 				const publication = await deleteMaterialByPublicationId(
-					id,
+					publicationId,
 					prismaTransaction,
 				);
 

@@ -35,12 +35,12 @@ function filterSaved(saved: any, query: string) {
  * @param locals
  */
 export async function GET({ params, url, locals }) {
-	const authError = await verifyAuth(locals);
+	const { id } = params;
+	const authError = await verifyAuth(locals, id);
 	if (authError) return authError;
 
-	const { id } = params;
-
 	const user = await getUserById(id);
+
 	if (!user)
 		return new Response(JSON.stringify({ error: 'User not found' }), {
 			status: 404,
@@ -51,7 +51,6 @@ export async function GET({ params, url, locals }) {
 		return new Response(JSON.stringify({ error: 'Server error' }), {
 			status: 500,
 		});
-
 	let saved;
 	const fileData: FetchedFileArray = [];
 
@@ -61,37 +60,37 @@ export async function GET({ params, url, locals }) {
 		for (const publication of saved) {
 			if (publication.materials === null) {
 				const filePath = publication.coverPic!.path;
-				const currentFileData = fileSystem.readFile(filePath);
+				const currentFileData = await fileSystem.readFile(filePath);
 				const coverPicData = currentFileData.toString('base64');
 				temp.push({ ...publication, coverPicData: coverPicData });
 			} else {
 				temp.push({
 					...publication,
-					coverPicData: coverPicFetcher(
+					coverPicData: (await coverPicFetcher(
 						publication.materials.encapsulatingType,
 						publication.coverPic,
-					).data,
+					)).data,
 				});
-				fileData.push(
+				fileData.push(await(
 					coverPicFetcher(
 						publication.materials.encapsulatingType,
 						publication.coverPic,
-					),
+					)),
 				);
 			}
 			saved = temp;
 		}
 
-		saved = saved.map((x) => {
+		saved = await Promise.all(saved.map(async (x) => {
 			return {
 				...x,
 				publisher: {
 					...x.publisher,
-					profilePicData: profilePicFetcher(x.publisher.profilePic)
+					profilePicData: (await profilePicFetcher(x.publisher.profilePic))
 						.data,
 				},
 			};
-		});
+		}));
 	} else saved = savedResponse.saved.map((x) => x.id);
 
 	saved = filterSaved(saved, query);

@@ -1,6 +1,6 @@
-import SBERTSingletonJS from "./MetadataSimilarityUtils/SBERTSingleton.mjs";
+import SBERTSingleton from "./MetadataSimilarityUtils/SBERTSingleton.mjs";
 
-export const model = await SBERTSingletonJS.getInstance();
+export const model = await SBERTSingleton.getInstance();
 
 /**
  * Calculates the cosine similarity between two vectors.

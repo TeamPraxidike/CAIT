@@ -5,29 +5,27 @@ import {
 	createCircuitPublication,
 	fileSystem,
 	handleConnections,
-	handleEdges,
+	handleEdges, type MaterialForm,
 	type NodeDiffActions,
 	prisma,
 	updateCircuitCoverPic,
-	updateReputation,
+	updateReputation
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 
 import {
 	enqueueCircuitComparison,
-	enqueueMaterialComparison,
 } from '$lib/PiscinaUtils/runner';
 
 import { profilePicFetcher } from '$lib/database/file';
 
-export async function GET({ locals, url }) {
+export async function GET({ url }) {
 	try {
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
 
 		const p = url.searchParams.get('publishers');
 		const publishers = p ? p.split(',') : [];
-		// const publishers = p ? p.split(',').map((x) => parseInt(x)) : [];
 		const limit = Number(url.searchParams.get('limit')) || 0;
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
@@ -41,26 +39,26 @@ export async function GET({ locals, url }) {
 			query,
 		);
 
-		circuits = circuits.map((circuit) => {
+		circuits = await Promise.all(circuits.map(async circuit => {
 			const filePath = circuit.publication.coverPic!.path;
 
-			const currentFileData = fileSystem.readFile(filePath);
+			const currentFileData = await fileSystem.readFile(filePath);
 
 			return {
 				...circuit,
 				publisher: {
 					...circuit.publication.publisher,
-					profilePicData: profilePicFetcher(
+					profilePicData: (await profilePicFetcher(
 						circuit.publication.publisher.profilePic,
-					).data,
+					)).data,
 				},
 				coverPicData: currentFileData.toString('base64'),
 			};
-		});
+		}));
 		return new Response(
 			JSON.stringify({
 				circuits: circuits.slice(0, amount),
-				idsCirc: circuits.map((c) => c.publicationId),
+				idsCirc: circuits.map(c => c.publicationId),
 			}),
 			{ status: 200 },
 		);
@@ -77,10 +75,11 @@ export async function GET({ locals, url }) {
  * @param params
  */
 export async function POST({ request, locals }) {
-	const authError = await verifyAuth(locals);
+	const body: CircuitForm = await request.json();
+
+	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
 
-	const body: CircuitForm = await request.json();
 	const tags = body.metaData.tags;
 	const maintainers = body.metaData.maintainers;
 	const metaData = body.metaData;
@@ -91,7 +90,7 @@ export async function POST({ request, locals }) {
 
 	try {
 		const createdCircuit = await prisma.$transaction(
-			async (prismaTransaction) => {
+			async (prismaTransaction: any) => {
 				const circuit = await createCircuitPublication(
 					userId,
 					numNodes,
@@ -111,6 +110,7 @@ export async function POST({ request, locals }) {
 					await updateCircuitCoverPic(
 						coverPic,
 						circuit.publicationId,
+						userId,
 						prismaTransaction,
 					);
 				} else {

@@ -19,12 +19,8 @@ export async function handleConnections(
 	publicationId: number,
 	prismaTransaction: Prisma.TransactionClient = prisma,
 ) {
-	if (maintainers.length > 0) {
-		await connectMaintainers(publicationId, maintainers, prismaTransaction);
-	}
-	if (tags.length > 0) {
-		await connectTags(publicationId, tags, prismaTransaction);
-	}
+	await connectMaintainers(publicationId, maintainers, prismaTransaction);
+	await connectTags(publicationId, tags, prismaTransaction);
 }
 
 /**
@@ -93,6 +89,37 @@ export async function connectTags(
 	}
 }
 
+export async function getMaintainers(
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	try {
+		return prismaContext.publication.findUnique({
+			where: { id: publicationId },
+			select: {
+				maintainers: true
+			}
+		});
+	} catch (error) {
+		throw new Error(`Could not get publication maintainers`);
+	}
+}
+
+export async function getPublisher(
+	publicationId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	try {
+		return prismaContext.publication.findUnique({
+			where: { id: publicationId },
+			select: {
+				publisher: true
+			}
+		});
+	} catch (error) {
+		throw new Error(`Could not get publication publisher`);
+	}
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -199,5 +226,16 @@ export async function getReportsPublication(publicationId: number) {
 				},
 			},
 		},
+	});
+}
+
+export async function getPublisherId(publicationId: number) {
+	return prisma.publication.findUnique({
+		where: {
+			id: publicationId,
+		},
+		select: {
+			publisherId: true
+		}
 	});
 }

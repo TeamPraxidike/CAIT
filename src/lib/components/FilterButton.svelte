@@ -12,7 +12,7 @@
 	export let selectedIds:string [];
 	export let selectedVals:string [];
 
-	export let profilePicData: string = '';
+	export let profilePicData: string | null;
 
 	export let hasIcon = false;
 	export let icon = '';
@@ -45,6 +45,8 @@
 	const update = () => {
 		dispatch("update", {idval : idValue})
 	}
+
+	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 
@@ -52,7 +54,7 @@
 	class="w-full h-full flex items-center gap-2 text-xs p-1 text-left dark:text-surface-200 text-surface-800 {roundingMenuItem(row, display.length)} {background(idValue)}"
 	on:click={update}>
 	{#if profilePic}
-		<img src={'data:image;base64,' + profilePicData} alt="userProfile" class="size-6 rounded-full" >
+		<img src={profilePicData ? `data:image;base64,${profilePicData}` : defaultProfilePicturePath} alt="userProfile" class="size-6 rounded-full" >
 <!--		<Icon class="text-surface-600 justify-self-end self-center size-6" icon="gg:profile" />-->
 	{/if}
 	{#if hasIcon}

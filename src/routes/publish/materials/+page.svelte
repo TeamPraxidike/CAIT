@@ -25,18 +25,35 @@
 	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import type { Snapshot } from './$types';
+
+	import {
+		saveCover, getCover, deleteCover,
+		saveFiles, getFiles, clearFiles,
+		saveMaterialSnapshot, getMaterialSnapshot, clearMaterialSnapshot, type FormSnapshot
+	} from '$lib/util/indexDB';
+	/**
+	 * Convert an array of File objects into a real FileList.
+	 */
+	export function arrayToFileList(files: File[]): FileList {
+		const dt = new DataTransfer();
+		files.forEach(file => dt.items.add(file));
+		return dt.files;
+	}
 
 	export let form: ActionData;
 	export let data: PageServerData;
 
+
+	let loggedUser = $page.data.loggedUser;
 	$: isSubmitting = false;
 
 	// tags
-	let tags: string[] = [];
+	let tags: string[] = []; 
 	$: tags = tags;
 	let allTags: PrismaTag[] = data.tags;
-	let newTags: string[] = [];
+	let newTags: string[] = []; 
 
 	let files: FileList = [] as unknown as FileList;
 	type UserWithProfilePic = User & { profilePicData: string };
@@ -45,45 +62,53 @@
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users;
 	// learning objectives
-	let LOs: string[] = [];
+	let LOs: string[] = []; 
 	$: LOs = LOs;
 
-	let PKs: string[] = [];
+	let PKs: string[] = []; 
 	$: PKs = PKs;
 
 	// input data
-	let title: string = '';
-	let description: string = '';
+	let title: string = ''; 
+	let description: string = ''; 
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
-	let theoryApplicationRatio = 0.5;
-	let selectedType = "Select Type";
+	let theoryApplicationRatio: number = 0.5;
+	let selectedType: string = "Select Type";
 	let allTypes: {id:string, content:string }[] = MaterialTypes.map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 	let typeActive = false;
 	// cover
 	let coverPic: File | undefined = undefined;
+
 	function chooseCover(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles) {
-			if (eventFiles[0].type === 'image/jpeg' || eventFiles[0].type === 'image/png')
-				coverPic = eventFiles[0];
-			else
+		if (eventFiles && eventFiles[0]) {
+			const file = eventFiles[0];
+			if (file.type === 'image/jpeg' || file.type === 'image/png') {
+				coverPic = file;
+				// Persist coverPic to IndexedDB 
+				saveCover(file);
+			} else {
 				toastStore.trigger({
 					message: 'Invalid file type, please upload a .jpg or .png file',
 					background: 'bg-warning-200'
 				});
+			}
 		}
 	}
 
 	$: uid = $page.data.session?.user.id;
 
-
 	function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles) {
+		if (eventFiles && eventFiles.length > 0) {
+			// Merge new files into the existing FileList
 			files = concatFileList(files, eventFiles);
+
+			// Convert final FileList to an array and store in IndexedDB **/
+			saveFiles(Array.from(files));
 		}
 	}
 
@@ -98,12 +123,28 @@
 	const toastStore = getToastStore();
 
 	$: if (form?.status === 200) {
-		toastStore.trigger({
-			message: 'Publication Added successfully',
-			background: 'bg-success-200',
-			classes: 'text-surface-900',
+		if (saveInterval) {
+			window.clearInterval(saveInterval);
+		}
+
+		Promise.all([
+			deleteCover(),
+			clearFiles(),
+			clearMaterialSnapshot()
+		]).then(() => {
+			// Show success message
+			toastStore.trigger({
+				message: 'Publication Added successfully',
+				background: 'bg-success-200',
+				classes: 'text-surface-900',
+			});
+
+			// Navigate away
+			goto(`/${loggedUser.username}/${form?.id}`);
+		}).catch(error => {
+				console.error('Error clearing data:', error);
 		});
-		goto(`/${$page.data.session?.user.id}/${form?.id}`);
+		goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -119,7 +160,8 @@
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-		const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
+
+		const confirmation = confirm('Data might be lost. Are you sure you want to proceed?');
 
 		if (!confirmation) {
 			event.preventDefault();
@@ -128,13 +170,85 @@
 
 	};
 
-	onMount(() => {
-		window.addEventListener('beforeunload', handleBeforeUnload);
+	let saveInterval: number | undefined = undefined;
 
-		return () => {
-			window.removeEventListener('beforeunload', handleBeforeUnload);
-		};
+	onMount(() => {
+		(async () => {
+
+			// THIS IS THE SNAPSHOT CODE (using indexedDB)
+
+			// get coverPic
+			const storedCover = await getCover();
+			if (storedCover) {
+				coverPic = storedCover; // single file
+			}
+
+			// get multiple files (returns array<File>)
+			const storedFiles = await getFiles();
+			if (storedFiles.length > 0) {
+				// Rebuild a FileList from that array
+				files = arrayToFileList(storedFiles);
+			}
+
+			// if a metadata snapshot already exists, use it
+			const existing = await getMaterialSnapshot();
+			if (existing) {
+				// TODO: This ?? business is meh, redo
+				title = existing.title;
+				description = existing.description;
+				tags = existing.tags;
+				newTags = existing.newTags;
+				LOs = existing.LOs;
+				PKs = existing.PKs;
+				selectedType = existing.selectedType ?? "Select type";
+				difficulty = existing.difficulty ?? "easy";
+				maintainers = existing.maintainers;
+				searchableUsers = existing.searchableUsers;
+				estimate = existing.estimate ?? "30";
+				copyright = existing.copyright ?? "No copyright";
+				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
+			}
+
+			// start a 2-sec interval that captures a snapshot
+			saveInterval = window.setInterval(() => {
+				const data: FormSnapshot = {
+					title,
+					description,
+					tags,
+					newTags,
+					LOs,
+					PKs,
+					selectedType,
+					difficulty,
+					maintainers,
+					searchableUsers,
+					estimate,
+					copyright,
+					theoryApplicationRatio,
+				};
+
+				console.log("IN CONST SNAPSHOT")
+
+				// Store it in IndexedDB
+				saveMaterialSnapshot(data);
+			}, 2000);
+
+			window.addEventListener('beforeunload', handleBeforeUnload);
+
+			return () => {
+				if (saveInterval) {
+					window.clearInterval(saveInterval);
+				}
+				window.removeEventListener('beforeunload', handleBeforeUnload);
+			};
+		})();
 	});
+
+	onDestroy(() => {
+		if (saveInterval) {
+			window.clearInterval(saveInterval);
+		}
+	})
 
 	const onNextHandler = () => {
 		window.scrollTo({
@@ -153,7 +267,7 @@
 		warning += ".";
 		return warning;
 	}
-	$: warning1 = generateWarningStep1(title, description, selectedType);
+	$: warning1 = generateWarningStep1(title, description, selectedType!);
 
 	let warning2: string = "";
 	const generateWarningStep2 = (tags: number, LOs: number) => {
@@ -194,7 +308,7 @@
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
-				formData.append('type', selectedType);
+		formData.append('type', selectedType);
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
@@ -267,7 +381,7 @@
 					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
 				</div>
 				<div class="flex flex-col w-full">
-					<MantainersEditBar bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
+					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
 					<div class="lg:w-1/2">
 						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 					</div>
@@ -279,7 +393,7 @@
 		</Step>
 		<Step locked={isSubmitting}>
 			<svelte:fragment slot="header">Review</svelte:fragment>
-			<PublishReview bind:title={title} bind:description={description} bind:LOs={LOs}
+			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
 										 bind:prior={PKs} bind:tags={tags}  bind:maintainers={maintainers}
 										 />
 			<div class="flex gap-2  pl-3">
@@ -290,7 +404,7 @@
 				<p class="text-lg">Theory to Application:</p>
 				<TheoryAppBar value="{theoryApplicationRatio}" editable="{false}" />
 			</div>
-			<p class="text-lg pl-3">Type: {selectedType.toUpperCase()}</p>
+			<p class="text-lg pl-3">Type: {selectedType?.toUpperCase()}</p>
 			<p class="text-lg pl-3">Time Estimate: {#if estimate !== ''} {estimate} minutes {:else} No estimate provided {/if} </p>
 			<p class="text-lg pl-3">Copyright: {copyright}</p>
 			<div class="pl-3">

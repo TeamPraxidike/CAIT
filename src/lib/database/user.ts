@@ -17,7 +17,6 @@ export async function createUser(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	const username = await generateUsername(data.firstName, data.lastName);
-
 	return prismaContext.user.create({
 		data: {
 			firstName: data.firstName,
@@ -97,6 +96,28 @@ export async function getUserById(
 	});
 }
 
+export async function getUserByUsername(
+	username: string,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	return prismaContext.user.findUnique({
+		where: { username },
+		include: {
+			posts: {
+				include: {
+					tags: true,
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+					},
+				},
+			},
+			profilePic: true,
+		},
+	});
+}
+
 export async function getUserByEmail(
 	email: string,
 	prismaContext: Prisma.TransactionClient = prisma,
@@ -150,6 +171,8 @@ export async function editUser(
 	user: userEditData,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
+	const username: string = await generateUsername(user.firstName, user.lastName);
+
 	return prismaContext.user.update({
 		where: {
 			id: user.id,
@@ -158,7 +181,7 @@ export async function editUser(
 			firstName: user.firstName,
 			lastName: user.lastName,
 			email: user.email,
-			username: await generateUsername(user.firstName, user.lastName),
+			username: username,
 			aboutMe: user.aboutMe,
 		},
 	});
@@ -537,6 +560,14 @@ export async function isReported(userId: string, publicationId: number){
 		if(reported === null) throw new Error("Unable to fetch reported applications")
 		return reported.reported.map(x => x.id).includes(publicationId);
 	});
+}
+
+export async function isAdmin(userId: string): Promise<boolean> {
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { isAdmin: true },
+	});
+	return user?.isAdmin === true;
 }
 
 export async function reportPublication(userId: string, publicationId: number) {
