@@ -15,7 +15,7 @@ import { verifyAuth } from '$lib/database/auth';
 import type { TUser, TUserWithPostsAndProfilePic, TUserWithProfilePic } from '$lib/database/user';
 
 
-export type TGETuser = {user: TUserWithPostsAndProfilePic, profilePic: FetchedFileItem};
+export type TGETuser = {user: TUserWithPostsAndProfilePic, profilePicData: FetchedFileItem};
 /**
  * Returns a user by id
  * @param params

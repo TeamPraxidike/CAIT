@@ -24,8 +24,12 @@ export const load: LayoutServerLoad = async ({ params, fetch, locals, depends })
 	}
 
 	const user: TGETuser = await uRes.json();
+	if (user.user == null) {
+		error(404, 'User not found');
+	}
+
 	return {
-		user: user,
-		profilePic: user.profilePic
+		user: user.user,
+		profilePic: user.profilePicData
 	};
 };

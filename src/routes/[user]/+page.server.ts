@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({
 	}
 
 	let savedRes = null;
-	if (params.user === session.user.username) {
+	if (params.user === session.user.user_metadata.username) {
 		savedRes = await fetch(
 			`/api/user/${session.user.id}/saved?fullPublications=true`,
 		);
