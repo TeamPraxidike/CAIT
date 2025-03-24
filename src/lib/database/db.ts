@@ -1,11 +1,82 @@
 import { prisma } from '$lib/database';
 import Fuse from 'fuse.js';
+import { Prisma } from '@prisma/client';
 
+
+export type Publiation = Prisma.PublicationGetPayload<{
+	include: {
+		usedInCourse: true,
+		tags: true,
+		publisher: {
+			include: {
+				profilePic: true,
+			},
+		},
+		maintainers: {
+			include: {
+				profilePic: true,
+			},
+		},
+		coverPic: true,
+		comments: {
+			include: {
+				replies: {
+					include: {
+						user: {
+							include: {
+								profilePic: true,
+							},
+						},
+					},
+				},
+				user: {
+					include: {
+						profilePic: true,
+					},
+				},
+			},
+		},
+		materials: {
+			include: {
+				publication: true,
+				files: true,
+			},
+		},
+		circuit: {
+			include: {
+				publication: {
+					include: {
+						tags: true,
+					},
+				},
+				nodes: {
+					include: {
+						publication: {
+							include: {
+								tags: true,
+								materials: true,
+								circuit: true,
+								coverPic: true,
+								publisher: {
+									include: {
+										profilePic: true,
+									},
+								},
+								usedInCourse: true,
+							},
+						},
+						next: true,
+					},
+				},
+			},
+		},
+	},
+}>;
 /**
  * Returns the publication with the given id. Gives no guarantee for the type of the publication.
  * @param id
  */
-export async function getPublicationById(id: number) {
+export async function getPublicationById(id: number): Promise<Publiation> {
 	return prisma.publication.findUnique({
 		where: {
 			id: id,

@@ -1,10 +1,26 @@
-import { Prisma } from '@prisma/client/extension';
+import { Prisma } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import { getPublicationById } from '$lib/database/db';
 
 ////////////////////////////////////////////////
 //   HELPER METHODS
 ////////////////////////////////////////////////
+
+export type PublicationReportsCount = Prisma.PublicationGetPayload<{
+	select: {
+		_count: {
+			select: {
+				reportedBy: true;
+			}
+		}
+	}
+}>;
+
+export type PublicationWithPublisherId = Prisma.PublicationGetPayload<{
+	select: {
+		publisherId: true
+	}
+}>;
 
 /**
  * Main method that handles linking/unlinking of tags and maintainerIds to publications
@@ -214,7 +230,7 @@ export async function updateAllTimeSaved(id: string, publicationId: number) {
 	}
 }
 
-export async function getReportsPublication(publicationId: number) {
+export async function getReportsPublication(publicationId: number): Promise<PublicationReportsCount> {
 	return prisma.publication.findUnique({
 		where: {
 			id: publicationId,
@@ -229,7 +245,7 @@ export async function getReportsPublication(publicationId: number) {
 	});
 }
 
-export async function getPublisherId(publicationId: number) {
+export async function getPublisherId(publicationId: number): Promise<PublicationWithPublisherId> {
 	return prisma.publication.findUnique({
 		where: {
 			id: publicationId,
