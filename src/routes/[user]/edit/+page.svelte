@@ -10,8 +10,8 @@
 	export let data: LayoutData;
 	export let form: ActionData;
 
-	let profilePic = data.profilePicData.data
-		? base64ToFile(data.profilePicData.data, 'cover.jpg', 'image/jpeg')
+	let profilePic = data.profilePic.data
+		? base64ToFile(data.profilePic.data, 'cover.jpg', 'image/jpeg')
 		: null
 	//$:profilePic = data.profilePicData;
 

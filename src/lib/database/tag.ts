@@ -1,8 +1,14 @@
 import { prisma } from '$lib/database';
-import { Prisma } from '@prisma/client/extension';
+import { Prisma } from '@prisma/client';
 import type { Tag } from '@prisma/client';
 
-export async function getAllTags() {
+type TagsNoPublication = Prisma.TagGetPayload<{
+	include : {
+		publication: false
+	}
+}>
+
+export async function getAllTags(): Promise<TagsNoPublication[]> {
 	return prisma.tag.findMany({
 		include: {
 			publication: false,
@@ -63,13 +69,13 @@ export async function addTags(
 	};
 }
 
-export async function getTagByContent(content: string) {
+export async function getTagByContent(content: string): Promise<Prisma.TagGetPayload<true>> {
 	return prisma.tag.findUnique({
 		where: { content: content.toLowerCase() },
 	});
 }
 
-export async function deleteTagByContent(content: string) {
+export async function deleteTagByContent(content: string): Promise<Prisma.TagGetPayload<true>> {
 	return prisma.tag.deleteMany({
 		where: { content: content.toLowerCase() },
 	});
