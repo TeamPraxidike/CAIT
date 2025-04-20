@@ -12,7 +12,7 @@ import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 import type { File as PrismaFile } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
-import type { TUser, TUserWithPostsAndProfilePic, TUserWithProfilePic } from '$lib/database/user';
+import type { User, TUserWithPostsAndProfilePic, TUserWithProfilePic } from '$lib/database/user';
 
 
 export type TGETuser = {user: TUserWithPostsAndProfilePic, profilePicData: FetchedFileItem};
@@ -60,7 +60,7 @@ export async function DELETE({ params, locals }) {
 	if (authError) return authError;
 
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
+		const user: TUserWithProfilePic = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 			const user: TUserWithProfilePic = await deleteUser(userId, prismaTransaction);
 			if(!user) {
 				throw "User not found";
@@ -108,7 +108,7 @@ export async function PUT({ params, request, locals }) {
 
 	const body: UserForm = await request.json();
 	try {
-		const user: TUser = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
+		const user: User = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 			const userData: userEditData = {
 				id: params.id,
 				firstName: body.metaData.firstName,
@@ -117,7 +117,7 @@ export async function PUT({ params, request, locals }) {
 				aboutMe: body.metaData.aboutMe,
 			};
 
-			const user: TUser = await editUser(userData, prismaTransaction);
+			const user: User = await editUser(userData, prismaTransaction);
 
 			await updateProfilePic(body.profilePic, user.id, prismaTransaction);
 

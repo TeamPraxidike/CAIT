@@ -32,13 +32,20 @@ export type LikedReplies = Prisma.UserGetPayload<{
 	}
 }>;
 
+export type UserPosts = Prisma.UserGetPayload<{
+	include: {
+		posts: true,
+		profilePic: true,
+	}
+}>;
+
 export type TUserWithProfilePic = Prisma.UserGetPayload<{
 	include: {
 		profilePic: true,
 	}
 }> | null;
 
-export type TUser = Prisma.UserGetPayload<true>;
+export type User = Prisma.UserGetPayload<true>;
 
 /**
  * Adds a new user to the database. Generates a unique username based on the user's first and last name.
@@ -54,7 +61,7 @@ export async function createUser(
 		password: string;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
-): Promise<TUser> {
+): Promise<User> {
 	const username = await generateUsername(data.firstName, data.lastName);
 	return prismaContext.user.create({
 		data: {
@@ -83,7 +90,7 @@ export async function createUser(
  * @param lastName
  */
 async function generateUsername(firstName: string, lastName: string) {
-	const users: TUser[] = await prisma.user.findMany({
+	const users: User[] = await prisma.user.findMany({
 		where: {
 			firstName: firstName,
 			lastName: lastName,
@@ -193,7 +200,7 @@ export type userEditData = {
 export async function editUser(
 	user: userEditData,
 	prismaContext: Prisma.TransactionClient = prisma,
-): Promise<TUser> {
+): Promise<User> {
 	const username: string = await generateUsername(user.firstName, user.lastName);
 
 	return prismaContext.user.update({
@@ -221,7 +228,7 @@ export async function updateReputation(
 	userId: string,
 	number: number,
 	prismaContext: Prisma.TransactionClient = prisma,
-): Promise<TUser> {
+): Promise<User> {
 	return prismaContext.user.update({
 		where: {
 			id: userId,
@@ -603,7 +610,7 @@ export async function reportPublication(userId: string, publicationId: number) {
 		}
 	});
 	if (reported === null) throw Error('Reported publications were not found');
-	if (reported.reportedBy.map((x: TUser) => x.id).includes(userId)) {
+	if (reported.reportedBy.map((x: User) => x.id).includes(userId)) {
 		await unreport(userId, publicationId);
 		return 'Publication unreported successfully';
 	} else {

@@ -60,7 +60,7 @@ export async function coursesUsingPublication(publicationId: number) {
  * Get all publications a user uses
  * @param userId
  */
-export async function publicationsAUserUses(userId: string): Promise<Prisma.PublicationUsedInCourseGetPayload<true>> {
+export async function publicationsAUserUses(userId: string): Promise<Prisma.PublicationGetPayload<true>[]> {
 	const publications: PublicationIds = await prisma.publicationUsedInCourse.findMany({
 		where: {
 			userId: userId,

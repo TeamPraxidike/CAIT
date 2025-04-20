@@ -35,6 +35,13 @@ export type FullComment = Prisma.CommentGetPayload<{
 	}
 }>;
 
+export type CommentWithRepliesAndLiked = Prisma.CommentGetPayload<{
+	include: {
+		replies: true,
+		likedBy: true,
+	}
+}>;
+
 /**
  * [POST] creates a comment from the given body
  * @param comment
@@ -61,7 +68,7 @@ export async function createComment(comment: createCommentData): Promise<Comment
  * [GET] gets the comment with the given id
  * @param commentId
  */
-export async function getComment(commentId: number) {
+export async function getComment(commentId: number): Promise<CommentWithRepliesAndLiked> {
 	return prisma.comment.findUnique({
 		where: {
 			id: commentId,

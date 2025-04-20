@@ -17,6 +17,11 @@ export async function PUT({ params, locals }) {
 
 	try {
 		const user = await getUserById(params.id);
+
+		if (!user) {
+			return new Response(JSON.stringify('User not found'), { status: 404 });
+		}
+
 		const userData: userEditData = {
 			id: params.id,
 			firstName: user.firstName,
