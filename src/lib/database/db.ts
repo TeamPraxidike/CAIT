@@ -3,7 +3,7 @@ import Fuse from 'fuse.js';
 import { Prisma } from '@prisma/client';
 
 
-export type Publiation = Prisma.PublicationGetPayload<{
+export type Publication = Prisma.PublicationGetPayload<{
 	include: {
 		usedInCourse: true,
 		tags: true,
@@ -76,7 +76,7 @@ export type Publiation = Prisma.PublicationGetPayload<{
  * Returns the publication with the given id. Gives no guarantee for the type of the publication.
  * @param id
  */
-export async function getPublicationById(id: number): Promise<Publiation> {
+export async function getPublicationById(id: number): Promise<Publication> {
 	return prisma.publication.findUnique({
 		where: {
 			id: id,

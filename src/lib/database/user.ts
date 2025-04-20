@@ -1,6 +1,5 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
-import type { TReply } from '$lib/database/reply';
 
 
 export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
@@ -18,6 +17,20 @@ export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
 		profilePic: true;
 	};
 }> | null;
+
+export type LikesOfUser = Prisma.UserGetPayload<{select: {liked: true}}>;
+
+export type LikedComments = Prisma.UserGetPayload<{
+	select: {
+		likedComments: true,
+	}
+}>;
+
+export type LikedReplies = Prisma.UserGetPayload<{
+	select: {
+		likedReplies: true,
+	}
+}>;
 
 export type TUserWithProfilePic = Prisma.UserGetPayload<{
 	include: {
@@ -312,7 +325,7 @@ async function unlike(userId: string, publicationId: number) {
  * returns a list with all liked publications of a user
  * @param userId
  */
-export async function getLikedPublications(userId: string) {
+export async function getLikedPublications(userId: string): Promise<LikesOfUser> {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,
@@ -432,11 +445,12 @@ async function unlikeComment(userId: string, commentId: number) {
 	});
 }
 
+
 /**
  * returns a list with all liked comment of a user
  * @param userId
  */
-export async function getLikedComments(userId: string) {
+export async function getLikedComments(userId: string): Promise<LikedComments> {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,
@@ -539,7 +553,7 @@ async function unlikeReply(userId: string, replyId: number) {
  * returns a list with all liked reply of a user
  * @param userId
  */
-export async function getLikedReplies(userId: string): Promise<TReply[]> {
+export async function getLikedReplies(userId: string): Promise<LikedReplies> {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,

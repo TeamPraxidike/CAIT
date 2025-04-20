@@ -1,7 +1,68 @@
 import { prisma } from '$lib/database';
-import { Prisma } from '@prisma/client/extension';
+import { Prisma } from '@prisma/client';
 import { Difficulty, PublicationType } from '@prisma/client';
 import Fuse from 'fuse.js';
+
+export type CircuitWithNodesAndPublication = Prisma.CircuitGetPayload<{
+	include: {
+		publication: {
+			include: {
+				tags: true,
+				coverPic: true,
+			},
+		},
+		nodes: {
+			include: {
+				publication: true,
+				prerequisites: true,
+				next: true,
+			},
+		},
+	}
+}>;
+
+export type CircuitWithPublisher = Prisma.CommentGetPayload<{
+	include: {
+		publication: {
+			include: {
+				tags: true,
+				coverPic: true,
+				usedInCourse: {
+					select: {
+						course: true,
+					},
+				},
+				publisher: {
+					include: {
+						profilePic: true,
+					},
+				},
+			},
+		},
+		nodes: true,
+	}
+}>;
+
+export type CircuitWithoutNodes = Prisma.CommentGetPayload<{
+	include: {
+		publication: {
+			include: {
+				tags: true,
+				coverPic: true,
+				usedInCourse: {
+					select: {
+						course: true,
+					},
+				},
+				publisher: {
+					include: {
+						profilePic: true,
+					},
+				},
+			},
+		},
+	}
+}>;
 
 export const sortSwitch = (sort: string) => {
 	let orderBy: any;
@@ -27,7 +88,7 @@ export const sortSwitch = (sort: string) => {
  * [GET] Returns a publication of type Circuit with the given id.
  * @param publicationId - id of publication linked to circuit
  */
-export async function getCircuitByPublicationId(publicationId: number) {
+export async function getCircuitByPublicationId(publicationId: number): Promise<CircuitWithNodesAndPublication> {
 	return prisma.circuit.findUnique({
 		where: { publicationId: publicationId },
 		include: {
@@ -57,7 +118,7 @@ export async function getAllCircuits(
 	limit: number,
 	sort: string,
 	query: string,
-) {
+): Promise<CircuitWithPublisher[]> {
 	const where: any = { AND: [] };
 
 	if (publishers.length > 0) {
@@ -216,7 +277,7 @@ export async function updateCircuitByPublicationId(
 	});
 }
 
-export async function getCircuitsContainingPublication(publicationId: number) {
+export async function getCircuitsContainingPublication(publicationId: number): Promise<CircuitWithoutNodes[]> {
 	return prisma.circuit.findMany({
 		where: {
 			nodes: {

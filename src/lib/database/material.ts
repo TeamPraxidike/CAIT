@@ -1,6 +1,28 @@
 import { prisma } from '$lib/database';
 import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
-import { Prisma } from '@prisma/client/extension';
+import { Prisma } from '@prisma/client';
+
+export type MaterialWithPublication = Prisma.MaterialGetPayload<{
+	include: {
+		publication: {
+			include: {
+				tags: true,
+				coverPic: true,
+				usedInCourse: {
+					select: {
+						course: true,
+					},
+				},
+				publisher: {
+					include: {
+						profilePic: true,
+					},
+				},
+			},
+		},
+		files: true,
+	}
+}>;
 
 export const sortSwitch = (sort: string) => {
 	let orderBy: any;
@@ -31,7 +53,7 @@ import Fuse from 'fuse.js';
 export async function getMaterialByPublicationId(
 	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+){
 	return prismaContext.material.findUnique({
 		where: { publicationId: publicationId },
 		include: {
@@ -77,7 +99,7 @@ export async function getAllMaterials(
 	type: MaterialType[],
 	sort: string,
 	query: string,
-) {
+): Promise<MaterialWithPublication[]> {
 	const where: any = { AND: [] };
 
 	if (publishers.length > 0) {

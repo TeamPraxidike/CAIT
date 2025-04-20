@@ -1,4 +1,5 @@
 import { prisma } from '$lib/database';
+import { Prisma } from '@prisma/client';
 
 export type editCommentData = {
 	id: number;
@@ -11,11 +12,34 @@ export type createCommentData = {
 	content: string;
 };
 
+export type CommentWithRepliesAndUsers = Prisma.CommentGetPayload<{
+	include: {
+		user: true,
+		replies: {
+			include: {
+				user: true,
+			},
+		},
+	}
+}>;
+
+export type FullComment = Prisma.CommentGetPayload<{
+	include: {
+		replies: {
+			include: {
+				user: true,
+			},
+		},
+		user: true,
+		likedBy: true,
+	}
+}>;
+
 /**
  * [POST] creates a comment from the given body
  * @param comment
  */
-export async function createComment(comment: createCommentData) {
+export async function createComment(comment: createCommentData): Promise<CommentWithRepliesAndUsers> {
 	return prisma.comment.create({
 		data: {
 			content: comment.content,
@@ -53,7 +77,7 @@ export async function getComment(commentId: number) {
  * [GET] gets the comment with the given publication id
  * @param publicationId
  */
-export async function getCommentsByPublicationId(publicationId: number) {
+export async function getCommentsByPublicationId(publicationId: number): Promise<FullComment> {
 	return prisma.comment.findMany({
 		where: {
 			publicationId: publicationId,
@@ -74,7 +98,7 @@ export async function getCommentsByPublicationId(publicationId: number) {
  * [DELETE] deletes the comment with the given id
  * @param commentId
  */
-export async function deleteComment(commentId: number) {
+export async function deleteComment(commentId: number): Promise<Prisma.CommentGetPayload<true>> {
 	return prisma.comment.delete({
 		where: {
 			id: commentId,
@@ -86,7 +110,7 @@ export async function deleteComment(commentId: number) {
  * [PUT] updates the content of a comment wth the id from the param to the content of the param
  * @param comment -  a custom data comment data to update the comment content
  */
-export async function updateComment(comment: editCommentData) {
+export async function updateComment(comment: editCommentData): Promise<Prisma.CommentGetPayload<true>> {
 	return prisma.comment.update({
 		where: {
 			id: comment.id,
