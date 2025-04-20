@@ -24,6 +24,8 @@ export type MaterialWithPublication = Prisma.MaterialGetPayload<{
 	}
 }>;
 
+export type MaterialWithPublicationNoFiles = Prisma.MaterialGetPayload<{include: {publication: true}}>;
+
 export const sortSwitch = (sort: string) => {
 	let orderBy: any;
 	switch (sort) {
@@ -187,6 +189,7 @@ export async function deleteMaterialByPublicationId(
 	});
 }
 
+
 /**
  * [POST] Returns a created publication of type Material
  * @param userId
@@ -207,7 +210,7 @@ export async function createMaterialPublication(
 		theoryPractice: number;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<MaterialWithPublicationNoFiles> {
 	return prismaContext.material.create({
 		data: {
 			copyright: metaData.copyright,

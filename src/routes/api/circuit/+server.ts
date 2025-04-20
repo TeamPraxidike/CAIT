@@ -1,4 +1,4 @@
-import { getAllCircuits } from '$lib/database/circuit';
+import { type CircuitWithPublication, getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
 	type CircuitForm,
@@ -89,7 +89,7 @@ export async function POST({ request, locals }) {
 	const numNodes = body.nodeDiff.numNodes;
 
 	try {
-		const createdCircuit = await prisma.$transaction(
+		const createdCircuit: CircuitWithPublication = await prisma.$transaction(
 			async (prismaTransaction: any) => {
 				const circuit = await createCircuitPublication(
 					userId,

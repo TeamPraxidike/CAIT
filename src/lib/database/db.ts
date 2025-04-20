@@ -72,6 +72,25 @@ export type Publication = Prisma.PublicationGetPayload<{
 		},
 	},
 }>;
+
+export type PublicationGet = Prisma.PublicationGetPayload<{
+	include: {
+		tags: true,
+		materials: true,
+		circuit: true,
+		coverPic: true,
+		publisher: {
+			include: {
+				profilePic: true,
+			},
+		},
+		usedInCourse: {
+			select: {
+				course: true,
+			},
+		},
+	}
+}>;
 /**
  * Returns the publication with the given id. Gives no guarantee for the type of the publication.
  * @param id
@@ -151,7 +170,7 @@ export async function getPublicationById(id: number): Promise<Publication> {
 	});
 }
 
-export async function getAllPublications(publishers: string[], query: string) {
+export async function getAllPublications(publishers: string[], query: string): Promise<PublicationGet[]> {
 	const where: any = { AND: [] };
 
 	if (publishers.length > 0) {
@@ -196,7 +215,7 @@ export async function getAllPublications(publishers: string[], query: string) {
 	return publications;
 }
 
-export async function getAllPublicationsByIds(ids: number[]) {
+export async function getAllPublicationsByIds(ids: number[]): Promise<Publication[]> {
 	return prisma.publication.findMany({
 		where: {
 			id: { in: ids },

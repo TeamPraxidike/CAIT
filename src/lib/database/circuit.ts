@@ -64,6 +64,12 @@ export type CircuitWithoutNodes = Prisma.CommentGetPayload<{
 	}
 }>;
 
+export type CircuitWithPublication = Prisma.CircuitGetPayload<{
+	include: {
+		publication: true,
+	}
+}>;
+
 export const sortSwitch = (sort: string) => {
 	let orderBy: any;
 	switch (sort) {
@@ -192,6 +198,7 @@ export async function deleteCircuitByPublicationId(
 	});
 }
 
+
 /**
  * [POST] Returns a created publication of type Circuit
  * @param userId
@@ -210,7 +217,7 @@ export async function createCircuitPublication(
 		prerequisites: string[];
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<CircuitWithPublication> {
 	return prismaContext.circuit.create({
 		data: {
 			numNodes: numNodes,

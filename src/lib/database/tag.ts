@@ -2,13 +2,8 @@ import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
 import type { Tag } from '@prisma/client';
 
-type TagsNoPublication = Prisma.TagGetPayload<{
-	include : {
-		publication: false
-	}
-}>
 
-export async function getAllTags(): Promise<TagsNoPublication[]> {
+export async function getAllTags(): Promise<Prisma.TagGetPayload<true>[]> {
 	return prisma.tag.findMany({
 		include: {
 			publication: false,

@@ -17,6 +17,7 @@ import { mapToDifficulty, mapToType } from '$lib';
 
 import type { PrismaClient, Tag} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
+import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -137,7 +138,7 @@ export async function POST({ request , locals}) {
 	const coverPic = body.coverPic;
 
 	try {
-		const createdMaterial = await prisma.$transaction(
+		const createdMaterial: MaterialWithPublicationNoFiles = await prisma.$transaction(
 			async (prismaTransaction: PrismaClient) => {
 				const material = await createMaterialPublication(
 					userId,
