@@ -102,7 +102,6 @@ import {handleSimilarity} from "$lib/database/similarity";
 
 import { prisma } from './prisma';
 import { Difficulty, MaterialType } from '@prisma/client';
-import path from 'path';
 
 /**
  * MaterialForm is the type of the form data that is sent to the server when creating a new material.
@@ -158,6 +157,7 @@ type CircuitForm = {
 		prerequisites: string[];
 		tags: string[];
 		maintainers: string[];
+		isDraft: boolean;
 	};
 	coverPic: { type: string; info: string } | null;
 	nodeDiff: NodeDiffActions;

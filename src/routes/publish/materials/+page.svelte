@@ -26,14 +26,13 @@
 	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
 	import { onDestroy, onMount } from 'svelte';
-	import type { Snapshot } from './$types';
 
 	import {
 		saveCover, getCover, deleteCover,
 		saveFiles, getFiles, clearFiles,
 		saveSnapshot, getSnapshot, clearSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
-	import { isDraft, type Metadata } from '$lib/util/validatePublication';
+	import { isMaterialDraft } from '$lib/util/validatePublication';
 	/**
 	 * Convert an array of File objects into a real FileList.
 	 */
@@ -296,8 +295,7 @@
 		isDraft: false
 	};
 	$: fileLength = files.length;
-	$: draft = isDraft(metadata, fileLength);
-
+	$: draft = isMaterialDraft(metadata, fileLength);
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -336,8 +334,7 @@
 		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
       }}>
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
-			 buttonNext="btn dark:bg-surface-200" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500"
-			 buttonCompleteLabel="Publish">
+			 buttonNext="btn dark:bg-surface-200" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />

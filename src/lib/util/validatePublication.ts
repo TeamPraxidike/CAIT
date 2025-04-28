@@ -18,21 +18,22 @@ export type Metadata = {
 	isDraft: boolean;
 };
 
-export function validateMetadata(metadata: Metadata) {
-	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return false;
+export function validateMetadata(metadata: Omit<Metadata, "materialType">) {
 	return metadata.title.length >= PUBLICATION_PARAMETERS.titleLength &&
 		metadata.description.length >= PUBLICATION_PARAMETERS.descriptionLength &&
 		metadata.learningObjectives.length >= PUBLICATION_PARAMETERS.learningObjectivesMin &&
 		metadata.tags.length >= PUBLICATION_PARAMETERS.tagsMin
 }
 
-export function validPublication(metadata: Metadata, fileInfo: FileDiffActions) {
+export function isMaterialValid(metadata: Metadata, fileInfo: FileDiffActions) {
 	if(metadata.isDraft) return true;
+	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return false;
 	return validateMetadata(metadata) &&
 		fileInfo.add.length - fileInfo.delete.length >= PUBLICATION_PARAMETERS.filesMin;
 }
 
-export function isDraft(metadata: Metadata, numFiles: number) {
+export function isMaterialDraft(metadata: Metadata, numFiles: number) {
+	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return true;
 	return !validateMetadata(metadata) ||
 		numFiles < PUBLICATION_PARAMETERS.filesMin;
 }

@@ -18,7 +18,7 @@ import { mapToDifficulty, mapToType } from '$lib';
 import type { PrismaClient, Tag} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
-import { validPublication } from '$lib/util/validatePublication';
+import { isMaterialValid } from '$lib/util/validatePublication';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -139,7 +139,7 @@ export async function POST({ request , locals}) {
 	const fileInfo: FileDiffActions = body.fileDiff;
 	const coverPic = body.coverPic;
 
-	if(!validPublication(metaData, fileInfo)) {
+	if(!isMaterialValid(metaData, fileInfo)) {
 		metaData.isDraft = true;
 	}
 

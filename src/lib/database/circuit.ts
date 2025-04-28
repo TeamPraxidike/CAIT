@@ -215,6 +215,7 @@ export async function createCircuitPublication(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
+		isDraft: boolean;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<CircuitWithPublication> {
@@ -230,6 +231,7 @@ export async function createCircuitPublication(
 					learningObjectives: metaData.learningObjectives,
 					prerequisites: metaData.prerequisites,
 					type: PublicationType.Circuit,
+					isDraft: metaData.isDraft,
 				},
 			},
 		},

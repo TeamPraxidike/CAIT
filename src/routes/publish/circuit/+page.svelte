@@ -10,7 +10,7 @@
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
@@ -19,6 +19,7 @@
 	import {
 		saveSnapshot, getSnapshot, clearSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
+	import { validateMetadata } from '$lib/util/validatePublication';
 
 	export let data: PageServerData;
 
@@ -55,14 +56,12 @@
 
 	$: additionalMaintainers = additionalMaintainers
 
-
 	/* LOCK = TRUE => LOCKED */
-	const locks: boolean[] = [true, true, true];
+	const locks: boolean[] = [true, false, false];
 
 	$: locks[0] = circuitNodesPlaceholder ? circuitNodesPlaceholder.length <= 1 : true;
-	$: locks[1] = title.length < 1 || description.length < 1;
-	$: locks[2] = tags.length < 1|| LOs.length < 1;
-	$: locks[3] = tags.length < 1|| LOs.length < 1;
+	// $: locks[1] = title.length < 1 || description.length < 1;
+	// $: locks[2] = tags.length < 1|| LOs.length < 1;
 
 	let warning0: string = "";
 	const generateWarningStep0 = (): string => {
@@ -113,7 +112,6 @@
 				message: 'Circuit Added successfully',
 				background: 'bg-success-200',
 				classes: 'text-surface-900',
-
 			});
 			goto(`/${loggedUser.username}/${form?.id}`);
 		}).catch(error => {
@@ -125,7 +123,6 @@
 			message: `Malformed information, please check your inputs: ${form?.message}`,
 			background: 'bg-error-200',
 			classes: 'text-surface-900',
-
 		});
 	}
 	const onNextHandler = async (event: CustomEvent) => {
@@ -138,7 +135,6 @@
 
 			nodeActions = nodeDiffActions;
 			circuitCoverPic = coverPic;
-
 		}
 	}
 	let circuitNodesPlaceholder: NodeInfo[] = [];
@@ -226,27 +222,39 @@
 		}
 	})
 
+	let markedAsDraft = false;
+	let draft = true;
+	$: metadata = {
+		title,
+		description,
+		learningObjectives: LOs,
+		tags,
+		isDraft: false
+	};
+	$: draft = !validateMetadata(metadata);
+
 </script>
 
 <!--<Node></Node>-->
 <Meta title="Publish Circuit" description="Organize publications into a circuits" type="site" />
 <!--<div class="col-span-9 h-[256px]"><CircuitManual isDraggable="{true}"/></div>-->
 <form method="POST" action="?/publish" class="col-span-full my-20 pr-10 shadow p-4"
-			use:enhance={({ formData }) => {
-				isSubmitting = true;
-				formData.append('publisherId', uid.toString());
-        formData.append('title', title);
-        formData.append('description', description);
+		use:enhance={({ formData }) => {
+			isSubmitting = true;
+			formData.append('publisherId', uid.toString());
+			formData.append('title', title);
+			formData.append('description', description);
 
-        formData.append('selectedTags', JSON.stringify(tags));
-		formData.append('newTags', JSON.stringify(newTags));
+			formData.append('selectedTags', JSON.stringify(tags));
+			formData.append('newTags', JSON.stringify(newTags));
 
-        formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
-        formData.append('learningObjectives', JSON.stringify(LOs));
-		formData.append('prior', JSON.stringify(priorKnowledge));
+			formData.append('additionalMaintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
+			formData.append('learningObjectives', JSON.stringify(LOs));
+			formData.append('prior', JSON.stringify(priorKnowledge));
 
-		formData.append('circuitData', JSON.stringify(nodeActions));
-		formData.append('coverPic', JSON.stringify(circuitCoverPic));
+			formData.append('circuitData', JSON.stringify(nodeActions));
+			formData.append('coverPic', JSON.stringify(circuitCoverPic));
+			formData.append("isDraft", JSON.stringify(markedAsDraft || draft));
       }}>
 	<Stepper on:submit={() => isSubmitting=true} on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 		<Step locked="{locks[0]}">
@@ -305,6 +313,15 @@
 					<CircuitComponent dbNodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
 				</SvelteFlowProvider>
 			{/key}
+
+			{#if draft}
+				<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's incomplete.</p>
+			{:else}
+				<div class="flex flex-row justify-end items-center gap-2">
+					<p class="pl-3">Save as a draft: </p>
+					<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
+				</div>
+			{/if}
 		</Step>
 	</Stepper>
 
