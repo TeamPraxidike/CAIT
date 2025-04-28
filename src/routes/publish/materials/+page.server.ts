@@ -69,6 +69,7 @@ export const actions = {
 		const losDataEntry = data.get('learningObjectives');
 		const maintainersDataEntry = data.get('maintainers');
 		const coverPicFile = data.get('coverPic');
+		const isDraft = data.get('isDraft')?.toString() === 'true';
 		let coverPic = null;
 
 		if (coverPicFile instanceof File) {
@@ -122,7 +123,7 @@ export const actions = {
 				materialType: convertMaterial(
 					data.get('type')?.toString() || '',
 				),
-				isDraft: false
+				isDraft: isDraft
 			},
 			coverPic,
 			fileDiff: {

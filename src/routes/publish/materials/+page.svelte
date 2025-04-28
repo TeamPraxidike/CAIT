@@ -285,7 +285,8 @@
 		}
 	}
 
-	let buttonLabel = "";
+	let markedAsDraft = false;
+	let draft = true;
 	$: metadata = {
 		title,
 		description,
@@ -295,7 +296,7 @@
 		isDraft: false
 	};
 	$: fileLength = files.length;
-	$: buttonLabel = isDraft(metadata, fileLength) ? "Save as draft" : "Publish";
+	$: draft = isDraft(metadata, fileLength);
 
 </script>
 
@@ -332,6 +333,7 @@
         formData.append('coverPic', coverPic || '');
 		formData.append('newTags', JSON.stringify(newTags));
 		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
+		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
       }}>
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 			 buttonNext="btn dark:bg-surface-200" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500"
@@ -429,8 +431,13 @@
 				<img src={URL.createObjectURL(coverPic)} alt="sss">
 			{/if}
 
-			{#if buttonLabel === "Save as draft"}
-				<p class="text-error-500 pl-3">This publication will be saved as a draft because it's incomplete.</p>
+			{#if draft}
+				<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's incomplete.</p>
+			{:else}
+				<div class="flex flex-row justify-end items-center gap-2">
+					<p class="pl-3">Save as a draft: </p>
+					<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
+				</div>
 			{/if}
 
 		</Step>
