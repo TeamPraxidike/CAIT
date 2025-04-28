@@ -33,6 +33,7 @@
 		saveFiles, getFiles, clearFiles,
 		saveSnapshot, getSnapshot, clearSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
+	import { isDraft, type Metadata } from '$lib/util/validatePublication';
 	/**
 	 * Convert an array of File objects into a real FileList.
 	 */
@@ -113,12 +114,11 @@
 	}
 
 	/* LOCK = TRUE => LOCKED */
-	const locks: boolean[] = [true, true, true];
+	const locks: boolean[] = [false, false, false];
 
-	$: locks[0] = files ? files.length === 0 : true;
-	$: locks[1] = title.length < 1 || description.length < 1 || selectedType === "Select Type";
-	$: locks[2] = tags.length < 1 || LOs.length<1;
-
+	// $: locks[0] = files ? files.length === 0 : true;
+	// $: locks[1] = title.length < 1 || description.length < 1 || selectedType === "Select Type";
+	// $: locks[2] = tags.length < 1 || LOs.length<1;
 
 	const toastStore = getToastStore();
 
@@ -284,6 +284,19 @@
 			event.preventDefault();
 		}
 	}
+
+	let buttonLabel = "";
+	$: metadata = {
+		title,
+		description,
+		learningObjectives: LOs,
+		tags,
+		materialType: selectedType,
+		isDraft: false
+	};
+	$: fileLength = files.length;
+	$: buttonLabel = isDraft(metadata, fileLength) ? "Save as draft" : "Publish";
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -315,13 +328,14 @@
         formData.append('tags', JSON.stringify(tags));
         formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
         formData.append('learningObjectives', JSON.stringify(LOs));
-				formData.append('prerequisites', JSON.stringify(PKs));
+		formData.append('prerequisites', JSON.stringify(PKs));
         formData.append('coverPic', coverPic || '');
-				formData.append('newTags', JSON.stringify(newTags));
-				formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
+		formData.append('newTags', JSON.stringify(newTags));
+		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
       }}>
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
-			 buttonNext="btn dark:bg-surface-200" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
+			 buttonNext="btn dark:bg-surface-200" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500"
+			 buttonCompleteLabel="Publish">
 		<Step locked={locks[0]}>
 			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 			<FileDropzone on:change={appendToFileList} multiple name="file" />
@@ -414,6 +428,11 @@
 				<p class="text-lg pl-3"> Cover Picture: </p>
 				<img src={URL.createObjectURL(coverPic)} alt="sss">
 			{/if}
+
+			{#if buttonLabel === "Save as draft"}
+				<p class="text-error-500 pl-3">This publication will be saved as a draft because it's incomplete.</p>
+			{/if}
+
 		</Step>
 	</Stepper>
 </form>
