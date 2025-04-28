@@ -19,7 +19,7 @@ export type Metadata = {
 };
 
 export function validateMetadata(metadata: Metadata) {
-	// if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return false;
+	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return false;
 	return metadata.title.length >= PUBLICATION_PARAMETERS.titleLength &&
 		metadata.description.length >= PUBLICATION_PARAMETERS.descriptionLength &&
 		metadata.learningObjectives.length >= PUBLICATION_PARAMETERS.learningObjectivesMin &&
@@ -33,8 +33,6 @@ export function validPublication(metadata: Metadata, fileInfo: FileDiffActions) 
 }
 
 export function isDraft(metadata: Metadata, numFiles: number) {
-	const res =  !validateMetadata(metadata) ||
+	return !validateMetadata(metadata) ||
 		numFiles < PUBLICATION_PARAMETERS.filesMin;
-	console.log(res);
-	return res;
 }
