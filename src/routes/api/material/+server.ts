@@ -18,6 +18,7 @@ import { mapToDifficulty, mapToType } from '$lib';
 import type { PrismaClient, Tag} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+import { PUBLICATION_PARAMETERS } from '$lib/shared/config';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -107,6 +108,17 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 };
 
+function canBePublished(metadata: MaterialForm['metaData'], fileInfo: FileDiffActions) {
+	if(metadata.isDraft) return true;
+	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return false;
+	return metadata.title.length >= PUBLICATION_PARAMETERS.titleLength &&
+		metadata.description.length >= PUBLICATION_PARAMETERS.descriptionLength &&
+		metadata.learningObjectives.length >= PUBLICATION_PARAMETERS.learningObjectivesMin &&
+		metadata.tags.length >= PUBLICATION_PARAMETERS.tagsMin &&
+		fileInfo.add.length - fileInfo.delete.length >= PUBLICATION_PARAMETERS.filesMin;
+}
+
+
 /**
  * Create a publication of type material
  * @param request
@@ -136,6 +148,12 @@ export async function POST({ request , locals}) {
 	const userId = body.userId;
 	const fileInfo: FileDiffActions = body.fileDiff;
 	const coverPic = body.coverPic;
+
+	if(!canBePublished(metaData, fileInfo)) {
+		return new Response(JSON.stringify({ error: 'Missing or incomplete fields' }), {
+			status: 400,
+		});
+	}
 
 	try {
 		const createdMaterial: MaterialWithPublicationNoFiles = await prisma.$transaction(

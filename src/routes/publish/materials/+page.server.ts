@@ -122,6 +122,7 @@ export const actions = {
 				materialType: convertMaterial(
 					data.get('type')?.toString() || '',
 				),
+				isDraft: false
 			},
 			coverPic,
 			fileDiff: {

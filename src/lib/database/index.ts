@@ -122,6 +122,7 @@ type MaterialForm = {
 		theoryPractice: number;
 		tags: string[];
 		maintainers: string[];
+		isDraft: boolean;
 	};
 	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;
