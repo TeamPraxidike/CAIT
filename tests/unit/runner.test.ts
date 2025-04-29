@@ -1,10 +1,8 @@
-import { describe, it, expect, vi, afterEach, beforeEach, type MockInstance } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import Piscina from 'piscina';
 import {
 	getAllCircuits,
-	getAllMaterials,
 	getCircuitByPublicationId,
-	getMaterialByPublicationId,
 	handleSimilarity
 } from "$lib/database";
 import {getFilesForMaterial, handleFileTokens} from "$lib/database/file";
@@ -13,11 +11,9 @@ import {
 	compareMetaInBackground,
 	compareFilesInBackground,
 	initialMaterialFileParseInBackground,
-	enqueueMaterialComparison,
 	enqueueCircuitComparison, type ResultMeta, type PublicationMeta, type ResultFile, type FileTokenInfo
 } from '$lib/PiscinaUtils/runner';
 import { Difficulty, MaterialType, PublicationType } from '@prisma/client';
-import en from '@snaplet/copycat/dist/locales/en';
 
 vi.mock('piscina');
 vi.mock('$lib/database', () => ({

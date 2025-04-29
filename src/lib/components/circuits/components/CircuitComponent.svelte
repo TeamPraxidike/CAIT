@@ -7,7 +7,7 @@
 		useSvelteFlow,
 		type Edge,
 		type Node,
-		MarkerType, addEdge, getNodesBounds, getViewportForBounds, useStore
+		MarkerType,
 	} from '@xyflow/svelte';
 
 	import '@xyflow/svelte/dist/style.css';
@@ -103,7 +103,6 @@
 	export let dbNodes: NodeInfo[];
 	export const nodes = writable<Node[]>([]);
 	export const edges = writable<Edge[]>([]);
-	let edgesIds : Edge[] = []
 	const nodeTypes = {
 		'custom': NodeTemplate
 	};
