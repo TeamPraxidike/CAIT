@@ -208,6 +208,7 @@ export async function createMaterialPublication(
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
+		isDraft: boolean;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
@@ -226,6 +227,7 @@ export async function createMaterialPublication(
 					prerequisites: metaData.prerequisites,
 					type: PublicationType.Material,
 					publisherId: userId,
+					isDraft: metaData.isDraft,
 				},
 			},
 		},
