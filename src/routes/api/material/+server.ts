@@ -17,6 +17,8 @@ import { mapToDifficulty, mapToType } from '$lib';
 
 import type { PrismaClient, Tag} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
+import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+import { isMaterialValid } from '$lib/util/validatePublication';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -106,6 +108,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 };
 
+
 /**
  * Create a publication of type material
  * @param request
@@ -136,8 +139,12 @@ export async function POST({ request , locals}) {
 	const fileInfo: FileDiffActions = body.fileDiff;
 	const coverPic = body.coverPic;
 
+	if(!isMaterialValid(metaData, fileInfo)) {
+		metaData.isDraft = true;
+	}
+
 	try {
-		const createdMaterial = await prisma.$transaction(
+		const createdMaterial: MaterialWithPublicationNoFiles = await prisma.$transaction(
 			async (prismaTransaction: PrismaClient) => {
 				const material = await createMaterialPublication(
 					userId,

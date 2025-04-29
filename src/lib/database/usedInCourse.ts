@@ -1,4 +1,18 @@
 import { prisma } from '$lib/database/prisma';
+import { Prisma } from '@prisma/client';
+
+
+export type PublicationUsedInCourse = Prisma.PublicationUsedInCourseGetPayload<{
+	select: {
+		course: true,
+	}
+}>[];
+
+export type PublicationIds = Prisma.PublicationUsedInCourseGetPayload<{
+	select: {
+		publicationId: true,
+	}
+}>[];
 
 /**
  * Replaces ALL courses that a user is using a publication in with the new courses send to this function
@@ -30,7 +44,7 @@ export async function addPublicationToUsedInCourse(userId: string, publicationId
  * @param publicationId
  */
 export async function coursesUsingPublication(publicationId: number) {
-	const courses = await prisma.publicationUsedInCourse.findMany({
+	const courses: PublicationUsedInCourse = await prisma.publicationUsedInCourse.findMany({
 		where: {
 			publicationId: publicationId,
 		},
@@ -38,6 +52,7 @@ export async function coursesUsingPublication(publicationId: number) {
 			course: true,
 		},
 	});
+
 	return courses.map((x) => x.course);
 }
 
@@ -45,8 +60,8 @@ export async function coursesUsingPublication(publicationId: number) {
  * Get all publications a user uses
  * @param userId
  */
-export async function publicationsAUserUses(userId: string) {
-	const publications = await prisma.publicationUsedInCourse.findMany({
+export async function publicationsAUserUses(userId: string): Promise<Prisma.PublicationGetPayload<true>[]> {
+	const publications: PublicationIds = await prisma.publicationUsedInCourse.findMany({
 		where: {
 			userId: userId,
 		},

@@ -1,8 +1,9 @@
 <script lang="ts">
     import type {User} from "@prisma/client";
     import { page } from '$app/stores';
+    import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
 
-    export let user:User;
+    export let user:TUserWithPostsAndProfilePic;
     export let userPhotoUrl: string;
 
 

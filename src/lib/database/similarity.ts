@@ -1,5 +1,28 @@
-import {Prisma} from "@prisma/client/extension";
+import { Prisma } from '@prisma/client';
 import {prisma} from "$lib/database/prisma";
+
+export type SimilarPublicationsResult = Prisma.SimilarContentGetPayload<{
+    include: {
+        similarTo: {
+            include: {
+                tags: true,
+                coverPic: true,
+                materials: true,
+                circuit: true,
+                usedInCourse: {
+                    select: {
+                        course: true,
+                    },
+                },
+                publisher: {
+                    include: {
+                        profilePic: true,
+                    },
+                },
+            },
+        },
+    }
+}>;
 
 export async function handleSimilarity(
     comparisons: {fromPubId: number, toPubId: number, similarity: number}[],
@@ -55,7 +78,7 @@ export async function handleSimilarity(
 
 export async function getSimilarPublications(
     publicationId: number
-) {
+): Promise<SimilarPublicationsResult[]> {
     return prisma.similarContent.findMany({
         where: {
             similarFromId: publicationId,

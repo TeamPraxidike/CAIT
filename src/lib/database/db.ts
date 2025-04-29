@@ -1,11 +1,101 @@
 import { prisma } from '$lib/database';
 import Fuse from 'fuse.js';
+import { Prisma } from '@prisma/client';
 
+
+export type Publication = Prisma.PublicationGetPayload<{
+	include: {
+		usedInCourse: true,
+		tags: true,
+		publisher: {
+			include: {
+				profilePic: true,
+			},
+		},
+		maintainers: {
+			include: {
+				profilePic: true,
+			},
+		},
+		coverPic: true,
+		comments: {
+			include: {
+				replies: {
+					include: {
+						user: {
+							include: {
+								profilePic: true,
+							},
+						},
+					},
+				},
+				user: {
+					include: {
+						profilePic: true,
+					},
+				},
+			},
+		},
+		materials: {
+			include: {
+				publication: true,
+				files: true,
+			},
+		},
+		circuit: {
+			include: {
+				publication: {
+					include: {
+						tags: true,
+					},
+				},
+				nodes: {
+					include: {
+						publication: {
+							include: {
+								tags: true,
+								materials: true,
+								circuit: true,
+								coverPic: true,
+								publisher: {
+									include: {
+										profilePic: true,
+									},
+								},
+								usedInCourse: true,
+							},
+						},
+						next: true,
+					},
+				},
+			},
+		},
+	},
+}>;
+
+export type PublicationGet = Prisma.PublicationGetPayload<{
+	include: {
+		tags: true,
+		materials: true,
+		circuit: true,
+		coverPic: true,
+		publisher: {
+			include: {
+				profilePic: true,
+			},
+		},
+		usedInCourse: {
+			select: {
+				course: true,
+			},
+		},
+	}
+}>;
 /**
  * Returns the publication with the given id. Gives no guarantee for the type of the publication.
  * @param id
  */
-export async function getPublicationById(id: number) {
+export async function getPublicationById(id: number): Promise<Publication> {
 	return prisma.publication.findUnique({
 		where: {
 			id: id,
@@ -80,7 +170,7 @@ export async function getPublicationById(id: number) {
 	});
 }
 
-export async function getAllPublications(publishers: string[], query: string) {
+export async function getAllPublications(publishers: string[], query: string): Promise<PublicationGet[]> {
 	const where: any = { AND: [] };
 
 	if (publishers.length > 0) {
@@ -125,7 +215,7 @@ export async function getAllPublications(publishers: string[], query: string) {
 	return publications;
 }
 
-export async function getAllPublicationsByIds(ids: number[]) {
+export async function getAllPublicationsByIds(ids: number[]): Promise<Publication[]> {
 	return prisma.publication.findMany({
 		where: {
 			id: { in: ids },

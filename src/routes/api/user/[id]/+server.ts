@@ -12,7 +12,10 @@ import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 import type { File as PrismaFile } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
+import type { User, TUserWithPostsAndProfilePic, TUserWithProfilePic } from '$lib/database/user';
 
+
+export type TGETuser = {user: TUserWithPostsAndProfilePic, profilePicData: FetchedFileItem};
 /**
  * Returns a user by id
  * @param params
@@ -24,14 +27,15 @@ export async function GET({ params, locals }) {
 
 	const { id } = params;
 	try {
-		const user = await getUserById(id);
+
+		const user:TUserWithPostsAndProfilePic = await getUserById(id);
 		if (!user)
 			return new Response(JSON.stringify({ error: 'User not found' }), {
 				status: 404,
 			});
 
 		// profilePic return
-		const profilePicData: FetchedFileItem = await profilePicFetcher(
+		const profilePicData:FetchedFileItem = await profilePicFetcher(
 			user.profilePic,
 		);
 
@@ -56,8 +60,11 @@ export async function DELETE({ params, locals }) {
 	if (authError) return authError;
 
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
-			const user = await deleteUser(userId, prismaTransaction);
+		const user: TUserWithProfilePic = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
+			const user: TUserWithProfilePic = await deleteUser(userId, prismaTransaction);
+			if(!user) {
+				throw "User not found";
+			}
 
 			// check if user has profilePic
 			const profilePic: PrismaFile | null = user.profilePic;
@@ -76,10 +83,8 @@ export async function DELETE({ params, locals }) {
 
 		return new Response(JSON.stringify(user), { status: 200 });
 	} catch (error) {
-		// TODO: documentation on this is atrocious, verify with tests!!!
 		if (
-			error instanceof Prisma.PrismaClientKnownRequestError &&
-			error.code === 'P2025'
+			error == "User not found"
 		) {
 			return new Response(JSON.stringify({ error: 'User not found' }), {
 				status: 404,
@@ -103,7 +108,7 @@ export async function PUT({ params, request, locals }) {
 
 	const body: UserForm = await request.json();
 	try {
-		const user = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
+		const user: User = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 			const userData: userEditData = {
 				id: params.id,
 				firstName: body.metaData.firstName,
@@ -112,7 +117,7 @@ export async function PUT({ params, request, locals }) {
 				aboutMe: body.metaData.aboutMe,
 			};
 
-			const user = await editUser(userData, prismaTransaction);
+			const user: User = await editUser(userData, prismaTransaction);
 
 			await updateProfilePic(body.profilePic, user.id, prismaTransaction);
 

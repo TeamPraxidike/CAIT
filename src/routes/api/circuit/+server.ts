@@ -1,11 +1,11 @@
-import { getAllCircuits } from '$lib/database/circuit';
+import { type CircuitWithPublication, getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
 	type CircuitForm,
 	createCircuitPublication,
 	fileSystem,
 	handleConnections,
-	handleEdges, type MaterialForm,
+	handleEdges,
 	type NodeDiffActions,
 	prisma,
 	updateCircuitCoverPic,
@@ -18,6 +18,7 @@ import {
 } from '$lib/PiscinaUtils/runner';
 
 import { profilePicFetcher } from '$lib/database/file';
+import { validateMetadata } from '$lib/util/validatePublication';
 
 export async function GET({ url }) {
 	try {
@@ -88,8 +89,12 @@ export async function POST({ request, locals }) {
 	const coverPic = body.coverPic;
 	const numNodes = body.nodeDiff.numNodes;
 
+	if (!validateMetadata(metaData)) {
+		metaData.isDraft = true;
+	}
+
 	try {
-		const createdCircuit = await prisma.$transaction(
+		const createdCircuit: CircuitWithPublication = await prisma.$transaction(
 			async (prismaTransaction: any) => {
 				const circuit = await createCircuitPublication(
 					userId,
@@ -143,6 +148,7 @@ export async function POST({ request, locals }) {
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {
+		console.error('Error creating circuit publication:', error);
 		if (
 			error instanceof Error &&
 			error.message === 'Circuit POST request needs a cover picture'

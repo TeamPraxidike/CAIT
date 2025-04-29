@@ -1,7 +1,9 @@
 import { getPublicationById, prisma } from '$lib/database';
-import { Prisma } from '@prisma/client/extension';
+import { Prisma } from '@prisma/client';
 import { type Edge, PublicationType } from '@prisma/client';
 
+
+export type Node = Prisma.NodeGetPayload<true>;
 /**
  * Gets the extensions needed for the frontend icons within the node cards
  * @param publicationId
@@ -79,7 +81,7 @@ export async function addNode(
 	x: number,
 	y: number,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<Node> {
 	const extensions = await fetchExtensions(publicationId);
 
 	try {
@@ -103,7 +105,7 @@ export async function editNode(
 	x: number,
 	y: number,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<Node> {
 	try {
 		return prismaContext.node.update({
 			where: {
@@ -126,7 +128,7 @@ export async function deleteNode(
 	circuitId: number,
 	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
-) {
+): Promise<Node> {
 	try {
 		return prismaContext.node.delete({
 			where: {

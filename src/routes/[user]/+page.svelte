@@ -9,14 +9,8 @@
 	/* This is the data that was returned from the server */
 	export let data: LayoutData & PageServerData;
 
-    let user:User & {
-        posts: Publication & {
-            tags: Tag[];
-        }[]
-    } = data.user;
-    let profilePic: FetchedFileItem = data.profilePicData;
-
-
+    let user = data.user;
+    let profilePic: FetchedFileItem = data.profilePic;
     // let saved = data.saved;
     // let savedFileData = data.savedFileData;
 

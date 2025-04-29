@@ -1,5 +1,36 @@
 import { prisma } from '$lib/database/prisma';
+import { Prisma } from '@prisma/client';
 
+
+export type SavedPublicationsResult = Prisma.UserGetPayload<{
+	select: {
+		saved: {
+			include: {
+				tags: true,
+				materials: {
+					include: {
+						files: true,
+					},
+				},
+				circuit: true,
+				coverPic: true,
+				usedInCourse: {
+					select: {
+						course: true,
+					},
+					where: {
+						userId: string,
+					},
+				},
+				publisher: {
+					include: {
+						profilePic: true,
+					},
+				},
+			},
+		},
+	},
+}>;
 /**
  * Saves a publication for a user or unsaves it if it is already saved.
  * You dont need to expliitely check which one it is, the function does it for you
@@ -25,7 +56,7 @@ export async function savePublication(userId: string, publicationId: number) {
  * @param publicationId
  */
 async function save(userId: string, publicationId: number) {
-	await prisma.$transaction(async (prismaTransaction) => {
+	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 		await prismaTransaction.user.update({
 			where: {
 				id: userId,
@@ -47,7 +78,7 @@ async function save(userId: string, publicationId: number) {
  * @param publicationId
  */
 async function unsave(userId: string, publicationId: number) {
-	await prisma.$transaction(async (prismaTransaction) => {
+	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 		await prismaTransaction.user.update({
 			where: {
 				id: userId,
@@ -63,7 +94,7 @@ async function unsave(userId: string, publicationId: number) {
 	});
 }
 
-export async function getSavedPublications(userId: string) {
+export async function getSavedPublications(userId: string): Promise<SavedPublicationsResult> {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,
