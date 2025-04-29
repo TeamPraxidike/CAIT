@@ -5,15 +5,15 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  provider = "prisma-client-js"
+  // previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_URL")
-  extensions = [vector]
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  // extensions = [vector]
 }
 
 enum Difficulty {
@@ -156,13 +156,15 @@ model File {
 }
 
 model FileChunk {
-  id        BigInt                     @id @default(autoincrement())
+  id        BigInt                      @id @default(autoincrement())
   content   String
   metadata  Json
   // Use Unsupported() to tell Prisma to treat this as a native type.
-  embedding Unsupported("vector(384)")
+  embedding Unsupported("vector(384)")?
   filePath  String
-  file      File                       @relation(fields: [filePath], references: [path], onDelete: Cascade)
+  file      File                        @relation(fields: [filePath], references: [path], onDelete: Cascade)
+
+  @@index([embedding], map: "filechunk_embedding_index")
 }
 
 model Circuit {

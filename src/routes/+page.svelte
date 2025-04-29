@@ -18,7 +18,7 @@
 			<h1 class="font-extrabold lg:font-bold md:text-2xl lg:text-3xl xl:text-4xl">CAIT</h1>
 			<h2 class="xl:pr-40 xl:text-1xl dark:text-surface-200">
 				Community for AI Teachers: Contribute and search for
-				lecture materials, assignments, exam questions and more!
+				lecture materials, assignments, exam questions and more! <br> HAPPY BIRTHDAY JOAN!!!!!!!!!
 			</h2>
 		</section>
 		<a href="/browse">
