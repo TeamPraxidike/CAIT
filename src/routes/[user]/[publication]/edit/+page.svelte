@@ -2,7 +2,7 @@
 	import type { LayoutServerData } from '../$types';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Publication, Tag as PrismaTag, User } from '@prisma/client';
-	import { Circuit, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
+	import { DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
 		FileButton, FileDropzone, getToastStore
 	} from '@skeletonlabs/skeleton';
@@ -366,9 +366,10 @@
 			{/if}
 		</div>
 	{:else}
-		<div  class="w-full">
-			<Circuit bind:this={circuitRef} publishing="{true}" nodes="{serverData.publication.circuit.nodes}"/>
-		</div>
+<!--		TODO: CAN'T UPDATE CIRCUITS ANYMORE - was never updated from cytoscape -->
+<!--		<div  class="w-full">-->
+<!--			<Circuit bind:this={circuitRef} publishing="{true}" nodes="{serverData.publication.circuit.nodes}"/>-->
+<!--		</div>-->
 	{/if}
 
 	{#if locks[1]}
