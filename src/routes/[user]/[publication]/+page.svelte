@@ -2,7 +2,7 @@
     import type {LayoutServerData, PageServerData} from './$types';
     import {
         AddInteractionForm,
-        Circuit, CircuitComponent,
+        CircuitComponent,
         Comment,
         DiffBar,
         FileTable,
