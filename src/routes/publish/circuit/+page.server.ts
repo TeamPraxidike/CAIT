@@ -49,6 +49,7 @@ export const actions = {
 			data.get('additionalMaintainers')?.toString() || '';
 		const prior = data.get('prior')?.toString() || '';
 		const LOs = data.get('learningObjectives')?.toString() || '';
+		const isDraft = data.get('isDraft')?.toString() === 'true';
 
 		//circuit data does not get carried over to the submission of the form, don't know why
 		const circuitData = data.get('circuitData')?.toString() || '';
@@ -85,6 +86,7 @@ export const actions = {
 				prerequisites: JSON.parse(prior),
 				tags: JSON.parse(selectedTags),
 				maintainers: JSON.parse(additionalMaintainers),
+				isDraft: isDraft,
 			},
 			coverPic: JSON.parse(circuitCoverPic),
 			nodeDiff: JSON.parse(circuitData),
