@@ -257,6 +257,7 @@ export async function updateCircuitByPublicationId(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
+		isDraft: boolean;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
@@ -275,6 +276,7 @@ export async function updateCircuitByPublicationId(
 						difficulty: metaData.difficulty,
 						learningObjectives: metaData.learningObjectives,
 						prerequisites: metaData.prerequisites,
+						isDraft: metaData.isDraft,
 					},
 				},
 			},

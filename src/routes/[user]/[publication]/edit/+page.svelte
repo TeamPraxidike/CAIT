@@ -16,6 +16,7 @@
 	import { onMount } from 'svelte';
 	import type { NodeDiffActions } from '$lib/database';
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
+	import { isMaterialDraft, validateMetadata } from '$lib/util/validatePublication';
 
 
 
@@ -219,6 +220,19 @@
 	}
 	$: warning2 = generateWarningStep2(tags.length, LOs.length);
 
+	let markedAsDraft = false; // user has marked as draft
+	let draft = true; // it is missing something so it is a draft
+	let metadata;
+	$: metadata = {
+		title,
+		description,
+		learningObjectives: LOs,
+		tags,
+		materialType: selectedType,
+		isDraft: false
+	};
+	$: fileLength = files?.length;
+	$: draft = (isMaterial && isMaterialDraft(metadata, fileLength)) || !validateMetadata(metadata);
 </script>
 
 
@@ -266,6 +280,7 @@
 		formData.append('circuitId', JSON.stringify(serverData.publication.circuit?.id || 0));
 		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0));
 		formData.append('publisherId', JSON.stringify(serverData.publication.publisherId));
+		formData.append("isDraft", JSON.stringify(markedAsDraft || draft));
 
 		if(circuitRef){
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
@@ -377,6 +392,15 @@
 	{/if}
 	{#if locks[2]}
 		<p class="text-error-300 dark:text-error-400">{warning2}</p>
+	{/if}
+
+	{#if draft}
+		<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's incomplete.</p>
+	{:else}
+		<div class="flex flex-row justify-end items-center gap-2">
+			<p class="pl-3">Save as a draft: </p>
+			<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
+		</div>
 	{/if}
 
 	<div class="flex float-right gap-2">
