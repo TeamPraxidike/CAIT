@@ -31,7 +31,6 @@
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
-
 	let title = publication.title;
 	let description = publication.description;
 	let theoryApp:any;
@@ -41,7 +40,6 @@
 	let files: FileList;
 	let oldFiles: any;
 	let fetchedFiles: any;
-
 
 	let LOs: string[] = serverData.publication.learningObjectives;
 	let PKs: string[] = serverData.publication.prerequisites;
@@ -220,8 +218,7 @@
 	}
 	$: warning2 = generateWarningStep2(tags.length, LOs.length);
 
-	let markedAsDraft = false; // user has marked as draft
-	let draft = true; // it is missing something so it is a draft
+
 	let metadata;
 	$: metadata = {
 		title,
@@ -232,6 +229,11 @@
 		isDraft: false
 	};
 	$: fileLength = files?.length;
+	console.log(metadata);
+	// it is missing something so it is a draft. First check if it is a material, then check if the metadata is valid (circuit)
+	let draft = serverData.publication.isDraft;
+	// user has marked as draft
+	let markedAsDraft = draft;
 	$: draft = (isMaterial && isMaterialDraft(metadata, fileLength)) || !validateMetadata(metadata);
 </script>
 
