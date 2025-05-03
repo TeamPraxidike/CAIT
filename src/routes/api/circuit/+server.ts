@@ -1,4 +1,4 @@
-import { type CircuitWithPublication, getAllCircuits } from '$lib/database/circuit';
+import { type CircuitWithPublication, type CircuitWithPublisher, getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
 	type CircuitForm,
@@ -19,6 +19,7 @@ import {
 
 import { profilePicFetcher } from '$lib/database/file';
 import { validateMetadata } from '$lib/util/validatePublication';
+import type { MaterialWithPublication } from '$lib/database/material';
 
 export async function GET({ url }) {
 	try {
@@ -40,6 +41,7 @@ export async function GET({ url }) {
 			query,
 		);
 
+		circuits = circuits.filter((c: CircuitWithPublisher) => !c.publication.isDraft);
 		circuits = await Promise.all(circuits.map(async circuit => {
 			const filePath = circuit.publication.coverPic!.path;
 
