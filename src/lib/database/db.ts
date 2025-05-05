@@ -196,6 +196,7 @@ export async function getAllPublications(publishers: string[], query: string): P
 			},
 		},
 	});
+	publications = publications.filter((p: Publication) => p.isDraft);
 
 	if (query !== '') {
 		const p = publications;

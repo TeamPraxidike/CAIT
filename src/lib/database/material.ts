@@ -255,6 +255,7 @@ export async function updateMaterialByPublicationId(
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
+		isDraft: boolean;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
@@ -276,6 +277,7 @@ export async function updateMaterialByPublicationId(
 						difficulty: metaData.difficulty,
 						learningObjectives: metaData.learningObjectives,
 						prerequisites: metaData.prerequisites,
+						isDraft: metaData.isDraft
 					},
 				},
 			},

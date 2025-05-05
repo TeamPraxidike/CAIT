@@ -425,7 +425,14 @@
 
 <div class="flex flex-col col-span-full">
 	<div class="flex flex-row justify-start items-center mt-20">
-		<h2 class="text-lg md:text-xl lg:text-2xl xl:text-4xl font-semibold break-words pr-6 self-center">{pubView.publication.title}</h2>
+
+		<h2 class="text-lg md:text-xl lg:text-2xl xl:text-4xl font-semibold break-words pr-2 self-center">{pubView.publication.title}</h2>
+		{#if data.pubView.publication.isDraft}
+			<div class="bg-warning-100 text-warning-700 rounded-full px-3 py-1 inline-block self-center mr-6">
+				<p class="text-sm font-semibold">Draft</p>
+			</div>
+		{/if}
+
 		{#if pubView.publication.publisherId === $page.data.session?.user.id
 		|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
 		|| loggedUser.isAdmin}

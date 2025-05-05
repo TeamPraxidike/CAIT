@@ -16,6 +16,7 @@
 	import { onMount } from 'svelte';
 	import type { NodeDiffActions } from '$lib/database';
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
+	import { isMaterialDraft, validateMetadata } from '$lib/util/validatePublication';
 
 
 
@@ -23,14 +24,9 @@
 	let loggedUser = $page.data.loggedUser;
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationView = data.pubView;
-	// console.log(data)
-	// console.log("----------")
-	// console.log(serverData);
-	// console.log("----------")
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
-
 	let title = publication.title;
 	let description = publication.description;
 	let theoryApp:any;
@@ -40,7 +36,6 @@
 	let files: FileList;
 	let oldFiles: any;
 	let fetchedFiles: any;
-
 
 	let LOs: string[] = serverData.publication.learningObjectives;
 	let PKs: string[] = serverData.publication.prerequisites;
@@ -60,15 +55,9 @@
 		selectedType = serverData.publication.materials.encapsulatingType;
 		(async () => {
 			fetchedFiles = await data.fetchedFiles;
-			// console.log(fetchedFiles);
-			// console.log("----------");
-			// console.log("serverData.publication.materials.files")
-			// console.log(serverData.publication.materials.files);
-			// console.log("----------")
 			//files = createFileList(serverData.fileData, serverData.publication.materials.files);
 			files = createFileList(fetchedFiles, serverData.publication.materials.files);
 			oldFiles = serverData.publication.materials.files
-			// console.log(oldFiles)
 		})();
 	}
 
@@ -219,6 +208,22 @@
 	}
 	$: warning2 = generateWarningStep2(tags.length, LOs.length);
 
+
+	let metadata;
+	$: metadata = {
+		title,
+		description,
+		learningObjectives: LOs,
+		tags,
+		materialType: selectedType,
+		isDraft: false
+	};
+	$: fileLength = files?.length;
+	// it is missing something so it is a draft. First check if it is a material, then check if the metadata is valid (circuit)
+	let draft = serverData.publication.isDraft;
+	// user has marked as draft
+	let markedAsDraft = draft;
+	$: draft = (isMaterial && isMaterialDraft(metadata, fileLength)) || !validateMetadata(metadata);
 </script>
 
 
@@ -266,6 +271,7 @@
 		formData.append('circuitId', JSON.stringify(serverData.publication.circuit?.id || 0));
 		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0));
 		formData.append('publisherId', JSON.stringify(serverData.publication.publisherId));
+		formData.append("isDraft", JSON.stringify(markedAsDraft || draft));
 
 		if(circuitRef){
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
@@ -356,7 +362,7 @@
 		</div>
 		<div class="mt-4">
 			<label for="coverPhoto">Cover Picture:</label>
-			<img src={coverPicMat ? URL.createObjectURL(coverPicMat) : defaultCoverPicturePath} alt="Cover image">
+			<img src={coverPicMat ? URL.createObjectURL(coverPicMat) : defaultCoverPicturePath} alt="Cover of publication">
 			<FileButton on:change={chooseCover} bind:files={selectedFileList} name="coverPhoto">Upload File</FileButton>
 			{#if coverPicMat !== undefined}
 				<button on:click={() => {
@@ -377,6 +383,15 @@
 	{/if}
 	{#if locks[2]}
 		<p class="text-error-300 dark:text-error-400">{warning2}</p>
+	{/if}
+
+	{#if !draft }
+		<div class="flex flex-row justify-end items-center gap-2">
+			<p class="pl-3">Save as a draft: </p>
+			<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
+		</div>
+	{:else}
+		<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's incomplete.</p>
 	{/if}
 
 	<div class="flex float-right gap-2">

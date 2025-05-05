@@ -17,8 +17,9 @@ import { mapToDifficulty, mapToType } from '$lib';
 
 import type { PrismaClient, Tag} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
-import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+import type { MaterialWithPublication, MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { isMaterialValid } from '$lib/util/validatePublication';
+import type { Publication } from '$lib/database/db';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -69,6 +70,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			query,
 		);
 
+		materials = materials.filter((m: MaterialWithPublication) => !m.publication.isDraft);
 		for (const material of materials) {
 			material.publication.tags = reorderTags(
 				material.publication.tags,

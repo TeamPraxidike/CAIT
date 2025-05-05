@@ -33,6 +33,7 @@ export const actions = {
 		const theoryApp = data.get('theoryAppRatio')?.toString() || '';
 		const type = data.get('type')?.toString() || '';
 		const selectedTags = data.get('tags')?.toString() || '';
+		const isDraft = data.get('isDraft')?.toString()  === 'true';
 
 		//I need to get the separate strings here so I can create them as string[], but not sure how to do that
 		const newTags = data.getAll('newTags') || '';
@@ -76,11 +77,12 @@ export const actions = {
 				metaData: {
 					title: title,
 					description: description,
-					difficulty: 'easy',
+					difficulty: (difficulty.toLowerCase() as Difficulty) || 'easy',
 					learningObjectives: JSON.parse(LOs),
 					prerequisites: JSON.parse(prior),
 					tags: JSON.parse(selectedTags),
 					maintainers: JSON.parse(maintainers),
+					isDraft: isDraft,
 				},
 				coverPic: JSON.parse(circuitCoverPic),
 				nodeDiff: JSON.parse(circuitData),
@@ -175,6 +177,7 @@ export const actions = {
 					tags: JSON.parse(selectedTags),
 					maintainers: JSON.parse(maintainers),
 					materialType: (type as MaterialType) || 'video',
+					isDraft: isDraft,
 				},
 				coverPic,
 				fileDiff: {

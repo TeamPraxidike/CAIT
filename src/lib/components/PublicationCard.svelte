@@ -221,7 +221,11 @@
 	{/if}
 	<div class=" w-full  h-[360px] rounded-lg shadow-md bg-surface-50 dark:bg-surface-800 border dark:border-none">
 		<div class="w-full relative h-2/5 rounded-t-lg">
-			{#if used === 1}
+			{#if publication.isDraft}
+				<div class="absolute mt-2 right-1 text-xs p-1 rounded-md bg-warning-100 text-warning-700 font-bold">
+					<p class="text-sm font-semibold">Draft</p>
+				</div>
+			{:else if used === 1}
 				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
 					Used in {used} course</p>
 			{:else if used > 0}
