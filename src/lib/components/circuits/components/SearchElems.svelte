@@ -2,7 +2,7 @@
 	import { Grid, PublicationCard, SearchBar } from '$lib';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	import { scale } from 'svelte/transition';
 	import {
@@ -16,6 +16,8 @@
 	import { getExtensions } from '$lib/util/file';
 	import { type PaginationSettings, Paginator } from '@skeletonlabs/skeleton';
 	export let materials : any = [];
+
+	// contains the ids of the publications that are selected
 	export let source : number[] = []
 	let circuits : any = [];
 	let publications: any = [];
@@ -98,6 +100,7 @@
 	};
 
 	const newMaterials = (event: CustomEvent) => {
+		console.log("KURWA", event.detail.option);
 		if (event.detail.option === 0)
 		{
 			chosenOption = 0
@@ -111,22 +114,22 @@
 		}
 		if (event.detail.option === 2){
 			chosenOption = 2
-			if ($page.data.session?.user.id)
-				userIds = [$page.data.session?.user.id]
+			if (page.data.session?.user.id)
+				userIds = [page.data.session?.user.id]
 			urlParam = "publication"
 		}
 		if (event.detail.option === 3){
 			chosenOption = 3
-			if ($page.data.session?.user.id)
-				userIds = [$page.data.session?.user.id]
-			urlParam = `user/${$page.data.session?.user.id}/saved`
+			if (page.data.session?.user.id)
+				userIds = [page.data.session?.user.id]
+			urlParam = `user/${page.data.session?.user.id}/saved`
 		}
 
 		searchAPI();
 	};
 
 	const searchAPI = async () => {
-
+		console.log("searchAPI", searchWord, userIds);
 		const queryParams = new URLSearchParams({
 			publishers: userIds.join(','),
 			q: searchWord,
@@ -145,12 +148,14 @@
 			// Handle the response data from the API
 				if (chosenOption === 0)
 				{
+					console.log(data);
 					materials = []
 					materials = data.materials
 					source = data.idsMat
 				}
 				if (chosenOption === 1)
 				{
+					console.log(data);
 					circuits = []
 					circuits = data.circuits
 					source = data.idsCirc
@@ -209,7 +214,24 @@
 			.then(data => {
 				// Handle the response data from the API
 				if (chosenOption === 0) {
-					materials = data.publications.map((x:Publication&{materials: Material & {files:string[]}, coverPicData:string, publisher:User & { profilePicData: string }}) => ({id: x.materials.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher, files:x.materials.files, encapsulatingType:x.materials.encapsulatingType}));
+					console.log(data);
+					materials = data.publications.map(
+						(
+							x:Publication & {
+								materials: Material & {files:string[]},
+								coverPicData: string,
+								publisher: User & { profilePicData: string }}
+						) => (
+								{
+									id: x.materials.id,
+									publication: x,
+									coverPicData: x.coverPicData,
+									publisher:x.publisher,
+									files:x.materials.files,
+									encapsulatingType:x.materials.encapsulatingType
+								}
+							)
+					);
 				} else if (chosenOption === 1){
 					circuits = data.publications.map((x : Publication&{circuit: Circuit, coverPicData:string, publisher:User & { profilePicData: string }})=> ({id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher}));
 				}
@@ -329,10 +351,17 @@
 			{:else if (chosenOption===2 || chosenOption===3)}
 				{#each publications as p}
 					<PublicationCard publication="{p}" inCircuits="{true}"
-													 extensions="{getExtensions(p.materials)}"
-													 selected="{selectedIds.has(p.id)}" on:selected={selectCard}
-													 on:removed={removeCard} imgSrc={p.coverPicData} liked={liked.includes(p.id)} saved={saved.includes(p.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={p.publisher} materialType={p.type === PublicationType.Circuit ? MaterialType.other: p.materials.encapsulatingType}/>
-
+									 extensions="{p.materials && p.materials.files ? getExtensions(p.materials) : []}"
+									 selected="{selectedIds.has(p.id)}" on:selected={selectCard}
+									 on:removed={removeCard}
+									 imgSrc={p.coverPicData}
+									 liked={liked.includes(p.id)}
+									 saved={saved.includes(p.id)}
+									 on:liked={likedToggled}
+									 on:saved={savedToggled}
+									 publisher={p.publisher}
+									 materialType={p.type === PublicationType.Circuit ? MaterialType.other: p.materials.encapsulatingType}
+					/>
 				{/each}
 			{:else if isSemanticActive && semanticPromise !== null}
 				{#await semanticPromise}
