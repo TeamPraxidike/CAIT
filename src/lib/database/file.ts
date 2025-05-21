@@ -391,10 +391,10 @@ export async function handleFileTokens(
 
 export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
 	return prisma.$queryRaw`
-	SELECT id, content, metadata, "filePath", embedding <#> ${embeddedUserQuery}::vector AS similarity
+	SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", embedding <#> ${embeddedUserQuery}::vector AS similarity
 	FROM public."FileChunk"
     WHERE embedding <#> ${embeddedUserQuery}::vector < -0.5
-	ORDER BY embedding <#> ${embeddedUserQuery}::vector ASC
+	ORDER BY "filePath", embedding <#> ${embeddedUserQuery}::vector ASC
 	LIMIT 5;
 	`;
 }

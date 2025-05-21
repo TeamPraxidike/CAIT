@@ -23,7 +23,7 @@ export async function POST({ request , locals}) {
 	// 	);
 	// }
 
-	const queryText = body.message;
+	const queryText = body.message.toLowerCase();
 
 	try {
 

@@ -24,7 +24,10 @@ export function preprocessText(text) {
     // replace every character that is NOT a letter with the empty string.
     let filteredText = cleanedStr.replace(/[^A-Za-z ]+/g, ' ');
 
-    filteredText = filteredText.toLowerCase();
+    // replace hyphen with '' (globally, not just once, that's why we use g)
+    let removeHyphens = cleanedStr.replace(/-/g, '');
+
+    filteredText = removeHyphens.toLowerCase();
 
     // tokenize
     let tokens = tokenizer.tokenize(filteredText);
