@@ -393,7 +393,7 @@ export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: nu
 	return prisma.$queryRaw`
 	SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", embedding <#> ${embeddedUserQuery}::vector AS similarity
 	FROM public."FileChunk"
-    WHERE embedding <#> ${embeddedUserQuery}::vector < -0.5
+    WHERE embedding <#> ${embeddedUserQuery}::vector < -0.4
 	ORDER BY "filePath", embedding <#> ${embeddedUserQuery}::vector ASC
 	LIMIT 5;
 	`;

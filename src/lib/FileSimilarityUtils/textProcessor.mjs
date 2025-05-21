@@ -25,7 +25,7 @@ export function preprocessText(text) {
     let filteredText = cleanedStr.replace(/[^A-Za-z ]+/g, ' ');
 
     // replace hyphen with '' (globally, not just once, that's why we use g)
-    let removeHyphens = cleanedStr.replace(/-/g, '');
+    let removeHyphens = filteredText.replace(/-/g, '');
 
     filteredText = removeHyphens.toLowerCase();
 
