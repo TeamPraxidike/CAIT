@@ -3,6 +3,7 @@ import { getFileChunks, performCosineSimilarityWithHNSWIndex } from '$lib/databa
 import { calculateCosineSimilarity, model } from '$lib/similarityIndex.mjs';
 import { getMaterialForFile } from '$lib/database/material';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
+import { preprocessText } from '$lib/FileSimilarityUtils/textProcessor.mjs';
 
 export async function POST({ request , locals}) {
 	// Authentication step
@@ -23,7 +24,9 @@ export async function POST({ request , locals}) {
 	// 	);
 	// }
 
-	const queryText = body.message;
+	const queryTextRaw = body.message;
+
+	const queryText = preprocessText(queryTextRaw);
 
 	try {
 
