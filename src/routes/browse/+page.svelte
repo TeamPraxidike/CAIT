@@ -571,6 +571,12 @@
 									publisher={message.publisher}
 								/>
 							</div>
+
+						{:else}
+							<p class="col-span-full text-center text-surface-600 dark:text-surface-400">
+								No results found
+							</p>
+
 						{/each}
 					</div>
 
