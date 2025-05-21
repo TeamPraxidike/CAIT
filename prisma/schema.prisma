@@ -89,7 +89,7 @@ model Publication {
   prerequisites      String[]
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
-  isDraft            Boolean
+  isDraft            Boolean    @default(false)
 
   comments Comment[]
 
