@@ -13,6 +13,7 @@
     }
 
     const handleKeyDown = (event:KeyboardEvent) => {
+        dispatch("press", {message: {searchType}, value:{inputKeywords}})
         if(event.key === 'Enter'){
             searchQuery();
             event.preventDefault();
