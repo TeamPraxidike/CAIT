@@ -82,41 +82,35 @@ type UserPfp = User & {
 
 export type PublicationView = {
 	isMaterial: boolean;
-	publication: Publication;
+	//fileData: Promise<FetchedFileArray>;
+	publication: Publication & {
+		usedInCourse: { course: string }[];
+		tags: Tag[];
+		publisher: UserPfp;
+		maintainers: UserPfp[];
+		comments: (Comment & {
+			replies: (Reply & {
+				user: UserPfp;
+			})[];
+			user: UserPfp;
+		})[];
+		materials: Material & {
+			files: PrismaFile[];
+		};
+		circuit: Circuit & {
+			nodes: (PrismaNode & {
+				publication: Publication & {
+					tags: Tag[];
+					usedInCourse: { course: string }[];
+					publisher: UserPfp;
+					coverPicData: string;
+					materials: Material;
+				};
+				prerequisites: Edge[];
+				next: Edge[];
+			})[];
+		};
+		coverPicData: string;
+	};
 	coverFileData: FetchedFileItem;
-}
-
-// export type PublicationView = {
-// 	isMaterial: boolean;
-// 	//fileData: Promise<FetchedFileArray>;
-// 	publication: Publication & {
-// 		usedInCourse: { course: string }[];
-// 		tags: Tag[];
-// 		publisher: UserPfp;
-// 		maintainers: UserPfp[];
-// 		comments: (Comment & {
-// 			replies: (Reply & {
-// 				user: UserPfp;
-// 			})[];
-// 			user: UserPfp;
-// 		})[];
-// 		materials: Material & {
-// 			files: PrismaFile[];
-// 		};
-// 		circuit: Circuit & {
-// 			nodes: (PrismaNode & {
-// 				publication: Publication & {
-// 					tags: Tag[];
-// 					usedInCourse: { course: string }[];
-// 					publisher: UserPfp;
-// 					coverPicData: string;
-// 					materials: Material;
-// 				};
-// 				prerequisites: Edge[];
-// 				next: Edge[];
-// 			})[];
-// 		};
-// 		coverPicData: string;
-// 	};
-// 	coverFileData: FetchedFileItem;
-// };
+};

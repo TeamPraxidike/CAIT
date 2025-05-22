@@ -30,6 +30,7 @@
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
+
 	let title = publication.title;
 	let description = publication.description;
 	let theoryApp:any;
@@ -60,7 +61,6 @@
 	if (!isMaterial){
 		circuitNodesPlaceholder = serverData.publication.circuit.nodes;
 	}
-	console.log(circuitNodesPlaceholder);
 	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
 
 	if (isMaterial){
@@ -189,14 +189,13 @@
 				title = existing.title;
 				description = existing.description;
 				tags = existing.tags;
-				newTags = existing.newTags;
+				// newTags = existing.newTags; // For some reason tags array is always empty
 				LOs = existing.LOs;
 				PKs = existing.PKs;
 				maintainers = existing.maintainers;
 				users = existing.searchableUsers;
 				circuitNodesPlaceholder = existing.circuitNodes ?? [];
 			}
-			console.log("AGAIN ", circuitNodesPlaceholder);
 
 			circuitKey = Date.now();
 
