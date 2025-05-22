@@ -103,7 +103,6 @@ export async function clearMaterialSnapshot() {
 
 // Save snapshot
 export async function saveCircuitSnapshot(snapshotData: FormSnapshot) {
-	console.log("SAVING SNAPSHOT")
 	const db = await initDB();
 	await db.put(CIRCUIT_METADATA_STORE, snapshotData, 'myFormSnapshot');
 }

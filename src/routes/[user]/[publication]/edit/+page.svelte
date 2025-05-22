@@ -2,7 +2,7 @@
 	import type { LayoutServerData } from '../$types';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Publication, Tag as PrismaTag, User } from '@prisma/client';
-	import { DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
+	import { CircuitComponent, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
 		FileButton, FileDropzone, getToastStore
 	} from '@skeletonlabs/skeleton';
@@ -17,6 +17,9 @@
 	import type { NodeDiffActions } from '$lib/database';
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
 	import { isMaterialDraft, validateMetadata } from '$lib/util/validatePublication';
+	import { SvelteFlowProvider } from '@xyflow/svelte';
+	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
+	import { type FormSnapshot, getCircuitSnapshot, saveCircuitSnapshot } from '$lib/util/indexDB';
 
 
 
@@ -41,12 +44,24 @@
 	let PKs: string[] = serverData.publication.prerequisites;
 	let difficulty: Difficulty = serverData.publication.difficulty;
 	type UserWithProfilePic = User & { profilePicData: string };
+	let liked: number[] = [];
+	let saved: number[] = [];
 
 	let maintainers:UserWithProfilePic[] = serverData.publication.maintainers;
 	let users: UserWithProfilePic[] = data.users
 	let browsingUsers = users.filter(x => !maintainers.map(y=>y.id).includes(x.id));
 
-	const isMaterial : boolean = serverData.isMaterial
+	const isMaterial : boolean = serverData.isMaterial;
+
+	let saveInterval: number | undefined = undefined;
+	let circuitKey = Date.now();
+
+	let circuitNodesPlaceholder: NodeInfo[] = [];
+	if (!isMaterial){
+		circuitNodesPlaceholder = serverData.publication.circuit.nodes;
+	}
+	console.log(circuitNodesPlaceholder);
+	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
 
 	if (isMaterial){
 		theoryApp = serverData.publication.materials.theoryPractice;
@@ -143,7 +158,9 @@
 	let newTags: string[] = [];
 
 
-	let circuitRef : InstanceType<typeof Circuit>;
+	let circuitRef : InstanceType<typeof CircuitComponent>;
+	$: circuitRef = circuitRef;
+
 	let nodeActions:NodeDiffActions = {add:[], delete:[], edit:[], numNodes:0, next:[]}
 
 	if (!isMaterial){
@@ -165,11 +182,47 @@
 	};
 
 	onMount(() => {
-		window.addEventListener('beforeunload', handleBeforeUnload);
+		(async () => {
+			const existing = await getCircuitSnapshot();
+			if (existing) {
+				// TODO: This ?? business is meh, redo
+				title = existing.title;
+				description = existing.description;
+				tags = existing.tags;
+				newTags = existing.newTags;
+				LOs = existing.LOs;
+				PKs = existing.PKs;
+				maintainers = existing.maintainers;
+				users = existing.searchableUsers;
+				circuitNodesPlaceholder = existing.circuitNodes ?? [];
+			}
+			console.log("AGAIN ", circuitNodesPlaceholder);
 
-		return () => {
-			window.removeEventListener('beforeunload', handleBeforeUnload);
-		};
+			circuitKey = Date.now();
+
+			saveInterval = window.setInterval(() => {
+				const data: FormSnapshot = {
+					title,
+					description,
+					tags,
+					newTags,
+					LOs,
+					PKs,
+					maintainers,
+					searchableUsers: users,
+					circuitNodes: circuitNodesPlaceholder
+				};
+
+				// Store it in IndexedDB
+				saveCircuitSnapshot(data);
+			}, 2000);
+
+			window.addEventListener('beforeunload', handleBeforeUnload);
+
+			return () => {
+				window.removeEventListener('beforeunload', handleBeforeUnload);
+			};
+		})();
 	});
 
 	const handleInputEnter = (event: KeyboardEvent) => {
@@ -268,10 +321,13 @@
 		formData.append('type', selectedType);
 		formData.append('coverPicMat', coverPicMat || '');
 
+
+		// TODO It does have the circuit, typescript is just hating. FIX THIS
 		formData.append('circuitId', JSON.stringify(serverData.publication.circuit?.id || 0));
 		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0));
 		formData.append('publisherId', JSON.stringify(serverData.publication.publisherId));
 		formData.append("isDraft", JSON.stringify(markedAsDraft || draft));
+
 
 		if(circuitRef){
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
@@ -372,10 +428,12 @@
 			{/if}
 		</div>
 	{:else}
-<!--		TODO: CAN'T UPDATE CIRCUITS ANYMORE - was never updated from cytoscape -->
-<!--		<div  class="w-full">-->
-<!--			<Circuit bind:this={circuitRef} publishing="{true}" nodes="{serverData.publication.circuit.nodes}"/>-->
-<!--		</div>-->
+		{#key circuitKey}
+			<SvelteFlowProvider>
+				<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
+			</SvelteFlowProvider>
+		{/key}
+
 	{/if}
 
 	{#if locks[1]}
