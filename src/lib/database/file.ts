@@ -19,8 +19,12 @@ import type { FileChunks } from '$lib/PiscinaUtils/runner';
 // 		data: file.data.toString(),
 // 	}));
 // }
+export type ProfilePic = {
+	fileId: string;
+	data: string | null;
+}
 
-export async function profilePicFetcher(profilePic: PrismaFile | null) {
+export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<ProfilePic> {
 	let filePath;
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type

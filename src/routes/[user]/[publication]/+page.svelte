@@ -30,7 +30,7 @@
     import {createFileList, IconMapExtension, saveFile} from '$lib/util/file';
     import {
         type Comment as PrismaComment,
-        type Difficulty, MaterialType,
+        type Difficulty,
         PublicationType,
         type Reply,
         type User
@@ -75,6 +75,7 @@
     const nodes : NodeInfo[] = isMaterial ? [] : pubView.publication.circuit.nodes.map(node => ({
         id: node.publication.id,
         title: node.publication.title,
+		username: node.publication.publisher.username,
         isMaterial: node.publication.type === PublicationType.Material,
         next: node.next,
         posX: node.posX,
