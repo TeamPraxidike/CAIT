@@ -34,7 +34,7 @@ export const load: LayoutServerLoad = async ({
 	if (userRes.status !== 200) error(userRes.status, userRes.statusText);
 
 	const userSpecificInfo = await userRes.json();
-	const pubView = await pRes.json();
+	const pubView: PublicationView = await pRes.json();
 
 	const cRes = await fetch(`/api/user/${session.user.id}/liked/comment`);
 	const rRes = await fetch(`/api/user/${session.user.id}/liked/reply`);
@@ -79,37 +79,44 @@ type UserPfp = User & {
  * The data that is loaded for the pubView view layout.
  * Only to be used in the pubView view layout or child pages.
  */
+
 export type PublicationView = {
 	isMaterial: boolean;
-	//fileData: Promise<FetchedFileArray>;
-	publication: Publication & {
-		usedInCourse: { course: string }[];
-		tags: Tag[];
-		publisher: UserPfp;
-		maintainers: UserPfp[];
-		comments: (Comment & {
-			replies: (Reply & {
-				user: UserPfp;
-			})[];
-			user: UserPfp;
-		})[];
-		materials: Material & {
-			files: PrismaFile[];
-		};
-		circuit: Circuit & {
-			nodes: (PrismaNode & {
-				publication: Publication & {
-					tags: Tag[];
-					usedInCourse: { course: string }[];
-					publisher: UserPfp;
-					coverPicData: string;
-					materials: Material;
-				};
-				prerequisites: Edge[];
-				next: Edge[];
-			})[];
-		};
-		coverPicData: string;
-	};
+	publication: Publication;
 	coverFileData: FetchedFileItem;
-};
+}
+
+// export type PublicationView = {
+// 	isMaterial: boolean;
+// 	//fileData: Promise<FetchedFileArray>;
+// 	publication: Publication & {
+// 		usedInCourse: { course: string }[];
+// 		tags: Tag[];
+// 		publisher: UserPfp;
+// 		maintainers: UserPfp[];
+// 		comments: (Comment & {
+// 			replies: (Reply & {
+// 				user: UserPfp;
+// 			})[];
+// 			user: UserPfp;
+// 		})[];
+// 		materials: Material & {
+// 			files: PrismaFile[];
+// 		};
+// 		circuit: Circuit & {
+// 			nodes: (PrismaNode & {
+// 				publication: Publication & {
+// 					tags: Tag[];
+// 					usedInCourse: { course: string }[];
+// 					publisher: UserPfp;
+// 					coverPicData: string;
+// 					materials: Material;
+// 				};
+// 				prerequisites: Edge[];
+// 				next: Edge[];
+// 			})[];
+// 		};
+// 		coverPicData: string;
+// 	};
+// 	coverFileData: FetchedFileItem;
+// };
