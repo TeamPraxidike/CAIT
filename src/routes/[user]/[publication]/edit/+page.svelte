@@ -30,6 +30,7 @@
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
+	console.log(tags);
 
 	let title = publication.title;
 	let description = publication.description;
@@ -188,8 +189,8 @@
 				// TODO: This ?? business is meh, redo
 				title = existing.title;
 				description = existing.description;
-				tags = existing.tags;
-				// newTags = existing.newTags; // For some reason tags array is always empty
+				// tags = existing.tags; // For some reason tags array is always empty
+				newTags = existing.newTags;
 				LOs = existing.LOs;
 				PKs = existing.PKs;
 				maintainers = existing.maintainers;
