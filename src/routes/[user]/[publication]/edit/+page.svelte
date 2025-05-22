@@ -1,7 +1,13 @@
 <script lang="ts">
 	import type { LayoutServerData } from '../$types';
 	import type { ActionData, PageServerData } from './$types';
-	import type { Difficulty, Publication, Tag as PrismaTag, User } from '@prisma/client';
+	import {
+		type Difficulty,
+		type Publication,
+		PublicationType,
+		type Tag as PrismaTag,
+		type User
+	} from '@prisma/client';
 	import { CircuitComponent, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
 		FileButton, FileDropzone, getToastStore
@@ -30,7 +36,6 @@
 	let publication: Publication = serverData.publication;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
-	console.log(tags);
 
 	let title = publication.title;
 	let description = publication.description;
@@ -60,7 +65,17 @@
 
 	let circuitNodesPlaceholder: NodeInfo[] = [];
 	if (!isMaterial){
-		circuitNodesPlaceholder = serverData.publication.circuit.nodes;
+		circuitNodesPlaceholder = serverData.publication.circuit.nodes.map(node => ({
+			id: node.publication.id,
+			title: node.publication.title,
+			username: node.publication.publisher.username,
+			isMaterial: node.publication.type === PublicationType.Material,
+			next: node.next,
+			posX: node.posX,
+			posY: node.posY,
+			extensions: node.extensions,
+			publisherId: node.publication.publisherId
+		}))
 	}
 	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
 
@@ -79,7 +94,7 @@
 
 	let coverPicMat:File|undefined = undefined;
 	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
-	let selectedFileList: FileList = [];
+	let selectedFileList: FileList = new DataTransfer().files;
 
 	if (isMaterial){
 		// TODO: (random?) figure out why the type is a string rather than a null
