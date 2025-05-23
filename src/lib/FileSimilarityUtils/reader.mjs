@@ -5,6 +5,7 @@ import { pythonKeywords } from './pythonKeywords.mjs';
 import { fileSystem } from '../indexJS.mjs';
 import { model } from '../similarityIndex.mjs';
 import CustomRecursiveCharacterTextSplitter from '../DocumentSplitter/Splitter.mjs'
+import { preprocessText } from './textProcessor.mjs';
 
 export async function reader(filePath) {
     // Extract file extension
@@ -43,7 +44,7 @@ export async function reader(filePath) {
         const fileChunks = await Promise.all(
             chunks.map(async (content) => ({
                 pageContent: content,
-                embedding: await model.computeEmbeddingSingleText(content),
+                embedding: await model.computeEmbeddingSingleText(preprocessText(content)),
                 metadata: { extension: extension }
             }))
         );

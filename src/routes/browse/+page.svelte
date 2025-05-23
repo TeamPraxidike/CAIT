@@ -17,25 +17,25 @@
 	let idsCirc: any[] = [];
 	$: data.materials.then(matData => {
 		materials = matData.materials;
-		console.log("hui1")
+		
 	}).catch(e => {
 		idsMat = [];
 	});
 	$: data.circuits.then(circData => {
 		circuits = circData.circuits;
-		console.log("pishka1")
+		
 	}).catch(e => {
 		idsCirc = [];
 	});
 	$: data.materials.then(matData => {
 		idsMat = matData.idsMat;
-		console.log("pis222222222222222222hka1")
+		
 	}).catch(e => {
 		idsMat = [];
 	});
 	$: data.circuits.then(circData => {
 		idsCirc = circData.idsCirc;
-		console.log("aaaaa")
+		
 	}).catch(e => {
 		idsCirc = [];
 	});
