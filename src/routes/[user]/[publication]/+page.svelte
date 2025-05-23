@@ -672,10 +672,7 @@
 
 	{#key pubView.publication.id}
 		<!--   RIGHT SINGLE 1/4 COLUMN   -->
-		<div class="flex flex-col items-center gap-2">
-			{#if isMaterial && pubView.publication.materials.theoryPractice}
-				<TheoryAppBar value="{pubView.publication.materials.theoryPractice}" editable="{false}" />
-			{/if}
+		<div class="flex flex-col gap-4">
 			<div class="flex gap-2">
 				<UserProp role="Publisher"
 						  userPhotoUrl={pubView.publication.publisher.profilePicData}
@@ -686,35 +683,30 @@
 							  view="material" user={maintainer} />
 				{/each}
 			</div>
-			<Accordion regionPanel="space-y-8" padding="p-3">
-				<AccordionItem class="variant-soft-primary rounded-lg">
-					<svelte:fragment slot="summary">Learning Objectives</svelte:fragment>
-					<svelte:fragment slot="content">
-						{#if pubView.publication.learningObjectives.length === 0}
-							<span>No learning objectives have been indicated</span>
-						{:else}
-							{#each pubView.publication.learningObjectives as LO}
-								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{LO}</p>
-							{/each}
-						{/if         }
-					</svelte:fragment>
-				</AccordionItem>
-			</Accordion>
-			<Accordion regionPanel="space-y-8" padding="p-3">
-				<AccordionItem class="variant-soft-primary rounded-lg">
-					<svelte:fragment slot="summary">Prior Knowledge</svelte:fragment>
-					<svelte:fragment slot="content">
-						{#if pubView.publication.prerequisites.length === 0}
-							<span>No prior knowledge has been indicated</span>
-						{:else}
-							{#each pubView.publication.prerequisites as PK}
-								<p class="w-full text-surface-800 dark:text-surface-100 my-1">{PK}</p>
-							{/each}
-						{/if}
-
-					</svelte:fragment>
-				</AccordionItem>
-			</Accordion>
+			<div class="flex flex-col">
+				<span class="font-bold text-surface-800">Learning Objectives:</span>
+				<ul class="list-inside">
+					{#if pubView.publication.learningObjectives.length === 0}
+						<span>No learning objectives have been indicated</span>
+					{:else}
+						{#each pubView.publication.learningObjectives as lo}
+							<li class="list text-surface-700 text-sm list-disc">{lo}</li>
+						{/each}
+					{/if}
+				</ul>
+			</div>
+			<div class="flex flex-col">
+				<span class="font-bold text-surface-800">Prior Knowledge:</span>
+				<ul class="list-inside">
+					{#if pubView.publication.prerequisites.length === 0}
+						<span class="text-surface-800">No prior knowledge has been indicated</span>
+					{:else}
+						{#each pubView.publication.prerequisites as pk}
+							<li class="list text-surface-700 text-sm list-disc">{pk}</li>
+						{/each}
+					{/if}
+				</ul>
+			</div>
 		</div>
 	{/key}
 </div>

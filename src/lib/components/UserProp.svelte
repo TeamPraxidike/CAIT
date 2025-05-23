@@ -17,14 +17,6 @@
 	const randomNumber = Math.floor(Math.random() * 1000);
 	let hoverName = '' + user.id + randomNumber;
 
-	const popupHoverBottom: PopupSettings = {
-		event: 'hover',
-		target: hoverName,
-		placement: 'bottom',
-		middleware: {
-			offset: 2
-		}
-	};
 	const popupHoverTop: PopupSettings = {
 		event: 'hover',
 		target: hoverName,
@@ -49,11 +41,6 @@
 	   class="{className} flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow">
 		<div class="flex flex-col space-y-1 items-start w-full md:pb-2">
 			<div class="w-full flex flex-col items-center">
-				<!--{#if userPhotoUrl !== ''}-->
-				<!--	<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />-->
-				<!--{:else}-->
-				<!--	<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />-->
-				<!--{/if}-->
 				{#if userPhotoUrl !== null}
 					<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
 				{:else}
@@ -74,24 +61,20 @@
 
 {:else if view === "material"}
 
-	<a href='/{user.username}' type="button" style="height:fit-content" use:popup={popupHoverBottom}
-		 class="flex-none [&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
-		<div class="flex flex-col items-center justify-center space-y-1 flex-none">
-			<!--{#if userPhotoUrl !== ''}-->
-			<!--	<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />-->
-			<!--{:else}-->
-			<!--	<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />-->
-			<!--{/if}-->
+	<a href='/{user.username}' type="button" style="height:fit-content"
+		 class="[&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover
+		 		bg-surface-50 hover:cursor-pointer rounded-lg w-full">
+		<div class="flex gap-2 items-center space-y-1 w-full flex-none">
 			{#if userPhotoUrl !== null}
-				<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
+				<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-10 h-10 rounded-full" />
 			{:else}
-				<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
+				<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 rounded-full" />
 			{/if}
 			<div class="max-w-full items-center flex-none">
 				<span class="dark:text-surface-50 text-surface-900 max-w-full truncate flex-none">{user.firstName.slice(0,1) + ". " + user.lastName}</span>
 				<hr class="dark:bg-surface-50 bg-surface-300" />
+				<div class="text-sm md:text-md ">{role}</div>
 			</div>
-			<div class="text-sm md:text-md ">{role}</div>
 		</div>
 	</a>
 
@@ -127,11 +110,6 @@
 	<a href='/{user.username}' use:popup={popupHoverTop}
 	   class="[&>*]:pointer-events-none flex-none col-span-2 h-20 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 pl-2 pr-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
 		<div class="flex space-x-2 items-center w-full">
-			<!--{#if userPhotoUrl !== ''}-->
-			<!--	<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />-->
-			<!--{:else}-->
-			<!--	<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />-->
-			<!--{/if}-->
 			{#if userPhotoUrl !== null}
 				<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
 			{:else}
