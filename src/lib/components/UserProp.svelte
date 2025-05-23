@@ -96,8 +96,8 @@
 	</a>
 
 {:else if view === "publish"}
-	<div style="height:fit-content"
-		 class="w-32 group flex flex-none relative flex-col text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 card-hover bg-surface-50 rounded-lg hover:shadow-lg shadow flex-grow-0">
+	<div class="flex relative text-surface-800 dark:text-surface-50 overflow-hidden
+		 		p-2 rounded-lg text-sm">
 		{#if role!=="Publisher"}
 			<button type="button" on:click={removeMaintainer} class="absolute top-0 right-0 rounded-lg hidden group-hover:block">
 				<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 36 36" {...$$props}>
@@ -111,20 +111,14 @@
 				</svg>
 			</button>
 		{/if}
-		<div class="w-full flex flex-col items-center flex-none">
-			<!--{#if userPhotoUrl !== ''}-->
-			<!--	<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />-->
-			<!--{:else}-->
-			<!--	<div class="w-10 h-10 md:w-20 md:h-20 bg-surface-500 placeholder-circle" />-->
-			<!--{/if}-->
+		<div class="w-full flex gap-2 items-center flex-none">
 			{#if userPhotoUrl !== null}
-				<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
+				<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-6 h-6 rounded-full" />
 			{:else}
-				<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
+				<img src={defaultProfilePicturePath} alt="User Profile" class="w-6 h-6 border border-1 border-gray-300 rounded-full" />
 			{/if}
 			<div class="max-w-full items-center">
-				<span class="dark:text-surface-50 text-surface-900 max-w-full truncate">{user.firstName.slice(0,1) + ". " + user.lastName}</span>
-				<hr class="dark:bg-surface-50 bg-surface-300" />
+				<span class="dark:text-surface-50 text-surface-900 max-w-full truncate">{user.firstName + " " + user.lastName}</span>
 			</div>
 		</div>
 	</div>
