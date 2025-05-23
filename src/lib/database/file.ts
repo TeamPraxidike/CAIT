@@ -393,14 +393,25 @@ export async function handleFileTokens(
 	}
 }
 
+// export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
+// 	return prisma.$queryRaw`
+// 	SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", embedding <#> ${embeddedUserQuery}::vector AS similarity
+// 	FROM public."FileChunk"
+//     WHERE embedding <#> ${embeddedUserQuery}::vector < -0.2
+// 	ORDER BY "filePath", embedding <#> ${embeddedUserQuery}::vector ASC
+// 	LIMIT 5;
+// 	`;
+// }
+
 export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
 	return prisma.$queryRaw`
-	SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", embedding <#> ${embeddedUserQuery}::vector AS similarity
-	FROM public."FileChunk"
-    WHERE embedding <#> ${embeddedUserQuery}::vector < -0.4
-	ORDER BY "filePath", embedding <#> ${embeddedUserQuery}::vector ASC
-	LIMIT 5;
-	`;
+    SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", 
+           (1 - (embedding <=> ${embeddedUserQuery}::vector)) AS similarity
+    FROM public."FileChunk"
+    WHERE embedding <=> ${embeddedUserQuery}::vector < 0.7  
+    ORDER BY "filePath", embedding <=> ${embeddedUserQuery}::vector ASC
+    LIMIT 5;
+    `;
 }
 
 // Cast the vector to a string format that can be parsed back to an array

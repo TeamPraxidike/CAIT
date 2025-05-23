@@ -1,38 +1,39 @@
 <script lang="ts">
 	import {
-		DiffBar,
 		DifficultySelection,
 		FileTable,
 		Filter,
 		MaterialTypes,
 		Meta,
-		PublishReview,
-		TheoryAppBar
+		Tag,
+		TheoryAppBar, UserProp
 	} from '$lib';
-	import {
-		FileButton,
-		FileDropzone,
-		getToastStore,
-		Step,
-		Stepper
-	} from '@skeletonlabs/skeleton';
+	import { FileButton, FileDropzone, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import MetadataLOandPK from "$lib/components/MetadataLOandPK.svelte";
-	import MantainersEditBar from "$lib/components/user/MantainersEditBar.svelte";
-	import TagsSelect from "$lib/components/TagsSelect.svelte";
+	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
+	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onDestroy, onMount } from 'svelte';
 
 	import {
-		saveCover, getCover, deleteCover,
-		saveFiles, getFiles, clearFiles,
-		saveMaterialSnapshot, getMaterialSnapshot, clearMaterialSnapshot, type FormSnapshot
+		clearFiles,
+		clearMaterialSnapshot,
+		deleteCover,
+		type FormSnapshot,
+		getCover,
+		getFiles,
+		getMaterialSnapshot,
+		saveCover,
+		saveFiles,
+		saveMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
+
 	/**
 	 * Convert an array of File objects into a real FileList.
 	 */
@@ -50,10 +51,10 @@
 	$: isSubmitting = false;
 
 	// tags
-	let tags: string[] = []; 
+	let tags: string[] = [];
 	$: tags = tags;
 	let allTags: PrismaTag[] = data.tags;
-	let newTags: string[] = []; 
+	let newTags: string[] = [];
 
 	let files: FileList = [] as unknown as FileList;
 	type UserWithProfilePic = User & { profilePicData: string };
@@ -62,21 +63,21 @@
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users;
 	// learning objectives
-	let LOs: string[] = []; 
+	let LOs: string[] = [];
 	$: LOs = LOs;
 
-	let PKs: string[] = []; 
+	let PKs: string[] = [];
 	$: PKs = PKs;
 
 	// input data
-	let title: string = ''; 
-	let description: string = ''; 
+	let title: string = '';
+	let description: string = '';
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
 	let theoryApplicationRatio: number = 0.5;
-	let selectedType: string = "Select Type";
-	let allTypes: {id:string, content:string }[] = MaterialTypes.map(x => ({id : '0', content : x})); //array with all the tags MOCK
+	let selectedType: string = 'Select Type';
+	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
 	let typeActive = false;
 	// cover
@@ -135,26 +136,26 @@
 			toastStore.trigger({
 				message: 'Publication Added successfully',
 				background: 'bg-success-200',
-				classes: 'text-surface-900',
+				classes: 'text-surface-900'
 			});
 
 			// Navigate away
 			goto(`/${loggedUser.username}/${form?.id}`);
 		}).catch(error => {
-				console.error('Error clearing data:', error);
+			console.error('Error clearing data:', error);
 		});
 		goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
 			background: 'bg-warning-200',
-			classes: 'text-surface-900',
+			classes: 'text-surface-900'
 		});
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
 			background: 'bg-error-200',
-			classes: 'text-surface-900',
+			classes: 'text-surface-900'
 		});
 	}
 
@@ -199,12 +200,12 @@
 				newTags = existing.newTags;
 				LOs = existing.LOs;
 				PKs = existing.PKs;
-				selectedType = existing.selectedType ?? "Select type";
-				difficulty = existing.difficulty ?? "easy";
+				selectedType = existing.selectedType ?? 'Select type';
+				difficulty = existing.difficulty ?? 'easy';
 				maintainers = existing.maintainers;
 				searchableUsers = existing.searchableUsers;
-				estimate = existing.estimate ?? "30";
-				copyright = existing.copyright ?? "No copyright";
+				estimate = existing.estimate ?? '30';
+				copyright = existing.copyright ?? 'No copyright';
 				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
 			}
 
@@ -223,10 +224,10 @@
 					searchableUsers,
 					estimate,
 					copyright,
-					theoryApplicationRatio,
+					theoryApplicationRatio
 				};
 
-				console.log("IN CONST SNAPSHOT")
+				console.log('IN CONST SNAPSHOT');
 
 				// Store it in IndexedDB
 				saveMaterialSnapshot(data);
@@ -247,42 +248,42 @@
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
 		}
-	})
+	});
 
 	const onNextHandler = () => {
 		window.scrollTo({
 			top: 0,
 			behavior: 'smooth'
 		});
-	}
-	let warning1: string = "";
+	};
+	let warning1: string = '';
 	const generateWarningStep1 = (title: string, description: string, selectedType: string): string => {
-		let warning = "You are missing ";
-		if (title.length < 1) warning += "a title";
-		if (description.length < 1 && title.length < 1) warning += ", a description";
-		else if(description.length < 1) warning += "a description";
-		if ((title.length < 1 || description.length < 1) && selectedType === "Select Type") warning += " and a material type";
-		else if (selectedType === "Select Type") warning += "a material type";
-		warning += ".";
+		let warning = 'You are missing ';
+		if (title.length < 1) warning += 'a title';
+		if (description.length < 1 && title.length < 1) warning += ', a description';
+		else if (description.length < 1) warning += 'a description';
+		if ((title.length < 1 || description.length < 1) && selectedType === 'Select Type') warning += ' and a material type';
+		else if (selectedType === 'Select Type') warning += 'a material type';
+		warning += '.';
 		return warning;
-	}
+	};
 	$: warning1 = generateWarningStep1(title, description, selectedType!);
 
-	let warning2: string = "";
+	let warning2: string = '';
 	const generateWarningStep2 = (tags: number, LOs: number) => {
-		let warning = "You are missing ";
-		if (tags < 1) warning += "a tag";
-		if (LOs < 1 && tags < 1) warning += " and a Learning objective";
-		else if (LOs < 1) warning += "a Learning objective";
-		return warning += ".";
-	}
+		let warning = 'You are missing ';
+		if (tags < 1) warning += 'a tag';
+		if (LOs < 1 && tags < 1) warning += ' and a Learning objective';
+		else if (LOs < 1) warning += 'a Learning objective';
+		return warning += '.';
+	};
 	$: warning2 = generateWarningStep2(tags.length, LOs.length);
 
 	const handleInputEnter = (event: KeyboardEvent) => {
-		if(event.key === 'Enter'){
+		if (event.key === 'Enter') {
 			event.preventDefault();
 		}
-	}
+	};
 
 	let markedAsDraft = false;
 	let draft = true;
@@ -334,31 +335,63 @@
 		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
       }}>
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
-			 buttonNext="btn dark:bg-surface-200" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
-		<Step locked={locks[0]}>
-			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
-			<FileDropzone on:change={appendToFileList} multiple name="file" />
-			<FileTable operation="edit" bind:files={files} />
-		</Step>
-		<Step locked={locks[1]}>
-			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-			<div class="flex flex-col gap-2">
-				<label for="title" >Title<span class="text-error-300">*</span></label>
-				<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
-					<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive} on:clearSettings={() => {typeActive=false}}/>
-				<textarea name="description" placeholder="Description..." bind:value={description}
-						  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
-			</div>
-			{#if coverPic}
-				<button on:click={() => coverPic = undefined} type="button" class="btn py-2 px-4 bg-error-400 text-surface-50 rounded-full hover:bg-opacity-85">Remove Cover Picture</button>
-			{:else}
-				<FileButton on:change={chooseCover} name="coverPhoto">Upload Cover Picture</FileButton>
-			{/if}
+			 buttonNext="btn dark:bg-surface-200"
+			 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
+				<Step locked={locks[0]}>
 
-			{#if coverPic}
-				<img src={URL.createObjectURL(coverPic)} alt="coverPicture" class="border-2 border-surface-700 w-1/2">
-			{/if}
+					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
+
+					<div class="grid grid-cols-2 gap-4">
+						<div class="h-80 flex">
+							<FileDropzone on:change={appendToFileList} multiple name="file" />
+						</div>
+						<FileTable operation="edit" bind:files={files} />
+					</div>
+
+				</Step>
+		<Step locked={locks[1]}>
+			<div class="grid grid-cols-2 gap-x-4 gap-y-2">
+				<label for="title">Title<span class="text-error-300">*</span></label>
+
+				<label for="coverPic">Cover Picture</label>
+
+				<div class="flex flex-col gap-2 min-h-80">
+					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
+						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
+					<textarea name="description" placeholder="Description..." bind:value={description}
+							  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
+				</div>
+
+				<div class="flex flex-col gap-2 h-full bg-surface-200
+							border-2 border-dashed border-surface-700">
+					{#if coverPic}
+						<img src={URL.createObjectURL(coverPic)}
+							 alt="coverPicture"
+							 class="max-h-96 w-full object-contain h-full">
+					{/if}
+				</div>
+
+				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}
+						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}
+						on:clearSettings={() => {typeActive=false}} />
+
+				<div>
+					{#if coverPic}
+						<button on:click={() => coverPic = undefined} type="button"
+								class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
+							Remove Cover Picture
+						</button>
+					{:else}
+						<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
+									on:change={chooseCover} name="coverPhoto">
+							Upload Cover Picture
+						</FileButton>
+					{/if}
+				</div>
+
+			</div>
+
+			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
 
 			{#if locks[1]}
 				<p class="text-error-300 dark:text-error-400">{warning1}</p>
@@ -372,7 +405,7 @@
 				</div>
 				<div class="flex flex-row gap-4 md:gap-2 items-center">
 					<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>
-					<TheoryAppBar bind:value={theoryApplicationRatio}/>
+					<TheoryAppBar bind:value={theoryApplicationRatio} />
 				</div>
 			</div>
 
@@ -380,23 +413,27 @@
 				<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
 					<div class="w-full md:w-1/2 flex-col gap-2">
 						<label for="estimate">Time Estimate (in minutes):</label>
-						<input type="number" name="estimate" bind:value={estimate} on:keydown={handleInputEnter} min="0" placeholder="How much time do the materials take"
+						<input type="number" name="estimate" bind:value={estimate} on:keydown={handleInputEnter} min="0"
+							   placeholder="How much time do the materials take"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
 					</div>
 					<div class="w-full md:w-1/2	">
-						<label for="copyright md-2">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
-						class="text-tertiary-700" > Check here how this applies to you</a>):</label>
-						<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter} placeholder="Leave blank if material is your own"
+						<label for="copyright md-2">Copyright License (<a
+							href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
+							class="text-tertiary-700"> Check here how this applies to you</a>):</label>
+						<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter}
+							   placeholder="Leave blank if material is your own"
 							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
 					</div>
 				</div>
 				<div class="w-full">
-					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
+					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}" />
 				</div>
 				<div class="flex flex-col w-full">
-					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={maintainers}/>
+					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
+									   bind:additionalMaintainers={maintainers} />
 					<div class="lg:w-1/2">
-						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
+						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags} />
 					</div>
 				</div>
 			</div>
@@ -406,30 +443,66 @@
 		</Step>
 		<Step locked={isSubmitting}>
 			<svelte:fragment slot="header">Review</svelte:fragment>
-			<PublishReview publisher={loggedUser} bind:title={title} bind:description={description} bind:LOs={LOs}
-										 bind:prior={PKs} bind:tags={tags}  bind:maintainers={maintainers}
-										 />
-			<div class="flex gap-2  pl-3">
-				<p class="text-lg">Difficulty:</p>
-				<DiffBar diff="{difficulty}"/>
+			<div class="grid grid-cols-12 gap-8">
+				<div class="col-span-8 flex flex-col">
+					<h2 class="text-3xl font-semibold break-words">{title}</h2>
+
+					<div class="flex flex-wrap gap-2 text-sm my-2">
+						{#each tags as tag}
+							<Tag tagText="{tag}" removable="{false}" width="{12}" />
+						{/each}
+					</div>
+
+					<p class="text-surface-800 text-sm">{description}</p>
+
+					<p class="text-surface-500 text-sm">
+						Time Estimate: {estimate || 'No estimate provided'} |
+						Type: {selectedType?.toUpperCase() || 'No type provided'} |
+						Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
+					</p>
+
+					<FileTable bind:files={files} />
+				</div>
+				<div class="col-span-4 flex flex-col gap-4">
+					{#if coverPic}
+						<p class="font-bold"> Cover Picture: </p>
+						<img src={URL.createObjectURL(coverPic)} alt="">
+					{/if}
+					<div class="flex flex-col">
+						<span class="font-bold">Maintainers:</span>
+						<div class="flex flex-wrap">
+							<UserProp role="Publisher" view="publish" user={loggedUser} userPhotoUrl={loggedUser.profilePicData} />
+							{#each maintainers as maintainer (maintainer.id)}
+								<UserProp user={maintainer} view="publish" role="Publisher" userPhotoUrl={maintainer.profilePicData} />
+							{/each}
+						</div>
+					</div>
+					<div class="flex flex-col">
+						<span class="font-bold">Learning Objectives:</span>
+						<ul class="list-inside">
+							{#each LOs as lo}
+								<li class="list text-sm list-disc">{lo}</li>
+							{/each}
+						</ul>
+					</div>
+					<div class="flex flex-col">
+						<span class="font-bold">Prior Knowledge:</span>
+						<ul class="list-inside">
+							{#each PKs as pk}
+								<li class="list text-sm list-disc">{pk}</li>
+							{/each}
+						</ul>
+					</div>
+					<div class="flex flex-col">
+						<span class="font-bold">Copyright:</span>
+						<span class="text-sm">{copyright || 'No copyright license'}</span>
+					</div>
+				</div>
 			</div>
-			<div class="pl-3 flex gap-3 items-center">
-				<p class="text-lg">Theory to Application:</p>
-				<TheoryAppBar value="{theoryApplicationRatio}" editable="{false}" />
-			</div>
-			<p class="text-lg pl-3">Type: {selectedType?.toUpperCase()}</p>
-			<p class="text-lg pl-3">Time Estimate: {#if estimate !== ''} {estimate} minutes {:else} No estimate provided {/if} </p>
-			<p class="text-lg pl-3">Copyright: {copyright}</p>
-			<div class="pl-3">
-				<FileTable bind:files={files} />
-			</div>
-			{#if coverPic}
-				<p class="text-lg pl-3"> Cover Picture: </p>
-				<img src={URL.createObjectURL(coverPic)} alt="sss">
-			{/if}
 
 			{#if draft}
-				<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's incomplete.</p>
+				<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's
+					incomplete.</p>
 			{:else}
 				<div class="flex flex-row justify-end items-center gap-2">
 					<p class="pl-3">Save as a draft: </p>

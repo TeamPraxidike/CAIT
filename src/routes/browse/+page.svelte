@@ -1,149 +1,100 @@
 <script lang="ts">
-	import { Filter, MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
-    import TagComponent from '$lib/components/generic/TagComponent.svelte';
-    import Icon from '@iconify/svelte';
-    import type { PageServerData } from './$types';
-    import ToggleComponent from '$lib/components/ToggleComponent.svelte';
-	import type { Circuit, Material, Publication, Tag, User } from '@prisma/client';
-		import { onMount } from 'svelte';
-    import {getExtensions} from "$lib/util/file";
-	import { type PaginationSettings, Paginator } from '@skeletonlabs/skeleton';
-
-
-	//let fetchPromise:Promise<any> = new Promise<null>(resolve => resolve(null));
+	import { MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
+	import { goto } from '$app/navigation';
+	import type { PageServerData } from './$types';
+	import type { Circuit, Material, Publication, User } from '@prisma/client';
+	import { onMount } from 'svelte';
+	import { getExtensions } from '$lib/util/file';
+	import { type PaginationSettings, Paginator, SlideToggle } from '@skeletonlabs/skeleton';
+	import DropdownSelect from '$lib/components/designSystem/DropdownSelect.svelte';
+	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';
 
 	export let data: PageServerData;
 	let searchWord: string = '';
-	// let materials = data.materials
-	// let circuits = data.circuits
-	let materials: any[] = []
-	let circuits: any[] = []
-	// let idsMat = data.idsMat
-	// let idsCirc = data.idsCirc
+	let materials: any[] = [];
+	let circuits: any[] = [];
 	let idsMat: any[] = [];
 	let idsCirc: any[] = [];
-	// $: materials = data.materials;
-	// $: circuits = data.circuits;
-	$: data.materials.then(matData => {materials = matData.materials}).catch(e => {idsMat = []})
-	$: data.circuits.then(circData => {circuits = circData.circuits}).catch(e => {idsCirc = []})
-	// $: idsMat = data.idsMat
-	// $: idsCirc = data.idsCirc
-	$: data.materials.then(matData => {idsMat = matData.idsMat}).catch(e => {idsMat = []})
-	$: data.circuits.then(circData => {idsCirc = circData.idsCirc}).catch(e => {idsCirc = []})
-	let amount = data.amount
-	let source = data.type === "circuits" ? idsCirc : idsMat
-	$: source = data.type === "circuits" ? idsCirc : idsMat
-	$: paginationSettings.size = source.length
+	$: data.materials.then(matData => {
+		materials = matData.materials;
+		
+	}).catch(e => {
+		idsMat = [];
+	});
+	$: data.circuits.then(circData => {
+		circuits = circData.circuits;
+		
+	}).catch(e => {
+		idsCirc = [];
+	});
+	$: data.materials.then(matData => {
+		idsMat = matData.idsMat;
+		
+	}).catch(e => {
+		idsMat = [];
+	});
+	$: data.circuits.then(circData => {
+		idsCirc = circData.idsCirc;
+		
+	}).catch(e => {
+		idsCirc = [];
+	});
+	let amount = data.amount;
+	let source = data.type === 'circuits' ? idsCirc : idsMat;
+	$: source = data.type === 'circuits' ? idsCirc : idsMat;
+	$: paginationSettings.size = source.length;
 
 
-	let users: (User & {posts: Publication[], profilePicData:string})[] = [];
-	$: data.users.then(userData => {
-		users = userData.users;
-	})
+	let users: (User & { posts: Publication[], profilePicData: string })[] = [];
 	let tags = data.tags;
-	//let profilePics:FetchedFileArray = data.profilePics;
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
 
 	$: pageType = data.type;
-
-
-	//Variables needed to deal with Sort and Difficulty
-	let sortOptions: {
-		id: string,
-		content: string
-	}[] = ['Most Recent', 'Most Liked', 'Most Used', 'Oldest'].map(x => ({ id: '0', content: x }));
-	let sortByActive = false;
+	let sortOptions: string[] = ['Most Recent', 'Most Liked', 'Oldest'];
 	let sortByText = 'Sort By';
+	let selectedDiff: ('Easy' | 'Medium' | 'Hard')[] = [];
+	let diffOptions: ('Easy' | 'Medium' | 'Hard')[] = ['Easy', 'Medium', 'Hard'];
+	let selectedTags: string[] = [];
 
-	let selectedDiff: { id: string, content: string }[] = [];
-	let diffOptions: { id: string, content: string }[] = ['Easy', 'Medium', 'Hard'].map((x: string) => ({
-		id: '0',
-		content: x
+	let selectedPublisherIDs: string[] = [];//keeps track of selected users ids
+	let allPublishersObjects: { id: string, content: string }[] = users.map((x: any) => ({
+		id: x.id,
+		content: (x.firstName + ' ' + x.lastName)
 	}));
-	let diffActive = false;
 
-	//Variables needed to deal with Tags
-	let selectedTags: { id: string, content: string }[] = []; //keeps track of selected tags
-	let allTags: { id: string, content: string }[] = tags.map((x: Tag) => ({ id: '0', content: x.content }));
-	let displayTags: { id: string, content: string }[] = allTags;
-	let tagActive = false;
+	let selectedTypes: string[] = [];
+	let allTypes: string[] = MaterialTypes;
 
-        //Variables needed to deal with Publishers
-        let selectedPublishers: {id:string, content:string }[] = [];//keeps track of selected tags
-        let allPublisherNames: {id:string, content:string }[] = users.map( (x:any) => ({id : x.id, content:(x.firstName + " " + x.lastName)})); //array with all the tags MOCK
-        let displayPublishers: {id:string, content:string }[] = allPublisherNames; //
-        let publisherActive = false
+	let numberNodes: string;
 
-        //Variables needed to deal with Types
-        let selectedTypes: {id:string, content:string }[] = []; //keeps track of selected tags
-        let allTypes: {id:string, content:string }[] =  MaterialTypes.map(x => ({id : '0', content : x})); //array with all the tags MOCK
-        let displayTypes: {id:string, content:string }[] = allTypes; //
-        let typeActive = false
-
-        let numberNodes : number;
-
-
-
-		const removeTag = (event: CustomEvent) => {
-			selectedTags = selectedTags.filter(item => item.content !== event.detail.text)
-			applyActive = true;
-		}
-
-		const removePublisher = (name: {id:string, content:string }) => {
-			selectedPublishers = selectedPublishers.filter(publisher => publisher.id !== name.id);
-			applyActive = true;
-
-		};
-
-
-		const removeDiff = (name:{id:string, content:string }) => {
-        selectedDiff = selectedDiff.filter(diff => diff.content !== name.content);
-        applyActive = true;
-
-    };
-
-    const removeType = (name: {id:string, content:string }) => {
-        selectedTypes = selectedTypes.filter(diff => diff.content !== name.content);
-        applyActive = true;
-
-    };
-
-
-    /**
-     * Method that makes all the dropdowns go up; Used so whenever you drop down a menu it closes all others
-     */
-    const clearAll = () => {
-        sortByActive = false;
-        diffActive = false;
-        tagActive = false;
-        publisherActive = false;
-        typeActive = false;
-    };
-
-    const resetFilters = () => {
-			page  = 0
-			amount = 8
-			paginationSettings.page = 0
-			paginationSettings.limit = amount
-        selectedTags = [];
-        selectedTypes = [];
-        selectedPublishers = [];
-        selectedDiff = [];
-        sendFiltersToAPI();
-    };
+	const resetFilters = () => {
+		page = 0;
+		amount = 8;
+		paginationSettings.page = 0;
+		paginationSettings.limit = amount;
+		selectedTags = [];
+		selectedTypes = [];
+		selectedPublisherIDs = [];
+		selectedDiff = [];
+		searchActive=true;
+	};
 
 	let fetchPromise: Promise<any> | null = null;
 
-	const onSearch = (event : CustomEvent) => {
-		searchWord = event.detail.value.inputKeywords;
-		fetchPromise = sendFiltersToAPI();
-	}
+	const onSearch = () => {
+
+		if (isSemanticActive) {
+			onSemanticSearch();
+		} else {
+			fetchPromise = sendFiltersToAPI();
+		}
+	};
 
 	let isSemanticActive = false;
 	$: isSemanticActive = isSemanticActive;
 
-	$: if (isSemanticActive){
+	$: if (isSemanticActive) {
 		pageType = 'semantic';
 	} else {
 		pageType = 'materials';
@@ -151,15 +102,14 @@
 
 	let semanticPromise: Promise<any> | null = null;
 
-	const onSemanticSearch = (event : CustomEvent) => {
-		let semanticSearchQuery = event.detail.value.inputKeywords;
-		semanticPromise = sendMessageToSemantic(semanticSearchQuery)
-	}
+	const onSemanticSearch = () => {
+		if (searchWord.trim() === '') return;
+		semanticPromise = sendMessageToSemantic(searchWord);
+	};
 
 	async function sendMessageToSemantic(inputMessage: string) {
 		if (!inputMessage.trim()) return;
-
-		applyActive = false;
+		searchActive = false;
 
 		const messageToSend = inputMessage.trim();
 
@@ -179,63 +129,32 @@
 			const rJson = await response.json();
 
 			return rJson.results;
-
-			// if (!rJson.results || !Array.isArray(rJson.results) || rJson.results.length === 0) {
-			// 	throw new Error('No results returned');
-			// }
-
-
-
 		} catch (error) {
 			console.error('Error sending message:', error);
-
 		}
 	}
 
 
 	async function sendFiltersToAPI() {
+		searchActive = false;
+		const queryParams = new URLSearchParams({
+			type: pageType
+		});
 
-        applyActive = false;
-        const queryParams = new URLSearchParams({
-            type: pageType
-        });
+		if (selectedPublisherIDs.length > 0) queryParams.set('publishers', selectedPublisherIDs.join(','));
 
-        if (selectedPublishers.length > 0)
-        {
-            queryParams.set("publishers", selectedPublishers.map(x => x.id).join(','))
-        }
+		if (selectedDiff.length > 0) queryParams.set('difficulty', selectedDiff.join(','));
+		if (selectedTags.length > 0) queryParams.set('tags', selectedTags.join(','));
+		if (selectedTypes.length > 0) queryParams.set('types', selectedTypes.join(','));
+		if (sortByText !== 'Most Recent') queryParams.set('sort', sortByText);
+		if (searchWord !== '') queryParams.set('q', searchWord);
+		if (numberNodes != undefined && Number.parseInt(numberNodes) !== 0) queryParams.set('limit', numberNodes);
 
-        if (selectedDiff.length > 0)
-        {
-            queryParams.set("difficulty", selectedDiff.map(x => x.content).join(','))
-        }
-        if (selectedTags.length > 0)
-        {
-            queryParams.set("tags", selectedTags.map(x => x.content).join(','))
-        }
-        if (selectedTypes.length > 0)
-        {
-            queryParams.set("types", selectedTypes.map(x => x.content).join(','))
-        }
-        if (sortByText !== "Most Recent")
-        {
-            queryParams.set("sort", sortByText)
-        }
-        if (searchWord !== "")
-        {
-            queryParams.set("q", searchWord)
-        }
-        if (numberNodes != undefined && numberNodes !== 0)
-        {
-            queryParams.set("limit", numberNodes.toString())
-        }
+		const s = pageType === 'materials' ? 'material' : 'circuit';
+		const url = `/api/${s}?${queryParams.toString()}`;
+		materials = [];
+		circuits = [];
 
-
-        const s = pageType === "materials" ? "material" : "circuit";
-        const url = `/api/${s}?${queryParams.toString()}`;
-        materials = [];
-        circuits = [];
-        //Make a GET request to the API
 		return fetch(url)
 			.then(response => {
 				if (!response.ok) {
@@ -245,52 +164,48 @@
 			})
 			.then(d => {
 				// Handle the response data from the API
-				if (s === "material") {
+				if (s === 'material') {
 
-					materials = d.materials
-					idsMat = d.idsMat
+					materials = d.materials;
+					idsMat = d.idsMat;
 				} else {
 					circuits = d.circuits;
-					idsCirc = d.idsCirc
+					idsCirc = d.idsCirc;
 				}
-				amount = 8
-				page = 0
-				paginationSettings.size = amount
-				paginationSettings.page = 0
+				amount = 8;
+				page = 0;
+				paginationSettings.size = amount;
+				paginationSettings.page = 0;
 
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
 			});
-    };
+	}
 
-	let page = 0
+	let page = 0;
 
 	function onPageChange(e: CustomEvent): void {
 		page = e.detail;
-		materials = []
-		circuits = []
-		// data.materials = []
-		// data.circuits = []
-		changePage(amount, page)
+		materials = [];
+		circuits = [];
+		changePage(amount, page);
 	}
 
 	function onAmountChange(e: CustomEvent): void {
-		// data.materials = []
-		// data.circuits = []
-		materials = []
-		circuits = []
+		materials = [];
+		circuits = [];
 		amount = e.detail;
-		changePage(amount, page)
+		changePage(amount, page);
 	}
 
-	const changePage = async(amount: number, pageNum:number) => {
-			const ids = pageType === "materials" ? idsMat : idsCirc
-			const queryParams = new URLSearchParams({
-				type: pageType,
-				ids: ids.slice(pageNum * amount, (pageNum+1)*amount).join(",")
-			});
-		const s = pageType === "materials" ? "material" : "circuit";
+	const changePage = async (amount: number, pageNum: number) => {
+		const ids = pageType === 'materials' ? idsMat : idsCirc;
+		const queryParams = new URLSearchParams({
+			type: pageType,
+			ids: ids.slice(pageNum * amount, (pageNum + 1) * amount).join(',')
+		});
+		const s = pageType === 'materials' ? 'material' : 'circuit';
 		const url = `/api/publication/set?${queryParams.toString()}`;
 		materials = [];
 		circuits = [];
@@ -303,377 +218,253 @@
 				return response.json();
 			})
 			.then(data => {
-				//console.log(data)
-				// Handle the response data from the API
-				if (s === "material") {
-					materials = data.publications.map((x:Publication&{materials: Material & {files:string[]}, coverPicData:string, publisher:User & { profilePicData: string }}) => ({id: x.materials.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher, files:x.materials.files, encapsulatingType:x.materials.encapsulatingType}));
+				if (s === 'material') {
+					materials = data.publications.map((x: Publication & {
+						materials: Material & { files: string[] },
+						coverPicData: string,
+						publisher: User & { profilePicData: string }
+					}) => ({
+						id: x.materials.id,
+						publication: x,
+						coverPicData: x.coverPicData,
+						publisher: x.publisher,
+						files: x.materials.files,
+						encapsulatingType: x.materials.encapsulatingType
+					}));
 				} else {
-					circuits = data.publications.map((x : Publication&{circuit: Circuit, coverPicData:string, publisher:User & { profilePicData: string }})=> ({id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher:x.publisher}));
+					circuits = data.publications.map((x: Publication & {
+						circuit: Circuit,
+						coverPicData: string,
+						publisher: User & { profilePicData: string }
+					}) => ({ id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher: x.publisher }));
 				}
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
 			});
-		}
+	};
 
+	let searchActive = false;
+	$:applyBackground = searchActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
 
-
-
-    let applyActive = false;
-    $:applyBackground = applyActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
-
-    const deleteFilters = (pageType: string) => {
-        if(pageType !== "materials"){
-			page  = 0
-			amount = 8
-			paginationSettings.page = 0
-			paginationSettings.limit = amount
+	const deleteFilters = (pageType: string) => {
+		if (pageType !== 'materials') {
+			page = 0;
+			amount = 8;
+			paginationSettings.page = 0;
+			paginationSettings.limit = amount;
 			selectedTags = [];
 			selectedTypes = [];
-			selectedPublishers = [];
+			selectedPublisherIDs = [];
 			selectedDiff = [];
-			// resetFilters();
 		}
+	};
 
+	$: deleteFilters(pageType);
 
-    }
+	onMount(async () => {
+		users = (await data.users).users;
+		allPublishersObjects = users.map((x: any) => ({
+			id: x.id,
+			content: (x.firstName + ' ' + x.lastName)
+		}));
 
-	$: deleteFilters(pageType)
-
-	onMount(()=>{
-		if (data.selectedTag !== ''){
-			applyActive = true;
+		if (data.selectedTag !== '') {
+			searchActive = true;
 			selectedTags = [];
-			selectedTags.push({id:'0', content: data.selectedTag});
+			selectedTags.push(data.selectedTag);
 			sendFiltersToAPI();
 		}
-	})
+	});
 
 	let paginationSettings = {
 		page: 0,
 		limit: amount,
 		size: source.length,
-		amounts: [4,8,12,16,32],
+		amounts: [4, 8, 12, 16, 32]
 	} satisfies PaginationSettings;
 
-	const switchPage = () => {
-		amount = 8
-		paginationSettings.limit = amount
-		paginationSettings.page = 0
-	}
+	/**
+	 * Will switch to a specific query page based on pageType.
+	 * This option toggles the semantic search off as it is meant to
+	 * only switch to either materials, circuits or people.
+	 *
+	 */
+	const switchToBrowsePage = () => {
+		goto(`/browse/?type=${pageType}`);
+		isSemanticActive = false;
+		amount = 8;
+		paginationSettings.limit = amount;
+		paginationSettings.page = 0;
+	};
 
-	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
 
-<div class="flex justify-between col-span-full mt-32">
-	<div class="flex gap-2 w-full lg:w-7/12 xl:w-1/2">
-		<SearchBar searchType="materials" bind:isSemanticActive={isSemanticActive} bind:inputKeywords={searchWord} on:SearchQuery={onSearch} on:SemanticSearchQuery={onSemanticSearch} />
-	</div>
-
-	{#if !isSemanticActive}
-		<div class="hidden rounded-lg lg:flex w-1/4">
-			<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-							 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
-		</div>
-	{/if}
-</div>
-{#if !isSemanticActive}
-	<div class="col-span-full">
-		<div class="flex lg:hidden rounded-lg w-3/4 min-h-6">
-			<ToggleComponent page="{true}" bind:pageType={pageType} options={["materials", "people", "circuits"]}
-											 labels={["Materials", "People", "Circuits"]} on:reset={switchPage}/>
-		</div>
-	</div>
-{/if}
-
-{#if !isSemanticActive}
-	<div class="col-span-full lg:col-span-7 xl:col-span-6 flex lg:justify-between gap-2">
-		{#if pageType !== "people"}
-			<div class="flex flex-col md:flex-row gap-1 md:items-center">
-						<div class="flex gap-1">
-							<Filter label="Tags" bind:selected={selectedTags} bind:all="{allTags}" bind:display="{displayTags}"
-											profilePic="{false}" bind:active="{tagActive}" on:clearSettings={clearAll}
-											on:filterSelected={() => {applyActive = true}} num="{0}" />
-							<Filter label="Publisher" bind:selected={selectedPublishers} bind:all="{allPublisherNames}"
-											bind:display="{displayPublishers}" profilePic="{true}"  bind:active="{publisherActive}"
-											on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}} num="{0}" people="{users}"/>
-							{#if pageType === "materials"}
-								<Filter label="Difficulty" bind:selected={selectedDiff} bind:all="{diffOptions}" bind:display="{diffOptions}"
-												profilePic="{false}" bind:active="{diffActive}" on:clearSettings={clearAll}
-												on:filterSelected={() => {applyActive = true}} num="{0}" />
-								<Filter label="Types" bind:selected={selectedTypes} bind:all="{allTypes}" bind:display="{displayTypes}"
-												profilePic="{false}" bind:active="{typeActive}" on:clearSettings={clearAll}
-												on:filterSelected={() => {applyActive = true}} num="{0}" />
-							{:else}
-								<Filter label="Min Num Nodes" selected={[]} all="{[]}" display="{[]}" type="{true}"
-												profilePic="{false}" on:filterSelected={() => {applyActive = true}} bind:active="{diffActive}" on:clearSettings={clearAll} bind:num={numberNodes}/>
-							{/if}
-						</div>
-
-						<div class="flex gap-1 h-full">
-							<div class = "hidden md:block w-px h-4/5 bg-surface-600 self-center" ></div>
-							<Filter label="Sort By" profilePic="{false}" oneAllowed={true} bind:active={sortByActive} bind:selectedOption={sortByText} bind:all={sortOptions} selected={[]} num="{0}" on:clearSettings={clearAll} on:filterSelected={() => {applyActive = true}}/>
-							<button class="rounded-lg text-xs py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
-											on:click={sendFiltersToAPI} disabled="{!applyActive}"  >Apply</button>
-							{#if (selectedTypes.length !== 0) || (selectedPublishers.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
-								<button class="h-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
-												on:click={resetFilters}>
-									Reset Filters
-								</button>
-							{/if}
-						</div>
-			</div>
-		{/if}
-	</div>
-{/if}
-
-
-<div class="col-span-full flex flex-wrap gap-2">
-    <div class="space-y-4">
-        {#if (selectedTags.length !== 0)}
-            <div class="gap-2 flex items-center flex-wrap">
-                <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Tags:</p>
-                {#each selectedTags as tag}
-                    <div>
-                        <TagComponent tagText="{tag.content}" width="{0}" removable="{true}" on:Remove={removeTag}/>
-                    </div>
-                {/each}
-            </div>
-        {/if}
-
-        {#if (selectedPublishers.length !== 0)}
-            <div class=" flex gap-2 items-center">
-                <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Publishers:</p>
-                {#each selectedPublishers as sp}
-                    <div class="flex gap-1 items-center">
-<!--												<img src="{'data:image;base64,' + users.filter(x =>x.id === sp.id)[0].profilePicData}" -->
-<!--													 alt="user profile" class="size-4 rounded-full"/>-->
-<!--					 TODO: please change                                                             -->
-						<img src={users.filter(x =>x.id === sp.id)[0].profilePicData
-						? 'data:image;base64,' + users.filter(x =>x.id === sp.id)[0].profilePicData
-						: defaultProfilePicturePath}
-							 alt="user profile" class="size-4 rounded-full"/>
-                        <p class="text-xs">{sp.content}</p>
-                        <button class="h-full" on:click={() => removePublisher(sp)}>
-                            <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
-                        </button>
-                    </div>
-                {/each}
-            </div>
-        {/if}
-
-        {#if (selectedDiff.length !== 0)}
-            <div class=" flex gap-2 items-center">
-                <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Difficulty:</p>
-                {#each selectedDiff as sd}
-                    <div class="flex gap-1 items-center">
-                        <p class="text-xs">{sd.content}</p>
-                        <button class="h-full" on:click={() => removeDiff(sd)}>
-                            <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
-                        </button>
-                    </div>
-                {/each}
-            </div>
-        {/if}
-
-        {#if (selectedTypes.length !== 0)}
-            <div class=" flex gap-2 items-center">
-                <p class="text-s font-semibold text-surface-600 dark:text-surface-200">Type:</p>
-                {#each selectedTypes as sd}
-                    <div class="flex gap-1 items-center">
-                        <p class="text-xs">{sd.content}</p>
-                        <button class="h-full" on:click={() => removeType(sd)}>
-                            <Icon icon="mdi:remove" class="text-surface-600 text-opacity-50 text-sm self-center mt-0.5"/>
-                        </button>
-                    </div>
-                {/each}
-            </div>
-        {/if}
-    </div>
+<div class="col-span-full mt-32">
+	<SearchBar searchType="materials" bind:isSemanticActive={isSemanticActive} bind:inputKeywords={searchWord}
+			   on:press={() => searchActive = true}
+			   on:SearchQuery={onSearch} on:SemanticSearchQuery={onSemanticSearch} />
 </div>
 
+<div class="col-span-3 border-gray-700">
 
-
-<!--{#if fetchPromise !== null}-->
-<!--	{#await fetchPromise}-->
-<!--		<div class="col-span-full flex flex-col justify-center items-center">-->
-<!--			<Icon icon="line-md:loading-loop" width="12.2rem" height="12.2rem" className="text-center" />-->
-<!--			<p>Loading</p>-->
-<!--		</div>-->
-<!--	{:then response}-->
-		<!-- Display the data when the promise is resolved -->
-<!--TODO: Please for the love of god refactor this-->
-		{#if fetchPromise === null}
-			{#if pageType === "materials"}
-				{#await materials}
-					<p>Loading materials...</p>
-				{:then materialsAwaited}
-					{#each materialsAwaited as material (material.id)}
-						<PublicationCard extensions="{getExtensions(material)}"
-										 imgSrc={material.coverPicData}
-										 publication={material.publication}
-										 liked={liked.includes(material.publication.id)}
-										 saved={saved.includes(material.publication.id)}
-										 materialType={material.encapsulatingType}
-										 publisher={material.publisher}
-						/>
-					{/each}
-				{:catch error}
-					<!--TODO: Change color-->
-					<p style="color: red">Error while loading materials. Reload the page to try again</p>
-				{/await}
-			{:else if pageType === "people"}
-				{#await users}
-					<p>Loading users...</p>
-				{:then usersAwaited}
-					{#each usersAwaited as person (person.id)}
-						<UserProp view="search" posts="{person.posts.length}"
-								  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
-					{/each}
-				{:catch error}
-					<!--TODO: Change color-->
-					<p style="color: red">Error while loading users. Reload the page to try again</p>
-				{/await}
-			{:else if pageType === "circuits"}
-				{#await circuits}
-					<p>Loading circuits...</p>
-				{:then circuitsAwaited}
-					{#each circuitsAwaited as circuit (circuit.id)}
-						<PublicationCard  publication="{circuit.publication}"
-										  imgSrc= {circuit.coverPicData}
-										  liked={liked.includes(circuit.publication.id)}
-										  saved={saved.includes(circuit.publication.id)}
-										  publisher={circuit.publisher}/>
-					{/each}
-				{:catch error}
-					<!--TODO: Change color-->
-					<p style="color: red">Error while loading circuits. Reload the page to try again</p>
-				{/await}
-			{:else if isSemanticActive && semanticPromise !== null}
-				{#await semanticPromise}
-					<p>Loading results...</p>
-				{:then semanticResultsAwaited}
-					<div class="col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-						{#each semanticResultsAwaited as message}
-							<div class="w-full flex flex-col gap-3 p-4 border border-surface-300 dark:border-surface-700 rounded-lg shadow bg-surface-100 dark:bg-surface-800">
-								<p class="italic text-surface-600 dark:text-surface-300">"...{message.content}..."</p>
-								<p class="text-sm text-surface-800 dark:text-surface-100">Name of file: <b>{message.fileTitle}</b></p>
-								<p class="text-xs text-surface-600 dark:text-surface-400"><i>You can find this file in:</i></p>
-								<PublicationCard
-									extensions="{getExtensions(message)}"
-									imgSrc={message.coverPicData}
-									publication={message.publication}
-									liked={false}
-									saved={false}
-									materialType={message.encapsulatingType}
-									publisher={message.publisher}
-								/>
-							</div>
-
-						{:else}
-							<p class="col-span-full text-center text-surface-600 dark:text-surface-400">
-								No results found
-							</p>
-
-						{/each}
-					</div>
-
-
-				{:catch error}
-					<!--TODO: Change color-->
-					<p style="color: red">Error while loading semantic search results. Reload the page to try again</p>
-				{/await}
-			{/if}
-		{:else if fetchPromise !== null}
-			{#if pageType === "materials"}
-				{#await fetchPromise}
-					<p>Loading materials...</p>
-				{:then materialsAwaited}
-					{#each materials as material (material.id)}
-						<PublicationCard extensions="{getExtensions(material)}"
-										 imgSrc={material.coverPicData}
-										 publication={material.publication}
-										 liked={liked.includes(material.publication.id)}
-										 saved={saved.includes(material.publication.id)}
-										 materialType={material.encapsulatingType}
-										 publisher={material.publisher}
-						/>
-					{/each}
-				{:catch error}
-					<!--TODO: Change color-->
-					<p style="color: red">Error while loading materials. Reload the page to try again</p>
-				{/await}
-			{:else if pageType === "people"}
-				{#await fetchPromise}
-					<p>Loading users...</p>
-				{:then usersAwaited}
-					{#each users as person (person.id)}
-						<UserProp view="search" posts="{person.posts.length}"
-								  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
-					{/each}
-				{:catch error}
-					<!--TODO: Change color-->
-					<p style="color: red">Error while loading users. Reload the page to try again</p>
-				{/await}
-			{:else if pageType === "circuits"}
-				{#await fetchPromise}
-					<p>Loading circuits...</p>
-				{:then circuitsAwaited}
-					{#each circuits as circuit (circuit.id)}
-						<PublicationCard  publication="{circuit.publication}"
-										  imgSrc= {circuit.coverPicData}
-										  liked={liked.includes(circuit.publication.id)}
-										  saved={saved.includes(circuit.publication.id)}
-										  publisher={circuit.publisher}/>
-					{/each}
-				{:catch error}
-					<!--TODO: Change color-->
-					<p style="color: red">Error while loading circuits. Reload the page to try again</p>
-				{/await}
-			{:else if isSemanticActive && semanticPromise !== null}
-				{#await semanticPromise}
-					<p>Loading results...</p>
-				{:then semanticResultsAwaited}
-					<div class="col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-						{#each semanticResultsAwaited as message}
-							<div class="w-full flex flex-col gap-3 p-4 border border-surface-300 dark:border-surface-700 rounded-lg shadow bg-surface-100 dark:bg-surface-800">
-								<p class="italic text-surface-600 dark:text-surface-300">"...{message.content}..."</p>
-								<p class="text-sm text-surface-800 dark:text-surface-100">Name of file: <b>{message.fileTitle}</b></p>
-								<p class="text-xs text-surface-600 dark:text-surface-400"><i>You can find this file in:</i></p>
-								<PublicationCard
-									extensions="{getExtensions(message)}"
-									imgSrc={message.coverPicData}
-									publication={message.publication}
-									liked={false}
-									saved={false}
-									materialType={message.encapsulatingType}
-									publisher={message.publisher}
-								/>
-							</div>
-						{/each}
-					</div>
-
-
-				{:catch error}
-					<!--TODO: Change color-->
-					<p style="color: red">Error while loading semantic search results. Reload the page to try again</p>
-				{/await}
-			{/if}
-		{/if}
-<!--	{:catch error}-->
-<!--		<p>There was an error: {error.message}</p>-->
-<!--	{/await}-->
-<!--{/if}-->
-
-{#if pageType !== 'people'}
-	<div class="col-span-full">
-		<Paginator
-			bind:settings={paginationSettings}
-			showFirstLastButtons="{true}"
-			showPreviousNextButtons="{true}"
-			on:page={onPageChange} on:amount={onAmountChange}
+	<div class="flex">
+		<div>
+			<span>Semantic Search</span> <br>
+			<span class="text-surface-500 text-sm"><i>Semantically search over file contents</i></span>
+		</div>
+		<SlideToggle
+			bind:checked={isSemanticActive}
+			label="Semantic Search"
+			class="mb-4"
+			name="semantic-search"
+			size="sm"
 		/>
 	</div>
-{/if}
+
+	<DropdownSelect title="Type" multiselect={false} options={["materials", "people", "circuits"]}
+					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
+	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
+					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
+
+	{#if pageType !== "people"}
+		<DropdownSelect title="Difficulty" multiselect={true} options={diffOptions}
+						bind:selected={selectedDiff} on:select={() => searchActive = true}
+						disabled={isSemanticActive}/>
+		<DropdownSelect title="Tags" multiselect={true} options={tags.map(x => x.content)}
+						bind:selected={selectedTags} on:select={() => searchActive = true}
+						disabled={isSemanticActive}/>
+		<DropdownSelect title="Publisher" multiselect={true}
+						options={allPublishersObjects.map(x => x.id)}
+						overwriteDisplays={allPublishersObjects.map(x => x.content)}
+						bind:selected={selectedPublisherIDs} on:select={() => searchActive = true}
+						disabled={isSemanticActive}/>
+	{/if}
+
+	{#if pageType === 'materials'}
+		<DropdownSelect title="Types" multiselect={true} options={allTypes}
+						bind:selected={selectedTypes} on:select={() => searchActive = true}
+						disabled={isSemanticActive}/>
+	{/if}
+
+	{#if pageType === 'circuits'}
+		<DropdownInput title="Minimum nodes:"
+					   bind:content={numberNodes} on:select={() => searchActive = true} />
+	{/if}
+	<button class="w-full rounded-sm py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
+			on:click={onSearch} disabled="{!searchActive}">
+		Search
+	</button>
+	{#if (selectedTypes.length !== 0) || (selectedPublisherIDs.length !== 0) || (selectedDiff.length !== 0) || (selectedTags.length !== 0)}
+		<button
+			class="w-full px-2 p-1 text-xs bg-primary-300 rounded-lg text-primary-50 hover:bg-opacity-75"
+			on:click={resetFilters}>
+			Reset Filters
+		</button>
+	{/if}
+</div>
+
+<div class="col-span-9 grid grid-cols-3 gap-2">
+	{#if pageType !== 'people'}
+		<div class="col-span-full">
+			<Paginator
+				bind:settings={paginationSettings}
+				showFirstLastButtons="{true}"
+				showPreviousNextButtons="{true}"
+				on:page={onPageChange} on:amount={onAmountChange}
+			/>
+		</div>
+	{/if}
+	{#if pageType === "materials"}
+		{#await fetchPromise || data.materials}
+			<p>Loading materials...</p>
+		{:then materialsAwaited}
+			{#each materials as material (material.id)}
+				<PublicationCard extensions="{getExtensions(material)}"
+								 imgSrc={material.coverPicData}
+								 publication={material.publication}
+								 liked={liked.includes(material.publication.id)}
+								 saved={saved.includes(material.publication.id)}
+								 materialType={material.encapsulatingType}
+								 publisher={material.publisher}
+								 className="col-span-1"
+				/>
+			{/each}
+		{:catch _}
+			<!--TODO: Change color-->
+			<p style="color: red">Error while loading materials. Reload the page to try again</p>
+		{/await}
+	{:else if pageType === "people"}
+		{#await fetchPromise || data.users}
+			<p>Loading users...</p>
+		{:then _}
+			{#each users as person (person.id)}
+				<UserProp view="search" posts="{person.posts.length}"
+						  className="col-span-1"
+						  userPhotoUrl={person.profilePicData} role="Maintainer" user={person} />
+			{/each}
+		{:catch _}
+			<!--TODO: Change color-->
+			<p style="color: red">Error while loading users. Reload the page to try again</p>
+		{/await}
+	{:else if pageType === "circuits"}
+		{#await fetchPromise ||  data.circuits}
+			<p>Loading circuits...</p>
+		{:then _}
+			{#each circuits as circuit (circuit.id)}
+				<PublicationCard publication="{circuit.publication}"
+								 imgSrc={circuit.coverPicData}
+								 liked={liked.includes(circuit.publication.id)}
+								 saved={saved.includes(circuit.publication.id)}
+								 publisher={circuit.publisher}
+								 className="col-span-1"
+				/>
+			{/each}
+		{:catch error}
+			<!--TODO: Change color-->
+			<p style="color: red">Error while loading circuits. Reload the page to try again</p>
+		{/await}
+	{:else if isSemanticActive && semanticPromise !== null}
+		{#await semanticPromise}
+			<p>Loading results...</p>
+		{:then semanticResultsAwaited}
+			{#each semanticResultsAwaited as message}
+				<div
+					class="col-span-full w-full flex flex-col gap-3 p-4 border border-surface-300 dark:border-surface-700 rounded-lg shadow bg-surface-100 dark:bg-surface-800">
+					<div>
+						<p class="text-sm text-surface-800 dark:text-surface-100 font-bold">Name of file:
+							{message.fileTitle}
+						</p>
+						<p class="italic p-4 bg-gray-100 text-surface-600 dark:text-surface-300">
+							"...{message.content}..."
+						</p>
+						<p class="text-xs text-surface-600 dark:text-surface-400 italic">
+							You can find this file in:
+						</p>
+					</div>
+					<div class="flex justify-between">
+						<span>
+							{message.publication.title} by {message.publisher.firstName} {message.publisher.lastName}
+						</span>
+						<a href="/{message.publisher.username}/{message.publication.id}"
+						   class="text-primary-600 dark:text-primary-400 hover:underline">
+							Go to publication
+						</a>
+					</div>
+				</div>
+
+			{:else}
+				<p class="col-span-full text-center text-surface-600 dark:text-surface-400">
+					No results found
+				</p>
+
+			{/each}
+
+		{:catch error}
+			<!--TODO: Change color-->
+			<p style="color: red">Error while loading semantic search results. Reload the page to try again</p>
+		{/await}
+	{/if}
+</div>
