@@ -5,7 +5,7 @@
 	import type { Circuit, Material, Publication, User } from '@prisma/client';
 	import { onMount } from 'svelte';
 	import { getExtensions } from '$lib/util/file';
-	import { type PaginationSettings, Paginator } from '@skeletonlabs/skeleton';
+	import { type PaginationSettings, Paginator, SlideToggle } from '@skeletonlabs/skeleton';
 	import DropdownSelect from '$lib/components/designSystem/DropdownSelect.svelte';
 	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';
 
@@ -83,7 +83,12 @@
 	let fetchPromise: Promise<any> | null = null;
 
 	const onSearch = () => {
-		fetchPromise = sendFiltersToAPI();
+
+		if (isSemanticActive) {
+			onSemanticSearch();
+		} else {
+			fetchPromise = sendFiltersToAPI();
+		}
 	};
 
 	let isSemanticActive = false;
@@ -304,25 +309,44 @@
 </div>
 
 <div class="col-span-3 border-gray-700">
+
+	<div class="flex">
+		<div>
+			<span>Semantic Search</span> <br>
+			<span class="text-surface-500 text-sm"><i>Semantically search over file contents</i></span>
+		</div>
+		<SlideToggle
+			bind:checked={isSemanticActive}
+			label="Semantic Search"
+			class="mb-4"
+			name="semantic-search"
+			size="sm"
+		/>
+	</div>
+
 	<DropdownSelect title="Type" multiselect={false} options={["materials", "people", "circuits"]}
-					bind:selected={pageType} on:select={switchToBrowsePage} />
+					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
 	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
-					bind:selected={sortByText} on:select={() => searchActive = true} />
+					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
 
 	{#if pageType !== "people"}
 		<DropdownSelect title="Difficulty" multiselect={true} options={diffOptions}
-						bind:selected={selectedDiff} on:select={() => searchActive = true} />
+						bind:selected={selectedDiff} on:select={() => searchActive = true}
+						disabled={isSemanticActive}/>
 		<DropdownSelect title="Tags" multiselect={true} options={tags.map(x => x.content)}
-						bind:selected={selectedTags} on:select={() => searchActive = true} />
+						bind:selected={selectedTags} on:select={() => searchActive = true}
+						disabled={isSemanticActive}/>
 		<DropdownSelect title="Publisher" multiselect={true}
 						options={allPublishersObjects.map(x => x.id)}
 						overwriteDisplays={allPublishersObjects.map(x => x.content)}
-						bind:selected={selectedPublisherIDs} on:select={() => searchActive = true} />
+						bind:selected={selectedPublisherIDs} on:select={() => searchActive = true}
+						disabled={isSemanticActive}/>
 	{/if}
 
 	{#if pageType === 'materials'}
 		<DropdownSelect title="Types" multiselect={true} options={allTypes}
-						bind:selected={selectedTypes} on:select={() => searchActive = true} />
+						bind:selected={selectedTypes} on:select={() => searchActive = true}
+						disabled={isSemanticActive}/>
 	{/if}
 
 	{#if pageType === 'circuits'}
@@ -442,16 +466,5 @@
 			<!--TODO: Change color-->
 			<p style="color: red">Error while loading semantic search results. Reload the page to try again</p>
 		{/await}
-	{/if}
-
-	{#if pageType !== 'people'}
-		<div class="col-span-full">
-			<Paginator
-				bind:settings={paginationSettings}
-				showFirstLastButtons="{true}"
-				showPreviousNextButtons="{true}"
-				on:page={onPageChange} on:amount={onAmountChange}
-			/>
-		</div>
 	{/if}
 </div>

@@ -7,6 +7,7 @@
 	export let multiselect: boolean = false;
 	export let selected: string[]|string = [];
 	export let overwriteDisplays: string[]|null = null;
+	export let disabled: boolean = false;
 
 	let open = false;
 
@@ -42,14 +43,17 @@
 	 aria-controls="dropdown-listbox"
 	 aria-expanded={open}
 	 aria-haspopup="listbox"
+	 aria-disabled={disabled}
 >
 	<button
 		id="dropdown-button"
-		class="text-md w-full bg-surface-200 border px-3 py-2 text-left"
+		class="text-md w-full bg-surface-200 border px-3 py-2 text-left
+			{disabled ? 'cursor-not-allowed text-surface-300' : ''}"
 		aria-haspopup="listbox"
 		aria-expanded={open}
 		on:click={toggleDropdown}
 		type="button"
+		disabled={disabled}
 	>
 		{title}
 	</button>
