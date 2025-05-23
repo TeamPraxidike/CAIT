@@ -10,7 +10,13 @@
 
 	let open = false;
 
-	$: opened = options.map(() => false);
+	$: opened = options.map(option => {
+		if (multiselect) {
+			return Array.isArray(selected) && selected.includes(option);
+		} else {
+			return selected === option;
+		}
+	});
 
 	const dispatch = createEventDispatcher();
 	function toggleDropdown() { open = !open; }
@@ -27,7 +33,6 @@
 			selected = option;
 			opened = options.map(() => false);
 			opened[options.indexOf(option)] = true;
-			open = false;
 		}
 		dispatch('select', {option});
 	}
@@ -76,7 +81,9 @@
 								tabindex="-1"
 							/>
 						{/if}
-						{overwriteDisplays ? overwriteDisplays[i] : option}
+						<span class={!multiselect && opened[options.indexOf(option)] ? 'font-bold' : ''}>
+							{overwriteDisplays ? overwriteDisplays[i] : option}
+						</span>
 					</button>
 				</li>
 			{/each}

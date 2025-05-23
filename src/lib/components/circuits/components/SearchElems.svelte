@@ -251,7 +251,7 @@
 	async function sendMessageToSemantic(inputMessage: string) {
 		if (!inputMessage.trim()) return;
 
-		//applyActive = false;
+		//searchActive = false;
 
 		const messageToSend = inputMessage.trim();
 

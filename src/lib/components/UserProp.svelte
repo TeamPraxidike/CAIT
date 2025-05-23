@@ -10,6 +10,7 @@
 	export let posts = 0;
 	export let userPhotoUrl: string | null;
 	export let role: 'Maintainer' | 'Publisher' | null;
+	export let className: string = 'col-span-2';
 
 	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 
@@ -45,7 +46,7 @@
 
 {#if view === "search"}
 	<a href='/{user.username}' style="height:fit-content"
-	   class="col-span-2 flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow">
+	   class="{className} flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow">
 		<div class="flex flex-col space-y-1 items-start w-full md:pb-2">
 			<div class="w-full flex flex-col items-center">
 				<!--{#if userPhotoUrl !== ''}-->
