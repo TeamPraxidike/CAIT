@@ -8,7 +8,6 @@
 		Tag,
 		TheoryAppBar, UserProp
 	} from '$lib';
-	import Icon from '@iconify/svelte';
 	import { FileButton, FileDropzone, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
