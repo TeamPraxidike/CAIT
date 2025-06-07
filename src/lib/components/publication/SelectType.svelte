@@ -1,6 +1,6 @@
 <script lang="ts">
 	const types = ["Video", "Lecture Notes", "Slides", "Assignment", "Exam", "Other"];
-	let selectedTypes: string[] = [];
+	export let selectedTypes: string[] = [];
 
 	function selectType(type: string) {
 		if (selectedTypes.indexOf(type) > -1) {
@@ -19,7 +19,7 @@
 				on:click={() => selectType(type)}
 				class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium
 					   hover:bg-gray-100 hover:text-black transition
-					   {selectedTypes.indexOf(type) > -1 ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-800'}"
+					   {selectedTypes.indexOf(type) > -1 ? 'bg-primary-600 text-white border-primary-500' : 'bg-white text-gray-800'}"
 			>
 				{type}
 			</button>

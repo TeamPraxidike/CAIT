@@ -14,7 +14,7 @@
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import SelectType from '$lib/components/publication/SelectType.svelte';
@@ -49,7 +49,7 @@
 	export let data: PageServerData;
 
 
-	let loggedUser = $page.data.loggedUser;
+	let loggedUser = page.data.loggedUser;
 	$: isSubmitting = false;
 
 	// tags
@@ -78,7 +78,9 @@
 	let estimate: string = '';
 	let copyright: string = '';
 	let theoryApplicationRatio: number = 0.5;
-	let selectedType: string = 'Select Type';
+	let selectedTypes: string[] = [];
+	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
+
 	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
 	let typeActive = false;
@@ -102,7 +104,7 @@
 		}
 	}
 
-	$: uid = $page.data.session?.user.id;
+	$: uid = page.data.session?.user.id;
 
 	function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
@@ -352,10 +354,10 @@
 					{/if}
 				</div>
 
-<!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
-<!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
-<!--						on:clearSettings={() => {typeActive=false}} />-->
-				<SelectType />
+				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}
+						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}
+						on:clearSettings={() => {typeActive=false}} />
+				<SelectType bind:selectedTypes={selectedTypes}/>
 
 				<div>
 					{#if coverPic}
