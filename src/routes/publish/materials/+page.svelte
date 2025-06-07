@@ -8,6 +8,7 @@
 		Tag,
 		TheoryAppBar, UserProp
 	} from '$lib';
+	import Icon from '@iconify/svelte';
 	import { FileButton, FileDropzone, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
@@ -33,6 +34,7 @@
 		saveMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
+	import Banner from '$lib/components/generic/Banner.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -301,6 +303,8 @@
 
 <Meta title="Publish" description="CAIT" type="site" />
 
+<Banner metadata={metadata} files={fileLength}/>
+
 <form method="POST"
 	  enctype="multipart/form-data"
 	  action="?/publish"
@@ -500,10 +504,7 @@
 				</div>
 			</div>
 
-			{#if draft}
-				<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's
-					incomplete.</p>
-			{:else}
+			{#if !draft}
 				<div class="flex flex-row justify-end items-center gap-2">
 					<p class="pl-3">Save as a draft: </p>
 					<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
