@@ -14,7 +14,7 @@ export let metadata: Metadata;
 // If you dont pass anything to them, they will be considered as filled
 export let files = 1;
 export let numNodes = 2
-export let materialType = 'slides';
+export let materialType = ['slides'];
 
 $: hasTitle = metadata && metadata.title && metadata.title.trim() !== '';
 $: hasDescription = metadata && metadata.description && metadata.description.trim() !== '';
@@ -28,7 +28,7 @@ $: fieldsList = [
 		!hasDescription && 'Description',
 		!hasTags && 'Tags',
 		!hasLOs && 'Learning Objectives',
-		materialType == "Select Type" && 'Material Type'
+		materialType.length <= 0 && 'Material Type'
 	].filter(Boolean).join(', ');
 
 $: show = true;

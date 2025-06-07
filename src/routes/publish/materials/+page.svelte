@@ -273,7 +273,7 @@
 		description,
 		learningObjectives: LOs,
 		tags,
-		materialType: selectedType,
+		materialType: selectedTypes,
 		isDraft: false
 	};
 	$: fileLength = files.length;
@@ -304,7 +304,7 @@
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
-		formData.append('type', selectedType);
+		formData.append('type', JSON.stringify(selectedTypes));
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
