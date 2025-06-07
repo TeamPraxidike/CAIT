@@ -23,8 +23,9 @@ export const load: PageServerLoad = async ({
 		};
 	}
 
+	// Check if the user is viewing their own profile and return his saved publications
 	let savedRes = null;
-	if (params.user === session.user.user_metadata.username) {
+	if (session.user.id === layoutData.user.id) {
 		savedRes = await fetch(
 			`/api/user/${session.user.id}/saved?fullPublications=true`,
 		);
@@ -33,6 +34,7 @@ export const load: PageServerLoad = async ({
 		}
 	}
 
+	// If the user is viewing another user's profile, fetch saved publications of that user so that they can be marked
 	const savedByUserRes = await fetch(
 		`/api/user/${session.user.id}/saved?fullPublications=false`,
 	);
