@@ -26,6 +26,7 @@
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import { type FormSnapshot, getCircuitSnapshot, saveCircuitSnapshot } from '$lib/util/indexDB';
+	import Banner from '$lib/components/generic/Banner.svelte';
 
 
 
@@ -246,10 +247,10 @@
 		}
 	}
 
-	const locks: boolean[] = [true, true, true, true];
-	$: locks[0] = isMaterial ? files?.length === 0 : false;
-	$: locks[1] = title.length < 1 || description.length < 1 || (isMaterial && selectedType === "Select Type");
-	$: locks[2] = tags.length < 1 || LOs.length < 1;
+	const locks: boolean[] = [false, false, false, false];
+	// $: locks[0] = isMaterial ? files?.length === 0 : false;
+	// $: locks[1] = title.length < 1 || description.length < 1 || (isMaterial && selectedType === "Select Type");
+	// $: locks[2] = tags.length < 1 || LOs.length < 1;
 
 
 	// Warning messages for missing fields
@@ -297,6 +298,7 @@
 
 <Meta title={publication.title} description="CAIT" type="site" />
 
+<Banner metadata={metadata} files={fileLength}/>
 <form action="?/edit" method="POST" enctype="multipart/form-data"
 	  class="col-span-full my-20"
 	  use:enhance={async ({ formData }) => {
@@ -463,8 +465,6 @@
 			<p class="pl-3">Save as a draft: </p>
 			<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
 		</div>
-	{:else}
-		<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's incomplete.</p>
 	{/if}
 
 	<div class="flex float-right gap-2">
