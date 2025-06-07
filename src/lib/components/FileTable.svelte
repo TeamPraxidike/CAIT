@@ -26,7 +26,7 @@
 
 <div class="rounded-lg p-1">
 	{#if files ? files.length === 0 : true}
-		<p class="text-error-300 dark:text-error-400">Upload at least one file to continue</p>
+		<p class="text-error-300 dark:text-error-400">Upload at least one file</p>
 	{:else}
 		<h4>Uploaded files</h4>
 	{/if}

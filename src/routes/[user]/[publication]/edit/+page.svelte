@@ -298,7 +298,10 @@
 
 <Meta title={publication.title} description="CAIT" type="site" />
 
-<Banner metadata={metadata} files={fileLength}/>
+<Banner metadata={metadata} files={fileLength}
+		materialType={metadata.materialType}
+		numNodes={circuitNodesPlaceholder.length}/>
+
 <form action="?/edit" method="POST" enctype="multipart/form-data"
 	  class="col-span-full my-20"
 	  use:enhance={async ({ formData }) => {
