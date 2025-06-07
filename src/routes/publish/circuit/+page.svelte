@@ -20,6 +20,7 @@
 		saveCircuitSnapshot, getCircuitSnapshot, clearCircuitSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
 	import { validateMetadata } from '$lib/util/validatePublication';
+	import Banner from '$lib/components/generic/Banner.svelte';
 
 	export let data: PageServerData;
 
@@ -59,36 +60,10 @@
 	/* LOCK = TRUE => LOCKED */
 	const locks: boolean[] = [true, false, false];
 
-	$: locks[0] = circuitNodesPlaceholder ? circuitNodesPlaceholder.length <= 1 : true;
+	// $: locks[0] = circuitNodesPlaceholder ? circuitNodesPlaceholder.length <= 1 : true;
 	// $: locks[1] = title.length < 1 || description.length < 1;
 	// $: locks[2] = tags.length < 1|| LOs.length < 1;
 
-	let warning0: string = "";
-	const generateWarningStep0 = (): string => {
-		return "The circuit needs at least 2 nodes";
-	}
-	$: warning0 = generateWarningStep0();
-
-	let warning1: string = "";
-	const generateWarningStep1 = (title: string, description: string): string => {
-		let warning = "You are missing ";
-		if (title.length < 1) warning += "a title";
-		if (description.length < 1 && title.length < 1) warning += ", a description";
-		else if(description.length < 1) warning += "a description";
-		warning += ".";
-		return warning;
-	}
-	$: warning1 = generateWarningStep1(title, description);
-
-	let warning2: string = "";
-	const generateWarningStep2 = (tags: number, LOs: number) => {
-		let warning = "You are missing ";
-		if (tags < 1) warning += "a tag";
-		if (LOs < 1 && tags < 1) warning += " and a Learning objective";
-		else if (LOs < 1) warning += "a Learning objective";
-		return warning += ".";
-	}
-	$: warning2 = generateWarningStep2(tags.length, LOs.length);
 
 	$: priorKnowledge = priorKnowledge;
 	$: LOs = LOs;
@@ -237,6 +212,9 @@
 
 <!--<Node></Node>-->
 <Meta title="Publish Circuit" description="Organize publications into a circuits" type="site" />
+
+<Banner metadata={metadata} numNodes={circuitNodesPlaceholder.length}/>
+
 <!--<div class="col-span-9 h-[256px]"><CircuitManual isDraggable="{true}"/></div>-->
 <form method="POST" action="?/publish" class="col-span-full my-20 pr-10 shadow p-4"
 		use:enhance={({ formData }) => {
@@ -265,9 +243,6 @@
 					<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>
 				</SvelteFlowProvider>
 			{/key}
-			{#if locks[0]}
-				<p class="text-error-300 dark:text-error-400">{warning0}</p>
-			{/if}
 		</Step>
 		<Step locked="{locks[1]}">
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
@@ -281,11 +256,6 @@
 					<textarea  bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Explain your circuit" required />
 				</div>
 			</div>
-
-			{#if locks[1]}
-				<p class="text-error-300 dark:text-error-400">{warning1}</p>
-			{/if}
-
 		</Step>
 		<Step locked="{locks[2]}">
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
@@ -298,10 +268,6 @@
 						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 				</div>
 			</div>
-
-			{#if locks[2]}
-				<p class="text-error-300 dark:text-error-400">{warning2}</p>
-			{/if}
 		</Step>
 		<Step locked={isSubmitting}>
 			<svelte:fragment slot="header">Review</svelte:fragment>
@@ -311,7 +277,7 @@
 			{#key circuitKey}
 				<SvelteFlowProvider>
 					<CircuitComponent dbNodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
-				</SvelteFlowProvider>
+				</SvelteFlowProvider>z`
 			{/key}
 
 			{#if draft}

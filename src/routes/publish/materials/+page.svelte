@@ -258,29 +258,6 @@
 			behavior: 'smooth'
 		});
 	};
-	let warning1: string = '';
-	const generateWarningStep1 = (title: string, description: string, selectedType: string): string => {
-		let warning = 'You are missing ';
-		if (title.length < 1) warning += 'a title';
-		if (description.length < 1 && title.length < 1) warning += ', a description';
-		else if (description.length < 1) warning += 'a description';
-		if ((title.length < 1 || description.length < 1) && selectedType === 'Select Type') warning += ' and a material type';
-		else if (selectedType === 'Select Type') warning += 'a material type';
-		warning += '.';
-		return warning;
-	};
-	$: warning1 = generateWarningStep1(title, description, selectedType!);
-
-	let warning2: string = '';
-	const generateWarningStep2 = (tags: number, LOs: number) => {
-		let warning = 'You are missing ';
-		if (tags < 1) warning += 'a tag';
-		if (LOs < 1 && tags < 1) warning += ' and a Learning objective';
-		else if (LOs < 1) warning += 'a Learning objective';
-		return warning += '.';
-	};
-	$: warning2 = generateWarningStep2(tags.length, LOs.length);
-
 	const handleInputEnter = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			event.preventDefault();
@@ -303,7 +280,7 @@
 
 <Meta title="Publish" description="CAIT" type="site" />
 
-<Banner metadata={metadata} files={fileLength}/>
+<Banner metadata={metadata} files={fileLength} materialType={metadata.materialType}/>
 
 <form method="POST"
 	  enctype="multipart/form-data"
@@ -396,10 +373,6 @@
 			</div>
 
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-
-			{#if locks[1]}
-				<p class="text-error-300 dark:text-error-400">{warning1}</p>
-			{/if}
 		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
@@ -441,9 +414,6 @@
 					</div>
 				</div>
 			</div>
-			{#if locks[2]}
-				<p class="text-error-300 dark:text-error-400">{warning2}</p>
-			{/if}
 		</Step>
 		<Step locked={isSubmitting}>
 			<svelte:fragment slot="header">Review</svelte:fragment>
