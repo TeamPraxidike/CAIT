@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({
 	const session = await locals.safeGetSession();
 	if (!session || !session.user) throw redirect(303, '/signin');
 
-	const pubsRes = await fetch(`/api/publication?publishers=${layoutData.user.id}`);
+	const pubsRes = await fetch(`/api/publication?publishers=${layoutData.user.id}&includeDraft=${session.user.id === layoutData.user.id}`);
 
 	if (pubsRes.status !== 200) {
 		return {

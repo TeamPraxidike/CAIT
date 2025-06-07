@@ -170,7 +170,8 @@ export async function getPublicationById(id: number): Promise<Publication> {
 	});
 }
 
-export async function getAllPublications(publishers: string[], query: string): Promise<PublicationGet[]> {
+
+export async function getAllPublications(publishers: string[], query: string, includeDrafts?: boolean): Promise<PublicationGet[]> {
 	const where: any = { AND: [] };
 
 	if (publishers.length > 0) {
@@ -196,7 +197,9 @@ export async function getAllPublications(publishers: string[], query: string): P
 			},
 		},
 	});
-	publications = publications.filter((p: Publication) => p.isDraft);
+	if (!includeDrafts) {
+		publications = publications.filter((p: PublicationGet) => !p.isDraft);
+	}
 
 	if (query !== '') {
 		const p = publications;
