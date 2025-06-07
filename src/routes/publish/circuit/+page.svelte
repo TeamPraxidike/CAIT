@@ -20,7 +20,7 @@
 		saveCircuitSnapshot, getCircuitSnapshot, clearCircuitSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
 	import { validateMetadata } from '$lib/util/validatePublication';
-	import Banner from '$lib/components/generic/Banner.svelte';
+	import Banner from '$lib/components/publication/Banner.svelte';
 
 	export let data: PageServerData;
 

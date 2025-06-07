@@ -26,7 +26,7 @@
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import { type FormSnapshot, getCircuitSnapshot, saveCircuitSnapshot } from '$lib/util/indexDB';
-	import Banner from '$lib/components/generic/Banner.svelte';
+	import Banner from '$lib/components/publication/Banner.svelte';
 
 
 

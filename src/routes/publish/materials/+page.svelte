@@ -17,6 +17,7 @@
 	import { page } from '$app/stores';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import SelectType from '$lib/components/publication/SelectType.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -33,7 +34,7 @@
 		saveMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
-	import Banner from '$lib/components/generic/Banner.svelte';
+	import Banner from '$lib/components/publication/Banner.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -351,9 +352,10 @@
 					{/if}
 				</div>
 
-				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}
-						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}
-						on:clearSettings={() => {typeActive=false}} />
+<!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
+<!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
+<!--						on:clearSettings={() => {typeActive=false}} />-->
+				<SelectType />
 
 				<div>
 					{#if coverPic}
