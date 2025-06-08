@@ -2,7 +2,6 @@
 	import {
 		DifficultySelection,
 		FileTable,
-		Filter,
 		MaterialTypes,
 		Meta,
 		Tag,
