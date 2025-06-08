@@ -60,7 +60,7 @@
 	/* LOCK = TRUE => LOCKED */
 	const locks: boolean[] = [true, false, false];
 
-	// $: locks[0] = circuitNodesPlaceholder ? circuitNodesPlaceholder.length <= 1 : true;
+	$: locks[0] = circuitNodesPlaceholder ? circuitNodesPlaceholder.length <= 1 : true;
 	// $: locks[1] = title.length < 1 || description.length < 1;
 	// $: locks[2] = tags.length < 1|| LOs.length < 1;
 
