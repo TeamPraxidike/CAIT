@@ -4,8 +4,10 @@
 
 	function selectType(type: string) {
 		if (selectedTypes.indexOf(type) > -1) {
+			selectedTypes = [] // remove this if you want to allow multiple selections
 			selectedTypes = selectedTypes.filter(t => t !== type);
 		} else {
+			selectedTypes = [] // remove this if you want to allow multiple selections
 			selectedTypes = [...selectedTypes, type];
 		}
 	}
