@@ -48,7 +48,7 @@
 
 <Meta title="Profile" description="CAIT" type="site" />
 
-<UserProfileBar user={user} userPhotoUrl={profilePic.data} />
+<UserProfileBar user={user} userPhotoUrl={profilePic.data} bind:tabset={tabSet}/>
 
 <div class="col-span-8">
     {#if page.data.session?.user.id === user.id}
