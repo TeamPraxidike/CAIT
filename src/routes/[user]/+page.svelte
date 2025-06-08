@@ -53,10 +53,10 @@
 <div class="col-span-8">
     {#if page.data.session?.user.id === user.id}
         <TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
-            <Tab bind:group={tabSet} name="tab1" value={0}>
+            <Tab bind:group={tabSet} name="tab1" value={1}>
                 <p>Saved Publications</p>
             </Tab>
-            <Tab bind:group={tabSet} name="tab2" value={1}>
+            <Tab bind:group={tabSet} name="tab2" value={0}>
                 <p>Your Publications</p>
             </Tab>
             <Tab bind:group={tabSet} name="tab3" value={2}>
@@ -64,6 +64,24 @@
             </Tab>
             <svelte:fragment slot="panel">
                 {#if tabSet === 0}
+                    {#if posts.length === 0}
+                        <p class="col-span-2 text-center">So empty... There are no publications here </p>
+                    {:else}
+                        <div class="grid grid-cols-2 gap-4">
+                            {#each cardPosts as publication, i}
+                                <div class="col-span-1">
+                                    <PublicationCard imgSrc={publication.coverPicData}
+                                                     publication={publication}
+                                                     liked={liked.includes(publication.id)}
+                                                     courses={posts[i].usedInCourse.map(x => x.course)}
+                                                     saved={data.savedByUser.includes(publication.id)}
+                                                     publisher={publication.publisher}
+                                                     materialType={getEncapsulatingType(publication)}/>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                {:else if tabSet === 1}
                     <div class="grid grid-cols-2 gap-4">
                         {#if saved.length !== 0}
                             {#each saved as publication}
@@ -78,24 +96,6 @@
                             {/each}
                         {/if}
                     </div>
-                {:else if tabSet === 1}
-                    {#if posts.length === 0}
-                        <p class="col-span-2 text-center">So empty... There are no publications here </p>
-                    {:else}
-                        <div class="grid grid-cols-2 gap-4">
-                        {#each cardPosts as publication, i}
-                            <div class="col-span-1">
-                            <PublicationCard imgSrc={publication.coverPicData}
-                                             publication={publication}
-                                             liked={liked.includes(publication.id)}
-                                             courses={posts[i].usedInCourse.map(x => x.course)}
-                                             saved={data.savedByUser.includes(publication.id)}
-                                             publisher={publication.publisher}
-                                             materialType={getEncapsulatingType(publication)}/>
-                            </div>
-                        {/each}
-                        </div>
-                    {/if}
                 {:else if tabSet === 2}
                     {#if posts.length === 0}
                         <p class="col-span-2 text-center">You don't have any draft publications</p>
