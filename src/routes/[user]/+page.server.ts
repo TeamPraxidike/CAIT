@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import type { User } from '@prisma/client';
 import { PublicationType } from '@prisma/client';
+import type { ExtendedPublication } from '../api/publication/+server';
 
 export const load: PageServerLoad = async ({
 	params,
@@ -69,7 +70,7 @@ export const load: PageServerLoad = async ({
 		savedByUserRes.status === 204
 			? { saved: [] }
 			: await savedByUserRes.json();
-	const publications = await pubsRes.json();
+	const publications: ExtendedPublication[] = (await pubsRes.json()).publications;
 	
 	return {
 		publications,
