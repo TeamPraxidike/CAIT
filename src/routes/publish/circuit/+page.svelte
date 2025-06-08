@@ -20,7 +20,7 @@
 		saveCircuitSnapshot, getCircuitSnapshot, clearCircuitSnapshot, type FormSnapshot
 	} from '$lib/util/indexDB';
 	import { validateMetadata } from '$lib/util/validatePublication';
-	import Banner from '$lib/components/generic/Banner.svelte';
+	import Banner from '$lib/components/publication/Banner.svelte';
 
 	export let data: PageServerData;
 
@@ -60,7 +60,7 @@
 	/* LOCK = TRUE => LOCKED */
 	const locks: boolean[] = [true, false, false];
 
-	// $: locks[0] = circuitNodesPlaceholder ? circuitNodesPlaceholder.length <= 1 : true;
+	$: locks[0] = circuitNodesPlaceholder ? circuitNodesPlaceholder.length <= 1 : true;
 	// $: locks[1] = title.length < 1 || description.length < 1;
 	// $: locks[2] = tags.length < 1|| LOs.length < 1;
 

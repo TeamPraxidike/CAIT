@@ -2,7 +2,6 @@
 	import {
 		DifficultySelection,
 		FileTable,
-		Filter,
 		MaterialTypes,
 		Meta,
 		Tag,
@@ -14,9 +13,10 @@
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import SelectType from '$lib/components/publication/SelectType.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -33,7 +33,7 @@
 		saveMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
-	import Banner from '$lib/components/generic/Banner.svelte';
+	import Banner from '$lib/components/publication/Banner.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -48,7 +48,7 @@
 	export let data: PageServerData;
 
 
-	let loggedUser = $page.data.loggedUser;
+	let loggedUser = page.data.loggedUser;
 	$: isSubmitting = false;
 
 	// tags
@@ -77,7 +77,9 @@
 	let estimate: string = '';
 	let copyright: string = '';
 	let theoryApplicationRatio: number = 0.5;
-	let selectedType: string = 'Select Type';
+	let selectedTypes: string[] = [];
+	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
+
 	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
 	let typeActive = false;
@@ -101,7 +103,7 @@
 		}
 	}
 
-	$: uid = $page.data.session?.user.id;
+	$: uid = page.data.session?.user.id;
 
 	function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
@@ -270,7 +272,7 @@
 		description,
 		learningObjectives: LOs,
 		tags,
-		materialType: selectedType,
+		materialType: selectedTypes,
 		isDraft: false
 	};
 	$: fileLength = files.length;
@@ -301,7 +303,7 @@
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
-		formData.append('type', selectedType);
+		formData.append('type', JSON.stringify(selectedTypes));
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
@@ -351,9 +353,10 @@
 					{/if}
 				</div>
 
-				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}
-						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}
-						on:clearSettings={() => {typeActive=false}} />
+<!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
+<!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
+<!--						on:clearSettings={() => {typeActive=false}} />-->
+				<SelectType bind:selectedTypes={selectedTypes}/>
 
 				<div>
 					{#if coverPic}
