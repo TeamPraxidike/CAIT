@@ -26,6 +26,7 @@
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import { type FormSnapshot, getCircuitSnapshot, saveCircuitSnapshot } from '$lib/util/indexDB';
+	import Banner from '$lib/components/publication/Banner.svelte';
 
 
 
@@ -246,36 +247,10 @@
 		}
 	}
 
-	const locks: boolean[] = [true, true, true, true];
-	$: locks[0] = isMaterial ? files?.length === 0 : false;
-	$: locks[1] = title.length < 1 || description.length < 1 || (isMaterial && selectedType === "Select Type");
-	$: locks[2] = tags.length < 1 || LOs.length < 1;
-
-
-	// Warning messages for missing fields
-	let warning1: string = "";
-	const generateWarningStep1 = (title: string, description: string, selectedType: string): string => {
-		let warning = "You are missing ";
-		if (title.length < 1) warning += "a title";
-		if (description.length < 1 && title.length < 1) warning += ", a description";
-		else if(description.length < 1) warning += "a description";
-		if ((title.length < 1 || description.length < 1) && selectedType === "Select Type") warning += " and a material type";
-		else if (selectedType === "Select Type") warning += "a material type";
-		warning += ".";
-		return warning;
-	}
-	$: warning1 = generateWarningStep1(title, description, selectedType);
-
-	let warning2: string = "";
-	const generateWarningStep2 = (tags: number, LOs: number) => {
-		let warning = "You are missing ";
-		if (tags < 1) warning += "a tag";
-		if (LOs < 1 && tags < 1) warning += " and a Learning Objective";
-		else if (LOs < 1) warning += "a Learning Objective";
-		return warning += ".";
-	}
-	$: warning2 = generateWarningStep2(tags.length, LOs.length);
-
+	const locks: boolean[] = [false, false, false, false];
+	// $: locks[0] = isMaterial ? files?.length === 0 : false;
+	// $: locks[1] = title.length < 1 || description.length < 1 || (isMaterial && selectedType === "Select Type");
+	// $: locks[2] = tags.length < 1 || LOs.length < 1;
 
 	let metadata;
 	$: metadata = {
@@ -296,6 +271,14 @@
 
 
 <Meta title={publication.title} description="CAIT" type="site" />
+
+{#if isMaterial}
+	<Banner metadata={metadata} files={fileLength}
+			materialType={metadata.materialType}/>
+{:else}
+	<Banner metadata={metadata}
+			numNodes={circuitNodesPlaceholder.length}/>
+{/if}
 
 <form action="?/edit" method="POST" enctype="multipart/form-data"
 	  class="col-span-full my-20"
@@ -451,20 +434,11 @@
 
 	{/if}
 
-	{#if locks[1]}
-		<p class="text-error-300 dark:text-error-400">{warning1}</p>
-	{/if}
-	{#if locks[2]}
-		<p class="text-error-300 dark:text-error-400">{warning2}</p>
-	{/if}
-
 	{#if !draft }
 		<div class="flex flex-row justify-end items-center gap-2">
 			<p class="pl-3">Save as a draft: </p>
 			<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
 		</div>
-	{:else}
-		<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's incomplete.</p>
 	{/if}
 
 	<div class="flex float-right gap-2">

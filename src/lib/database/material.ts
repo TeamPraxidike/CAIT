@@ -204,7 +204,7 @@ export async function createMaterialPublication(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		materialType: MaterialType;
+		materialType: MaterialType[];
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
@@ -217,7 +217,7 @@ export async function createMaterialPublication(
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,
-			encapsulatingType: metaData.materialType,
+			encapsulatingType: metaData.materialType[0],
 			publication: {
 				create: {
 					title: metaData.title,

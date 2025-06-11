@@ -120,9 +120,7 @@ export const actions = {
 				theoryPractice: Number(data.get('theoryToApplication')),
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
-				materialType: convertMaterial(
-					data.get('type')?.toString() || '',
-				),
+				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
 				isDraft: isDraft
 			},
 			coverPic,

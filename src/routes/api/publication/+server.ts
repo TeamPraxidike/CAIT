@@ -1,17 +1,25 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { coverPicFetcher, fileSystem } from '$lib/database';
-import { getAllPublications } from '$lib/database/db';
-import { type Publication, PublicationType } from '@prisma/client';
+import { getAllPublications, type PublicationGet } from '$lib/database/db';
+import { PublicationType } from '@prisma/client';
 import { profilePicFetcher } from '$lib/database/file';
+
+export type ExtendedPublication = PublicationGet & {
+	coverPicData: string | null;
+	publisher: PublicationGet['publisher'] & {
+		profilePicData: string | null;
+	};
+};
 
 export const GET: RequestHandler = async ({ url }) => {
 	try {
 		const p = url.searchParams.get('publishers');
+		const includeDraft = url.searchParams.get('includeDraft') === 'true' || false;
 		const publishers = p ? p.split(',') : [];
 		const query: string = url.searchParams.get('q') || '';
 		const amount: number = Number(url.searchParams.get('amount')) || 8;
 
-		let publications = await getAllPublications(publishers, query);
+		let publications: PublicationGet[] = await getAllPublications(publishers, query, includeDraft);
 
 		publications = await Promise.all(publications.map(async (publication: any) => {
 			let coverPicData: string | null;
@@ -33,7 +41,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				coverPicData: coverPicData,
 			};
 		}));
-		publications = await Promise.all(publications.map(async (publication: any) => {
+		publications = await Promise.all(publications.map(async (publication: any): (Promise<ExtendedPublication>) => {
 			return {
 				...publication,
 				publisher: {

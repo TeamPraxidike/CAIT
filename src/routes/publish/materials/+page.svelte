@@ -2,7 +2,6 @@
 	import {
 		DifficultySelection,
 		FileTable,
-		Filter,
 		MaterialTypes,
 		Meta,
 		Tag,
@@ -14,9 +13,10 @@
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import SelectType from '$lib/components/publication/SelectType.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -33,6 +33,7 @@
 		saveMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
+	import Banner from '$lib/components/publication/Banner.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -47,7 +48,7 @@
 	export let data: PageServerData;
 
 
-	let loggedUser = $page.data.loggedUser;
+	let loggedUser = page.data.loggedUser;
 	$: isSubmitting = false;
 
 	// tags
@@ -76,7 +77,9 @@
 	let estimate: string = '';
 	let copyright: string = '';
 	let theoryApplicationRatio: number = 0.5;
-	let selectedType: string = 'Select Type';
+	let selectedTypes: string[] = [];
+	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
+
 	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
 	let typeActive = false;
@@ -100,7 +103,7 @@
 		}
 	}
 
-	$: uid = $page.data.session?.user.id;
+	$: uid = page.data.session?.user.id;
 
 	function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
@@ -256,29 +259,6 @@
 			behavior: 'smooth'
 		});
 	};
-	let warning1: string = '';
-	const generateWarningStep1 = (title: string, description: string, selectedType: string): string => {
-		let warning = 'You are missing ';
-		if (title.length < 1) warning += 'a title';
-		if (description.length < 1 && title.length < 1) warning += ', a description';
-		else if (description.length < 1) warning += 'a description';
-		if ((title.length < 1 || description.length < 1) && selectedType === 'Select Type') warning += ' and a material type';
-		else if (selectedType === 'Select Type') warning += 'a material type';
-		warning += '.';
-		return warning;
-	};
-	$: warning1 = generateWarningStep1(title, description, selectedType!);
-
-	let warning2: string = '';
-	const generateWarningStep2 = (tags: number, LOs: number) => {
-		let warning = 'You are missing ';
-		if (tags < 1) warning += 'a tag';
-		if (LOs < 1 && tags < 1) warning += ' and a Learning objective';
-		else if (LOs < 1) warning += 'a Learning objective';
-		return warning += '.';
-	};
-	$: warning2 = generateWarningStep2(tags.length, LOs.length);
-
 	const handleInputEnter = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			event.preventDefault();
@@ -292,7 +272,7 @@
 		description,
 		learningObjectives: LOs,
 		tags,
-		materialType: selectedType,
+		materialType: selectedTypes,
 		isDraft: false
 	};
 	$: fileLength = files.length;
@@ -300,6 +280,8 @@
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
+
+<Banner metadata={metadata} files={fileLength} materialType={metadata.materialType}/>
 
 <form method="POST"
 	  enctype="multipart/form-data"
@@ -321,7 +303,7 @@
         formData.append('userId', uid?.toString() || '');
         formData.append('title', title);
         formData.append('description', description);
-		formData.append('type', selectedType);
+		formData.append('type', JSON.stringify(selectedTypes));
         formData.append('difficulty', difficulty);
         formData.append('estimate', estimate);
         formData.append('copyright', copyright);
@@ -371,9 +353,10 @@
 					{/if}
 				</div>
 
-				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}
-						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}
-						on:clearSettings={() => {typeActive=false}} />
+<!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
+<!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
+<!--						on:clearSettings={() => {typeActive=false}} />-->
+				<SelectType bind:selectedTypes={selectedTypes}/>
 
 				<div>
 					{#if coverPic}
@@ -392,10 +375,6 @@
 			</div>
 
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-
-			{#if locks[1]}
-				<p class="text-error-300 dark:text-error-400">{warning1}</p>
-			{/if}
 		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
@@ -437,9 +416,6 @@
 					</div>
 				</div>
 			</div>
-			{#if locks[2]}
-				<p class="text-error-300 dark:text-error-400">{warning2}</p>
-			{/if}
 		</Step>
 		<Step locked={isSubmitting}>
 			<svelte:fragment slot="header">Review</svelte:fragment>
@@ -500,10 +476,7 @@
 				</div>
 			</div>
 
-			{#if draft}
-				<p class="text-error-500 pl-3 text-right">This publication will be saved as a draft because it's
-					incomplete.</p>
-			{:else}
+			{#if !draft}
 				<div class="flex flex-row justify-end items-center gap-2">
 					<p class="pl-3">Save as a draft: </p>
 					<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />

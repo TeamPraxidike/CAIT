@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import type { User } from '@prisma/client';
 import { PublicationType } from '@prisma/client';
+import type { ExtendedPublication } from '../api/publication/+server';
 
 export const load: PageServerLoad = async ({
 	params,
@@ -14,7 +15,7 @@ export const load: PageServerLoad = async ({
 	const session = await locals.safeGetSession();
 	if (!session || !session.user) throw redirect(303, '/signin');
 
-	const pubsRes = await fetch(`/api/publication?publishers=${layoutData.user.id}`);
+	const pubsRes = await fetch(`/api/publication?publishers=${layoutData.user.id}&includeDraft=${session.user.id === layoutData.user.id}`);
 
 	if (pubsRes.status !== 200) {
 		return {
@@ -23,8 +24,9 @@ export const load: PageServerLoad = async ({
 		};
 	}
 
+	// Check if the user is viewing their own profile and return his saved publications
 	let savedRes = null;
-	if (params.user === session.user.user_metadata.username) {
+	if (session.user.id === layoutData.user.id) {
 		savedRes = await fetch(
 			`/api/user/${session.user.id}/saved?fullPublications=true`,
 		);
@@ -33,6 +35,7 @@ export const load: PageServerLoad = async ({
 		}
 	}
 
+	// If the user is viewing another user's profile, fetch saved publications of that user so that they can be marked
 	const savedByUserRes = await fetch(
 		`/api/user/${session.user.id}/saved?fullPublications=false`,
 	);
@@ -67,7 +70,7 @@ export const load: PageServerLoad = async ({
 		savedByUserRes.status === 204
 			? { saved: [] }
 			: await savedByUserRes.json();
-	const publications = await pubsRes.json();
+	const publications: ExtendedPublication[] = (await pubsRes.json()).publications;
 	
 	return {
 		publications,

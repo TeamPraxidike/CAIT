@@ -1,16 +1,23 @@
 <script lang="ts">
     import type {User} from "@prisma/client";
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
 
     export let user:TUserWithPostsAndProfilePic;
-    export let userPhotoUrl: string;
+    if (!user) {
+        throw new Error("There was an error with exporting the user data. Please try again.");
+    }
 
+    export let userPhotoUrl: string;
+    export let tabset: number;
+
+    const numPosts = user.posts.filter((x) => !x.isDraft).length
+    const numDrafts = user.posts.filter((x) => x.isDraft).length
 
     /**
      * Check if the current user is the same as the user being viewed.
      */
-    const currentlyAuth = () => $page.data.session?.user.id === user.id;
+    const currentlyAuth = () => page.data.session?.user.id === user.id;
 
     const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 </script>
@@ -33,18 +40,28 @@
                 md:w-7/12 md:justify-start
                 xl:w-full">
         <h2 class="text-lg md:text-xl">{user.firstName} {user.lastName}</h2>
-        <p class="variant-soft-primary md:hidden p-2 rounded-lg">Reputation: {user.reputation}</p>
 
         <div class="hidden md:flex items-start flex-col gap-4 text-surface-700 dark:text-surface-200 ">
             <p class="lg:text-sm 2xl:text-base">Email: {user.email}</p>
             <hr class="w-11/12">
+
             {#if user.aboutMe !== ''}
                 <p class="text-surface-700 text-sm dark:text-surface-400">
                     {user.aboutMe}
                 </p>
             {/if}
+            <div class="flex gap-2">
+                {#if numPosts !== 0}
+                    <button class="variant-soft-primary hidden md:block p-2 rounded-lg"
+                    on:click={() => tabset = 0}>{numPosts} {numPosts > 1 ? "Publications" : "Publication"}</button>
+                {/if}
+                {#if currentlyAuth() && numDrafts !== 0}
+                    <button class="variant-soft-primary hidden md:block p-2 rounded-lg"
+                    on:click={() => tabset=2}>{numDrafts} {numDrafts > 1 ? "Drafts" : "Draft"}</button>
+                {/if}
+            </div>
+
             <div class="flex gap-2 flex-wrap">
-                <p class="variant-soft-primary hidden md:block p-2 rounded-lg">Reputation: {user.reputation}</p>
                 {#if currentlyAuth()}
                     <div class="flex gap-2">
                         <a type="button" href="/{user.username}/edit"  class="btn bg-surface-800 text-surface-50 rounded-lg
