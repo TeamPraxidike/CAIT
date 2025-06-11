@@ -34,6 +34,7 @@
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
+	import type { FileURL } from '$lib/database/fileURL';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -58,6 +59,7 @@
 	let newTags: string[] = [];
 
 	let files: FileList = [] as unknown as FileList;
+	let fileURLs: string[] = [] as string[];
 	type UserWithProfilePic = User & { profilePicData: string };
 	let maintainers: UserWithProfilePic[] = [];
 
@@ -79,6 +81,7 @@
 	let theoryApplicationRatio: number = 0.5;
 	let selectedTypes: string[] = [];
 	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
+	let fileURL = '';
 
 	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
@@ -114,6 +117,12 @@
 			// Convert final FileList to an array and store in IndexedDB **/
 			saveFiles(Array.from(files));
 		}
+	}
+
+	function appendFileURLtoList() {
+		if (fileURL !== '')
+			fileURLs = [...fileURLs, fileURL]
+		fileURL = ''
 	}
 
 	/* LOCK = TRUE => LOCKED */
@@ -264,6 +273,7 @@
 			event.preventDefault();
 		}
 	};
+	// const uploadFile
 
 	let markedAsDraft = false;
 	let draft = true;
@@ -301,6 +311,7 @@
 		if (!willSubmit) return;
 
         formData.append('userId', uid?.toString() || '');
+		formData.append('fileURLs', JSON.stringify(fileURLs));
         formData.append('title', title);
         formData.append('description', description);
 		formData.append('type', JSON.stringify(selectedTypes));
@@ -324,10 +335,42 @@
 					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 
 					<div class="grid grid-cols-2 gap-4">
-						<div class="h-80 flex">
-							<FileDropzone on:change={appendToFileList} multiple name="file" />
+						<div class="flex flex-col h-80">
+							<div class="flex-1">
+								<FileDropzone
+									on:change={appendToFileList}
+									multiple
+									name="file"
+									class="w-full h-full border-2 border-dashed rounded-xl p-4"
+								/>
+							</div>
+
+							<!-- URL Input + Button Row -->
+							<div class="mt-4 flex gap-4">
+								<div class="flex flex-col flex-1">
+									<label for="urlInput" class="mb-1 text-sm font-medium text-gray-700">Or enter a URL</label>
+									<input
+										type="url"
+										id="urlInput"
+										name="url"
+										placeholder="https://example.com"
+										class="w-full px-4 py-3 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+										bind:value = {fileURL}
+									/>
+								</div>
+
+								<div class="self-end">
+									<button
+										on:click={appendFileURLtoList}
+										type="button"
+										class="px-6 py-3 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 text-lg"
+									>
+										Upload
+									</button>
+								</div>
+							</div>
 						</div>
-						<FileTable operation="edit" bind:files={files} />
+						<FileTable operation="edit" bind:files={files} bind:fileURLs={fileURLs}/>
 					</div>
 
 				</Step>
@@ -437,7 +480,7 @@
 						Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
 					</p>
 
-					<FileTable bind:files={files} />
+					<FileTable bind:files={files} bind:fileURLs={fileURLs}/>
 				</div>
 				<div class="col-span-4 flex flex-col gap-4">
 					{#if coverPic}

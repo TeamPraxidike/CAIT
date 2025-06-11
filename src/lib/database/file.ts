@@ -9,6 +9,7 @@ import type { File as PrismaFile, FileChunk } from '@prisma/client';
 import path from 'path';
 import fs from 'fs';
 import type { FileChunks } from '$lib/PiscinaUtils/runner';
+import { addFileURL } from '$lib/database/fileURL';
 
 
 // // TODO: This seems to be useless, could remove if nothing breaks
@@ -340,6 +341,10 @@ export async function updateFiles(
 ) {
 	// add files
 	for (const file of fileInfo.add) {
+		if (file.type == "URL" ) {
+			await addFileURL(file.title, file.info, materialId, prismaContext);
+			continue;
+		}
 		const buffer: Buffer = Buffer.from(file.info, 'base64');
 
 		await addFile(file.title, file.type, userId, buffer, materialId, prismaContext);

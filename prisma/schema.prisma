@@ -133,9 +133,18 @@ model Material {
   timeEstimate      Int?
   theoryPractice    Float?
   files             File[]       @relation("Files")
+  fileURLs          FileURL[]    @relation("MaterialFileURLs")
 
   publicationId Int         @unique
   publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+}
+
+model FileURL {
+  id         Int      @id @default(autoincrement())
+  url        String
+  name       String
+  materialId Int
+  material   Material @relation("MaterialFileURLs", fields: [materialId], references: [id], onDelete: Cascade)
 }
 
 model File {

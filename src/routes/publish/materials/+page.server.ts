@@ -15,8 +15,9 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
  * It then returns an object with the file's name, type, and base64 string.
  *
  * @param fileList the list of files to be added to the database of type `FileList`.
+ * @param fileURLs the list of URLs pointing to files to be added to the database of type `FileList`.
  */
-async function filesToAddOperation(fileList: FileList) {
+async function filesToAddOperation(fileList: FileList, fileURLs: string[] = []) {
 	const addPromises = Array.from(fileList).map(async (file) => {
 		const buffer = await file.arrayBuffer();
 		const info = Buffer.from(buffer).toString('base64');
@@ -27,8 +28,15 @@ async function filesToAddOperation(fileList: FileList) {
 			info,
 		};
 	});
+	const addURLs = Array.from(fileURLs).map((url) => {
+		return {
+			title: url,
+			type: "URL",
+			info: url,
+		};
+	});
 
-	return await Promise.all(addPromises);
+	return (await Promise.all(addPromises)).concat(addURLs);
 }
 
 const convertMaterial = (s: string): MaterialType => {
