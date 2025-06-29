@@ -13,6 +13,8 @@
 	export let operation: 'download' | 'view' | 'edit' = 'view';
 	const ms = getModalStore();
 
+	$: warning = (files && files.length === 0) && (fileURLs && fileURLs.length === 0);
+
 
 	function activateModal(file: File) {
 		ms.trigger({
@@ -30,10 +32,10 @@
 </script>
 
 <div class="rounded-lg p-1">
-	{#if files ? files.length === 0 : true}
-		<p class="text-error-300 dark:text-error-400">Upload at least one file</p>
+	{#if warning}
+		<p class="text-error-300 dark:text-error-400">Upload at least one material</p>
 	{:else}
-		<h4>Uploaded files</h4>
+		<h4>Uploaded materials</h4>
 	{/if}
 	{#if files}
 		<div class="flex flex-col gap-1">
@@ -60,7 +62,7 @@
 			{#each fileURLs as url (url)}
 				<button type="button" animate:flip={{ delay: 0, duration: 200 }}
 						class="hover:bg-gray-200 transition-colors duration-75 flex items-center rounded-lg gap-2 p-3 bg-gray-100 dark:hover:bg-surface-700 dark:bg-surface-800"
-						on:click={() => window.open(url, '_blank').focus()}
+						on:click={() => window.open(url, '_blank')?.focus()}
 						transition:slide={{ delay: 0, duration: 200, axis: 'x' }}>
 
 					<span class="hover:text-surface-700 underline cursor-pointer dark:text-surface-200 dark:hover:text-surface-600 text-surface-500">{url}</span>

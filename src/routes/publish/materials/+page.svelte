@@ -239,7 +239,7 @@
 					theoryApplicationRatio
 				};
 
-				console.log('IN CONST SNAPSHOT');
+				// console.log('IN CONST SNAPSHOT');
 
 				// Store it in IndexedDB
 				saveMaterialSnapshot(data);
@@ -287,6 +287,7 @@
 	};
 	$: fileLength = files.length;
 	$: draft = isMaterialDraft(metadata, fileLength);
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />

@@ -136,6 +136,7 @@ export async function getPublicationById(id: number): Promise<Publication> {
 				include: {
 					publication: true,
 					files: true,
+					fileURLs: true
 				},
 			},
 			circuit: {

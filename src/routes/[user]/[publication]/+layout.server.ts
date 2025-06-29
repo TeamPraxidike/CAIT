@@ -13,6 +13,7 @@ import type {
 	Tag,
 	User,
 } from '@prisma/client';
+import type { FileURL } from '$lib/database/fileURL';
 
 export const load: LayoutServerLoad = async ({
 	params,
@@ -96,6 +97,7 @@ export type PublicationView = {
 		})[];
 		materials: Material & {
 			files: PrismaFile[];
+			fileURLs: FileURL[]
 		};
 		circuit: Circuit & {
 			nodes: (PrismaNode & {

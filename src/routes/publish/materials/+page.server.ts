@@ -68,8 +68,10 @@ export const actions = {
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
 		const fileList: FileList = data.getAll('file') as unknown as FileList;
+		const fileURLs: string[] = JSON.parse(data.get("fileURLs")?.toString() || '');
 		if (!fileList) return { status: 400, message: 'No files provided' };
-		const add = await filesToAddOperation(fileList);
+		const add = await filesToAddOperation(fileList, fileURLs);
+
 
 		const tagsDataEntry = data.get('tags');
 		if (!tagsDataEntry) return { status: 400, message: 'No tags provided' };
@@ -143,7 +145,7 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
-
+		console.log(`Material publish response: ${res.status} - ${res.statusText}`);
 		return { status: res.status, id: (await res.json()).id };
 	},
 } satisfies Actions;

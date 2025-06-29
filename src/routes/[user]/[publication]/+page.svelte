@@ -82,7 +82,8 @@
         posY: node.posY,
         extensions: node.extensions,
         publisherId: node.publication.publisherId
-    }))
+    }));
+	const fileUrls: string[] = isMaterial ? data.pubView.publication.materials.fileURLs.map((x) => x.url) : [];
     userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
     likedComments = data.likedComments as number[];
     likedReplies = data.likedReplies as number[];
@@ -584,7 +585,9 @@
 								<p>This publication has no files</p>
 							{:else}
 								<div class="w-full">
-									<FileTable operation="download" files={createFileList(files, pubView.publication.materials.files)} />
+									<FileTable operation="download"
+											   files={createFileList(files, pubView.publication.materials.files)}
+											   fileURLs={fileUrls}/>
 								</div>
 							{/if}
 						{:catch error}
