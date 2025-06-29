@@ -219,6 +219,7 @@
 				estimate = existing.estimate ?? '30';
 				copyright = existing.copyright ?? 'No copyright';
 				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
+				fileURLs = existing.fileURLs ?? [];
 			}
 
 			// start a 2-sec interval that captures a snapshot
@@ -236,11 +237,12 @@
 					searchableUsers,
 					estimate,
 					copyright,
+					fileURLs,
 					theoryApplicationRatio
 				};
 
 				// console.log('IN CONST SNAPSHOT');
-
+				// console.log('Saving material snapshot:', data);
 				// Store it in IndexedDB
 				saveMaterialSnapshot(data);
 			}, 2000);
