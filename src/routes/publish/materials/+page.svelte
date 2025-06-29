@@ -287,14 +287,14 @@
 		materialType: selectedTypes,
 		isDraft: false
 	};
-	$: fileLength = files.length;
-	$: draft = isMaterialDraft(metadata, fileLength);
+	$: numMaterials = Math.max(fileURLs.length, files.length);
+	$: draft = isMaterialDraft(metadata, numMaterials);
 
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
 
-<Banner metadata={metadata} files={fileLength} materialType={metadata.materialType}/>
+<Banner metadata={metadata} files={numMaterials} materialType={metadata.materialType}/>
 
 <form method="POST"
 	  enctype="multipart/form-data"
