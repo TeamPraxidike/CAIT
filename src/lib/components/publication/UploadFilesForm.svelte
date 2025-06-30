@@ -24,7 +24,6 @@
 		if (fileURL !== '' && fileURLs.indexOf(fileURL) == -1)
 			fileURLs = [...fileURLs, fileURL]
 		fileURL = ''
-		console.log(fileURLs);
 	}
 </script>
 

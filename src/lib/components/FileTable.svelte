@@ -1,11 +1,10 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import { IconMap } from '$lib/util/file';
+	import { getURLIcon, IconMap } from '$lib/util/file';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { Download, Render } from '$lib';
 	import { slide } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
-	import { redirect } from '@sveltejs/kit';
 
 	export let files: FileList | any[];
 	export let fileURLs: string[] = [];
@@ -65,7 +64,9 @@
 						on:click={() => window.open(url, '_blank')?.focus()}
 						transition:slide={{ delay: 0, duration: 200, axis: 'x' }}>
 
-					<span class="hover:text-surface-700 underline cursor-pointer dark:text-surface-200 dark:hover:text-surface-600 text-surface-500">{url}</span>
+					<Icon icon={getURLIcon(url)}
+						  class="text-xl text-surface-500" />
+					<span class="text-left hover:text-surface-700 underline cursor-pointer dark:text-surface-200 dark:hover:text-surface-600 text-surface-500">{url}</span>
 					{#if operation === 'edit'}
 						<button on:click={() => removeURL(url)} type="button" on:click|stopPropagation class="ml-auto flex gap-2 items-center">
 							<Icon class="xl:text-2xl" icon="mdi:delete" />
