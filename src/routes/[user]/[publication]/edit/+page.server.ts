@@ -177,7 +177,7 @@ export const actions = {
 					theoryPractice: Number(theoryApp),
 					tags: JSON.parse(selectedTags),
 					maintainers: JSON.parse(maintainers),
-					materialType: (type as MaterialType) || 'video',
+					materialType: ([type] as MaterialType[]) || ['video'],
 					isDraft: isDraft,
 					fileURLs: fileURLs || [],
 				},

@@ -251,7 +251,7 @@ export async function updateMaterialByPublicationId(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		materialType: MaterialType;
+		materialType: MaterialType[];
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
@@ -263,7 +263,7 @@ export async function updateMaterialByPublicationId(
 	return prismaContext.material.update({
 		where: { publicationId: publicationId },
 		data: {
-			encapsulatingType: metaData.materialType,
+			encapsulatingType: metaData.materialType[0],
 			fileURLs: {
 				deleteMany: {},
 				createMany: {

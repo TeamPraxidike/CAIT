@@ -121,7 +121,12 @@ export async function PUT({ request, params, locals }) {
 		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
-
+		if (!publisherId) {
+			return new Response(
+				JSON.stringify({ error: 'Publisher not found' }),
+				{ status: 404 },
+			);
+		}
 		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
 			return unauthResponse();
 
