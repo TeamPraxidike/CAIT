@@ -5,7 +5,7 @@
 	import { saveFiles } from '$lib/util/indexDB';
 
 	export let fileURLs: string[] = [];
-	export let files: FileList = new FileList();
+	export let files: FileList = [] as unknown as FileList;
 
 	let fileURL = '';
 
