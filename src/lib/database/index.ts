@@ -122,6 +122,7 @@ type MaterialForm = {
 		tags: string[];
 		maintainers: string[];
 		isDraft: boolean;
+		fileURLs: string[];
 	};
 	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;

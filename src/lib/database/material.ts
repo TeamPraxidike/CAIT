@@ -256,6 +256,7 @@ export async function updateMaterialByPublicationId(
 		timeEstimate: number;
 		theoryPractice: number;
 		isDraft: boolean;
+		fileURLs: string[];
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
@@ -263,6 +264,15 @@ export async function updateMaterialByPublicationId(
 		where: { publicationId: publicationId },
 		data: {
 			encapsulatingType: metaData.materialType,
+			fileURLs: {
+				deleteMany: {},
+				createMany: {
+					data: metaData.fileURLs.map((url) => ({
+						url: url,
+						name: url,
+					})),
+				},
+			},
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,

@@ -101,6 +101,7 @@ export const actions = {
 			/**
 			 * New file DATA (File list)
 			 */
+			const fileURLs = JSON.parse(data.get("fileURLs")?.toString() || '');
 			const fileList: FileList = data.getAll(
 				'file',
 			) as unknown as FileList;
@@ -178,6 +179,7 @@ export const actions = {
 					maintainers: JSON.parse(maintainers),
 					materialType: (type as MaterialType) || 'video',
 					isDraft: isDraft,
+					fileURLs: fileURLs || [],
 				},
 				coverPic,
 				fileDiff: {

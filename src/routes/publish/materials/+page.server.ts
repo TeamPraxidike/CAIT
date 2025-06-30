@@ -131,7 +131,8 @@ export const actions = {
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
-				isDraft: isDraft
+				isDraft: isDraft,
+				fileURLs: fileURLs || [],
 			},
 			coverPic,
 			fileDiff: {
@@ -145,7 +146,6 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
-		console.log(`Material publish response: ${res.status} - ${res.statusText}`);
 		return { status: res.status, id: (await res.json()).id };
 	},
 } satisfies Actions;

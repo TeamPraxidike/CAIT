@@ -61,6 +61,7 @@
 
 	const isMaterial : boolean = serverData.isMaterial;
 
+	let fileURLs: string[] = isMaterial ? data.pubView.publication.materials.fileURLs.map((x) => x.url) : [];
 	let saveInterval: number | undefined = undefined;
 	let circuitKey = Date.now();
 
@@ -212,6 +213,7 @@
 				maintainers = existing.maintainers;
 				users = existing.searchableUsers;
 				circuitNodesPlaceholder = existing.circuitNodes ?? [];
+				// fileURLs = existing.fileURLs ?? [];
 			}
 
 			circuitKey = Date.now();
@@ -225,6 +227,7 @@
 					LOs,
 					PKs,
 					maintainers,
+					// fileURLs,
 					searchableUsers: users,
 					circuitNodes: circuitNodesPlaceholder
 				};
@@ -325,6 +328,7 @@
 		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0));
 		formData.append('publisherId', JSON.stringify(serverData.publication.publisherId));
 		formData.append("isDraft", JSON.stringify(markedAsDraft || draft));
+		formData.append('fileURLs', JSON.stringify(fileURLs));
 
 
 		if(circuitRef){
@@ -412,7 +416,7 @@
 	{#if isMaterial}
 		<div class="mt-10 mb-20 w-full">
 			<FileDropzone on:change={changeFilezone} multiple name="fileInputBind" />
-			<FileTable operation="edit" bind:files={files} />
+			<FileTable operation="edit" bind:files={files} bind:fileURLs={fileURLs}/>
 		</div>
 		<div class="mt-4">
 			<label for="coverPhoto">Cover Picture:</label>
