@@ -7,11 +7,10 @@
 		Tag,
 		TheoryAppBar, UserProp
 	} from '$lib';
-	import { FileButton, FileDropzone, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
+	import { FileButton, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
-	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
@@ -29,12 +28,11 @@
 		getFiles,
 		getMaterialSnapshot,
 		saveCover,
-		saveFiles,
 		saveMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
-	import type { FileURL } from '$lib/database/fileURL';
+	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -81,7 +79,6 @@
 	let theoryApplicationRatio: number = 0.5;
 	let selectedTypes: string[] = [];
 	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
-	let fileURL = '';
 
 	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
@@ -108,22 +105,7 @@
 
 	$: uid = page.data.session?.user.id;
 
-	function appendToFileList(e: Event) {
-		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles && eventFiles.length > 0) {
-			// Merge new files into the existing FileList
-			files = concatFileList(files, eventFiles);
 
-			// Convert final FileList to an array and store in IndexedDB **/
-			saveFiles(Array.from(files));
-		}
-	}
-
-	function appendFileURLtoList() {
-		if (fileURL !== '')
-			fileURLs = [...fileURLs, fileURL]
-		fileURL = ''
-	}
 
 	/* LOCK = TRUE => LOCKED */
 	const locks: boolean[] = [false, false, false];
@@ -336,46 +318,9 @@
 				<Step locked={locks[0]}>
 
 					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
-
-					<div class="grid grid-cols-2 gap-4">
-						<div class="flex flex-col h-80">
-							<div class="flex-1">
-								<FileDropzone
-									on:change={appendToFileList}
-									multiple
-									name="file"
-									class="w-full h-full border-2 border-dashed rounded-xl p-4"
-								/>
-							</div>
-
-							<!-- URL Input + Button Row -->
-							<div class="mt-4 flex gap-4">
-								<div class="flex flex-col flex-1">
-									<label for="urlInput" class="mb-1 text-sm font-medium text-gray-700">Or enter a URL</label>
-									<input
-										type="url"
-										id="urlInput"
-										name="url"
-										placeholder="https://example.com"
-										class="w-full px-4 py-3 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-										bind:value = {fileURL}
-									/>
-								</div>
-
-								<div class="self-end">
-									<button
-										on:click={appendFileURLtoList}
-										type="button"
-										class="px-6 py-3 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 text-lg"
-									>
-										Upload
-									</button>
-								</div>
-							</div>
-						</div>
-						<FileTable operation="edit" bind:files={files} bind:fileURLs={fileURLs}/>
-					</div>
-
+					<UploadFilesForm
+						bind:fileURLs={fileURLs}
+						bind:files={files}/>
 				</Step>
 		<Step locked={locks[1]}>
 			<div class="grid grid-cols-2 gap-x-4 gap-y-2">
