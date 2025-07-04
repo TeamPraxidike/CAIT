@@ -3,6 +3,7 @@
 import { Difficulty, MaterialType } from '@prisma/client';
 import { createMaterialPublication } from '$lib/database';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+import { expect } from 'vitest';
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -23,19 +24,40 @@ function randomEnumValue<T extends object>(e: T): T[keyof T] {
 export async function createUniquePublication(userId: string): Promise<MaterialWithPublicationNoFiles> {
 	const title = generateRandomString();
 	const description = generateRandomString(100);
+	const copyright = generateRandomString(10)
+	const difficulty = randomEnumValue(Difficulty);
+	const learningObjectives = [generateRandomString()];
+	const prerequisites = [generateRandomString()];
+	const materialType = [randomEnumValue(MaterialType)];
+	const timeEstimate = Math.floor(Math.random() * 10) + 1;
+	const theoryPractice = Math.random();
 
 	const inputData = {
 		title,
 		description,
-		copyright: "true",
-		difficulty: randomEnumValue(Difficulty),
-		learningObjectives: [generateRandomString()],
-		prerequisites: [generateRandomString()],
-		materialType: [randomEnumValue(MaterialType)],
-		timeEstimate: 4,
-		theoryPractice: 9,
+		copyright,
+		difficulty,
+		learningObjectives,
+		prerequisites,
+		materialType,
+		timeEstimate,
+		theoryPractice,
 		isDraft: false
 	}
 
-	return await createMaterialPublication(userId, inputData);
+	const publication = await createMaterialPublication(userId, inputData);
+
+	expect(publication).toHaveProperty('publicationId');
+	expect(publication.publication.title).toBe(title);
+	expect(publication.publication.description).toBe(description);
+	expect(publication.copyright).toBe(copyright);
+	expect(publication.publication.learningObjectives).toStrictEqual(learningObjectives);
+	expect(publication.publication.prerequisites).toStrictEqual(prerequisites);
+	expect([publication.encapsulatingType]).toStrictEqual(materialType);
+	expect(publication.publication.difficulty).toBe(difficulty);
+	expect(publication.timeEstimate).toBe(timeEstimate);
+	expect(publication.theoryPractice).toBeCloseTo(theoryPractice, 2);
+	expect(publication.publication.isDraft).toBe(false);
+
+	return publication;
 }
