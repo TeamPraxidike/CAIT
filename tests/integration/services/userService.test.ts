@@ -15,32 +15,23 @@ import {
 } from '$lib/database/user';
 import { resetUserTable } from '../setup';
 import { Difficulty, type Material, type User } from '@prisma/client';
+import { createUniqueUser, createUserInputObject } from '../../utility/users';
 
 await resetUserTable();
 
 describe('Creating users', () => {
 	it('should increase the id by 1', async () => {
-		const user = await createUser({
-			firstName: 'Vasko',
-			lastName: 'Prasko',
-			email: 'email@gmailfdnfsdghgfd' + Math.random(),
-			password: 'password',
-		});
+		const user = await createUniqueUser();
 		expect(await getUserById(user.id)).toHaveProperty(
 			'username',
-			'VaskoPrasko',
+			`${user.firstName}${user.lastName}`,
 		);
 
 		for (let i = 2; i < 20; i++) {
-			const newUser = await createUser({
-				firstName: 'Vasko',
-				lastName: 'Prasko',
-				email: 'email@gmailadsgfahr' + i + Math.random(),
-				password: 'password',
-			});
+			const newUser = await createUniqueUser(user.firstName, user.lastName);
 			expect(await getUserById(newUser.id)).toHaveProperty(
 				'username',
-				'VaskoPrasko_' + i,
+				user.username + '_' + i,
 			);
 		}
 	});
@@ -48,47 +39,39 @@ describe('Creating users', () => {
 
 describe('Editing users', () => {
 	it('should update user reputation', async () => {
-		const user = await createUser({
-			firstName: 'Marti',
-			lastName: 'Parti',
-			email: 'email@gmailsdfgsdfgsdfg' + Math.random(),
-			password: 'password',
-		});
+		const user = await createUniqueUser();
 
 		await updateReputation(user.id, 10);
 
 		const updatedUser = await getUserById(user.id);
-		expect(updatedUser.reputation).toEqual(10);
+		expect(updatedUser).not.toBeNull;
+		expect(updatedUser!.reputation).toEqual(10);
 
 		await updateReputation(user.id, -5);
 
 		const updatedUser2 = await getUserById(user.id);
-		expect(updatedUser2.reputation).toEqual(5);
+		expect(updatedUser2).not.toBeNull;
+		expect(updatedUser2!.reputation).toEqual(5);
 	});
 
 	it('should change users', async () => {
-		const user = await createUser({
-			firstName: 'Marti',
-			lastName: 'Parti',
-			email: 'email@gmailsdfgsdfgsdfg' + Math.random(),
-			password: 'password',
-		});
+		const user = await createUniqueUser();
 
-		const email = 'l' + Math.random();
+		const newUserInfo = createUserInputObject();
 		await editUser({
 			id: user.id,
-			firstName: 'Kiro',
-			lastName: 'Breika',
-			email: email,
-			aboutMe: "hello I am Kiro"
+			firstName: newUserInfo.firstName,
+			lastName: newUserInfo.lastName,
+			email: newUserInfo.email,
+			aboutMe: "I just edited myself!!!",
 		});
 
 		const editedUser = await getUserById(user.id);
-		expect(editedUser).toHaveProperty('firstName', 'Kiro');
-		expect(editedUser).toHaveProperty('lastName', 'Breika');
-		expect(editedUser).toHaveProperty('email', email);
+		expect(editedUser).toHaveProperty('firstName', newUserInfo.firstName);
+		expect(editedUser).toHaveProperty('lastName', newUserInfo.lastName);
+		expect(editedUser).toHaveProperty('email', newUserInfo.email);
 
-		expect(editedUser).toHaveProperty('username', 'KiroBreika');
+		expect(editedUser).toHaveProperty('username', `${newUserInfo.firstName}${newUserInfo.lastName}`);
 	});
 });
 
