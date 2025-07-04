@@ -16,6 +16,8 @@ import {
 import { resetUserTable } from '../setup';
 import { Difficulty, type Material, type User } from '@prisma/client';
 import { createUniqueUser, createUserInputObject } from '../../utility/users';
+import { createUniquePublication } from '../../utility/publicationsUtility';
+import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 
 await resetUserTable();
 
@@ -77,27 +79,12 @@ describe('Editing users', () => {
 
 describe('Liking publications', () => {
 	let user: User;
-	let publication: Material;
+	let publication: MaterialWithPublicationNoFiles;
 	let likedMessage: string;
 
 	beforeEach(async () => {
-		user = await createUser({
-			firstName: 'Marti21e1423213',
-			lastName: 'Parti',
-			email: 'email@gmailasdjryukryuk5' + Math.random(),
-			password: 'password',
-		});
-		publication = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			copyright: "true",
-			difficulty: Difficulty.easy,
-			learningObjectives: [],
-			prerequisites: [],
-			materialType: 'assignment',
-			timeEstimate: 4,
-			theoryPractice: 9,
-		});
+		user = await createUniqueUser();
+		publication = await createUniquePublication(user.id);
 		likedMessage = await likePublication(
 			user.id,
 			publication.publicationId,
@@ -112,7 +99,7 @@ describe('Liking publications', () => {
 		}
 		expect(liked.liked).toHaveLength(1);
 		expect(liked.liked[0].id).toBe(publication.publicationId);
-		expect(liked.liked[0].title).toBe('cool publication');
+		expect(liked.liked[0].title).toBe(publication.publication.title);
 	});
 
 	it('should increase the likes value in the publication', async () => {
