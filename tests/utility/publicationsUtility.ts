@@ -4,8 +4,9 @@ import { Difficulty, MaterialType } from '@prisma/client';
 import { createMaterialPublication } from '$lib/database';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 
-function generateRandomString(n: number = 20): string {
-	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+export function generateRandomString(n: number = 20): string {
 	let result = '';
 	for (let i = 0; i < n; i++) {
 		result += characters.charAt(Math.floor(Math.random() * characters.length));
