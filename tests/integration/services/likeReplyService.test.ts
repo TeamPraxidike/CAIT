@@ -9,40 +9,31 @@ import {
 	getReply,
 	likesReplyUpdate,
 } from '$lib/database';
+import { createUniqueUser } from '../../utility/users';
+import { createUniquePublication, generateRandomString } from '../../utility/publicationsUtility';
 
 describe('Comments Liking', () => {
 	let user: User;
 	let publication: Material;
 	let comment: any;
+	let contentComment: string;
 	let reply: any;
+	let contentReply: string;
 	let message: string;
 	beforeEach(async () => {
-		user = await createUser({
-			firstName: 'Marti',
-			lastName: 'Parti',
-			email: 'email@gmail' + Math.random(),
-			password: 'password',
-		});
-		publication = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			materialType: 'assignment',
-			copyright: "true",
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-		});
+		user = await createUniqueUser();
+		publication = await createUniquePublication(user.id);
+		contentComment = generateRandomString(50);
+		contentReply = generateRandomString(50);
 		comment = await createComment({
 			userId: user.id,
 			publicationId: publication.publicationId,
-			content: 'Ivan',
+			content: contentComment,
 		});
 		reply = await createReply({
 			userId: user.id,
 			commentId: comment.id,
-			content: 'Ivan Reply',
+			content: contentReply,
 		});
 		message = await likesReplyUpdate(user.id, reply.id);
 	});
