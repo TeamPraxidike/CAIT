@@ -84,7 +84,7 @@ export async function getComment(commentId: number): Promise<CommentWithRepliesA
  * [GET] gets the comment with the given publication id
  * @param publicationId
  */
-export async function getCommentsByPublicationId(publicationId: number): Promise<FullComment> {
+export async function getCommentsByPublicationId(publicationId: number): Promise<FullComment[]> {
 	return prisma.comment.findMany({
 		where: {
 			publicationId: publicationId,
