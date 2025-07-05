@@ -204,7 +204,7 @@
 <!--        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />-->
         <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border"
              src={photoUrl ? `data:image;base64,${photoUrl}` : defaultProfilePicturePath}
-             alt="Profile Picture" />
+             alt="Profile Picture of ${commenter.username}" />
         <div class="flex flex-col w-full">
 
         <div class="flex gap-3 items-center max-w-full">

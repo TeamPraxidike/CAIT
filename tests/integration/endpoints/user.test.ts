@@ -2,17 +2,20 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { testingUrl } from '../setup';
 import {
 	createMaterialPublication,
-	createUser,
+	createUser, getUserById,
 	likePublication,
 	prisma,
-	savePublication,
+	savePublication
 } from '$lib/database';
-import { Difficulty } from '@prisma/client';
+import { Difficulty, Prisma } from '@prisma/client';
+import { generateRandomString } from '../../utility/publicationsUtility';
+import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
+import { createUniqueUser } from '../../utility/users';
 
 //await resetUserTable();
 
 async function getExistingUserIDs() {
-	const users = await prisma.user.findMany({
+	const users: Prisma.UserGetPayload<true>[] = await prisma.user.findMany({
 		select: {
 			id: true,
 		},
@@ -25,14 +28,15 @@ describe('Users', () => {
 		it('should respond with 404 if the user does not exist', async () => {
 			const userIds: string[] = await getExistingUserIDs();
 
-			let randomID;
+			let randomID: string;
 			do {
-				randomID = 'kur';
+				randomID = uuid();
 			} while (userIds.includes(randomID));
 
 			const response = await fetch(`${testingUrl}/user/${randomID}`, {
 				method: 'GET',
 			});
+			console.log(response);
 			expect(response.status).toBe(404);
 			const body = await response.json();
 			expect(body.error).toBe('User not found');
@@ -40,13 +44,7 @@ describe('Users', () => {
 		});
 
 		it('should respond with 200 and the user if it exists', async () => {
-			const newUser = await createUser({
-				firstName: 'ivan' + Math.random(),
-				lastName: 'shishman',
-				email: 'ivanshishman@pliska.bg' + Math.random(),
-				password: 'password',
-			});
-
+			const newUser = await createUniqueUser();
 			const response = await fetch(`${testingUrl}/user/${newUser.id}`, {
 				method: 'GET',
 			});
