@@ -8,7 +8,7 @@ import {
 	savePublication
 } from '$lib/database';
 import { Difficulty, Prisma } from '@prisma/client';
-import { createUniquePublication, generateRandomString } from '../../utility/publicationsUtility';
+import { createUniqueMaterial, generateRandomString } from '../../utility/publicationsUtility';
 import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
 import { createUniqueUser, createUserInputObject, type UserInput } from '../../utility/users';
 
@@ -158,7 +158,7 @@ describe('Users', () => {
 
 		it('should return a list with liked posts as content', async () => {
 			const user = await createUniqueUser()
-			const publication = await createUniquePublication(user.id);
+			const publication = await createUniqueMaterial(user.id);
 
 			await fetch(
 				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
@@ -174,7 +174,7 @@ describe('Users', () => {
 			expect(responseBody).toHaveLength(1);
 			expect(responseBody[0]).toBe(publication.publicationId);
 
-			const publication2 = await createUniquePublication(user.id);
+			const publication2 = await createUniqueMaterial(user.id);
 
 			await fetch(
 				`${testingUrl}/user/${user.id}/liked/${publication2.publicationId}`,
@@ -195,7 +195,7 @@ describe('Users', () => {
 	describe('[POST] /user/:id/liked/:publicationId', () => {
 		it('should successfully like a publication', async () => {
 			const user = await createUniqueUser();
-			const publication = await createUniquePublication(user.id);
+			const publication = await createUniqueMaterial(user.id);
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
@@ -296,7 +296,7 @@ describe('Users', () => {
 
 		it('should return a list with liked posts as content', async () => {
 			const user = await createUniqueUser();
-			const publication = await createUniquePublication(user.id);
+			const publication = await createUniqueMaterial(user.id);
 
 			await fetch(
 				`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`,
@@ -311,7 +311,7 @@ describe('Users', () => {
 			expect(responseBody.saved).toHaveLength(1);
 			expect(responseBody.saved[0]).toBe(publication.publicationId);
 
-			const publication2 = await createUniquePublication(user.id);
+			const publication2 = await createUniqueMaterial(user.id);
 
 			await fetch(
 				`${testingUrl}/user/${user.id}/saved/${publication2.publicationId}`,
@@ -333,7 +333,7 @@ describe('Users', () => {
 		it('should successfully save a publication', async () => {
 			const user = await createUniqueUser();
 
-			const publication = await createUniquePublication(user.id);
+			const publication = await createUniqueMaterial(user.id);
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`,
@@ -390,7 +390,7 @@ describe('Users', () => {
 	describe('[GET] user/[id]/publicationInfo/[publicationId]', async () => {
 		it('should correctly return saved and liked', async () => {
 			const user = await createUniqueUser();
-			const publication = await createUniquePublication(user.id);
+			const publication = await createUniqueMaterial(user.id);
 
 			const response1 = await fetch(
 				`${testingUrl}/user/${user.id}/publicationInfo/${publication.publicationId}`,

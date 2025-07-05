@@ -8,7 +8,8 @@ import {
 import { Difficulty } from '@prisma/client';
 import { testingUrl } from '../setup';
 import { createUniqueUser } from '../../utility/users';
-import { createUniquePublication } from '../../utility/publicationsUtility';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
+import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
 
 describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 	it('should successfully use a publication in a course', async () => {
@@ -21,7 +22,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 
 		const res = await prisma.$transaction(async () => {
 			const user = await createUniqueUser();
-			const publication = await createUniquePublication(user.id);
+			const publication = await createUniqueMaterial(user.id);
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/use-in-course/${publication.publicationId}`,
@@ -57,7 +58,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 
 	it('should return 404 when user does not exist', async () => {
 		const response = await fetch(
-			`${testingUrl}/user/${830957945}/use-in-course/${34567890}`,
+			`${testingUrl}/user/${uuid()}/use-in-course/${34567890}`,
 			{
 				method: 'POST',
 			},
@@ -85,7 +86,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 describe('[GET] /publication/{publicationId}/used-in-course', () => {
 	it('should return 204 when no content', async () => {
 		const user = await createUniqueUser();
-		const publication = await createUniquePublication(user.id);
+		const publication = await createUniqueMaterial(user.id);
 
 		const response = await fetch(
 			`${testingUrl}/publication/${publication.publicationId}/use-in-course`,
@@ -113,15 +114,15 @@ describe('[GET] /user/[id]/use-in-course', () => {
 
 	it('should return 404 when no user', async () => {
 		const response = await fetch(
-			`${testingUrl}/user/${456787}/use-in-course`,
+			`${testingUrl}/user/${uuid()}/use-in-course`,
 		);
 		expect(response.status).toBe(404);
 	});
 
 	it('should add courses to the list', async () => {
 		const user = await createUniqueUser();
-		const publication1 = await createUniquePublication(user.id);
-		const publication2 = await createUniquePublication(user.id);
+		const publication1 = await createUniqueMaterial(user.id);
+		const publication2 = await createUniqueMaterial(user.id);
 
 		await addPublicationToUsedInCourse(
 			user.id,

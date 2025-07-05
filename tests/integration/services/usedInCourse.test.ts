@@ -7,7 +7,7 @@ import {
 	publicationsAUserUses,
 } from '$lib/database';
 import { createUniqueUser } from '../../utility/users';
-import { createUniquePublication } from '../../utility/publicationsUtility';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 
 describe('Using in a course', () => {
@@ -17,8 +17,8 @@ describe('Using in a course', () => {
 
 	beforeEach(async () => {
 		user = await createUniqueUser();
-		publication = await createUniquePublication(user.id);
-		publication2 = await createUniquePublication(user.id);
+		publication = await createUniqueMaterial(user.id);
+		publication2 = await createUniqueMaterial(user.id);
 	});
 
 	it('should add to the list of used in course', async () => {

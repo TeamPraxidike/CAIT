@@ -12,7 +12,7 @@ import {
 } from '$lib/database/save';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { createUniqueUser } from '../../utility/users';
-import { createUniquePublication } from '../../utility/publicationsUtility';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
 
 describe('Saving publications', () => {
 	let user: User;
@@ -21,7 +21,7 @@ describe('Saving publications', () => {
 
 	beforeEach(async () => {
 		user = await createUniqueUser();
-		publication = await createUniquePublication(user.id);
+		publication = await createUniqueMaterial(user.id);
 		savedMessage = await savePublication(
 			user.id,
 			publication.publicationId,

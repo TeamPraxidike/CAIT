@@ -4,7 +4,7 @@ import { Difficulty, MaterialType } from '@prisma/client';
 import { createMaterialPublication, createUser, getMaterialByPublicationId } from '$lib/database';
 import { getFilesForMaterial } from '$lib/database/file';
 import { createUniqueUser } from '../../utility/users';
-import { createUniquePublication } from '../../utility/publicationsUtility';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
 
 it('should be AEY', () => {
     expect(3).toBe(3);
@@ -56,7 +56,7 @@ describe('Materials', async () => {
 
         it('should respond with 200 if the publication of type material exists', async () => {
             const user = await createUniqueUser();
-            const material = await createUniquePublication(user.id);
+            const material = await createUniqueMaterial(user.id);
 
             const response = await fetch(
                 `${testingUrl}/material/${material.publicationId}`,
@@ -90,7 +90,7 @@ describe('Materials', async () => {
 
         it('should handle one material', async () => {
             const user = await createUniqueUser();
-            const material = await createUniquePublication(user.id);
+            const material = await createUniqueMaterial(user.id);
 
             const response = await fetch(`${testingUrl}/material`, { method: 'GET' });
             expect(response.status).toBe(200);
@@ -109,7 +109,7 @@ describe('Materials', async () => {
             const randomNumber = Math.ceil(Math.random() * 10);
             for (let i = 0; i < randomNumber; i++) {
                 const user = await createUniqueUser();
-                await createUniquePublication(user.id);
+                await createUniqueMaterial(user.id);
             }
 
             const response = await fetch(`${testingUrl}/material`, { method: 'GET' });

@@ -9,42 +9,13 @@ import {
 	updateCircuitCoverPic
 } from '$lib/database';
 import { Difficulty, MaterialType } from '@prisma/client';
+import { createUniqueUser, createUserInputObject } from '../../utility/users';
+import { createUniqueCircuit, createUniqueMaterial } from '../../utility/publicationsUtility';
 
 async function populate() {
-	const body = {
-		metaData: {
-			firstName: 'Paisiifewaafwe' + Math.random(),
-			lastName: 'Hilendarskiafw',
-			email: 'paiskataH@yahoomail.com' + Math.random(),
-			password: 'parola'
-		}
-	};
+	const user = await createUniqueUser()
+	const circuit = await createUniqueCircuit(user.id);
 
-	const user = await fetch(`${testingUrl}/user`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(body),
-	});
-	const userData = await user.json();
-	const circuitData = {
-		metaData : {
-			title: 'Vasko and Friends',
-			description: 'Vasko falls in love with Travis Scott',
-			difficulty: Difficulty.easy,
-			learningObjectives: [],
-			prerequisites: [],
-		},
-		userId: userData.user.id,
-		numNodes: 0
-	};
-
-	const circuit = await createCircuitPublication(
-		circuitData['userId'],
-		circuitData['numNodes'],
-		circuitData['metaData']
-	);
 	// the prisma creation of a circuit does not update the profile picture, but the requests assume that it is updated and will crash if there is no
 	// picture. Because of that we need to give it some dummy data if we use prisma for creation.
 	await updateCircuitCoverPic(
@@ -52,17 +23,11 @@ async function populate() {
 			info: "a",
 			type: "png"
 		},
-		circuit.publicationId
+		circuit.publicationId,
+		user.id
 	);
 	return circuit;
 }
-
-describe('Circuits', async () => {
-	it('should be remade', () => {
-		expect(true).toBe(true);
-	});
-});
-
 
 describe('Circuits', async () => {
 	describe('[GET] /circuit/:id', () => {
@@ -97,7 +62,7 @@ describe('Circuits', async () => {
 		});
 
 		it('should respond with 404 if the publication of type circuit does not exist', async () => {
-			const response = await fetch(`${testingUrl}/circuit/1`, {
+			const response = await fetch(`${testingUrl}/circuit/9437985`, {
 				method: 'GET',
 			});
 			expect(response.status).toBe(404);
@@ -107,40 +72,8 @@ describe('Circuits', async () => {
 		});
 
 		it('should respond with 500 if a server-side error occurs during execution (no profile picture in circuit)', async () => {
-			const body = {
-				metaData: {
-					firstName: 'Paisiifewaafwe' + Math.random(),
-					lastName: 'Hilendarskiafw',
-					email: 'paiskataH@yahoomail.com' + Math.random(),
-					password: 'parola'
-				}
-			};
-
-			const user = await fetch(`${testingUrl}/user`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			});
-			const userData = await user.json();
-			const circuitData = {
-				metaData : {
-					title: 'Vasko and Friends',
-					description: 'Vasko falls in love with Travis Scott',
-					difficulty: Difficulty.easy,
-					learningObjectives: [],
-					prerequisites: [],
-				},
-				userId: userData.user.id,
-				numNodes: 0
-			};
-
-			const circuit = await createCircuitPublication(
-				circuitData['userId'],
-				circuitData['numNodes'],
-				circuitData['metaData']
-			);
+			const user = await createUniqueUser();
+			const circuit = await createUniqueCircuit(user.id)
 
 			const response = await fetch(
 				`${testingUrl}/circuit/${circuit.publicationId}`,
@@ -225,25 +158,14 @@ describe('Circuits', async () => {
 			});
 			expect(response.status).toBe(400);
 			const body = await response.json();
-			expect(body.error).toEqual('Bad Delete Request - Invalid Circuit Id');
+			expect(body.error).toEqual('Bad Delete Request - Invalid Circuit publicationId');
 			expect(body).not.toHaveProperty('id');
 		});
 
 		it('should respond with 200 if successful deletion of everything related to circuit', async () => {
 			const circuit = await populate();
-			const metadata = {
-				title: "title",
-				description: "desc",
-				difficulty: Difficulty.easy,
-				learningObjectives: [],
-				prerequisites: [],
-				materialType: MaterialType.video,
-				copyright: "owner",
-				timeEstimate: 30,
-				theoryPractice: 70
-			}
-
-			const material = await createMaterialPublication(circuit.publication.publisherId, metadata);
+			const user = await createUniqueUser();
+			const material = await createUniqueMaterial(user.id);
 			const node = await addNode(circuit.id, material.publicationId, 0, 0);
 			expect(node).not.toBeNull();
 

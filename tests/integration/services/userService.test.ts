@@ -16,7 +16,7 @@ import {
 import { resetUserTable } from '../setup';
 import { Difficulty, type Material, type User } from '@prisma/client';
 import { createUniqueUser, createUserInputObject } from '../../utility/users';
-import { createUniquePublication } from '../../utility/publicationsUtility';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 
 await resetUserTable();
@@ -84,7 +84,7 @@ describe('Liking publications', () => {
 
 	beforeEach(async () => {
 		user = await createUniqueUser();
-		publication = await createUniquePublication(user.id);
+		publication = await createUniqueMaterial(user.id);
 		likedMessage = await likePublication(
 			user.id,
 			publication.publicationId,

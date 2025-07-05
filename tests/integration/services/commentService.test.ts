@@ -11,7 +11,7 @@ import {
 } from '$lib/database';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { createUniqueUser } from '../../utility/users';
-import { createUniquePublication, generateRandomString } from '../../utility/publicationsUtility';
+import { createUniqueMaterial, generateRandomString } from '../../utility/publicationsUtility';
 
 describe('Comments CRUD', () => {
 	let user: User;
@@ -21,7 +21,7 @@ describe('Comments CRUD', () => {
 
 	beforeEach(async () => {
 		user = await createUniqueUser();
-		publication = await createUniquePublication(user.id);
+		publication = await createUniqueMaterial(user.id);
 		content = generateRandomString(50);
 		comment = await createComment({
 			userId: user.id,

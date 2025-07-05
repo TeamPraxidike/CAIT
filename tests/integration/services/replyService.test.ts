@@ -11,7 +11,7 @@ import {
 	updateReply,
 } from '$lib/database';
 import { createUniqueUser } from '../../utility/users';
-import { createUniquePublication, generateRandomString } from '../../utility/publicationsUtility';
+import { createUniqueMaterial, generateRandomString } from '../../utility/publicationsUtility';
 
 describe('Reply CRUD', () => {
 	let user: User;
@@ -23,7 +23,7 @@ describe('Reply CRUD', () => {
 
 	beforeEach(async () => {
 		user = await createUniqueUser();
-		publication = await createUniquePublication(user.id);
+		publication = await createUniqueMaterial(user.id);
 		contentComment = generateRandomString(50);
 		contentReply = generateRandomString(50);
 		comment = await createComment({

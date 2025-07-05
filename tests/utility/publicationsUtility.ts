@@ -1,7 +1,7 @@
 
 // function to generate a random string of characters of length n
 import { Difficulty, MaterialType } from '@prisma/client';
-import { createMaterialPublication } from '$lib/database';
+import { createCircuitPublication, createMaterialPublication } from '$lib/database';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { expect } from 'vitest';
 
@@ -21,10 +21,30 @@ function randomEnumValue<T extends object>(e: T): T[keyof T] {
 	return e[key];
 }
 
-export async function createUniquePublication(userId: string): Promise<MaterialWithPublicationNoFiles> {
+export async function createUniqueCircuit(userId: string, numNodes: number = 0) {
 	const title = generateRandomString();
 	const description = generateRandomString(100);
-	const copyright = generateRandomString(10)
+	const difficulty = randomEnumValue(Difficulty);
+	const learningObjectives = [generateRandomString()];
+	const prerequisites = [generateRandomString()];
+	const isDraft = false;
+
+	const inputData = {
+		title,
+		description,
+		difficulty,
+		learningObjectives,
+		prerequisites,
+		isDraft
+	};
+
+	return await createCircuitPublication(userId, numNodes, inputData)
+}
+
+export async function createUniqueMaterial(userId: string): Promise<MaterialWithPublicationNoFiles> {
+	const title = generateRandomString();
+	const description = generateRandomString(100);
+	const copyright = generateRandomString(10);
 	const difficulty = randomEnumValue(Difficulty);
 	const learningObjectives = [generateRandomString()];
 	const prerequisites = [generateRandomString()];

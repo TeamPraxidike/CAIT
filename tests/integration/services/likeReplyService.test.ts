@@ -10,7 +10,7 @@ import {
 	likesReplyUpdate,
 } from '$lib/database';
 import { createUniqueUser } from '../../utility/users';
-import { createUniquePublication, generateRandomString } from '../../utility/publicationsUtility';
+import { createUniqueMaterial, generateRandomString } from '../../utility/publicationsUtility';
 
 describe('Comments Liking', () => {
 	let user: User;
@@ -22,7 +22,7 @@ describe('Comments Liking', () => {
 	let message: string;
 	beforeEach(async () => {
 		user = await createUniqueUser();
-		publication = await createUniquePublication(user.id);
+		publication = await createUniqueMaterial(user.id);
 		contentComment = generateRandomString(50);
 		contentReply = generateRandomString(50);
 		comment = await createComment({
