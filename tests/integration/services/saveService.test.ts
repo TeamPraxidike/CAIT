@@ -1,9 +1,7 @@
 import { it, expect, describe, beforeEach } from 'vitest';
-import { Difficulty, type Material, type User } from '@prisma/client';
+import { type User } from '@prisma/client';
 import {
 	addPublicationToUsedInCourse,
-	createMaterialPublication,
-	createUser,
 } from '$lib/database';
 import {
 	getSavedPublications,

@@ -1,14 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { testingUrl } from '../setup';
 import {
-	createMaterialPublication,
-	createUser, getUserById,
+	getUserById,
 	likePublication,
 	prisma,
 	savePublication
 } from '$lib/database';
-import { Difficulty, Prisma } from '@prisma/client';
-import { createUniqueMaterial, generateRandomString } from '../../utility/publicationsUtility';
+import { Prisma } from '@prisma/client';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
 import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
 import { createUniqueUser, createUserInputObject, type UserInput } from '../../utility/users';
 

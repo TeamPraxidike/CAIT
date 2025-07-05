@@ -1,10 +1,8 @@
 import { it, beforeEach, describe, expect } from 'vitest';
-import { Difficulty, type Material, type User } from '@prisma/client';
+import { type Material, type User } from '@prisma/client';
 import {
 	createComment,
-	createMaterialPublication,
 	createReply,
-	createUser,
 	deleteReply,
 	getRepliesByCommentId,
 	getReply,

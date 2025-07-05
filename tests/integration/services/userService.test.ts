@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
-	createMaterialPublication,
-	createUser,
 	getPublicationById,
 	getUserById,
 	updateReputation,
@@ -14,7 +12,7 @@ import {
 	likePublication,
 } from '$lib/database/user';
 import { resetUserTable } from '../setup';
-import { Difficulty, type Material, type User } from '@prisma/client';
+import { type User } from '@prisma/client';
 import { createUniqueUser, createUserInputObject } from '../../utility/users';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';

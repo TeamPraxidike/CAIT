@@ -3,13 +3,11 @@ import { resetCircuitTable, resetMaterialTable, testingUrl } from '../setup';
 // import { Difficulty } from '@prisma/client';
 import {
 	addNode,
-	createCircuitPublication,
-	createMaterialPublication, getMaterialByPublicationId,
+	getMaterialByPublicationId,
 	prisma,
 	updateCircuitCoverPic
 } from '$lib/database';
-import { Difficulty, MaterialType } from '@prisma/client';
-import { createUniqueUser, createUserInputObject } from '../../utility/users';
+import { createUniqueUser } from '../../utility/users';
 import { createUniqueCircuit, createUniqueMaterial } from '../../utility/publicationsUtility';
 
 async function populate() {

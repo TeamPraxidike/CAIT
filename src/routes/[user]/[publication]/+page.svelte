@@ -8,7 +8,6 @@
         FileTable,
         getDateDifference, HorizontalScroll,
         Meta,
-        Tag, TheoryAppBar,
         UserProp
     } from '$lib';
     import {fly} from 'svelte/transition';
@@ -19,8 +18,6 @@
     import Icon from '@iconify/svelte';
     import type {PublicationView} from './+layout.server';
     import {
-        Accordion,
-        AccordionItem,
         getModalStore,
         getToastStore,
         type ModalSettings,

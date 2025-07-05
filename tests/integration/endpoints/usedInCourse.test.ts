@@ -1,11 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
 	addPublicationToUsedInCourse,
-	createMaterialPublication,
-	createUser,
 	prisma,
 } from '$lib/database';
-import { Difficulty } from '@prisma/client';
 import { testingUrl } from '../setup';
 import { createUniqueUser } from '../../utility/users';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
@@ -13,13 +10,6 @@ import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
 
 describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 	it('should successfully use a publication in a course', async () => {
-		const body = {
-			firstName: 'Kirilcho' + Math.random(),
-			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl' + Math.random() * Math.random(),
-			profilePic: 'image.jpg',
-		};
-
 		const res = await prisma.$transaction(async () => {
 			const user = await createUniqueUser();
 			const publication = await createUniqueMaterial(user.id);

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type {User} from "@prisma/client";
     import { page } from '$app/state';
     import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
 

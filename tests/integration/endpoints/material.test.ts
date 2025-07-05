@@ -1,7 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { resetMaterialTable, testingUrl } from '../setup';
-import { Difficulty, MaterialType } from '@prisma/client';
-import { createMaterialPublication, createUser, getMaterialByPublicationId } from '$lib/database';
+import {  getMaterialByPublicationId } from '$lib/database';
 import { getFilesForMaterial } from '$lib/database/file';
 import { createUniqueUser } from '../../utility/users';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
