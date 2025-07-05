@@ -3,38 +3,19 @@ import { resetMaterialTable, testingUrl } from '../setup';
 import { Difficulty, MaterialType } from '@prisma/client';
 import { createMaterialPublication, createUser, getMaterialByPublicationId } from '$lib/database';
 import { getFilesForMaterial } from '$lib/database/file';
+import { createUniqueUser } from '../../utility/users';
+import { createUniquePublication } from '../../utility/publicationsUtility';
 
 it('should be AEY', () => {
     expect(3).toBe(3);
 });
 
 
-async function populate() {
-    const user = await createUser({
-        firstName: 'Vasko' + Math.random(),
-        lastName: 'Vasko',
-        email: 'Vasko' + Math.random(),
-        password: 'path'
-    });
-    const metadata = {
-        title: "title",
-        description: "desc",
-        difficulty: Difficulty.easy,
-        learningObjectives: [],
-        prerequisites: [],
-        materialType: MaterialType.video,
-        copyright: "owner",
-        timeEstimate: 30,
-        theoryPractice: 70
-    }
-
-    return await createMaterialPublication(user.id, metadata);
-}
 
 describe('Materials', async () => {
     describe('[GET] /material/:id', () => {
         it('should respond with 404 if the publication of type material does not exist', async () => {
-            const response = await fetch(`${testingUrl}/material/1`, {
+            const response = await fetch(`${testingUrl}/material/8534853`, {
                 method: 'GET',
             });
             expect(response.status).toBe(404);
@@ -74,7 +55,8 @@ describe('Materials', async () => {
         });
 
         it('should respond with 200 if the publication of type material exists', async () => {
-            const material = await populate();
+            const user = await createUniqueUser();
+            const material = await createUniquePublication(user.id);
 
             const response = await fetch(
                 `${testingUrl}/material/${material.publicationId}`,
@@ -107,7 +89,8 @@ describe('Materials', async () => {
         });
 
         it('should handle one material', async () => {
-            await populate();
+            const user = await createUniqueUser();
+            const material = await createUniquePublication(user.id);
 
             const response = await fetch(`${testingUrl}/material`, { method: 'GET' });
             expect(response.status).toBe(200);
@@ -123,9 +106,10 @@ describe('Materials', async () => {
 
         it('should handle two or more (random number) materials', async () => {
             // test is flacky because sometimes another test deletes the materials table before this one finishes
-            const randomNumber = Math.round(Math.random() * 8) + 2;
+            const randomNumber = Math.ceil(Math.random() * 10);
             for (let i = 0; i < randomNumber; i++) {
-                await populate();
+                const user = await createUniqueUser();
+                await createUniquePublication(user.id);
             }
 
             const response = await fetch(`${testingUrl}/material`, { method: 'GET' });
@@ -133,18 +117,15 @@ describe('Materials', async () => {
 
             const responseBody = await response.json();
 
+            console.log(responseBody.materials);
+            console.log(`Expected at least ${randomNumber} materials, but got ${responseBody.materials.length}`);
             expect(responseBody.materials.length).toBeGreaterThanOrEqual(randomNumber);
         });
     });
 
     describe('[POST] /material', () => {
         it('should create a material publication with files', async () => {
-            const user = await createUser({
-                firstName: 'Vasko' + Math.random(),
-                lastName: 'Genov',
-                email: 'Vasko@vasko' + Math.random(),
-                password: 'parola'
-            });
+            const user = await createUniqueUser();
             const materialData = {
                 userId: user.id,
                 metaData: {
@@ -220,12 +201,7 @@ describe('Materials', async () => {
         });
     });
     it('should respond with 200 if successful', async () => {
-        const user = await createUser({
-            firstName: 'user1' + Math.random(),
-            lastName: 'user',
-            email: 'user@email' + Math.random(),
-            password: 'password',
-        });
+        const user = await createUniqueUser();
         const materialData = {
             userId: user.id,
             metaData: {
@@ -268,6 +244,7 @@ describe('Materials', async () => {
         const createdMat = await createdResponse.json();
 
         const mat = await getMaterialByPublicationId(createdMat.id);
+        if (mat === null) throw new Error('Material not found');
         const fileBefore = await getFilesForMaterial(mat.id);
         expect(fileBefore).toHaveLength(1);
 
