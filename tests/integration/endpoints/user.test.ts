@@ -8,9 +8,9 @@ import {
 	savePublication
 } from '$lib/database';
 import { Difficulty, Prisma } from '@prisma/client';
-import { generateRandomString } from '../../utility/publicationsUtility';
+import { createUniquePublication, generateRandomString } from '../../utility/publicationsUtility';
 import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
-import { createUniqueUser } from '../../utility/users';
+import { createUniqueUser, createUserInputObject, type UserInput } from '../../utility/users';
 
 //await resetUserTable();
 
@@ -56,39 +56,31 @@ describe('Users', () => {
 
 	describe('[POST] /user/', () => {
 		let response: Response;
+		let userInput: { metaData: UserInput };
 		beforeEach(async () => {
-			const body = {
-				firstName: 'Paisiifewaafwe' + Math.random(),
-				lastName: 'Hilendarskiafw',
-				email: 'paiskataH@yahoomail.com' + Math.random(),
-			};
+			userInput = { metaData: createUserInputObject() };
 
 			response = await fetch(`${testingUrl}/user`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(body),
+				body: JSON.stringify(userInput),
 			});
 		});
 
-		// it('should respond with 200 and the user if it is created', async () => {
-		// 	expect(response.status).toBe(200);
-		//
-		// 	const user = (await response.json()).user;
-		// 	expect(await getUserById(user.id)).toHaveProperty(
-		// 		'firstName',
-		// 		'Paisii',
-		// 	);
-		// });
+		it('should respond with 200 and the user if it is created', async () => {
+			expect(response.status).toBe(200);
+
+			const user = (await response.json()).user;
+			expect(await getUserById(user.id)).toHaveProperty(
+				'firstName',
+				user.firstName,
+			);
+		});
 
 		it('should respond with 500 if body is malformed', async () => {
-			const body = {
-				name: 'Paisii' + Math.random(),
-				lastName: 'Hilendarski',
-				email: 'paiskataH@yahoomail.com' + Math.random(),
-				profilePic: 'paiskata.jpg',
-			};
+			const body = createUserInputObject();
 
 			response = await fetch(`${testingUrl}/user`, {
 				method: 'POST',
@@ -101,84 +93,57 @@ describe('Users', () => {
 		});
 	});
 
-	// describe('[DELETE] /user/:id', () => {
-	// 	let response: Response;
-	// 	beforeEach(async () => {
-	// 		const body = {
-	// 			firstName: 'Boiko',
-	// 			lastName: 'Borisov',
-	// 			email: 'KeepYourselfPositive@student.tudelft.nl',
-	// 			profilePic: 'boiko.sh',
-	// 		};
-	//
-	// 		response = await fetch(`${testingUrl}/user`, {
-	// 			method: 'POST',
-	// 			headers: {
-	// 				'Content-Type': 'application/json',
-	// 			},
-	// 			body: JSON.stringify(body),
-	// 		});
-	// 	});
-	//
-	// 	// it('should succesfully delete already existing users', async () => {
-	// 	// 	const user = await response.json();
-	// 	// 	const deleteResponse = await fetch(
-	// 	// 		`${testingUrl}/user/${user.id}`,
-	// 	// 		{
-	// 	// 			method: 'DELETE',
-	// 	// 			headers: {
-	// 	// 				'Content-Type': 'application/json',
-	// 	// 			},
-	// 	// 		},
-	// 	// 	);
-	// 	// 	expect(deleteResponse.status).toBe(200);
-	// 	// });
-	// });
+	describe('[DELETE] /user/:id', () => {
+		let response: Response;
+		beforeEach(async () => {
+			const body = {metaData: createUserInputObject()}
 
-	// describe('[PUT] /user/:id', () => {
-	// 	it('should succesfully delete already existing users', async () => {
-	// 		const body = {
-	// 			firstName: 'FirstName',
-	// 			lastName: 'LastName',
-	// 			email: 'email@student.tudelft.nl',
-	// 			profilePic: 'boiko.sh',
-	// 		};
-	//
-	// 		const newUser = await createUser({
-	// 			firstName: body.firstName,
-	// 			lastName: body.lastName,
-	// 			email: body.email,
-	// 		});
-	//
-	// 		const editUser: userEditData = {
-	// 			id: newUser.id,
-	// 			firstName: 'coolName',
-	// 			lastName: 'coolLastName',
-	// 			email: 'email@student.tudelft.nl',
-	// 		};
-	//
-	// 		const response = await fetch(`${testingUrl}/user/${newUser.id}`, {
-	// 			method: 'PUT',
-	// 			headers: {
-	// 				'Content-Type': 'application/json',
-	// 			},
-	// 			body: JSON.stringify(editUser),
-	// 		});
-	// 		const user = await response.json();
-	// 		expect(response.status).toBe(200);
-	//
-	// 		expect(user).toHaveProperty('firstName', 'coolName');
-	// 	});
-	// });
+			response = await fetch(`${testingUrl}/user`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(body),
+			});
+		});
+
+		it('should succesfully delete already existing users', async () => {
+			const user = await response.json();
+			const deleteResponse = await fetch(
+				`${testingUrl}/user/${user.user.id}`,
+				{
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				},
+			);
+			expect(deleteResponse.status).toBe(200);
+		});
+	});
+
+	describe('[PUT] /user/:id', () => {
+		it('should succesfully edit already existing users', async () => {
+			const newUser = await createUniqueUser();
+
+			const editUser = { metaData: { ...createUserInputObject(), aboutMe: "This is a test user" }, profilePic: null };
+			const response = await fetch(`${testingUrl}/user/${newUser.id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(editUser),
+			});
+			const user = await response.json();
+			expect(response.status).toBe(200);
+
+			expect(user).toHaveProperty('firstName', editUser.metaData.firstName);
+		});
+	});
 
 	describe('[GET] /user/:id/liked', () => {
 		it('should return an empty list for a newly created user', async () => {
-			const user = await createUser({
-				firstName: 'Mar342423423243ti' + Math.random(),
-				lastName: 'Parti',
-				email: 'email@gmail' + Math.random(),
-				password: 'password',
-			});
+			const user = await createUniqueUser();
 
 			const response = await fetch(`${testingUrl}/user/${user.id}/liked`);
 			expect(response.status).toBe(204);
@@ -186,29 +151,14 @@ describe('Users', () => {
 
 		it('should return 404 when user does not exist', async () => {
 			const response = await fetch(
-				`${testingUrl}/user/thisIdDoesNotExist/liked`,
+				`${testingUrl}/user/${uuid()}/liked`,
 			);
 			expect(response.status).toBe(404);
 		});
 
 		it('should return a list with liked posts as content', async () => {
-			const user = await createUser({
-				firstName: 'Marti' + Math.random(),
-				lastName: 'Parti',
-				email: 'email@gmail' + Math.random(),
-				password: 'password',
-			});
-			const publication = await createMaterialPublication(user.id, {
-				title: 'cool publication 2',
-				description: 'This publication has description',
-				copyright: "true",
-				difficulty: Difficulty.easy,
-				learningObjectives: [],
-				prerequisites: [],
-				materialType: 'assignment',
-				timeEstimate: 4,
-				theoryPractice: 9,
-			});
+			const user = await createUniqueUser()
+			const publication = await createUniquePublication(user.id);
 
 			await fetch(
 				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
@@ -224,17 +174,7 @@ describe('Users', () => {
 			expect(responseBody).toHaveLength(1);
 			expect(responseBody[0]).toBe(publication.publicationId);
 
-			const publication2 = await createMaterialPublication(user.id, {
-				title: 'cool publication 2',
-				description: 'This publication has description',
-				copyright: "true",
-				difficulty: Difficulty.easy,
-				learningObjectives: [],
-				prerequisites: [],
-				materialType: 'assignment',
-				timeEstimate: 4,
-				theoryPractice: 9,
-			});
+			const publication2 = await createUniquePublication(user.id);
 
 			await fetch(
 				`${testingUrl}/user/${user.id}/liked/${publication2.publicationId}`,
@@ -254,30 +194,8 @@ describe('Users', () => {
 
 	describe('[POST] /user/:id/liked/:publicationId', () => {
 		it('should successfully like a publication', async () => {
-			const body = {
-				firstName: 'Kirilcho' + Math.random(),
-				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl' + Math.random(),
-				profilePic: 'image.jpg',
-			};
-			const user = await createUser({
-				firstName: body.firstName,
-				lastName: body.lastName,
-				email: body.email,
-				password: 'password',
-			});
-
-			const publication = await createMaterialPublication(user.id, {
-				title: 'cool publication',
-				description: 'This publication has description',
-				difficulty: Difficulty.easy,
-				materialType: 'assignment',
-				copyright: "true",
-				timeEstimate: 4,
-				theoryPractice: 9,
-				learningObjectives: [],
-				prerequisites: [],
-			});
+			const user = await createUniqueUser();
+			const publication = await createUniquePublication(user.id);
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
@@ -316,7 +234,7 @@ describe('Users', () => {
 
 		it('should return 404 when user does not exist', async () => {
 			const response = await fetch(
-				`${testingUrl}/user/${830957945}/liked/${34567890}`,
+				`${testingUrl}/user/${uuid()}/liked/${34567890}`,
 				{
 					method: 'POST',
 				},
@@ -327,18 +245,7 @@ describe('Users', () => {
 		});
 
 		it('should return 404 when publication does not exist', async () => {
-			const body = {
-				firstName: 'Kirilcho' + Math.random(),
-				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl' + Math.random(),
-				profilePic: 'image.jpg',
-			};
-			const user = await createUser({
-				firstName: body.firstName,
-				lastName: body.lastName,
-				email: body.email,
-				password: 'password',
-			});
+			const user = await createUniqueUser();
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/liked/${34567890}`,
@@ -355,7 +262,7 @@ describe('Users', () => {
 	describe('[GET] /user/:id/liked/:publicationId', () => {
 		it('should return 404 when user does not exist', async () => {
 			const response = await fetch(
-				`${testingUrl}/user/${830957945}/liked/${34567890}`,
+				`${testingUrl}/user/${uuid()}/liked/${34567890}`,
 			);
 			expect(response.status).toBe(404);
 			const responseBody = await response.json();
@@ -363,18 +270,7 @@ describe('Users', () => {
 		});
 
 		it('should return 404 when publication does not exist', async () => {
-			const body = {
-				firstName: 'Kirilcho' + Math.random(),
-				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl' + Math.random(),
-				profilePic: 'image.jpg',
-			};
-			const user = await createUser({
-				firstName: body.firstName,
-				lastName: body.lastName,
-				email: body.email,
-				password: 'password',
-			});
+			const user = await createUniqueUser();
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/liked/${34567890}`,
@@ -387,40 +283,20 @@ describe('Users', () => {
 
 	describe('[GET] /user/:id/saved', () => {
 		it('should return an empty list for a newly created user', async () => {
-			const user = await createUser({
-				firstName: 'Marti' + Math.random(),
-				lastName: 'Parti',
-				email: 'email@gmail' + Math.random(),
-				password: 'password',
-			});
+			const user = await createUniqueUser();
 
 			const response = await fetch(`${testingUrl}/user/${user.id}/saved`);
 			expect(response.status).toBe(204);
 		});
 
 		it('should return 404 when user does not exist', async () => {
-			const response = await fetch(`${testingUrl}/user/${9848906}/saved`);
+			const response = await fetch(`${testingUrl}/user/${uuid()}/saved`);
 			expect(response.status).toBe(404);
 		});
 
 		it('should return a list with liked posts as content', async () => {
-			const user = await createUser({
-				firstName: 'Marti' + Math.random(),
-				lastName: 'Parti',
-				email: 'email@gmail' + Math.random(),
-				password: 'password',
-			});
-			const publication = await createMaterialPublication(user.id, {
-				title: 'cool publication',
-				description: 'This publication has description',
-				difficulty: Difficulty.easy,
-				materialType: 'assignment',
-				copyright: "true",
-				timeEstimate: 4,
-				theoryPractice: 9,
-				learningObjectives: [],
-				prerequisites: [],
-			});
+			const user = await createUniqueUser();
+			const publication = await createUniquePublication(user.id);
 
 			await fetch(
 				`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`,
@@ -430,23 +306,12 @@ describe('Users', () => {
 			);
 
 			const response = await fetch(`${testingUrl}/user/${user.id}/saved`);
-
 			const responseBody = await response.json();
 
 			expect(responseBody.saved).toHaveLength(1);
 			expect(responseBody.saved[0]).toBe(publication.publicationId);
 
-			const publication2 = await createMaterialPublication(user.id, {
-				title: 'cool publication',
-				description: 'This publication has description',
-				difficulty: Difficulty.easy,
-				materialType: 'assignment',
-				copyright: "true",
-				timeEstimate: 4,
-				theoryPractice: 9,
-				learningObjectives: [],
-				prerequisites: [],
-			});
+			const publication2 = await createUniquePublication(user.id);
 
 			await fetch(
 				`${testingUrl}/user/${user.id}/saved/${publication2.publicationId}`,
@@ -466,30 +331,9 @@ describe('Users', () => {
 
 	describe('[POST] /user/:id/saved/:publicationId', () => {
 		it('should successfully save a publication', async () => {
-			const body = {
-				firstName: 'Kirilcho' + Math.random(),
-				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl' + Math.random(),
-				profilePic: 'image.jpg',
-			};
-			const user = await createUser({
-				firstName: body.firstName,
-				lastName: body.lastName,
-				email: body.email,
-				password: 'password',
-			});
+			const user = await createUniqueUser();
 
-			const publication = await createMaterialPublication(user.id, {
-				title: 'cool publication',
-				description: 'This publication has description',
-				difficulty: Difficulty.easy,
-				materialType: 'assignment',
-				copyright: "true",
-				timeEstimate: 4,
-				theoryPractice: 9,
-				learningObjectives: [],
-				prerequisites: [],
-			});
+			const publication = await createUniquePublication(user.id);
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`,
@@ -518,7 +362,7 @@ describe('Users', () => {
 
 		it('should return 404 when user does not exist', async () => {
 			const response = await fetch(
-				`${testingUrl}/user/${830957945}/saved/${34567890}`,
+				`${testingUrl}/user/${uuid()}/saved/${34567890}`,
 				{
 					method: 'POST',
 				},
@@ -529,18 +373,7 @@ describe('Users', () => {
 		});
 
 		it('should return 404 when publication does not exist', async () => {
-			const body = {
-				firstName: 'Kirilcho' + Math.random(),
-				lastName: 'Panayotov',
-				email: 'email@student.tudelft.nl' + Math.random(),
-				profilePic: 'image.jpg',
-			};
-			const user = await createUser({
-				firstName: body.firstName,
-				lastName: body.lastName,
-				email: body.email,
-				password: 'password',
-			});
+			const user = await createUniqueUser();
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/saved/${34567890}`,
@@ -556,23 +389,8 @@ describe('Users', () => {
 
 	describe('[GET] user/[id]/publicationInfo/[publicationId]', async () => {
 		it('should correctly return saved and liked', async () => {
-			const user = await createUser({
-				firstName: 'Marti' + Math.random(),
-				lastName: 'Parti',
-				email: 'email@gmail' + Math.random(),
-				password: 'password',
-			});
-			const publication = await createMaterialPublication(user.id, {
-				title: 'cool publication',
-				description: 'This publication has description',
-				difficulty: Difficulty.easy,
-				materialType: 'assignment',
-				copyright: "true",
-				timeEstimate: 4,
-				theoryPractice: 9,
-				learningObjectives: [],
-				prerequisites: [],
-			});
+			const user = await createUniqueUser();
+			const publication = await createUniquePublication(user.id);
 
 			const response1 = await fetch(
 				`${testingUrl}/user/${user.id}/publicationInfo/${publication.publicationId}`,
@@ -596,18 +414,13 @@ describe('Users', () => {
 
 		it('should return 404 when user does not exist', async () => {
 			const response1 = await fetch(
-				`${testingUrl}/user/${7239857}/publicationInfo/${7747474}`,
+				`${testingUrl}/user/${uuid()}/publicationInfo/${7747474}`,
 			);
 			expect(response1.status).toBe(404);
 		});
 
 		it('should return 404 when publication does not exist', async () => {
-			const user = await createUser({
-				firstName: 'Marti' + Math.random(),
-				lastName: 'Parti',
-				email: 'email@gmail' + Math.random(),
-				password: 'password',
-			});
+			const user = await createUniqueUser();
 
 			const response1 = await fetch(
 				`${testingUrl}/user/${user.id}/publicationInfo/${7747474}`,

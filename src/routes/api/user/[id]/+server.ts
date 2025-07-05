@@ -25,11 +25,8 @@ export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
 	if (authError !== null) return authError;
 
-	console.log(`GET user by id: ${params.id}`);
-
 	const { id } = params;
 	try {
-
 		const user:TUserWithPostsAndProfilePic = await getUserById(id);
 		if (user === null) {
 			return new Response(JSON.stringify({ error: 'User not found' }), {
@@ -41,7 +38,6 @@ export async function GET({ params, locals }) {
 		const profilePicData:FetchedFileItem = await profilePicFetcher(
 			user.profilePic,
 		);
-
 
 		return new Response(JSON.stringify({ user, profilePicData }), {
 			status: 200,

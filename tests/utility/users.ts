@@ -5,6 +5,18 @@ const firstNames = ["Martin", "Joan", "Vasko", "Bobi", "Kiril", "John", "Jane", 
 const lastNames = ["Damyanov", "Guenov", "Marinov", "Popov", "Panayotov", "Petrov", "Ivanov", "Georgiev", "Dimitrov", "Kolev", "Smith", "Doe", "Johnson", "Brown"];
 const emailProviders = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "example.com", ".abv.bg", "mail.bg", "yandex.com", "icloud.com", "protonmail.com"];
 
+export type UserInput = {
+	firstName: string;
+	lastName: string;
+	email: string;
+	password: string;
+}
+
+function randomNumber(): string {
+	const randomNumber = Math.random(); // Generate a random number between 0 and 1
+	const decimalPart = randomNumber.toString().split('.')[1]; // Extract the decimal part
+	return decimalPart || '0'; // Return the decimal part or '0' if undefined
+}
 
 // pick a random value from an array
 function getRandomElement(arr: string[]): string {
@@ -18,16 +30,16 @@ function getFirstName(): string {
 
 // generate a random last name
 function getLastName(): string {
-	return getRandomElement(lastNames) + Math.random() * 10000;
+	return getRandomElement(lastNames) + randomNumber();
 }
 
 // create a user input object with random first and last names
 // and a random email address
-export function createUserInputObject(firstName: string = getFirstName(), lastName: string = getLastName()) {
+export function createUserInputObject(firstName: string = getFirstName(), lastName: string = getLastName()): UserInput {
 	return {
 		firstName: firstName,
 		lastName: lastName,
-		email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.random()*10000}@${getRandomElement(emailProviders)}`,
+		email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${randomNumber()}@${getRandomElement(emailProviders)}`,
 		password: 'password',
 	};
 }
