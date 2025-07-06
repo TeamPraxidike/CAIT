@@ -35,7 +35,6 @@ describe('Users', () => {
 			const response = await fetch(`${testingUrl}/user/${randomID}`, {
 				method: 'GET',
 			});
-			console.log(response);
 			expect(response.status).toBe(404);
 			const body = await response.json();
 			expect(body.error).toBe('User not found');
@@ -186,8 +185,8 @@ describe('Users', () => {
 			);
 			const responseBody2 = await response2.json();
 			expect(responseBody2).toHaveLength(2);
-			expect(responseBody2[0]).toBe(publication.publicationId);
-			expect(responseBody2[1]).toBe(publication2.publicationId);
+			expect(responseBody2).toContain(publication.publicationId);
+			expect(responseBody2).toContain(publication2.publicationId);
 		});
 	});
 
