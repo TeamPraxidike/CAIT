@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type {User} from "@prisma/client";
     import { page } from '$app/state';
     import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
 
@@ -33,8 +32,8 @@
     <!--{:else}-->
     <!--    <div class="w-20 h-20 md:w-40 md:h-40 rounded-full bg-surface-500 placeholder-circle" />-->
     <!--{/if}-->
-    <img src={userPhotoUrl ? `data:image;base64,${userPhotoUrl}` : defaultProfilePicturePath }
-         class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full object-cover" />
+    <img src={userPhotoUrl ? `data:image;base64,${userPhotoUrl}` : defaultProfilePicturePath } alt="Profile picture of ${user.username}"
+         class="w-32 h-32 md:w-40 my-4 md:h-40 rounded-full object-cover"/>
     <div class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
                 sm:flex-col sm:items-start
                 md:w-7/12 md:justify-start

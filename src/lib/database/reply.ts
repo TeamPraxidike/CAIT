@@ -58,7 +58,7 @@ export async function getReply(replyId: number): Promise<ReplyLikedBy> {
  * [GET] gets the reply with the comment id
  * @param commentId
  */
-export async function getRepliesByCommentId(commentId: number): Promise<Reply> {
+export async function getRepliesByCommentId(commentId: number): Promise<Reply[]> {
 	return prisma.reply.findMany({
 		where: {
 			commentId: commentId,

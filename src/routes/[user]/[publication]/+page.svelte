@@ -8,7 +8,6 @@
         FileTable,
         getDateDifference, HorizontalScroll,
         Meta,
-        Tag, TheoryAppBar,
         UserProp
     } from '$lib';
     import {fly} from 'svelte/transition';
@@ -19,8 +18,6 @@
     import Icon from '@iconify/svelte';
     import type {PublicationView} from './+layout.server';
     import {
-        Accordion,
-        AccordionItem,
         getModalStore,
         getToastStore,
         type ModalSettings,
@@ -35,7 +32,7 @@
         type Reply,
         type User
     } from '@prisma/client';
-    import {page} from '$app/stores';
+    import {page} from '$app/state';
     import { SvelteFlowProvider } from '@xyflow/svelte';
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
@@ -44,8 +41,8 @@
 
 	export let data: LayoutServerData & PageServerData;
 	//$: ({ loggedUser } = data);
-	let loggedUser = $page.data.loggedUser;
-	const userId = $page.data.session?.user.id;
+	let loggedUser = page.data.loggedUser;
+	const userId = page.data.session?.user.id;
 
 	let tabSet: number = 0;
 	let pubView: PublicationView;
@@ -434,12 +431,12 @@
 			</div>
 		{/if}
 
-		{#if pubView.publication.publisherId === $page.data.session?.user.id
-		|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")
+		{#if pubView.publication.publisherId === page.data.session?.user.id
+		|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")
 		|| loggedUser.isAdmin}
 			<div class="space-x-1">
-				{#if pubView.publication.publisherId === $page.data.session?.user.id
-				|| pubView.publication.maintainers.map(x => x.id).includes($page.data.session?.user.id || "-1")}
+				{#if pubView.publication.publisherId === page.data.session?.user.id
+				|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")}
 					<button bind:this={hoverEdit}
 							on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit`)}
 							type="button" class="btn self-center p-0 m-0">
@@ -601,7 +598,7 @@
 				{:else if tabSet === 1}
 
 					<!--    DISCUSSION -->
-					{#if $page.data.session?.user}
+					{#if page.data.session?.user}
 						<AddInteractionForm publisher={loggedUser} on:addedReply={addComment} addComment='{true}'
 											commentId="{1}" publicationId="{pubView.publication.id}" />
 					{/if}

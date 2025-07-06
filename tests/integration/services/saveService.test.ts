@@ -1,39 +1,25 @@
 import { it, expect, describe, beforeEach } from 'vitest';
-import { Difficulty, type Material, type User } from '@prisma/client';
+import { type User } from '@prisma/client';
 import {
 	addPublicationToUsedInCourse,
-	createMaterialPublication,
-	createUser,
 } from '$lib/database';
 import {
 	getSavedPublications,
 	isPublicationSaved,
 	savePublication,
 } from '$lib/database/save';
+import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+import { createUniqueUser } from '../../utility/users';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
 
-describe('Liking publications', () => {
+describe('Saving publications', () => {
 	let user: User;
-	let publication: Material;
+	let publication: MaterialWithPublicationNoFiles;
 	let savedMessage: string;
 
 	beforeEach(async () => {
-		user = await createUser({
-			firstName: 'Martiqq',
-			lastName: 'Parti',
-			email: 'email@gmail' + Math.random(),
-			password: 'password',
-		});
-		publication = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			learningObjectives: ['lo1'],
-			prerequisites: ['p1'],
-			materialType: 'assignment',
-			copyright: "true",
-			timeEstimate: 300,
-			theoryPractice: 0.5,
-		});
+		user = await createUniqueUser();
+		publication = await createUniqueMaterial(user.id);
 		savedMessage = await savePublication(
 			user.id,
 			publication.publicationId,
@@ -44,14 +30,14 @@ describe('Liking publications', () => {
 		expect(savedMessage).toBe('Publication saved successfully');
 		const saved = await getSavedPublications(user.id);
 		if (saved === null) {
-			throw Error('liked was null');
+			throw Error('saved was null');
 		}
 		expect(saved.saved).toHaveLength(1);
 		expect(saved.saved[0].id).toBe(publication.publicationId);
-		expect(saved.saved[0].title).toBe('cool publication');
+		expect(saved.saved[0].title).toBe(publication.publication.title);
 	});
 
-	it('should remove it from the saved list when unliked', async () => {
+	it('should remove it from the saved list when unsaved', async () => {
 		const response = await savePublication(
 			user.id,
 			publication.publicationId,

@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
-	createMaterialPublication,
-	createUser,
 	getPublicationById,
 	getUserById,
 	updateReputation,
@@ -14,33 +12,26 @@ import {
 	likePublication,
 } from '$lib/database/user';
 import { resetUserTable } from '../setup';
-import { Difficulty, type Material, type User } from '@prisma/client';
+import { type User } from '@prisma/client';
+import { createUniqueUser, createUserInputObject } from '../../utility/users';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
+import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 
 await resetUserTable();
 
 describe('Creating users', () => {
 	it('should increase the id by 1', async () => {
-		const user = await createUser({
-			firstName: 'Vasko',
-			lastName: 'Prasko',
-			email: 'email@gmailfdnfsdghgfd' + Math.random(),
-			password: 'password',
-		});
+		const user = await createUniqueUser();
 		expect(await getUserById(user.id)).toHaveProperty(
 			'username',
-			'VaskoPrasko',
+			`${user.firstName}${user.lastName}`,
 		);
 
 		for (let i = 2; i < 20; i++) {
-			const newUser = await createUser({
-				firstName: 'Vasko',
-				lastName: 'Prasko',
-				email: 'email@gmailadsgfahr' + i + Math.random(),
-				password: 'password',
-			});
+			const newUser = await createUniqueUser(user.firstName, user.lastName);
 			expect(await getUserById(newUser.id)).toHaveProperty(
 				'username',
-				'VaskoPrasko_' + i,
+				user.username + '_' + i,
 			);
 		}
 	});
@@ -48,73 +39,50 @@ describe('Creating users', () => {
 
 describe('Editing users', () => {
 	it('should update user reputation', async () => {
-		const user = await createUser({
-			firstName: 'Marti',
-			lastName: 'Parti',
-			email: 'email@gmailsdfgsdfgsdfg' + Math.random(),
-			password: 'password',
-		});
+		const user = await createUniqueUser();
 
 		await updateReputation(user.id, 10);
 
 		const updatedUser = await getUserById(user.id);
-		expect(updatedUser.reputation).toEqual(10);
+		expect(updatedUser).not.toBeNull;
+		expect(updatedUser!.reputation).toEqual(10);
 
 		await updateReputation(user.id, -5);
 
 		const updatedUser2 = await getUserById(user.id);
-		expect(updatedUser2.reputation).toEqual(5);
+		expect(updatedUser2).not.toBeNull;
+		expect(updatedUser2!.reputation).toEqual(5);
 	});
 
 	it('should change users', async () => {
-		const user = await createUser({
-			firstName: 'Marti',
-			lastName: 'Parti',
-			email: 'email@gmailsdfgsdfgsdfg' + Math.random(),
-			password: 'password',
-		});
+		const user = await createUniqueUser();
 
-		const email = 'l' + Math.random();
+		const newUserInfo = createUserInputObject();
 		await editUser({
 			id: user.id,
-			firstName: 'Kiro',
-			lastName: 'Breika',
-			email: email,
-			aboutMe: "hello I am Kiro"
+			firstName: newUserInfo.firstName,
+			lastName: newUserInfo.lastName,
+			email: newUserInfo.email,
+			aboutMe: "I just edited myself!!!",
 		});
 
 		const editedUser = await getUserById(user.id);
-		expect(editedUser).toHaveProperty('firstName', 'Kiro');
-		expect(editedUser).toHaveProperty('lastName', 'Breika');
-		expect(editedUser).toHaveProperty('email', email);
+		expect(editedUser).toHaveProperty('firstName', newUserInfo.firstName);
+		expect(editedUser).toHaveProperty('lastName', newUserInfo.lastName);
+		expect(editedUser).toHaveProperty('email', newUserInfo.email);
 
-		expect(editedUser).toHaveProperty('username', 'KiroBreika');
+		expect(editedUser).toHaveProperty('username', `${newUserInfo.firstName}${newUserInfo.lastName}`);
 	});
 });
 
 describe('Liking publications', () => {
 	let user: User;
-	let publication: Material;
+	let publication: MaterialWithPublicationNoFiles;
 	let likedMessage: string;
 
 	beforeEach(async () => {
-		user = await createUser({
-			firstName: 'Marti21e1423213',
-			lastName: 'Parti',
-			email: 'email@gmailasdjryukryuk5' + Math.random(),
-			password: 'password',
-		});
-		publication = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			copyright: "true",
-			difficulty: Difficulty.easy,
-			learningObjectives: [],
-			prerequisites: [],
-			materialType: 'assignment',
-			timeEstimate: 4,
-			theoryPractice: 9,
-		});
+		user = await createUniqueUser();
+		publication = await createUniqueMaterial(user.id);
 		likedMessage = await likePublication(
 			user.id,
 			publication.publicationId,
@@ -129,7 +97,7 @@ describe('Liking publications', () => {
 		}
 		expect(liked.liked).toHaveLength(1);
 		expect(liked.liked[0].id).toBe(publication.publicationId);
-		expect(liked.liked[0].title).toBe('cool publication');
+		expect(liked.liked[0].title).toBe(publication.publication.title);
 	});
 
 	it('should increase the likes value in the publication', async () => {

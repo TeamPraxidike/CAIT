@@ -1,41 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
 	addPublicationToUsedInCourse,
-	createMaterialPublication,
-	createUser,
 	prisma,
 } from '$lib/database';
-import { Difficulty } from '@prisma/client';
 import { testingUrl } from '../setup';
+import { createUniqueUser } from '../../utility/users';
+import { createUniqueMaterial } from '../../utility/publicationsUtility';
+import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
 
 describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 	it('should successfully use a publication in a course', async () => {
-		const body = {
-			firstName: 'Kirilcho' + Math.random(),
-			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl' + Math.random() * Math.random(),
-			profilePic: 'image.jpg',
-		};
-
 		const res = await prisma.$transaction(async () => {
-			const user = await createUser({
-				firstName: body.firstName,
-				lastName: body.lastName,
-				email: body.email,
-				password: 'password',
-			});
-
-			const publication = await createMaterialPublication(user.id, {
-				title: 'cool publication',
-				description: 'This publication has description',
-				difficulty: Difficulty.easy,
-				copyright: "true",
-				timeEstimate: 4,
-				theoryPractice: 9,
-				learningObjectives: [],
-				prerequisites: [],
-				materialType: 'assignment',
-			});
+			const user = await createUniqueUser();
+			const publication = await createUniqueMaterial(user.id);
 
 			const response = await fetch(
 				`${testingUrl}/user/${user.id}/use-in-course/${publication.publicationId}`,
@@ -71,7 +48,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 
 	it('should return 404 when user does not exist', async () => {
 		const response = await fetch(
-			`${testingUrl}/user/${830957945}/use-in-course/${34567890}`,
+			`${testingUrl}/user/${uuid()}/use-in-course/${34567890}`,
 			{
 				method: 'POST',
 			},
@@ -82,18 +59,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 	});
 
 	it('should return 404 when publication does not exist', async () => {
-		const body = {
-			firstName: 'Kirilcho' + Math.random(),
-			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl' + Math.random(),
-			profilePic: 'image.jpg',
-		};
-		const user = await createUser({
-			firstName: body.firstName,
-			lastName: body.lastName,
-			email: body.email,
-			password: 'password',
-		});
+		const user = await createUniqueUser();
 
 		const response = await fetch(
 			`${testingUrl}/user/${user.id}/use-in-course/${34567890}`,
@@ -109,30 +75,9 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 
 describe('[GET] /publication/{publicationId}/used-in-course', () => {
 	it('should return 204 when no content', async () => {
-		const body = {
-			firstName: 'Kirilcho' + Math.random(),
-			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl' + Math.random(),
-			profilePic: 'image.jpg',
-		};
-		const user = await createUser({
-			firstName: body.firstName,
-			lastName: body.lastName,
-			email: body.email,
-			password: 'password',
-		});
+		const user = await createUniqueUser();
+		const publication = await createUniqueMaterial(user.id);
 
-		const publication = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			materialType: 'assignment',
-			copyright: "true",
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-		});
 		const response = await fetch(
 			`${testingUrl}/publication/${publication.publicationId}/use-in-course`,
 		);
@@ -149,18 +94,8 @@ describe('[GET] /publication/{publicationId}/used-in-course', () => {
 
 describe('[GET] /user/[id]/use-in-course', () => {
 	it('should return 204 when no content', async () => {
-		const body = {
-			firstName: 'Kirilcho' + Math.random(),
-			lastName: 'Panayotov',
-			email: 'email@student.tudelft.nl' + Math.random(),
-			profilePic: 'image.jpg',
-		};
-		const user = await createUser({
-			firstName: body.firstName,
-			lastName: body.lastName,
-			email: body.email,
-			password: 'password',
-		});
+		const user = await createUniqueUser();
+
 		const response = await fetch(
 			`${testingUrl}/user/${user.id}/use-in-course`,
 		);
@@ -169,40 +104,15 @@ describe('[GET] /user/[id]/use-in-course', () => {
 
 	it('should return 404 when no user', async () => {
 		const response = await fetch(
-			`${testingUrl}/user/${456787}/use-in-course`,
+			`${testingUrl}/user/${uuid()}/use-in-course`,
 		);
 		expect(response.status).toBe(404);
 	});
 
 	it('should add courses to the list', async () => {
-		const user = await createUser({
-			firstName: 'body.firstName' + Math.random(),
-			lastName: 'body.lastName',
-			email: 'body.email' + Math.random(),
-			password: 'password',
-		});
-		const publication1 = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			materialType: 'assignment',
-			copyright: "true",
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-		});
-		const publication2 = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			materialType: 'assignment',
-			copyright: "true",
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-		});
+		const user = await createUniqueUser();
+		const publication1 = await createUniqueMaterial(user.id);
+		const publication2 = await createUniqueMaterial(user.id);
 
 		await addPublicationToUsedInCourse(
 			user.id,
