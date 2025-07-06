@@ -8,9 +8,9 @@
 		type Tag as PrismaTag,
 		type User
 	} from '@prisma/client';
-	import { CircuitComponent, DifficultySelection, FileTable, Filter, Meta, TheoryAppBar } from '$lib';
+	import { CircuitComponent, DifficultySelection, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
-		FileButton, FileDropzone, getToastStore
+		FileButton, getToastStore
 	} from '@skeletonlabs/skeleton';
 	import { appendFile, base64ToFile, concatFileList, createFileList } from '$lib/util/file';
 	import type { PublicationView } from '../+layout.server';
@@ -27,6 +27,7 @@
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import { type FormSnapshot, getCircuitSnapshot, saveCircuitSnapshot } from '$lib/util/indexDB';
 	import Banner from '$lib/components/publication/Banner.svelte';
+	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 
 
 
@@ -61,6 +62,7 @@
 
 	const isMaterial : boolean = serverData.isMaterial;
 
+	let fileURLs: string[] = isMaterial ? data.pubView.publication.materials.fileURLs.map((x) => x.url) : [];
 	let saveInterval: number | undefined = undefined;
 	let circuitKey = Date.now();
 
@@ -95,7 +97,7 @@
 
 	let coverPicMat:File|undefined = undefined;
 	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
-	let selectedFileList: FileList = new DataTransfer().files;
+	let selectedFileList: FileList = [] as unknown as FileList;
 
 	if (isMaterial){
 		// TODO: (random?) figure out why the type is a string rather than a null
@@ -212,6 +214,7 @@
 				maintainers = existing.maintainers;
 				users = existing.searchableUsers;
 				circuitNodesPlaceholder = existing.circuitNodes ?? [];
+				// fileURLs = existing.fileURLs ?? [];
 			}
 
 			circuitKey = Date.now();
@@ -225,6 +228,7 @@
 					LOs,
 					PKs,
 					maintainers,
+					// fileURLs,
 					searchableUsers: users,
 					circuitNodes: circuitNodesPlaceholder
 				};
@@ -325,6 +329,7 @@
 		formData.append('materialId', JSON.stringify(serverData.publication.materials?.id || 0));
 		formData.append('publisherId', JSON.stringify(serverData.publication.publisherId));
 		formData.append("isDraft", JSON.stringify(markedAsDraft || draft));
+		formData.append('fileURLs', JSON.stringify(fileURLs));
 
 
 		if(circuitRef){
@@ -410,10 +415,12 @@
 	</div>
 
 	{#if isMaterial}
-		<div class="mt-10 mb-20 w-full">
-			<FileDropzone on:change={changeFilezone} multiple name="fileInputBind" />
-			<FileTable operation="edit" bind:files={files} />
+		<div class="mt-8">
+			<UploadFilesForm
+				bind:fileURLs={fileURLs}
+				bind:files={files}/>
 		</div>
+
 		<div class="mt-4">
 			<label for="coverPhoto">Cover Picture:</label>
 			<img src={coverPicMat ? URL.createObjectURL(coverPicMat) : defaultCoverPicturePath} alt="Cover of publication">

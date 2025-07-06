@@ -310,6 +310,20 @@ export const PublicationTypeIconMap: Map<string, string> = new Map([
 	['Exam Questions', 'healthicons:i-exam-multiple-choice'],
 ]);
 
+export const getIconForURL: Map<string, string> = new Map([
+	["youtube", "logos:youtube-icon"],
+	["github", "mdi:github"]
+]);
+
+export const getURLIcon = (url: string): string => {
+	for (const [website, icon] of getIconForURL.entries()) {
+		if (url.includes(website)) {
+			return icon;
+		}
+	}
+	return "humbleicons:url";
+}
+
 const getFileExtension = (filePath: string): string => {
 	const index = filePath.lastIndexOf('.');
 	return index !== -1 ? filePath.substring(index + 1) : '';

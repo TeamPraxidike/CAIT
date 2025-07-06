@@ -7,11 +7,10 @@
 		Tag,
 		TheoryAppBar, UserProp
 	} from '$lib';
-	import { FileButton, FileDropzone, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
+	import { FileButton, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
-	import { concatFileList } from '$lib/util/file';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
@@ -29,11 +28,11 @@
 		getFiles,
 		getMaterialSnapshot,
 		saveCover,
-		saveFiles,
 		saveMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
+	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -58,6 +57,7 @@
 	let newTags: string[] = [];
 
 	let files: FileList = [] as unknown as FileList;
+	let fileURLs: string[] = [] as string[];
 	type UserWithProfilePic = User & { profilePicData: string };
 	let maintainers: UserWithProfilePic[] = [];
 
@@ -105,16 +105,7 @@
 
 	$: uid = page.data.session?.user.id;
 
-	function appendToFileList(e: Event) {
-		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles && eventFiles.length > 0) {
-			// Merge new files into the existing FileList
-			files = concatFileList(files, eventFiles);
 
-			// Convert final FileList to an array and store in IndexedDB **/
-			saveFiles(Array.from(files));
-		}
-	}
 
 	/* LOCK = TRUE => LOCKED */
 	const locks: boolean[] = [false, false, false];
@@ -210,6 +201,7 @@
 				estimate = existing.estimate ?? '30';
 				copyright = existing.copyright ?? 'No copyright';
 				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
+				fileURLs = existing.fileURLs ?? [];
 			}
 
 			// start a 2-sec interval that captures a snapshot
@@ -227,11 +219,12 @@
 					searchableUsers,
 					estimate,
 					copyright,
+					fileURLs,
 					theoryApplicationRatio
 				};
 
-				console.log('IN CONST SNAPSHOT');
-
+				// console.log('IN CONST SNAPSHOT');
+				// console.log('Saving material snapshot:', data);
 				// Store it in IndexedDB
 				saveMaterialSnapshot(data);
 			}, 2000);
@@ -264,6 +257,7 @@
 			event.preventDefault();
 		}
 	};
+	// const uploadFile
 
 	let markedAsDraft = false;
 	let draft = true;
@@ -275,13 +269,14 @@
 		materialType: selectedTypes,
 		isDraft: false
 	};
-	$: fileLength = files.length;
-	$: draft = isMaterialDraft(metadata, fileLength);
+	$: numMaterials = Math.max(fileURLs.length, files.length);
+	$: draft = isMaterialDraft(metadata, numMaterials);
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
 
-<Banner metadata={metadata} files={fileLength} materialType={metadata.materialType}/>
+<Banner metadata={metadata} files={numMaterials} materialType={metadata.materialType}/>
 
 <form method="POST"
 	  enctype="multipart/form-data"
@@ -301,6 +296,7 @@
 		if (!willSubmit) return;
 
         formData.append('userId', uid?.toString() || '');
+		formData.append('fileURLs', JSON.stringify(fileURLs));
         formData.append('title', title);
         formData.append('description', description);
 		formData.append('type', JSON.stringify(selectedTypes));
@@ -322,14 +318,9 @@
 				<Step locked={locks[0]}>
 
 					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
-
-					<div class="grid grid-cols-2 gap-4">
-						<div class="h-80 flex">
-							<FileDropzone on:change={appendToFileList} multiple name="file" />
-						</div>
-						<FileTable operation="edit" bind:files={files} />
-					</div>
-
+					<UploadFilesForm
+						bind:fileURLs={fileURLs}
+						bind:files={files}/>
 				</Step>
 		<Step locked={locks[1]}>
 			<div class="grid grid-cols-2 gap-x-4 gap-y-2">
@@ -437,7 +428,7 @@
 						Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
 					</p>
 
-					<FileTable bind:files={files} />
+					<FileTable bind:files={files} bind:fileURLs={fileURLs}/>
 				</div>
 				<div class="col-span-4 flex flex-col gap-4">
 					{#if coverPic}

@@ -251,18 +251,28 @@ export async function updateMaterialByPublicationId(
 		difficulty: Difficulty;
 		learningObjectives: string[];
 		prerequisites: string[];
-		materialType: MaterialType;
+		materialType: MaterialType[];
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
 		isDraft: boolean;
+		fileURLs: string[];
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	return prismaContext.material.update({
 		where: { publicationId: publicationId },
 		data: {
-			encapsulatingType: metaData.materialType,
+			encapsulatingType: metaData.materialType[0],
+			fileURLs: {
+				deleteMany: {},
+				createMany: {
+					data: metaData.fileURLs.map((url) => ({
+						url: url,
+						name: url,
+					})),
+				},
+			},
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,

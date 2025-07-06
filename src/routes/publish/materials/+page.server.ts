@@ -15,8 +15,9 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
  * It then returns an object with the file's name, type, and base64 string.
  *
  * @param fileList the list of files to be added to the database of type `FileList`.
+ * @param fileURLs the list of URLs pointing to files to be added to the database of type `FileList`.
  */
-async function filesToAddOperation(fileList: FileList) {
+async function filesToAddOperation(fileList: FileList, fileURLs: string[] = []) {
 	const addPromises = Array.from(fileList).map(async (file) => {
 		const buffer = await file.arrayBuffer();
 		const info = Buffer.from(buffer).toString('base64');
@@ -27,8 +28,15 @@ async function filesToAddOperation(fileList: FileList) {
 			info,
 		};
 	});
+	const addURLs = Array.from(fileURLs).map((url) => {
+		return {
+			title: url,
+			type: "URL",
+			info: url,
+		};
+	});
 
-	return await Promise.all(addPromises);
+	return (await Promise.all(addPromises)).concat(addURLs);
 }
 
 const convertMaterial = (s: string): MaterialType => {
@@ -60,8 +68,10 @@ export const actions = {
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
 		const fileList: FileList = data.getAll('file') as unknown as FileList;
+		const fileURLs: string[] = JSON.parse(data.get("fileURLs")?.toString() || '');
 		if (!fileList) return { status: 400, message: 'No files provided' };
-		const add = await filesToAddOperation(fileList);
+		const add = await filesToAddOperation(fileList, fileURLs);
+
 
 		const tagsDataEntry = data.get('tags');
 		if (!tagsDataEntry) return { status: 400, message: 'No tags provided' };
@@ -121,7 +131,8 @@ export const actions = {
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
-				isDraft: isDraft
+				isDraft: isDraft,
+				fileURLs: fileURLs || [],
 			},
 			coverPic,
 			fileDiff: {
@@ -135,7 +146,6 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
-
 		return { status: res.status, id: (await res.json()).id };
 	},
 } satisfies Actions;

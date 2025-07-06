@@ -26,6 +26,7 @@ export type FormSnapshot = {
 	estimate?: string;  // -- for materials ONLY
 	copyright?: string;  // -- for materials ONLY
 	theoryApplicationRatio?: number;  // -- for materials ONLY
+	fileURLs?: string[]; // -- for materials ONLY
 	circuitNodes?: NodeInfo[]; // -- for circuits ONLY
 };
 
@@ -84,6 +85,7 @@ export async function clearFiles() {
 // Save snapshot
 export async function saveMaterialSnapshot(snapshotData: FormSnapshot) {
 	console.log("SAVING SNAPSHOT")
+	// console.log(snapshotData);
 	const db = await initDB();
 	await db.put(MATERIAL_METADATA_STORE, snapshotData, 'myFormSnapshot');
 }
