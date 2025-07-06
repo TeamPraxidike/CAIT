@@ -1,48 +1,36 @@
 import { it, beforeEach, describe, expect } from 'vitest';
-import { Difficulty, type Material, type User } from '@prisma/client';
+import { type User } from '@prisma/client';
 import {
 	createComment,
-	createMaterialPublication,
-	createUser,
 	deleteComment,
 	getComment,
 	getCommentsByPublicationId,
 	updateComment,
 } from '$lib/database';
+import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+import { createUniqueUser } from '../../utility/users';
+import { createUniqueMaterial, generateRandomString } from '../../utility/publicationsUtility';
 
 describe('Comments CRUD', () => {
 	let user: User;
-	let publication: Material;
+	let publication: MaterialWithPublicationNoFiles;
 	let comment: any;
+	let content: string;
 
 	beforeEach(async () => {
-		user = await createUser({
-			firstName: 'Marti23',
-			lastName: 'Parti',
-			email: 'email@gmail' + Math.random(),
-			password: 'password',
-		});
-		publication = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			materialType: 'assignment',
-			copyright: "true",
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-		});
+		user = await createUniqueUser();
+		publication = await createUniqueMaterial(user.id);
+		content = generateRandomString(50);
 		comment = await createComment({
 			userId: user.id,
 			publicationId: publication.publicationId,
-			content: 'Ivan',
+			content,
 		});
 	});
 	it('should add comment successfully', async () => {
 		expect(comment).toBeTruthy();
 		expect(comment.publicationId).toEqual(publication.publicationId);
-		expect(comment.content).toEqual('Ivan');
+		expect(comment.content).toEqual(content);
 		const comments = await getCommentsByPublicationId(
 			publication.publicationId,
 		);
@@ -63,11 +51,12 @@ describe('Comments CRUD', () => {
 		expect(comments.length).toEqual(0);
 	});
 	it('should update comment successfully', async () => {
+		const newContent = generateRandomString(50);
 		comment = await updateComment({
 			id: comment.id,
-			content: 'notIvan',
+			content: newContent,
 		});
-		expect(comment.content).toEqual('notIvan');
+		expect(comment.content).toEqual(newContent);
 		expect(comment.createdAt).not.toEqual(comment.updatedAt);
 		const comments = await getCommentsByPublicationId(
 			publication.publicationId,

@@ -1,5 +1,4 @@
 import {
-	type FetchedFileArray,
 	type FileDiffActions,
 	fileSystem,
 	prisma,
@@ -7,7 +6,6 @@ import {
 import { Prisma } from '@prisma/client/extension';
 import type { File as PrismaFile, FileChunk } from '@prisma/client';
 import path from 'path';
-import fs from 'fs';
 import type { FileChunks } from '$lib/PiscinaUtils/runner';
 import { addFileURL } from '$lib/database/fileURL';
 

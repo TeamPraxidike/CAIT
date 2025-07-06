@@ -121,12 +121,14 @@ export async function PUT({ request, params, locals }) {
 		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
+
 		if (!publisherId) {
 			return new Response(
 				JSON.stringify({ error: 'Publisher not found' }),
 				{ status: 404 },
 			);
 		}
+
 		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
 			return unauthResponse();
 
@@ -189,10 +191,6 @@ export async function PUT({ request, params, locals }) {
 export async function DELETE({ params, locals }) {
 	const publicationId = parseInt(params.publicationId);
 
-	const publication = await getPublisherId(publicationId);
-	const authError = await verifyAuth(locals, publication.publisherId);
-	if (authError) return authError;
-
 	if (isNaN(publicationId) || publicationId <= 0) {
 		return new Response(
 			JSON.stringify({
@@ -201,6 +199,10 @@ export async function DELETE({ params, locals }) {
 			{ status: 400 },
 		);
 	}
+
+	const publication = await getPublisherId(publicationId);
+	const authError = await verifyAuth(locals, publication.publisherId);
+	if (authError) return authError;
 
 	try {
 		// TODO: should we trust frontend for this info? Probably not...

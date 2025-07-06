@@ -1,41 +1,30 @@
 import { it, beforeEach, describe, expect } from 'vitest';
-import { Difficulty, type Material, type User } from '@prisma/client';
+import { type User } from '@prisma/client';
 import {
 	createComment,
-	createMaterialPublication,
-	createUser,
 	getComment,
 	getLikedComments,
 	likesCommentUpdate,
 } from '$lib/database';
+import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+import { createUniqueUser } from '../../utility/users';
+import { createUniqueMaterial, generateRandomString } from '../../utility/publicationsUtility';
 
 describe('Comments Liking', () => {
 	let user: User;
-	let publication: Material;
+	let publication: MaterialWithPublicationNoFiles;
 	let comment: any;
+	let content: string;
 	let message: string;
+
 	beforeEach(async () => {
-		user = await createUser({
-			firstName: 'Marti12345431143',
-			lastName: 'Parti',
-			email: 'email@gmail' + Math.random(),
-			password: 'password',
-		});
-		publication = await createMaterialPublication(user.id, {
-			title: 'cool publication',
-			description: 'This publication has description',
-			difficulty: Difficulty.easy,
-			materialType: 'assignment',
-			copyright: "true",
-			timeEstimate: 4,
-			theoryPractice: 9,
-			learningObjectives: [],
-			prerequisites: [],
-		});
+		user = await createUniqueUser();
+		publication = await createUniqueMaterial(user.id);
+		content = generateRandomString(50);
 		comment = await createComment({
 			userId: user.id,
 			publicationId: publication.publicationId,
-			content: 'Ivan',
+			content,
 		});
 		message = await likesCommentUpdate(user.id, comment.id);
 	});

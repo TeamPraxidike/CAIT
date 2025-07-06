@@ -23,16 +23,16 @@ export type TGETuser = {user: TUserWithPostsAndProfilePic, profilePicData: Fetch
  */
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
-	if (authError) return authError;
+	if (authError !== null) return authError;
 
 	const { id } = params;
 	try {
-
 		const user:TUserWithPostsAndProfilePic = await getUserById(id);
-		if (!user)
+		if (user === null) {
 			return new Response(JSON.stringify({ error: 'User not found' }), {
 				status: 404,
 			});
+		}
 
 		// profilePic return
 		const profilePicData:FetchedFileItem = await profilePicFetcher(
