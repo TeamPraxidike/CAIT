@@ -31,7 +31,7 @@ export async function GET({ url }) {
 		const limit = Number(url.searchParams.get('limit')) || 0;
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
-		const amount: number = Number(url.searchParams.get('amount')) || 8;
+		const amount: number = Number(url.searchParams.get('amount')) || 9;
 
 		let circuits = await getAllCircuits(
 			tags,
@@ -41,7 +41,10 @@ export async function GET({ url }) {
 			query,
 		);
 
-		circuits = circuits.filter((c: CircuitWithPublisher) => !c.publication.isDraft);
+		// circuits = circuits.filter((c: CircuitWithPublisher) => !c.publication.isDraft);
+		const idsCirc = circuits.slice(c => c.publicationId)
+		circuits = circuits.slice(0, amount)
+
 		circuits = await Promise.all(circuits.map(async circuit => {
 			const filePath = circuit.publication.coverPic!.path;
 
@@ -60,8 +63,10 @@ export async function GET({ url }) {
 		}));
 		return new Response(
 			JSON.stringify({
-				circuits: circuits.slice(0, amount),
-				idsCirc: circuits.map(c => c.publicationId),
+				// circuits: circuits.slice(0, amount),
+				circuits: circuits,
+				//idsCirc: circuits.map(c => c.publicationId),
+				idsCirc: idsCirc
 			}),
 			{ status: 200 },
 		);

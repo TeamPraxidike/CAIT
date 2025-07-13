@@ -23,7 +23,8 @@ export const load: LayoutServerLoad = async ({
 }) => {
 	await parent();
 
-	const session = await locals.safeGetSession();
+	//const session = await locals.safeGetSession();
+	const session = locals.session
 	if (!session || !session.user) throw redirect(303, '/signin');
 
 	const pRes = await fetch(`/api/publication/${params.publication}`);

@@ -55,9 +55,110 @@
     }
 
     const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
+
+    import { navigating } from '$app/stores'
+
+    let progress = 0;
+    let showProgressBar = false;
+    let enterEndingInterval = true;
+    let progressBarColor = '#00A6D6'
+    let progressInterval: any = null;
+
+    const DURATION_MS = 2500;
+    const PLACEHOLDER_PROGRESS = 40;
+
+    // // slow it down even further (for heavier fetch operations)
+    // $: if (progress === PLACEHOLDER_PROGRESS - 10 && enterEndingInterval) {
+    //     clearInterval(progressInterval);
+    //
+    //     progressInterval = window.setInterval(() => {
+    //         progress = Math.min(progress + 1, PLACEHOLDER_PROGRESS);
+    //         //console.log(progress);
+    //     }, 500);
+    // }
+
+    $: if ($navigating && $navigating.complete !== null && !showProgressBar) {
+        console.log("in the if")
+        showProgressBar = true;
+        progress = 0;
+
+        clearInterval(progressInterval);
+
+        progressInterval = window.setInterval(() => {
+            progress = Math.min(progress + 1, PLACEHOLDER_PROGRESS);
+            //console.log(progress);
+        }, DURATION_MS / PLACEHOLDER_PROGRESS);
+
+        $navigating.complete.then(() => {
+            clearInterval(progressInterval);
+            progressInterval = window.setInterval(() => {
+                progress = Math.min(progress + 1, 100);
+                //console.log(progress);
+
+                if (progress === 100 && enterEndingInterval) {
+                    console.log("prog if")
+
+                    enterEndingInterval = false;
+
+                    // setTimeout(() => {
+                    //     clearInterval(progressInterval);
+                    // }, 200)
+
+                    clearInterval(progressInterval);
+
+                    progressBarColor = 'transparent';
+
+                    setTimeout(() => {
+                        progress = 0;
+                    }, 200)
+
+                    setTimeout(() => {
+                        progressBarColor = '#00A6D6';
+                        showProgressBar = false;
+                        enterEndingInterval = true;
+                    }, 800);
+                }
+            }, 3);
+            // hide the progress bar after the completion animation (500ms)
+        }).catch(() => {
+            // if navigation is cancelled or fails, hide the bar immediately.
+
+            enterEndingInterval = false;
+
+            clearInterval(progressInterval);
+
+            progressBarColor = 'transparent';
+
+            setTimeout(() => {
+                progress = 0;
+            }, 200)
+
+            setTimeout(() => {
+                progressBarColor = '#00A6D6';
+                showProgressBar = false;
+                enterEndingInterval = true;
+            }, 800);
+        });
+    } else {
+        console.log("it is null");
+        //clearInterval(progressInterval);
+    }
 </script>
 
-<header class="w-screen shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none overflow-x-hidden">
+<header class="w-full sticky top-0 z-50 shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none overflow-x-hidden">
+
+    <!--{#if showProgressBar}-->
+    <!--    <div class="progress-bar-container z-100">-->
+    <!--        <div class="progress-bar-meter" style="width: {progress}%"></div>-->
+    <!--    </div>-->
+    <!--{/if}-->
+
+
+    <div class="progress-bar-container z-100">
+        <div class="progress-bar-meter" style="width: {progress}%; background-color: {progressBarColor};"></div>
+    </div>
+
+
     <Grid>
         <a href="/" class = "col-start-1" on:click={confirmPublishReset}>
             <enhanced:img class="h-16 w-16" src="/static/images/favicons/favicon-128.png" alt="CAIT Logo"/>
@@ -164,3 +265,18 @@
     </Grid>
 </header>
 
+<style>
+    .progress-bar-container {
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 3px;
+        background-color: transparent;
+    }
+
+    .progress-bar-meter {
+        height: 100%;
+        transition: width 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+</style>

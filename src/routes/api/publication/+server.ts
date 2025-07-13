@@ -17,9 +17,13 @@ export const GET: RequestHandler = async ({ url }) => {
 		const includeDraft = url.searchParams.get('includeDraft') === 'true' || false;
 		const publishers = p ? p.split(',') : [];
 		const query: string = url.searchParams.get('q') || '';
-		const amount: number = Number(url.searchParams.get('amount')) || 8;
+		const amount: number = Number(url.searchParams.get('amount')) || 9;
 
-		let publications: PublicationGet[] = await getAllPublications(publishers, query, includeDraft);
+		// let publications: PublicationGet[] = await getAllPublications(publishers, query, includeDraft);
+		let publications = await getAllPublications(publishers, query, includeDraft);
+
+		const ids = publications.map(p => p.id)
+		publications = publications.slice(0, amount)
 
 		publications = await Promise.all(publications.map(async (publication: any) => {
 			let coverPicData: string | null;
@@ -41,7 +45,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				coverPicData: coverPicData,
 			};
 		}));
-		publications = await Promise.all(publications.map(async (publication: any): (Promise<ExtendedPublication>) => {
+		publications = await Promise.all(publications.map(async (publication: any) => {
 			return {
 				...publication,
 				publisher: {
@@ -54,8 +58,10 @@ export const GET: RequestHandler = async ({ url }) => {
 		}));
 		return new Response(
 			JSON.stringify({
-				publications: publications.slice(0, amount),
-				ids: publications.map((x: { id: any; }) => x.id),
+				// publications: publications.slice(0, amount),
+				publications: publications,
+				ids: ids
+				// ids: publications.map((x: { id: any; }) => x.id),
 			}),
 			{
 				status: 200,

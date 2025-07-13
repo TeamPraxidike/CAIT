@@ -1,15 +1,15 @@
 <script lang="ts">
     import type {LayoutServerData, PageServerData} from './$types';
-    import {
-        AddInteractionForm,
-        CircuitComponent,
-        Comment,
-        DiffBar,
-        FileTable,
-        getDateDifference, HorizontalScroll,
-        Meta,
-        UserProp
-    } from '$lib';
+	import {
+		AddInteractionForm,
+		CircuitComponent,
+		Comment,
+		DiffBar,
+		FileTable,
+		getDateDifference, HorizontalScroll,
+		Meta, Tag,
+		UserProp
+	} from '$lib';
     import {fly} from 'svelte/transition';
     import {TabGroup, Tab} from '@skeletonlabs/skeleton';
 

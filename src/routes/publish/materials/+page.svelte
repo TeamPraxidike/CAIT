@@ -115,6 +115,8 @@
 	// $: locks[2] = tags.length < 1 || LOs.length<1;
 
 	const toastStore = getToastStore();
+	let showAnimation = false;
+	let fadeOverlay: any;
 
 	$: if (form?.status === 200) {
 		if (saveInterval) {
@@ -126,19 +128,22 @@
 			clearFiles(),
 			clearMaterialSnapshot()
 		]).then(() => {
-			// Show success message
-			toastStore.trigger({
-				message: 'Publication Added successfully',
-				background: 'bg-success-200',
-				classes: 'text-surface-900'
-			});
+			// // Show success message
+			// toastStore.trigger({
+			// 	message: 'Publication Added successfully',
+			// 	background: 'bg-success-200',
+			// 	classes: 'text-surface-900'
+			// });
+			//
+			// // Navigate away
+			// goto(`/${loggedUser.username}/${form?.id}`);
 
-			// Navigate away
-			goto(`/${loggedUser.username}/${form?.id}`);
+			showAnimation = true;
+			fadeOverlay.classList.add('active');
 		}).catch(error => {
 			console.error('Error clearing data:', error);
 		});
-		goto(`/${loggedUser.username}/${form?.id}`);
+		// goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
@@ -156,6 +161,8 @@
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 
 		const confirmation = confirm('Data might be lost. Are you sure you want to proceed?');
+
+		showAnimation = false;
 
 		if (!confirmation) {
 			event.preventDefault();
@@ -244,6 +251,7 @@
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
 		}
+		showAnimation = false;
 	});
 
 	const onNextHandler = () => {
@@ -272,17 +280,18 @@
 	$: numMaterials = Math.max(fileURLs.length, files.length);
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
 
 <Banner metadata={metadata} files={numMaterials} materialType={metadata.materialType}/>
 
-<form method="POST"
-	  enctype="multipart/form-data"
-	  action="?/publish"
-	  class="col-span-full my-20 pr-10 shadow p-4"
-	  use:enhance={({ formData }) => {
+<div class="form-container col-span-full my-20 pr-10 shadow p-4">
+	<form method="POST"
+		  enctype="multipart/form-data"
+		  action="?/publish"
+		  use:enhance={({ formData }) => {
 	    isSubmitting = true;
 		let willSubmit = true;
         Array.from(files).forEach(file => {
@@ -312,168 +321,317 @@
 		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
       }}>
-	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
-			 buttonNext="btn dark:bg-surface-200"
-			 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
-				<Step locked={locks[0]}>
+		<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
+				 buttonNext="btn dark:bg-surface-200"
+				 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
+			<Step locked={locks[0]}>
 
-					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
-					<UploadFilesForm
-						bind:fileURLs={fileURLs}
-						bind:files={files}/>
-				</Step>
-		<Step locked={locks[1]}>
-			<div class="grid grid-cols-2 gap-x-4 gap-y-2">
-				<label for="title">Title<span class="text-error-300">*</span></label>
+				<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
+				<UploadFilesForm
+					bind:fileURLs={fileURLs}
+					bind:files={files}/>
+			</Step>
+			<Step locked={locks[1]}>
+				<div class="grid grid-cols-2 gap-x-4 gap-y-2">
+					<label for="title">Title<span class="text-error-300">*</span></label>
 
-				<label for="coverPic">Cover Picture</label>
+					<label for="coverPic">Cover Picture</label>
 
-				<div class="flex flex-col gap-2 min-h-80">
-					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
-						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
-					<textarea name="description" placeholder="Description..." bind:value={description}
-							  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
-				</div>
+					<div class="flex flex-col gap-2 min-h-80">
+						<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
+							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
+						<textarea name="description" placeholder="Description..." bind:value={description}
+								  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
+					</div>
 
-				<div class="flex flex-col gap-2 h-full bg-surface-200
+					<div class="flex flex-col gap-2 h-full bg-surface-200
 							border-2 border-dashed border-surface-700">
-					{#if coverPic}
-						<img src={URL.createObjectURL(coverPic)}
-							 alt="coverPicture"
-							 class="max-h-96 w-full object-contain h-full">
-					{/if}
-				</div>
-
-<!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
-<!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
-<!--						on:clearSettings={() => {typeActive=false}} />-->
-				<SelectType bind:selectedTypes={selectedTypes}/>
-
-				<div>
-					{#if coverPic}
-						<button on:click={() => coverPic = undefined} type="button"
-								class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
-							Remove Cover Picture
-						</button>
-					{:else}
-						<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
-									on:change={chooseCover} name="coverPhoto">
-							Upload Cover Picture
-						</FileButton>
-					{/if}
-				</div>
-
-			</div>
-
-			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-		</Step>
-		<Step locked={locks[2]}>
-			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-			<div class="flex flex-col gap-8 p-6 justify-between">
-				<div class="flex gap-4 items-center">
-					<DifficultySelection bind:difficulty={difficulty} />
-				</div>
-				<div class="flex flex-row gap-4 md:gap-2 items-center">
-					<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>
-					<TheoryAppBar bind:value={theoryApplicationRatio} />
-				</div>
-			</div>
-
-			<div class="flex flex-col gap-4 p-3">
-				<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
-					<div class="w-full md:w-1/2 flex-col gap-2">
-						<label for="estimate">Time Estimate (in minutes):</label>
-						<input type="number" name="estimate" bind:value={estimate} on:keydown={handleInputEnter} min="0"
-							   placeholder="How much time do the materials take"
-							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
-					</div>
-					<div class="w-full md:w-1/2	">
-						<label for="copyright md-2">Copyright License (<a
-							href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
-							class="text-tertiary-700"> Check here how this applies to you</a>):</label>
-						<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter}
-							   placeholder="Leave blank if material is your own"
-							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
-					</div>
-				</div>
-				<div class="w-full">
-					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}" />
-				</div>
-				<div class="flex flex-col w-full">
-					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-									   bind:additionalMaintainers={maintainers} />
-					<div class="lg:w-1/2">
-						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags} />
-					</div>
-				</div>
-			</div>
-		</Step>
-		<Step locked={isSubmitting}>
-			<svelte:fragment slot="header">Review</svelte:fragment>
-			<div class="grid grid-cols-12 gap-8">
-				<div class="col-span-8 flex flex-col">
-					<h2 class="text-3xl font-semibold break-words">{title}</h2>
-
-					<div class="flex flex-wrap gap-2 text-sm my-2">
-						{#each tags as tag}
-							<Tag tagText="{tag}" removable="{false}" width="{12}" />
-						{/each}
+						{#if coverPic}
+							<img src={URL.createObjectURL(coverPic)}
+								 alt="coverPicture"
+								 class="max-h-96 w-full object-contain h-full">
+						{/if}
 					</div>
 
-					<p class="text-surface-800 text-sm">{description}</p>
+					<!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
+					<!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
+					<!--						on:clearSettings={() => {typeActive=false}} />-->
+					<SelectType bind:selectedTypes={selectedTypes}/>
 
-					<p class="text-surface-500 text-sm">
-						Time Estimate: {estimate || 'No estimate provided'} |
-						Type: {selectedType?.toUpperCase() || 'No type provided'} |
-						Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
-					</p>
+					<div>
+						{#if coverPic}
+							<button on:click={() => coverPic = undefined} type="button"
+									class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
+								Remove Cover Picture
+							</button>
+						{:else}
+							<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
+										on:change={chooseCover} name="coverPhoto">
+								Upload Cover Picture
+							</FileButton>
+						{/if}
+					</div>
 
-					<FileTable bind:files={files} bind:fileURLs={fileURLs}/>
 				</div>
-				<div class="col-span-4 flex flex-col gap-4">
-					{#if coverPic}
-						<p class="font-bold"> Cover Picture: </p>
-						<img src={URL.createObjectURL(coverPic)} alt="">
-					{/if}
-					<div class="flex flex-col">
-						<span class="font-bold">Maintainers:</span>
-						<div class="flex flex-wrap">
-							<UserProp role="Publisher" view="publish" user={loggedUser} userPhotoUrl={loggedUser.profilePicData} />
-							{#each maintainers as maintainer (maintainer.id)}
-								<UserProp user={maintainer} view="publish" role="Publisher" userPhotoUrl={maintainer.profilePicData} />
-							{/each}
+
+				<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
+			</Step>
+			<Step locked={locks[2]}>
+				<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
+				<div class="flex flex-col gap-8 p-6 justify-between">
+					<div class="flex gap-4 items-center">
+						<DifficultySelection bind:difficulty={difficulty} />
+					</div>
+					<div class="flex flex-row gap-4 md:gap-2 items-center">
+						<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>
+						<TheoryAppBar bind:value={theoryApplicationRatio} />
+					</div>
+				</div>
+
+				<div class="flex flex-col gap-4 p-3">
+					<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
+						<div class="w-full md:w-1/2 flex-col gap-2">
+							<label for="estimate">Time Estimate (in minutes):</label>
+							<input type="number" name="estimate" bind:value={estimate} on:keydown={handleInputEnter} min="0"
+								   placeholder="How much time do the materials take"
+								   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
+						</div>
+						<div class="w-full md:w-1/2	">
+							<label for="copyright md-2">Copyright License (<a
+								href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
+								class="text-tertiary-700"> Check here how this applies to you</a>):</label>
+							<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter}
+								   placeholder="Leave blank if material is your own"
+								   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
 						</div>
 					</div>
-					<div class="flex flex-col">
-						<span class="font-bold">Learning Objectives:</span>
-						<ul class="list-inside">
-							{#each LOs as lo}
-								<li class="list text-sm list-disc">{lo}</li>
-							{/each}
-						</ul>
+					<div class="w-full">
+						<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}" />
 					</div>
-					<div class="flex flex-col">
-						<span class="font-bold">Prior Knowledge:</span>
-						<ul class="list-inside">
-							{#each PKs as pk}
-								<li class="list text-sm list-disc">{pk}</li>
-							{/each}
-						</ul>
-					</div>
-					<div class="flex flex-col">
-						<span class="font-bold">Copyright:</span>
-						<span class="text-sm">{copyright || 'No copyright license'}</span>
+					<div class="flex flex-col w-full">
+						<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
+										   bind:additionalMaintainers={maintainers} />
+						<div class="lg:w-1/2">
+							<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags} />
+						</div>
 					</div>
 				</div>
-			</div>
+			</Step>
+			<Step locked={isSubmitting}>
+				<svelte:fragment slot="header">Review</svelte:fragment>
+				<div class="grid grid-cols-12 gap-8">
+					<div class="col-span-8 flex flex-col">
+						<h2 class="text-3xl font-semibold break-words">{title}</h2>
 
-			{#if !draft}
-				<div class="flex flex-row justify-end items-center gap-2">
-					<p class="pl-3">Save as a draft: </p>
-					<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
+						<div class="flex flex-wrap gap-2 text-sm my-2">
+							{#each tags as tag}
+								<Tag tagText="{tag}" removable="{false}" width="{12}" />
+							{/each}
+						</div>
+
+						<p class="text-surface-800 text-sm">{description}</p>
+
+						<p class="text-surface-500 text-sm">
+							Time Estimate: {estimate || 'No estimate provided'} |
+							Type: {selectedType?.toUpperCase() || 'No type provided'} |
+							Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
+						</p>
+
+						<FileTable bind:files={files} bind:fileURLs={fileURLs}/>
+					</div>
+					<div class="col-span-4 flex flex-col gap-4">
+						{#if coverPic}
+							<p class="font-bold"> Cover Picture: </p>
+							<img src={URL.createObjectURL(coverPic)} alt="">
+						{/if}
+						<div class="flex flex-col">
+							<span class="font-bold">Maintainers:</span>
+							<div class="flex flex-wrap">
+								<UserProp role="Publisher" view="publish" user={loggedUser} userPhotoUrl={loggedUser.profilePicData} />
+								{#each maintainers as maintainer (maintainer.id)}
+									<UserProp user={maintainer} view="publish" role="Publisher" userPhotoUrl={maintainer.profilePicData} />
+								{/each}
+							</div>
+						</div>
+						<div class="flex flex-col">
+							<span class="font-bold">Learning Objectives:</span>
+							<ul class="list-inside">
+								{#each LOs as lo}
+									<li class="list text-sm list-disc">{lo}</li>
+								{/each}
+							</ul>
+						</div>
+						<div class="flex flex-col">
+							<span class="font-bold">Prior Knowledge:</span>
+							<ul class="list-inside">
+								{#each PKs as pk}
+									<li class="list text-sm list-disc">{pk}</li>
+								{/each}
+							</ul>
+						</div>
+						<div class="flex flex-col">
+							<span class="font-bold">Copyright:</span>
+							<span class="text-sm">{copyright || 'No copyright license'}</span>
+						</div>
+					</div>
 				</div>
-			{/if}
 
-		</Step>
-	</Stepper>
-</form>
+				{#if !draft}
+					<div class="flex flex-row justify-end items-center gap-2">
+						<p class="pl-3">Save as a draft: </p>
+						<input type="checkbox" bind:checked={markedAsDraft} class="toggle toggle-primary" />
+					</div>
+				{/if}
+
+			</Step>
+		</Stepper>
+	</form>
+</div>
+
+<div class="fade-overlay" class:active={showAnimation} bind:this={fadeOverlay}>
+	<div class="logo-container">
+		<img src="/images/about/CAIT_Logo_nobg.png" alt="Success" class="logo">
+	</div>
+	<div class="success-text">Publication uploaded successfully</div>
+	<div class="button-container">
+		<button type="button" class="success-btn
+			bg-primary-600 text-surface-50 border-2 border-primary-600
+			hover:opacity-60 transition duration-400;" on:click={() => {
+				showAnimation = false;
+				goto('/publish');
+			}}>
+			Publish something else
+		</button>
+		<button type="button" class="success-btn
+			bg-[#fcfcfd] text-black border-2 border-[#007393]
+			hover:opacity-60 transition duration-400;" on:click={() => {
+				showAnimation = false;
+				goto(`/${loggedUser.username}/${form?.id}`);
+			}}>
+			View this publication
+		</button>
+	</div>
+</div>
+
+<style>
+    .form-container {
+        position: relative;
+    }
+
+    /* Fullscreen overlay */
+    .fade-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 40;
+        background: linear-gradient(135deg, #ffffff 0%, #fcfcfd 100%);
+        filter: saturate(0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 2rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .fade-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Logo container */
+    .logo-container {
+        transform: scale(0.8) translateY(20px);
+        opacity: 0;
+        transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition-delay: 0.3s;
+    }
+
+    .fade-overlay.active .logo-container {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+
+    .logo {
+        width: 200px;
+        height: 200px;
+        max-width: 80vw;
+        max-height: 80vh;
+        object-fit: contain;
+    }
+
+    /* Success text */
+    .success-text {
+        color: black;
+        font-size: 1.5rem;
+        font-weight: 500;
+        text-align: center;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition-delay: 0.5s;
+    }
+
+    .fade-overlay.active .success-text {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .button-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition-delay: 0.7s;
+    }
+
+    .fade-overlay.active .button-container {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .success-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 160px;
+        text-align: center;
+    }
+
+    /* Responsive: Stack buttons on small screens */
+    @media (max-width: 640px) {
+        .button-container {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .success-btn {
+            width: 100%;
+            max-width: 280px;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .logo {
+            width: 150px;
+            height: 150px;
+        }
+
+		.success-text {
+            font-size: 1rem;
+		}
+
+    }
+</style>

@@ -172,7 +172,8 @@ export async function getPublicationById(id: number): Promise<Publication> {
 }
 
 
-export async function getAllPublications(publishers: string[], query: string, includeDrafts?: boolean): Promise<PublicationGet[]> {
+// export async function getAllPublications(publishers: string[], query: string, includeDrafts?: boolean): Promise<PublicationGet[]> {
+export async function getAllPublications(publishers: string[], query: string, includeDrafts?: boolean) {
 	const where: any = { AND: [] };
 
 	if (publishers.length > 0) {
@@ -187,9 +188,12 @@ export async function getAllPublications(publishers: string[], query: string, in
 			circuit: true,
 			coverPic: true,
 			publisher: {
-				include: {
-					profilePic: true,
-				},
+				select: {
+					firstName: true,
+					lastName: true,
+					username: true,
+					profilePic: true
+				}
 			},
 			usedInCourse: {
 				select: {
@@ -220,77 +224,36 @@ export async function getAllPublications(publishers: string[], query: string, in
 	return publications;
 }
 
-export async function getAllPublicationsByIds(ids: number[]): Promise<Publication[]> {
+// export async function getAllPublicationsByIds(ids: number[]): Promise<Publication[]> {
+export async function getAllPublicationsByIds(ids: number[]) {
 	return prisma.publication.findMany({
 		where: {
 			id: { in: ids },
 		},
 		include: {
-			usedInCourse: true,
+			// usedInCourse: true,
+			usedInCourse: {
+				select: {
+					course: true,
+				},
+			},
 			tags: true,
 			publisher: {
-				include: {
-					profilePic: true,
-				},
-			},
-			maintainers: {
-				include: {
-					profilePic: true,
-				},
+				select: {
+					firstName: true,
+					lastName: true,
+					username: true,
+					profilePic: true
+				}
 			},
 			coverPic: true,
-			comments: {
-				include: {
-					replies: {
-						include: {
-							user: {
-								include: {
-									profilePic: true,
-								},
-							},
-						},
-					},
-					user: {
-						include: {
-							profilePic: true,
-						},
-					},
-				},
-			},
-			materials: {
-				include: {
-					publication: true,
-					files: true,
-				},
-			},
-			circuit: {
-				include: {
-					publication: {
-						include: {
-							tags: true,
-						},
-					},
-					nodes: {
-						include: {
-							publication: {
-								include: {
-									tags: true,
-									materials: true,
-									circuit: true,
-									coverPic: true,
-									publisher: {
-										include: {
-											profilePic: true,
-										},
-									},
-									usedInCourse: true,
-								},
-							},
-							next: true,
-						},
-					},
-				},
-			},
+			// materials: {
+			// 	include: {
+			// 		encapsulatingType: true
+			// 	},
+			// },
+			materials: true,
+			circuit: true,
 		},
 	});
 }

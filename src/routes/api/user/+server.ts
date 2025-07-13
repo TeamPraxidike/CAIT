@@ -38,10 +38,25 @@ export async function POST({ request }) {
 // get all users
 export async function GET() {
 	try {
-		let users: UserPosts[] = await prisma.user.findMany({
-			include: {
-				posts: true,
+		// let users: UserPosts[] = await prisma.user.findMany({
+		// 	include: {
+		// 		posts: true,
+		// 		profilePic: true,
+		// 	},
+		// });
+
+		let users = await prisma.user.findMany({
+			select: {
+				firstName: true,
+				lastName: true,
+				username: true,
+				reputation: true,
 				profilePic: true,
+				posts: {
+					select: {
+						id: true
+					}
+				}
 			},
 		});
 
