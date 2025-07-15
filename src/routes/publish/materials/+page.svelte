@@ -347,7 +347,7 @@
 <!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
 <!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
 <!--						on:clearSettings={() => {typeActive=false}} />-->
-				<SelectType bind:selectedTypes={selectedTypes}/>
+				<SelectType bind:selectedTypes={selectedTypes} types=""/>
 
 				<div>
 					{#if coverPic}
