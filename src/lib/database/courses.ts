@@ -25,3 +25,11 @@ export async function createCourse(course: createCourseData): Promise<Course> {
 		}
 	});
 }
+
+export async function findCourseByName(courseName: string): Promise<Course> {
+	return prisma.course.findFirst({
+		where: {
+			courseName: courseName
+		}
+	});
+}

@@ -52,13 +52,6 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 	const materialType = [randomEnumValue(MaterialType)];
 	const timeEstimate = Math.floor(Math.random() * 10) + 1;
 	const theoryPractice = Math.random();
-	// const course = await createCourse({
-	// 	learningObjectives: [],
-	// 	prerequisites: [],
-	// 	educationalLevel: Level.Bachelor,
-	// 	courseName: generateRandomString(10),
-	// 	creatorId: userId
-	// });
 
 	const inputData = {
 		title,
@@ -70,8 +63,7 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 		materialType,
 		timeEstimate,
 		theoryPractice,
-		isDraft: false,
-		// courseId: course.id
+		isDraft: false
 	}
 
 	const publication = await createMaterialPublication(userId, inputData);
@@ -89,4 +81,25 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 	expect(publication.publication.isDraft).toBe(false);
 
 	return publication;
+}
+
+export function generateCourseData(creatorID: string){
+	const los = Math.ceil(Math.random() * 5);
+	const prerequisites = Math.ceil(Math.random() * 5);
+
+	const learningObjectives: string[] = [];
+	for (let i = 0; i < los; i++) {
+		learningObjectives.push(generateRandomString(20));
+	}
+	const prerequisitesArray: string[] = [];
+	for (let i = 0; i < prerequisites; i++) {
+		prerequisitesArray.push(generateRandomString(20));
+	}
+	return {
+		learningObjectives: learningObjectives,
+		prerequisites: prerequisitesArray,
+		educationalLevel: randomEnumValue(Level),
+		courseName: generateRandomString(10),
+		creatorId: creatorID
+	};
 }

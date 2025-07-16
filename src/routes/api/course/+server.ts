@@ -1,6 +1,5 @@
 import { verifyAuth } from '$lib/database/auth';
-import { createComment, type createCommentData, getPublicationById, updateReputation } from '$lib/database';
-import { createCourse, type createCourseData } from '$lib/database/courses';
+import { createCourse, type createCourseData, findCourseByName } from '$lib/database/courses';
 
 export async function POST({ request, locals }) {
 	const body = await request.json();
@@ -14,10 +13,15 @@ export async function POST({ request, locals }) {
 			learningObjectives: body.learningObjectives,
 			prerequisites: body.prerequisites,
 			educationalLevel: body.educationalLevel,
-			courseName: body.courseName
+			courseName: body.courseName,
+			creatorId: body.userId
 		};
 
-		const course = await createCourse(courseData);
+		if (await findCourseByName(courseData.courseName) !== null) {
+			return new Response(JSON.stringify({ error: "Course with that name already exists" }), { status: 400 });
+		}
+
+		const course = await createCourse(body);
 		return new Response(JSON.stringify(course), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error }), { status: 500 });
