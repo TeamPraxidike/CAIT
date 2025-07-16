@@ -32,6 +32,7 @@
 			Publication Type</h1>
 		<h2 class="w-full text-md text-surface-500 text-opacity-80 dark:text-surface-300">Upload your materials or connect
 			materials in a circuit</h2>
+	</div>
 	<div class="flex-col flex md:flex-row items-center">
 		<a
 			data-testid="goto_publish_material"

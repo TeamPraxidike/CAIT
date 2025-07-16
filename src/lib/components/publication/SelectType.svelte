@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let types: string[] = [];
+	export let types: string[] = ["Video", "Lecture Notes", "Slides", "Assignment", "Exam", "Other"];
 	export let selectedTypes: string[] = [];
 
 	function selectType(type: string) {
