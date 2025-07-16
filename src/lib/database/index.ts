@@ -123,6 +123,7 @@ type MaterialForm = {
 		maintainers: string[];
 		isDraft: boolean;
 		fileURLs: string[];
+		course: string
 	};
 	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;

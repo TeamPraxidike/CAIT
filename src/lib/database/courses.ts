@@ -33,3 +33,15 @@ export async function findCourseByName(courseName: string): Promise<Course> {
 		}
 	});
 }
+
+export async function findCourseByMantainer(userId: string): Promise<Course[]> {
+	return prisma.course.findMany({
+		where: {
+			maintainers: {
+				some: {
+					id: userId
+				}
+			}
+		}
+	});
+}

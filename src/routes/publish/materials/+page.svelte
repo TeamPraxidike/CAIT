@@ -33,6 +33,7 @@
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
+	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -73,6 +74,7 @@
 	// input data
 	let title: string = '';
 	let description: string = '';
+	let course: string | null = null;
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
@@ -311,6 +313,7 @@
 		formData.append('newTags', JSON.stringify(newTags));
 		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
+		formData.append('course', course || '');
       }}>
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 			 buttonNext="btn dark:bg-surface-200"
@@ -347,7 +350,11 @@
 <!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
 <!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
 <!--						on:clearSettings={() => {typeActive=false}} />-->
-				<SelectType bind:selectedTypes={selectedTypes}/>
+				<div class="flex flex-col gap-2">
+					<SelectType bind:selectedTypes={selectedTypes}/>
+					<hr class="m-2">
+					<SelectCourse bind:selectedCourse={course} courses={data.courses}/>
+				</div>
 
 				<div>
 					{#if coverPic}

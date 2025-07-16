@@ -2,11 +2,12 @@ import type { Actions, PageServerLoad } from './$types';
 import { type MaterialForm } from '$lib/database';
 import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
 
-export const load: PageServerLoad = async ({ fetch, parent }) => {
+export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	return { tags, users };
+	const courses = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+	return { tags, users, courses };
 };
 
 /**
@@ -133,6 +134,7 @@ export const actions = {
 				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
 				isDraft: isDraft,
 				fileURLs: fileURLs || [],
+				course: data.get('course')?.toString() || '',
 			},
 			coverPic,
 			fileDiff: {
