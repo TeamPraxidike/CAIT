@@ -7,7 +7,7 @@ import Grid from '$lib/components/generic/Grid.svelte';
 import SearchBar from '$lib/components/SearchBar.svelte';
 import UserProp from '$lib/components/UserProp.svelte';
 import DifficultySelection from '$lib/components/difficulty/DifficultySelection.svelte';
-import Tag from '$lib/components/generic/TagComponent.svelte';
+import Tag from '$lib/components/generic/Tag.svelte';
 import DiffBar from '$lib/components/difficulty/DiffBar.svelte';
 import UserProfileBar from '$lib/components/user/UserProfileBar.svelte';
 import IconLink from '$lib/components/generic/IconLink.svelte';

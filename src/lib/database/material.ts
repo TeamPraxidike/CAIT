@@ -226,7 +226,9 @@ export async function createMaterialPublication(
 					learningObjectives: metaData.learningObjectives,
 					prerequisites: metaData.prerequisites,
 					type: PublicationType.Material,
-					publisherId: userId,
+					publisher: {
+						connect: { id: userId }
+					},
 					isDraft: metaData.isDraft,
 				},
 			},

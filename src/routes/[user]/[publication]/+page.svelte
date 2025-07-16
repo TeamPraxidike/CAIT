@@ -8,7 +8,8 @@
         FileTable,
         getDateDifference, HorizontalScroll,
         Meta,
-        UserProp
+        UserProp,
+		Tag
     } from '$lib';
     import {fly} from 'svelte/transition';
     import {TabGroup, Tab} from '@skeletonlabs/skeleton';

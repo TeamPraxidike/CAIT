@@ -1,9 +1,10 @@
 
 // function to generate a random string of characters of length n
-import { Difficulty, MaterialType } from '@prisma/client';
+import { Difficulty, Level, MaterialType } from '@prisma/client';
 import { createCircuitPublication, createMaterialPublication } from '$lib/database';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { expect } from 'vitest';
+import { createCourse } from '$lib/database/courses';
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -51,6 +52,13 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 	const materialType = [randomEnumValue(MaterialType)];
 	const timeEstimate = Math.floor(Math.random() * 10) + 1;
 	const theoryPractice = Math.random();
+	// const course = await createCourse({
+	// 	learningObjectives: [],
+	// 	prerequisites: [],
+	// 	educationalLevel: Level.Bachelor,
+	// 	courseName: generateRandomString(10),
+	// 	creatorId: userId
+	// });
 
 	const inputData = {
 		title,
@@ -62,7 +70,8 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 		materialType,
 		timeEstimate,
 		theoryPractice,
-		isDraft: false
+		isDraft: false,
+		// courseId: course.id
 	}
 
 	const publication = await createMaterialPublication(userId, inputData);

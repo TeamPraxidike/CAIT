@@ -22,10 +22,10 @@ enum Difficulty {
   hard
 }
 
-enum Level{
-    Bachelor
-    Master
-    PhD
+enum Level {
+  Bachelor
+  Master
+  PhD
 }
 
 enum MaterialType {
@@ -67,9 +67,8 @@ model User {
   replies     Reply[]
   isAdmin     Boolean       @default(false)
 
-  profilePic File? @relation("ProfilePic")
-  courses Course[] @relation("CourseInstructors")
-
+  profilePic File?    @relation("ProfilePic")
+  courses    Course[] @relation("CourseInstructors")
 }
 
 model PublicationUsedInCourse {
@@ -98,8 +97,8 @@ model Publication {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   isDraft            Boolean    @default(false)
-  courseId Int
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId           Int?
+  course             Course?    @relation("CoursePublications", fields: [courseId], references: [id], onDelete: Cascade)
 
   comments Comment[]
 
@@ -266,11 +265,11 @@ model Reply {
 }
 
 model Course {
-    id Int @id
-    learningObjectives String[]
-    prerequisites      String[]
-    educationalLevel   Level
-    courseName  String
-    publications Publication[]
-    maintainers User[] @relation("CourseInstructors")
+  id                 Int           @id @default(autoincrement())
+  learningObjectives String[]
+  prerequisites      String[]
+  educationalLevel   Level
+  courseName         String        @unique
+  publications       Publication[] @relation("CoursePublications")
+  maintainers        User[]        @relation("CourseInstructors")
 }
