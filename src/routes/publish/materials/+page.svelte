@@ -10,7 +10,7 @@
 	import { FileButton, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
-	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
+	import type {  Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
@@ -353,7 +353,7 @@
 				<div class="flex flex-col gap-2">
 					<SelectType bind:selectedTypes={selectedTypes}/>
 					<hr class="m-2">
-					<SelectCourse bind:selectedCourse={course} courses={data.courses}/>
+					<SelectCourse bind:selectedCourse={course} courses={data.courses.map(x => x.courseName)}/>
 				</div>
 
 				<div>

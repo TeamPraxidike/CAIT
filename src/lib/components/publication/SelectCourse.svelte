@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let courses: string[] = ["SCE 101", "SCE 102", "SCE 103", "SCE 104", "SCE 105"];
+	import Icon from '@iconify/svelte';
+
+	export let courses: string[] = ["CSE3000", "CSE4000", "CSE5000"];
 	export let selectedCourse: string | null = null;
 
 	function selectType(course: string) {
@@ -24,5 +26,21 @@
 				<div class="w-px h-5 bg-gray-300 self-center"></div>
 			{/if}
 		{/each}
+		{#if courses.length === 0}
+			<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+					on:click={() => window.open('/course/create')}>
+				Add a course
+			</button>
+		{:else}
+			<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"
+					on:click={() => window.location.href = '/course/create'}>
+				<Icon icon="mdi:plus-circle" width="32" height="32"
+					  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
+			</button>
+		{/if}
+		<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+				on:click={() => window.open('/courses/browse')}>
+			Browse courses
+		</button>
 	</div>
 </div>

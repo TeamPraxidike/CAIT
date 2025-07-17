@@ -17,7 +17,7 @@ export async function POST({ request, locals }) {
 			creatorId: body.userId
 		};
 
-		if (await findCourseByName(courseData.courseName) !== null) {
+		if (await findCourseByName(body.courseName) !== null) {
 			return new Response(JSON.stringify({ error: "Course with that name already exists" }), { status: 400 });
 		}
 
