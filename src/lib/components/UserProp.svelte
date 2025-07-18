@@ -42,7 +42,7 @@
 		<div class="flex flex-col space-y-1 items-start w-full md:pb-2">
 			<div class="w-full flex flex-col items-center">
 				{#if userPhotoUrl !== null}
-					<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
+					<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
 				{:else}
 					<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
 				{/if}
@@ -66,7 +66,7 @@
 		 		bg-surface-50 hover:cursor-pointer rounded-lg w-full">
 		<div class="flex gap-2 items-center space-y-1 w-full flex-none">
 			{#if userPhotoUrl !== null}
-				<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-10 h-10 rounded-full" />
+				<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 rounded-full" />
 			{:else}
 				<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 rounded-full" />
 			{/if}
@@ -96,7 +96,7 @@
 		{/if}
 		<div class="w-full flex gap-2 items-center flex-none">
 			{#if userPhotoUrl !== null}
-				<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-6 h-6 rounded-full" />
+				<img src={userPhotoUrl} alt="User Profile" class="w-6 h-6 rounded-full" />
 			{:else}
 				<img src={defaultProfilePicturePath} alt="User Profile" class="w-6 h-6 border border-1 border-gray-300 rounded-full" />
 			{/if}
@@ -111,7 +111,7 @@
 	   class="[&>*]:pointer-events-none flex-none col-span-2 h-20 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 pl-2 pr-2 card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow hover:ring-1 hover:ring-primary-600 hover:ring-opacity-20r">
 		<div class="flex space-x-2 items-center w-full">
 			{#if userPhotoUrl !== null}
-				<img src={'data:image;base64,' + userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
+				<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
 			{:else}
 				<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 md:w-28 md:h-28 rounded-full" />
 			{/if}

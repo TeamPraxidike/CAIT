@@ -8,6 +8,7 @@ import type { File as PrismaFile, FileChunk } from '@prisma/client';
 import path from 'path';
 import type { FileChunks } from '$lib/PiscinaUtils/runner';
 import { addFileURL } from '$lib/database/fileURL';
+import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 
 
 // // TODO: This seems to be useless, could remove if nothing breaks
@@ -45,10 +46,22 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
 		// since photo is defined, read the file based on the path (just like a File)
 		filePath = profilePic.path;
 
-		const currentFileData = await fileSystem.readFile(filePath);
+		// const currentFileData = await fileSystem.readFile(filePath);
+		// return {
+		// 	fileId: filePath,
+		// 	data: currentFileData.toString('base64'),
+		// };
+		let currentFileData;
+		if (!(fileSystem instanceof LocalFileSystem)) {
+			currentFileData = await fileSystem.readFileURL(filePath);
+		}
+		else {
+			currentFileData = (await fileSystem.readFile(filePath)).toString('base64');
+		}
+
 		return {
 			fileId: filePath,
-			data: currentFileData.toString('base64'),
+			data: currentFileData,
 		};
 	}
 }
@@ -89,10 +102,23 @@ export async function coverPicFetcher(
 		// since photo is defined, read the file based on the path (just like a File)
 		filePath = coverPic.path;
 
-		const currentFileData = await fileSystem.readFile(filePath);
+		// const currentFileData = await fileSystem.readFile(filePath);
+		// return {
+		// 	fileId: filePath,
+		// 	data: currentFileData.toString('base64'),
+		// };
+		let currentFileData;
+		if (!(fileSystem instanceof LocalFileSystem)) {
+			currentFileData = await fileSystem.readFileURL(filePath);
+		}
+		else {
+			// TODO: frontend expects urls currently, add base64 checks jic
+			currentFileData = (await fileSystem.readFile(filePath)).toString('base64');
+		}
+
 		return {
 			fileId: filePath,
-			data: currentFileData.toString('base64'),
+			data: currentFileData,
 		};
 	}
 }

@@ -62,7 +62,9 @@
 	let maintainers: UserWithProfilePic[] = [];
 
 	let users: UserWithProfilePic[] = data.users;
-	let searchableUsers = users;
+	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
+	searchableUsers.forEach(user => {console.log(user.id)});
+	console.log(loggedUser.id);
 	// learning objectives
 	let LOs: string[] = [];
 	$: LOs = LOs;
@@ -497,7 +499,7 @@
 		<button type="button" class="success-btn
 			bg-primary-600 text-surface-50 border-2 border-primary-600
 			hover:opacity-60 transition duration-400;" on:click={() => {
-				showAnimation = false;
+				// showAnimation = false;
 				goto('/publish');
 			}}>
 			Publish something else
@@ -505,7 +507,7 @@
 		<button type="button" class="success-btn
 			bg-[#fcfcfd] text-black border-2 border-[#007393]
 			hover:opacity-60 transition duration-400;" on:click={() => {
-				showAnimation = false;
+				// showAnimation = false;
 				goto(`/${loggedUser.username}/${form?.id}`);
 			}}>
 			View this publication

@@ -100,7 +100,8 @@ export async function getAllMaterials(
 	diff: Difficulty[],
 	type: MaterialType[],
 	sort: string,
-	query: string
+	query: string,
+	withFiles: boolean = false
 ) {
 // ): Promise<MaterialWithPublication[]> {
 	const where: any = { AND: [], NOT: null };
@@ -146,7 +147,7 @@ export async function getAllMaterials(
 					},
 				},
 			},
-			// files: true,
+			files: withFiles,
 		},
 	});
 

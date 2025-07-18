@@ -81,6 +81,16 @@ export class SupabaseFileSystem implements FileSystem {
 		return Buffer.from(new Uint8Array(arrayBuffer));
 	}
 
+	async readFileURL(pathArg: string): Promise<string> {
+		const { data, error } = await this.supabase
+			.storage
+			.from(this.bucketName)
+			.createSignedUrl(pathArg, 180)
+
+		if (error) throw error;
+		return data.signedUrl;
+	}
+
 
 	// TODO: Method needs to be rewritten IF editing is going to be supported
 	/**

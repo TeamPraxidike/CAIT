@@ -47,11 +47,13 @@ export async function GET() {
 
 		let users = await prisma.user.findMany({
 			select: {
+				id: true,
 				firstName: true,
 				lastName: true,
 				username: true,
 				reputation: true,
 				profilePic: true,
+				// TODO: maybe just use a count and return the number of posts directly?
 				posts: {
 					select: {
 						id: true
