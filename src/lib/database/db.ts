@@ -167,6 +167,7 @@ export async function getPublicationById(id: number): Promise<Publication> {
 					},
 				},
 			},
+			course: true
 		},
 	});
 }

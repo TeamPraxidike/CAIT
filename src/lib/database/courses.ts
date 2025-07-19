@@ -45,3 +45,34 @@ export async function findCourseByMantainer(userId: string): Promise<Course[]> {
 		}
 	});
 }
+
+export async function linkCourseToPublication(publicationId: number, courseId: number): Promise<void> {
+	await prisma.publication.update({
+		where: {
+			id: publicationId
+		},
+		data: {
+			courseId: courseId
+		}
+	});
+}
+
+export async function removeCourseFromPublications(courseId: number) {
+	await prisma.publication.updateMany({
+		where: {
+			courseId: courseId
+		},
+		data: {
+			courseId: null
+		}
+	});
+}
+
+export async function deleteCourse(courseId: number): Promise<Course> {
+	await removeCourseFromPublications(courseId);
+	return prisma.course.delete({
+		where: {
+			id: courseId
+		}
+	});
+}

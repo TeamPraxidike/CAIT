@@ -22,7 +22,6 @@
 
 
 </script>
-
 <div class="grid grid-cols-1">
 	<div class="flex flex-wrap gap-2">
 		{#each courses as course}
