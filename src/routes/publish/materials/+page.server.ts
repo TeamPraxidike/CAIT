@@ -144,7 +144,7 @@ export const actions = {
 				edit: [],
 			},
 		};
-
+		console.log('material', material);
 		const res = await fetch('/api/material', {
 			method: 'POST',
 			body: JSON.stringify(material),
