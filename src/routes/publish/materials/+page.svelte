@@ -74,7 +74,7 @@
 	// input data
 	let title: string = '';
 	let description: string = '';
-	let course: string | null = null;
+	let course: number | null = null;
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
@@ -313,7 +313,7 @@
 		formData.append('newTags', JSON.stringify(newTags));
 		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
-		formData.append('course', course || '');
+		formData.append('course', course ? course.toString() : 'null');
       }}>
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 			 buttonNext="btn dark:bg-surface-200"
@@ -353,7 +353,7 @@
 				<div class="flex flex-col gap-2">
 					<SelectType bind:selectedTypes={selectedTypes}/>
 					<hr class="m-2">
-					<SelectCourse bind:selectedCourse={course} courses={data.courses.map(x => x.courseName)}/>
+					<SelectCourse bind:selectedCourse={course} courses={data.courses}/>
 				</div>
 
 				<div>

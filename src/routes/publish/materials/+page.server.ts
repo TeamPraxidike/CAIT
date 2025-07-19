@@ -135,7 +135,7 @@ export const actions = {
 				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
 				isDraft: isDraft,
 				fileURLs: fileURLs || [],
-				course: data.get('course')?.toString() || '',
+				course: data.get('course')?.toString() || 'null',
 			},
 			coverPic,
 			fileDiff: {

@@ -21,13 +21,12 @@ export const actions = {
 			courseName: title,
 			creatorId: locals.session?.user.id,
 		};
-
+		console.log(courseData);
 		const res = await fetch(`/api/course`, {
 			method: 'POST',
 			body: JSON.stringify(courseData),
 		});
 		const newCourse = await res.json();
-		console.log(newCourse);
 		// throw redirect(303, `/${newUser.username}`);
 	},
 
