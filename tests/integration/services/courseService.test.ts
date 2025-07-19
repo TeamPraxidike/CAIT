@@ -1,7 +1,8 @@
 import { it, describe, expect } from 'vitest';
 import { Level } from '@prisma/client';
 import { createUniqueUser } from '../../utility/users';
-import { createUniqueMaterial, generateCourseData, generateRandomString } from '../../utility/publicationsUtility';
+import { createUniqueMaterial, generateRandomString } from '../../utility/publicationsUtility';
+import { generateCourseData } from '../../utility/courses';
 import {
 	createCourse, deleteCourse,
 	findCourseByMantainer,
@@ -68,6 +69,7 @@ describe('Courses interactions with publications', () => {
 			publications.push(material);
 			await linkCourseToPublication(material.publicationId, course.id);
 		}
+
 		await removeCourseFromPublications(course.id);
 
 		for (let i = 0; i < publications.length; i++) {

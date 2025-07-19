@@ -68,6 +68,7 @@ export async function removeCourseFromPublications(courseId: number) {
 	});
 }
 
+// Maybe wrap in a transaction
 export async function deleteCourse(courseId: number): Promise<Course> {
 	await removeCourseFromPublications(courseId);
 	return prisma.course.delete({

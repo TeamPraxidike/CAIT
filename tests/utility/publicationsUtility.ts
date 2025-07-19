@@ -16,7 +16,7 @@ export function generateRandomString(n: number = 20): string {
 	return result;
 }
 
-function randomEnumValue<T extends object>(e: T): T[keyof T] {
+export function randomEnumValue<T extends object>(e: T): T[keyof T] {
 	const rand = Math.floor(Math.random() * Object.keys(e).length);
 	const key = Object.keys(e)[rand] as keyof T;
 	return e[key];
@@ -81,25 +81,4 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 	expect(publication.publication.isDraft).toBe(false);
 
 	return publication;
-}
-
-export function generateCourseData(creatorID: string){
-	const los = Math.ceil(Math.random() * 5);
-	const prerequisites = Math.ceil(Math.random() * 5);
-
-	const learningObjectives: string[] = [];
-	for (let i = 0; i < los; i++) {
-		learningObjectives.push(generateRandomString(20));
-	}
-	const prerequisitesArray: string[] = [];
-	for (let i = 0; i < prerequisites; i++) {
-		prerequisitesArray.push(generateRandomString(20));
-	}
-	return {
-		learningObjectives: learningObjectives,
-		prerequisites: prerequisitesArray,
-		educationalLevel: randomEnumValue(Level),
-		courseName: generateRandomString(10),
-		creatorId: creatorID
-	};
 }
