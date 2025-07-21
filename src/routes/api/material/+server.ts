@@ -169,8 +169,10 @@ export async function POST({ request , locals}) {
 				);
 
 				await updateFiles(fileInfo, material.id, userId, prismaTransaction);
-				await linkCourseToPublication(material.publicationId, body.metaData.course);
-
+				console.log(material);
+				if (body.metaData.course) {
+					await linkCourseToPublication(material.publication.id, body.metaData.course, prismaTransaction);
+				}
 				return material;
 			},
 		);

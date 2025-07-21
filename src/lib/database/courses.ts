@@ -1,5 +1,5 @@
 
-import { type Level, Prisma } from '@prisma/client';
+import { type Level, Prisma, type PrismaClient } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 
 export type createCourseData = {
@@ -46,13 +46,25 @@ export async function findCourseByMantainer(userId: string): Promise<Course[]> {
 	});
 }
 
-export async function linkCourseToPublication(publicationId: number, courseId: number): Promise<void> {
-	await prisma.publication.update({
-		where: {
-			id: publicationId
-		},
+export async function linkCourseToPublication(publicationId: number, courseId: number, prismaTransaction: PrismaClient) {
+	if (!courseId) return;
+
+	// First check if the publication exists
+	const publication = await prismaTransaction.publication.findUnique({
+		where: { id: publicationId }
+	});
+
+	if (!publication) {
+		console.error(`Publication with ID ${publicationId} not found`);
+		return;
+	}
+
+	return prismaTransaction.publication.update({
+		where: { id: publicationId },
 		data: {
-			courseId: courseId
+			course: {
+				connect: { id: courseId }
+			}
 		}
 	});
 }
