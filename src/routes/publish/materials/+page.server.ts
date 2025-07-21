@@ -135,7 +135,7 @@ export const actions = {
 				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
 				isDraft: isDraft,
 				fileURLs: fileURLs || [],
-				course: data.get('course')?.toString() || 'null',
+				course: Number(data.get('course')?.toString()),
 			},
 			coverPic,
 			fileDiff: {
@@ -144,7 +144,6 @@ export const actions = {
 				edit: [],
 			},
 		};
-		console.log('material', material);
 		const res = await fetch('/api/material', {
 			method: 'POST',
 			body: JSON.stringify(material),

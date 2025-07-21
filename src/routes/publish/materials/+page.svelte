@@ -82,6 +82,31 @@
 	let selectedTypes: string[] = [];
 	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
 
+	let previousCourse: number | null = null;
+	$: if (course !== previousCourse) {
+		// Remove learning objectives and prerequisites that are a part of the previous course
+		const prevCourse = data.courses.find(c => c.id === previousCourse);
+		LOs = LOs.filter(l => !prevCourse?.learningObjectives.includes(l));
+		PKs = PKs.filter(p => !prevCourse?.prerequisites.includes(p));
+
+		previousCourse = course;
+
+		// Add learning objectives and prerequisites from the newly selected course, while keeping custom ones
+		for (let i = 0; i < data.courses.length; i++) {
+			if (data.courses[i].id === course) {
+				const lo = new Set(LOs);
+				const pk = new Set(PKs);
+				data.courses[i].learningObjectives.forEach(obj => lo.add(obj));
+				data.courses[i].prerequisites.forEach(obj => pk.add(obj));
+				LOs = Array.from(lo);
+				PKs = Array.from(pk);
+				break;
+			}
+		}
+
+	}
+
+
 	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
 	let typeActive = false;
@@ -194,8 +219,8 @@
 				description = existing.description;
 				tags = existing.tags;
 				newTags = existing.newTags;
-				LOs = existing.LOs;
-				PKs = existing.PKs;
+				// LOs = existing.LOs;
+				// PKs = existing.PKs;
 				selectedType = existing.selectedType ?? 'Select type';
 				difficulty = existing.difficulty ?? 'easy';
 				maintainers = existing.maintainers;
@@ -404,13 +429,14 @@
 					</div>
 				</div>
 				<div class="w-full">
-					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}" />
+					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}
+									 adding="{true}"/>
 				</div>
 				<div class="flex flex-col w-full">
 					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
 									   bind:additionalMaintainers={maintainers} />
 					<div class="lg:w-1/2">
-						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags} />
+						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 					</div>
 				</div>
 			</div>
