@@ -46,17 +46,15 @@ export async function findCourseByMantainer(userId: string): Promise<Course[]> {
 	});
 }
 
-export async function linkCourseToPublication(publicationId: number, courseId: number, prismaTransaction: PrismaClient) {
+export async function linkCourseToPublication(publicationId: number, courseId: number, prismaTransaction: PrismaClient = prisma) {
 	if (!courseId) return;
 
-	// First check if the publication exists
 	const publication = await prismaTransaction.publication.findUnique({
 		where: { id: publicationId }
 	});
 
 	if (!publication) {
-		console.error(`Publication with ID ${publicationId} not found`);
-		return;
+		throw new Error(`Publication with ID ${publicationId} not found.`);
 	}
 
 	return prismaTransaction.publication.update({
@@ -80,12 +78,13 @@ export async function removeCourseFromPublications(courseId: number) {
 	});
 }
 
-// Maybe wrap in a transaction
 export async function deleteCourse(courseId: number): Promise<Course> {
-	await removeCourseFromPublications(courseId);
-	return prisma.course.delete({
-		where: {
-			id: courseId
-		}
+	return prisma.$transaction(async (prismaTransaction: PrismaClient) => {
+		await removeCourseFromPublications(courseId);
+		return prismaTransaction.course.delete({
+			where: {
+				id: courseId
+			}
+		});
 	});
 }
