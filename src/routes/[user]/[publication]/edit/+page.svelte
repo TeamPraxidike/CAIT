@@ -28,6 +28,7 @@
 	import { type FormSnapshot, getCircuitSnapshot, saveCircuitSnapshot } from '$lib/util/indexDB';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
+	import SelectType from '$lib/components/publication/SelectType.svelte';
 
 
 
@@ -44,7 +45,7 @@
 	let theoryApp:any;
 	let time:any;
 	let copyright:any;
-	let selectedType:any;
+	let selectedType:string[];
 	let files: FileList;
 	let oldFiles: any;
 	let fetchedFiles: any;
@@ -86,7 +87,7 @@
 		theoryApp = serverData.publication.materials.theoryPractice;
 		time = serverData.publication.materials.timeEstimate;
 		copyright = serverData.publication.materials.copyright;
-		selectedType = serverData.publication.materials.encapsulatingType;
+		selectedType = [serverData.publication.materials.encapsulatingType];
 		(async () => {
 			fetchedFiles = await data.fetchedFiles;
 			//files = createFileList(serverData.fileData, serverData.publication.materials.files);
@@ -262,7 +263,7 @@
 		description,
 		learningObjectives: LOs,
 		tags,
-		materialType: selectedType,
+		materialType: selectedType[0],
 		isDraft: false
 	};
 	$: fileLength = files?.length;
@@ -320,7 +321,7 @@
 		formData.append('theoryAppRatio', JSON.stringify(theoryApp));
 		formData.append('timeEstimate', time);
 		formData.append('copyright', copyright);
-		formData.append('type', selectedType);
+		formData.append('type', JSON.stringify(selectedType));
 		formData.append('coverPicMat', coverPicMat || '');
 
 
@@ -376,8 +377,9 @@
 		<input minlength="3" type="text" id="title" name="title" bind:value={title} on:keydown={handleInputEnter}
 			   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
 		{#if isMaterial}
-			<label for="type"> Type</label>
-			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>
+<!--			<label for="type"> Type</label>-->
+<!--			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>-->
+			<SelectType bind:selectedTypes={selectedType}/>
 		{/if}
 		<label for="description"> Description</label>
 		<textarea minlength="10" id="description" name="description" bind:value={description}

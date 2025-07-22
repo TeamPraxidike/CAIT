@@ -6,6 +6,7 @@ import {
 	type MaterialForm,
 } from '$lib/database';
 import type { Difficulty, MaterialType, Tag } from '@prisma/client';
+import { convertMaterial } from '$lib/util/types';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();
@@ -177,9 +178,10 @@ export const actions = {
 					theoryPractice: Number(theoryApp),
 					tags: JSON.parse(selectedTags),
 					maintainers: JSON.parse(maintainers),
-					materialType: ([type] as MaterialType[]) || ['video'],
+					materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
 					isDraft: isDraft,
 					fileURLs: fileURLs || [],
+					course: 0
 				},
 				coverPic,
 				fileDiff: {

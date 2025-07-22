@@ -94,7 +94,7 @@ export async function PUT({ request, params, locals }) {
 	
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
-
+	console.log('PUT request for material with body:', body);
 	// TODO: cleanup
 	const material = body;
 	const metaData = material.metaData;
