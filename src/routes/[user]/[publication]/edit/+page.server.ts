@@ -7,14 +7,16 @@ import {
 } from '$lib/database';
 import type { Difficulty, MaterialType, Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
+import type { Course } from '$lib/database/courses';
 
-export const load: PageServerLoad = async ({ fetch, parent }) => {
+export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tagRes = await fetch('/api/tags');
 	const tags: Tag[] = await tagRes.json();
 	const usersRes = await fetch('/api/user');
 	const { users } = await usersRes.json();
-	return { tags, users };
+	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+	return { tags, users, courses };
 };
 
 export const actions = {

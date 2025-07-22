@@ -29,6 +29,8 @@
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 	import SelectType from '$lib/components/publication/SelectType.svelte';
+	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
+	import { changeCourse } from '$lib/util/coursesLogic';
 
 
 
@@ -52,6 +54,7 @@
 
 	let LOs: string[] = serverData.publication.learningObjectives;
 	let PKs: string[] = serverData.publication.prerequisites;
+	let course: number | null = null;
 	let difficulty: Difficulty = serverData.publication.difficulty;
 	type UserWithProfilePic = User & { profilePicData: string };
 	let liked: number[] = [];
@@ -94,6 +97,11 @@
 			files = createFileList(fetchedFiles, serverData.publication.materials.files);
 			oldFiles = serverData.publication.materials.files
 		})();
+	}
+
+	let previousCourse: number | null = null;
+	$: if (course !== previousCourse) {
+		({ course, previousCourse, LOs, PKs } = changeCourse(course, previousCourse, LOs, PKs, data.courses));
 	}
 
 	let coverPicMat:File|undefined = undefined;
@@ -331,6 +339,7 @@
 		formData.append('publisherId', JSON.stringify(serverData.publication.publisherId));
 		formData.append("isDraft", JSON.stringify(markedAsDraft || draft));
 		formData.append('fileURLs', JSON.stringify(fileURLs));
+		formData.append('course', course ? course.toString() : 'null');
 
 
 		if(circuitRef){
@@ -376,17 +385,16 @@
 		<label for="title"> Title</label>
 		<input minlength="3" type="text" id="title" name="title" bind:value={title} on:keydown={handleInputEnter}
 			   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
-		{#if isMaterial}
-<!--			<label for="type"> Type</label>-->
-<!--			<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType} bind:all={allTypes} selected={[]} num="{0}"/>-->
-			<SelectType bind:selectedTypes={selectedType}/>
-		{/if}
+
 		<label for="description"> Description</label>
 		<textarea minlength="10" id="description" name="description" bind:value={description}
 				  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400"
 		></textarea>
 		{#if isMaterial}
-			<div class="flex gap-4 items-center">
+			<SelectType bind:selectedTypes={selectedType}/>
+			<hr class="m-2">
+			<SelectCourse bind:selectedCourseId={course} courses={data.courses}/>
+			<div class="flex gap-4 items-center mt-6">
 				<DifficultySelection bind:difficulty={difficulty} />
 			</div>
 			<div class="flex flex-col items-start">

@@ -34,6 +34,7 @@
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
+	import { changeCourse } from '$lib/util/coursesLogic';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -82,27 +83,11 @@
 	let selectedTypes: string[] = [];
 	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
 
+
+
 	let previousCourse: number | null = null;
 	$: if (course !== previousCourse) {
-		// Remove learning objectives and prerequisites that are a part of the previous course
-		const prevCourse = data.courses.find(c => c.id === previousCourse);
-		LOs = LOs.filter(l => !prevCourse?.learningObjectives.includes(l));
-		PKs = PKs.filter(p => !prevCourse?.prerequisites.includes(p));
-
-		previousCourse = course;
-
-		// Add learning objectives and prerequisites from the newly selected course, while keeping custom ones
-		for (let i = 0; i < data.courses.length; i++) {
-			if (data.courses[i].id === course) {
-				const lo = new Set(LOs);
-				const pk = new Set(PKs);
-				data.courses[i].learningObjectives.forEach(obj => lo.add(obj));
-				data.courses[i].prerequisites.forEach(obj => pk.add(obj));
-				LOs = Array.from(lo);
-				PKs = Array.from(pk);
-				break;
-			}
-		}
+		({ course, previousCourse, LOs, PKs } = changeCourse(course, previousCourse, LOs, PKs, data.courses));
 	}
 
 
