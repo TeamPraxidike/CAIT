@@ -271,7 +271,7 @@
 		description,
 		learningObjectives: LOs,
 		tags,
-		materialType: selectedType[0],
+		materialType: selectedType,
 		isDraft: false
 	};
 	$: fileLength = files?.length;

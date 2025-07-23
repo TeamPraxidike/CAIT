@@ -46,7 +46,7 @@ export async function findCourseByMantainer(userId: string): Promise<Course[]> {
 	});
 }
 
-export async function linkCourseToPublication(publicationId: number, courseId: number, prismaTransaction: PrismaClient = prisma) {
+export async function linkCourseToPublication(publicationId: number, courseId: number, prismaTransaction: Prisma.TransactionClient = prisma) {
 	if (!courseId) return;
 
 	const publication = await prismaTransaction.publication.findUnique({
@@ -65,6 +65,17 @@ export async function linkCourseToPublication(publicationId: number, courseId: n
 			}
 		}
 	});
+}
+
+export async function removeCourseFromPublication(publicationID: number) {
+	await prisma.publication.update({
+		where: {
+			id: publicationID
+		},
+		data: {
+			courseId: null
+		}
+	})
 }
 
 export async function removeCourseFromPublications(courseId: number) {

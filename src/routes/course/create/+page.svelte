@@ -36,6 +36,7 @@
 		formData.append('title', title);
 		formData.append('learningObjectives', JSON.stringify(learningObjectives));
 		formData.append('prerequisites', JSON.stringify(prerequisites));
+		formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
     }}>
 
 	<h2 class="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold">Create a course</h2>

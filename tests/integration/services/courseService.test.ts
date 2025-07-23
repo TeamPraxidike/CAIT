@@ -43,7 +43,6 @@ describe('Courses CRUD', () => {
 });
 
 describe('Courses interactions with publications', () => {
-
 	it('should link courses with publications', async () => {
 		const user = await createUniqueUser();
 		const courseData = generateCourseData(user.id)

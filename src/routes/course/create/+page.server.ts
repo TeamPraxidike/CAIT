@@ -8,6 +8,7 @@ export const actions = {
 		const session = await locals.safeGetSession();
 		if (!session || !session.user) throw redirect(303, '/signin');
 		console.log("here");
+		console.log(request);
 		try {
 			const formData = await request.formData();
 			console.log("here1");
