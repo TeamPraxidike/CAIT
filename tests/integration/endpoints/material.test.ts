@@ -1,7 +1,9 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { resetMaterialTable, testingUrl } from '../setup';
 import { createUniqueUser } from '../../utility/users';
-import { createUniqueMaterial } from '../../utility/publicationsUtility';
+import { createMaterialData, createUniqueMaterial } from '../../utility/publicationsUtility';
+import type { User } from '$lib/database/user';
+import { getMaterialByPublicationId, getPublicationById } from '$lib/database';
 
 it('should be AEY', () => {
     expect(3).toBe(3);
@@ -245,4 +247,74 @@ describe('Materials', async () => {
     //
     //     await resetMaterialTable();
     // });
+
+    describe('[PUT] /material/:id', () => {
+        let user: User;
+        beforeEach(async () => {
+            user = await createUniqueUser();
+        });
+
+        it('should updata all data on edit', async () => {
+            const material = await createUniqueMaterial(user.id);
+            const editData = await createMaterialData(user.id);
+
+
+            const response = await fetch(
+                `${testingUrl}/material/${material.publication.id}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(editData),
+                },
+            );
+            expect(response.status).toBe(200);
+
+            const newPublication = await getMaterialByPublicationId(material.publication.id);
+            if (newPublication === null) {
+                throw new Error('Material not found after edit');
+            }
+
+            expect(newPublication.timeEstimate).toBe(editData.metaData.timeEstimate);
+            expect(newPublication.publication.title).toBe(editData.metaData.title);
+            expect(newPublication.publication.description).toBe(editData.metaData.description);
+            expect(newPublication.copyright).toBe(editData.metaData.copyright);
+            expect(newPublication.publication.difficulty).toBe(editData.metaData.difficulty);
+            expect(newPublication.publication.learningObjectives).toEqual(editData.metaData.learningObjectives);
+            expect(newPublication.publication.prerequisites).toEqual(editData.metaData.prerequisites);
+            expect([newPublication.encapsulatingType]).toEqual(editData.metaData.materialType);
+            expect(newPublication.theoryPractice).toBe(editData.metaData.theoryPractice);
+            expect(newPublication.publication.isDraft).toBe(editData.metaData.isDraft);
+            expect(newPublication.publication.tags).toEqual(editData.metaData.tags);
+            expect(newPublication.publication.maintainers).toEqual(editData.metaData.maintainers);
+        });
+
+        it('should unlink courses', async () => {
+            const material = await createUniqueMaterial(user.id);
+            const editData = await createMaterialData(user.id);
+            editData.metaData.course = NaN;
+
+            const response = await fetch(
+                `${testingUrl}/material/${material.publication.id}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(editData),
+                },
+            );
+            expect(response.status).toBe(200);
+
+            const newPublication = await getMaterialByPublicationId(material.publication.id);
+            if (newPublication === null) {
+                throw new Error('Material not found after edit');
+            }
+
+            const pub = await getPublicationById(material.publicationId);
+            expect(pub).toBeDefined();
+            expect(pub.courseId).toBeNull();
+        });
+    });
 });

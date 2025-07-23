@@ -1,10 +1,10 @@
 
 // function to generate a random string of characters of length n
-import { Difficulty, Level, MaterialType } from '@prisma/client';
-import { createCircuitPublication, createMaterialPublication } from '$lib/database';
+import { Difficulty, MaterialType } from '@prisma/client';
+import { createCircuitPublication, createMaterialPublication, type MaterialForm } from '$lib/database';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { expect } from 'vitest';
-import { createCourse } from '$lib/database/courses';
+import { createRandomCourse } from './courses';
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -40,6 +40,50 @@ export async function createUniqueCircuit(userId: string, numNodes: number = 0) 
 	};
 
 	return await createCircuitPublication(userId, numNodes, inputData)
+}
+
+export async function createMaterialMetaData(userId: string): Promise<MaterialForm['metaData']> {
+	const title = generateRandomString();
+	const description = generateRandomString(100);
+	const copyright = generateRandomString(10);
+	const difficulty = randomEnumValue(Difficulty);
+	const learningObjectives = [generateRandomString()];
+	const prerequisites = [generateRandomString()];
+	const materialType = [randomEnumValue(MaterialType)];
+	const timeEstimate = Math.floor(Math.random() * 10) + 1;
+	const theoryPractice = Math.random();
+
+	const course = await createRandomCourse(userId);
+
+	return {
+		title,
+		description,
+		copyright,
+		difficulty,
+		learningObjectives,
+		prerequisites,
+		materialType,
+		timeEstimate,
+		theoryPractice,
+		isDraft: false,
+		tags: [],
+		maintainers: [],
+		fileURLs: [],
+		course: course.id
+	};
+}
+
+export async function createMaterialData(userId: string): Promise<MaterialForm> {
+	return {
+		userId,
+		metaData: await createMaterialMetaData(userId),
+		fileDiff: {
+			add: [],
+			delete: [],
+			edit: []
+		},
+		coverPic: null
+	}
 }
 
 export async function createUniqueMaterial(userId: string): Promise<MaterialWithPublicationNoFiles> {

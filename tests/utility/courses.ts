@@ -43,3 +43,18 @@ export function generateCourseData(creatorID: string){
 		creatorId: creatorID
 	};
 }
+
+export async function createRandomCourse(creatorId: string){
+	const courseData = generateCourseData(creatorId)
+	return await createCourse(courseData);
+}
+
+export async function createMaterialsWithCourses(userId: string, courseId: number, num: number = 5){
+	const publications: MaterialWithPublicationNoFiles[] = []
+	for (let i = 0; i < num; i++) {
+		const material = await createUniqueMaterial(userId);
+		publications.push(material);
+		await linkCourseToPublication(material.publicationId, courseId);
+	}
+	return publications;
+}
