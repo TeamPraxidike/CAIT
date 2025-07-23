@@ -182,18 +182,25 @@ export async function POST({ request , locals}) {
 					prismaTransaction,
 				);
 
-				await updateCoverPic(
-					coverPic,
-					material.publicationId,
-					userId,
-					prismaTransaction,
-				);
-
-				await updateFiles(fileInfo, material.id, userId, prismaTransaction);
+				// await updateCoverPic(
+				// 	coverPic,
+				// 	material.publicationId,
+				// 	userId
+				// );
+				//
+				// await updateFiles(fileInfo, material.id, userId);
 
 				return material;
 			},
 		);
+
+		await updateCoverPic(
+			coverPic,
+			createdMaterial.publicationId,
+			userId
+		);
+
+		await updateFiles(fileInfo, createdMaterial.id, userId);
 
 		await updateReputation(userId, 30);
 
