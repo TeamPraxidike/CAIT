@@ -23,9 +23,10 @@ export class SupabaseFileSystem implements FileSystem {
 	 * @param file Binary data of the file
 	 * @param name The name of the file
 	 * @param ownerId file owner uuid
+	 * @param type - mime type
 	 * @returns Promise<string> The path/key of the saved file in the bucket
 	 */
-	async saveFile(file: Buffer, name: string, ownerId: string): Promise<string> {
+	async saveFile(file: Buffer, name: string, ownerId: string, type?: string): Promise<string> {
 		if (!file) throw new Error('No file provided');
 
 		try{
@@ -39,7 +40,10 @@ export class SupabaseFileSystem implements FileSystem {
 					cacheControl: '3600', // 60 minutes
 					metadata: {
 						"ownerId": ownerId
-					}
+					},
+					// https://stackoverflow.com/questions/78048604/supabase-storage-error-failed-to-load-pdf-document
+					upsert: true,
+					contentType: type ?? 'text/plain;charset=UTF-8'
 				});
 
 			if (error) throw error;

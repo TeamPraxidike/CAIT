@@ -5,7 +5,7 @@
  * @see LocalFileSystem
  */
 export default interface FileSystem {
-	saveFile(file: Buffer, name: string, ownerId: string): Promise<string>;
+	saveFile(file: Buffer, name: string, ownerId?: string, type?: string): Promise<string>;
 	deleteFile(path: string): void;
 	readFile(path: string): Promise<Buffer>;
 	readFileURL?(path: string): Promise<string>;

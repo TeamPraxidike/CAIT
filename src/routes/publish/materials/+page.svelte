@@ -439,7 +439,7 @@
 							Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
 						</p>
 
-						<FileTable bind:files={files} bind:fileURLs={fileURLs}/>
+						<FileTable bind:files={files} bind:fileURLs={fileURLs} fileFormat = 'upload'/>
 					</div>
 					<div class="col-span-4 flex flex-col gap-4">
 						{#if coverPic}

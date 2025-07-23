@@ -5,7 +5,8 @@ import {
 	type FetchedFileItem,
 	type FileDiffActions,
 	fileSystem,
-	getMaterialByPublicationId, getPublisherId,
+	getMaterialByPublicationId,
+	getPublisherId,
 	handleConnections,
 	type MaterialForm,
 	prisma,
@@ -18,8 +19,10 @@ import { type File as PrismaFile, Prisma, type PrismaClient } from '@prisma/clie
 import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
 
 
-import {enqueueMaterialComparison} from "$lib/PiscinaUtils/runner";
+import { enqueueMaterialComparison } from '$lib/PiscinaUtils/runner';
 import { getMaintainers, getPublisher } from '$lib/database/publication';
+import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
+import { profilePicFetcher } from '$lib/database/file';
 
 
 export async function GET({ params, locals }) {
@@ -52,25 +55,41 @@ export async function GET({ params, locals }) {
 		const fileData: FetchedFileArray = [];
 
 		for (const file of material.files) {
-			const currentFileData = await fileSystem.readFile(file.path);
-			fileData.push({
-				fileId: file.path,
-				data: currentFileData.toString('base64'),
-			});
+			//const currentFileData = await fileSystem.readFile(file.path);
+			if (fileSystem instanceof SupabaseFileSystem){
+				const currentFileData = await fileSystem.readFileURL(file.path);
+				fileData.push({
+					fileId: file.path,
+					name: file.title,
+					type: file.type,
+					data: currentFileData
+				});
+			}
+			// TODO: This will break on the frontend (when using LocalFileSystem)
+			// Because the system expects urls, not base64 strings
+			else {
+				const currentFileData = await fileSystem.readFile(file.path);
+				fileData.push({
+					fileId: file.path,
+					name: file.title,
+					type: file.type,
+					data: currentFileData.toString('base64')
+				});
+			}
 		}
 
-		// coverPic return
+		// coverPic
 		const coverFileData: FetchedFileItem = await coverPicFetcher(
 			material.encapsulatingType,
 			material.publication.coverPic,
 		);
 
-		// TODO: is the || necessary
-		material.publication.publisher = {
-			...material.publication.publisher,
-			profilePicData:
-				material.publication.publisher.profilePic?.data || '',
-		};
+		// publisher profile pic
+		// TODO: this needs a type, not questionable type assertions
+		(material.publication.publisher as any).profilePicData = await profilePicFetcher(
+			material.publication.publisher.profilePic
+		);
+
 
 		return new Response(
 			JSON.stringify({ material, fileData, coverFileData }),

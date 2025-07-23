@@ -181,8 +181,15 @@ type FileDiffActions = {
 /**
  * Fetched file item with the id and the data in the form of a base64 string.
  */
+// type FetchedFileItem = {
+// 	fileId: string;
+// 	data: string | null;
+// };
+
 type FetchedFileItem = {
 	fileId: string;
+	name?: string;
+	type?: string;
 	data: string | null;
 };
 

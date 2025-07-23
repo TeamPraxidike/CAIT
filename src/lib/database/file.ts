@@ -1,7 +1,8 @@
 import {
+	type FetchedFileItem,
 	type FileDiffActions,
 	fileSystem,
-	prisma,
+	prisma
 } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
 import type { File as PrismaFile, FileChunk } from '@prisma/client';
@@ -9,6 +10,7 @@ import path from 'path';
 import type { FileChunks } from '$lib/PiscinaUtils/runner';
 import { addFileURL } from '$lib/database/fileURL';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
+import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 
 
 // // TODO: This seems to be useless, could remove if nothing breaks
@@ -19,12 +21,12 @@ import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 // 		data: file.data.toString(),
 // 	}));
 // }
-export type ProfilePic = {
-	fileId: string;
-	data: string | null;
-}
+// export type ProfilePic = {
+// 	fileId: string;
+// 	data: string | null;
+// }
 
-export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<ProfilePic> {
+export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<FetchedFileItem> {
 	let filePath;
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
@@ -52,7 +54,7 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
 		// 	data: currentFileData.toString('base64'),
 		// };
 		let currentFileData;
-		if (!(fileSystem instanceof LocalFileSystem)) {
+		if (fileSystem instanceof SupabaseFileSystem) {
 			currentFileData = await fileSystem.readFileURL(filePath);
 		}
 		else {
@@ -74,7 +76,7 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
 export async function coverPicFetcher(
 	encapsulatingType: string,
 	coverPic: PrismaFile | null,
-) {
+) : Promise<FetchedFileItem> {
 	let filePath;
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
@@ -108,7 +110,7 @@ export async function coverPicFetcher(
 		// 	data: currentFileData.toString('base64'),
 		// };
 		let currentFileData;
-		if (!(fileSystem instanceof LocalFileSystem)) {
+		if (fileSystem instanceof SupabaseFileSystem) {
 			currentFileData = await fileSystem.readFileURL(filePath);
 		}
 		else {
@@ -281,13 +283,13 @@ export async function addFile(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
-		const path = await fileSystem.saveFile(info, title, ownerId);
+		const path = await fileSystem.saveFile(info, title, ownerId, type);
 		try {
 			return prismaContext.file.create({
 				data: {
 					path: path,
 					title: title,
-					type,
+					type: type,
 					materialId: materialId, // Associate the File with Material, could use connect, shouldn't matter
 				},
 			});

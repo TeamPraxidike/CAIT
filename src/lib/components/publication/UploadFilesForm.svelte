@@ -64,5 +64,5 @@
 			</div>
 		</div>
 	</div>
-	<FileTable operation="edit" bind:files={files} bind:fileURLs={fileURLs}/>
+	<FileTable operation="edit" fileFormat="upload" bind:files={files} bind:fileURLs={fileURLs}/>
 </div>

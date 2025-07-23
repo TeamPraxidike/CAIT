@@ -5,25 +5,40 @@
 	import { Download, Render } from '$lib';
 	import { slide } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
+	import type { FetchedFileArray, FetchedFileItem } from '$lib/database';
 
-	export let files: FileList | any[];
+	// export let files: FileList | any[];
+	// it's a FileList during upload, it's a FetchedFileArray when fetched from the backend
+	export let files: FileList | FetchedFileArray;
 	export let fileURLs: string[] = [];
 
+	// it's a FileList during upload, it's a FetchedFileArray when fetched from the backend
+	// TODO: a better name could go a long way
+	export let fileFormat: 'upload' | 'fetch' = 'fetch';
 	export let operation: 'download' | 'view' | 'edit' = 'view';
 	const ms = getModalStore();
 
 	$: warning = (files && files.length === 0) && (fileURLs && fileURLs.length === 0);
 
 
-	function activateModal(file: File) {
+	// function activateModal(file: File) {
+	function activateModal(file: File | FetchedFileItem) {
 		ms.trigger({
 			type: 'component',
-			component: { ref: Render, props: { file } }
+			component: { ref: Render, props: { file, fileFormat } }
 		});
 	}
 
-	function removeFile(file: File) {
-		files = Array.from(files).filter(f => f.name !== file.name) as unknown as FileList;
+	// function removeFile(file: File) {
+	// 	files = Array.from(files).filter(f => f.name !== file.name) as unknown as FileList;
+	// }
+	function removeFile(file: File | FetchedFileItem) {
+		if (fileFormat === 'fetch') {
+			files = Array.from(files as FetchedFileArray).filter(f => f.fileId !== (file as FetchedFileItem).fileId);
+		}
+		else{
+			files = Array.from(files as FileList).filter(f => f.name !== (file as File).name) as unknown as FileList;
+		}
 	}
 	function removeURL(url: string) {
 		fileURLs = Array.from(fileURLs).filter(x => x !== url) as string[];
@@ -38,6 +53,7 @@
 	{/if}
 	{#if files}
 		<div class="flex flex-col gap-1">
+			<!--{#each files as file (file.name)}-->
 			{#each files as file (file.name)}
 				<button type="button" animate:flip={{ delay: 0, duration: 200 }}
 						class="hover:bg-gray-200 transition-colors duration-75 flex items-center rounded-lg gap-2 p-3 bg-gray-100 dark:hover:bg-surface-700 dark:bg-surface-800"
@@ -47,7 +63,7 @@
 						  class="text-xl text-surface-500" />
 					<span class="hover:text-surface-700 underline cursor-pointer dark:text-surface-200 dark:hover:text-surface-600 text-surface-500">{file.name}</span>
 					{#if operation === 'download'}
-						<Download file={file} className="ml-auto">
+						<Download file={file} fileFormat={fileFormat} className="ml-auto">
 							<Icon class="xl:text-2xl" icon="material-symbols:download" />
 						</Download>
 					{:else if operation === 'edit'}
