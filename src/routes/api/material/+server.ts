@@ -19,6 +19,7 @@ import type { PrismaClient, Tag} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
 import type { MaterialWithPublication, MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { isMaterialValid } from '$lib/util/validatePublication';
+import { linkCourseToPublication } from '$lib/database/courses';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -168,7 +169,10 @@ export async function POST({ request , locals}) {
 				);
 
 				await updateFiles(fileInfo, material.id, userId, prismaTransaction);
-
+				console.log(material);
+				if (body.metaData.course) {
+					await linkCourseToPublication(material.publication.id, body.metaData.course, prismaTransaction);
+				}
 				return material;
 			},
 		);

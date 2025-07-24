@@ -1,12 +1,15 @@
 import type { Actions, PageServerLoad } from './$types';
 import { type MaterialForm } from '$lib/database';
 import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
+import type { Course } from '$lib/database/courses';
+import { convertMaterial } from '$lib/util/types';
 
-export const load: PageServerLoad = async ({ fetch, parent }) => {
+export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	return { tags, users };
+	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+	return { tags, users, courses };
 };
 
 /**
@@ -38,26 +41,6 @@ async function filesToAddOperation(fileList: FileList, fileURLs: string[] = []) 
 
 	return (await Promise.all(addPromises)).concat(addURLs);
 }
-
-const convertMaterial = (s: string): MaterialType => {
-	switch (s.toLowerCase()) {
-		case 'exam questions':
-			return MaterialType.examQuestions;
-		case 'lecture notes':
-			return MaterialType.lectureNotes;
-		case 'slides':
-			return MaterialType.slides;
-		case 'assignment':
-			return MaterialType.assignment;
-		case 'other':
-			return MaterialType.other;
-		case 'video':
-			return MaterialType.video;
-		default:
-			// Handle invalid input if necessary
-			return MaterialType.other;
-	}
-};
 
 export const actions = {
 	/**
@@ -133,6 +116,7 @@ export const actions = {
 				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
 				isDraft: isDraft,
 				fileURLs: fileURLs || [],
+				course: Number(data.get('course')?.toString()),
 			},
 			coverPic,
 			fileDiff: {
@@ -141,7 +125,6 @@ export const actions = {
 				edit: [],
 			},
 		};
-
 		const res = await fetch('/api/material', {
 			method: 'POST',
 			body: JSON.stringify(material),

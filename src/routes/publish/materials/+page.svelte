@@ -10,7 +10,7 @@
 	import { FileButton, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
-	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
+	import type {  Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
@@ -33,6 +33,8 @@
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
+	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
+	import { changeCourse } from '$lib/util/coursesLogic';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -73,12 +75,21 @@
 	// input data
 	let title: string = '';
 	let description: string = '';
+	let course: number | null = null;
 	let difficulty: Difficulty = 'easy';
 	let estimate: string = '';
 	let copyright: string = '';
 	let theoryApplicationRatio: number = 0.5;
 	let selectedTypes: string[] = [];
 	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
+
+
+
+	let previousCourse: number | null = null;
+	$: if (course !== previousCourse) {
+		({ course, previousCourse, LOs, PKs } = changeCourse(course, previousCourse, LOs, PKs, data.courses));
+	}
+
 
 	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
@@ -192,8 +203,8 @@
 				description = existing.description;
 				tags = existing.tags;
 				newTags = existing.newTags;
-				LOs = existing.LOs;
-				PKs = existing.PKs;
+				// LOs = existing.LOs;
+				// PKs = existing.PKs;
 				selectedType = existing.selectedType ?? 'Select type';
 				difficulty = existing.difficulty ?? 'easy';
 				maintainers = existing.maintainers;
@@ -311,6 +322,7 @@
 		formData.append('newTags', JSON.stringify(newTags));
 		formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
+		formData.append('course', course ? course.toString() : 'null');
       }}>
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 			 buttonNext="btn dark:bg-surface-200"
@@ -347,7 +359,11 @@
 <!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
 <!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
 <!--						on:clearSettings={() => {typeActive=false}} />-->
-				<SelectType bind:selectedTypes={selectedTypes}/>
+				<div class="flex flex-col gap-2">
+					<SelectType bind:selectedTypes={selectedTypes}/>
+					<hr class="m-2">
+					<SelectCourse bind:selectedCourseId={course} courses={data.courses}/>
+				</div>
 
 				<div>
 					{#if coverPic}
@@ -397,13 +413,14 @@
 					</div>
 				</div>
 				<div class="w-full">
-					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}" />
+					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}
+									 adding="{true}"/>
 				</div>
 				<div class="flex flex-col w-full">
 					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
 									   bind:additionalMaintainers={maintainers} />
 					<div class="lg:w-1/2">
-						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags} />
+						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 					</div>
 				</div>
 			</div>

@@ -103,6 +103,12 @@
         }
     }
 
+    const deleteLO = (lo: string) => {
+        LOs = LOs.filter(x => x !== lo);
+    }
+    const deletePK = (pk: string) => {
+        priorKnowledge = priorKnowledge.filter(x => x !== pk);
+    }
 </script>
 
 
@@ -128,12 +134,10 @@
 
             <div class="overflow-y-auto max-h-56 mt-1 space-y-1 flex flex-col max-w-full">
                 {#each LOs as LO, index}
-
                     {#if editingLO && index === editingIndexLO}
                         <input class="focus:border-primary-400 dark:bg-surface-700 bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md"
                                bind:value={editingLOText} on:keypress={handleLOEdit}/>
                     {:else }
-
                         <div role="table" tabindex="-1" class="p-2 flex rounded-lg justify-between dark:bg-surface-700 bg-surface-200 items-center text-wrap shrink break-words" on:mouseenter={()=>{displayButtonLO=true; hoverIndexLO=index}} on:mouseleave={()=>{displayButtonLO=false;}}>
                             <p class="right-1 text-base p-1 rounded-md break-words max-w-4/5">{LO}</p>
 
@@ -142,7 +146,7 @@
                                     <button type="button" class="self-center rounded-lg" on:click={() => {editingLO=true; editingIndexLO=index; editingLOText=LO;}}>
                                         <Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 dark:text-surface-200 ml-auto hover:text-opacity-85" />
                                     </button>
-                                    <button type="button" class=" self-center rounded-lg" on:click={() => {LOs = LOs.filter(x=>x!==LO)}}>
+                                    <button type="button" class=" self-center rounded-lg" on:click={() => {deleteLO(LO)}}>
                                         <Icon icon="mdi:trash-can" width="20" height="20" class="text-error-300 ml-auto dark:text-error-600 hover:text-opacity-85" />
                                     </button>
                                 </div>
@@ -187,7 +191,7 @@
                                 <button type="button" class="self-center rounded-lg" on:click={() => {editingPK=true; editingIndexPK=index; editingPKText=pk;}}>
                                     <Icon icon="mdi:pencil" width="20" height="20"  class="text-surface-700 dark:text-surface-200 ml-auto hover:text-opacity-85" />
                                 </button>
-                                <button type="button" class=" self-center rounded-lg" on:click={() => {priorKnowledge = priorKnowledge.filter(x=>x!==pk)}}>
+                                <button type="button" class=" self-center rounded-lg" on:click={() => deletePK(pk)}>
                                     <Icon icon="mdi:trash-can" width="20" height="20" class="text-error-300 dark:text-error-600 ml-auto hover:text-opacity-85" />
                                 </button>
                             </div>

@@ -12,6 +12,7 @@
 
     const numPosts = user.posts.filter((x) => !x.isDraft).length
     const numDrafts = user.posts.filter((x) => x.isDraft).length
+    const courses = ["CSE3000"]
 
     /**
      * Check if the current user is the same as the user being viewed.
@@ -65,9 +66,23 @@
                     <div class="flex gap-2">
                         <a type="button" href="/{user.username}/edit"  class="btn bg-surface-800 text-surface-50 rounded-lg
                            dark:bg-surface-700">Edit Profile</a>
-                        <button class="btn bg-surface-800 text-surface-50 rounded-lg
-                           dark:bg-surface-700">Settings</button>
                     </div>
+                {/if}
+            </div>
+            <hr class="w-11/12">
+
+            <div class="flex gap-2 flex-wrap">
+                {#if currentlyAuth()}
+                    {#each courses as course}
+                    <div class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium
+					   hover:bg-gray-100 hover:text-black transition">
+                        {course}
+                    </div>
+                        {/each}
+                    <button class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium
+					   hover:bg-gray-100 hover:text-black transition">
+                        Add Course
+                    </button>
                 {/if}
             </div>
         </div>
