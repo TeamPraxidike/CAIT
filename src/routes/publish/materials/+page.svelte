@@ -340,44 +340,55 @@
 
 				<label for="coverPic">Cover Picture</label>
 
-				<div class="flex flex-col gap-2 min-h-80">
+
+				<div class="flex flex-col gap-2">
 					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
-					<textarea name="description" placeholder="Description..." bind:value={description}
-							  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
+					<div class="flex flex-col gap-2">
+						<SelectType bind:selectedTypes={selectedTypes}/>
+						<hr class="m-2">
+						<SelectCourse bind:selectedCourseId={course} courses={data.courses}/>
+					</div>
 				</div>
 
-				<div class="flex flex-col gap-2 h-full bg-surface-200
-							border-2 border-dashed border-surface-700">
-					{#if coverPic}
-						<img src={URL.createObjectURL(coverPic)}
-							 alt="coverPicture"
-							 class="max-h-96 w-full object-contain h-full">
-					{/if}
+				<div>
+					<div class="flex flex-col gap-2 h-full bg-surface-200
+								border-2 border-dashed border-surface-700">
+
+						<div>
+							{#if coverPic}
+								<img src={URL.createObjectURL(coverPic)}
+									 alt="coverPicture"
+									 class="max-h-96 w-full object-contain h-full">
+							{/if}
+						</div>
+					</div>
+
+					<div>
+						{#if coverPic}
+							<button on:click={() => coverPic = undefined} type="button"
+									class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
+								Remove Cover Picture
+							</button>
+						{:else}
+							<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
+										on:change={chooseCover} name="coverPhoto">
+								Upload Cover Picture
+							</FileButton>
+						{/if}
+					</div>
 				</div>
+
+
+
+
 
 <!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
 <!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
 <!--						on:clearSettings={() => {typeActive=false}} />-->
-				<div class="flex flex-col gap-2">
-					<SelectType bind:selectedTypes={selectedTypes}/>
-					<hr class="m-2">
-					<SelectCourse bind:selectedCourseId={course} courses={data.courses}/>
-				</div>
 
-				<div>
-					{#if coverPic}
-						<button on:click={() => coverPic = undefined} type="button"
-								class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
-							Remove Cover Picture
-						</button>
-					{:else}
-						<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
-									on:change={chooseCover} name="coverPhoto">
-							Upload Cover Picture
-						</FileButton>
-					{/if}
-				</div>
+
+
 
 			</div>
 
@@ -385,16 +396,15 @@
 		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-			<div class="flex flex-col gap-8 p-6 justify-between">
-				<div class="flex gap-4 items-center">
-					<DifficultySelection bind:difficulty={difficulty} />
-				</div>
-				<div class="flex flex-row gap-4 md:gap-2 items-center">
-					<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>
-					<TheoryAppBar bind:value={theoryApplicationRatio} />
-				</div>
-			</div>
-
+<!--			<div class="flex flex-col gap-8 p-6 justify-between">-->
+<!--				<div class="flex gap-4 items-center">-->
+<!--					<DifficultySelection bind:difficulty={difficulty} />-->
+<!--				</div>-->
+<!--				<div class="flex flex-row gap-4 md:gap-2 items-center">-->
+<!--					<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>-->
+<!--					<TheoryAppBar bind:value={theoryApplicationRatio} />-->
+<!--				</div>-->
+<!--			</div>-->
 			<div class="flex flex-col gap-4 p-3">
 				<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
 					<div class="w-full md:w-1/2 flex-col gap-2">
@@ -423,6 +433,8 @@
 						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 					</div>
 				</div>
+				<textarea name="description" placeholder="Additional Description..." bind:value={description}
+						  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
 			</div>
 		</Step>
 		<Step locked={isSubmitting}>

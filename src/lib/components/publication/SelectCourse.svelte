@@ -2,10 +2,12 @@
 	import Icon from '@iconify/svelte';
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import type { Course } from '$lib/database/courses';
+	import CourseModal from '$lib/components/publication/CourseModal.svelte';
+	import { invalidate } from '$app/navigation';
 
 	const modalStore = getModalStore();
 
-	export let courses: Course[];
+	export let courses: Course[] = [];
 	export let selectedCourseId: number | null = null;
 
 	function selectType(courseId: number) {
@@ -28,37 +30,60 @@
 			}
 		}
 	};
+	console.log(courses)
 
 
+	let showModal = false;
+
+	const openNewCourseModal = () => {
+		showModal = true;
+	};
+
+
+	const closeModal = () => showModal = false;
+
+	const refresh = () => {
+		// invalidate current page data or manually refetch from endpoint
+	};
 </script>
 
 <div class="flex flex-wrap gap-2">
-	{#each courses as course}
-		<button
-			type="button"
-			on:click={() => selectType(course.id)}
-			class="group relative px-2 py-1 text-sm font-medium
-	   transition hover:font-bold
-	   {course.id === selectedCourseId ? 'bg-primary-600 text-white border-primary-500 rounded-full' : 'bg-white text-gray-800'}"
-		>
-			{course.courseName}
+
+	{#if showModal}
+		<CourseModal existingCourse={null} onSuccess={refresh} close={closeModal} />
+	{/if}
+
+
+	{#if Array.isArray(courses) && courses.length > 0}
+		{#each courses as course}
 			<button
 				type="button"
-				class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs cursor-pointer"
-				aria-label="Delete course"
-				on:click={() => modalStore.trigger(modal)}
+				on:click={() => selectType(course.id)}
+				class="group relative px-2 py-1 text-sm font-medium
+		   transition hover:font-bold
+		   {course.id === selectedCourseId ? 'bg-primary-600 text-white border-primary-500 rounded-full' : 'bg-white text-gray-800'}"
 			>
-				x
+				{course.courseName}
+				<button
+					type="button"
+					class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs cursor-pointer"
+					aria-label="Delete course"
+					on:click={() => modalStore.trigger(modal)}
+				>
+					x
+				</button>
 			</button>
-		</button>
-		{#if course !== courses[courses.length - 1]}
-			<div class="w-px h-5 bg-gray-300 self-center"></div>
-		{/if}
-	{/each}
+			{#if course !== courses[courses.length - 1]}
+				<div class="w-px h-5 bg-gray-300 self-center"></div>
+			{/if}
+		{/each}
+	{:else}
+		<p>No courses available. Click below to add one.</p>
+	{/if}
 
-	{#if courses.length === 0}
+		{#if courses.length === 0}
 		<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-				on:click={() => window.location.href = '/course/create'}>
+				on:click={() => openNewCourseModal()}>
 			Add a course
 		</button>
 	{:else}
