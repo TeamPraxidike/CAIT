@@ -360,7 +360,10 @@
 					<div class="flex flex-col gap-2">
 						<SelectType bind:selectedTypes={selectedTypes}/>
 						<hr class="m-2">
-						<SelectCourse on:showCourseModal={openModal} bind:selectedCourseId={course} courses={data.courses}/>
+						<SelectCourse on:showCourseModal={openModal}
+									  bind:selectedCourseId={course}
+									  courses={data.courses}
+									  allCourses={data.allCourses}/>
 					</div>
 				</div>
 

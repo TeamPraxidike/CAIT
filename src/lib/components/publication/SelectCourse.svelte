@@ -15,6 +15,7 @@
 	const modalStore = getModalStore();
 
 	export let courses: Course[] = [];
+	export let allCourses: Course[]	= [];
 	export let selectedCourseId: number | null = null;
 
 	let showMyCourses = true;
@@ -74,7 +75,7 @@
 				{/if}
 			{/each}
 		{:else}
-			<p>No courses available. Click button to add one.</p>
+			<p></p>
 		{/if}
 
 
@@ -99,7 +100,10 @@
 			</button>
 		</div>
 	{:else}
-		<BrowseCourses bind:selectedCourseId={selectedCourseId}/>
+		<BrowseCourses bind:selectedCourseId={selectedCourseId}
+					   courses={allCourses}
+					   modalStore={modalStore}
+					   modal={modal} />
 		<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
 				type="button"
 				on:click={() => showMyCourses = !showMyCourses}>

@@ -10,7 +10,8 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
 	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
-	return { tags, users, courses };
+	const allCourses: Course[] = await (await fetch(`/api/course`)).json();
+	return { tags, users, courses, allCourses };
 };
 
 /**
