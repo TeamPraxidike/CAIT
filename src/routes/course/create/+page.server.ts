@@ -1,7 +1,6 @@
 import type { Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { Level } from '@prisma/client';
-import { goto } from '$app/navigation';
 
 
 export const actions = {

@@ -58,6 +58,6 @@
 		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50 mt-4">
 			Publish
 		</button>
-		<button type="button" class=" flex-none float-right btn rounded-lg variant-filled-surface text-surface-50 mt-4">Cancel</button>
+		<button type="button" class=" flex-none float-right btn rounded-lg variant-filled-surface text-surface-50 mt-4" on:click={() => goto("/publish/materials")}>Cancel</button>
 	</div>
 </form>
