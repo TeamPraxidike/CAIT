@@ -15,8 +15,8 @@
 		<div class="flex flex-wrap gap-2">
 			{#each courses as course (course.id)}
 				<CourseButton
-					{course}
-					{selectedCourseId}
+					bind:course
+					bind:selectedCourseId
 					{modalStore}
 					{modal}
 					canDelete={false}
