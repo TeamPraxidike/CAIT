@@ -46,6 +46,10 @@ export async function findCourseByMantainer(userId: string): Promise<Course[]> {
 	});
 }
 
+export async function getAllCourses(): Promise<Course[]> {
+	return prisma.course.findMany();
+}
+
 export async function linkCourseToPublication(publicationId: number, courseId: number, prismaTransaction: Prisma.TransactionClient = prisma) {
 	if (!courseId) return;
 
