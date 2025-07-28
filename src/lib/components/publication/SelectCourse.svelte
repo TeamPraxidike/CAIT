@@ -4,6 +4,10 @@
 	import type { Course } from '$lib/database/courses';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import { invalidate } from '$app/navigation';
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
+
+
 
 	const modalStore = getModalStore();
 
@@ -37,6 +41,7 @@
 
 	const openNewCourseModal = () => {
 		showModal = true;
+		dispatch('showCourseModal');
 	};
 
 
@@ -49,9 +54,9 @@
 
 <div class="flex flex-wrap gap-2">
 
-	{#if showModal}
-		<CourseModal existingCourse={null} onSuccess={refresh} close={closeModal} />
-	{/if}
+	<!--{#if showModal}-->
+	<!--	<CourseModal existingCourse={null} onSuccess={refresh} close={closeModal} />-->
+	<!--{/if}-->
 
 
 	{#if Array.isArray(courses) && courses.length > 0}
@@ -78,23 +83,28 @@
 			{/if}
 		{/each}
 	{:else}
-		<p>No courses available. Click below to add one.</p>
+		<p>No courses available. Click button to add one.</p>
 	{/if}
 
-		{#if courses.length === 0}
-		<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-				on:click={() => openNewCourseModal()}>
-			Add a course
+
+	<div class="flex gap-2 flex-wrap">
+		<!--{#if courses.length === 0}-->
+			<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+					on:click={() => openNewCourseModal()}>
+				Add a course
+			</button>
+		<!--{:else}-->
+		<!--	<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"-->
+		<!--			on:click={() => window.location.href = '/course/create'}>-->
+		<!--		<Icon icon="mdi:plus-circle" width="32" height="32"-->
+		<!--			  class="bg-surface-0 text-surface-800 hover:text-surface-600" />-->
+		<!--	</button>-->
+		<!--{/if}-->
+		<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+				on:click={() => window.open('/courses/browse')}>
+			Browse courses
 		</button>
-	{:else}
-		<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"
-				on:click={() => window.location.href = '/course/create'}>
-			<Icon icon="mdi:plus-circle" width="32" height="32"
-				  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
-		</button>
-	{/if}
-	<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-			on:click={() => window.open('/courses/browse')}>
-		Browse courses
-	</button>
+	</div>
+
+
 </div>

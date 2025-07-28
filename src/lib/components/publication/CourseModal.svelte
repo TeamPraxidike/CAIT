@@ -15,8 +15,6 @@
 	export let onSuccess = () => {};
 	let id = existingCourse?.id ?? null;
 
-
-
 	let title = '';
 	let level: Level;
 	let learningObjectives: string[] = [];
@@ -35,25 +33,33 @@
 	const handleInputEnter = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') event.preventDefault();
 	};
+
+	$: isFormValid = title.trim().length > 0 && level !== undefined && learningObjectives.length > 0;
+
 </script>
 
 <div class="modal-bg">
 	<form
-		action="?/publish"
+		action="?/publishCourse"
 		method="POST"
 		enctype="multipart/form-data"
 		class="modal-form space-y-6"
+		on:submit={() => console.log("Modal form submitted")}
 		use:enhance={({ formData }) => {
 			formData.append('title', title);
 			formData.append('learningObjectives', JSON.stringify(learningObjectives));
 			formData.append('prerequisites', JSON.stringify(prerequisites));
 			formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
+			formData.append('level', level);
+
+			close();
 		}}>
+		<input type="hidden" name="formContext" value="course-modal" />
 
 		<h2 class="text-2xl font-bold mb-4">Create a Course</h2>
 
 		<div class="space-y-2">
-			<label for="title" class="block font-medium">Name</label>
+			<label for="title" class="block font-medium">Name<span class="text-error-300">*</span></label>
 			<input
 				type="text"
 				id="title"
@@ -65,14 +71,14 @@
 			/>
 		</div>
 
-		<label for="Level" class="block font-medium">Education Level</label>
+		<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
 
 		<CourseLevel bind:label={level} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />
 
 		<div class="flex justify-end items-center pt-4">
 			<div class="flex gap-3">
-				<button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
+				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
 				<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition" on:click={close}>Cancel</button>
 			</div>
 

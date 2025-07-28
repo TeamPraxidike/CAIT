@@ -35,6 +35,7 @@
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
 	import { changeCourse } from '$lib/util/coursesLogic';
+	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -127,7 +128,7 @@
 
 	const toastStore = getToastStore();
 
-	$: if (form?.status === 200) {
+	$: if (form?.status === 200 && form?.context === 'material-page') {
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
 		}
@@ -150,13 +151,13 @@
 			console.error('Error clearing data:', error);
 		});
 		goto(`/${loggedUser.username}/${form?.id}`);
-	} else if (form?.status === 400) {
+	} else if (form?.status === 400 && form?.context === 'material-page') {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
 			background: 'bg-warning-200',
 			classes: 'text-surface-900'
 		});
-	} else if (form?.status === 500) {
+	} else if (form?.status === 500 && form?.context === 'material-page') {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
 			background: 'bg-error-200',
@@ -268,8 +269,17 @@
 			event.preventDefault();
 		}
 	};
-	// const uploadFile
+	function openModal() {
+		showModal = true;
+	}
 
+	function closeModal() {
+		showModal = false;
+	}
+
+
+	// const uploadFile
+	let showModal = false;
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
@@ -289,10 +299,12 @@
 
 <Banner metadata={metadata} files={numMaterials} materialType={metadata.materialType}/>
 
+
 <form method="POST"
 	  enctype="multipart/form-data"
 	  action="?/publish"
 	  class="col-span-full my-20 pr-10 shadow p-4"
+	  on:submit={() => console.log("Page form submitted")}
 	  use:enhance={({ formData }) => {
 	    isSubmitting = true;
 		let willSubmit = true;
@@ -324,6 +336,7 @@
 		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 		formData.append('course', course ? course.toString() : 'null');
       }}>
+	<input type="hidden" name="formContext" value="material-page" />
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 			 buttonNext="btn dark:bg-surface-200"
 			 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
@@ -347,7 +360,7 @@
 					<div class="flex flex-col gap-2">
 						<SelectType bind:selectedTypes={selectedTypes}/>
 						<hr class="m-2">
-						<SelectCourse bind:selectedCourseId={course} courses={data.courses}/>
+						<SelectCourse on:showCourseModal={openModal} bind:selectedCourseId={course} courses={data.courses}/>
 					</div>
 				</div>
 
@@ -506,3 +519,8 @@
 		</Step>
 	</Stepper>
 </form>
+
+
+{#if showModal}
+	<CourseModal existingCourse={null} close={closeModal} />
+{/if}
