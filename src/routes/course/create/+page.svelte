@@ -30,10 +30,10 @@
 	}
 </script>
 
-<form action="?/publish" method="POST" enctype="multipart/form-data"
+<form action="?/publish" method="POST"
 	  class="col-span-full my-20"
 	  use:enhance={async ({ formData }) => {
-		formData.append('title', title);
+	  // Title of the course comes from the input field automatically
 		formData.append('learningObjectives', JSON.stringify(learningObjectives));
 		formData.append('prerequisites', JSON.stringify(prerequisites));
 		formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
@@ -52,9 +52,12 @@
 	<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}"/>
 <!--	<MantainersEditBar publisher={user} bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />-->
 	<div class="flex float-right gap-2">
-		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50 mt-4" on:click={()=>{window.history.back()}}>
+
+<!--		These two buttons go back to the create page and they depend
+			on the indexDB to keep all the information that was filled in-->
+		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50 mt-4">
 			Publish
 		</button>
-		<button type="button" on:click={()=>{window.history.back()}} class=" flex-none float-right btn rounded-lg variant-filled-surface text-surface-50 mt-4">Cancel</button>
+		<button type="button" class=" flex-none float-right btn rounded-lg variant-filled-surface text-surface-50 mt-4">Cancel</button>
 	</div>
 </form>
