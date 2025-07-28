@@ -50,6 +50,8 @@
 
 <UserProfileBar user={user} userPhotoUrl={profilePic.data} bind:tabset={tabSet}/>
 
+
+
 <div class="col-span-8">
     {#if page.data.session?.user.id === user.id}
         <TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
