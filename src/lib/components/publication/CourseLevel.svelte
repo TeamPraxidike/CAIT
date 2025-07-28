@@ -15,6 +15,7 @@
 </script>
 
 <div class="flex gap-3">
+
 	{#each levels as level}
 		<button
 			type="button"

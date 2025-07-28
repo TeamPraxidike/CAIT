@@ -38,35 +38,55 @@
 </script>
 
 <div class="modal-bg">
-	<form action="?/publish" method="POST" enctype="multipart/form-data"
-		  class="modal-form" use:enhance={({ formData }) => {
+	<form
+		action="?/publish"
+		method="POST"
+		enctype="multipart/form-data"
+		class="modal-form space-y-6"
+		use:enhance={({ formData }) => {
 			formData.append('title', title);
 			formData.append('learningObjectives', JSON.stringify(learningObjectives));
 			formData.append('prerequisites', JSON.stringify(prerequisites));
 			formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
 		}}>
-		<h2 class="text-xl font-semibold mb-4">Create a course</h2>
 
-		<label for="title">Title</label>
-		<input type="text" id="title" name="title" bind:value={title} on:keydown={handleInputEnter} required>
+		<h2 class="text-2xl font-bold mb-4">Create a Course</h2>
+
+		<div class="space-y-2">
+			<label for="title" class="block font-medium">Name</label>
+			<input
+				type="text"
+				id="title"
+				name="title"
+				bind:value={title}
+				on:keydown={handleInputEnter}
+				required
+				class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+			/>
+		</div>
+
+		<label for="Level" class="block font-medium">Education Level</label>
 
 		<CourseLevel bind:label={level} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />
 
-
-		<div class="flex justify-between mt-4">
-			<div class="flex gap-2">
-				<button type="submit" class="btn-primary">{isEdit ? 'Save' : 'Create'}</button>
-				<button type="button" class="btn-secondary" on:click={close}>Cancel</button>
+		<div class="flex justify-end items-center pt-4">
+			<div class="flex gap-3">
+				<button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
+				<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition" on:click={close}>Cancel</button>
 			</div>
+
 			{#if isEdit}
-				<button type="button" class="btn-danger ml-auto" on:click={async () => {
-				if (confirm('Are you sure you want to delete this course?')) {
-					await fetch(`/api/course/${id}`, { method: 'DELETE' });
-					onSuccess();
-					close();
-				}
-			}}>
+				<button
+					type="button"
+					class="btn-danger text-sm px-5 py-2 ml-auto"
+					on:click={async () => {
+						if (confirm('Are you sure you want to delete this course?')) {
+							await fetch(`/api/course/${id}`, { method: 'DELETE' });
+							onSuccess();
+							close();
+						}
+					}}>
 					Delete
 				</button>
 			{/if}
@@ -83,12 +103,15 @@
         align-items: center;
         justify-content: center;
         z-index: 50;
+        padding: 1rem;
     }
+
     .modal-form {
         background: white;
-        padding: 2rem;
-        border-radius: 1rem;
+        padding: 3rem;
+        border-radius: 1.25rem;
         width: 100%;
-        max-width: 600px;
+        max-width: 800px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
 </style>
