@@ -1,8 +1,9 @@
 import type { Actions, PageServerLoad } from './$types';
 import { type MaterialForm } from '$lib/database';
-import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
+import { type Difficulty, Level, MaterialType, type Tag } from '@prisma/client';
 import type { Course } from '$lib/database/courses';
 import { convertMaterial } from '$lib/util/types';
+import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
@@ -129,6 +130,34 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
-		return { status: res.status, id: (await res.json()).id };
+		return { status: res.status, id: (await res.json()).id , context: data.get('context')?.toString()};
+	},
+	publishCourse: async ({request, fetch, locals}) => {
+		const session = await locals.safeGetSession();
+		if (!session || !session.user) throw redirect(303, '/signin');
+
+		try {
+			const formData = await request.formData();
+			const title = formData.get('title');
+			const level = formData.get('level');
+			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
+			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
+			const courseData = {
+				learningObjectives: learningObjectives,
+				prerequisites: prerequisites,
+				educationalLevel: level,
+				courseName: title,
+				creatorId: locals.session?.user.id,
+			};
+			const res = await fetch(`/api/course`, {
+				method: 'POST',
+				body: JSON.stringify(courseData),
+			});
+			const newCourse = await res.json();
+			return { status: res.status, id: newCourse.id , context: formData.get('context')?.toString()};
+		} catch (error) {
+			console.error("Error creating course ", error);
+			throw redirect(303, '/course/create');
+		}
 	},
 } satisfies Actions;

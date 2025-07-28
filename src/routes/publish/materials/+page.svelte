@@ -35,6 +35,7 @@
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
 	import { changeCourse } from '$lib/util/coursesLogic';
+	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -127,7 +128,7 @@
 
 	const toastStore = getToastStore();
 
-	$: if (form?.status === 200) {
+	$: if (form?.status === 200 && form?.context === 'material-page') {
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
 		}
@@ -150,13 +151,13 @@
 			console.error('Error clearing data:', error);
 		});
 		goto(`/${loggedUser.username}/${form?.id}`);
-	} else if (form?.status === 400) {
+	} else if (form?.status === 400 && form?.context === 'material-page') {
 		toastStore.trigger({
 			message: `Malformed information, please check your inputs: ${form?.message}`,
 			background: 'bg-warning-200',
 			classes: 'text-surface-900'
 		});
-	} else if (form?.status === 500) {
+	} else if (form?.status === 500 && form?.context === 'material-page') {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
 			background: 'bg-error-200',
@@ -268,8 +269,17 @@
 			event.preventDefault();
 		}
 	};
-	// const uploadFile
+	function openModal() {
+		showModal = true;
+	}
 
+	function closeModal() {
+		showModal = false;
+	}
+
+
+	// const uploadFile
+	let showModal = false;
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
@@ -289,10 +299,12 @@
 
 <Banner metadata={metadata} files={numMaterials} materialType={metadata.materialType}/>
 
+
 <form method="POST"
 	  enctype="multipart/form-data"
 	  action="?/publish"
 	  class="col-span-full my-20 pr-10 shadow p-4"
+	  on:submit={() => console.log("Page form submitted")}
 	  use:enhance={({ formData }) => {
 	    isSubmitting = true;
 		let willSubmit = true;
@@ -324,6 +336,7 @@
 		formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 		formData.append('course', course ? course.toString() : 'null');
       }}>
+	<input type="hidden" name="formContext" value="material-page" />
 	<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 			 buttonNext="btn dark:bg-surface-200"
 			 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
@@ -340,44 +353,55 @@
 
 				<label for="coverPic">Cover Picture</label>
 
-				<div class="flex flex-col gap-2 min-h-80">
+
+				<div class="flex flex-col gap-2">
 					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
-					<textarea name="description" placeholder="Description..." bind:value={description}
-							  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
+					<div class="flex flex-col gap-2">
+						<SelectType bind:selectedTypes={selectedTypes}/>
+						<hr class="m-2">
+						<SelectCourse on:showCourseModal={openModal} bind:selectedCourseId={course} courses={data.courses}/>
+					</div>
 				</div>
 
-				<div class="flex flex-col gap-2 h-full bg-surface-200
-							border-2 border-dashed border-surface-700">
-					{#if coverPic}
-						<img src={URL.createObjectURL(coverPic)}
-							 alt="coverPicture"
-							 class="max-h-96 w-full object-contain h-full">
-					{/if}
+				<div>
+					<div class="flex flex-col gap-2 h-full bg-surface-200
+								border-2 border-dashed border-surface-700">
+
+						<div>
+							{#if coverPic}
+								<img src={URL.createObjectURL(coverPic)}
+									 alt="coverPicture"
+									 class="max-h-96 w-full object-contain h-full">
+							{/if}
+						</div>
+					</div>
+
+					<div>
+						{#if coverPic}
+							<button on:click={() => coverPic = undefined} type="button"
+									class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
+								Remove Cover Picture
+							</button>
+						{:else}
+							<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
+										on:change={chooseCover} name="coverPhoto">
+								Upload Cover Picture
+							</FileButton>
+						{/if}
+					</div>
 				</div>
+
+
+
+
 
 <!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
 <!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
 <!--						on:clearSettings={() => {typeActive=false}} />-->
-				<div class="flex flex-col gap-2">
-					<SelectType bind:selectedTypes={selectedTypes}/>
-					<hr class="m-2">
-					<SelectCourse bind:selectedCourseId={course} courses={data.courses}/>
-				</div>
 
-				<div>
-					{#if coverPic}
-						<button on:click={() => coverPic = undefined} type="button"
-								class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
-							Remove Cover Picture
-						</button>
-					{:else}
-						<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
-									on:change={chooseCover} name="coverPhoto">
-							Upload Cover Picture
-						</FileButton>
-					{/if}
-				</div>
+
+
 
 			</div>
 
@@ -385,16 +409,15 @@
 		</Step>
 		<Step locked={locks[2]}>
 			<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-			<div class="flex flex-col gap-8 p-6 justify-between">
-				<div class="flex gap-4 items-center">
-					<DifficultySelection bind:difficulty={difficulty} />
-				</div>
-				<div class="flex flex-row gap-4 md:gap-2 items-center">
-					<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>
-					<TheoryAppBar bind:value={theoryApplicationRatio} />
-				</div>
-			</div>
-
+<!--			<div class="flex flex-col gap-8 p-6 justify-between">-->
+<!--				<div class="flex gap-4 items-center">-->
+<!--					<DifficultySelection bind:difficulty={difficulty} />-->
+<!--				</div>-->
+<!--				<div class="flex flex-row gap-4 md:gap-2 items-center">-->
+<!--					<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>-->
+<!--					<TheoryAppBar bind:value={theoryApplicationRatio} />-->
+<!--				</div>-->
+<!--			</div>-->
 			<div class="flex flex-col gap-4 p-3">
 				<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
 					<div class="w-full md:w-1/2 flex-col gap-2">
@@ -423,6 +446,8 @@
 						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 					</div>
 				</div>
+				<textarea name="description" placeholder="Additional Description..." bind:value={description}
+						  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
 			</div>
 		</Step>
 		<Step locked={isSubmitting}>
@@ -494,3 +519,8 @@
 		</Step>
 	</Stepper>
 </form>
+
+
+{#if showModal}
+	<CourseModal existingCourse={null} close={closeModal} />
+{/if}

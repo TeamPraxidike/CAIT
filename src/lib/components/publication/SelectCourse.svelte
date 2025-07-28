@@ -1,27 +1,109 @@
 <script lang="ts">
 	import type { Course } from '$lib/database/courses';
-	import CourseList from '$lib/components/publication/courses/CourseList.svelte';
+	import CourseModal from '$lib/components/publication/CourseModal.svelte';
+	import { invalidate } from '$app/navigation';
+	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
 
-	export let courses: Course[];
+
+
+	const modalStore = getModalStore();
+
+	export let courses: Course[] = [];
 	export let selectedCourseId: number | null = null;
 
-	let myCourses = true;
+	function selectType(courseId: number) {
+		selectedCourseId = selectedCourseId === courseId ? null : courseId;
+	}
+
+	const modal: ModalSettings = {
+		type: 'confirm',
+		title: 'Are you sure you want to delete this course?',
+		body: 'It will be removed from all publications that are associated with it. Their metadata will remain the same.',
+		response: async (r: boolean) => {
+			if (r) {
+				courses = courses.filter(c => c.id !== selectedCourseId);
+				await fetch(`/api/course/${selectedCourseId}`, {
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+			}
+		}
+	};
+	console.log(courses)
+
+
+	let showModal = false;
+
+	const openNewCourseModal = () => {
+		showModal = true;
+		dispatch('showCourseModal');
+	};
+
+
+	const closeModal = () => showModal = false;
+
+	const refresh = () => {
+		// invalidate current page data or manually refetch from endpoint
+	};
 </script>
 
 <div class="flex flex-wrap gap-2">
-	{#if myCourses}
-		<CourseList bind:courses={courses} bind:selectedCourseId={selectedCourseId}/>
-		<button type="button"
-				class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-				on:click={() => myCourses = !myCourses}>
+
+	<!--{#if showModal}-->
+	<!--	<CourseModal existingCourse={null} onSuccess={refresh} close={closeModal} />-->
+	<!--{/if}-->
+
+
+	{#if Array.isArray(courses) && courses.length > 0}
+		{#each courses as course}
+			<button
+				type="button"
+				on:click={() => selectType(course.id)}
+				class="group relative px-2 py-1 text-sm font-medium
+		   transition hover:font-bold
+		   {course.id === selectedCourseId ? 'bg-primary-600 text-white border-primary-500 rounded-full' : 'bg-white text-gray-800'}"
+			>
+				{course.courseName}
+				<button
+					type="button"
+					class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs cursor-pointer"
+					aria-label="Delete course"
+					on:click={() => modalStore.trigger(modal)}
+				>
+					x
+				</button>
+			</button>
+			{#if course !== courses[courses.length - 1]}
+				<div class="w-px h-5 bg-gray-300 self-center"></div>
+			{/if}
+		{/each}
+	{:else}
+		<p>No courses available. Click button to add one.</p>
+	{/if}
+
+
+	<div class="flex gap-2 flex-wrap">
+		<!--{#if courses.length === 0}-->
+			<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+					on:click={() => openNewCourseModal()}>
+				Add a course
+			</button>
+		<!--{:else}-->
+		<!--	<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"-->
+		<!--			on:click={() => window.location.href = '/course/create'}>-->
+		<!--		<Icon icon="mdi:plus-circle" width="32" height="32"-->
+		<!--			  class="bg-surface-0 text-surface-800 hover:text-surface-600" />-->
+		<!--	</button>-->
+		<!--{/if}-->
+		<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+				on:click={() => window.open('/courses/browse')}>
 			Browse courses
 		</button>
-	{:else}
+	</div>
 
-		<button type="button"
-				class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-				on:click={() => myCourses = !myCourses}>
-			My courses
-		</button>
-	{/if}
+
 </div>
