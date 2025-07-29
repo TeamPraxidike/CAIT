@@ -3,12 +3,14 @@
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 
 	export let selectedCourseId: number | null;
+	export let previousCourseId: number | null;
 	export let course: Course;
 	export let modalStore;
 	export let modal: ModalSettings;
 	export let canDelete = true;
 
 	function selectType(courseId: number) {
+		previousCourseId = selectedCourseId;
 		selectedCourseId = selectedCourseId === courseId ? null : courseId;
 	}
 </script>

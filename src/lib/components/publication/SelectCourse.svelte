@@ -16,6 +16,8 @@
 	export let allCourses: Course[]	= [];
 	export let selectedCourseId: number | null = null;
 
+	let originalCourseIds = courses.map((c) => c.id);
+
 	let showMyCourses = false;
 
 	let popupSettings: PopupSettings = {
@@ -35,9 +37,22 @@
 		};
 	});
 
+
+
 	function onCourseSelect(e: CustomEvent<CourseOption>): void {
-		console.log(e);
+		previousCourseId = selectedCourseId;
 		selectedCourseId = parseInt(e.detail.value, 10);
+		// courses.push(allCourses.find(course => course.id === selectedCourseId) as Course);
+	}
+
+	let previousCourseId: number | null = null;
+	$: if (selectedCourseId !== null) {
+		if (!courses.some(course => course.id === selectedCourseId)) {
+			courses = [...courses, allCourses.find(course => course.id === selectedCourseId) as Course];
+		}
+		if (previousCourseId !== null && !originalCourseIds.includes(previousCourseId)) {
+			courses = courses.filter(c => c.id !== previousCourseId);
+		}
 	}
 
 	const modal: ModalSettings = {
@@ -85,6 +100,7 @@
 				<CourseButton
 					bind:course
 					bind:selectedCourseId
+					bind:previousCourseId
 					modalStore={modalStore}
 					modal={modal} />
 
