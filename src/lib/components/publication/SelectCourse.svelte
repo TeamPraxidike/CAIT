@@ -18,7 +18,7 @@
 	export let allCourses: Course[]	= [];
 	export let selectedCourseId: number | null = null;
 
-	let showMyCourses = true;
+	let showMyCourses = false;
 
 
 
@@ -61,55 +61,57 @@
 	<!--	<CourseModal existingCourse={null} onSuccess={refresh} close={closeModal} />-->
 	<!--{/if}-->
 
-	{#if showMyCourses}
-		{#if Array.isArray(courses) && courses.length > 0}
-			{#each courses as course}
-				<CourseButton
-					bind:course
-					bind:selectedCourseId
-					modalStore={modalStore}
-					modal={modal} />
+	{#if Array.isArray(courses) && courses.length > 0}
+		{#each courses as course}
+			<CourseButton
+				bind:course
+				bind:selectedCourseId
+				modalStore={modalStore}
+				modal={modal} />
 
-				{#if course !== courses[courses.length - 1]}
-					<div class="w-px h-5 bg-gray-300 self-center"></div>
-				{/if}
-			{/each}
-		{:else}
-			<p></p>
-		{/if}
-
-
-		<div class="flex gap-2 flex-wrap">
-			{#if courses.length === 0}
-				<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-						on:click={() => openNewCourseModal()}>
-					Add a course
-				</button>
-			{:else}
-				<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"
-						on:click={() => openNewCourseModal()}>
-					<Icon icon="mdi:plus-circle" width="32" height="32"
-						  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
-				</button>
+			{#if course !== courses[courses.length - 1]}
+				<div class="w-px h-5 bg-gray-300 self-center"></div>
 			{/if}
+		{/each}
+	{:else}
+		<p></p>
+	{/if}
 
+
+	<div class="flex gap-2 flex-wrap">
+		{#if courses.length === 0}
+			<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+					on:click={() => openNewCourseModal()}>
+				Add a course
+			</button>
+		{:else}
+			<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"
+					on:click={() => openNewCourseModal()}>
+				<Icon icon="mdi:plus-circle" width="32" height="32"
+					  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
+			</button>
+		{/if}
+		<div>
 			<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
 					type="button"
 					on:click={() => showMyCourses = !showMyCourses}>
-				Browse courses
+				Browse all courses
+				<span class="text-sm">▼</span>
 			</button>
+
+
+			{#if showMyCourses}
+				<div class="absolute mt-2 w-64 max-w-md rounded-lg shadow-lg border border-surface-300 bg-white z-50 overflow-hidden dark:bg-surface-800 dark:border-surface-700 dark:text-surface-50">
+					<BrowseCourses
+						courses={allCourses}
+						selectedCourseId={selectedCourseId}
+					/>
+				</div>
+			{/if}
+
 		</div>
-	{:else}
-		<BrowseCourses bind:selectedCourseId={selectedCourseId}
-					   courses={allCourses}
-					   modalStore={modalStore}
-					   modal={modal} />
-		<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-				type="button"
-				on:click={() => showMyCourses = !showMyCourses}>
-			Show my courses
-		</button>
-	{/if}
+	</div>
+
 
 
 </div>
