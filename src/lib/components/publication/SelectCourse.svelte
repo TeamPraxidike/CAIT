@@ -97,13 +97,22 @@
 	<div class="flex flex-wrap gap-2">
 		{#if Array.isArray(courses) && courses.length > 0}
 			{#each courses as course}
-				<CourseButton
-					bind:course
-					bind:selectedCourseId
-					bind:previousCourseId
-					modalStore={modalStore}
-					modal={modal} />
-
+				{#if originalCourseIds.includes(course.id)}
+					<CourseButton
+						bind:course
+						bind:selectedCourseId
+						bind:previousCourseId
+						modalStore={modalStore}
+						modal={modal} />
+				{:else}
+					<CourseButton
+						bind:course
+						bind:selectedCourseId
+						bind:previousCourseId
+						modalStore={modalStore}
+						modal={modal}
+						canDelete={false}/>
+				{/if}
 				{#if course !== courses[courses.length - 1]}
 					<div class="w-px h-5 bg-gray-300 self-center"></div>
 				{/if}
