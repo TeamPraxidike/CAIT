@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { testingUrl } from '../setup';
-import { generateCourseData } from '../../utility/courses';
+import { createRandomCourse, generateCourseData } from '../../utility/courses';
 import { createUniqueUser } from '../../utility/users';
 import { publicationsWithCourses } from '../../utility/courses';
 import { getPublicationById } from '$lib/database';
 import {
-	findCourseByName,
+	type Course,
+	findCourseByName, getAllCourses
 } from '$lib/database/courses';
 
 // await resetTagsTable();
@@ -48,6 +49,25 @@ describe('[POST] /api/course', () => {
 		});
 		expect(response2.status).toBe(400);
 	});
+});
+
+describe('[GET] /api/course/', () => {
+	it('should get all courses from the database', async () => {
+		const courses: string[] = [];
+		for (let i = 0; i < 5; i++) {
+			courses.push((await createRandomCourse((await createUniqueUser()).id)).courseName);
+		}
+
+		const response = await fetch(`${testingUrl}/course`);
+		expect(response.status).toBe(200);
+		const data = await response.json();
+		expect(data).toBeDefined();
+		const allCourses: string[] = data.map((course: Course) => course.courseName);
+		courses.forEach(course => {
+			expect(allCourses).toContain(course)
+		});
+	});
+
 });
 
 describe('[DELETE] /api/course/[courseId]', () => {

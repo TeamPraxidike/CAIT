@@ -2,8 +2,9 @@ import { it, describe, expect } from 'vitest';
 import { createUniqueUser } from '../../utility/users';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
 import { createMaterialsWithCourses, createRandomCourse } from '../../utility/courses';
-import { deleteCourse,
-	findCourseByMantainer,
+import {
+	type Course, deleteCourse,
+	findCourseByMantainer, getAllCourses,
 	linkCourseToPublication, removeCourseFromPublication,
 	removeCourseFromPublications
 } from '$lib/database/courses';
@@ -31,6 +32,20 @@ describe('Courses CRUD', () => {
 		expect(courseNames).toContain(course1.courseName);
 		expect(courseNames).toContain(course2.courseName);
 		expect(courseNames).not.toContain(course3.courseName);
+	});
+
+	it('should fetch all courses', async () => {
+		const courses: string[] = [];
+		for (let i = 0; i < 5; i++) {
+			courses.push((await createRandomCourse((await createUniqueUser()).id)).courseName);
+		}
+
+		const allCourses: string[] = (await getAllCourses()).map((course: Course) => course.courseName);
+		expect(allCourses).toBeDefined();
+		expect(allCourses.length).toBeGreaterThanOrEqual(5);
+		courses.forEach(course => {
+			expect(allCourses).toContain(course)
+		});
 	});
 });
 

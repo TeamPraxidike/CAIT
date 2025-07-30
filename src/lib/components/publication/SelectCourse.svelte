@@ -1,21 +1,58 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
-	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import type { Course } from '$lib/database/courses';
-	import CourseModal from '$lib/components/publication/CourseModal.svelte';
-	import { invalidate } from '$app/navigation';
+	import { getModalStore, type ModalSettings, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
+	import Icon from '@iconify/svelte';
+	import CourseButton from '$lib/components/publication/courses/CourseButton.svelte';
 	const dispatch = createEventDispatcher();
+
+	import {Autocomplete, type AutocompleteOption, popup} from "@skeletonlabs/skeleton";
 
 
 
 	const modalStore = getModalStore();
 
 	export let courses: Course[] = [];
+	export let allCourses: Course[]	= [];
 	export let selectedCourseId: number | null = null;
 
-	function selectType(courseId: number) {
-		selectedCourseId = selectedCourseId === courseId ? null : courseId;
+	let originalCourseIds = courses.map((c) => c.id);
+
+	let showMyCourses = false;
+
+	let popupSettings: PopupSettings = {
+		event: 'focus-click',
+		target: 'popupAutocomplete',
+		placement: 'bottom',
+	};
+
+	let inputPopupDemo: string = '';
+
+	type CourseOption = AutocompleteOption<string, string>;
+
+	let courseOptions: CourseOption[] = allCourses.map(course => {
+		return {
+			label: course.courseName,
+			value: course.id.toString()
+		};
+	});
+
+
+
+	function onCourseSelect(e: CustomEvent<CourseOption>): void {
+		previousCourseId = selectedCourseId;
+		selectedCourseId = parseInt(e.detail.value, 10);
+		// courses.push(allCourses.find(course => course.id === selectedCourseId) as Course);
+	}
+
+	let previousCourseId: number | null = null;
+	$: if (selectedCourseId !== null) {
+		if (!courses.some(course => course.id === selectedCourseId)) {
+			courses = [...courses, allCourses.find(course => course.id === selectedCourseId) as Course];
+		}
+		if (previousCourseId !== null && !originalCourseIds.includes(previousCourseId)) {
+			courses = courses.filter(c => c.id !== previousCourseId);
+		}
 	}
 
 	const modal: ModalSettings = {
@@ -34,7 +71,6 @@
 			}
 		}
 	};
-	console.log(courses)
 
 
 	let showModal = false;
@@ -52,59 +88,70 @@
 	};
 </script>
 
-<div class="flex flex-wrap gap-2">
+<div class="flex flex-col gap-2">
 
 	<!--{#if showModal}-->
 	<!--	<CourseModal existingCourse={null} onSuccess={refresh} close={closeModal} />-->
 	<!--{/if}-->
 
+	<div class="flex flex-wrap gap-2">
+		{#if Array.isArray(courses) && courses.length > 0}
+			{#each courses as course}
+				{#if originalCourseIds.includes(course.id)}
+					<CourseButton
+						bind:course
+						bind:selectedCourseId
+						bind:previousCourseId
+						modalStore={modalStore}
+						modal={modal} />
+				{:else}
+					<CourseButton
+						bind:course
+						bind:selectedCourseId
+						bind:previousCourseId
+						modalStore={modalStore}
+						modal={modal}
+						canDelete={false}/>
+				{/if}
+				{#if course !== courses[courses.length - 1]}
+					<div class="w-px h-5 bg-gray-300 self-center"></div>
+				{/if}
+			{/each}
+		{:else}
+			<p></p>
+		{/if}
 
-	{#if Array.isArray(courses) && courses.length > 0}
-		{#each courses as course}
-			<button
-				type="button"
-				on:click={() => selectType(course.id)}
-				class="group relative px-2 py-1 text-sm font-medium
-		   transition hover:font-bold
-		   {course.id === selectedCourseId ? 'bg-primary-600 text-white border-primary-500 rounded-full' : 'bg-white text-gray-800'}"
-			>
-				{course.courseName}
-				<button
-					type="button"
-					class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs cursor-pointer"
-					aria-label="Delete course"
-					on:click={() => modalStore.trigger(modal)}
-				>
-					x
-				</button>
-			</button>
-			{#if course !== courses[courses.length - 1]}
-				<div class="w-px h-5 bg-gray-300 self-center"></div>
-			{/if}
-		{/each}
-	{:else}
-		<p>No courses available. Click button to add one.</p>
-	{/if}
 
-
-	<div class="flex gap-2 flex-wrap">
-		<!--{#if courses.length === 0}-->
+		{#if courses.length === 0}
 			<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
 					on:click={() => openNewCourseModal()}>
 				Add a course
 			</button>
-		<!--{:else}-->
-		<!--	<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"-->
-		<!--			on:click={() => window.location.href = '/course/create'}>-->
-		<!--		<Icon icon="mdi:plus-circle" width="32" height="32"-->
-		<!--			  class="bg-surface-0 text-surface-800 hover:text-surface-600" />-->
-		<!--	</button>-->
-		<!--{/if}-->
-		<button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-				on:click={() => window.open('/courses/browse')}>
-			Browse courses
-		</button>
+		{:else}
+			<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"
+					on:click={() => openNewCourseModal()}>
+				<Icon icon="mdi:plus-circle" width="32" height="32"
+					  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
+			</button>
+		{/if}
 	</div>
 
 
+	<div class="w-1/2">
+		<input
+			class="input autocomplete"
+			type="search"
+			name="autocomplete-search"
+			bind:value={inputPopupDemo}
+			placeholder="Search Courses..."
+			use:popup={popupSettings}
+		/>
+		<div data-popup="popupAutocomplete" class="popup w-64 max-h-64 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg p-4">
+			<Autocomplete
+				bind:input={inputPopupDemo}
+				options={courseOptions}
+				on:selection={onCourseSelect}
+			/>
+		</div>
+	</div>
 </div>

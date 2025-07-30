@@ -36,6 +36,7 @@
 	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
 	import { changeCourse } from '$lib/util/coursesLogic';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
+	import TimeEstimate from '$lib/components/publication/TimeEstimate.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -78,7 +79,7 @@
 	let description: string = '';
 	let course: number | null = null;
 	let difficulty: Difficulty = 'easy';
-	let estimate: string = '';
+	let estimate: number = 0;
 	let copyright: string = '';
 	let theoryApplicationRatio: number = 0.5;
 	let selectedTypes: string[] = [];
@@ -210,7 +211,7 @@
 				difficulty = existing.difficulty ?? 'easy';
 				maintainers = existing.maintainers;
 				searchableUsers = existing.searchableUsers;
-				estimate = existing.estimate ?? '30';
+				estimate = existing.estimate ?? 0;
 				copyright = existing.copyright ?? 'No copyright';
 				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
 				fileURLs = existing.fileURLs ?? [];
@@ -324,7 +325,7 @@
         formData.append('description', description);
 		formData.append('type', JSON.stringify(selectedTypes));
         formData.append('difficulty', difficulty);
-        formData.append('estimate', estimate);
+        formData.append('estimate', JSON.stringify(estimate));
         formData.append('copyright', copyright);
         formData.append('tags', JSON.stringify(tags));
         formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
@@ -360,7 +361,10 @@
 					<div class="flex flex-col gap-2">
 						<SelectType bind:selectedTypes={selectedTypes}/>
 						<hr class="m-2">
-						<SelectCourse on:showCourseModal={openModal} bind:selectedCourseId={course} courses={data.courses}/>
+						<SelectCourse on:showCourseModal={openModal}
+									  bind:selectedCourseId={course}
+									  courses={data.courses}
+									  allCourses={data.allCourses}/>
 					</div>
 				</div>
 
@@ -420,12 +424,13 @@
 <!--			</div>-->
 			<div class="flex flex-col gap-4 p-3">
 				<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
-					<div class="w-full md:w-1/2 flex-col gap-2">
-						<label for="estimate">Time Estimate (in minutes):</label>
-						<input type="number" name="estimate" bind:value={estimate} on:keydown={handleInputEnter} min="0"
-							   placeholder="How much time do the materials take"
-							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
-					</div>
+<!--					<div class="w-full md:w-1/2 flex-col gap-2">-->
+<!--						<label for="estimate">Time Estimate (in minutes):</label>-->
+<!--						<input type="number" name="estimate" bind:value={estimate} on:keydown={handleInputEnter} min="0"-->
+<!--							   placeholder="How much time do the materials take"-->
+<!--							   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">-->
+<!--					</div>-->
+					<TimeEstimate bind:totalMinutes={estimate}/>
 					<div class="w-full md:w-1/2	">
 						<label for="copyright md-2">Copyright License (<a
 							href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”

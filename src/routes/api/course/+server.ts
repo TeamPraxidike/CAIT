@@ -1,5 +1,18 @@
 import { verifyAuth } from '$lib/database/auth';
-import { createCourse, type createCourseData, findCourseByName } from '$lib/database/courses';
+import { createCourse, type createCourseData, findCourseByName, getAllCourses } from '$lib/database/courses';
+
+
+export async function GET({ locals }) {
+	const authError = await verifyAuth(locals, locals.user?.id);
+	if (authError) return authError;
+
+	try {
+		const courses = await getAllCourses();
+		return new Response(JSON.stringify(courses), { status: 200 });
+	} catch (error) {
+		return new Response(JSON.stringify({ error }), { status: 500 });
+	}
+}
 
 export async function POST({ request, locals }) {
 	const body = await request.json();
