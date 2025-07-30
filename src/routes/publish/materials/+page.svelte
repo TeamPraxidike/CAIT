@@ -527,5 +527,6 @@
 
 
 {#if showModal}
-	<CourseModal existingCourse={null} close={closeModal} />
+	<CourseModal existingCourse={null} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
+				 bind:additionalMaintainers={maintainers} />
 {/if}

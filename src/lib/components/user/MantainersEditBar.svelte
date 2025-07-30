@@ -15,6 +15,7 @@
 	export let publisher: UserWithProfilePic
 	
 	// todo: ask bobby and remove if unnecessary.
+	// note: I am Bobi, I was not asked but it is ok
 	// let p = $page.data.session?.user as User & {profilePic: string};
 	// let publisher = {
 	// 	id: p.id,
@@ -90,7 +91,7 @@
 </script>
 
 <div class="flex flex-col gap-2 w-full p-3">
-	<span>Maintainers:</span>
+	<span>Maintainers<span class="text-error-300">*</span>:</span>
 	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
 		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={publisher.profilePicData}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
