@@ -16,7 +16,7 @@
 	export let allCourses: Course[]	= [];
 	export let selectedCourseId: number | null = null;
 
-	let originalCourseIds = courses.map((c) => c.id);
+	export let originalCourseIds = courses.map((c) => c.id);
 
 	let showMyCourses = false;
 

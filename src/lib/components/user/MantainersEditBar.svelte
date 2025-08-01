@@ -4,6 +4,7 @@
 	import type { User } from '@prisma/client';
 	import { page } from '$app/stores';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	let userName: HTMLInputElement;
 	export let users: UserWithProfilePic[] = [];
@@ -11,7 +12,6 @@
 	export let searchableUsers = users;
 	let display = 'hidden';
 	let uid = $page.data.session?.user.id || 0;
-	type UserWithProfilePic = User & { profilePicData: string | null};
 	export let publisher: UserWithProfilePic
 	
 	// todo: ask bobby and remove if unnecessary.

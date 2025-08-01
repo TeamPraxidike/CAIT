@@ -18,6 +18,7 @@
 	import SelectType from '$lib/components/publication/SelectType.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onDestroy, onMount } from 'svelte';
+	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	import {
 		clearFiles,
@@ -62,7 +63,6 @@
 
 	let files: FileList = [] as unknown as FileList;
 	let fileURLs: string[] = [] as string[];
-	type UserWithProfilePic = User & { profilePicData: string };
 	let maintainers: UserWithProfilePic[] = [];
 
 	let users: UserWithProfilePic[] = data.users;

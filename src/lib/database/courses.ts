@@ -8,6 +8,7 @@ export type createCourseData = {
 	educationalLevel: Level;
 	courseName: string;
 	creatorId: string;
+	maintainers: string[];
 }
 
 export type Course = Prisma.CourseGetPayload<true>;
@@ -20,7 +21,7 @@ export async function createCourse(course: createCourseData): Promise<Course> {
 			educationalLevel: course.educationalLevel,
 			courseName: course.courseName,
 			maintainers: {
-				connect: [{ id: course.creatorId }]
+				connect: [{ id: course.creatorId }, ...course.maintainers.map(x => ({ id: x }))]
 			}
 		}
 	});
