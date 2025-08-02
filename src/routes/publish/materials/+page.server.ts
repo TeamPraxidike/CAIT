@@ -10,8 +10,10 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	const courses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
-	const allCourses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course`)).json();
+	const courses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended/user/${locals.user?.id}`)).json();
+	const allCourses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended`)).json();
+	// const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+	// const allCourses: Course[] = await (await fetch(`/api/course`)).json();
 	return { tags, users, courses, allCourses };
 };
 
