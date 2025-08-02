@@ -9,8 +9,9 @@ const COVER_STORE = 'cover';
 const FILES_STORE = 'files';
 const MATERIAL_METADATA_STORE = 'material_metadata_snapshots';
 const CIRCUIT_METADATA_STORE = 'circuit_metadata_snapshots';
+import  { type UserWithProfilePic } from '$lib/util/coursesLogic';
 
-type UserWithProfilePic = User & { profilePicData: string };
+// type UserWithProfilePic = User & { profilePicData: string };
 
 export type FormSnapshot = {
 	title: string; // for materials + circuits

@@ -4,13 +4,14 @@ import { type Difficulty, Level, MaterialType, type Tag } from '@prisma/client';
 import type { Course } from '$lib/database/courses';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
+import {type CourseWithMaintainersAndProfilePic} from '$lib/database/courses';
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
-	const allCourses: Course[] = await (await fetch(`/api/course`)).json();
+	const courses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+	const allCourses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course`)).json();
 	return { tags, users, courses, allCourses };
 };
 

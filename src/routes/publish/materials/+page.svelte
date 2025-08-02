@@ -446,7 +446,7 @@
 				</div>
 				<div class="flex flex-col w-full">
 					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-									   bind:additionalMaintainers={maintainers} />
+									   bind:additionalMaintainers={maintainers} bind:previousMaintainers={}>
 					<div class="lg:w-1/2">
 						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 					</div>

@@ -13,6 +13,7 @@
 	let display = 'hidden';
 	let uid = $page.data.session?.user.id || 0;
 	export let publisher: UserWithProfilePic
+	export let previousMaintainers: UserWithProfilePic[] = [];
 	
 	// todo: ask bobby and remove if unnecessary.
 	// note: I am Bobi, I was not asked but it is ok

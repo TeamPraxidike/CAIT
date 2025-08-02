@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Course } from '$lib/database/courses';
+	import type { Course, CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
 	import { getModalStore, type ModalSettings, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
 	import Icon from '@iconify/svelte';
@@ -12,8 +12,8 @@
 
 	const modalStore = getModalStore();
 
-	export let courses: Course[] = [];
-	export let allCourses: Course[]	= [];
+	export let courses: CourseWithMaintainersAndProfilePic[] = [];
+	export let allCourses: CourseWithMaintainersAndProfilePic[]	= [];
 	export let selectedCourseId: number | null = null;
 
 	export let originalCourseIds = courses.map((c) => c.id);
@@ -48,7 +48,7 @@
 	let previousCourseId: number | null = null;
 	$: if (selectedCourseId !== null) {
 		if (!courses.some(course => course.id === selectedCourseId)) {
-			courses = [...courses, allCourses.find(course => course.id === selectedCourseId) as Course];
+			courses = [...courses, allCourses.find(course => course.id === selectedCourseId) as CourseWithMaintainersAndProfilePic];
 		}
 		if (previousCourseId !== null && !originalCourseIds.includes(previousCourseId)) {
 			courses = courses.filter(c => c.id !== previousCourseId);
