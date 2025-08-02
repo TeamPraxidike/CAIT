@@ -1,11 +1,10 @@
 <script lang="ts">
 	import {
-		DifficultySelection,
 		FileTable,
 		MaterialTypes,
 		Meta,
 		Tag,
-		TheoryAppBar, UserProp
+		UserProp
 	} from '$lib';
 	import { FileButton, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
@@ -89,7 +88,7 @@
 
 	let previousCourse: number | null = null;
 	$: if (course !== previousCourse) {
-		({ course, previousCourse, LOs, PKs } = changeCourse(course, previousCourse, LOs, PKs, data.courses));
+		({ course, previousCourse, LOs, PKs, maintainers } = changeCourse(course, previousCourse, LOs, PKs, data.courses, maintainers));
 	}
 
 
@@ -446,7 +445,7 @@
 				</div>
 				<div class="flex flex-col w-full">
 					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-									   bind:additionalMaintainers={maintainers} bind:previousMaintainers={}>
+									   bind:additionalMaintainers={maintainers}/>
 					<div class="lg:w-1/2">
 						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 					</div>
