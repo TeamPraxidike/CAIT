@@ -63,6 +63,7 @@
 	let files: FileList = [] as unknown as FileList;
 	let fileURLs: string[] = [] as string[];
 	let maintainers: UserWithProfilePic[] = [];
+	let courseMaintainers: UserWithProfilePic[] = [];
 
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users;
@@ -163,6 +164,10 @@
 			background: 'bg-error-200',
 			classes: 'text-surface-900'
 		});
+	} else if (form?.status === 200 && form?.context === 'course-modal'){
+		originalCourseIds = [...originalCourseIds, form?.id];
+		console.log(form?.id);
+		console.log("added new course");
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -293,6 +298,8 @@
 	$: numMaterials = Math.max(fileURLs.length, files.length);
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
+	let originalCourseIds: number[] = [];
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -363,7 +370,9 @@
 						<SelectCourse on:showCourseModal={openModal}
 									  bind:selectedCourseId={course}
 									  courses={data.courses}
-									  allCourses={data.allCourses}/>
+									  allCourses={data.allCourses}
+									  bind:originalCourseIds={originalCourseIds}
+						/>
 					</div>
 				</div>
 
@@ -527,5 +536,5 @@
 
 {#if showModal}
 	<CourseModal existingCourse={null} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-				 bind:additionalMaintainers={maintainers} />
+				 bind:additionalMaintainers={courseMaintainers} />
 {/if}

@@ -39,8 +39,12 @@
 	const handleInputEnter = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') event.preventDefault();
 	};
+	let form:HTMLFormElement
 
 	$: isFormValid = title.trim().length > 0 && level !== undefined && learningObjectives.length > 0;
+	// $: if ()
+
+
 
 </script>
 
@@ -48,6 +52,7 @@
 	<form
 		action="?/publishCourse"
 		method="POST"
+		bind:this={form}
 		enctype="multipart/form-data"
 		class="modal-form space-y-6"
 		on:submit={() => console.log("Modal form submitted")}
@@ -59,6 +64,7 @@
 			formData.append('level', level);
 
 			close();
+
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
 

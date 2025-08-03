@@ -8,7 +8,7 @@ export function changeCourse(course: number | null, previousCourse: number | nul
 	const prevCourse = courses.find(c => c.id === previousCourse);
 	LOs = LOs.filter(l => !prevCourse?.learningObjectives.includes(l));
 	PKs = PKs.filter(p => !prevCourse?.prerequisites.includes(p));
-	maintainers = maintainers.filter(m => !prevCourse?.maintainers.some(pm => pm.id === m.id));
+	maintainers = maintainers.filter(m => !prevCourse?.maintainers.map(pm => pm.id).includes(m.id));
 
 	previousCourse = course;
 
@@ -25,7 +25,7 @@ export function changeCourse(course: number | null, previousCourse: number | nul
 
 			LOs = Array.from(lo);
 			PKs = Array.from(pk);
-			maintainers = Array.from(mt.values());
+			maintainers = Array.from(new Set(mt.values()));
 			break;
 		}
 	}

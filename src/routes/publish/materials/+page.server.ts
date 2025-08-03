@@ -134,7 +134,7 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
-		return { status: res.status, id: (await res.json()).id , context: data.get('context')?.toString()};
+		return { status: res.status, id: (await res.json()).id , context: data.get('fomrContext')?.toString()};
 	},
 	publishCourse: async ({request, fetch, locals}) => {
 		const session = await locals.safeGetSession();
@@ -160,7 +160,7 @@ export const actions = {
 				body: JSON.stringify(courseData),
 			});
 			const newCourse = await res.json();
-			return { status: res.status, id: newCourse.id , context: formData.get('context')?.toString()};
+			return { status: res.status, id: newCourse.id , context: formData.get('formContext')?.toString()};
 		} catch (error) {
 			console.error("Error creating course ", error);
 			throw redirect(303, '/course/create');
