@@ -49,7 +49,7 @@
 
     const confirmPublishReset = (event: MouseEvent) => {
         const url = $page.url.pathname;
-        if(url.includes('publish/') || url.includes('edit')){
+        if(url.includes('edit')){
             const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
             if (!confirmation) {
                 event.preventDefault();
@@ -60,7 +60,7 @@
     }
     const handleSignOut = () => {
         const url = $page.url.pathname;
-        if(url.includes('publish/') || url.includes('edit')){
+        if(url.includes('edit')){
             const confirmation = confirm('Data will be lost. Are you sure you want to proceed?');
             if (confirmation) {
                 supabase.auth.signOut()

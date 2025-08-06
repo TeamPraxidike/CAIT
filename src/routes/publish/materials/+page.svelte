@@ -191,14 +191,14 @@
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 
-		const confirmation = confirm('Data might be lost. Are you sure you want to proceed?');
+		// const confirmation = confirm('Data might be lost. Are you sure you want to proceed?');
 
 		showAnimation = false;
 
-		if (!confirmation) {
-			event.preventDefault();
-			return;
-		}
+		// if (!confirmation) {
+		// 	event.preventDefault();
+		// 	return;
+		// }
 
 	};
 
