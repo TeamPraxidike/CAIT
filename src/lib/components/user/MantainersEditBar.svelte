@@ -95,8 +95,10 @@
 	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
 		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={publisher.profilePicData}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
+			{#if maintainer.id !== publisher.id}
 			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
 								role="Maintainer" userPhotoUrl={maintainer.profilePicData} />
+				{/if}
 		{/each}
 
 		<button type="button" name="add_maintainer" use:popup={popupAdd} class="btn rounded-lg hover:bg-opacity-85 text-center" >

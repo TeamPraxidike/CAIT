@@ -89,6 +89,8 @@
 
 	let previousCourse: number | null = null;
 	$: if (course !== previousCourse) {
+		maintainers = [];
+		console.log("course changed");
 		({ course, previousCourse, LOs, PKs, maintainers } = changeCourse(course, previousCourse, LOs, PKs, data.courses, maintainers));
 	}
 
