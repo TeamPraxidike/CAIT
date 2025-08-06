@@ -1,3 +1,5 @@
+<!--TODO: FIX-->
+
 <script lang="ts">
 	// export let file: File;
 	import type { FetchedFileItem } from '$lib/database';

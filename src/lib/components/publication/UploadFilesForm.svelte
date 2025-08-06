@@ -2,21 +2,150 @@
 	import { FileDropzone } from '@skeletonlabs/skeleton';
 	import { FileTable } from '$lib';
 	import { concatFileList } from '$lib/util/file';
-	import { saveFiles } from '$lib/util/indexDB';
+	import { type FileTUSMetadata, getFileTUSMetadata, saveFiles, saveFileTUSMetadata } from '$lib/util/indexDB';
+	import { onMount } from 'svelte';
 
 	export let fileURLs: string[] = [];
 	export let files: FileList = [] as unknown as FileList;
+	export let fileTUSMetadata: { [key: string] : FileTUSMetadata } = {}
+	export let supabaseClient: any = null;
+	export let loggedUser: any = null;
+	export let fileTUSProgress: { [key: string]: any } = {}
+	export let fileTUSUploadObjects: { [key: string]: any } = {}
+
+	const supabaseURL = import.meta.env.PUBLIC_SUPABASE_URL ?? 'http://localhost:8000';
+	const bucketName = "uploadedFiles"
 
 	let fileURL = '';
 
-	function appendToFileList(e: Event) {
+	import * as tus from 'tus-js-client'
+
+	// source: https://supabase.com/docs/guides/storage/uploads/resumable-uploads?queryGroups=language&language=js
+
+	export async function uploadFileTUS(bucketName: string, fileName: string,
+										file: File, contentType: string,
+										supabaseClient: any, supabaseURL: string) {
+
+		const { data: { session } } = await supabaseClient.auth.getSession()
+
+		return new Promise((resolve, reject) => {
+			const upload = new tus.Upload(file, {
+				// Supabase TUS endpoint (with direct storage hostname)
+				endpoint: `${supabaseURL}/storage/v1/upload/resumable`,
+				// endpoint: `${supabaseURL}/upload/resumable`,
+				retryDelays: [0, 3000, 5000, 10000, 20000],
+				headers: {
+					//TODO: authorizationToken could expire, leading to rejection every time
+					authorization: `Bearer ${session.access_token}`,
+					'x-upsert': 'true', // optionally set upsert to true to overwrite existing files
+				},
+				uploadDataDuringCreation: true,
+				removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
+				metadata: {
+					bucketName: bucketName,
+					objectName: fileName,
+					contentType: contentType,
+					cacheControl: 3600,
+				},
+				chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
+				onError: function (error) {
+					// TODO
+					// console.log('Failed because: ' + error)
+					reject(error)
+				},
+				onProgress: function (bytesUploaded, bytesTotal) {
+					const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+					// console.log(bytesUploaded, bytesTotal, percentage + '%')
+
+					// use original name for clarity
+					fileTUSProgress[file.name] = percentage;
+					fileTUSProgress = {...fileTUSProgress};
+
+					console.log("INSIDE:");
+					console.log(fileTUSProgress);
+					console.log("--------");
+				},
+				onSuccess: async function() {
+					console.log('Download %s from %s', (upload.file as File).name, upload.url)
+
+					// save locally
+					fileTUSMetadata[file.name]['isDone'] = true;
+					fileTUSMetadata = {...fileTUSMetadata};
+
+					// update indexedDB
+					await saveFileTUSMetadata(fileTUSMetadata[file.name]);
+
+					resolve()
+				},
+			})
+
+			fileTUSUploadObjects[file.name] = upload;
+			fileTUSUploadObjects = {...fileTUSUploadObjects};
+
+			// Check if there are any previous uploads to continue.
+			return upload.findPreviousUploads().then(function (previousUploads) {
+				// Found previous uploads so we select the first one.
+				if (previousUploads.length) {
+					upload.resumeFromPreviousUpload(previousUploads[0])
+				}
+				// Start the upload
+				upload.start()
+			})
+		})
+	}
+
+	async function isFileTUSMetaAlreadyProcessed(file: File) {
+		// get IndexedDB FileTUSMetadata
+		// return (await getFileTUSMetadata(file.name)) ? true : false;
+		return (file.name in fileTUSMetadata);
+	}
+
+	async function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
 		if (eventFiles && eventFiles.length > 0) {
 			// Merge new files into the existing FileList
 			files = concatFileList(files, eventFiles);
 
 			// Convert final FileList to an array and store in IndexedDB **/
-			saveFiles(Array.from(files));
+			await saveFiles(Array.from(files));
+
+			// for each of the files, generate a name
+			// add to IndexedDB and start TUS uploading
+			for (const currentFile of files) {
+
+				console.log(`${currentFile.name} checking`);
+
+				// if we already have the metadata then the file is not new
+				if (!(await isFileTUSMetaAlreadyProcessed(currentFile))) {
+
+					console.log(`${currentFile.name} not processed yet`);
+
+					// source: https://github.com/tronprotocol/tronweb/issues/531
+					const pathFileNameGenerated =
+						`${crypto.randomUUID()}` + `.${(currentFile.name + '').split('.').pop()}`;
+
+					const currentTUSMetadata: FileTUSMetadata = {
+						originalName: currentFile.name,
+						generatedName: pathFileNameGenerated,
+						isDone: false
+					}
+
+					// save metadata to indexedDB
+					await saveFileTUSMetadata(currentTUSMetadata)
+
+					// update local variable
+					fileTUSMetadata[currentTUSMetadata.originalName] = currentTUSMetadata;
+					fileTUSMetadata = {...fileTUSMetadata};
+
+					console.log(fileTUSProgress);
+
+					// start actual upload
+					uploadFileTUS(bucketName, pathFileNameGenerated, currentFile, currentFile.type,
+					supabaseClient, supabaseURL);
+
+					console.log(fileTUSProgress);
+				}
+			}
 		}
 	}
 
@@ -64,5 +193,7 @@
 			</div>
 		</div>
 	</div>
-	<FileTable operation="edit" fileFormat="upload" bind:files={files} bind:fileURLs={fileURLs}/>
+	<FileTable operation="edit" fileFormat="upload" bind:files={files} bind:fileURLs={fileURLs}
+			   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
+			   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>
 </div>

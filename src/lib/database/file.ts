@@ -274,16 +274,36 @@ export async function updateCircuitCoverPic(
 	);
 }
 
+/**
+ * Adds file to the database.
+ * @param title
+ * @param type
+ * @param ownerId
+ * @param info - could be either a Buffer or a path string.
+ * It's a path string if it's derived from files associated with a material publication
+ * It's Buffer if it's a cover picture/profile picture
+ * @param materialId
+ * @param prismaContext
+ */
 export async function addFile(
 	title: string,
 	type: string,
 	ownerId: string,
-	info: Buffer,
+	info: Buffer | string,
 	materialId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
-		const path = await fileSystem.saveFile(info, title, ownerId, type);
+		let path: string;
+		if (info instanceof Buffer){
+			path = await fileSystem.saveFile(info, title, ownerId, type);
+		}
+		else path = info;
+
+		console.log(title);
+		console.log(type);
+		console.log(info);
+
 		try {
 			return prismaContext.file.create({
 				data: {
@@ -371,9 +391,12 @@ export async function updateFiles(
 			await addFileURL(file.title, file.info, materialId, prismaContext);
 			continue;
 		}
-		const buffer: Buffer = Buffer.from(file.info, 'base64');
+		// const buffer: Buffer = Buffer.from(file.info, 'base64');
+		const path: string = file.info;
 
-		await addFile(file.title, file.type, userId, buffer, materialId, prismaContext);
+		console.log(file);
+
+		await addFile(file.title, file.type, userId, path, materialId, prismaContext);
 	}
 
 	// delete files

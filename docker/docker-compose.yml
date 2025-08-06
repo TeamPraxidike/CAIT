@@ -267,6 +267,7 @@ services:
       GLOBAL_S3_BUCKET: stub
       ENABLE_IMAGE_TRANSFORMATION: "true"
       IMGPROXY_URL: http://imgproxy:5001
+      TUS_URL_PATH: /storage/v1/upload/resumable
     volumes:
       - ./volumes/storage:/var/lib/storage:z
 

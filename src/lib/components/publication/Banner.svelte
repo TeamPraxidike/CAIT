@@ -1,5 +1,6 @@
 <script lang="ts">
 import Icon from '@iconify/svelte';
+import { fade } from 'svelte/transition';
 
 type Metadata = {
 	title?: string;
@@ -35,7 +36,8 @@ $: show = true;
 </script>
 
 {#if show && fieldsList.length > 0}
-	<div class="absolute left-0 right-0 bg-yellow-100 border border-yellow-300 text-yellow-900 text-sm p-3 shadow-sm flex items-start justify-between">
+	<div class="relative col-span-full bg-yellow-100 border border-yellow-300 text-yellow-900 text-sm p-3 shadow-sm flex items-start justify-between"
+		 out:fade={{duration: 300}}>
 		<div class="flex items-start space-x-2 w-full max-w-7xl mx-auto">
 			<Icon icon="mdi:warning-outline" class="w-5 h-5 mt-0.5 text-yellow-600" />
 			<div class="flex-1">

@@ -1,6 +1,7 @@
 import type { Actions, PageServerLoad } from './$types';
-import { type MaterialForm } from '$lib/database';
+import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
 import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
+import type { FileTUSMetadata } from '$lib/util/indexDB';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();
@@ -67,11 +68,14 @@ export const actions = {
 	 */
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
-		const fileList: FileList = data.getAll('file') as unknown as FileList;
-		const fileURLs: string[] = JSON.parse(data.get("fileURLs")?.toString() || '');
-		if (!fileList) return { status: 400, message: 'No files provided' };
-		const add = await filesToAddOperation(fileList, fileURLs);
+		const fileList: string[] = data.getAll('file') as unknown as string[];
+		const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
+		if (!fileList || fileList.length < 1) return { status: 400, message: 'No files provided' };
+		// const add = await filesToAddOperation(fileList, fileURLs);
 
+		const add = fileList.concat(fileURLs).map((item: string) => {
+			return JSON.parse(item) as UploadMaterialFileFormat
+		});
 
 		const tagsDataEntry = data.get('tags');
 		if (!tagsDataEntry) return { status: 400, message: 'No tags provided' };

@@ -194,6 +194,16 @@ type FetchedFileItem = {
 };
 
 /**
+ * Type used exclusively for files in a material publication (excluding cover picture)
+ * This information is fed to the backend in this format
+ */
+type UploadMaterialFileFormat = {
+	title: string,
+	type: string,
+	info: string
+}
+
+/**
  * Array of fetched file items.
  */
 type FetchedFileArray = FetchedFileItem[];
@@ -241,6 +251,7 @@ export {
 	type FetchedFileItem,
 	type FetchedFileArray,
 	type NodeDiffActions,
+	type UploadMaterialFileFormat,
 	handleSimilarity,
 	updateCircuitCoverPic,
 	updateFiles,
