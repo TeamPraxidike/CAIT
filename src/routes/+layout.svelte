@@ -84,7 +84,7 @@
 <Header supabase={supabase} loggedUser={loggedUser} />
 
 
-<div class="w-full dark:text-surface-50 text-surface-900 overflow-x-hidden">
+<div class="w-full min-h-screen dark:text-surface-50 text-surface-900 overflow-x-hidden">
 
 <!--	<div class="progress-bar-container">-->
 <!--&lt;!&ndash;		<div class="progress-bar-meter" style="width: {progress}%"></div>&ndash;&gt;-->

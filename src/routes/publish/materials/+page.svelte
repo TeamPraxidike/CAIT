@@ -8,7 +8,7 @@
 		Tag,
 		TheoryAppBar, UserProp
 	} from '$lib';
-	import { FileButton, getToastStore, Step, Stepper } from '@skeletonlabs/skeleton';
+	import { FileButton, getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
@@ -139,7 +139,12 @@
 
 	const toastStore = getToastStore();
 	let showAnimation = false;
-	$: showAnimation = showAnimation;
+	$: if (showAnimation) {
+		// tick() waits until the DOM has been updated
+		tick().then(() => {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		});
+	}
 
 	$: if (form?.status === 200) {
 		if (saveInterval) {
@@ -160,7 +165,6 @@
 			//
 			// // Navigate away
 			// goto(`/${loggedUser.username}/${form?.id}`);
-			await tick();
 
 			showAnimation = true;
 		}).catch(error => {
@@ -173,12 +177,16 @@
 			background: 'bg-warning-200',
 			classes: 'text-surface-900'
 		});
+
+		isSubmitting = false;
 	} else if (form?.status === 500) {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
 			background: 'bg-error-200',
 			classes: 'text-surface-900'
 		});
+
+		isSubmitting = false;
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -404,15 +412,19 @@
 
 		return true;
 	}
+
+	let bannerFieldsList;
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
 
 {#if !showAnimation}
-	<Banner metadata={metadata} files={numMaterials} materialType={metadata.materialType}/>
+	<div class="col-span-full" out:fade={{duration: 400}}>
+		<Banner bind:fieldsList={bannerFieldsList} metadata={metadata} files={numMaterials} materialType={metadata.materialType}/>
+	</div>
 
-	<div class="form-container col-span-full px-5 pt-5 pb-20 shadow"
-		 out:fade={{duration: 300}}>
+	<div class="form-container col-span-full px-5 pt-5 pb-5 shadow"
+		 out:fade={{duration: 400}}>
 		<form method="POST"
 			  enctype="multipart/form-data"
 			  action="?/publish"
@@ -474,6 +486,7 @@
 		  }}>
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					 buttonNext="btn dark:bg-surface-200"
+					 buttonCompleteLabel="Complete"
 					 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 				<Step locked={locks[0]}>
 
@@ -645,14 +658,32 @@
 				</Step>
 			</Stepper>
 		</form>
+
+		<!-- Loading Radial -->
+		<!-- This is not a really good solution...	-->
+		{#if isSubmitting}
+			<div class="col-span-full relative w-full">
+				<div class="absolute right-0 -top-[50px] z-10 bg-white pr-8 pl-20 py-3">
+					<ProgressRadial font="12" width="w-10"/>
+				</div>
+			</div>
+		{/if}
 	</div>
+
 {:else}
-	<div class="fade-overlay col-span-full pt-20 pb-20"
+	<div class="fade-overlay col-span-full pt-20"
 		 in:fade={{ delay: 600, duration: 400 }} out:fade={{duration: 300}}>
 		<div class="logo-container">
 			<img src="/images/about/CAIT_Logo_nobg.png" alt="Success" class="logo">
 		</div>
 		<div class="success-text">Publication uploaded successfully</div>
+		<div class="success-subtext">
+			{#if bannerFieldsList.length !== 0 || markedAsDraft}
+				Your publication has been saved as a draft - only you can see it
+			{:else}
+				Your publication is now visible to all users of CAIT
+			{/if}
+		</div>
 		<div class="button-container">
 			<button type="button" class="success-btn
 				bg-primary-600 text-surface-50 border-2 border-primary-600
@@ -668,7 +699,7 @@
 					// showAnimation = false;
 					goto(`/${loggedUser.username}/${form?.id}`);
 				}}>
-				View this publication
+				View publication
 			</button>
 		</div>
 	</div>
@@ -710,6 +741,15 @@
         color: black;
         font-size: 1.5rem;
         font-weight: 500;
+        text-align: center;
+        opacity: 0;
+        animation: slide-in-content 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;
+    }
+
+    .success-subtext {
+        color: black;
+        font-size: 1.0rem;
+        font-weight: 350;
         text-align: center;
         opacity: 0;
         animation: slide-in-content 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;
@@ -774,6 +814,10 @@
 
         .success-text {
             font-size: 1rem;
+        }
+
+        .success-subtext {
+            font-size: 0.75rem;
         }
     }
 </style>
