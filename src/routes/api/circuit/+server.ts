@@ -1,7 +1,7 @@
 import { type CircuitWithPublication, type CircuitWithPublisher, getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
-	type CircuitForm,
+	type CircuitForm, coverPicFetcher,
 	createCircuitPublication,
 	fileSystem,
 	handleConnections,
@@ -46,9 +46,9 @@ export async function GET({ url }) {
 		circuits = circuits.slice(0, amount)
 
 		circuits = await Promise.all(circuits.map(async circuit => {
-			const filePath = circuit.publication.coverPic!.path;
-
-			const currentFileData = await fileSystem.readFile(filePath);
+			// const filePath = circuit.publication.coverPic!.path;
+			//
+			// const currentFileData = await fileSystem.readFile(filePath);
 
 			return {
 				...circuit,
@@ -58,7 +58,9 @@ export async function GET({ url }) {
 						circuit.publication.publisher.profilePic,
 					)).data,
 				},
-				coverPicData: currentFileData.toString('base64'),
+				coverPicData: (await coverPicFetcher(
+					circuit.publication.coverPic
+				)).data,
 			};
 		}));
 		return new Response(

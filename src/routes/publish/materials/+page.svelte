@@ -319,9 +319,7 @@
 			}
 
 			for (const f of files){
-				console.log(f.name)
 				if (!(fileTUSMetadata[f.name]['isDone'])){
-					console.log("resuming");
 					uploadFileTUS(bucketName, fileTUSMetadata[f.name]['generatedName'], f, f.type,
 					supabaseClient, supabaseURL)
 				}

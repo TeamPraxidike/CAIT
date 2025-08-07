@@ -74,8 +74,8 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
  * @param coverPic
  */
 export async function coverPicFetcher(
-	encapsulatingType: string,
-	coverPic: PrismaFile | null,
+	encapsulatingType: string | null = null,
+	coverPic: PrismaFile | null = null
 ) : Promise<FetchedFileItem> {
 	let filePath;
 

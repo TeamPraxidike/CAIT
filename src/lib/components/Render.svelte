@@ -3,7 +3,6 @@
 	import Icon from '@iconify/svelte';
 	import { Download, formatFileSize } from '$lib';
 	import type { FetchedFileItem } from '$lib/database';
-	import DocumentViewer from '$lib/components/DocumentViewer.svelte';
 
 	//export let file: File;
 	export let file: FetchedFileItem | File;
@@ -14,9 +13,9 @@
 		'pdf', 'pdf/a',
 
 		// Images
-		// 'png',
-		// 'jpeg', 'jpg',
-		// 'tiff', 'tif',
+		'png',
+		'jpeg', 'jpg',
+		'tiff', 'tif'
 		//
 		// // Office documents
 		// 'docx', 'doc', 'dotx', 'docm',
@@ -98,7 +97,6 @@
 					{:else if file.type.startsWith('text')}
 						<CodeBlock language={getLanguage(file.type)} code={decoder.decode(fileBuffer)} />
 					{:else if isSupportedForPreview(getExtension(file))}
-<!--						<DocumentViewer documentURL={URL.createObjectURL(new Blob([fileBuffer], { type: file.type }))} />-->
 						<iframe title={file.name} src={URL.createObjectURL(new Blob([fileBuffer], { type: file.type }))}
 								class="w-full h-[70vh]"></iframe>
 					{:else}
@@ -123,7 +121,6 @@
 			{:else if file.type.startsWith('text')}
 				<CodeBlock language={getLanguage(file.type)} code={file.data ?? ''} />
 			{:else if isSupportedForPreview(getExtension(file))}
-<!--				<DocumentViewer documentURL={file.data} />-->
 				<iframe title={file.name} src={file.data}
 						class="w-full h-[70vh]"></iframe>
 			{:else}

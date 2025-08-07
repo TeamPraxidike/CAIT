@@ -49,25 +49,25 @@
 		} else {
 			files = Array.from(files as FileList).filter(f => f.name !== (file as File).name) as unknown as FileList;
 
-			const { data: { session } } = await supabaseClient.auth.getSession()
-
 			// TODO error handling
+			try{
+				if (fileTUSMetadata[file.name]['isDone']) {
+					const formData = new FormData();
+					formData.append('file', fileTUSMetadata[file.name]['generatedName']);
+					fetch('?/deleteTUSFile', {
+						method: "POST",
+						body: formData
+					})
 
-			if (fileTUSMetadata[file.name]['isDone']) {
-				const formData = new FormData();
-				formData.append('file', fileTUSMetadata[file.name]['generatedName']);
-				fetch('?/deleteTUSFile', {
-					method: "POST",
-					body: formData
-				})
-
-			} else {
-				fileTUSUploadObjects[(file as File).name].abort(true);
-				fileTUSUploadObjects = {...fileTUSUploadObjects};
+				} else {
+					fileTUSUploadObjects[(file as File).name].abort(true);
+					fileTUSUploadObjects = {...fileTUSUploadObjects};
+				}
+			}
+			catch (e){
+				console.log("Could not delete/abort file");
 			}
 
-			// TODO
-			// deleteFromBackend()
 			if ((file as File).name in fileTUSProgress){
 				delete fileTUSProgress[(file as File).name];
 				fileTUSProgress = {...fileTUSProgress};

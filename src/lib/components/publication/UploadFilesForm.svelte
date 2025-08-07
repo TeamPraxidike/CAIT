@@ -2,7 +2,13 @@
 	import { FileDropzone } from '@skeletonlabs/skeleton';
 	import { FileTable } from '$lib';
 	import { concatFileList } from '$lib/util/file';
-	import { type FileTUSMetadata, getFileTUSMetadata, saveFiles, saveFileTUSMetadata } from '$lib/util/indexDB';
+	import {
+		deleteFileTUSMetadata,
+		type FileTUSMetadata,
+		getFileTUSMetadata,
+		saveFiles,
+		saveFileTUSMetadata
+	} from '$lib/util/indexDB';
 	import { onMount } from 'svelte';
 
 	export let fileURLs: string[] = [];
@@ -122,8 +128,6 @@
 			// add to IndexedDB and start TUS uploading
 			for (const currentFile of files) {
 
-				console.log(`${currentFile.name} checking`);
-
 				// if we already have the metadata then the file is not new
 				if (!(await isFileTUSMetaAlreadyProcessed(currentFile))) {
 
@@ -139,20 +143,25 @@
 						isDone: false
 					}
 
-					// save metadata to indexedDB
-					await saveFileTUSMetadata(currentTUSMetadata)
+					try{
+						// save metadata to indexedDB
+						await saveFileTUSMetadata(currentTUSMetadata)
 
-					// update local variable
-					fileTUSMetadata[currentTUSMetadata.originalName] = currentTUSMetadata;
-					fileTUSMetadata = {...fileTUSMetadata};
+						// update local variable
+						fileTUSMetadata[currentTUSMetadata.originalName] = currentTUSMetadata;
+						fileTUSMetadata = {...fileTUSMetadata};
 
-					console.log(fileTUSProgress);
-
-					// start actual upload
-					uploadFileTUS(bucketName, pathFileNameGenerated, currentFile, currentFile.type,
-					supabaseClient, supabaseURL);
-
-					console.log(fileTUSProgress);
+						// start actual upload
+						uploadFileTUS(bucketName, pathFileNameGenerated, currentFile, currentFile.type,
+							supabaseClient, supabaseURL);
+					}
+					catch (e) {
+						await deleteFileTUSMetadata(pathFileNameGenerated);
+						if (fileTUSMetadata[currentTUSMetadata.originalName]){
+							delete fileTUSMetadata[currentTUSMetadata.originalName];
+							fileTUSMetadata = {...fileTUSMetadata};
+						}
+					}
 				}
 			}
 		}

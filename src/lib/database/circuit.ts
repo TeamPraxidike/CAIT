@@ -142,7 +142,7 @@ export async function getAllCircuits(
 		});
 	}
 
-	where.NOT = {isDraft: true}
+	where.NOT = {publication: {isDraft: true}}
 
 	const sortBy = sortSwitch(sort);
 

@@ -37,8 +37,11 @@ export const GET: RequestHandler = async ({ url }) => {
 				)).data;
 			} else {
 				const filePath = publication.coverPic!.path;
-				const currentFileData = await fileSystem.readFile(filePath);
-				coverPicData = currentFileData.toString('base64');
+				coverPicData = (await coverPicFetcher(
+					publication.coverPic,
+				)).data;
+				// const currentFileData = await fileSystem.readFile(filePath);
+				// coverPicData = currentFileData.toString('base64');
 			}
 			return {
 				...publication,
