@@ -367,8 +367,10 @@
 					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
 					<div class="flex flex-col gap-2">
+						<label for="content">Content<span class="text-error-300">*</span></label>
 						<SelectType bind:selectedTypes={selectedTypes}/>
 						<hr class="m-2">
+						<label for="course">Course<span class="text-error-300">*</span></label>
 						<SelectCourse on:showCourseModal={openModal}
 									  bind:selectedCourseId={course}
 									  courses={data.courses}
@@ -454,15 +456,38 @@
 					<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}
 									 adding="{true}"/>
 				</div>
-				<div class="flex flex-col w-full">
-					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-									   bind:additionalMaintainers={maintainers}/>
-					<div class="lg:w-1/2">
-						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
+				<div class="flex flex-row w-full gap-6">
+					<div class="flex flex-col gap-4 w-1/2">
+						<MantainersEditBar
+							publisher={loggedUser}
+							bind:searchableUsers={searchableUsers}
+							users={users}
+							bind:additionalMaintainers={maintainers}
+						/>
+
+						<TagsSelect
+							allTags={allTags}
+							bind:tags={tags}
+							bind:newTags={newTags}
+						/>
+					</div>
+
+					<!-- RIGHT COLUMN: Additional Description -->
+					<div class="flex flex-col w-1/2">
+						<label for="description" class="mb-2">Additional Description:</label>
+						<textarea
+							id="description"
+							name="description"
+							placeholder="Here you can provide additional description for your publication..."
+							bind:value={description}
+							class="min-h-60 h-full resize-y rounded-lg bg-surface-50 dark:bg-surface-800 w-full text-surface-700 dark:text-surface-200"
+						/>
 					</div>
 				</div>
-				<textarea name="description" placeholder="Additional Description..." bind:value={description}
-						  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
+
+				<!--				<label for="Description">Additional Description:</label>-->
+<!--				<textarea name="description" placeholder="Here you can provide additional description for your publication..." bind:value={description}-->
+<!--						  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />-->
 			</div>
 		</Step>
 		<Step locked={isSubmitting}>
@@ -497,7 +522,9 @@
 						<div class="flex flex-wrap">
 							<UserProp role="Publisher" view="publish" user={loggedUser} userPhotoUrl={loggedUser.profilePicData} />
 							{#each maintainers as maintainer (maintainer.id)}
-								<UserProp user={maintainer} view="publish" role="Publisher" userPhotoUrl={maintainer.profilePicData} />
+								{#if maintainer.id !== loggedUser.id}
+									<UserProp user={maintainer} view="publish" role="Publisher" userPhotoUrl={maintainer.profilePicData} />
+								{/if}
 							{/each}
 						</div>
 					</div>

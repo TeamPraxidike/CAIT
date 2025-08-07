@@ -330,7 +330,7 @@
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
 
 	{#if pageType !== "people"}
-		<DropdownSelect title="Difficulty" multiselect={true} options={diffOptions}
+		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}
 						bind:selected={selectedDiff} on:select={() => searchActive = true}
 						disabled={isSemanticActive}/>
 		<DropdownSelect title="Tags" multiselect={true} options={tags.map(x => x.content)}
@@ -344,7 +344,7 @@
 	{/if}
 
 	{#if pageType === 'materials'}
-		<DropdownSelect title="Types" multiselect={true} options={allTypes}
+		<DropdownSelect title="Content" multiselect={true} options={allTypes}
 						bind:selected={selectedTypes} on:select={() => searchActive = true}
 						disabled={isSemanticActive}/>
 	{/if}

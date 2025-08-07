@@ -93,8 +93,9 @@
 	<!--{#if showModal}-->
 	<!--	<CourseModal existingCourse={null} onSuccess={refresh} close={closeModal} />-->
 	<!--{/if}-->
-
 	<div class="flex flex-wrap gap-2">
+<!--		<label for="Your Courses">Your Courses:</label>-->
+
 		{#if Array.isArray(courses) && courses.length > 0}
 			{#each courses as course}
 				{#if originalCourseIds.includes(course.id)}
@@ -136,7 +137,7 @@
 		{/if}
 	</div>
 
-
+<!--	<label for="browse"> Browse Courses</label>-->
 	<div class="w-1/2">
 		<input
 			class="input autocomplete"
