@@ -54,15 +54,13 @@
 			// TODO error handling
 
 			if (fileTUSMetadata[file.name]['isDone']) {
-				// TODO: delete file from backend
-				console.log("todo delete file from backend");
-				// FOR SOME REASON THIS RETURNS 409 conflict
-				// const url = fileTUSUploadObjects[(file as File).name].url
-				// await tus.Upload.terminate(url, {
-				// 	headers: {
-				// 		authorization: `Bearer ${session.access_token}`,
-				// 	},
-				// });
+				const formData = new FormData();
+				formData.append('file', fileTUSMetadata[file.name]['generatedName']);
+				fetch('?/deleteTUSFile', {
+					method: "POST",
+					body: formData
+				})
+
 			} else {
 				fileTUSUploadObjects[(file as File).name].abort(true);
 				fileTUSUploadObjects = {...fileTUSUploadObjects};

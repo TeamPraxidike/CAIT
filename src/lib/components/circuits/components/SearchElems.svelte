@@ -338,16 +338,16 @@
 			{#if chosenOption === 0}
 				{#each materials as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
-													 extensions="{getExtensions(m)}"
+													 extensions="{m.files ? getExtensions(p.materials) : []}"
 													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
 													 on:removed={removeCard} imgSrc={m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher} materialType={m.encapsulatingType}/>
 				{/each}
-				{:else if chosenOption===1}
-					{#each circuits as m}
+			{:else if chosenOption===1}
+				{#each circuits as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
 					selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
 					on:removed={removeCard} imgSrc={m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
-					{/each}
+				{/each}
 			{:else if (chosenOption===2 || chosenOption===3)}
 				{#each publications as p}
 					<PublicationCard publication="{p}" inCircuits="{true}"

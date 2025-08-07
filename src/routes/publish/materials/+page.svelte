@@ -104,6 +104,11 @@
 		const eventFiles = (e.target as HTMLInputElement).files;
 		if (eventFiles && eventFiles[0]) {
 			const file = eventFiles[0];
+
+			if ((file.size / (1024*1024)) > 2) {
+				return;
+			}
+
 			if (file.type === 'image/jpeg' || file.type === 'image/png') {
 				coverPic = file;
 				// Persist coverPic to IndexedDB 
@@ -172,11 +177,19 @@
 		});
 		// goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
-		toastStore.trigger({
-			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-warning-200',
-			classes: 'text-surface-900'
-		});
+		if (!allUploadsDone()){
+			toastStore.trigger({
+				message: 'Some files are still being uploaded',
+				background: 'bg-warning-200'
+			});
+		}
+		else {
+			toastStore.trigger({
+				message: `Malformed information, please check your inputs: ${form?.message}`,
+				background: 'bg-warning-200',
+				classes: 'text-surface-900'
+			});
+		}
 
 		isSubmitting = false;
 	} else if (form?.status === 500) {
@@ -434,7 +447,7 @@
 
 			// check if all the file uploads (excluding cover picture) are done
 			if (!(allUploadsDone())){
-				alert('Some files are still being uploaded');
+				// alert('Some files are still being uploaded');
 				isSubmitting = false;
 				return;
 			}
@@ -504,7 +517,7 @@
 					<div class="grid grid-cols-2 gap-x-4 gap-y-2">
 						<label for="title">Title<span class="text-error-300">*</span></label>
 
-						<label for="coverPic">Cover Picture</label>
+						<label for="coverPic">Cover Picture (Max. size: 2MB)</label>
 
 						<div class="flex flex-col gap-2 min-h-80">
 							<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
@@ -660,7 +673,7 @@
 		</form>
 
 		<!-- Loading Radial -->
-		<!-- This is not a really good solution...	-->
+		<!-- this is not a really good solution...	-->
 		{#if isSubmitting}
 			<div class="col-span-full relative w-full">
 				<div class="absolute right-0 -top-[50px] z-10 bg-white pr-8 pl-20 py-3">

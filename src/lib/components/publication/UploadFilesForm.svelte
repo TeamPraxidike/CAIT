@@ -103,10 +103,19 @@
 	async function appendToFileList(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
 		if (eventFiles && eventFiles.length > 0) {
-			// Merge new files into the existing FileList
-			files = concatFileList(files, eventFiles);
 
-			// Convert final FileList to an array and store in IndexedDB **/
+			// retain files that are under the per-file size limit
+			let filesToUse = []
+			for (const eventFile of eventFiles){
+				if ((eventFile.size / (1024*1024)) <= 100) {
+					filesToUse.push(eventFile);
+				}
+			}
+
+			// Merge new files into the existing FileList
+			files = concatFileList(files, filesToUse);
+
+			// convert final FileList to an array and store in IndexedDB
 			await saveFiles(Array.from(files));
 
 			// for each of the files, generate a name
@@ -165,7 +174,9 @@
 				multiple
 				name="file"
 				class="w-full h-full border-2 border-dashed rounded-xl p-4"
-			/>
+			>
+				<svelte:fragment slot="meta">Max. size per file: 100MB</svelte:fragment>
+			</FileDropzone>
 		</div>
 
 		<!-- URL Input + Button Row -->

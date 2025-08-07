@@ -1,5 +1,5 @@
 import type { Actions, PageServerLoad } from './$types';
-import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
+import { deleteFile, type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
 import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
 import type { FileTUSMetadata } from '$lib/util/indexDB';
 
@@ -152,4 +152,14 @@ export const actions = {
 		});
 		return { status: res.status, id: (await res.json()).id };
 	},
+
+	deleteTUSFile: async ({request}) => {
+		const data = await request.formData();
+		const filePathToRemove = data.get('file') as string;
+
+		console.log(filePathToRemove);
+		// no need to await here, even if something goes wrong
+		// the file just remains an orphan - could be manually deleted later on
+		deleteFile(filePathToRemove, true);
+	}
 } satisfies Actions;
