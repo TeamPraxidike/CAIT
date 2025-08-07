@@ -197,4 +197,18 @@ export const actions = {
 			return { status: res.status };
 		}
 	},
+
+	// we need to create a FileList for UploadFilesForm, comprised of File objects
+	// right now, we have the file URLs, which is not exactly what we need
+	// so we will just fetch blobs from the backend and proceed just like before
+	// it's the easiest option.... but I hate it
+	getBlobs: async ({request}) => {
+		const data = await request.formData();
+
+		const files = data.getAll('files') as string[];
+
+		for (const f of files){
+			//fetch blob from backend
+		}
+	}
 } satisfies Actions;

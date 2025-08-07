@@ -20,7 +20,7 @@
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import { onMount } from 'svelte';
-	import type { NodeDiffActions } from '$lib/database';
+	import type { FetchedFileArray, NodeDiffActions } from '$lib/database';
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
 	import { isMaterialDraft, validateMetadata } from '$lib/util/validatePublication';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
@@ -45,9 +45,8 @@
 	let time:any;
 	let copyright:any;
 	let selectedType:any;
-	let files: FileList;
 	let oldFiles: any;
-	let fetchedFiles: any;
+	let fetchedFiles: FetchedFileArray | [] = [];
 
 	let LOs: string[] = serverData.publication.learningObjectives;
 	let PKs: string[] = serverData.publication.prerequisites;
@@ -89,8 +88,10 @@
 		selectedType = serverData.publication.materials.encapsulatingType;
 		(async () => {
 			fetchedFiles = await data.fetchedFiles;
+
+
 			//files = createFileList(serverData.fileData, serverData.publication.materials.files);
-			files = createFileList(fetchedFiles, serverData.publication.materials.files);
+			//files = createFileList(fetchedFiles, serverData.publication.materials.files);
 			oldFiles = serverData.publication.materials.files
 		})();
 	}
@@ -136,10 +137,7 @@
 		}
 	}
 
-
-
 	let allTags: PrismaTag[] = data.tags;
-
 
 	export let form: ActionData;
 	const toastStore = getToastStore();
@@ -416,7 +414,14 @@
 
 	{#if isMaterial}
 		<div class="mt-8">
+<!--			<UploadFilesForm-->
+<!--				bind:fileURLs={fileURLs}-->
+<!--				bind:files={files}/>-->
 			<UploadFilesForm
+				bind:supabaseClient={supabaseClient}
+				bind:fileTUSMetadata={fileTUSMetadata}
+				bind:fileTUSProgress={fileTUSProgress}
+				bind:fileTUSUploadObjects={fileTUSUploadObjects}
 				bind:fileURLs={fileURLs}
 				bind:files={files}/>
 		</div>

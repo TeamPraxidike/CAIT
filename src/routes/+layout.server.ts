@@ -1,4 +1,7 @@
 import type { LayoutServerLoad } from './$types'
+import { verifyAuth } from '$lib/database/auth';
+import { deleteFile } from '$lib/database';
+import type { Actions } from '@sveltejs/kit';
 
 export const load: LayoutServerLoad = async ({ locals, cookies, fetch }) => {
   // const { session } = await safeGetSession()

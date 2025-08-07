@@ -52,12 +52,10 @@
 			// TODO error handling
 			try{
 				if (fileTUSMetadata[file.name]['isDone']) {
-					const formData = new FormData();
-					formData.append('file', fileTUSMetadata[file.name]['generatedName']);
-					fetch('?/deleteTUSFile', {
-						method: "POST",
-						body: formData
-					})
+					await supabaseClient
+						.storage
+						.from('uploadedFiles')
+						.remove([fileTUSMetadata[file.name]['generatedName']]);
 
 				} else {
 					fileTUSUploadObjects[(file as File).name].abort(true);

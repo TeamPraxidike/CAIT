@@ -57,7 +57,7 @@ export const load: LayoutServerLoad = async ({
 				// something definitely went wrong here
 				throw new Error(`Failed to load files: ${res.statusText}`);
 			}
-			const fileData = await res.json();
+			const fileData: FetchedFileArray = await res.json();
 
 			return fileData;
 		} catch (err) {

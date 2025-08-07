@@ -30,7 +30,7 @@
 		getFiles,
 		getMaterialSnapshot,
 		saveCover,
-		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata
+		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata
 	} from '$lib/util/indexDB';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
@@ -159,7 +159,8 @@
 		Promise.all([
 			deleteCover(),
 			clearFiles(),
-			clearMaterialSnapshot()
+			clearMaterialSnapshot(),
+			deleteAllFileTUSMetadata()
 		]).then(async () => {
 			// // Show success message
 			// toastStore.trigger({
@@ -503,7 +504,6 @@
 
 					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 					<UploadFilesForm
-						bind:loggedUser={loggedUser}
 						bind:supabaseClient={supabaseClient}
 						bind:fileTUSMetadata={fileTUSMetadata}
 						bind:fileTUSProgress={fileTUSProgress}

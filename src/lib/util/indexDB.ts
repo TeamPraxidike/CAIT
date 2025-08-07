@@ -110,6 +110,11 @@ export async function deleteFileTUSMetadata(fileName: string) {
 	await db.delete(FILES_TUS_STORE, fileName);
 }
 
+export async function deleteAllFileTUSMetadata() {
+	const db = await initDB();
+	await db.clear(FILES_TUS_STORE);
+}
+
 // Save snapshot
 export async function saveMaterialSnapshot(snapshotData: FormSnapshot) {
 	console.log("SAVING SNAPSHOT")

@@ -15,7 +15,6 @@
 	export let files: FileList = [] as unknown as FileList;
 	export let fileTUSMetadata: { [key: string] : FileTUSMetadata } = {}
 	export let supabaseClient: any = null;
-	export let loggedUser: any = null;
 	export let fileTUSProgress: { [key: string]: any } = {}
 	export let fileTUSUploadObjects: { [key: string]: any } = {}
 
