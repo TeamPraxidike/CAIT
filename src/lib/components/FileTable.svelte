@@ -60,6 +60,10 @@
 						.remove([fileTUSMetadata[file.name]['generatedName']]);
 				}
 				else if(!integrateWithIndexDB){
+					if (fileTUSUploadObjects[(file as File).name]){
+						fileTUSUploadObjects[(file as File).name].abort(true);
+						fileTUSUploadObjects = {...fileTUSUploadObjects};
+					}
 					return;
 					// the code below works, but it directly deletes the file
 					// we don't necessarily want that behaviour (accidental clicks happen)
