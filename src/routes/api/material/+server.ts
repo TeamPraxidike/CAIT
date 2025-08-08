@@ -207,9 +207,11 @@ export async function POST({ request , locals}) {
 		const publicationId = createdMaterial.publicationId;
 		const materialId = createdMaterial.id;
 
-		enqueueMaterialComparison(publicationId, materialId).catch((error) =>
-			console.error(error),
-		);
+		setTimeout(() => {
+			enqueueMaterialComparison(publicationId, materialId).catch((error) => {
+				console.error(error);
+			}
+		)}, 2000);
 
 		return new Response(JSON.stringify({ id: publicationId }), {
 			status: 200,

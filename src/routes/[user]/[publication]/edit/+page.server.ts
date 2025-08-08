@@ -3,7 +3,7 @@ import {
 	type CircuitForm,
 	type FetchedFileArray,
 	type FetchedFileItem,
-	type MaterialForm,
+	type MaterialForm, type UploadMaterialFileFormat
 } from '$lib/database';
 import type { Difficulty, MaterialType, Tag } from '@prisma/client';
 
@@ -102,9 +102,14 @@ export const actions = {
 			 * New file DATA (File list)
 			 */
 			const fileURLs = JSON.parse(data.get("fileURLs")?.toString() || '');
-			const fileList: FileList = data.getAll(
-				'file',
-			) as unknown as FileList;
+			// const fileList: FileList = data.getAll(
+			// 	'file',
+			// ) as unknown as FileList;
+			const fileListUnformated: string[] = data.getAll('filesToUse') as unknown as string[];
+			const fileList: UploadMaterialFileFormat[] = fileListUnformated.map(item => {
+				console.log(item);
+				return JSON.parse(item) as UploadMaterialFileFormat
+			})
 
 			const oldFilesDataFormData = data.get('oldFilesData');
 			if (oldFilesDataFormData === null) {
@@ -115,25 +120,27 @@ export const actions = {
 				oldFilesDataFormData.toString(),
 			);
 
-			const fileArray: File[] =
-				fileList.length === 0 ? [] : Array.from(fileList);
+			// const fileArray: File[] =
+			// 	fileList.length === 0 ? [] : Array.from(fileList);
 
 			const addInfo: { title: string; type: string; info: string }[] = [];
 
-			for (const file of fileArray) {
-				if (file.size === 0) continue;
+			for (const file of fileList) {
+				// TODO: good edge case
+				//if (file.size === 0) continue;
 
-				const arBuf = await file.arrayBuffer();
-				const buffer = Buffer.from(arBuf);
-				const base64String = buffer.toString('base64');
+				// const arBuf = await file.arrayBuffer();
+				// const buffer = Buffer.from(arBuf);
+				// const base64String = buffer.toString('base64');
+
 				const index = oldFileData.findIndex(
-					(fData: FetchedFileItem) => fData.data === base64String,
+					(fData: FetchedFileItem) => fData.fileId === file.info,
 				);
 				if (index === -1) {
 					addInfo.push({
-						title: file.name,
+						title: file.title,
 						type: file.type,
-						info: base64String,
+						info: file.info,
 					});
 				} else {
 					oldFileData.splice(index, 1);
@@ -145,6 +152,9 @@ export const actions = {
 					path: data.fileId,
 				};
 			});
+
+			console.log("check");
+			console.log(deleteInfo);
 
 			const coverPicFile = data.get('coverPicMat');
 			let coverPic = null;
@@ -197,18 +207,4 @@ export const actions = {
 			return { status: res.status };
 		}
 	},
-
-	// we need to create a FileList for UploadFilesForm, comprised of File objects
-	// right now, we have the file URLs, which is not exactly what we need
-	// so we will just fetch blobs from the backend and proceed just like before
-	// it's the easiest option.... but I hate it
-	getBlobs: async ({request}) => {
-		const data = await request.formData();
-
-		const files = data.getAll('files') as string[];
-
-		for (const f of files){
-			//fetch blob from backend
-		}
-	}
 } satisfies Actions;

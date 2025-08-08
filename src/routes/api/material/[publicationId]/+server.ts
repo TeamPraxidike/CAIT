@@ -160,20 +160,6 @@ export async function PUT({ request, params, locals }) {
 					prismaTransaction,
 				);
 
-				await updateCoverPic(
-					coverPic,
-					publicationId,
-					body.userId,
-					prismaTransaction,
-				);
-
-				await updateFiles(
-					fileInfo,
-					body.materialId,
-					body.userId,
-					prismaTransaction,
-				);
-
 				return await updateMaterialByPublicationId(
 					publicationId,
 					metaData,
@@ -182,10 +168,26 @@ export async function PUT({ request, params, locals }) {
 			},
 		);
 
+		await updateCoverPic(
+			coverPic,
+			publicationId,
+			body.userId
+		);
+
+		await updateFiles(
+			fileInfo,
+			body.materialId,
+			body.userId
+		);
+
 		const materialId = updatedMaterial.id;
 
-		enqueueMaterialComparison(publicationId, materialId).catch(error => console.error(error))
-
+		// enqueueMaterialComparison(publicationId, materialId).catch(error => console.error(error))
+		setTimeout(() => {
+			enqueueMaterialComparison(publicationId, materialId).catch((error) => {
+					console.error(error);
+				}
+			)}, 2000);
 
 		return new Response(JSON.stringify({ id: materialId }), { status: 200 });
 	} catch (error) {

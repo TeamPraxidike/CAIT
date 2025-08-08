@@ -18,12 +18,18 @@
 	export let fileTUSProgress: { [key: string]: any } = {}
 	export let fileTUSUploadObjects: { [key: string]: any } = {}
 
+	// these are purely for the editing page
+	// TODO: either find a different solution or redo UploadFilesForm + FileTable
+	export let integrateWithIndexDB: boolean = true;
+	export let fetchedFiles: FetchedFileArray | [] = [];
+
 	const supabaseURL = import.meta.env.PUBLIC_SUPABASE_URL ?? 'http://localhost:8000';
 	const bucketName = "uploadedFiles"
 
 	let fileURL = '';
 
 	import * as tus from 'tus-js-client'
+	import type { FetchedFileArray } from '$lib/database';
 
 	// source: https://supabase.com/docs/guides/storage/uploads/resumable-uploads?queryGroups=language&language=js
 
@@ -65,10 +71,6 @@
 					// use original name for clarity
 					fileTUSProgress[file.name] = percentage;
 					fileTUSProgress = {...fileTUSProgress};
-
-					console.log("INSIDE:");
-					console.log(fileTUSProgress);
-					console.log("--------");
 				},
 				onSuccess: async function() {
 					console.log('Download %s from %s', (upload.file as File).name, upload.url)
@@ -77,8 +79,10 @@
 					fileTUSMetadata[file.name]['isDone'] = true;
 					fileTUSMetadata = {...fileTUSMetadata};
 
-					// update indexedDB
-					await saveFileTUSMetadata(fileTUSMetadata[file.name]);
+					if (integrateWithIndexDB){
+						// update indexedDB
+						await saveFileTUSMetadata(fileTUSMetadata[file.name]);
+					}
 
 					resolve()
 				},
@@ -100,8 +104,6 @@
 	}
 
 	async function isFileTUSMetaAlreadyProcessed(file: File) {
-		// get IndexedDB FileTUSMetadata
-		// return (await getFileTUSMetadata(file.name)) ? true : false;
 		return (file.name in fileTUSMetadata);
 	}
 
@@ -121,7 +123,9 @@
 			files = concatFileList(files, filesToUse);
 
 			// convert final FileList to an array and store in IndexedDB
-			await saveFiles(Array.from(files));
+			if (integrateWithIndexDB){
+				await saveFiles(Array.from(files));
+			}
 
 			// for each of the files, generate a name
 			// add to IndexedDB and start TUS uploading
@@ -143,8 +147,10 @@
 					}
 
 					try{
-						// save metadata to indexedDB
-						await saveFileTUSMetadata(currentTUSMetadata)
+						if (integrateWithIndexDB){
+							// save metadata to indexedDB
+							await saveFileTUSMetadata(currentTUSMetadata)
+						}
 
 						// update local variable
 						fileTUSMetadata[currentTUSMetadata.originalName] = currentTUSMetadata;
@@ -155,7 +161,9 @@
 							supabaseClient, supabaseURL);
 					}
 					catch (e) {
-						await deleteFileTUSMetadata(pathFileNameGenerated);
+						if (integrateWithIndexDB){
+							await deleteFileTUSMetadata(pathFileNameGenerated);
+						}
 						if (fileTUSMetadata[currentTUSMetadata.originalName]){
 							delete fileTUSMetadata[currentTUSMetadata.originalName];
 							fileTUSMetadata = {...fileTUSMetadata};
@@ -212,7 +220,9 @@
 			</div>
 		</div>
 	</div>
-	<FileTable operation="edit" fileFormat="upload" bind:files={files} bind:fileURLs={fileURLs}
+	<FileTable operation="edit" fileFormat="upload"
+			   integrateWithIndexDB={integrateWithIndexDB} fetchedFiles={fetchedFiles}
+			   bind:files={files} bind:fileURLs={fileURLs}
 			   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
 			   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>
 </div>

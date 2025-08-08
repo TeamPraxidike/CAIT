@@ -16,7 +16,7 @@
 	import type { PublicationView } from '../+layout.server';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import { onMount } from 'svelte';
@@ -25,17 +25,23 @@
 	import { isMaterialDraft, validateMetadata } from '$lib/util/validatePublication';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
-	import { type FormSnapshot, getCircuitSnapshot, saveCircuitSnapshot } from '$lib/util/indexDB';
+	import {
+		type FileTUSMetadata,
+		type FormSnapshot,
+		getCircuitSnapshot,
+		saveCircuitSnapshot
+	} from '$lib/util/indexDB';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 
 
 
 	// $: ({loggedUser} = data);
-	let loggedUser = $page.data.loggedUser;
+	let loggedUser = page.data.loggedUser;
 	export let data: LayoutServerData & PageServerData;
 	let serverData: PublicationView = data.pubView;
 	let publication: Publication = serverData.publication;
+	let supabaseClient: any = page.data.supabase;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
 
@@ -45,6 +51,7 @@
 	let time:any;
 	let copyright:any;
 	let selectedType:any;
+	let files: FileList;
 	let oldFiles: any;
 	let fetchedFiles: FetchedFileArray | [] = [];
 
@@ -62,7 +69,8 @@
 	const isMaterial : boolean = serverData.isMaterial;
 
 	let fileURLs: string[] = isMaterial ? data.pubView.publication.materials.fileURLs.map((x) => x.url) : [];
-	let saveInterval: number | undefined = undefined;
+	let fileTUSMetadata: { [key: string] : FileTUSMetadata } = {}
+
 	let circuitKey = Date.now();
 
 	let circuitNodesPlaceholder: NodeInfo[] = [];
@@ -81,20 +89,54 @@
 	}
 	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
 
-	if (isMaterial){
-		theoryApp = serverData.publication.materials.theoryPractice;
-		time = serverData.publication.materials.timeEstimate;
-		copyright = serverData.publication.materials.copyright;
-		selectedType = serverData.publication.materials.encapsulatingType;
-		(async () => {
-			fetchedFiles = await data.fetchedFiles;
+	onMount(async () => {
+		if (isMaterial){
+			theoryApp = serverData.publication.materials.theoryPractice;
+			time = serverData.publication.materials.timeEstimate;
+			copyright = serverData.publication.materials.copyright;
+			selectedType = serverData.publication.materials.encapsulatingType;
 
+				fetchedFiles = await data.fetchedFiles;
 
-			//files = createFileList(serverData.fileData, serverData.publication.materials.files);
-			//files = createFileList(fetchedFiles, serverData.publication.materials.files);
-			oldFiles = serverData.publication.materials.files
-		})();
-	}
+				const dataTransfer = new DataTransfer();
+
+				for (const f of fetchedFiles){
+					fileTUSMetadata[f.name] = {
+						originalName: f.name,
+						generatedName: f.fileId,
+						isDone: true
+					}
+
+					const { data: blob, error } = await supabaseClient
+						.storage
+						.from("uploadedFiles")
+						.download(f.fileId);
+
+					if (error) {
+						console.error('Error downloading file from Supabase:', error.message);
+						throw error;
+					}
+
+					if (!blob) {
+						console.error('Download succeeded but the returned blob is null.');
+						return null;
+					}
+
+					const file = new File([blob], f.name, {
+						type: blob.type,
+					});
+
+					dataTransfer.items.add(file);
+				}
+
+				files = dataTransfer.files;
+
+				//files = createFileList(serverData.fileData, serverData.publication.materials.files);
+				//files = createFileList(fetchedFiles, serverData.publication.materials.files);
+				//oldFiles = serverData.publication.materials.files
+			}
+	})
+
 
 	let coverPicMat:File|undefined = undefined;
 	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
@@ -200,41 +242,6 @@
 
 	onMount(() => {
 		(async () => {
-			const existing = await getCircuitSnapshot();
-			if (existing) {
-				// TODO: This ?? business is meh, redo
-				title = existing.title;
-				description = existing.description;
-				// tags = existing.tags; // For some reason tags array is always empty
-				newTags = existing.newTags;
-				LOs = existing.LOs;
-				PKs = existing.PKs;
-				maintainers = existing.maintainers;
-				users = existing.searchableUsers;
-				circuitNodesPlaceholder = existing.circuitNodes ?? [];
-				// fileURLs = existing.fileURLs ?? [];
-			}
-
-			circuitKey = Date.now();
-
-			saveInterval = window.setInterval(() => {
-				const data: FormSnapshot = {
-					title,
-					description,
-					tags,
-					newTags,
-					LOs,
-					PKs,
-					maintainers,
-					// fileURLs,
-					searchableUsers: users,
-					circuitNodes: circuitNodesPlaceholder
-				};
-
-				// Store it in IndexedDB
-				saveCircuitSnapshot(data);
-			}, 2000);
-
 			window.addEventListener('beforeunload', handleBeforeUnload);
 
 			return () => {
@@ -295,20 +302,31 @@
 			return;
 		}
 
+		console.log(isMaterial)
 
 		if(isMaterial){
-      		Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+      		// Array.from(files).forEach(file => appendFile(formData, file, 'file'));
+      		for (const f of files){
+				 let uploadFormat = {
+					title: f.name,
+					type: f.type,
+					info: fileTUSMetadata[f.name]['generatedName']
+				}
+				console.log("appending this:");
+				console.log(uploadFormat);
+				formData.append('filesToUse', JSON.stringify(uploadFormat));
+      		}
 		}
 
 		formData.append('title', title);
 		formData.append('description', description)
 		formData.append('isMaterial', JSON.stringify(isMaterial));
 
-		formData.append('oldFiles', JSON.stringify(oldFiles));
+		//formData.append('oldFiles', JSON.stringify(oldFiles));
 		//formData.append('oldFilesData', JSON.stringify(serverData.fileData));
 		formData.append('oldFilesData', JSON.stringify(fetchedFiles));
 
-		formData.append('userId', $page.data.session?.user.id.toString() || '');
+		formData.append('userId', page.data.session?.user.id.toString() || '');
 		formData.append('tags', JSON.stringify(tags));
 		formData.append('newTags', JSON.stringify(newTags))
 		formData.append('difficulty', difficulty);
@@ -330,7 +348,7 @@
 		formData.append('fileURLs', JSON.stringify(fileURLs));
 
 
-		if(circuitRef){
+		if(circuitRef) {
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
             let oldAdd = nodeActions.add;
             let newAdd = nodeDiffActions.add;
@@ -414,14 +432,11 @@
 
 	{#if isMaterial}
 		<div class="mt-8">
-<!--			<UploadFilesForm-->
-<!--				bind:fileURLs={fileURLs}-->
-<!--				bind:files={files}/>-->
 			<UploadFilesForm
-				bind:supabaseClient={supabaseClient}
+				integrateWithIndexDB={false}
+				fetchedFiles={fetchedFiles}
 				bind:fileTUSMetadata={fileTUSMetadata}
-				bind:fileTUSProgress={fileTUSProgress}
-				bind:fileTUSUploadObjects={fileTUSUploadObjects}
+				bind:supabaseClient={supabaseClient}
 				bind:fileURLs={fileURLs}
 				bind:files={files}/>
 		</div>

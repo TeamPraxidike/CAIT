@@ -25,14 +25,18 @@
 
 	export let supabaseClient: any = null;
 
+	// these are purely for the editing page
+	// TODO: either find a different solution or redo UploadFilesForm + FileTable
+	export let integrateWithIndexDB: boolean = true;
+	export let fetchedFiles: FetchedFileArray | [] = [];
+
+
 	export let progressBarColor = '#00A6D6'
 
 	const ms = getModalStore();
 
 	$: warning = (files && files.length === 0) && (fileURLs && fileURLs.length === 0);
 
-
-	// function activateModal(file: File) {
 	function activateModal(file: File | FetchedFileItem) {
 		ms.trigger({
 			type: 'component',
@@ -40,10 +44,8 @@
 		});
 	}
 
-	// function removeFile(file: File) {
-	// 	files = Array.from(files).filter(f => f.name !== file.name) as unknown as FileList;
-	// }
 	async function removeFile(file: File | FetchedFileItem) {
+		// this branch doesn't really get explored but will leave for clarity
 		if (fileFormat === 'fetch') {
 			files = Array.from(files as FetchedFileArray).filter(f => f.fileId !== (file as FetchedFileItem).fileId);
 		} else {
@@ -51,19 +53,29 @@
 
 			// TODO error handling
 			try{
-				if (fileTUSMetadata[file.name]['isDone']) {
+				if (fileTUSMetadata[file.name] && fileTUSMetadata[file.name]['isDone']) {
 					await supabaseClient
 						.storage
 						.from('uploadedFiles')
 						.remove([fileTUSMetadata[file.name]['generatedName']]);
-
-				} else {
+				}
+				else if(!integrateWithIndexDB){
+					return;
+					// the code below works, but it directly deletes the file
+					// we don't necessarily want that behaviour (accidental clicks happen)
+					// await supabaseClient
+					// 	.storage
+					// 	.from('uploadedFiles')
+					// 	.remove([fetchedFiles.find(x => x.name === file.name)?.fileId]);
+				}
+				else {
 					fileTUSUploadObjects[(file as File).name].abort(true);
 					fileTUSUploadObjects = {...fileTUSUploadObjects};
 				}
 			}
 			catch (e){
 				console.log("Could not delete/abort file");
+				console.error(e);
 			}
 
 			if ((file as File).name in fileTUSProgress){
@@ -78,10 +90,12 @@
 				delete fileTUSUploadObjects[(file as File).name];
 				fileTUSUploadObjects = {...fileTUSUploadObjects};
 			}
-			await deleteFileTUSMetadata((file as File).name);
 
-			// this also deletes the indexDb file because it's a PUT operation
-			await saveFiles(Array.from(files))
+			if (integrateWithIndexDB){
+				await deleteFileTUSMetadata((file as File).name);
+				// this also deletes the indexDb file because it's a PUT operation
+				await saveFiles(Array.from(files))
+			}
 		}
 	}
 	function removeURL(url: string) {

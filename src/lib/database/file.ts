@@ -362,22 +362,8 @@ export async function editFile(
 
 export async function deleteFile(
 	path: string,
-	isFromTUS: boolean = false,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-
-	if (isFromTUS){
-
-		console.log("REMOVING TUS");
-
-		try {
-			fileSystem.deleteFile(path);
-			return;
-		} catch (errorFileSystem) {
-			console.error(errorFileSystem);
-		}
-	}
-
 	try {
 		await prismaContext.file.delete({ where: { path: path } });
 

@@ -135,7 +135,13 @@ export async function getPublicationById(id: number): Promise<Publication> {
 			materials: {
 				include: {
 					publication: true,
-					files: true,
+					files: {
+						select: {
+							path: true,
+							title: true,
+							type: true
+						}
+					},
 					fileURLs: true
 				},
 			},
