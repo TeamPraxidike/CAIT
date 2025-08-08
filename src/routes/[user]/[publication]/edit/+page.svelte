@@ -51,7 +51,13 @@
 	let time:any;
 	let copyright:any;
 	let selectedType:any;
-	let files: FileList;
+	let files: FileList = [];
+	// $: if (dataTransferPromise !== null) {
+	// 	files = await dataTransferPromise.then(r => {
+	// 		return r.files;
+	// 	})
+	// }
+
 	let oldFiles: any;
 	let fetchedFiles: FetchedFileArray | [] = [];
 
@@ -89,6 +95,43 @@
 	}
 	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
 
+	let dataTransferPromise: Promise<void> | null = null;
+
+	async function defineDataTransfer(): Promise<DataTransfer>{
+		const localDataTransfer = new DataTransfer();
+
+		for (const f of fetchedFiles){
+			fileTUSMetadata[f.name] = {
+				originalName: f.name,
+				generatedName: f.fileId,
+				isDone: true
+			}
+
+			const { data: blob, error } = await supabaseClient
+				.storage
+				.from("uploadedFiles")
+				.download(f.fileId);
+
+			if (error) {
+				console.error('Error downloading file from Supabase:', error.message);
+				throw error;
+			}
+
+			if (!blob) {
+				console.error('Download succeeded but the returned blob is null.');
+				return null;
+			}
+
+			const file = new File([blob], f.name, {
+				type: blob.type,
+			});
+
+			localDataTransfer.items.add(file);
+		}
+
+		return localDataTransfer
+	}
+
 	onMount(async () => {
 		if (isMaterial){
 			theoryApp = serverData.publication.materials.theoryPractice;
@@ -96,44 +139,17 @@
 			copyright = serverData.publication.materials.copyright;
 			selectedType = serverData.publication.materials.encapsulatingType;
 
-				fetchedFiles = await data.fetchedFiles;
+			fetchedFiles = await data.fetchedFiles;
 
-				const dataTransfer = new DataTransfer();
+			dataTransferPromise = defineDataTransfer().then(dt => {
+				files = dt.files;
+			});
 
-				for (const f of fetchedFiles){
-					fileTUSMetadata[f.name] = {
-						originalName: f.name,
-						generatedName: f.fileId,
-						isDone: true
-					}
+			//files = dataTransfer.files;
 
-					const { data: blob, error } = await supabaseClient
-						.storage
-						.from("uploadedFiles")
-						.download(f.fileId);
-
-					if (error) {
-						console.error('Error downloading file from Supabase:', error.message);
-						throw error;
-					}
-
-					if (!blob) {
-						console.error('Download succeeded but the returned blob is null.');
-						return null;
-					}
-
-					const file = new File([blob], f.name, {
-						type: blob.type,
-					});
-
-					dataTransfer.items.add(file);
-				}
-
-				files = dataTransfer.files;
-
-				//files = createFileList(serverData.fileData, serverData.publication.materials.files);
-				//files = createFileList(fetchedFiles, serverData.publication.materials.files);
-				//oldFiles = serverData.publication.materials.files
+			//files = createFileList(serverData.fileData, serverData.publication.materials.files);
+			//files = createFileList(fetchedFiles, serverData.publication.materials.files);
+			//oldFiles = serverData.publication.materials.files
 			}
 	})
 
@@ -431,15 +447,24 @@
 	</div>
 
 	{#if isMaterial}
-		<div class="mt-8">
-			<UploadFilesForm
-				integrateWithIndexDB={false}
-				fetchedFiles={fetchedFiles}
-				bind:fileTUSMetadata={fileTUSMetadata}
-				bind:supabaseClient={supabaseClient}
-				bind:fileURLs={fileURLs}
-				bind:files={files}/>
-		</div>
+		{#if dataTransferPromise !== null}
+			{#await dataTransferPromise}
+				<p class="my-8">Loading files...</p>
+			{:then dataTransferAwaited}
+				<div class="mt-8">
+					<UploadFilesForm
+						integrateWithIndexDB={false}
+						fetchedFiles={fetchedFiles}
+						bind:fileTUSMetadata={fileTUSMetadata}
+						bind:supabaseClient={supabaseClient}
+						bind:fileURLs={fileURLs}
+						bind:files={files}/>
+				</div>
+			{:catch error}
+				<!--TODO: Change color-->
+				<p style="color: red">Error while loading files. Reload the page to try again</p>
+			{/await}
+		{/if}
 
 		<div class="mt-4">
 			<label for="coverPhoto">Cover Picture:</label>
