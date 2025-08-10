@@ -100,7 +100,7 @@
 	};
 
 	const newMaterials = (event: CustomEvent) => {
-		console.log("KURWA", event.detail.option);
+		
 		if (event.detail.option === 0)
 		{
 			chosenOption = 0
@@ -129,7 +129,7 @@
 	};
 
 	const searchAPI = async () => {
-		console.log("searchAPI", searchWord, userIds);
+		
 		const queryParams = new URLSearchParams({
 			publishers: userIds.join(','),
 			q: searchWord,
@@ -148,14 +148,14 @@
 			// Handle the response data from the API
 				if (chosenOption === 0)
 				{
-					console.log(data);
+					
 					materials = []
 					materials = data.materials
 					source = data.idsMat
 				}
 				if (chosenOption === 1)
 				{
-					console.log(data);
+					
 					circuits = []
 					circuits = data.circuits
 					source = data.idsCirc
@@ -173,7 +173,7 @@
 					publications = []
 					publications = data.saved
 					source = data.ids
-					console.log(data)
+					
 				}
 				amount = 8
 				p = 0
@@ -214,7 +214,7 @@
 			.then(data => {
 				// Handle the response data from the API
 				if (chosenOption === 0) {
-					console.log(data);
+					
 					materials = data.publications.map(
 						(
 							x:Publication & {
@@ -338,16 +338,16 @@
 			{#if chosenOption === 0}
 				{#each materials as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
-													 extensions="{getExtensions(m)}"
+													 extensions="{m.files ? getExtensions(p.materials) : []}"
 													 selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
 													 on:removed={removeCard} imgSrc={m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher} materialType={m.encapsulatingType}/>
 				{/each}
-				{:else if chosenOption===1}
-					{#each circuits as m}
+			{:else if chosenOption===1}
+				{#each circuits as m}
 					<PublicationCard publication="{m.publication}" inCircuits="{true}"
 					selected="{selectedIds.has(m.publication.id)}" on:selected={selectCard}
 					on:removed={removeCard} imgSrc={m.coverPicData} liked={liked.includes(m.publication.id)} saved={saved.includes(m.publication.id)} on:liked={likedToggled} on:saved={savedToggled} publisher={m.publisher}/>
-					{/each}
+				{/each}
 			{:else if (chosenOption===2 || chosenOption===3)}
 				{#each publications as p}
 					<PublicationCard publication="{p}" inCircuits="{true}"

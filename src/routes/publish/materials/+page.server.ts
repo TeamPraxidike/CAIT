@@ -1,9 +1,11 @@
 import type { Actions, PageServerLoad } from './$types';
-import { type MaterialForm } from '$lib/database';
-import { type Difficulty, Level, MaterialType, type Tag } from '@prisma/client';
+
+import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
+import { type Difficulty, type Tag } from '@prisma/client';;
 import type { Course } from '$lib/database/courses';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
+
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
@@ -52,14 +54,23 @@ export const actions = {
 	 */
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
-		const fileList: FileList = data.getAll('file') as unknown as FileList;
-		const fileURLs: string[] = JSON.parse(data.get("fileURLs")?.toString() || '');
-		if (!fileList) return { status: 400, message: 'No files provided' };
-		const add = await filesToAddOperation(fileList, fileURLs);
 
+		// ignore if the context is not correct
+		if (data.get('context') === 'course-form') {
+			return { status: 418, context: 'course-form'};
+		}
+
+		const fileList: string[] = data.getAll('file') as unknown as string[];
+		const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
+		if (!fileList || fileList.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
+		// const add = await filesToAddOperation(fileList, fileURLs);
+
+		const add = fileList.concat(fileURLs).map((item: string) => {
+			return JSON.parse(item) as UploadMaterialFileFormat
+		});
 
 		const tagsDataEntry = data.get('tags');
-		if (!tagsDataEntry) return { status: 400, message: 'No tags provided' };
+		if (!tagsDataEntry) return { status: 400, message: 'No tags provided', context: 'publication-form' };
 
 		const losDataEntry = data.get('learningObjectives');
 		const maintainersDataEntry = data.get('maintainers');
@@ -92,7 +103,7 @@ export const actions = {
 			if (resTags.status !== 200) {
 				return {
 					status: resTags.status,
-					message: await resTags.json(),
+					message: await resTags.json(), context: 'publication-form'
 				};
 			}
 		}
@@ -131,7 +142,7 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
-		return { status: res.status, id: (await res.json()).id , context: data.get('context')?.toString()};
+		return { status: res.status, id: (await res.json()).id , context: 'publication-form'};
 	},
 	publishCourse: async ({request, fetch, locals}) => {
 		const session = await locals.safeGetSession();
@@ -155,7 +166,7 @@ export const actions = {
 				body: JSON.stringify(courseData),
 			});
 			const newCourse = await res.json();
-			return { status: res.status, id: newCourse.id , context: formData.get('context')?.toString()};
+			return { status: res.status, id: newCourse.id , context: 'course-form'};
 		} catch (error) {
 			console.error("Error creating course ", error);
 			throw redirect(303, '/course/create');

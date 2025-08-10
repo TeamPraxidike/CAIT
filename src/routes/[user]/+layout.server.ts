@@ -10,7 +10,10 @@ import type {TGETuser} from '../api/user/[id]/+server';
  */
 export const load: LayoutServerLoad = async ({ params, fetch, locals, depends }) => {
 	depends('supabase:auth')
-	const session = await locals.safeGetSession();
+	//const session = await locals.safeGetSession();
+
+	const session = locals.session
+
 	if (!session) throw redirect(303, '/signin');
 
 	const uRes = await fetch(`/api/user/username/${params.user}`);

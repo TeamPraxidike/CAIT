@@ -1,5 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
-import type { FetchedFileArray } from '$lib/database';
+import type { FetchedFileArray, MaterialForm, UploadMaterialFileFormat } from '$lib/database';
+import type { Difficulty } from '@prisma/client';
 
 export const load: PageServerLoad = async ({
 	parent,

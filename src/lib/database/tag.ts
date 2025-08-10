@@ -5,8 +5,8 @@ import type { Tag } from '@prisma/client';
 
 export async function getAllTags(): Promise<Prisma.TagGetPayload<true>[]> {
 	return prisma.tag.findMany({
-		include: {
-			publication: false,
+		select: {
+			content: true,
 		},
 	});
 }

@@ -7,7 +7,7 @@
     import {Grid} from "$lib";
 </script>
 
-<footer class="w-screen py-20 text-surface-400 mt-28 overflow-x-hidden">
+<footer class="w-full relative z-50 py-20 text-surface-400 mt-28 overflow-x-hidden">
     <Grid>
         <!-- Left Section -->
         <div class="flex flex-col gap-4 col-span-4

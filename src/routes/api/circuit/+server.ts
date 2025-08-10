@@ -1,7 +1,7 @@
 import { type CircuitWithPublication, type CircuitWithPublisher, getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
-	type CircuitForm,
+	type CircuitForm, coverPicFetcher,
 	createCircuitPublication,
 	fileSystem,
 	handleConnections,
@@ -31,7 +31,7 @@ export async function GET({ url }) {
 		const limit = Number(url.searchParams.get('limit')) || 0;
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
-		const amount: number = Number(url.searchParams.get('amount')) || 8;
+		const amount: number = Number(url.searchParams.get('amount')) || 9;
 
 		let circuits = await getAllCircuits(
 			tags,
@@ -41,11 +41,14 @@ export async function GET({ url }) {
 			query,
 		);
 
-		circuits = circuits.filter((c: CircuitWithPublisher) => !c.publication.isDraft);
-		circuits = await Promise.all(circuits.map(async circuit => {
-			const filePath = circuit.publication.coverPic!.path;
+		// circuits = circuits.filter((c: CircuitWithPublisher) => !c.publication.isDraft);
+		const idsCirc = circuits.slice(c => c.publicationId)
+		circuits = circuits.slice(0, amount)
 
-			const currentFileData = await fileSystem.readFile(filePath);
+		circuits = await Promise.all(circuits.map(async circuit => {
+			// const filePath = circuit.publication.coverPic!.path;
+			//
+			// const currentFileData = await fileSystem.readFile(filePath);
 
 			return {
 				...circuit,
@@ -55,13 +58,17 @@ export async function GET({ url }) {
 						circuit.publication.publisher.profilePic,
 					)).data,
 				},
-				coverPicData: currentFileData.toString('base64'),
+				coverPicData: (await coverPicFetcher(
+					circuit.publication.coverPic
+				)).data,
 			};
 		}));
 		return new Response(
 			JSON.stringify({
-				circuits: circuits.slice(0, amount),
-				idsCirc: circuits.map(c => c.publicationId),
+				// circuits: circuits.slice(0, amount),
+				circuits: circuits,
+				//idsCirc: circuits.map(c => c.publicationId),
+				idsCirc: idsCirc
 			}),
 			{ status: 200 },
 		);

@@ -124,7 +124,8 @@ export async function getAllCircuits(
 	limit: number,
 	sort: string,
 	query: string,
-): Promise<CircuitWithPublisher[]> {
+// ): Promise<CircuitWithPublisher[]> {
+) {
 	const where: any = { AND: [] };
 
 	if (publishers.length > 0) {
@@ -140,6 +141,8 @@ export async function getAllCircuits(
 			publication: { tags: { some: { content: { in: tags } } } },
 		});
 	}
+
+	where.NOT = {publication: {isDraft: true}}
 
 	const sortBy = sortSwitch(sort);
 
@@ -163,7 +166,7 @@ export async function getAllCircuits(
 					},
 				},
 			},
-			nodes: true,
+			// nodes: true,
 		},
 	});
 

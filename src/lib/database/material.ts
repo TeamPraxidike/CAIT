@@ -102,8 +102,10 @@ export async function getAllMaterials(
 	type: MaterialType[],
 	sort: string,
 	query: string,
-): Promise<MaterialWithPublication[]> {
-	const where: any = { AND: [] };
+	withFiles: boolean = false
+) {
+// ): Promise<MaterialWithPublication[]> {
+	const where: any = { AND: [], NOT: null };
 
 	if (publishers.length > 0) {
 		where.AND.push({ publication: { publisherId: { in: publishers } } });
@@ -122,6 +124,8 @@ export async function getAllMaterials(
 	if (type.length > 0) {
 		where.AND.push({ encapsulatingType: { in: type } });
 	}
+
+	where.NOT = {publication: { isDraft: true } }
 
 	const sortBy = sortSwitch(sort);
 	let materials = await prisma.material.findMany({
@@ -144,7 +148,7 @@ export async function getAllMaterials(
 					},
 				},
 			},
-			files: true,
+			files: withFiles,
 		},
 	});
 

@@ -4,6 +4,7 @@ import {
 	type Publication,
 	type Tag,
 } from '@prisma/client';
+import type { FileTUSMetadata } from '$lib/util/indexDB';
 
 export function formatFileSize(bytes:number):string {
 	if (bytes < 0) return "0 B";
@@ -130,6 +131,21 @@ export function appendFile(
 	} else {
 		formData.append(key, file);
 	}
+}
+
+/**
+ * Checks if all the files have been TUS uploaded
+ * @param fileTUSMetadata
+ * @param files
+ */
+export function allUploadsDone(fileTUSMetadata: { [key: string] : FileTUSMetadata }, files: FileList): boolean{
+	for (const f of files){
+		if (!(fileTUSMetadata[f.name]['isDone'])){
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /**

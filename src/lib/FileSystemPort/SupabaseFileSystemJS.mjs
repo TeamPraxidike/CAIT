@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import { Agent } from 'undici';
 
 /**
  * Adapter interface for the FileSystem Port that deals with file management locally.
@@ -19,7 +20,28 @@ export class SupabaseFileSystem{
 		this.supabaseKey = supabaseKey;
 		this.bucketName = bucketName;
 
-		this.supabase = createClient(this.supabaseUrl, this.supabaseKey);
+		//  originalError: TypeError: fetch failed
+		//  [cause]: SocketError: other side closed
+		// TODO: this tries to (at the very least) minimize reuse of stale connections
+		// otherwise Piscina (which keeps workers alive) migth try to reuse a closed socket
+		// verify that it works
+
+		// Undici Agent (controls connection reuse for fetch)
+		const dispatcher = new Agent({
+			// this disables keep-alive
+			pipelining: 0
+		});
+
+		const customFetch = (url, init = {}) =>
+			fetch(url, { ...init, dispatcher });
+
+
+		this.supabase = createClient(this.supabaseUrl, this.supabaseKey, {
+			global: { fetch: customFetch },
+			auth: { persistSession: false }
+		});
+
+		//this.supabase = createClient(this.supabaseUrl, this.supabaseKey);
 	}
 
 	/**

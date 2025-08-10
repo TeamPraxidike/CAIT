@@ -8,7 +8,6 @@ import CustomRecursiveCharacterTextSplitter from '../DocumentSplitter/Splitter.m
 import { preprocessText } from './textProcessor.mjs';
 
 export async function reader(filePath) {
-    // Extract file extension
     const extension = filePath.split('.').pop();
 
     // Map file extensions to corresponding reader functions
@@ -24,7 +23,6 @@ export async function reader(filePath) {
         xlsx: officeReader,
     };
 
-    // Get the appropriate reader function
     const readFunction = readers[extension];
 
     if (!readFunction) {
@@ -33,14 +31,12 @@ export async function reader(filePath) {
     }
 
     try {
-        // Read the file content
         const text = await readFunction(filePath);
 
         // Create text splitter
         const splitter = new CustomRecursiveCharacterTextSplitter();
         const chunks = await splitter.splitText(text);
 
-        // Format into documents
         const fileChunks = await Promise.all(
             chunks.map(async (content) => ({
                 pageContent: content,

@@ -70,7 +70,7 @@
 
 	const resetFilters = () => {
 		page = 0;
-		amount = 8;
+		amount = 9;
 		paginationSettings.page = 0;
 		paginationSettings.limit = amount;
 		selectedTags = [];
@@ -172,7 +172,7 @@
 					circuits = d.circuits;
 					idsCirc = d.idsCirc;
 				}
-				amount = 8;
+				amount = 9;
 				page = 0;
 				paginationSettings.size = amount;
 				paginationSettings.page = 0;
@@ -219,24 +219,31 @@
 			})
 			.then(data => {
 				if (s === 'material') {
-					materials = data.publications.map((x: Publication & {
-						materials: Material & { files: string[] },
-						coverPicData: string,
-						publisher: User & { profilePicData: string }
-					}) => ({
+					// materials = data.publications.map((x: Publication & {
+					// 	materials: Material & { files: string[] },
+					// 	coverPicData: string,
+					// 	publisher: User & { profilePicData: string }
+					// }) => ({
+					materials = data.publications.map(x => ({
 						id: x.materials.id,
 						publication: x,
 						coverPicData: x.coverPicData,
 						publisher: x.publisher,
-						files: x.materials.files,
+						// files: x.materials.files,
 						encapsulatingType: x.materials.encapsulatingType
 					}));
 				} else {
-					circuits = data.publications.map((x: Publication & {
-						circuit: Circuit,
-						coverPicData: string,
-						publisher: User & { profilePicData: string }
-					}) => ({ id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher: x.publisher }));
+					// circuits = data.publications.map((x: Publication & {
+					// 	circuit: Circuit,
+					// 	coverPicData: string,
+					// 	publisher: User & { profilePicData: string }
+					// }) => ({ id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher: x.publisher }));
+					circuits = data.publications.map(x => ({
+						id: x.circuit.id,
+						publication: x,
+						coverPicData: x.coverPicData,
+						publisher: x.publisher
+					}));
 				}
 			})
 			.catch(error => {
@@ -250,7 +257,7 @@
 	const deleteFilters = (pageType: string) => {
 		if (pageType !== 'materials') {
 			page = 0;
-			amount = 8;
+			amount = 9;
 			paginationSettings.page = 0;
 			paginationSettings.limit = amount;
 			selectedTags = [];
@@ -281,7 +288,8 @@
 		page: 0,
 		limit: amount,
 		size: source.length,
-		amounts: [4, 8, 12, 16, 32]
+		// amounts: [4, 8, 12, 16, 32]
+		amounts: [9, 18, 36]
 	} satisfies PaginationSettings;
 
 	/**
@@ -293,7 +301,7 @@
 	const switchToBrowsePage = () => {
 		goto(`/browse/?type=${pageType}`);
 		isSemanticActive = false;
-		amount = 8;
+		amount = 9;
 		paginationSettings.limit = amount;
 		paginationSettings.page = 0;
 	};
@@ -382,8 +390,8 @@
 			<p>Loading materials...</p>
 		{:then materialsAwaited}
 			{#each materials as material (material.id)}
-				<PublicationCard extensions="{getExtensions(material)}"
-								 imgSrc={material.coverPicData}
+<!--				<PublicationCard extensions="{getExtensions(material)}"-->
+				<PublicationCard imgSrc={material.coverPicData}
 								 publication={material.publication}
 								 liked={liked.includes(material.publication.id)}
 								 saved={saved.includes(material.publication.id)}
