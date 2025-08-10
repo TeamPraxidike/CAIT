@@ -105,7 +105,7 @@ export const actions = {
 			// const fileList: FileList = data.getAll(
 			// 	'file',
 			// ) as unknown as FileList;
-			const fileListUnformated: string[] = data.getAll('filesToUse') as unknown as string[];
+			const fileListUnformated: string[] = data.getAll('file') as unknown as string[];
 			const fileList: UploadMaterialFileFormat[] = fileListUnformated.map(item => {
 				return JSON.parse(item) as UploadMaterialFileFormat
 			})

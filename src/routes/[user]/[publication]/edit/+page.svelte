@@ -10,7 +10,7 @@
 	} from '@prisma/client';
 	import { CircuitComponent, DifficultySelection, Filter, Meta, TheoryAppBar } from '$lib';
 	import {
-		FileButton, getToastStore
+		FileButton, getToastStore, ProgressRadial
 	} from '@skeletonlabs/skeleton';
 	import { appendFile, base64ToFile, concatFileList, createFileList } from '$lib/util/file';
 	import type { PublicationView } from '../+layout.server';
@@ -31,6 +31,7 @@
 		getCircuitSnapshot,
 		saveCircuitSnapshot
 	} from '$lib/util/indexDB';
+	import { allUploadsDone } from '$lib/util/file'
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 
@@ -201,6 +202,7 @@
 	const toastStore = getToastStore();
 
 	$: if (form?.status === 200) {
+		isSubmitting = false;
 		toastStore.trigger({
 			message: 'Publication Edited successfully',
 			background: 'bg-success-200',
@@ -208,10 +210,20 @@
 		});
 		goto(`/${loggedUser.username}/${publication.id}`);
 	} else if (form?.status === 400) {
-		toastStore.trigger({
-			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-warning-200'
-		});
+		isSubmitting = false;
+		if (!(allUploadsDone(fileTUSMetadata, files))){
+			toastStore.trigger({
+				message: 'Some files are still being uploaded',
+				background: 'bg-warning-200'
+			});
+		}
+		else {
+			toastStore.trigger({
+				message: `Malformed information, please check your inputs: ${form?.message}`,
+				background: 'bg-warning-200',
+				classes: 'text-surface-900'
+			});
+		}
 	} else if (form?.status === 401) {
 		toastStore.trigger({
 			message: `Unauthorized! ${form?.message}`,
@@ -292,33 +304,54 @@
 	// user has marked as draft
 	let markedAsDraft = draft;
 	$: draft = (isMaterial && isMaterialDraft(metadata, fileLength)) || !validateMetadata(metadata);
+
+	let isSubmitting: boolean = false;
 </script>
 
 
 <Meta title={publication.title} description="CAIT" type="site" />
 
 {#if isMaterial}
-	<Banner metadata={metadata} files={fileLength}
-			materialType={metadata.materialType}/>
+	<div class="col-span-full">
+		<Banner metadata={metadata} files={fileLength}
+				materialType={metadata.materialType}/>
+	</div>
 {:else}
-	<Banner metadata={metadata}
-			numNodes={circuitNodesPlaceholder.length}/>
+	<div class="col-span-full">
+		<Banner metadata={metadata}
+				numNodes={circuitNodesPlaceholder.length}/>
+	</div>
 {/if}
 
-<form action="?/edit" method="POST" enctype="multipart/form-data"
+<form method="POST"
+	  enctype="multipart/form-data"
+	  action="?/edit"
 	  class="col-span-full my-20"
 	  use:enhance={async ({ formData }) => {
-
+		isSubmitting = true;
 
 		if (locks[0] || locks[1] || locks[2]) {
 			toastStore.trigger({
 				message: "Please complete all required fields before submitting.",
 				background: "bg-warning-200"
 			});
+			isSubmitting = false;
 			return;
 		}
 
 		if(isMaterial){
+			// apparently files are automatically appended to the form using the
+			// file key, so just remove it
+			formData.delete('file')
+
+			// check if all the file uploads (excluding cover picture) are done
+			if (!(allUploadsDone(fileTUSMetadata, files))){
+				// alert('Some files are still being uploaded');
+				console.log("SERIOZNO LI WE");
+				isSubmitting = false;
+				return;
+			}
+
       		// Array.from(files).forEach(file => appendFile(formData, file, 'file'));
       		for (const f of files){
 				 let uploadFormat = {
@@ -326,7 +359,7 @@
 					type: f.type,
 					info: fileTUSMetadata[f.name]['generatedName']
 				}
-				formData.append('filesToUse', JSON.stringify(uploadFormat));
+				formData.append('file', JSON.stringify(uploadFormat));
       		}
 		}
 
@@ -489,12 +522,18 @@
 		</div>
 	{/if}
 
-	<div class="flex float-right gap-2">
-		<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50 mt-4"
-				disabled={locks[0] || locks[1] || locks[2]}>
-			Save Changes
-		</button>
-		<button type="button" on:click={()=>{window.history.back()}} class=" flex-none float-right btn rounded-lg variant-filled-surface text-surface-50 mt-4">Cancel</button>
+	<div class="flex float-right gap-2 mt-4">
+		{#if isSubmitting}
+			<div class="mr-8">
+				<ProgressRadial font="12" width="w-10"/>
+			</div>
+		{:else}
+			<button type="submit" class="btn rounded-lg variant-filled-primary text-surface-50"
+					disabled={locks[0] || locks[1] || locks[2] || isSubmitting}>
+				Save Changes
+			</button>
+		{/if}
+		<button type="button" on:click={()=>{window.history.back()}} class=" flex-none float-right btn rounded-lg variant-filled-surface text-surface-50">Cancel</button>
 	</div>
 
 </form>

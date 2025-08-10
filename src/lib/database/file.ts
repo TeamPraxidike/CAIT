@@ -430,9 +430,12 @@ export async function handleFileTokens(
 		// Insert new documents using raw SQL for the vector type
 		for (const chunk of dataCurrent.chunks) {
 			// Use Prisma's executeRaw to handle the vector type correctly
+
+			// Raw query failed.Code: `22021`.Message: `ERROR: invalid byte sequence for encoding "UTF8": 0x00
+			// TOOD: does replace work?
 			await prisma.$executeRaw`
                 INSERT INTO "FileChunk" (content, metadata, embedding, "filePath")
-                VALUES (${chunk.pageContent},
+                VALUES (${chunk.pageContent.replace(/\u0000/g, '')},
                         ${JSON.stringify(chunk.metadata)}::json,
                         ${chunk.embedding}::vector(384),
                         ${dataCurrent.filePath})

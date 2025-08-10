@@ -32,6 +32,7 @@
 		saveCover,
 		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata
 	} from '$lib/util/indexDB';
+	import { allUploadsDone } from '$lib/util/file'
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
@@ -50,7 +51,7 @@
 
 
 	let loggedUser = page.data.loggedUser;
-	$: isSubmitting = false;
+	let isSubmitting: boolean = false;
 
 	// tags
 	let tags: string[] = [];
@@ -176,7 +177,7 @@
 		});
 		// goto(`/${loggedUser.username}/${form?.id}`);
 	} else if (form?.status === 400) {
-		if (!allUploadsDone()){
+		if (!allUploadsDone(fileTUSMetadata, files)){
 			toastStore.trigger({
 				message: 'Some files are still being uploaded',
 				background: 'bg-warning-200'
@@ -412,16 +413,6 @@
 	$: numMaterials = Math.max(fileURLs.length, files.length);
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
-	function allUploadsDone(): boolean{
-		for (const f of files){
-			if (!(fileTUSMetadata[f.name]['isDone'])){
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	let bannerFieldsList;
 </script>
 
@@ -438,11 +429,14 @@
 			  enctype="multipart/form-data"
 			  action="?/publish"
 			  use:enhance={({ formData }) => {
+		  	// apparently files are automatically appended to the form using the
+			// file key, so just remove it
+			formData.delete('file')
 			isSubmitting = true;
 			let willSubmit = true;
 
 			// check if all the file uploads (excluding cover picture) are done
-			if (!(allUploadsDone())){
+			if (!(allUploadsDone(fileTUSMetadata, files))){
 				// alert('Some files are still being uploaded');
 				isSubmitting = false;
 				return;
