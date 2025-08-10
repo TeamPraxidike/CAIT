@@ -1,8 +1,9 @@
 import { verifyAuth } from '$lib/database/auth';
 import {
+	coverPicFetcher,
 	fileSystem,
 	getAllCircuits,
-	getCircuitByPublicationId,
+	getCircuitByPublicationId
 } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
 import { getCircuitsContainingPublication } from '$lib/database/circuit';
@@ -46,7 +47,9 @@ export async function GET({ locals, params }) {
 						circuit.publication.publisher.profilePic,
 					)).data,
 				},
-				coverPicData: currentFileData.toString('base64'),
+				coverPicData: (await coverPicFetcher(
+					circuit.publication.coverPic!.path
+				)).data,
 			};
 		}));
 		return new Response(JSON.stringify(circuits), { status: 200 });
