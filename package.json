@@ -67,7 +67,6 @@
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.4",
-		"@nutrient-sdk/viewer": "^1.5.0",
 		"@supabase/ssr": "^0.5.2",
 		"@supabase/supabase-js": "^2.46.2",
 		"@sveltejs/adapter-node": "^5.2.9",
