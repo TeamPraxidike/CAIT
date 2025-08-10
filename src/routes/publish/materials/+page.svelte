@@ -162,7 +162,10 @@
 		});
 	}
 
-	$: if (form?.status === 200 && form?.context === 'material-page') {
+	// IMPORTANT - use contexts to separate form events
+	// otherwise, for example, any Course related form events get mistaken for
+	// events from the main form
+	$: if (form?.status === 200 && form?.context === 'publication-form') {
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
 		}
@@ -173,22 +176,13 @@
 			clearMaterialSnapshot(),
 			deleteAllFileTUSMetadata()
 		]).then(async () => {
-			// // Show success message
-			// toastStore.trigger({
-			// 	message: 'Publication Added successfully',
-			// 	background: 'bg-success-200',
-			// 	classes: 'text-surface-900'
-			// });
-			//
-			// // Navigate away
-			// goto(`/${loggedUser.username}/${form?.id}`);
 
 			showAnimation = true;
+
 		}).catch(error => {
 			console.error('Error clearing data:', error);
 		});
-		// goto(`/${loggedUser.username}/${form?.id}`);
-	} else if (form?.status === 400) {
+	} else if (form?.status === 400 && form?.context === 'publication-form') {
 		if (!allUploadsDone(fileTUSMetadata, files)){
 			toastStore.trigger({
 				message: 'Some files are still being uploaded',
@@ -204,7 +198,10 @@
 		}
 
 		isSubmitting = false;
-	} else if (form?.status === 500) {
+	} else if (form?.status === 418) {
+		isSubmitting = false;
+		showAnimation = false;
+	} else if (form?.status === 500 && form?.context === 'publication-form') {
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
 			background: 'bg-error-200',
@@ -215,16 +212,7 @@
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-
-		// const confirmation = confirm('Data might be lost. Are you sure you want to proceed?');
-
 		showAnimation = false;
-
-		// if (!confirmation) {
-		// 	event.preventDefault();
-		// 	return;
-		// }
-
 	};
 
 	let saveInterval: number | undefined = undefined;
@@ -305,7 +293,7 @@
 	onMount(() => {
 		(async () => {
 
-			// THIS IS THE SNAPSHOT CODE (using indexedDB)
+			// THIS IS THE SNAPSHOT CODE (using indexDB)
 
 			// get coverPic
 			const storedCover = await getCover();
@@ -450,65 +438,55 @@
 			  enctype="multipart/form-data"
 			  action="?/publish"
 			  use:enhance={({ formData }) => {
-		  	// apparently files are automatically appended to the form using the
-			// file key, so just remove it
-			formData.delete('file')
-			isSubmitting = true;
-			let willSubmit = true;
+					// apparently files are automatically appended to the form using the
+					// file key, so just remove it
+					formData.delete('file')
+					isSubmitting = true;
+					let willSubmit = true;
 
-			// check if all the file uploads (excluding cover picture) are done
-			if (!(allUploadsDone(fileTUSMetadata, files))){
-				// alert('Some files are still being uploaded');
-				isSubmitting = false;
-				return;
-			}
+					// check if all the file uploads (excluding cover picture) are done
+					if (!(allUploadsDone(fileTUSMetadata, files))){
+						// alert('Some files are still being uploaded');
+						isSubmitting = false;
+						return;
+					}
 
-			for (const f of files){
-				let uploadFormat = {
-					title: f.name,
-					type: f.type,
-					info: fileTUSMetadata[f.name]['generatedName']
-				}
-				formData.append('file', JSON.stringify(uploadFormat));
-			}
+					for (const f of files){
+						let uploadFormat = {
+							title: f.name,
+							type: f.type,
+							info: fileTUSMetadata[f.name]['generatedName']
+						}
+						formData.append('file', JSON.stringify(uploadFormat));
+					}
 
-			for (const url of fileURLs){
-				let uploadFormat = {
-					title: url,
-					type: "URL",
-					info: url
-				}
-				formData.append('fileURLs', JSON.stringify(uploadFormat));
-			}
+					for (const url of fileURLs){
+						let uploadFormat = {
+							title: url,
+							type: "URL",
+							info: url
+						}
+						formData.append('fileURLs', JSON.stringify(uploadFormat));
+					}
 
-			// Array.from(files).forEach(file => {
-			//   if (file.size > 1024 * 1024 * 100) {
-			//     alert('File size exceeds 100MB');
-			// 	willSubmit = false;
-			// 	isSubmitting = false;
-			//   } else {
-			//     formData.append('file', file);
-			//   }
-			// });
-			// if (!willSubmit) return;
-
-			formData.append('userId', uid?.toString() || '');
-			formData.append('title', title);
-			formData.append('description', description);
-			formData.append('type', JSON.stringify(selectedTypes));
-			formData.append('difficulty', difficulty);
-			formData.append('estimate', estimate);
-			formData.append('copyright', copyright);
-			formData.append('tags', JSON.stringify(tags));
-			formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
-			formData.append('learningObjectives', JSON.stringify(LOs));
-			formData.append('prerequisites', JSON.stringify(PKs));
-			formData.append('coverPic', coverPic || '');
-			formData.append('newTags', JSON.stringify(newTags));
-			formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
-			formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
-			formData.append('course', course ? course.toString() : 'null');
-		  }}>
+					formData.append('userId', uid?.toString() || '');
+					formData.append('title', title);
+					formData.append('description', description);
+					formData.append('type', JSON.stringify(selectedTypes));
+					formData.append('difficulty', difficulty);
+					formData.append('estimate', estimate);
+					formData.append('copyright', copyright);
+					formData.append('tags', JSON.stringify(tags));
+					formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
+					formData.append('learningObjectives', JSON.stringify(LOs));
+					formData.append('prerequisites', JSON.stringify(PKs));
+					formData.append('coverPic', coverPic || '');
+					formData.append('newTags', JSON.stringify(newTags));
+					formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
+					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
+					formData.append('course', course ? course.toString() : 'null');
+				  }}
+			  use:handleInputEnter>
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					 buttonNext="btn dark:bg-surface-200"
 					 buttonCompleteLabel="Complete"
@@ -683,10 +661,6 @@
 		{/if}
 	</div>
 
-	{#if showModal}
-		<CourseModal existingCourse={null} close={closeModal} />
-	{/if}
-
 {:else}
 	<div class="fade-overlay col-span-full pt-20"
 		 in:fade={{ delay: 600, duration: 400 }} out:fade={{duration: 300}}>
@@ -838,4 +812,8 @@
         }
     }
 </style>
+
+{#if showModal}
+	<CourseModal existingCourse={null} close={closeModal} />
+{/if}
 
