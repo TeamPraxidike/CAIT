@@ -1,6 +1,5 @@
 import {
 	coverPicFetcher,
-	type FetchedFileArray,
 	type FetchedFileItem,
 	fileSystem,
 	getPublicationById,
@@ -66,6 +65,7 @@ export async function GET({ params }) {
 				profilePicData: (await profilePicFetcher(user.profilePic)).data,
 			};
 		}));
+
 
 		if (publication.materials) {
 			//const fileData: FetchedFileArray = [];

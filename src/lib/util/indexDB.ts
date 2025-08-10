@@ -30,7 +30,7 @@ export type FormSnapshot = {
 	searchableUsers: UserWithProfilePic[]; // for materials + circuits
 	selectedType?: string; // -- for materials ONLY
 	difficulty?: Difficulty; // -- for materials ONLY
-	estimate?: string;  // -- for materials ONLY
+	estimate?: number;  // -- for materials ONLY
 	copyright?: string;  // -- for materials ONLY
 	theoryApplicationRatio?: number;  // -- for materials ONLY
 	fileURLs?: string[]; // -- for materials ONLY

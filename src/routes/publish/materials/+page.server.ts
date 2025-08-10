@@ -1,14 +1,19 @@
 import type { Actions, PageServerLoad } from './$types';
-import { deleteFile, type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
-import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
-import type { FileTUSMetadata } from '$lib/util/indexDB';
-import { verifyAuth } from '$lib/database/auth';
 
-export const load: PageServerLoad = async ({ fetch, parent }) => {
+import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
+import { type Difficulty, type Tag } from '@prisma/client';;
+import type { Course } from '$lib/database/courses';
+import { convertMaterial } from '$lib/util/types';
+import { redirect } from '@sveltejs/kit';
+
+
+export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	return { tags, users };
+	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+	const allCourses: Course[] = await (await fetch(`/api/course`)).json();
+	return { tags, users, courses, allCourses };
 };
 
 /**
@@ -40,26 +45,6 @@ async function filesToAddOperation(fileList: FileList, fileURLs: string[] = []) 
 
 	return (await Promise.all(addPromises)).concat(addURLs);
 }
-
-const convertMaterial = (s: string): MaterialType => {
-	switch (s.toLowerCase()) {
-		case 'exam questions':
-			return MaterialType.examQuestions;
-		case 'lecture notes':
-			return MaterialType.lectureNotes;
-		case 'slides':
-			return MaterialType.slides;
-		case 'assignment':
-			return MaterialType.assignment;
-		case 'other':
-			return MaterialType.other;
-		case 'video':
-			return MaterialType.video;
-		default:
-			// Handle invalid input if necessary
-			return MaterialType.other;
-	}
-};
 
 export const actions = {
 	/**
@@ -138,6 +123,7 @@ export const actions = {
 				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
 				isDraft: isDraft,
 				fileURLs: fileURLs || [],
+				course: Number(data.get('course')?.toString()),
 			},
 			coverPic,
 			fileDiff: {
@@ -146,11 +132,38 @@ export const actions = {
 				edit: [],
 			},
 		};
-
 		const res = await fetch('/api/material', {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
-		return { status: res.status, id: (await res.json()).id };
+		return { status: res.status, id: (await res.json()).id , context: data.get('context')?.toString()};
+	},
+	publishCourse: async ({request, fetch, locals}) => {
+		const session = await locals.safeGetSession();
+		if (!session || !session.user) throw redirect(303, '/signin');
+
+		try {
+			const formData = await request.formData();
+			const title = formData.get('title');
+			const level = formData.get('level');
+			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
+			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
+			const courseData = {
+				learningObjectives: learningObjectives,
+				prerequisites: prerequisites,
+				educationalLevel: level,
+				courseName: title,
+				creatorId: locals.session?.user.id,
+			};
+			const res = await fetch(`/api/course`, {
+				method: 'POST',
+				body: JSON.stringify(courseData),
+			});
+			const newCourse = await res.json();
+			return { status: res.status, id: newCourse.id , context: formData.get('context')?.toString()};
+		} catch (error) {
+			console.error("Error creating course ", error);
+			throw redirect(303, '/course/create');
+		}
 	},
 } satisfies Actions;

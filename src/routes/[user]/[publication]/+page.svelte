@@ -54,8 +54,6 @@
 	let files: FetchedFileArray | [];
 	let liked: boolean = false;
 	let likes: number;
-	let circuitsPubAppearIn: any[] = [];
-	let similarPublications: any[] = [];
 	let likedPublications: number[] = [];
 	let savedPublications: number[] = [];
 	let reported: boolean = false;
@@ -647,6 +645,15 @@
 							  view="material" user={maintainer} />
 				{/each}
 			</div>
+
+			{#if pubView.publication.course !== null}
+				<div class="text-surface-500 text-sm">
+					<span>Part of the</span>
+					<span class="font-semibold">{pubView.publication.course.courseName}</span>
+					<span>course</span>
+				</div>
+			{/if}
+
 			<div class="flex flex-col">
 				<span class="font-bold text-surface-800">Learning Objectives:</span>
 				<ul class="list-inside">

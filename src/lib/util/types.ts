@@ -35,6 +35,26 @@ export function mapToType(mt: string): MaterialType {
 	}
 }
 
+export const convertMaterial = (s: string): MaterialType => {
+	switch (s.toLowerCase()) {
+		case 'exam questions':
+			return MaterialType.examQuestions;
+		case 'lecture notes':
+			return MaterialType.lectureNotes;
+		case 'slides':
+			return MaterialType.slides;
+		case 'assignment':
+			return MaterialType.assignment;
+		case 'other':
+			return MaterialType.other;
+		case 'video':
+			return MaterialType.video;
+		default:
+			// Handle invalid input if necessary
+			return MaterialType.other;
+	}
+};
+
 export function typeToHumanString(mt: string): string {
 	switch (mt) {
 		case 'examQuestions':

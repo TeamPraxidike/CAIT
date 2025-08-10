@@ -1,6 +1,7 @@
 <script lang="ts">
     import { page } from '$app/state';
     import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
+    import CourseModal from '$lib/components/publication/CourseModal.svelte';
 
     export let user:TUserWithPostsAndProfilePic;
     if (!user) {
@@ -12,6 +13,7 @@
 
     const numPosts = user.posts.filter((x) => !x.isDraft).length
     const numDrafts = user.posts.filter((x) => x.isDraft).length
+    const courses = ["CSE3000"]
 
     /**
      * Check if the current user is the same as the user being viewed.
@@ -19,6 +21,17 @@
     const currentlyAuth = () => page.data.session?.user.id === user.id;
 
     const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
+    function openModal() {
+        showModal = true;
+    }
+
+    function closeModal() {
+        showModal = false;
+    }
+
+
+    // const uploadFile
+    let showModal = false;
 </script>
 
 <div class="col-span-4 flex flex-col items-center gap-2 text-surface-800 rounded-b-lg pb-4 border border-surface-300 border-t-0 self-start
@@ -65,9 +78,23 @@
                     <div class="flex gap-2">
                         <a type="button" href="/{user.username}/edit"  class="btn bg-surface-800 text-surface-50 rounded-lg
                            dark:bg-surface-700">Edit Profile</a>
-                        <button class="btn bg-surface-800 text-surface-50 rounded-lg
-                           dark:bg-surface-700">Settings</button>
                     </div>
+                {/if}
+            </div>
+            <hr class="w-11/12">
+
+            <div class="flex gap-2 flex-wrap">
+                {#if currentlyAuth()}
+                    {#each courses as course}
+                    <div class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium
+					   hover:bg-gray-100 hover:text-black transition">
+                        {course}
+                    </div>
+                        {/each}
+                    <button class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium
+					   hover:bg-gray-100 hover:text-black transition" on:click={openModal}>
+                        Add Course
+                    </button>
                 {/if}
             </div>
         </div>
@@ -95,3 +122,7 @@
 
     </div>
 </div>
+
+{#if showModal}
+    <CourseModal existingCourse={null} close={closeModal} />
+{/if}

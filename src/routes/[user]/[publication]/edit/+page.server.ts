@@ -6,14 +6,17 @@ import {
 	type MaterialForm, type UploadMaterialFileFormat
 } from '$lib/database';
 import type { Difficulty, MaterialType, Tag } from '@prisma/client';
+import { convertMaterial } from '$lib/util/types';
+import type { Course } from '$lib/database/courses';
 
-export const load: PageServerLoad = async ({ fetch, parent }) => {
+export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tagRes = await fetch('/api/tags');
 	const tags: Tag[] = await tagRes.json();
 	const usersRes = await fetch('/api/user');
 	const { users } = await usersRes.json();
-	return { tags, users };
+	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+	return { tags, users, courses };
 };
 
 export const actions = {
@@ -184,9 +187,10 @@ export const actions = {
 					theoryPractice: Number(theoryApp),
 					tags: JSON.parse(selectedTags),
 					maintainers: JSON.parse(maintainers),
-					materialType: ([type] as MaterialType[]) || ['video'],
+					materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
 					isDraft: isDraft,
 					fileURLs: fileURLs || [],
+					course: Number(data.get('course')?.toString())
 				},
 				coverPic,
 				fileDiff: {

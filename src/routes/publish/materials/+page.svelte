@@ -11,7 +11,7 @@
 	import { FileButton, getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
-	import type { Difficulty, Tag as PrismaTag, User } from '@prisma/client';
+	import type {  Difficulty, Tag as PrismaTag, User } from '@prisma/client';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
@@ -36,6 +36,10 @@
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
+	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
+	import { changeCourse } from '$lib/util/coursesLogic';
+	import CourseModal from '$lib/components/publication/CourseModal.svelte';
+	import TimeEstimate from '$lib/components/publication/TimeEstimate.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -76,12 +80,14 @@
 	// input data
 	let title: string = '';
 	let description: string = '';
+	let course: number | null = null;
 	let difficulty: Difficulty = 'easy';
-	let estimate: string = '';
+	let estimate: number = 0;
 	let copyright: string = '';
 	let theoryApplicationRatio: number = 0.5;
 	let selectedTypes: string[] = [];
 	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
+
 
 	// TODO: do I absolutely need these for reactivity?
 	// also, this whole system could be redesigned with event emitters
@@ -92,6 +98,12 @@
 	$: fileTUSProgress = fileTUSProgress
 	let fileTUSUploadObjects: { [key: string]: any } = {}
 	$: fileTUSUploadObjects = fileTUSUploadObjects
+
+	let previousCourse: number | null = null;
+	$: if (course !== previousCourse) {
+		({ course, previousCourse, LOs, PKs } = changeCourse(course, previousCourse, LOs, PKs, data.courses));
+	}
+
 
 	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
 
@@ -150,7 +162,7 @@
 		});
 	}
 
-	$: if (form?.status === 200) {
+	$: if (form?.status === 200 && form?.context === 'material-page') {
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
 		}
@@ -332,13 +344,13 @@
 				description = existing.description;
 				tags = existing.tags;
 				newTags = existing.newTags;
-				LOs = existing.LOs;
-				PKs = existing.PKs;
+				// LOs = existing.LOs;
+				// PKs = existing.PKs;
 				selectedType = existing.selectedType ?? 'Select type';
 				difficulty = existing.difficulty ?? 'easy';
 				maintainers = existing.maintainers;
 				searchableUsers = existing.searchableUsers;
-				estimate = existing.estimate ?? '30';
+				estimate = existing.estimate ?? 0;
 				copyright = existing.copyright ?? 'No copyright';
 				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
 				fileURLs = existing.fileURLs ?? [];
@@ -398,8 +410,17 @@
 			event.preventDefault();
 		}
 	};
-	// const uploadFile
+	function openModal() {
+		showModal = true;
+	}
 
+	function closeModal() {
+		showModal = false;
+	}
+
+
+	// const uploadFile
+	let showModal = false;
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
@@ -486,13 +507,13 @@
 			formData.append('newTags', JSON.stringify(newTags));
 			formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 			formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
+			formData.append('course', course ? course.toString() : 'null');
 		  }}>
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					 buttonNext="btn dark:bg-surface-200"
 					 buttonCompleteLabel="Complete"
 					 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
 				<Step locked={locks[0]}>
-
 					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 					<UploadFilesForm
 						bind:supabaseClient={supabaseClient}
@@ -503,70 +524,58 @@
 						bind:files={files}/>
 				</Step>
 				<Step locked={locks[1]}>
+					<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
 					<div class="grid grid-cols-2 gap-x-4 gap-y-2">
 						<label for="title">Title<span class="text-error-300">*</span></label>
-
 						<label for="coverPic">Cover Picture (Max. size: 2MB)</label>
 
-						<div class="flex flex-col gap-2 min-h-80">
+
+						<div class="flex flex-col gap-2">
 							<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
 								   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
-							<textarea name="description" placeholder="Description..." bind:value={description}
-									  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
+							<div class="flex flex-col gap-2">
+								<SelectType bind:selectedTypes={selectedTypes}/>
+								<hr class="m-2">
+								<SelectCourse on:showCourseModal={openModal}
+											  bind:selectedCourseId={course}
+											  courses={data.courses}
+											  allCourses={data.allCourses}/>
+							</div>
 						</div>
-
-						<div class="flex flex-col gap-2 h-full bg-surface-200
-								border-2 border-dashed border-surface-700">
-							{#if coverPic}
-								<img src={URL.createObjectURL(coverPic)}
-									 alt="coverPicture"
-									 class="max-h-96 w-full object-contain h-full">
-							{/if}
-						</div>
-
-						<!--				<Filter label="Type" profilePic="{false}" oneAllowed={true} bind:selectedOption={selectedType}-->
-						<!--						bind:all={allTypes} selected={[]} num="{0}" bind:active={typeActive}-->
-						<!--						on:clearSettings={() => {typeActive=false}} />-->
-						<SelectType bind:selectedTypes={selectedTypes}/>
 
 						<div>
-							{#if coverPic}
-								<button on:click={() => coverPic = undefined} type="button"
-										class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
-									Remove Cover Picture
-								</button>
-							{:else}
-								<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
-											on:change={chooseCover} name="coverPhoto">
-									Upload Cover Picture
-								</FileButton>
-							{/if}
+							<div class="flex flex-col gap-2 h-full bg-surface-200
+										border-2 border-dashed border-surface-700">
+								<div>
+									{#if coverPic}
+										<img src={URL.createObjectURL(coverPic)}
+											 alt="coverPicture"
+											 class="max-h-96 w-full object-contain h-full">
+									{/if}
+								</div>
+							</div>
+
+							<div>
+								{#if coverPic}
+									<button on:click={() => coverPic = undefined} type="button"
+											class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
+										Remove Cover Picture
+									</button>
+								{:else}
+									<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
+												on:change={chooseCover} name="coverPhoto">
+										Upload Cover Picture
+									</FileButton>
+								{/if}
+							</div>
 						</div>
-
 					</div>
-
-					<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
 				</Step>
 				<Step locked={locks[2]}>
 					<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-					<div class="flex flex-col gap-8 p-6 justify-between">
-						<div class="flex gap-4 items-center">
-							<DifficultySelection bind:difficulty={difficulty} />
-						</div>
-						<div class="flex flex-row gap-4 md:gap-2 items-center">
-							<label for="theoryRatio h-full self-center text-center">Theory Application Ratio</label>
-							<TheoryAppBar bind:value={theoryApplicationRatio} />
-						</div>
-					</div>
-
 					<div class="flex flex-col gap-4 p-3">
 						<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
-							<div class="w-full md:w-1/2 flex-col gap-2">
-								<label for="estimate">Time Estimate (in minutes):</label>
-								<input type="number" name="estimate" bind:value={estimate} on:keydown={handleInputEnter} min="0"
-									   placeholder="How much time do the materials take"
-									   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
-							</div>
+							<TimeEstimate bind:totalMinutes={estimate}/>
 							<div class="w-full md:w-1/2	">
 								<label for="copyright md-2">Copyright License (<a
 									href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
@@ -577,15 +586,18 @@
 							</div>
 						</div>
 						<div class="w-full">
-							<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}" />
+							<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}
+											 adding="{true}"/>
 						</div>
 						<div class="flex flex-col w-full">
 							<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
 											   bind:additionalMaintainers={maintainers} />
 							<div class="lg:w-1/2">
-								<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags} />
+								<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 							</div>
 						</div>
+						<textarea name="description" placeholder="Additional Description..." bind:value={description}
+								  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
 					</div>
 				</Step>
 				<Step locked={isSubmitting}>
@@ -608,7 +620,6 @@
 								Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
 							</p>
 
-	<!--						<FileTable bind:files={files} bind:fileURLs={fileURLs} fileFormat = 'upload'/>-->
 							<FileTable operation="view" fileFormat="upload" bind:files={files} bind:fileURLs={fileURLs}
 									   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
 									   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>
@@ -671,6 +682,10 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if showModal}
+		<CourseModal existingCourse={null} close={closeModal} />
+	{/if}
 
 {:else}
 	<div class="fade-overlay col-span-full pt-20"
@@ -823,3 +838,4 @@
         }
     }
 </style>
+

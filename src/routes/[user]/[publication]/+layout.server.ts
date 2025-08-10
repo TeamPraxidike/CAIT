@@ -8,12 +8,12 @@ import type {
 	File as PrismaFile,
 	Material,
 	Node as PrismaNode,
-	Publication,
 	Reply,
 	Tag,
 	User,
 } from '@prisma/client';
 import type { FileURL } from '$lib/database/fileURL';
+import type { Publication } from '$lib/database/db';
 
 export const load: LayoutServerLoad = async ({
 	params,

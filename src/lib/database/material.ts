@@ -46,6 +46,7 @@ export const sortSwitch = (sort: string) => {
 	return orderBy;
 };
 import Fuse from 'fuse.js';
+import { linkCourseToPublication, removeCourseFromPublication } from '$lib/database/courses';
 
 /**
  * [GET] Returns a publication of type Material with the given id.
@@ -230,7 +231,9 @@ export async function createMaterialPublication(
 					learningObjectives: metaData.learningObjectives,
 					prerequisites: metaData.prerequisites,
 					type: PublicationType.Material,
-					publisherId: userId,
+					publisher: {
+						connect: { id: userId }
+					},
 					isDraft: metaData.isDraft,
 				},
 			},
@@ -261,9 +264,15 @@ export async function updateMaterialByPublicationId(
 		theoryPractice: number;
 		isDraft: boolean;
 		fileURLs: string[];
+		course: number | null
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
+	if (metaData.course === null) {
+		await removeCourseFromPublication(publicationId);
+	} else {
+		await linkCourseToPublication(publicationId, metaData.course, prismaContext);
+	}
 	return prismaContext.material.update({
 		where: { publicationId: publicationId },
 		data: {

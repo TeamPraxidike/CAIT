@@ -70,6 +70,15 @@ export type Publication = Prisma.PublicationGetPayload<{
 				},
 			},
 		},
+		course: {
+			select: {
+				id: true,
+				courseName: true,
+				learningObjectives: true,
+				prerequisites: true,
+				educationalLevel: true
+			}
+		}
 	},
 }>;
 
@@ -173,6 +182,15 @@ export async function getPublicationById(id: number): Promise<Publication> {
 					},
 				},
 			},
+			course: {
+				select: {
+					id: true,
+					courseName: true,
+					learningObjectives: true,
+					prerequisites: true,
+					educationalLevel: true
+				}
+			}
 		},
 	});
 }
