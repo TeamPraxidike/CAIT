@@ -84,18 +84,8 @@
     const DURATION_MS = 2500;
     const PLACEHOLDER_PROGRESS = 40;
 
-    // // slow it down even further (for heavier fetch operations)
-    // $: if (progress === PLACEHOLDER_PROGRESS - 10 && enterEndingInterval) {
-    //     clearInterval(progressInterval);
-    //
-    //     progressInterval = window.setInterval(() => {
-    //         progress = Math.min(progress + 1, PLACEHOLDER_PROGRESS);
-    //         //console.log(progress);
-    //     }, 500);
-    // }
-
     $: if ($navigating && $navigating.complete !== null && !showProgressBar) {
-        console.log("in the if")
+
         showProgressBar = true;
         progress = 0;
 
@@ -103,17 +93,17 @@
 
         progressInterval = window.setInterval(() => {
             progress = Math.min(progress + 1, PLACEHOLDER_PROGRESS);
-            //console.log(progress);
+            //
         }, DURATION_MS / PLACEHOLDER_PROGRESS);
 
         $navigating.complete.then(() => {
             clearInterval(progressInterval);
             progressInterval = window.setInterval(() => {
                 progress = Math.min(progress + 1, 100);
-                //console.log(progress);
+                //
 
                 if (progress === 100 && enterEndingInterval) {
-                    console.log("prog if")
+
 
                     enterEndingInterval = false;
 
@@ -157,7 +147,7 @@
             }, 800);
         });
     } else {
-        console.log("it is null");
+
         //clearInterval(progressInterval);
     }
 </script>

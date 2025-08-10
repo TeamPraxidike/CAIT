@@ -300,10 +300,6 @@ export async function addFile(
 		}
 		else path = info;
 
-		console.log(title);
-		console.log(type);
-		console.log(info);
-
 		try {
 			return prismaContext.file.create({
 				data: {
@@ -393,8 +389,6 @@ export async function updateFiles(
 		}
 		// const buffer: Buffer = Buffer.from(file.info, 'base64');
 		const path: string = file.info;
-
-		console.log(file);
 
 		await addFile(file.title, file.type, userId, path, materialId, prismaContext);
 	}

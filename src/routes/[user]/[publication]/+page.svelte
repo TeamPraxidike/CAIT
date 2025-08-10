@@ -83,7 +83,6 @@
         publisherId: node.publication.publisherId
     }));
 	const fileUrls: string[] = isMaterial ? data.pubView.publication.materials.fileURLs.map((x) => x.url) : [];
-	console.log(fileUrls);
     userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
     likedComments = data.likedComments as number[];
     likedReplies = data.likedReplies as number[];

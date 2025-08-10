@@ -107,7 +107,6 @@ export const actions = {
 			// ) as unknown as FileList;
 			const fileListUnformated: string[] = data.getAll('filesToUse') as unknown as string[];
 			const fileList: UploadMaterialFileFormat[] = fileListUnformated.map(item => {
-				console.log(item);
 				return JSON.parse(item) as UploadMaterialFileFormat
 			})
 
@@ -153,8 +152,6 @@ export const actions = {
 				};
 			});
 
-			console.log("check");
-			console.log(deleteInfo);
 
 			const coverPicFile = data.get('coverPicMat');
 			let coverPic = null;

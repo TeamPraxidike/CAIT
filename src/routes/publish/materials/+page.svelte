@@ -65,8 +65,6 @@
 
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
-	searchableUsers.forEach(user => {console.log(user.id)});
-	console.log(loggedUser.id);
 	// learning objectives
 	let LOs: string[] = [];
 	$: LOs = LOs;
@@ -263,7 +261,6 @@
 					fileTUSProgress = {...fileTUSProgress};
 				},
 				onSuccess: async function() {
-					console.log('Download %s from %s', (upload.file as File).name, upload.url)
 
 					// save locally
 					fileTUSMetadata[file.name]['isDone'] = true;

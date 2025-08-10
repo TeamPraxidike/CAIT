@@ -318,8 +318,6 @@
 			return;
 		}
 
-		console.log(isMaterial)
-
 		if(isMaterial){
       		// Array.from(files).forEach(file => appendFile(formData, file, 'file'));
       		for (const f of files){
@@ -328,8 +326,6 @@
 					type: f.type,
 					info: fileTUSMetadata[f.name]['generatedName']
 				}
-				console.log("appending this:");
-				console.log(uploadFormat);
 				formData.append('filesToUse', JSON.stringify(uploadFormat));
       		}
 		}

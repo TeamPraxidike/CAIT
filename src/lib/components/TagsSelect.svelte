@@ -57,18 +57,13 @@
     }
 
     const handleInvalid = () => {
-        // console.log(allTags)
-        // console.log(tags)
-        console.log(tagInput)
         // if it has valid length, is a valid dropdown option and has not been included yet
         if(tagInput.length>0 && allTags.includes({content: tagInput}) && !tags.includes(tagInput)) {
-            console.log("first if")
             tags=[...tags,tagInput];
             newTags=[...newTags,tagInput];
             tagInput='';
         }
         else {
-            console.log("else")
             enterTag = true;
             newTag = tagInput;
             createTag();

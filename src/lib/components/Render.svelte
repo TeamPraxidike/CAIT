@@ -35,8 +35,6 @@
 	}
 
 	function isSupportedForPreview(extension: string) {
-		console.log(extension);
-		console.log(SUPPORTED_VIEWER_FILES.includes(extension));
 		return SUPPORTED_VIEWER_FILES.includes(extension);
 	}
 
