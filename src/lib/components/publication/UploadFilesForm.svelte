@@ -23,7 +23,7 @@
 	export let integrateWithIndexDB: boolean = true;
 	export let fetchedFiles: FetchedFileArray | [] = [];
 
-	const supabaseURL = import.meta.env.PUBLIC_SUPABASE_URL ?? 'http://localhost:8000';
+	export let supabaseURL: string = 'http://localhost:8000';
 	const bucketName = "uploadedFiles"
 
 	let fileURL = '';
@@ -73,8 +73,6 @@
 					fileTUSProgress = {...fileTUSProgress};
 				},
 				onSuccess: async function() {
-					console.log('Download %s from %s', (upload.file as File).name, upload.url)
-
 					// save locally
 					fileTUSMetadata[file.name]['isDone'] = true;
 					fileTUSMetadata = {...fileTUSMetadata};
@@ -133,8 +131,6 @@
 
 				// if we already have the metadata then the file is not new
 				if (!(await isFileTUSMetaAlreadyProcessed(currentFile))) {
-
-					console.log(`${currentFile.name} not processed yet`);
 
 					// source: https://github.com/tronprotocol/tronweb/issues/531
 					const pathFileNameGenerated =

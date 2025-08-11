@@ -46,6 +46,7 @@
 	let serverData: PublicationView = data.pubView;
 	let publication: Publication = serverData.publication;
 	let supabaseClient: any = page.data.supabase;
+	const supabaseURL: string = data.PUBLIC_SUPABASE_URL;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
 
@@ -484,6 +485,7 @@
 			{:then dataTransferAwaited}
 				<div class="mt-8">
 					<UploadFilesForm
+						supabaseURL={supabaseURL}
 						integrateWithIndexDB={false}
 						fetchedFiles={fetchedFiles}
 						bind:fileTUSMetadata={fileTUSMetadata}

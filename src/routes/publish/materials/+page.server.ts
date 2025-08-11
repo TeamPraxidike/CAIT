@@ -5,6 +5,7 @@ import { type Difficulty, type Tag } from '@prisma/client';;
 import type { Course } from '$lib/database/courses';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
+import { env } from '$env/dynamic/public';
 
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
@@ -13,7 +14,7 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	const { users } = await (await fetch(`/api/user`)).json();
 	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
 	const allCourses: Course[] = await (await fetch(`/api/course`)).json();
-	return { tags, users, courses, allCourses };
+	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
 /**

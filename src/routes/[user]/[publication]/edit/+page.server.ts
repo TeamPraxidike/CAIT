@@ -8,6 +8,7 @@ import {
 import type { Difficulty, MaterialType, Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import type { Course } from '$lib/database/courses';
+import { env } from '$env/dynamic/public';
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
@@ -16,7 +17,7 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	const usersRes = await fetch('/api/user');
 	const { users } = await usersRes.json();
 	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
-	return { tags, users, courses };
+	return { tags, users, courses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
 export const actions = {

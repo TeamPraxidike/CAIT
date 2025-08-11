@@ -53,7 +53,7 @@
 	export let form: ActionData;
 	export let data: PageServerData;
 
-
+	const supabaseURL: string = data.PUBLIC_SUPABASE_URL;
 	let loggedUser = page.data.loggedUser;
 	let isSubmitting: boolean = false;
 
@@ -144,7 +144,6 @@
 	//$: supabaseClient = page.data.supabase;
 
 	const bucketName = "uploadedFiles"
-	const supabaseURL = import.meta.env.PUBLIC_SUPABASE_URL ?? 'http://localhost:8000';
 
 	/* LOCK = TRUE => LOCKED */
 	const locks: boolean[] = [false, false, false];
@@ -494,6 +493,7 @@
 				<Step locked={locks[0]}>
 					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 					<UploadFilesForm
+						supabaseURL={supabaseURL}
 						bind:supabaseClient={supabaseClient}
 						bind:fileTUSMetadata={fileTUSMetadata}
 						bind:fileTUSProgress={fileTUSProgress}
