@@ -41,6 +41,7 @@
 	};
 	let form:HTMLFormElement
 
+
 	$: isFormValid = title.trim().length > 0 && level !== undefined && learningObjectives.length > 0;
 	// $: if ()
 
@@ -55,13 +56,13 @@
 		bind:this={form}
 		enctype="multipart/form-data"
 		class="modal-form space-y-6"
-		on:submit={() => console.log("Modal form submitted")}
 		use:enhance={({ formData }) => {
 			formData.append('title', title);
 			formData.append('learningObjectives', JSON.stringify(learningObjectives));
 			formData.append('prerequisites', JSON.stringify(prerequisites));
 			formData.append('maintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
 			formData.append('level', level);
+			formData.append('context', 'course-form')
 
 			close();
 

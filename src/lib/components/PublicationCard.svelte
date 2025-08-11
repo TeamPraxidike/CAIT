@@ -234,7 +234,7 @@
 			{/if}
 			<a href="../{publisher.username}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}"
 			   on:click={resetTab}>
-				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc ? `data:image;base64,${imgSrc}` : defaultCoverPicturePath } alt="" />
+				<img class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="" />
 			</a>
 		</div>
 		<div class="flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
@@ -352,7 +352,7 @@
 							<div bind:this={pfpElement} class="relative inline-flex items-center">
 								<a href="/{publisher.username}" class="flex-none">
 									<img class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
-										 src={publisher.profilePicData ? `data:image;base64,${publisher.profilePicData}` : defaultProfilePicturePath} alt="CAIT Logo" />
+										 src={publisher.profilePicData ? publisher.profilePicData : defaultProfilePicturePath} alt="CAIT Logo" />
 								</a>
 								{#if isHoveredPfp}
 									<div

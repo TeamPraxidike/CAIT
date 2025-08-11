@@ -47,7 +47,7 @@
                 <!--    <div class="h-16 w-16 placeholder-circle object-cover" />-->
                 <!--{/if}-->
                 <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
-                ? `data:image;base64,${loggedUser.profilePicData}`
+                ? loggedUser.profilePicData
                 : defaultProfilePicturePath} alt={loggedUser.firstName}/>
                 <div class="flex flex-col">
                     <span>{loggedUser.firstName}</span>
@@ -61,7 +61,7 @@
 
         </div>
     {:else}
-        <div class="card relative z-20 bg-surface-50 border border-surface-300 p-4 w-64
+        <div class="card relative z-60 bg-surface-50 border border-surface-300 p-4 w-64
                                 dark:text-surface-50 dark:border-none">
             <div class="flex flex-col">
                 <a href="/{loggedUser.username}" on:click={confirmPublishReset}
@@ -70,12 +70,12 @@
                     {#if $page.data.session}
 <!--                        <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>-->
                         <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
-                        ? `data:image;base64,${loggedUser.profilePicData}`
+                        ? loggedUser.profilePicData
                         : defaultProfilePicturePath} alt={loggedUser.firstName}/>
                     {:else}
 <!--                        <div class="h-16 w-16 placeholder-circle" />-->
                         <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
-                        ? `data:image;base64,${loggedUser.profilePicData}`
+                        ? loggedUser.profilePicData
                         : defaultProfilePicturePath} alt={loggedUser.firstName}/>
                     {/if}
                     <div class="flex flex-col">

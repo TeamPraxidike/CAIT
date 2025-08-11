@@ -1,16 +1,15 @@
 <script lang="ts">
     import type {LayoutServerData, PageServerData} from './$types';
-    import {
-        AddInteractionForm,
-        CircuitComponent,
-        Comment,
-        DiffBar,
-        FileTable,
-        getDateDifference, HorizontalScroll,
-        Meta,
-        UserProp,
-		Tag
-    } from '$lib';
+	import {
+		AddInteractionForm,
+		CircuitComponent,
+		Comment,
+		DiffBar,
+		FileTable,
+		getDateDifference, HorizontalScroll,
+		Meta, Tag,
+		UserProp
+	} from '$lib';
     import {fly} from 'svelte/transition';
     import {TabGroup, Tab} from '@skeletonlabs/skeleton';
 
@@ -36,6 +35,7 @@
     import {page} from '$app/state';
     import { SvelteFlowProvider } from '@xyflow/svelte';
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
+	import type { FetchedFileArray } from '$lib/database';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -50,7 +50,8 @@
 	let isMaterial: boolean;
 	let likedComments: number[] = [];
 	let likedReplies: number[] = [];
-	let files: FileList | [];
+	// let files: FileList | [];
+	let files: FetchedFileArray | [];
 	let liked: boolean = false;
 	let likes: number;
 	let likedPublications: number[] = [];
@@ -80,52 +81,12 @@
         publisherId: node.publication.publisherId
     }));
 	const fileUrls: string[] = isMaterial ? data.pubView.publication.materials.fileURLs.map((x) => x.url) : [];
-	console.log(fileUrls);
     userSpecificInfo = data.userSpecificInfo as { liked: boolean; saved: boolean }
     likedComments = data.likedComments as number[];
     likedReplies = data.likedReplies as number[];
 
-	//files = isMaterial ? createFileList(pubView.fileData, pubView.publication.materials.files) : [];
-
-	// let loading: boolean = false;
-	// let error: string | null = null;
-
-	// // Function to fetch files
-	// async function fetchFiles() {
-	// 	if (!isMaterial) {
-	// 		files = [];
-	// 		return;
-	// 	}
-	//
-	// 	loading = true;
-	// 	error = null;
-	//
-	// 	try {
-	// 		const res = await fetch(`/api/material/${pubView.publication.id}/files`);
-	// 		if (!res.ok) {
-	// 			throw new Error(`Failed to load files: ${res.statusText}`);
-	// 		}
-	// 		const fileData = await res.json();
-	//
-	// 		files = await createFileList(fileData, pubView.publication.materials.files);
-	// 	} catch (err) {
-	// 		console.error('Error creating file list:', err);
-	// 		error = 'Failed to load files.';
-	// 	} finally {
-	// 		loading = false;
-	// 	}
-	// }
-	//
-	// // Fetch files when the component mounts or when dependencies change
-	// onMount(() => {
-	// 	fetchFiles();
-	// });
-
 	liked = userSpecificInfo.liked;
 	likes = pubView.publication.likes;
-
-	// circuitsPubAppearIn = data.circuitsPubAppearIn;
-	// similarPublications = data.similarPublications;
 
 	likedPublications = data.liked as number[];
 	savedPublications = data.saved.saved as number[];
@@ -135,10 +96,6 @@
 	$: comments = pubView.publication.comments;
 	tags = pubView.publication.tags.map(tag => tag.content) as string[];
 	created = getDateDifference(pubView.publication.createdAt, new Date()) as string;
-   
-
-	//console.log(pubView.publication.publisher.username)
-
 
 	$: if (data) {
 		pubView = data.pubView as PublicationView;
@@ -582,8 +539,12 @@
 								<p>This publication has no files</p>
 							{:else}
 								<div class="w-full">
+<!--									<FileTable operation="download"-->
+<!--											   files={createFileList(files, pubView.publication.materials.files)}-->
+<!--											   fileURLs={fileUrls}/>-->
 									<FileTable operation="download"
-											   files={createFileList(files, pubView.publication.materials.files)}
+											   fileFormat="fetch"
+											   files={files}
 											   fileURLs={fileUrls}/>
 								</div>
 							{/if}

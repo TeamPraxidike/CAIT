@@ -4,6 +4,7 @@ import {
 	fileSystem,
 	getMaterialByPublicationId
 } from '$lib/database';
+import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -34,12 +35,26 @@ export async function GET({ params, locals }) {
 
 		// file content for return
 		const fileData: FetchedFileArray = [];
+		// const fileData = [];
+
 
 		for (const file of material.files) {
-			const currentFileData = await fileSystem.readFile(file.path);
+			//const currentFileData = await fileSystem.readFile(file.path);
+			let currentFileData: string;
+			if (!(fileSystem instanceof LocalFileSystem)) {
+				currentFileData = await fileSystem.readFileURL(file.path);
+			}
+			// TODO: This will break for LocalFileSystem
+			else {
+				currentFileData = (await fileSystem.readFile(file.path))
+					.toString('base64');
+			}
 			fileData.push({
 				fileId: file.path,
-				data: currentFileData.toString('base64'),
+				name: file.title,
+				type: file.type,
+				//data: currentFileData.toString('base64'),
+				data: currentFileData,
 			});
 		}
 

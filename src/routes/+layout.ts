@@ -3,7 +3,7 @@ import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/publi
 import type { LayoutLoad } from './$types';
 import type { User } from '@prisma/client';
 
-export const load: LayoutLoad = async ({ data, depends, fetch }) => {
+export const load: LayoutLoad = async ({ data, depends }) => {
 	/**
 	 * Declare a dependency so the layout can be invalidated, for example, on
 	 * session refresh.
@@ -27,28 +27,7 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 			}
 		});
 
-	/**
-	 * It's fine to use `getSession` here, because on the client, `getSession` is
-	 * safe, and on the server, it reads `session` from the `LayoutData`, which
-	 * safely checked the session using `safeGetSession`.
-	 */
-	const {
-		data: { session }
-	} = await supabase.auth.getSession();
-
-	const {
-		data: { user }
-	} = await supabase.auth.getUser();
-
-	const loggedUserResp = await fetch(`/api/user/${user?.id}`);
-	const loggedUserBody = loggedUserResp.status === 200 ? await loggedUserResp.json() : null;
-
-	const loggedUser: (User & { profilePicData: string }) | null = loggedUserBody
-		? {
-			...loggedUserBody.user,
-			profilePicData: loggedUserBody.profilePicData.data
-		}
-		: null;
+	const { session, user, loggedUser } = data;
 	
 	return { session, supabase, user, loggedUser };
 };

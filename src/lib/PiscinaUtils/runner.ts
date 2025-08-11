@@ -96,7 +96,7 @@ export async function enqueueMaterialComparison(publicationId: number, materialI
 
         await handleFileTokens(initialParsing)
 
-        const materials = await getAllMaterials([],[],[],[],'','');
+        const materials = await getAllMaterials([],[],[],[],'','', true);
         const currentMaterial = await getMaterialByPublicationId(publicationId)
         const comparisons: {fromPubId: number, toPubId: number,
             similarityFile: Promise<ResultFile>, similarityMeta: Promise<ResultMeta>}[] = [];

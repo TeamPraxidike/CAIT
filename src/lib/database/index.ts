@@ -182,10 +182,27 @@ type FileDiffActions = {
 /**
  * Fetched file item with the id and the data in the form of a base64 string.
  */
+// type FetchedFileItem = {
+// 	fileId: string;
+// 	data: string | null;
+// };
+
 type FetchedFileItem = {
 	fileId: string;
+	name?: string;
+	type?: string;
 	data: string | null;
 };
+
+/**
+ * Type used exclusively for files in a material publication (excluding cover picture)
+ * This information is fed to the backend in this format
+ */
+type UploadMaterialFileFormat = {
+	title: string,
+	type: string,
+	info: string
+}
 
 /**
  * Array of fetched file items.
@@ -235,6 +252,7 @@ export {
 	type FetchedFileItem,
 	type FetchedFileArray,
 	type NodeDiffActions,
+	type UploadMaterialFileFormat,
 	handleSimilarity,
 	updateCircuitCoverPic,
 	updateFiles,

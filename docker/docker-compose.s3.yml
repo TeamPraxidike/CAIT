@@ -62,7 +62,7 @@ services:
       POSTGREST_URL: http://rest:3000
       PGRST_JWT_SECRET: ${JWT_SECRET}
       DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      FILE_SIZE_LIMIT: 52428800
+      FILE_SIZE_LIMIT: 104857600
       STORAGE_BACKEND: s3
       GLOBAL_S3_BUCKET: stub
       GLOBAL_S3_ENDPOINT: http://minio:9000

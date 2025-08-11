@@ -43,7 +43,6 @@
         if(publication.type === PublicationType.Material) return publication.materials.encapsulatingType;
         else return PublicationType.Circuit;
     }
-    saved.forEach((x) => console.log(getEncapsulatingType(x)))
 </script>
 
 <Meta title="Profile" description="CAIT" type="site" />

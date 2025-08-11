@@ -34,6 +34,7 @@
 	<p>Time estimate:</p>
 	<div class="flex items-center gap-4 bg-gray-100 p-4 rounded-xl w-fit">
 		<button
+			type="button"
 			on:mousedown={() => startHold(increment)}
 			on:mouseup={stopHold}
 			on:mouseleave={stopHold}
@@ -45,6 +46,7 @@
 		</div>
 
 		<button
+			type="button"
 			on:mousedown={() => startHold(decrement)}
 			on:mouseup={stopHold}
 			on:mouseleave={stopHold}
