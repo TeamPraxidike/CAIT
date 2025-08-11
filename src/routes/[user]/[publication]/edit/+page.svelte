@@ -43,6 +43,7 @@
 	let serverData: PublicationView = data.pubView;
 	let publication: Publication = serverData.publication;
 	let supabaseClient: any = page.data.supabase;
+	const supabaseURL: string = data.PUBLIC_SUPABASE_URL;
 
 	let tags: string[] = serverData.publication.tags.map(tag => tag.content);
 
@@ -177,6 +178,7 @@
 		if (file.type === 'image/jpeg' || file.type === 'image/png') {
 			coverPicMat = file;
 
+			// TODO
 			// If you add a picture and then remove it
 			// You cannot re-add it until you select another image (and remove it)
 			// this is a workaround, think of it as deleting some cache
@@ -481,6 +483,7 @@
 			{:then dataTransferAwaited}
 				<div class="mt-8">
 					<UploadFilesForm
+						supabaseURL={supabaseURL}
 						integrateWithIndexDB={false}
 						fetchedFiles={fetchedFiles}
 						bind:fileTUSMetadata={fileTUSMetadata}

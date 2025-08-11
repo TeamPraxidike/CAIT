@@ -4,18 +4,18 @@ import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database'
 import { type Difficulty, type Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
-import {type CourseWithMaintainersAndProfilePic} from '$lib/database/courses';
+import type { Course } from '$lib/database/courses';
+import { env } from '$env/dynamic/public';
+
 
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	const courses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended/user/${locals.user?.id}`)).json();
-	const allCourses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended`)).json();
-	// const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
-	// const allCourses: Course[] = await (await fetch(`/api/course`)).json();
-	return { tags, users, courses, allCourses };
+	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+	const allCourses: Course[] = await (await fetch(`/api/course`)).json();
+	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
 /**
@@ -61,13 +61,11 @@ export const actions = {
 		if (data.get('context') === 'course-form') {
 			return { status: 418, context: 'course-form'};
 		}
-		console.log("after 418");
 
 		const fileList: string[] = data.getAll('file') as unknown as string[];
 		const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
 		if (!fileList || fileList.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
 		// const add = await filesToAddOperation(fileList, fileURLs);
-		console.log("After 400");
 
 		const add = fileList.concat(fileURLs).map((item: string) => {
 			return JSON.parse(item) as UploadMaterialFileFormat
@@ -75,8 +73,6 @@ export const actions = {
 
 		const tagsDataEntry = data.get('tags');
 		if (!tagsDataEntry) return { status: 400, message: 'No tags provided', context: 'publication-form' };
-
-		console.log("After 400 second");
 
 		const losDataEntry = data.get('learningObjectives');
 		const maintainersDataEntry = data.get('maintainers');
@@ -92,8 +88,6 @@ export const actions = {
 				info,
 			};
 		}
-
-		console.log("After cover pic");
 
 		const userId = data.get('userId')?.toString();
 		if (userId === undefined) throw new Error('User id is undefined');
@@ -115,8 +109,6 @@ export const actions = {
 				};
 			}
 		}
-
-		console.log("After tags");
 
 		const material: MaterialForm = {
 			userId,
@@ -152,11 +144,7 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(material),
 		});
-
-		console.log("After material");
-
 		return { status: res.status, id: (await res.json()).id , context: 'publication-form'};
-		// return { status: res.status, id: (await res.json()).id , context: data.get('fomrContext')?.toString()};
 	},
 	publishCourse: async ({request, fetch, locals}) => {
 		const session = await locals.safeGetSession();

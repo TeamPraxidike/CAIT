@@ -16,7 +16,8 @@
 		}
 		else{
 			// TODO: I don't like this. Need better safeguards/assertions
-			href = (file as FetchedFileItem).data ?? '';
+			const signedUrl = (file as FetchedFileItem).data ?? '';
+			href = signedUrl + (signedUrl.includes('?') ? '&' : '?') + 'download=' + encodeURIComponent(file.name);
 		}
 	}
 </script>

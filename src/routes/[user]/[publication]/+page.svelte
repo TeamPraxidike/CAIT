@@ -45,6 +45,7 @@
 	let loggedUser = page.data.loggedUser;
 	const userId = page.data.session?.user.id;
 
+	let supabaseClient = page.data.supabase;
 	let tabSet: number = 0;
 	let pubView: PublicationView;
 	let isMaterial: boolean;
@@ -544,6 +545,7 @@
 <!--											   fileURLs={fileUrls}/>-->
 									<FileTable operation="download"
 											   fileFormat="fetch"
+											   supabaseClient={supabaseClient}
 											   files={files}
 											   fileURLs={fileUrls}/>
 								</div>
