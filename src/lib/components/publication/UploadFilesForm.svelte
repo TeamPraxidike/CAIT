@@ -106,9 +106,9 @@
 	}
 
 	async function appendToFileList(e: Event) {
-		const eventFiles = (e.target as HTMLInputElement).files;
+		const input = e.target as HTMLInputElement;
+		const eventFiles = input.files;
 		if (eventFiles && eventFiles.length > 0) {
-
 			// retain files that are under the per-file size limit
 			let filesToUse = []
 			for (const eventFile of eventFiles){
@@ -168,6 +168,10 @@
 				}
 			}
 		}
+
+		// allows reselecting the same file later
+		// think of it as deleting cache
+		input.value = '';
 	}
 
 	function appendFileURLtoList() {
