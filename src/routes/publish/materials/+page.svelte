@@ -521,8 +521,10 @@
 					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
 					<div class="flex flex-col gap-2">
+						<label for="content">Content<span class="text-error-300">*</span></label>
 						<SelectType bind:selectedTypes={selectedTypes}/>
 						<hr class="m-2">
+						<label for="course">Course<span class="text-error-300">*</span></label>
 						<SelectCourse on:showCourseModal={openModal}
 									  bind:selectedCourseId={course}
 									  courses={data.courses}
