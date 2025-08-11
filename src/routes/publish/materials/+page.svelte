@@ -17,7 +17,7 @@
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import SelectType from '$lib/components/publication/SelectType.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	import {
@@ -168,6 +168,7 @@
 	// otherwise, for example, any Course related form events get mistaken for
 	// events from the main form
 	$: if (form?.status === 200 && form?.context === 'publication-form') {
+		console.log('Form submission successful:');
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
 		}
@@ -178,13 +179,12 @@
 			clearMaterialSnapshot(),
 			deleteAllFileTUSMetadata()
 		]).then(async () => {
-
 			showAnimation = true;
-
 		}).catch(error => {
 			console.error('Error clearing data:', error);
 		});
 	} else if (form?.status === 400 && form?.context === 'publication-form') {
+		console.log('Form submission failed with status 400:');
 		if (!allUploadsDone(fileTUSMetadata, files)){
 			toastStore.trigger({
 				message: 'Some files are still being uploaded',
@@ -201,9 +201,11 @@
 
 		isSubmitting = false;
 	} else if (form?.status === 418) {
+		console.log("error 418 ");
 		isSubmitting = false;
 		showAnimation = false;
 	} else if (form?.status === 500 && form?.context === 'publication-form') {
+		console.log('Form submission failed with status 500:');
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
 			background: 'bg-error-200',
@@ -211,6 +213,7 @@
 		});
 		isSubmitting = false;
 	} else if (form?.status === 200 && form?.context === 'course-modal'){
+		console.log('Course modal submission successful:');
 		originalCourseIds = [...originalCourseIds, form?.id];
 		console.log(form?.id);
 		console.log("added new course");
@@ -428,7 +431,7 @@
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
 	let originalCourseIds: number[] = [];
-	let bannerFieldsList;
+	let bannerFieldsList: string[];
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -480,7 +483,7 @@
 					formData.append('description', description);
 					formData.append('type', JSON.stringify(selectedTypes));
 					formData.append('difficulty', difficulty);
-					formData.append('estimate', estimate);
+					formData.append('estimate', JSON.stringify(estimate));
 					formData.append('copyright', copyright);
 					formData.append('tags', JSON.stringify(tags));
 					formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
@@ -492,7 +495,7 @@
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 					formData.append('course', course ? course.toString() : 'null');
 				  }}
-			  use:handleInputEnter>
+			  use:handleInputEnter >
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					 buttonNext="btn dark:bg-surface-200"
 					 buttonCompleteLabel="Complete"
