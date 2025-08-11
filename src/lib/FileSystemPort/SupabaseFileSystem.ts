@@ -89,7 +89,7 @@ export class SupabaseFileSystem implements FileSystem {
 		const { data, error } = await this.supabase
 			.storage
 			.from(this.bucketName)
-			.createSignedUrl(pathArg, 180)
+			.createSignedUrl(pathArg, 3600)
 
 		if (error) throw error;
 		return data.signedUrl;
