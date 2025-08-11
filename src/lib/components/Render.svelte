@@ -7,6 +7,7 @@
 	//export let file: File;
 	export let file: FetchedFileItem | File;
 	export let fileFormat: 'upload' | 'fetch' = 'upload'
+	export let supabaseClient;
 
 	const SUPPORTED_VIEWER_FILES = [
 		// PDF
@@ -66,6 +67,19 @@
 	function closeModal() {
 		modalStore.close();
 	}
+
+	async function getSupabaseFile(file: FetchedFileItem){
+		console.log(file);
+
+		const { data, error } = await supabaseClient
+			.storage
+			.from("uploadedFiles")
+			.download(file.fileId);
+
+		if (error) throw error;
+		const arrayBuffer = await data.arrayBuffer();
+		return arrayBuffer;
+	}
 </script>
 
 <div class="bg-surface-100 p-8 rounded-lg flex flex-col">
@@ -117,7 +131,14 @@
 							type={file.type} />
 				</video>
 			{:else if file.type.startsWith('text')}
-				<CodeBlock language={getLanguage(file.type)} code={file.data ?? ''} />
+				{#await getSupabaseFile(file)}
+					<div>Loading...</div>
+				{:then fileBuffer}
+					<CodeBlock language={getLanguage(file.type)}
+							   code={decoder.decode(fileBuffer)} />
+				{:catch error}
+					<div>Could not load file</div>
+				{/await}
 			{:else if isSupportedForPreview(getExtension(file))}
 				<iframe title={file.name} src={file.data}
 						class="w-full h-[70vh]"></iframe>
