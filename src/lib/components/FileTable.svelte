@@ -7,7 +7,6 @@
 	import { flip } from 'svelte/animate';
 	import type { FetchedFileArray, FetchedFileItem } from '$lib/database';
 	import { deleteFileTUSMetadata, type FileTUSMetadata, saveFiles } from '$lib/util/indexDB';
-	import * as tus from 'tus-js-client';
 
 	// export let files: FileList | any[];
 	// it's a FileList during upload, it's a FetchedFileArray when fetched from the backend

@@ -8,11 +8,11 @@
 		type Tag as PrismaTag,
 		type User
 	} from '@prisma/client';
-	import { CircuitComponent, DifficultySelection, Filter, Meta, TheoryAppBar } from '$lib';
+	import { CircuitComponent, DifficultySelection, Meta, TheoryAppBar } from '$lib';
 	import {
 		FileButton, getToastStore, ProgressRadial
 	} from '@skeletonlabs/skeleton';
-	import { appendFile, base64ToFile, concatFileList, createFileList } from '$lib/util/file';
+	import { base64ToFile, concatFileList } from '$lib/util/file';
 	import type { PublicationView } from '../+layout.server';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -27,9 +27,6 @@
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import {
 		type FileTUSMetadata,
-		type FormSnapshot,
-		getCircuitSnapshot,
-		saveCircuitSnapshot
 	} from '$lib/util/indexDB';
 	import { allUploadsDone } from '$lib/util/file'
 	import Banner from '$lib/components/publication/Banner.svelte';

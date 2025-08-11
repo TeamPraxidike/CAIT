@@ -2,9 +2,8 @@
 	import { MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
-	import type { Circuit, Material, Publication, User } from '@prisma/client';
+	import type { Publication, User } from '@prisma/client';
 	import { onMount } from 'svelte';
-	import { getExtensions } from '$lib/util/file';
 	import { type PaginationSettings, Paginator, SlideToggle } from '@skeletonlabs/skeleton';
 	import DropdownSelect from '$lib/components/designSystem/DropdownSelect.svelte';
 	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';

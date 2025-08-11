@@ -1,8 +1,7 @@
 import type { Actions, PageServerLoad } from './$types';
 
 import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
-import { type Difficulty, type Tag } from '@prisma/client';;
-import type { Course } from '$lib/database/courses';
+import { type Difficulty, type Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
 import {type CourseWithMaintainersAndProfilePic} from '$lib/database/courses';

@@ -1,7 +1,6 @@
 import { openDB } from 'idb';
-import type { Difficulty, User } from '@prisma/client';
+import type { Difficulty } from '@prisma/client';
 import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
-import { CircuitComponent } from '$lib';
 
 const DB_NAME = 'FileStorage';
 const DB_VERSION = 3;

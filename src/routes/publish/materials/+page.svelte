@@ -10,7 +10,7 @@
 	import { FileButton, getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
-	import type {  Difficulty, Tag as PrismaTag, User } from '@prisma/client';
+	import type {  Difficulty, Tag as PrismaTag } from '@prisma/client';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';

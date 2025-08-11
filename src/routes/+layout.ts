@@ -1,7 +1,6 @@
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 import type { LayoutLoad } from './$types';
-import type { User } from '@prisma/client';
 
 export const load: LayoutLoad = async ({ data, depends }) => {
 	/**
