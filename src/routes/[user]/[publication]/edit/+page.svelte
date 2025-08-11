@@ -181,6 +181,7 @@
 		if (file.type === 'image/jpeg' || file.type === 'image/png') {
 			coverPicMat = file;
 
+			// TODO
 			// If you add a picture and then remove it
 			// You cannot re-add it until you select another image (and remove it)
 			// this is a workaround, think of it as deleting some cache
