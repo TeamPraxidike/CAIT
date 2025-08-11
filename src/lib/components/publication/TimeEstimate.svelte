@@ -18,6 +18,7 @@
 		let dec = 30;
 		if (totalMinutes >= 120) dec = 60;
 		if (totalMinutes >= 30) totalMinutes -= dec;
+		else totalMinutes = 0;
 	}
 
 	function startHold(action: () => void) {
