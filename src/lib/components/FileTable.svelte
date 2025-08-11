@@ -40,7 +40,7 @@
 	function activateModal(file: File | FetchedFileItem) {
 		ms.trigger({
 			type: 'component',
-			component: { ref: Render, props: { file, fileFormat } }
+			component: { ref: Render, props: { file, fileFormat, supabaseClient } }
 		});
 	}
 
