@@ -108,7 +108,7 @@ export async function load({ url, fetch, locals }) {
 		saved,
 		// idsMat,
 		// idsCirc,
-		amount: 8,
+		amount: 9,
 	};
 }
 

@@ -1,13 +1,16 @@
 import {
+	type FetchedFileItem,
 	type FileDiffActions,
 	fileSystem,
-	prisma,
+	prisma
 } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
 import type { File as PrismaFile, FileChunk } from '@prisma/client';
 import path from 'path';
 import type { FileChunks } from '$lib/PiscinaUtils/runner';
 import { addFileURL } from '$lib/database/fileURL';
+import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
+import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 
 
 // // TODO: This seems to be useless, could remove if nothing breaks
@@ -18,12 +21,12 @@ import { addFileURL } from '$lib/database/fileURL';
 // 		data: file.data.toString(),
 // 	}));
 // }
-export type ProfilePic = {
-	fileId: string;
-	data: string | null;
-}
+// export type ProfilePic = {
+// 	fileId: string;
+// 	data: string | null;
+// }
 
-export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<ProfilePic> {
+export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<FetchedFileItem> {
 	let filePath;
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
@@ -45,10 +48,22 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
 		// since photo is defined, read the file based on the path (just like a File)
 		filePath = profilePic.path;
 
-		const currentFileData = await fileSystem.readFile(filePath);
+		// const currentFileData = await fileSystem.readFile(filePath);
+		// return {
+		// 	fileId: filePath,
+		// 	data: currentFileData.toString('base64'),
+		// };
+		let currentFileData;
+		if (fileSystem instanceof SupabaseFileSystem) {
+			currentFileData = await fileSystem.readFileURL(filePath);
+		}
+		else {
+			currentFileData = (await fileSystem.readFile(filePath)).toString('base64');
+		}
+
 		return {
 			fileId: filePath,
-			data: currentFileData.toString('base64'),
+			data: currentFileData,
 		};
 	}
 }
@@ -59,9 +74,9 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
  * @param coverPic
  */
 export async function coverPicFetcher(
-	encapsulatingType: string,
-	coverPic: PrismaFile | null,
-) {
+	encapsulatingType: string | null = null,
+	coverPic: PrismaFile | null = null
+) : Promise<FetchedFileItem> {
 	let filePath;
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
@@ -89,10 +104,23 @@ export async function coverPicFetcher(
 		// since photo is defined, read the file based on the path (just like a File)
 		filePath = coverPic.path;
 
-		const currentFileData = await fileSystem.readFile(filePath);
+		// const currentFileData = await fileSystem.readFile(filePath);
+		// return {
+		// 	fileId: filePath,
+		// 	data: currentFileData.toString('base64'),
+		// };
+		let currentFileData;
+		if (fileSystem instanceof SupabaseFileSystem) {
+			currentFileData = await fileSystem.readFileURL(filePath);
+		}
+		else {
+			// TODO: frontend expects urls currently, add base64 checks jic
+			currentFileData = (await fileSystem.readFile(filePath)).toString('base64');
+		}
+
 		return {
 			fileId: filePath,
-			data: currentFileData.toString('base64'),
+			data: currentFileData,
 		};
 	}
 }
@@ -246,22 +274,38 @@ export async function updateCircuitCoverPic(
 	);
 }
 
+/**
+ * Adds file to the database.
+ * @param title
+ * @param type
+ * @param ownerId
+ * @param info - could be either a Buffer or a path string.
+ * It's a path string if it's derived from files associated with a material publication
+ * It's Buffer if it's a cover picture/profile picture
+ * @param materialId
+ * @param prismaContext
+ */
 export async function addFile(
 	title: string,
 	type: string,
 	ownerId: string,
-	info: Buffer,
+	info: Buffer | string,
 	materialId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
-		const path = await fileSystem.saveFile(info, title, ownerId);
+		let path: string;
+		if (info instanceof Buffer){
+			path = await fileSystem.saveFile(info, title, ownerId, type);
+		}
+		else path = info;
+
 		try {
 			return prismaContext.file.create({
 				data: {
 					path: path,
 					title: title,
-					type,
+					type: type,
 					materialId: materialId, // Associate the File with Material, could use connect, shouldn't matter
 				},
 			});
@@ -343,9 +387,10 @@ export async function updateFiles(
 			await addFileURL(file.title, file.info, materialId, prismaContext);
 			continue;
 		}
-		const buffer: Buffer = Buffer.from(file.info, 'base64');
+		// const buffer: Buffer = Buffer.from(file.info, 'base64');
+		const path: string = file.info;
 
-		await addFile(file.title, file.type, userId, buffer, materialId, prismaContext);
+		await addFile(file.title, file.type, userId, path, materialId, prismaContext);
 	}
 
 	// delete files
@@ -385,9 +430,12 @@ export async function handleFileTokens(
 		// Insert new documents using raw SQL for the vector type
 		for (const chunk of dataCurrent.chunks) {
 			// Use Prisma's executeRaw to handle the vector type correctly
+
+			// Raw query failed.Code: `22021`.Message: `ERROR: invalid byte sequence for encoding "UTF8": 0x00
+			// TOOD: does replace work?
 			await prisma.$executeRaw`
                 INSERT INTO "FileChunk" (content, metadata, embedding, "filePath")
-                VALUES (${chunk.pageContent},
+                VALUES (${chunk.pageContent.replace(/\u0000/g, '')},
                         ${JSON.stringify(chunk.metadata)}::json,
                         ${chunk.embedding}::vector(384),
                         ${dataCurrent.filePath})

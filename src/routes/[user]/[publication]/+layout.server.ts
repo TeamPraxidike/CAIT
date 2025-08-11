@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { error, redirect } from '@sveltejs/kit';
-import type { FetchedFileItem } from '$lib/database';
+import type { FetchedFileArray, FetchedFileItem } from '$lib/database';
 import type {
 	Circuit,
 	Comment,
@@ -23,7 +23,8 @@ export const load: LayoutServerLoad = async ({
 }) => {
 	await parent();
 
-	const session = await locals.safeGetSession();
+	//const session = await locals.safeGetSession();
+	const session = locals.session
 	if (!session || !session.user) throw redirect(303, '/signin');
 
 	const pRes = await fetch(`/api/publication/${params.publication}`);
@@ -56,7 +57,7 @@ export const load: LayoutServerLoad = async ({
 				// something definitely went wrong here
 				throw new Error(`Failed to load files: ${res.statusText}`);
 			}
-			const fileData = await res.json();
+			const fileData: FetchedFileArray = await res.json();
 
 			return fileData;
 		} catch (err) {

@@ -64,9 +64,10 @@ export class LocalFileSystem implements FileSystem {
 	 * @param file the binary data of the file
 	 * @param name  the name of the file - used to determine the file extension
 	 * @param ownerId - file owner id
+	 * @param type - mime type
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async saveFile(file: Buffer, name: string, ownerId: string): Promise<string> {
+	async saveFile(file: Buffer, name: string, ownerId?: string, type?: string): Promise<string> {
 		if (!file) {
 			throw new Error('No file provided');
 		}

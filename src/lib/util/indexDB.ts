@@ -4,13 +4,20 @@ import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 import { CircuitComponent } from '$lib';
 
 const DB_NAME = 'FileStorage';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const COVER_STORE = 'cover';
 const FILES_STORE = 'files';
+const FILES_TUS_STORE = 'tus'
 const MATERIAL_METADATA_STORE = 'material_metadata_snapshots';
 const CIRCUIT_METADATA_STORE = 'circuit_metadata_snapshots';
 
 type UserWithProfilePic = User & { profilePicData: string };
+
+export type FileTUSMetadata = {
+	originalName: string
+	generatedName: string
+	isDone: boolean
+}
 
 export type FormSnapshot = {
 	title: string; // for materials + circuits
@@ -45,6 +52,9 @@ export async function initDB() {
 			if (!db.objectStoreNames.contains(CIRCUIT_METADATA_STORE)) {
 				db.createObjectStore(CIRCUIT_METADATA_STORE);
 			}
+			if (!db.objectStoreNames.contains(FILES_TUS_STORE)) {
+				db.createObjectStore(FILES_TUS_STORE);
+			}
 		}
 	});
 }
@@ -71,6 +81,7 @@ export async function saveFiles(files: File[]) {
 	// Save under a fixed key, e.g. 'uploadedFiles'
 	await db.put(FILES_STORE, files, 'uploadedFiles');
 }
+
 export async function getFiles(): Promise<File[]> {
 	const db = await initDB();
 	const result = await db.get(FILES_STORE, 'uploadedFiles');
@@ -80,6 +91,28 @@ export async function clearFiles() {
 	console.log("DELETING FILES");
 	const db = await initDB();
 	await db.delete(FILES_STORE, 'uploadedFiles');
+}
+
+export async function saveFileTUSMetadata(fileTUSMetadata: FileTUSMetadata) {
+	console.log("saving TUS");
+	const db = await initDB();
+	await db.put(FILES_TUS_STORE, fileTUSMetadata, fileTUSMetadata.originalName);
+}
+
+export async function getFileTUSMetadata(fileName: string) {
+	const db = await initDB();
+	const result = await db.get(FILES_TUS_STORE, fileName);
+	return result || null; // return empty array if nothing stored
+}
+
+export async function deleteFileTUSMetadata(fileName: string) {
+	const db = await initDB();
+	await db.delete(FILES_TUS_STORE, fileName);
+}
+
+export async function deleteAllFileTUSMetadata() {
+	const db = await initDB();
+	await db.clear(FILES_TUS_STORE);
 }
 
 // Save snapshot

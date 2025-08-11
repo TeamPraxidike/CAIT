@@ -59,7 +59,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const query: string = url.searchParams.get('q') || '';
-		const amount: number = Number(url.searchParams.get('amount')) || 8;
+		const amount: number = Number(url.searchParams.get('amount')) || 9;
 
 		let materials = await getAllMaterials(
 			tags,
@@ -67,16 +67,24 @@ export const GET: RequestHandler = async ({ url }) => {
 			diff,
 			type,
 			sort,
-			query,
+			query
 		);
 
-		materials = materials.filter((m: MaterialWithPublication) => !m.publication.isDraft);
+		// materials = materials.filter((m: MaterialWithPublication) => !m.publication.isDraft);
+
+		const idsMat = materials.map(m => m.publicationId)
+
+		materials = materials.slice(0, amount)
+
+
 		for (const material of materials) {
 			material.publication.tags = reorderTags(
 				material.publication.tags,
 				tags,
 			);
 		}
+
+
 
 		materials = await Promise.all(materials.map(async (material) => {
 			return {
@@ -94,16 +102,30 @@ export const GET: RequestHandler = async ({ url }) => {
 			};
 		}));
 
+
+
 		return new Response(
 			JSON.stringify({
-				materials: materials.slice(0, amount),
-				idsMat: materials.map((m) => m.publicationId),
+				//materials: materials.slice(0, amount),
+				materials: materials,
+				//idsMat: materials.map((m) => m.publicationId),
+				idsMat: idsMat
 			}),
 			{
 				status: 200,
 			},
 		);
 	} catch (error) {
+		console.error('Supabase Storage Error Details:');
+
+		if (error instanceof Error) {
+			console.error('• Name:', error.name);
+			console.error('• Message:', error.message);
+			console.error('• Stack:', error.stack);
+		}
+
+		// Try inspecting the full object
+		console.error('• Raw error object:', JSON.stringify(error, null, 2));
 		return new Response(JSON.stringify({ error: 'Server Error' }), {
 			status: 500,
 		});
@@ -161,30 +183,28 @@ export async function POST({ request , locals}) {
 					prismaTransaction,
 				);
 
-				await updateCoverPic(
-					coverPic,
-					material.publicationId,
-					userId,
-					prismaTransaction,
-				);
-
-				await updateFiles(fileInfo, material.id, userId, prismaTransaction);
-				console.log(material);
-				if (body.metaData.course) {
-					await linkCourseToPublication(material.publication.id, body.metaData.course, prismaTransaction);
-				}
 				return material;
 			},
 		);
+
+		await updateCoverPic(
+			coverPic,
+			createdMaterial.publicationId,
+			userId
+		);
+
+		await updateFiles(fileInfo, createdMaterial.id, userId);
 
 		await updateReputation(userId, 30);
 
 		const publicationId = createdMaterial.publicationId;
 		const materialId = createdMaterial.id;
 
-		enqueueMaterialComparison(publicationId, materialId).catch((error) =>
-			console.error(error),
-		);
+		setTimeout(() => {
+			enqueueMaterialComparison(publicationId, materialId).catch((error) => {
+				console.error(error);
+			}
+		)}, 2000);
 
 		return new Response(JSON.stringify({ id: publicationId }), {
 			status: 200,

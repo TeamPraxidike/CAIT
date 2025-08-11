@@ -203,7 +203,7 @@
      class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full  rounded-lg flex gap-2 p-1 ">
 <!--        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />-->
         <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border"
-             src={photoUrl ? `data:image;base64,${photoUrl}` : defaultProfilePicturePath}
+             src={photoUrl ? photoUrl : defaultProfilePicturePath}
              alt="Profile Picture of ${commenter.username}" />
         <div class="flex flex-col w-full">
 
