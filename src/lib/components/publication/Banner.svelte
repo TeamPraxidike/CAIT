@@ -33,7 +33,6 @@ $: fieldsList = [
 		materialType.length <= 0 && 'Material Type'
 	].filter(Boolean);
 
-console.log("Fields ", fieldsList);
 
 $: show = true;
 </script>
