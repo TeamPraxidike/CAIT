@@ -4,16 +4,47 @@
 	import type { ActionData } from './$types';
 	import { FileButton, getToastStore } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
-	import { base64ToFile } from '$lib/util/file';
+	import { page } from '$app/state';
+	import type { FetchedFileItem } from '$lib/database';
+	import { onMount, tick } from 'svelte';
 
 	/* This is the data that was returned from the server */
 	export let data: LayoutData;
 	export let form: ActionData;
 
-	let profilePic = data.profilePic.data
-		? base64ToFile(data.profilePic.data, 'cover.jpg', 'image/jpeg')
-		: null
-	//$:profilePic = data.profilePicData;
+	let supabaseClient = page.data.supabase;
+
+	let profilePicFetchedData: string | null = data.profilePic
+	let profilePicPromise: null | Promise<File> = null;
+
+	onMount(() => {
+		// if the data is not null, then we have info about the file
+		// so it is no the default, we need to download it
+		if (profilePicFetchedData.data){
+			profilePicPromise = downloadFileFromSupabase(profilePicFetchedData);
+		}
+	});
+
+	//TODO: move this function to index and export
+	async function downloadFileFromSupabase(f: FetchedFileItem){
+		const { data: blob, error } = await supabaseClient.storage
+			.from("uploadedFiles")
+			.download(f.fileId)
+
+		if (error) {
+			console.error('Error downloading file from Supabase:', error.message);
+			throw error;
+		}
+
+		if (!blob) {
+			console.error('Download succeeded but the returned blob is null.');
+			return null;
+		}
+
+		return new File([blob], f.name, {
+			type: blob.type,
+		});
+	}
 
 	const toastStore = getToastStore();
 	$: if (form?.status === 400) {
@@ -36,22 +67,33 @@
 	 * Function to handle the profile picture upload
 	 */
 	async function choosePfp(e: Event) {
-		const eventFiles = (e.target as HTMLInputElement).files;
+		let input = e.target as HTMLInputElement;
+		const eventFiles = input.files;
 		if (eventFiles) {
 			if (eventFiles[0].type === 'image/jpeg' || eventFiles[0].type === 'image/png') {
-				profilePic = eventFiles[0]
+				return eventFiles[0];
 				// const buffer = await eventFiles[0].arrayBuffer();
 				// const base64Image = btoa(String.fromCharCode(...new Uint8Array(buffer)));
 				// profilePic = { data: base64Image };
-			} else
+			} else {
 				toastStore.trigger({
 					message: 'Invalid file type, please upload a .jpg or .png file',
 					background: 'bg-warning-200',
 					classes: 'text-surface-900',
-
 				});
+
+				return profilePicPromise;
+			}
+
 		}
+
+		input.value = '';
 	}
+
+	async function chosenPfpPromiseHandler(e: Event){
+		profilePicPromise = choosePfp(e);
+	}
+
 	const handleInputEnter = (event: KeyboardEvent) => {
 		if(event.key === 'Enter'){
 			event.preventDefault();
@@ -69,25 +111,47 @@
 </h3>
 
 <form enctype="multipart/form-data" method="POST" action="?/edit" class="col-span-6 flex flex-col gap-8"
-	  use:enhance={({formData}) => {
+	  use:enhance={async ({formData}) => {
 		formData.append('userId', data.user.id);
+
+		let profilePic = null;
+		if (profilePicPromise !== null){
+			profilePic = await profilePicPromise;
+		}
+
 		formData.append('profilePicSet', profilePic);
 		formData.append('email', data.user.email);
 	  }}>
 
-	<div class="flex gap-8 items-center">
-		<div class="flex flex-col items-center">
-			<h4 class="text-lg text-surface-900 col-span-3 dark:text-surface-50">
-				Profile Picture
-			</h4>
-			<!--{#if profilePic}-->
-			<!--	<img src={URL.createObjectURL(profilePic)} class="w-32 h-32 rounded-full" alt="profilePic">-->
-			<!--{/if}-->
-			<img src={profilePic ? URL.createObjectURL(profilePic) : defaultProfilePicturePath}
-				 class="w-32 h-32 rounded-full" alt="profilePic">
+	{#if profilePicPromise !== null}
+		<div class="flex gap-8 items-center">
+			{#await profilePicPromise}
+				<p>Loading profile picture...</p>
+			{:then profilePicResolved}
+				<div class="flex flex-col items-center">
+					<h4 class="text-lg text-surface-900 col-span-3 dark:text-surface-50">
+						Profile Picture
+					</h4>
+					<img src={URL.createObjectURL(profilePicResolved)}
+						 class="w-32 h-32 rounded-full" alt="profilePic">
+				</div>
+				<FileButton on:change={chosenPfpPromiseHandler} name="profilePic" accept="image/*"/>
+			{:catch error}
+				<p>Error while loading profile picture</p>
+			{/await}
 		</div>
-		<FileButton on:change={choosePfp} name="profilePic" accept="image/*"/>
-	</div>
+	{:else}
+		<div class="flex gap-8 items-center">
+			<div class="flex flex-col items-center">
+				<h4 class="text-lg text-surface-900 col-span-3 dark:text-surface-50">
+					Profile Picture
+				</h4>
+				<img src={defaultProfilePicturePath}
+					 class="w-32 h-32 rounded-full" alt="profilePic">
+			</div>
+			<FileButton on:change={chosenPfpPromiseHandler} name="profilePic" accept="image/*"/>
+		</div>
+	{/if}
 	<div>
 		<label for="firstName" class="text-surface-900 dark:text-surface-50">
 			First name
