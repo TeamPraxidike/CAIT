@@ -8,8 +8,6 @@
 
 	import {Autocomplete, type AutocompleteOption, popup} from "@skeletonlabs/skeleton";
 
-
-
 	const modalStore = getModalStore();
 
 	export let courses: Course[] = [];
@@ -36,7 +34,6 @@
 			value: course.id.toString()
 		};
 	});
-
 
 
 	function onCourseSelect(e: CustomEvent<CourseOption>): void {

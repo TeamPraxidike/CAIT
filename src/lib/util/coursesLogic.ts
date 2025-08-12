@@ -3,18 +3,18 @@ import type {User} from '$lib/database/user';
 
 export type UserWithProfilePic = User & { profilePicData: string | null};
 
-export function changeCourse(course: number | null, previousCourse: number | null, LOs: string[], PKs: string[] , courses: CourseWithMaintainersAndProfilePic[], maintainers: UserWithProfilePic[]){
+export function changeCourse(newCourse: number | null, currentCourse: number | null, LOs: string[], PKs: string[] , courses: CourseWithMaintainersAndProfilePic[], maintainers: UserWithProfilePic[]){
 	// Remove learning objectives and prerequisites that are a part of the previous course
-	const prevCourse = courses.find(c => c.id === previousCourse);
+	const prevCourse = courses.find(c => c.id === currentCourse);
 	LOs = LOs.filter(l => !prevCourse?.learningObjectives.includes(l));
 	PKs = PKs.filter(p => !prevCourse?.prerequisites.includes(p));
 	maintainers = maintainers.filter(m => !prevCourse?.maintainers.map(pm => pm.id).includes(m.id));
 
-	previousCourse = course;
+	currentCourse = newCourse;
 
 	// Add learning objectives, prerequisites, and maintainers from the newly selected course
 	for (let i = 0; i < courses.length; i++) {
-		if (courses[i].id === course) {
+		if (courses[i].id === newCourse) {
 			const lo = new Set(LOs);
 			const pk = new Set(PKs);
 			const mt = new Map(maintainers.map(m => [m.id, m]));
@@ -31,8 +31,7 @@ export function changeCourse(course: number | null, previousCourse: number | nul
 	}
 
 	return {
-		previousCourse,
-		course,
+		course: newCourse,
 		LOs,
 		PKs,
 		maintainers
