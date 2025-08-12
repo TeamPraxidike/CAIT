@@ -10,11 +10,15 @@
 
 	const modalStore = getModalStore();
 
-	export let courses: Course[] = [];
-	export let allCourses: Course[]	= [];
-	export let selectedCourseId: number | null = null;
+	export let courses: Course[] = []; // all courses by the user
+	export let allCourses: Course[]	= []; // all courses available in the system
+	export let selectedCourseId: number | null = null; // the id of the course that is selected
 
-	export let originalCourseIds = courses.map((c) => c.id);
+	export let originalCourseIds = courses.map(c => c.id);
+
+	console.log('Courses:', courses);
+	console.log('Original Course IDs:', originalCourseIds);
+	console.log('Mapped Course IDs:', courses.map(c => c.id));
 
 	let showMyCourses = false;
 
@@ -44,9 +48,14 @@
 
 	let previousCourseId: number | null = null;
 	$: if (selectedCourseId !== null) {
+		// If the selected course is not made by the user (i.e. not in the original course list),
+		// add it to the courses list so that it can be displayed in the UI.
 		if (!courses.some(course => course.id === selectedCourseId)) {
 			courses = [...courses, allCourses.find(course => course.id === selectedCourseId) as CourseWithMaintainersAndProfilePic];
 		}
+
+		// If there was a previous course selected and it is not in the original course list (i.e. it was added dynamically),
+		// remove it from the courses list.
 		if (previousCourseId !== null && !originalCourseIds.includes(previousCourseId)) {
 			courses = courses.filter(c => c.id !== previousCourseId);
 		}

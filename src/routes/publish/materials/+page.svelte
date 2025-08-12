@@ -67,6 +67,8 @@
 	let fileURLs: string[] = [] as string[];
 	let maintainers: UserWithProfilePic[] = [];
 	let courseMaintainers: UserWithProfilePic[] = [];
+	let originalCourseIds: number[] = data.courses.map(c => c.id);
+	let bannerFieldsList: string[];
 
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
@@ -212,7 +214,7 @@
 			classes: 'text-surface-900'
 		});
 		isSubmitting = false;
-	} else if (form?.status === 200 && form?.context === 'course-modal'){
+	} else if (form?.status === 200 && form?.context === 'course-form'){
 		console.log('Course modal submission successful:');
 		originalCourseIds = [...originalCourseIds, form?.id];
 		console.log(form?.id);
@@ -430,8 +432,7 @@
 	$: numMaterials = Math.max(fileURLs.length, files.length);
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
-	let originalCourseIds: number[] = [];
-	let bannerFieldsList: string[];
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
