@@ -12,8 +12,8 @@
 
 	const modalStore = getModalStore();
 
-	export let courses: CourseWithMaintainersAndProfilePic[] = [];
-	export let allCourses: CourseWithMaintainersAndProfilePic[]	= [];
+	export let courses: Course[] = [];
+	export let allCourses: Course[]	= [];
 	export let selectedCourseId: number | null = null;
 
 	export let originalCourseIds = courses.map((c) => c.id);
