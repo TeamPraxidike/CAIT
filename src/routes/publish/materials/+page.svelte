@@ -66,8 +66,11 @@
 	let files: FileList = [] as unknown as FileList;
 	let fileURLs: string[] = [] as string[];
 	let maintainers: UserWithProfilePic[] = [];
+	let courses = data.courses;
+	$: courses = courses;
+
 	let courseMaintainers: UserWithProfilePic[] = [];
-	let originalCourseIds: number[] = data.courses.map(c => c.id);
+	let originalCourseIds: number[] = courses.map(c => c.id);
 	let bannerFieldsList: string[];
 
 	let users: UserWithProfilePic[] = data.users;
@@ -105,7 +108,7 @@
 	$: if (course !== previousCourse) {
 		maintainers = [];
 		console.log("course changed");
-		({ course, LOs, PKs, maintainers } = changeCourse(course, previousCourse, LOs, PKs, data.courses, maintainers));
+		({ course, LOs, PKs, maintainers } = changeCourse(course, previousCourse, LOs, PKs, courses, maintainers));
 		previousCourse = course;
 	}
 
@@ -529,9 +532,13 @@
 						<label for="course">Course<span class="text-error-300">*</span></label>
 						<SelectCourse on:showCourseModal={openModal}
 									  bind:selectedCourseId={course}
-									  courses={data.courses}
+									  courses={courses}
 									  allCourses={data.allCourses}
 									  bind:originalCourseIds={originalCourseIds}
+									  on:courseDeleted={(event) => {
+										  courses = courses.filter(c => c.id !== event.detail.courseId);
+										  courses = [...courses];
+									  }}
 						/>
 					</div>
 				</div>

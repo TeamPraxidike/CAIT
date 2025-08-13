@@ -16,10 +16,6 @@
 
 	export let originalCourseIds = courses.map(c => c.id);
 
-	console.log('Courses:', courses);
-	console.log('Original Course IDs:', originalCourseIds);
-	console.log('Mapped Course IDs:', courses.map(c => c.id));
-
 	let showMyCourses = false;
 
 	let popupSettings: PopupSettings = {
@@ -68,12 +64,16 @@
 		response: async (r: boolean) => {
 			if (r) {
 				courses = courses.filter(c => c.id !== selectedCourseId);
+				dispatch('courseDeleted', { courseId: selectedCourseId }); // inform parent component, so that it can update the UI
+
 				await fetch(`/api/course/${selectedCourseId}`, {
 					method: 'DELETE',
 					headers: {
 						'Content-Type': 'application/json'
 					}
 				});
+
+				selectedCourseId = null;
 			}
 		}
 	};
