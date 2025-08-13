@@ -217,11 +217,16 @@
 			classes: 'text-surface-900'
 		});
 		isSubmitting = false;
-	} else if (form?.status === 200 && form?.context === 'course-form'){
-		console.log('Course modal submission successful:');
-		originalCourseIds = [...originalCourseIds, form?.id];
-		console.log(form?.id);
-		console.log("added new course");
+	} else if (form !== null && form.status === 200 && form.context === 'course-form'){
+		originalCourseIds = [...originalCourseIds, form.id];
+
+		// This is necessary since when the course is created, the reactivity triggers the form to resubmit again
+		// not sure why, but this makes sure that we dont get into an infinte loop
+		// I dont think it is a problem otherwise, as far as I checked there are no duplicates in the database
+		if (!courses.some(course => course.id === form.course.id)) {
+			courses.push(form.course);
+			courses = courses;
+		}
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
