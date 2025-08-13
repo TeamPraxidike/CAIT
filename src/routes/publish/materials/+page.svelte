@@ -238,7 +238,7 @@
 
 		const { data: { session } } = await supabaseClient.auth.getSession()
 
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			const upload = new tus.Upload(file, {
 				// Supabase TUS endpoint (with direct storage hostname)
 				endpoint: `${supabaseURL}/storage/v1/upload/resumable`,
@@ -255,7 +255,7 @@
 					bucketName: bucketName,
 					objectName: fileName,
 					contentType: contentType,
-					cacheControl: 3600,
+					cacheControl: "3600",
 				},
 				chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
 				onError: function (error) {
@@ -670,7 +670,7 @@
 		{#if isSubmitting}
 			<div class="col-span-full relative w-full">
 				<div class="absolute right-0 -top-[50px] z-10 bg-white pr-8 pl-20 py-3">
-					<ProgressRadial font="12" width="w-10"/>
+					<ProgressRadial font={12} width="w-10"/>
 				</div>
 			</div>
 		{/if}
