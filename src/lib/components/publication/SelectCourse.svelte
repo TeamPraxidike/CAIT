@@ -8,7 +8,7 @@
 
 	import {Autocomplete, type AutocompleteOption, popup} from "@skeletonlabs/skeleton";
 
-	const modalStore = getModalStore();
+
 
 	export let courses: Course[] = []; // all courses by the user
 	export let allCourses: Course[]	= []; // all courses available in the system
@@ -57,32 +57,16 @@
 		}
 	}
 
-	const modal: ModalSettings = {
-		type: 'confirm',
-		title: 'Are you sure you want to delete this course?',
-		body: 'It will be removed from all publications that are associated with it. Their metadata will remain the same.',
-		response: async (r: boolean) => {
-			if (r) {
-				const id = modal.meta.courseId;
-				courses = courses.filter(c => c.id !== id);
-				dispatch('courseDeleted', { courseId: id }); // inform parent component, so that it can update the UI
-
-				await fetch(`/api/course/${id}`, {
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				});
-
-				if (id === selectedCourseId) {
-					selectedCourseId = null;
-				}
-			}
-		}
-	};
-
-
 	let showModal = false;
+
+	function handleDeletion(e: CustomEvent<{ courseId: number }>) {
+		const courseId = e.detail.courseId;
+		courses = courses.filter(c => c.id !== courseId);
+		if (selectedCourseId === courseId) {
+			selectedCourseId = null;
+		}
+		dispatch('courseDeleted', { courseId });
+	}
 
 	const openNewCourseModal = () => {
 		showModal = true;
@@ -112,16 +96,14 @@
 						bind:course
 						bind:selectedCourseId
 						bind:previousCourseId
-						modalStore={modalStore}
-						modal={modal} />
+						on:courseDeleted={handleDeletion}/>
 				{:else}
 					<CourseButton
 						bind:course
 						bind:selectedCourseId
 						bind:previousCourseId
-						modalStore={modalStore}
-						modal={modal}
-						canDelete={false}/>
+						canDelete={false}
+						on:courseDeleted={handleDeletion}/>
 				{/if}
 				{#if course !== courses[courses.length - 1]}
 					<div class="w-px h-5 bg-gray-300 self-center"></div>

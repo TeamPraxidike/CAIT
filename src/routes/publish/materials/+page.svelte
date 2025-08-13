@@ -108,8 +108,9 @@
 	$: if (course !== previousCourse) {
 		maintainers = [];
 		console.log("course changed");
-		({ course, LOs, PKs, maintainers } = changeCourse(course, previousCourse, LOs, PKs, courses, maintainers));
 		previousCourse = course;
+		({ course, LOs, PKs, maintainers } = changeCourse(course, previousCourse, LOs, PKs, courses, maintainers));
+		console.log("course is now ", course);
 	}
 
 
@@ -227,6 +228,8 @@
 			courses.push(form.course);
 			courses = courses;
 		}
+		console.log(form);
+		console.log("Courses are ", courses);
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -503,8 +506,7 @@
 					formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 					formData.append('course', course ? course.toString() : 'null');
-				  }}
-			  use:handleInputEnter >
+				  }} >
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					 buttonNext="btn dark:bg-surface-200"
 					 buttonCompleteLabel="Complete"
