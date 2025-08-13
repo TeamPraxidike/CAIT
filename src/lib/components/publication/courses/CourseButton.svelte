@@ -28,7 +28,13 @@
 			type="button"
 			class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs cursor-pointer"
 			aria-label="Delete course"
-			on:click={() => modalStore.trigger(modal)}
+			on:click={() => {
+				// pass along which course to delete
+				modal.meta = {
+					courseId: course.id
+				};
+				modalStore.trigger(modal)
+			}}
 		>
 			x
 		</button>

@@ -63,17 +63,20 @@
 		body: 'It will be removed from all publications that are associated with it. Their metadata will remain the same.',
 		response: async (r: boolean) => {
 			if (r) {
-				courses = courses.filter(c => c.id !== selectedCourseId);
-				dispatch('courseDeleted', { courseId: selectedCourseId }); // inform parent component, so that it can update the UI
+				const id = modal.meta.courseId;
+				courses = courses.filter(c => c.id !== id);
+				dispatch('courseDeleted', { courseId: id }); // inform parent component, so that it can update the UI
 
-				await fetch(`/api/course/${selectedCourseId}`, {
+				await fetch(`/api/course/${id}`, {
 					method: 'DELETE',
 					headers: {
 						'Content-Type': 'application/json'
 					}
 				});
 
-				selectedCourseId = null;
+				if (id === selectedCourseId) {
+					selectedCourseId = null;
+				}
 			}
 		}
 	};
