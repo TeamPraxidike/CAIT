@@ -20,6 +20,11 @@
 
 	let showMyCourses = false;
 
+    // Show up to 10 courses; if more, show a "+N more…" chip at the end
+    let maxVisible = 7;
+    $: visibleCourses = Array.isArray(courses) ? courses.slice(0, maxVisible) : [];
+    $: hiddenCount = Array.isArray(courses) ? Math.max(0, courses.length - maxVisible) : 0;
+
 	let popupSettings: PopupSettings = {
 		event: 'focus-click',
 		target: 'popupAutocomplete',
@@ -96,7 +101,7 @@
 
 	<div class="flex flex-wrap gap-2">
 		{#if Array.isArray(courses) && courses.length > 0}
-			{#each courses as course}
+			{#each visibleCourses as course, idx}
 				{#if originalCourseIds.includes(course.id)}
 					<CourseButton
 						bind:course
@@ -113,10 +118,19 @@
 						modal={modal}
 						canDelete={false}/>
 				{/if}
-				{#if course !== courses[courses.length - 1]}
+				{#if idx !== visibleCourses.length - 1}
 					<div class="w-px h-5 bg-gray-300 self-center"></div>
 				{/if}
 			{/each}
+
+            {#if hiddenCount > 0}
+                {#if visibleCourses.length > 0}
+                    <div class="w-px h-5 bg-gray-300 self-center"></div>
+                {/if}
+                <span class="self-center inline-flex items-center px-2 py-1 text-sm font-medium bg-white text-gray-800 select-none cursor-default">
+                    +{hiddenCount} more…
+                </span>
+            {/if}
 		{:else}
 			<p></p>
 		{/if}
@@ -131,7 +145,7 @@
 			<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"
 					on:click={() => openNewCourseModal()}>
 				<Icon icon="mdi:plus-circle" width="32" height="32"
-					  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
+					  class="bg-surface-0 text-primary-600 hover:text-primary-500 dark:text-surface-100 dark:hover:text-primary-600" />
 			</button>
 		{/if}
 	</div>

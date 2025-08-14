@@ -134,7 +134,7 @@
                         chips="items-center gap-1 inline-flex rounded-lg py-1 px-2 whitespace-nowrap variant-soft-primary"
                         on:invalid={handleInvalid} class="dark:bg-transparent dark:border-surface-300 dark:text-surface-300 bg-transparent text-surface-800 border-surface-700"/>
         {/if}
-    <button type="button" class="w-full bg-primary-300 rounded-lg py-2 dark-primary-700 text-surface-50" on:click={createTag}>{buttonText}</button>
+    <button type="button" class="w-full py-2 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 dark:text-surface-50" on:click={createTag}>{buttonText}</button>
 
     <div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
         <Autocomplete bind:input={tagInput} options={flavorOptions} denylist={tags}

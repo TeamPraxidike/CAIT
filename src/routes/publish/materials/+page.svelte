@@ -487,9 +487,8 @@
 				  }}
 			  use:handleInputEnter>
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
-					 buttonNext="btn dark:bg-surface-200"
 					 buttonCompleteLabel="Complete"
-					 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
+					 buttonComplete="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600">
 				<Step locked={locks[0]}>
 					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 					<UploadFilesForm
@@ -510,7 +509,7 @@
 
 						<div class="flex flex-col gap-2">
 							<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
-								   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
+								   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 							<div class="flex flex-col gap-2">
 								<SelectType bind:selectedTypes={selectedTypes}/>
 								<hr class="m-2">
@@ -536,11 +535,11 @@
 							<div>
 								{#if coverPic}
 									<button on:click={() => coverPic = undefined} type="button"
-											class="mt-2 rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
+											class="mt-2 rounded-lg py-2 px-4 bg-surface-900 text-surface-50 dark:bg-surface-100 dark:text-surface-800 hover:bg-opacity-85">
 										Remove Cover Picture
 									</button>
 								{:else}
-									<FileButton button="mt-2 rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
+									<FileButton button="mt-2 rounded-lg py-2 px-4 bg-primary-600 text-white hover:bg-primary-500"
 												on:change={chooseCover} name="coverPhoto">
 										Upload Cover Picture
 									</FileButton>
@@ -560,7 +559,7 @@
 									class="text-tertiary-700"> Check here how this applies to you</a>):</label>
 								<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter}
 									   placeholder="Leave blank if material is your own"
-									   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
+									   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 							</div>
 						</div>
 						<div class="w-full">
@@ -575,7 +574,7 @@
 							</div>
 						</div>
 						<textarea name="description" placeholder="Additional Description..." bind:value={description}
-								  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
+								  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200 focus:border-primary-500 focus:ring-0" />
 					</div>
 				</Step>
 				<Step locked={isSubmitting}>
@@ -655,7 +654,7 @@
 		{#if isSubmitting}
 			<div class="col-span-full relative w-full">
 				<div class="absolute right-0 -top-[50px] z-10 bg-white pr-8 pl-20 py-3">
-					<ProgressRadial font="12" width="w-10"/>
+					<ProgressRadial font={12} width="w-10"/>
 				</div>
 			</div>
 		{/if}

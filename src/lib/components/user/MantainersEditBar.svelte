@@ -100,7 +100,7 @@
 
 		<button type="button" name="add_maintainer" use:popup={popupAdd} class="btn rounded-lg hover:bg-opacity-85 text-center" >
 			<Icon icon="mdi:plus-circle" width="32" height="32"
-						class="bg-surface-0 text-surface-800 hover:text-surface-600" />
+						class="bg-surface-0 text-primary-600 hover:text-primary-600 dark:text-surface-100 dark:hover:text-primary-600" />
 		</button>
 
 	</div>

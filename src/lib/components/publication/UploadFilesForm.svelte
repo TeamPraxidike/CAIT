@@ -198,13 +198,13 @@
 		<!-- URL Input + Button Row -->
 		<div class="mt-4 flex gap-4">
 			<div class="flex flex-col flex-1">
-				<label for="urlInput" class="mb-1 text-sm font-medium text-gray-700">Or enter a URL</label>
+				<label for="urlInput" class="mb-1 text-sm" style="font-size: 16px;">Or enter a URL</label>
 				<input
 					type="url"
 					id="urlInput"
 					name="url"
 					placeholder="https://example.com"
-					class="w-full px-4 py-3 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+					class="w-full px-4 py-3 border rounded-xl shadow-sm focus:border-primary-500 focus:ring-0 dark:focus:border-primary-500 dark:focus:ring-0"
 					bind:value = {fileURL}
 				/>
 			</div>
@@ -213,7 +213,7 @@
 				<button
 					on:click={appendFileURLtoList}
 					type="button"
-					class="px-6 py-3 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 text-lg"
+					class="px-6 py-3 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 text-lg dark:text-surface-50"
 				>
 					Upload
 				</button>

@@ -79,8 +79,8 @@
 
 		<div class="flex justify-end items-center pt-4">
 			<div class="flex gap-3">
-				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
-				<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition" on:click={close}>Cancel</button>
+				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition dark:text-surface-50">{isEdit ? 'Save' : 'Create'}</button>
+				<button type="button" class="bg-primary-600 hover:bg-primary-500 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition dark:text-surface-50" on:click={close}>Cancel</button>
 			</div>
 
 			{#if isEdit}
