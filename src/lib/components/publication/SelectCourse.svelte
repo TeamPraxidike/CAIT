@@ -1,14 +1,12 @@
 <script lang="ts">
 	import type { Course, CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
-	import { getModalStore, type ModalSettings, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { type PopupSettings } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import CourseButton from '$lib/components/publication/courses/CourseButton.svelte';
 	const dispatch = createEventDispatcher();
 
 	import {Autocomplete, type AutocompleteOption, popup} from "@skeletonlabs/skeleton";
-
-
 
 	export let courses: Course[] = []; // all courses by the user
 	export let allCourses: Course[]	= []; // all courses available in the system
