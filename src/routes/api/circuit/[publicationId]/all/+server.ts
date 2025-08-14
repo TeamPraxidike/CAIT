@@ -2,8 +2,6 @@ import { verifyAuth } from '$lib/database/auth';
 import {
 	coverPicFetcher,
 	fileSystem,
-	getAllCircuits,
-	getCircuitByPublicationId
 } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
 import { getCircuitsContainingPublication } from '$lib/database/circuit';

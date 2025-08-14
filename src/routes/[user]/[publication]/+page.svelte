@@ -24,7 +24,7 @@
         type ToastSettings
     } from '@skeletonlabs/skeleton';
     import {goto} from '$app/navigation';
-    import {createFileList, IconMapExtension, saveFile} from '$lib/util/file';
+    import { IconMapExtension, saveFile} from '$lib/util/file';
     import {
         type Comment as PrismaComment,
         type Difficulty,

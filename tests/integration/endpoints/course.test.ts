@@ -5,8 +5,8 @@ import { createUniqueUser } from '../../utility/users';
 import { publicationsWithCourses } from '../../utility/courses';
 import { getPublicationById } from '$lib/database';
 import {
-	type Course,
-	findCourseByName, getAllCourses
+	type Course, type CourseWithMaintainersAndProfilePic, findCourseByMantainerExtended,
+	findCourseByName, findCourseByNameExtended, getAllCourses, getAllCoursesExtended
 } from '$lib/database/courses';
 
 // await resetTagsTable();
@@ -91,3 +91,89 @@ describe('[DELETE] /api/course/[courseId]', () => {
 	});
 
 });
+
+describe('[GET] /api/course-extended/user/[id]', () => {
+	it('should fetch all courses for a user with maintainers including profilePicData', async () => {
+		const user = await createUniqueUser();
+		await createRandomCourse(user.id);
+
+		const response = await fetch(`${testingUrl}/course-extended/user/${user.id}`);
+		expect(response.status).toBe(200);
+
+		const data: CourseWithMaintainersAndProfilePic[] = await response.json();
+		expect(Array.isArray(data)).toBe(true);
+		data.forEach(course => {
+			expect(course.maintainers).toBeDefined();
+			course.maintainers.forEach(maintainer => {
+				expect(maintainer.profilePicData).toBeDefined();
+			});
+		});
+	});
+});
+
+describe('[GET] /api/course-extended', () => {
+	it('should fetch all extended courses with profilePicData', async () => {
+		const user = await createUniqueUser();
+		await createRandomCourse(user.id);
+
+		const response = await fetch(`${testingUrl}/course-extended`);
+		expect(response.status).toBe(200);
+
+		const data: CourseWithMaintainersAndProfilePic[] = await response.json();
+		expect(Array.isArray(data)).toBe(true);
+		data.forEach(course => {
+			expect(course.maintainers).toBeDefined();
+			course.maintainers.forEach(maintainer => {
+				expect(maintainer.profilePicData).toBeDefined();
+			});
+		});
+	});
+});
+
+describe('[SERVICE] Course enrichment functions', () => {
+	it('getAllCoursesExtended() returns courses with profilePicData on maintainers', async () => {
+		const user = await createUniqueUser();
+		await createRandomCourse(user.id);
+
+		const courses = await getAllCoursesExtended();
+		expect(Array.isArray(courses)).toBe(true);
+		expect(courses.length).toBeGreaterThan(0);
+
+		courses.forEach(course => {
+			expect(course.maintainers).toBeDefined();
+			course.maintainers.forEach(maintainer => {
+				expect(maintainer.profilePicData).toBeDefined();
+			});
+		});
+	});
+
+	it('findCourseByNameExtended() returns one course with maintainers containing profilePicData', async () => {
+		const user = await createUniqueUser();
+		const course = await createRandomCourse(user.id);
+
+		const found = await findCourseByNameExtended(course.courseName);
+		expect(found).toBeDefined();
+		expect(found?.courseName).toBe(course.courseName);
+
+		found?.maintainers.forEach(maintainer => {
+			expect(maintainer.profilePicData).toBeDefined();
+		});
+	});
+
+	it('findCourseByMantainerExtended() returns user courses with profilePicData', async () => {
+		const user = await createUniqueUser();
+		await createRandomCourse(user.id);
+
+		const courses = await findCourseByMantainerExtended(user.id);
+		expect(Array.isArray(courses)).toBe(true);
+		expect(courses.length).toBeGreaterThan(0);
+
+		courses.forEach(course => {
+			expect(course.maintainers).toBeDefined();
+			course.maintainers.forEach(maintainer => {
+				expect(maintainer.profilePicData).toBeDefined();
+			});
+		});
+	});
+});
+

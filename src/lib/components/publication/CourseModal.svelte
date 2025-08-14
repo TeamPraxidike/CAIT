@@ -8,8 +8,14 @@
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import CourseLevel from '$lib/components/publication/CourseLevel.svelte';
 	import type { Course } from '$lib/database/courses';
+	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 
 	export let close: () => void; // to close the modal
+	export let users: UserWithProfilePic[] = [];
+	export let additionalMaintainers: UserWithProfilePic[] = [];
+	export let searchableUsers = users;
+	export let publisher: UserWithProfilePic
+
 
 	export let existingCourse: Course | null;
 	export let onSuccess = () => {};
@@ -33,9 +39,13 @@
 	const handleInputEnter = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') event.preventDefault();
 	};
+	let form:HTMLFormElement
 
 
 	$: isFormValid = title.trim().length > 0 && level !== undefined && learningObjectives.length > 0;
+	// $: if ()
+
+
 
 </script>
 
@@ -43,17 +53,19 @@
 	<form
 		action="?/publishCourse"
 		method="POST"
+		bind:this={form}
 		enctype="multipart/form-data"
 		class="modal-form space-y-6"
 		use:enhance={({ formData }) => {
 			formData.append('title', title);
 			formData.append('learningObjectives', JSON.stringify(learningObjectives));
 			formData.append('prerequisites', JSON.stringify(prerequisites));
-			formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
+			formData.append('maintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
 			formData.append('level', level);
 			formData.append('context', 'course-form')
 
 			close();
+
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
 
@@ -75,7 +87,10 @@
 		<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
 
 		<CourseLevel bind:label={level} />
+		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
+						   bind:additionalMaintainers={additionalMaintainers} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />
+
 
 		<div class="flex justify-end items-center pt-4">
 			<div class="flex gap-3">

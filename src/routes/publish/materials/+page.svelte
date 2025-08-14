@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import {
-		DifficultySelection,
 		FileTable,
 		MaterialTypes,
 		Meta,
 		Tag,
-		TheoryAppBar, UserProp
+		UserProp
 	} from '$lib';
 	import { FileButton, getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
-	import type {  Difficulty, Tag as PrismaTag, User } from '@prisma/client';
+	import type {  Difficulty, Tag as PrismaTag } from '@prisma/client';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
@@ -19,6 +18,7 @@
 	import SelectType from '$lib/components/publication/SelectType.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
+	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	import {
 		clearFiles,
@@ -65,8 +65,13 @@
 
 	let files: FileList = [] as unknown as FileList;
 	let fileURLs: string[] = [] as string[];
-	type UserWithProfilePic = User & { profilePicData: string };
 	let maintainers: UserWithProfilePic[] = [];
+	let courses = data.courses;
+	$: courses = courses;
+
+	let courseMaintainers: UserWithProfilePic[] = [];
+	let originalCourseIds: number[] = courses.map(c => c.id);
+	let bannerFieldsList: string[];
 
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
@@ -101,7 +106,14 @@
 
 	let previousCourse: number | null = null;
 	$: if (course !== previousCourse) {
-		({ course, previousCourse, LOs, PKs } = changeCourse(course, previousCourse, LOs, PKs, data.courses));
+		maintainers = [];
+		const prev_temp = previousCourse;
+		previousCourse = course;
+		const result = changeCourse(course, prev_temp, LOs, PKs, courses, maintainers);
+		course = result.course;
+		LOs = result.LOs;
+		PKs = result.PKs;
+		maintainers = result.maintainers;
 	}
 
 
@@ -165,6 +177,7 @@
 	// otherwise, for example, any Course related form events get mistaken for
 	// events from the main form
 	$: if (form?.status === 200 && form?.context === 'publication-form') {
+		console.log('Form submission successful:');
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
 		}
@@ -175,13 +188,12 @@
 			clearMaterialSnapshot(),
 			deleteAllFileTUSMetadata()
 		]).then(async () => {
-
 			showAnimation = true;
-
 		}).catch(error => {
 			console.error('Error clearing data:', error);
 		});
 	} else if (form?.status === 400 && form?.context === 'publication-form') {
+		console.log('Form submission failed with status 400:');
 		if (!allUploadsDone(fileTUSMetadata, files)){
 			toastStore.trigger({
 				message: 'Some files are still being uploaded',
@@ -198,16 +210,22 @@
 
 		isSubmitting = false;
 	} else if (form?.status === 418) {
+		console.log("error 418 ");
 		isSubmitting = false;
 		showAnimation = false;
 	} else if (form?.status === 500 && form?.context === 'publication-form') {
+		console.log('Form submission failed with status 500:');
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
 			background: 'bg-error-200',
 			classes: 'text-surface-900'
 		});
-
 		isSubmitting = false;
+	} else if (form?.status == 200 && form?.context === 'course-form') {
+		originalCourseIds = [...originalCourseIds, form.course.id];
+		courses.push(form?.course);
+		courses = courses;
+		form = { ...form, context: "undefined" };
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -227,7 +245,7 @@
 
 		const { data: { session } } = await supabaseClient.auth.getSession()
 
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			const upload = new tus.Upload(file, {
 				// Supabase TUS endpoint (with direct storage hostname)
 				endpoint: `${supabaseURL}/storage/v1/upload/resumable`,
@@ -421,7 +439,7 @@
 	$: numMaterials = Math.max(fileURLs.length, files.length);
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
-	let bannerFieldsList;
+
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -473,7 +491,7 @@
 					formData.append('description', description);
 					formData.append('type', JSON.stringify(selectedTypes));
 					formData.append('difficulty', difficulty);
-					formData.append('estimate', estimate);
+					formData.append('estimate', JSON.stringify(estimate));
 					formData.append('copyright', copyright);
 					formData.append('tags', JSON.stringify(tags));
 					formData.append('maintainers', JSON.stringify(maintainers.map(m => m.id)));
@@ -484,8 +502,7 @@
 					formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 					formData.append('course', course ? course.toString() : 'null');
-				  }}
-			  use:handleInputEnter>
+				  }} >
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					 buttonCompleteLabel="Complete"
 					 buttonComplete="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600">
@@ -507,18 +524,26 @@
 						<label for="coverPic">Cover Picture (Max. size: 2MB)</label>
 
 
-						<div class="flex flex-col gap-2">
-							<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
-								   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
-							<div class="flex flex-col gap-2">
-								<SelectType bind:selectedTypes={selectedTypes}/>
-								<hr class="m-2">
-								<SelectCourse on:showCourseModal={openModal}
-											  bind:selectedCourseId={course}
-											  courses={data.courses}
-											  allCourses={data.allCourses}/>
-							</div>
-						</div>
+				<div class="flex flex-col gap-2">
+					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
+						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
+					<div class="flex flex-col gap-2">
+						<label for="content">Content<span class="text-error-300">*</span></label>
+						<SelectType bind:selectedTypes={selectedTypes}/>
+						<hr class="m-2">
+						<label for="course">Course<span class="text-error-300">*</span></label>
+						<SelectCourse on:showCourseModal={openModal}
+									  bind:selectedCourseId={course}
+									  courses={courses}
+									  allCourses={data.allCourses}
+									  bind:originalCourseIds={originalCourseIds}
+									  on:courseDeleted={(event) => {
+										  courses = courses.filter(c => c.id !== event.detail.courseId);
+										  courses = [...courses];
+									  }}
+						/>
+					</div>
+				</div>
 
 						<div>
 							<div class="flex flex-col gap-2 min-h-56 bg-surface-200
@@ -813,6 +838,7 @@
 </style>
 
 {#if showModal}
-	<CourseModal existingCourse={null} close={closeModal} />
+	<CourseModal existingCourse={null} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
+				 bind:additionalMaintainers={courseMaintainers}/>
 {/if}
 

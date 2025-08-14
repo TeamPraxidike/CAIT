@@ -1,6 +1,8 @@
 
 import { type Level, Prisma, type PrismaClient } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
+import type { UserWithProfilePic } from '$lib/util/coursesLogic';
+import { profilePicFetcher } from '$lib/database/file';
 
 export type createCourseData = {
 	learningObjectives: string[];
@@ -8,9 +10,42 @@ export type createCourseData = {
 	educationalLevel: Level;
 	courseName: string;
 	creatorId: string;
+	maintainers: string[];
 }
 
+export type CourseWithMaintainersAndProfilePic = Course & {
+	maintainers: UserWithProfilePic[];
+};
+
 export type Course = Prisma.CourseGetPayload<true>;
+
+
+async function enrichMaintainers(course: Course & { maintainers: any[] }): Promise<CourseWithMaintainersAndProfilePic> {
+	const enrichedMaintainers: UserWithProfilePic[] = await Promise.all(
+		course.maintainers.map(async (user) => ({
+			...user,
+			profilePicData: (await profilePicFetcher(user.profilePic)).data,
+		}))
+	);
+
+	return {
+		...course,
+		maintainers: enrichedMaintainers,
+	};
+}
+
+export async function getAllCoursesExtended(): Promise<CourseWithMaintainersAndProfilePic[]> {
+	const courses = await prisma.course.findMany({
+		include: {
+			maintainers: {
+				include: { profilePic: true }
+			}
+		}
+	});
+
+	return Promise.all(courses.map(enrichMaintainers));
+}
+
 
 export async function createCourse(course: createCourseData): Promise<Course> {
 	return prisma.course.create({
@@ -20,35 +55,47 @@ export async function createCourse(course: createCourseData): Promise<Course> {
 			educationalLevel: course.educationalLevel,
 			courseName: course.courseName,
 			maintainers: {
-				connect: [{ id: course.creatorId }]
+				connect: [{ id: course.creatorId }, ...course.maintainers.map(x => ({ id: x }))]
 			}
 		}
 	});
 }
 
-export async function findCourseByName(courseName: string): Promise<Course> {
-	return prisma.course.findFirst({
-		where: {
-			courseName: courseName
+export async function findCourseByNameExtended(courseName: string): Promise<CourseWithMaintainersAndProfilePic | null> {
+	const course = await prisma.course.findFirst({
+		where: { courseName },
+		include: {
+			maintainers: {
+				include: { profilePic: true }
+			}
 		}
 	});
+
+	if (!course) return null;
+	return enrichMaintainers(course);
 }
 
-export async function findCourseByMantainer(userId: string): Promise<Course[]> {
-	return prisma.course.findMany({
+
+export async function findCourseByMantainerExtended(userId: string): Promise<CourseWithMaintainersAndProfilePic[]> {
+	const courses = await prisma.course.findMany({
 		where: {
 			maintainers: {
-				some: {
-					id: userId
-				}
+				some: { id: userId }
+			}
+		},
+		include: {
+			maintainers: {
+				include: { profilePic: true }
 			}
 		}
 	});
+
+	return Promise.all(courses.map(enrichMaintainers));
 }
 
-export async function getAllCourses(): Promise<Course[]> {
-	return prisma.course.findMany();
-}
+// export async function getAllCourses(): Promise<Course[]> {
+// 	return prisma.course.findMany();
+// }
 
 export async function linkCourseToPublication(publicationId: number, courseId: number, prismaTransaction: Prisma.TransactionClient = prisma) {
 	if (!courseId) return;
@@ -103,3 +150,28 @@ export async function deleteCourse(courseId: number): Promise<Course> {
 		});
 	});
 }
+
+export async function findCourseByName(courseName: string): Promise<Course> {
+	return prisma.course.findFirst({
+		where: {
+			courseName: courseName
+		}
+	});
+}
+
+export async function findCourseByMantainer(userId: string): Promise<Course[]> {
+	return prisma.course.findMany({
+		where: {
+			maintainers: {
+				some: {
+					id: userId
+				}
+			}
+		}
+	});
+}
+
+export async function getAllCourses(): Promise<Course[]> {
+	return prisma.course.findMany();
+}
+

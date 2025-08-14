@@ -27,7 +27,8 @@ export async function POST({ request, locals }) {
 			prerequisites: body.prerequisites,
 			educationalLevel: body.educationalLevel,
 			courseName: body.courseName,
-			creatorId: body.userId
+			creatorId: body.userId,
+			maintainers: body.maintainers,
 		};
 
 		if (await findCourseByName(body.courseName) !== null) {

@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { coverPicFetcher, fileSystem } from '$lib/database';
+import { coverPicFetcher } from '$lib/database';
 import { getAllPublications, type PublicationGet } from '$lib/database/db';
 import { PublicationType } from '@prisma/client';
 import { profilePicFetcher } from '$lib/database/file';

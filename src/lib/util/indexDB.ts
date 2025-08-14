@@ -1,7 +1,6 @@
 import { openDB } from 'idb';
-import type { Difficulty, User } from '@prisma/client';
+import type { Difficulty } from '@prisma/client';
 import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
-import { CircuitComponent } from '$lib';
 
 const DB_NAME = 'FileStorage';
 const DB_VERSION = 3;
@@ -10,8 +9,9 @@ const FILES_STORE = 'files';
 const FILES_TUS_STORE = 'tus'
 const MATERIAL_METADATA_STORE = 'material_metadata_snapshots';
 const CIRCUIT_METADATA_STORE = 'circuit_metadata_snapshots';
+import  { type UserWithProfilePic } from '$lib/util/coursesLogic';
 
-type UserWithProfilePic = User & { profilePicData: string };
+// type UserWithProfilePic = User & { profilePicData: string };
 
 export type FileTUSMetadata = {
 	originalName: string
@@ -117,7 +117,7 @@ export async function deleteAllFileTUSMetadata() {
 
 // Save snapshot
 export async function saveMaterialSnapshot(snapshotData: FormSnapshot) {
-	console.log("SAVING SNAPSHOT")
+	// console.log("SAVING SNAPSHOT")
 	// console.log(snapshotData);
 	const db = await initDB();
 	await db.put(MATERIAL_METADATA_STORE, snapshotData, 'myFormSnapshot');

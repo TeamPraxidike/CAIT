@@ -2,9 +2,8 @@
 	import { MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
-	import type { Circuit, Material, Publication, User } from '@prisma/client';
+	import type { Publication, User } from '@prisma/client';
 	import { onMount } from 'svelte';
-	import { getExtensions } from '$lib/util/file';
 	import { type PaginationSettings, Paginator, SlideToggle } from '@skeletonlabs/skeleton';
 	import DropdownSelect from '$lib/components/designSystem/DropdownSelect.svelte';
 	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';
@@ -338,7 +337,7 @@
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
 
 	{#if pageType !== "people"}
-		<DropdownSelect title="Difficulty" multiselect={true} options={diffOptions}
+		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}
 						bind:selected={selectedDiff} on:select={() => searchActive = true}
 						disabled={isSemanticActive}/>
 		<DropdownSelect title="Tags" multiselect={true} options={tags.map(x => x.content)}
@@ -352,7 +351,7 @@
 	{/if}
 
 	{#if pageType === 'materials'}
-		<DropdownSelect title="Types" multiselect={true} options={allTypes}
+		<DropdownSelect title="Content" multiselect={true} options={allTypes}
 						bind:selected={selectedTypes} on:select={() => searchActive = true}
 						disabled={isSemanticActive}/>
 	{/if}

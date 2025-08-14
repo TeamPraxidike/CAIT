@@ -1,6 +1,5 @@
 <script lang="ts">
 import Icon from '@iconify/svelte';
-import { fade } from 'svelte/transition';
 
 type Metadata = {
 	title?: string;
@@ -32,7 +31,8 @@ $: fieldsList = [
 		!hasTags && 'Tags',
 		!hasLOs && 'Learning Objectives',
 		materialType.length <= 0 && 'Material Type'
-	].filter(Boolean).join(', ');
+	].filter(Boolean);
+
 
 $: show = true;
 </script>
@@ -43,7 +43,7 @@ $: show = true;
 			<Icon icon="mdi:warning-outline" class="w-5 h-5 mt-0.5 text-yellow-600" />
 			<div class="flex-1">
 				<p class="font-medium">This material will be saved as a draft.</p>
-				<p class="mt-1 text-sm">Complete the following to publish: <span class="font-semibold">{fieldsList}</span></p>
+				<p class="mt-1 text-sm">Complete the following to publish: <span class="font-semibold">{fieldsList.join(', ')}</span></p>
 			</div>
 		</div>
 		<button on:click={() => show = false} class="text-yellow-700 hover:text-yellow-900 transition px-3">

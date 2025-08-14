@@ -4,6 +4,7 @@
 	import type { User } from '@prisma/client';
 	import { page } from '$app/stores';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	let userName: HTMLInputElement;
 	export let users: UserWithProfilePic[] = [];
@@ -11,10 +12,10 @@
 	export let searchableUsers = users;
 	let display = 'hidden';
 	let uid = $page.data.session?.user.id || 0;
-	type UserWithProfilePic = User & { profilePicData: string | null};
 	export let publisher: UserWithProfilePic
-	
+
 	// todo: ask bobby and remove if unnecessary.
+	// note: I am Bobi, I was not asked but it is ok
 	// let p = $page.data.session?.user as User & {profilePic: string};
 	// let publisher = {
 	// 	id: p.id,
@@ -90,12 +91,14 @@
 </script>
 
 <div class="flex flex-col gap-2 w-full p-3">
-	<span>Maintainers:</span>
+	<span>Maintainers<span class="text-error-300">*</span>:</span>
 	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
 		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={publisher.profilePicData}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
+			{#if maintainer.id !== publisher.id}
 			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
 								role="Maintainer" userPhotoUrl={maintainer.profilePicData} />
+				{/if}
 		{/each}
 
 		<button type="button" name="add_maintainer" use:popup={popupAdd} class="btn rounded-lg hover:bg-opacity-85 text-center" >
