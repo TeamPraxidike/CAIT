@@ -10,8 +10,6 @@ export function changeCourse(newCourse: number | null, currentCourse: number | n
 	PKs = PKs.filter(p => !prevCourse?.prerequisites.includes(p));
 	maintainers = maintainers.filter(m => !prevCourse?.maintainers.map(pm => pm.id).includes(m.id));
 
-	currentCourse = newCourse;
-
 	// Add learning objectives, prerequisites, and maintainers from the newly selected course
 	for (let i = 0; i < courses.length; i++) {
 		if (courses[i].id === newCourse) {
@@ -20,12 +18,21 @@ export function changeCourse(newCourse: number | null, currentCourse: number | n
 			const mt = new Map(maintainers.map(m => [m.id, m]));
 
 			courses[i].learningObjectives.forEach(obj => lo.add(obj));
+
 			courses[i].prerequisites.forEach(obj => pk.add(obj));
-			courses[i].maintainers.forEach(m => mt.set(m.id, m));
+
+			if (courses[i].maintainers) {
+				courses[i].maintainers.forEach(m => {
+					if (m && m.id) {
+						mt.set(m.id, m);
+					}
+				});
+			}
 
 			LOs = Array.from(lo);
 			PKs = Array.from(pk);
 			maintainers = Array.from(new Set(mt.values()));
+
 			break;
 		}
 	}

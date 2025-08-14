@@ -107,10 +107,13 @@
 	let previousCourse: number | null = null;
 	$: if (course !== previousCourse) {
 		maintainers = [];
-		console.log("course changed");
+		const prev_temp = previousCourse;
 		previousCourse = course;
-		({ course, LOs, PKs, maintainers } = changeCourse(course, previousCourse, LOs, PKs, courses, maintainers));
-		console.log("course is now ", course);
+		const result = changeCourse(course, prev_temp, LOs, PKs, courses, maintainers);
+		course = result.course;
+		LOs = result.LOs;
+		PKs = result.PKs;
+		maintainers = result.maintainers;
 	}
 
 
@@ -218,18 +221,11 @@
 			classes: 'text-surface-900'
 		});
 		isSubmitting = false;
-	} else if (form !== null && form.status === 200 && form.context === 'course-form'){
-		originalCourseIds = [...originalCourseIds, form.id];
-
-		// This is necessary since when the course is created, the reactivity triggers the form to resubmit again
-		// not sure why, but this makes sure that we dont get into an infinte loop
-		// I dont think it is a problem otherwise, as far as I checked there are no duplicates in the database
-		if (!courses.some(course => course.id === form.course.id)) {
-			courses.push(form.course);
-			courses = courses;
-		}
-		console.log(form);
-		console.log("Courses are ", courses);
+	} else if (form?.status == 200 && form?.context === 'course-form') {
+		originalCourseIds = [...originalCourseIds, form.course.id];
+		courses.push(form?.course);
+		courses = courses;
+		form = { ...form, context: "undefined" };
 	}
 
 	const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -844,6 +840,6 @@
 
 {#if showModal}
 	<CourseModal existingCourse={null} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-				 bind:additionalMaintainers={courseMaintainers} />
+				 bind:additionalMaintainers={courseMaintainers}/>
 {/if}
 

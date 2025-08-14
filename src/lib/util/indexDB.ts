@@ -117,7 +117,7 @@ export async function deleteAllFileTUSMetadata() {
 
 // Save snapshot
 export async function saveMaterialSnapshot(snapshotData: FormSnapshot) {
-	console.log("SAVING SNAPSHOT")
+	// console.log("SAVING SNAPSHOT")
 	// console.log(snapshotData);
 	const db = await initDB();
 	await db.put(MATERIAL_METADATA_STORE, snapshotData, 'myFormSnapshot');
