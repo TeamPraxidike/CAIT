@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { Meta, Section } from '$lib';
-	const initiative = 'This initiative was started by the ML teacher community at TU Delft in their attempt to increase collaboration between different lecturers in their preparation for their courses. This platform was developed to facilitate sharing machine learning education materials between TU Delft teachers. We are looking for feedback to improve this platform and make it useful for you!';
-
+	import { Meta } from '$lib';
 </script>
 
 <Meta title="About" description="CAIT" type="site" />
@@ -9,7 +7,7 @@
 
 <section class="col-span-full" aria-label="About me page heading">
 	<h1 class="font-extrabold lg:font-bold md:text-2xl lg:text-3xl xl:text-4xl mt-20">About</h1>
-	<h2>Community for AI Teachers: Contribute and search for lecture materials, assignments, exam questions and more!</h2>
+<!--	<h2>Community for AI Teachers: Contribute and search for lecture materials, assignments, exam questions and more!</h2>-->
 </section>
 
 <main class="col-span-full flex flex-col gap-10 mb-20">
