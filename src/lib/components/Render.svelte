@@ -160,6 +160,6 @@
 			<span class="text-surface-600">Size: {formatFileSize(file.size)}</span>
 		{/if}
 		<button type="button" on:click={closeModal} class="btn rounded-lg variant-soft-surface">Close</button>
-		<Download {file} className="btn rounded-lg bg-surface-600 text-surface-50">Download</Download>
+		<Download file={file} fileFormat={fileFormat} className="btn rounded-lg bg-surface-600 text-surface-50">Download</Download>
 	</div>
 </div>
