@@ -1,5 +1,12 @@
 <script lang="ts">
 	import { Meta, Section } from '$lib';
+
+	const repText = 'The reputation system in the platform is based on the quantity and quality of the publications a user publishes.' +
+		' It reflects on the activity of the user and how others rate their publications and comments.It is directly proportional ' +
+		'to the number of publications, comments made and stars a user has received. If another user saves or indicates that they ' +
+		'use your publication, this will be reflected in an increase of your reputation.'
+	const matDescription = 'The smallest and most common unit of publication on the platform represents a collection of files, which are described by the users with metadata such as title, publication, difficulty and tags. One such collection can include files of a variety of types (PDF, Python notebook and more).';
+	const circuitDescription = 'The circuit is a type of publication, where you can organize and define connections between multiple publications. In a circuit, you can add a materials publication that was described above or another circuit in a node. These nodes can be connected with directed edges which represent the suggested order of examining the publications.';
 </script>
 
 <Meta title="Home" description="CAIT" type="site" />
@@ -34,9 +41,7 @@
 </section>
 
 <main class="col-span-full flex flex-col gap-10 my-20">
-	<Section title="Materials" description={'Learn more about the content you can find on this platform'}
-			 subtitle="What you can expect to find" img='/images/home/materials.svg' />
-	<Section title="Circuits"
-			 description={'Learn more about how to organize publications and give an order to them in a circuit'}
-			 subtitle="Define your learning workflow" img='/images/home/circuit.png' />
+	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publicationCard.png" mdFlex="md:flex-row-reverse" iconList={true}/>
+	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/images/about/circuit.png"/>
+	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} img="/images/about/reputation.png" mdFlex="md:flex-row-reverse"/>
 </main>
