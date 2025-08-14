@@ -6,19 +6,19 @@ ALTER TABLE "Publication" ADD COLUMN     "courseId" INTEGER;
 
 -- CreateTable
 CREATE TABLE "Course" (
-    "id" SERIAL NOT NULL,
-    "learningObjectives" TEXT[],
-    "prerequisites" TEXT[],
-    "educationalLevel" "Level" NOT NULL,
-    "courseName" TEXT NOT NULL,
+                          "id" SERIAL NOT NULL,
+                          "learningObjectives" TEXT[],
+                          "prerequisites" TEXT[],
+                          "educationalLevel" "Level" NOT NULL,
+                          "courseName" TEXT NOT NULL,
 
-    CONSTRAINT "Course_pkey" PRIMARY KEY ("id")
+                          CONSTRAINT "Course_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "_CourseInstructors" (
-    "A" INTEGER NOT NULL,
-    "B" UUID NOT NULL
+                                      "A" INTEGER NOT NULL,
+                                      "B" UUID NOT NULL
 );
 
 -- CreateIndex

@@ -1,7 +1,7 @@
 import { createUser, prisma, type UserCreateForm } from '$lib/database';
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 import type { PrismaClient } from '@prisma/client';
-import type { UserPosts, User } from '$lib/database/user';
+import type { User } from '$lib/database/user';
 
 /**
  * Create a new user

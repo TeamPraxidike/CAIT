@@ -5,7 +5,7 @@ import {
 	type FetchedFileItem,
 	type MaterialForm, type UploadMaterialFileFormat
 } from '$lib/database';
-import type { Difficulty, MaterialType, Tag } from '@prisma/client';
+import type { Difficulty, Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import type { Course } from '$lib/database/courses';
 import { env } from '$env/dynamic/public';

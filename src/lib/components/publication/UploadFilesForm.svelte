@@ -5,11 +5,9 @@
 	import {
 		deleteFileTUSMetadata,
 		type FileTUSMetadata,
-		getFileTUSMetadata,
 		saveFiles,
 		saveFileTUSMetadata
 	} from '$lib/util/indexDB';
-	import { onMount } from 'svelte';
 
 	export let fileURLs: string[] = [];
 	export let files: FileList = [] as unknown as FileList;

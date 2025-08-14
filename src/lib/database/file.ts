@@ -9,7 +9,6 @@ import type { File as PrismaFile, FileChunk } from '@prisma/client';
 import path from 'path';
 import type { FileChunks } from '$lib/PiscinaUtils/runner';
 import { addFileURL } from '$lib/database/fileURL';
-import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
 import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 
 

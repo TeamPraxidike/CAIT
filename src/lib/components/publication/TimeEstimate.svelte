@@ -2,6 +2,8 @@
 	export let totalMinutes = 0;
 	let interval: NodeJS.Timeout;
 
+	let editTimer = false;
+
 	function formatTime(minutes: number) {
 		const hrs = Math.floor(minutes / 60);
 		const mins = minutes % 60;
@@ -18,6 +20,7 @@
 		let dec = 30;
 		if (totalMinutes >= 120) dec = 60;
 		if (totalMinutes >= 30) totalMinutes -= dec;
+		else totalMinutes = 0;
 	}
 
 	function startHold(action: () => void) {
@@ -41,9 +44,27 @@
 			class="text-xl px-3 py-1 rounded bg-white shadow hover:bg-gray-200"
 		>⬆</button>
 
-		<div class="text-lg font-semibold text-center min-w-[80px]">
-			{formatTime(totalMinutes)}
-		</div>
+		{#if editTimer}
+			<input
+				type="number"
+				min="0"
+				bind:value={totalMinutes}
+				class="text-lg font-semibold text-center max-w-[80px] border border-gray-300 rounded p-1"
+				on:blur={() => editTimer = false}
+				on:keydown={(e) => {
+					if (e.key === 'Enter') {
+						editTimer = false;
+					}
+				}}
+			/>
+		{:else}
+			<div class="text-lg font-semibold text-center min-w-[80px]"
+				 role="button"
+				 tabindex="0"
+				 on:dblclick={() => editTimer = !editTimer}>
+				{formatTime(totalMinutes)}
+			</div>
+		{/if}
 
 		<button
 			type="button"

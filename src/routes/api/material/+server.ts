@@ -17,9 +17,8 @@ import { mapToDifficulty, mapToType } from '$lib';
 
 import type { PrismaClient, Tag} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
-import type { MaterialWithPublication, MaterialWithPublicationNoFiles } from '$lib/database/material';
+import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { isMaterialValid } from '$lib/util/validatePublication';
-import { linkCourseToPublication } from '$lib/database/courses';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);

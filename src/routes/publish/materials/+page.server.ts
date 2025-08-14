@@ -1,19 +1,20 @@
 import type { Actions, PageServerLoad } from './$types';
 
 import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
-import { type Difficulty, type Tag } from '@prisma/client';;
-import type { Course } from '$lib/database/courses';
+import { type Difficulty, type Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
+import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
 import { env } from '$env/dynamic/public';
+
 
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
-	const allCourses: Course[] = await (await fetch(`/api/course`)).json();
+	const courses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended/user/${locals.user?.id}`)).json();
+	const allCourses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended`)).json();
 	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
@@ -155,19 +156,21 @@ export const actions = {
 			const level = formData.get('level');
 			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
 			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
+			const maintainers = JSON.parse(formData.get('maintainers') as string);
 			const courseData = {
 				learningObjectives: learningObjectives,
 				prerequisites: prerequisites,
 				educationalLevel: level,
 				courseName: title,
 				creatorId: locals.session?.user.id,
+				maintainers: maintainers,
 			};
 			const res = await fetch(`/api/course`, {
 				method: 'POST',
 				body: JSON.stringify(courseData),
 			});
 			const newCourse = await res.json();
-			return { status: res.status, id: newCourse.id , context: 'course-form'};
+			return { status: res.status, id: newCourse.id, context: 'course-form', course: newCourse};
 		} catch (error) {
 			console.error("Error creating course ", error);
 			throw redirect(303, '/course/create');

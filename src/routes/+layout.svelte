@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../app.postcss';
-	import SemanticSearch from '$lib/components/SemanticSearch.svelte';
 
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';

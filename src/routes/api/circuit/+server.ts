@@ -1,9 +1,8 @@
-import { type CircuitWithPublication, type CircuitWithPublisher, getAllCircuits } from '$lib/database/circuit';
+import { type CircuitWithPublication, getAllCircuits } from '$lib/database/circuit';
 import {
 	addNode,
 	type CircuitForm, coverPicFetcher,
 	createCircuitPublication,
-	fileSystem,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
@@ -19,7 +18,6 @@ import {
 
 import { profilePicFetcher } from '$lib/database/file';
 import { validateMetadata } from '$lib/util/validatePublication';
-import type { MaterialWithPublication } from '$lib/database/material';
 
 export async function GET({ url }) {
 	try {
