@@ -20,7 +20,7 @@
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import { onMount } from 'svelte';
-	import type { FetchedFileArray, NodeDiffActions } from '$lib/database';
+	import type { FetchedFileArray, FetchedFileItem, NodeDiffActions } from '$lib/database';
 	import TagsSelect from "$lib/components/TagsSelect.svelte";
 	import { isMaterialDraft, validateMetadata } from '$lib/util/validatePublication';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
@@ -34,6 +34,7 @@
 	import SelectType from '$lib/components/publication/SelectType.svelte';
 	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
 	import { changeCourse } from '$lib/util/coursesLogic';
+	import type { SupabaseClient } from '@supabase/supabase-js';
 
 
 
@@ -96,6 +97,26 @@
 
 	let dataTransferPromise: Promise<void> | null = null;
 
+	async function downloadFileFromSupabase(f: FetchedFileItem, supabaseClient: SupabaseClient<any, 'public', any>): Promise<File>{
+		const { data: blob, error } = await supabaseClient.storage
+			.from("uploadedFiles")
+			.download(f.fileId)
+
+		if (error) {
+			console.error('Error downloading file from Supabase:', error.message);
+			throw error;
+		}
+
+		if (!blob) {
+			console.error('Download succeeded but the returned blob is null.');
+			return null;
+		}
+
+		return new File([blob], f.name, {
+			type: blob.type,
+		});
+	}
+
 	async function defineDataTransfer(): Promise<DataTransfer>{
 		const localDataTransfer = new DataTransfer();
 
@@ -106,30 +127,16 @@
 				isDone: true
 			}
 
-			const { data: blob, error } = await supabaseClient
-				.storage
-				.from("uploadedFiles")
-				.download(f.fileId);
-
-			if (error) {
-				console.error('Error downloading file from Supabase:', error.message);
-				throw error;
-			}
-
-			if (!blob) {
-				console.error('Download succeeded but the returned blob is null.');
-				return null;
-			}
-
-			const file = new File([blob], f.name, {
-				type: blob.type,
-			});
+			const file = await downloadFileFromSupabase(f, supabaseClient)
 
 			localDataTransfer.items.add(file);
 		}
 
 		return localDataTransfer
 	}
+
+	let coverPicPromise: null | Promise<File> = null;
+	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
 
 	onMount(async () => {
 		if (isMaterial){
@@ -144,8 +151,12 @@
 				files = dt.files;
 			});
 
-
+			// TODO: (random?) figure out why the type is a string rather than a null
+			if ((typeof serverData.coverFileData.data === "string" && serverData.coverFileData.data != 'null') ||
+				(typeof serverData.coverFileData.data !== "string" && serverData.coverFileData.data != null)){
+				coverPicPromise = downloadFileFromSupabase(serverData.coverFileData, supabaseClient);
 			}
+		}
 	})
 
 	let previousCourse: number | null = null;
@@ -153,22 +164,10 @@
 		({ course, previousCourse, LOs, PKs } = changeCourse(course, previousCourse, LOs, PKs, data.courses));
 	}
 
-
-	let coverPicMat:File|undefined = undefined;
-	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
-	let selectedFileList: FileList = [] as unknown as FileList;
-
-	if (isMaterial){
-		// TODO: (random?) figure out why the type is a string rather than a null
-		if ((typeof serverData.coverFileData.data === "string" && serverData.coverFileData.data != 'null') ||
-			(typeof serverData.coverFileData.data !== "string" && serverData.coverFileData.data != null)){
-			coverPicMat = base64ToFile(serverData.coverFileData.data, 'cover.jpg', 'image/jpeg');
-		}
-	}
 	let allTypes: {id:string, content:string }[] = ["presentation", "code", "video", "assignment", "dataset", "exam"].map(x => ({id : '0', content : x})); //array with all the tags MOCK
 
 
-	function chooseCover(e: Event) {
+	async function chooseCover(e: Event) {
 		const input = e.target as HTMLInputElement;
 		if (!input.files?.length) return;
 
@@ -176,24 +175,23 @@
 
 		// Check if file is valid
 		if (file.type === 'image/jpeg' || file.type === 'image/png') {
-			coverPicMat = file;
-
-			// TODO
-			// If you add a picture and then remove it
-			// You cannot re-add it until you select another image (and remove it)
-			// this is a workaround, think of it as deleting some cache
-			input.value = '';
-
-			// Update the FileList using DataTransfer
-			const dataTransfer = new DataTransfer();
-			dataTransfer.items.add(file);
-			selectedFileList = dataTransfer.files;
+			return file;
 		} else {
 			toastStore.trigger({
 				message: 'Invalid file type, please upload a .jpg or .png file',
 				background: 'bg-warning-200'
 			});
 		}
+
+		// TODO
+		// If you add a picture and then remove it
+		// You cannot re-add it until you select another image (and remove it)
+		// this is a workaround, think of it as deleting some cache
+		input.value = '';
+	}
+
+	async function chooseCoverPromiseHandler(e: Event){
+		coverPicPromise = chooseCover(e);
 	}
 
 	let allTags: PrismaTag[] = data.tags;
@@ -347,7 +345,6 @@
 			// check if all the file uploads (excluding cover picture) are done
 			if (!(allUploadsDone(fileTUSMetadata, files))){
 				// alert('Some files are still being uploaded');
-				console.log("SERIOZNO LI WE");
 				isSubmitting = false;
 				return;
 			}
@@ -382,7 +379,12 @@
 		formData.append('timeEstimate', time);
 		formData.append('copyright', copyright);
 		formData.append('type', JSON.stringify(selectedType));
-		formData.append('coverPicMat', coverPicMat || '');
+
+		let coverPicMat = null
+		if (coverPicPromise !== null){
+			coverPicMat = await coverPicPromise;
+		}
+		formData.append('coverPicMat', coverPicMat);
 
 
 		// TODO It does have the circuit, typescript is just hating. FIX THIS
@@ -498,14 +500,20 @@
 		{/if}
 
 		<div class="mt-4">
-			<label for="coverPhoto">Cover Picture:</label>
-			<img src={coverPicMat ? URL.createObjectURL(coverPicMat) : defaultCoverPicturePath} alt="Cover of publication">
-			<FileButton on:change={chooseCover} bind:files={selectedFileList} name="coverPhoto">Upload File</FileButton>
-			{#if coverPicMat !== undefined}
-				<button on:click={() => {
-					coverPicMat = undefined;
-					selectedFileList = new DataTransfer().files;
-				}} type="button" class="btn">Remove</button>
+			{#if coverPicPromise !== null}
+				{#await coverPicPromise}
+					<p>Loading cover picture</p>
+				{:then awaitedCoverPic}
+					<label for="coverPhoto">Cover Picture:</label>
+					<img src={URL.createObjectURL(awaitedCoverPic)} alt="Cover of publication">
+					<FileButton on:change={chooseCoverPromiseHandler} name="coverPhoto">Upload File</FileButton>
+				{:catch error}
+					<p>Error while loading cover picture</p>
+				{/await}
+			{:else}
+				<label for="coverPhoto">Cover Picture:</label>
+				<img src={defaultCoverPicturePath} alt="Cover of publication">
+				<FileButton on:change={chooseCoverPromiseHandler} name="coverPhoto">Upload File</FileButton>
 			{/if}
 		</div>
 	{:else}
