@@ -20,6 +20,7 @@
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.9.1",
+		"@esbuild-plugins/tsconfig-paths": "^0.1.2",
 		"@eslint/js": "^9.1.1",
 		"@iconify/svelte": "^4.0.2",
 		"@iconify/tailwind": "^1.1.1",
@@ -43,6 +44,7 @@
 		"@vitest/coverage-istanbul": "^3.1.2",
 		"@vitest/coverage-v8": "^3.1.2",
 		"autoprefixer": "10.4.19",
+		"esbuild": "^0.25.9",
 		"eslint": "^8.57.0",
 		"eslint-plugin-svelte": "^2.35.1",
 		"globals": "^15.1.0",
