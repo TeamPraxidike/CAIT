@@ -432,7 +432,7 @@ export function explorePlatform(){
 			flowLogin();
 		}
 
-		// comment 20% of the time
+		// upload materia publication 20% of the time
 		if (Math.random() <= 0.2){
 			flowUploadMaterial();
 		}
