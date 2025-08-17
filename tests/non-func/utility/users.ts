@@ -84,13 +84,17 @@ const SERVICE_TOKEN = __ENV.SUPABASE_SERVICE_KEY;
 const BUCKET = 'uploadedFiles';
 
 // Read a local file at init time (binary)
-const BYTES = open('./logo.jpg', 'b');
-const CONTENT_TYPE = 'image/jpg';
+// const BYTES = open('./logo.jpg', 'b');
+// const CONTENT_TYPE = 'image/jpg';
+
+const BYTES = open('./pm.pdf', 'b');
+const CONTENT_TYPE = 'application/pdf';
 
 const BASE = "https://cait.beta.praxidike.org"
 
 export function createMaterialData(userId: string) {
-	const objectPath = `${Date.now()}${generateRandomString(10)}.jpg`;
+	//const objectPath = `${Date.now()}${generateRandomString(10)}.jpg`;
+	const objectPath = `${Date.now()}${generateRandomString(10)}.pdf`;
 	const url = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${encodeURIComponent(objectPath)}`;
 
 	const res = http.post(url, BYTES, {
@@ -110,7 +114,8 @@ export function createMaterialData(userId: string) {
 			userId,
 			metaData: createMaterialMetaData(),
 			fileDiff: {
-				add: [{ title: "stress.jpg", type: CONTENT_TYPE, info: objectPath }],
+				//add: [{ title: "stress.jpg", type: CONTENT_TYPE, info: objectPath }],
+				add: [{ title: "stress.pdf", type: CONTENT_TYPE, info: objectPath }],
 				delete: [],
 				edit: []
 			},

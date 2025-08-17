@@ -34,11 +34,10 @@ export const options = {
 			startVUs: 0,
 			stages: [
 				{ duration: '15s', target: 30 }, // ramp up (to 10 VUs)
-				{ duration: '120s', target: 30 },
-				{ duration: '15s', target: 40 }, // ramp up (to 20 VUs)
-				{ duration: '120s', target: 40 },
+				{ duration: '180s', target: 30 },
 				{ duration: '15s', target: 50 }, // ramp up (to 30 VUs)
-				{ duration: '120s', target: 50 },
+				{ duration: '180s', target: 50 },
+				{ duration: '30s', target: 0 },
 			],
 			gracefulRampDown: '0s',
 			exec: 'explorePlatform'
@@ -432,8 +431,8 @@ export function explorePlatform(){
 			flowLogin();
 		}
 
-		// upload materia publication 20% of the time
-		if (Math.random() <= 0.2){
+		// upload material publication 30% of the time
+		if (Math.random() <= 0.3){
 			flowUploadMaterial();
 		}
 		else{
