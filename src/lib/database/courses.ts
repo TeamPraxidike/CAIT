@@ -12,6 +12,10 @@ export type createCourseData = {
 	creatorId: string;
 	maintainers: string[];
 	copyright: string;
+	coverPic: {
+		type: string;
+		info: string;
+	} | null;
 }
 
 export type CourseWithMaintainersAndProfilePic = Course & {

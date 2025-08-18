@@ -158,6 +158,19 @@ export const actions = {
 			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
 			const maintainers = JSON.parse(formData.get('maintainers') as string);
 			const copyright = formData.get('copyright') as string;
+
+			const coverPicFile = formData.get('coverPic');
+			let coverPic = null;
+
+			if (coverPicFile instanceof File) {
+				const buffer = await coverPicFile.arrayBuffer();
+				const info = Buffer.from(buffer).toString('base64');
+				coverPic = {
+					type: coverPicFile.type,
+					info,
+				};
+			}
+
 			const courseData = {
 				learningObjectives: learningObjectives,
 				prerequisites: prerequisites,
@@ -166,6 +179,7 @@ export const actions = {
 				creatorId: locals.session?.user.id,
 				copyright: copyright,
 				maintainers: maintainers,
+				coverPic: coverPic,
 			};
 			const res = await fetch(`/api/course`, {
 				method: 'POST',

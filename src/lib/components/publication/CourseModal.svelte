@@ -67,6 +67,7 @@
 			formData.append('level', level);
 			formData.append('context', 'course-form');
 			formData.append('copyright', copyright);
+			formData.append('coverPic', coverPic || '');
 
 			close();
 		}}>

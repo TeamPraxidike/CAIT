@@ -1,5 +1,6 @@
 import { verifyAuth } from '$lib/database/auth';
 import { createCourse, type createCourseData, findCourseByName, getAllCourses } from '$lib/database/courses';
+import { updateCoverPic } from '$lib/database';
 
 
 export async function GET({ locals }) {
@@ -17,19 +18,19 @@ export async function GET({ locals }) {
 export async function POST({ request, locals }) {
 	const body = await request.json();
 
-	const authError = await verifyAuth(locals, body.userId);
+	const authError = await verifyAuth(locals, body.creatorId);
 	if (authError) return authError;
 
 	try {
-
 		const courseData: createCourseData = {
 			learningObjectives: body.learningObjectives,
 			prerequisites: body.prerequisites,
 			educationalLevel: body.educationalLevel,
 			courseName: body.courseName,
-			creatorId: body.userId,
+			creatorId: body.creatorId,
 			maintainers: body.maintainers,
-			copyright: body.copyright
+			copyright: body.copyright,
+			coverPic: body.coverPic
 		};
 
 		if (await findCourseByName(body.courseName) !== null) {
@@ -37,6 +38,15 @@ export async function POST({ request, locals }) {
 		}
 
 		const course = await createCourse(body);
+
+		const isCourse = true;
+		await updateCoverPic(
+			body.coverPic,
+			course.id,
+			body.creatorId,
+			isCourse
+		);
+
 		return new Response(JSON.stringify(course), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error }), { status: 500 });

@@ -146,8 +146,6 @@ export async function addCoverPic(
 			} else {
 				query.publicationId = id;
 			}
-			console.log("AAAAAAAAAAA");
-			console.log(query);
 			return prismaContext.file.create({
 				data: query,
 			});
