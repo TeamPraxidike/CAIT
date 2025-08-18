@@ -69,6 +69,8 @@
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.4",
+		"@prisma/extension-optimize": "^2.0.0",
+		"@prisma/instrumentation": "^5.22.0",
 		"@supabase/ssr": "^0.5.2",
 		"@supabase/supabase-js": "^2.46.2",
 		"@sveltejs/adapter-node": "^5.2.9",
