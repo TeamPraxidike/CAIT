@@ -100,7 +100,7 @@
 				bind:value={title}
 				on:keydown={handleInputEnter}
 				required
-				class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+				class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0"
 			/>
 		</div>
 

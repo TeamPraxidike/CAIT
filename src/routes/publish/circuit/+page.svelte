@@ -273,11 +273,11 @@
 			<div class="flex flex-col gap-5 col-span-full">
 				<div class="w-full space-y-1">
 					<label for="circuitTitle" class="block font-medium">Title<span class="text-error-300">*</span></label>
-					<input on:keydown={handleInputEnter} bind:value={title} id="circuitTitle" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Enter title" required/>
+					<input on:keydown={handleInputEnter} bind:value={title} id="circuitTitle" class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0" placeholder="Enter title" required/>
 				</div>
 				<div class="w-full space-y-1">
 					<label for="circuitDescription" class="block font-medium">Description<span class="text-error-300">*</span></label>
-					<textarea  bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Explain your circuit" required />
+					<textarea  bind:value={description} rows="5" id="circuitDescription" class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0" placeholder="Explain your circuit" required />
 				</div>
 			</div>
 		</Step>
