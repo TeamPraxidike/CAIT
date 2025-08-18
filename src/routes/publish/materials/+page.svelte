@@ -123,27 +123,7 @@
 	// cover
 	let coverPic: File | undefined = undefined;
 
-	function chooseCover(e: Event) {
-		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles && eventFiles[0]) {
-			const file = eventFiles[0];
 
-			if ((file.size / (1024*1024)) > 2) {
-				return;
-			}
-
-			if (file.type === 'image/jpeg' || file.type === 'image/png') {
-				coverPic = file;
-				// Persist coverPic to IndexedDB 
-				saveCover(file);
-			} else {
-				toastStore.trigger({
-					message: 'Invalid file type, please upload a .jpg or .png file',
-					background: 'bg-warning-200'
-				});
-			}
-		}
-	}
 
 	$: uid = page.data.session?.user.id;
 
@@ -236,6 +216,7 @@
 
 
 	import * as tus from 'tus-js-client'
+	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 
 	// source: https://supabase.com/docs/guides/storage/uploads/resumable-uploads?queryGroups=language&language=js
 
@@ -519,10 +500,10 @@
 						bind:files={files}/>
 				</Step>
 				<Step locked={locks[1]}>
-					<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-					<div class="grid grid-cols-2 gap-x-4 gap-y-2">
-						<label for="title">Title<span class="text-error-300">*</span></label>
-						<label for="coverPic">Cover Picture (Max. size: 2MB)</label>
+				<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
+				<div class="grid grid-cols-2 gap-x-4 gap-y-2">
+					<label for="title">Title<span class="text-error-300">*</span></label>
+					<label for="coverPic">Cover Picture (Max. size: 2MB)</label>
 
 
 				<div class="flex flex-col gap-2">
@@ -546,33 +527,8 @@
 					</div>
 				</div>
 
-						<div>
-							<div class="flex flex-col gap-2 h-full bg-surface-200
-										border-2 border-dashed border-surface-700">
-								<div>
-									{#if coverPic}
-										<img src={URL.createObjectURL(coverPic)}
-											 alt="coverPicture"
-											 class="max-h-96 w-full object-contain h-full">
-									{/if}
-								</div>
-							</div>
-
-							<div>
-								{#if coverPic}
-									<button on:click={() => coverPic = undefined} type="button"
-											class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
-										Remove Cover Picture
-									</button>
-								{:else}
-									<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
-												on:change={chooseCover} name="coverPhoto">
-										Upload Cover Picture
-									</FileButton>
-								{/if}
-							</div>
-						</div>
-					</div>
+					<CoverPicSelect bind:coverPic={coverPic} toastStore={toastStore} />
+				</div>
 				</Step>
 				<Step locked={locks[2]}>
 					<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
