@@ -1,9 +1,15 @@
 <script lang="ts">
-	import { FileButton } from '@skeletonlabs/skeleton';
+	import { FileButton, getToastStore } from '@skeletonlabs/skeleton';
 	import { saveCover } from '$lib/util/indexDB';
 
 	export let coverPic: File | undefined = undefined;
-	export let toastStore: any;
+	export let toastStore: any = null;
+
+	export let width: string = "w-full";
+
+	if (toastStore == null) {
+		toastStore = getToastStore();
+	}
 
 	function chooseCover(e: Event) {
 		const eventFiles = (e.target as HTMLInputElement).files;
@@ -30,7 +36,7 @@
 
 <div>
 	<div class="flex flex-col gap-2 h-full bg-surface-200
-										border-2 border-dashed border-surface-700">
+										border-2 border-dashed border-surface-700 {width} min-h-24">
 		<div>
 			{#if coverPic}
 				<img src={URL.createObjectURL(coverPic)}

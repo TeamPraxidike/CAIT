@@ -9,6 +9,7 @@
 	import CourseLevel from '$lib/components/publication/CourseLevel.svelte';
 	import type { Course } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 
 	export let close: () => void; // to close the modal
 	export let users: UserWithProfilePic[] = [];
@@ -26,6 +27,7 @@
 	let learningObjectives: string[] = [];
 	let prerequisites: string[] = [];
 	let copyright: string = "";
+	let coverPic: File | undefined = undefined;
 
 	type UserWithProfilePic = User & { profilePicData: string | null };
 	let maintainers: UserWithProfilePic[] = [];
@@ -67,7 +69,6 @@
 			formData.append('copyright', copyright);
 
 			close();
-
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
 
@@ -108,6 +109,8 @@
 
 		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
 						   bind:additionalMaintainers={additionalMaintainers} />
+
+		<CoverPicSelect bind:coverPic={coverPic} width="w-1/2"/>
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />
 
 
