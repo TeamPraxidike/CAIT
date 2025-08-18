@@ -25,6 +25,7 @@
 	let level: Level;
 	let learningObjectives: string[] = [];
 	let prerequisites: string[] = [];
+	let copyright: string = "";
 
 	type UserWithProfilePic = User & { profilePicData: string | null };
 	let maintainers: UserWithProfilePic[] = [];
@@ -62,7 +63,8 @@
 			formData.append('prerequisites', JSON.stringify(prerequisites));
 			formData.append('maintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
 			formData.append('level', level);
-			formData.append('context', 'course-form')
+			formData.append('context', 'course-form');
+			formData.append('copyright', copyright);
 
 			close();
 
@@ -84,9 +86,26 @@
 			/>
 		</div>
 
-		<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
 
-		<CourseLevel bind:label={level} />
+		<div class="flex flex-row justify-start items-center gap-10 mb-4">
+			<div>
+				<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
+				<CourseLevel bind:label={level} />
+			</div>
+
+			<div>
+				<label for="copyright" class="block font-medium">Copyright</label>
+				<input type="text"
+					   name="copyright"
+					   bind:value={copyright}
+					   on:keydown={handleInputEnter}
+					   required
+					   class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+				/>
+			</div>
+
+		</div>
+
 		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
 						   bind:additionalMaintainers={additionalMaintainers} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />

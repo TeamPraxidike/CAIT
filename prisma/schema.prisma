@@ -168,8 +168,8 @@ model File {
   publicationId Int?         @unique
   coverPic      Publication? @relation("CoverPic", fields: [publicationId], references: [id], onDelete: Cascade)
 
-  courseId       Int?    @unique
-  courseCoverPic Course? @relation("CourseCoverPic", fields: [courseId], references: [id], onDelete: Cascade)
+  // courseId       Int?    @unique
+  // courseCoverPic Course? @relation("CourseCoverPic", fields: [courseId], references: [id], onDelete: Cascade)
 
   materialId Int?
   material   Material? @relation("Files", fields: [materialId], references: [id], onDelete: Cascade)
@@ -275,6 +275,6 @@ model Course {
   courseName         String        @unique
   publications       Publication[] @relation("CoursePublications")
   maintainers        User[]        @relation("CourseInstructors")
-  coverPic           File?         @relation("CourseCoverPic")
+  // coverPic           File?         @relation("CourseCoverPic")
   copyright          String
 }

@@ -29,6 +29,7 @@ export async function POST({ request, locals }) {
 			courseName: body.courseName,
 			creatorId: body.userId,
 			maintainers: body.maintainers,
+			copyright: body.copyright
 		};
 
 		if (await findCourseByName(body.courseName) !== null) {

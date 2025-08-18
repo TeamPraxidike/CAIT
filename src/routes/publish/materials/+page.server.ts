@@ -157,12 +157,14 @@ export const actions = {
 			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
 			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
 			const maintainers = JSON.parse(formData.get('maintainers') as string);
+			const copyright = formData.get('copyright') as string;
 			const courseData = {
 				learningObjectives: learningObjectives,
 				prerequisites: prerequisites,
 				educationalLevel: level,
 				courseName: title,
 				creatorId: locals.session?.user.id,
+				copyright: copyright,
 				maintainers: maintainers,
 			};
 			const res = await fetch(`/api/course`, {

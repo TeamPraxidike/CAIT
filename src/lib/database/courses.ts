@@ -11,6 +11,7 @@ export type createCourseData = {
 	courseName: string;
 	creatorId: string;
 	maintainers: string[];
+	copyright: string;
 }
 
 export type CourseWithMaintainersAndProfilePic = Course & {
@@ -54,6 +55,7 @@ export async function createCourse(course: createCourseData): Promise<Course> {
 			prerequisites: course.prerequisites,
 			educationalLevel: course.educationalLevel,
 			courseName: course.courseName,
+			copyright: course.copyright,
 			maintainers: {
 				connect: [{ id: course.creatorId }, ...course.maintainers.map(x => ({ id: x }))]
 			}
