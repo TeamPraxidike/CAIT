@@ -106,6 +106,7 @@
 
 	let previousCourse: number | null = null;
 	$: if (course !== previousCourse) {
+		const currentCourse = courses.find(c => c.id === course);
 		maintainers = [];
 		const prev_temp = previousCourse;
 		previousCourse = course;
@@ -114,6 +115,10 @@
 		LOs = result.LOs;
 		PKs = result.PKs;
 		maintainers = result.maintainers;
+
+		if (currentCourse && currentCourse.copyright !== "") {
+			copyright = currentCourse.copyright;
+		}
 	}
 
 
