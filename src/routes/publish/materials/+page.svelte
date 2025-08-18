@@ -602,7 +602,7 @@
 						<div class="flex flex-col md:flex-row col-span-full items-center gap-10">
 							<TimeEstimate bind:totalMinutes={estimate}/>
 							<div class="w-full md:w-1/2	">
-								<label for="copyright md-2">Copyright License (<a
+								<label for="copyright md-2" class="block font-medium">Copyright License (<a
 									href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
 									class="text-tertiary-700"> Check here how this applies to you</a>):</label>
 								<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter}

@@ -90,9 +90,9 @@
 	};
 </script>
 
-<div class="flex flex-col gap-2 w-full p-3">
-	<span>Maintainers<span class="text-error-300">*</span>:</span>
-	<div class="flex flex-wrap flex-grow-0 my-2 gap-1 items-center w-full">
+<div class="flex flex-col gap-2 w-full">
+	<label for="maintainers" class="block font-medium">Maintainers<span class="text-error-300">*</span>:</label>
+	<div class="flex flex-wrap flex-grow-0 mt-1 gap-1 items-center w-full">
 		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={publisher.profilePicData}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			{#if maintainer.id !== publisher.id}
@@ -102,7 +102,7 @@
 		{/each}
 
 		<button type="button" name="add_maintainer" use:popup={popupAdd} class="btn rounded-lg hover:bg-opacity-85 text-center" >
-			<Icon icon="mdi:plus-circle" width="32" height="32"
+			<Icon icon="mdi:plus-circle" width="34" height="34"
 						class="bg-surface-0 text-primary-600 hover:text-primary-600 dark:text-surface-100 dark:hover:text-primary-600" />
 		</button>
 

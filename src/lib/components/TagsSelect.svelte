@@ -117,8 +117,8 @@
     $: buttonText = enterTag ? 'Add Tag' : 'Create New Tag';
 </script>
 
-<label class="pl-3" for="tags_input">Tags (at least one)<span class="text-error-300">*</span>:</label>
-<div class="text-token space-y-2 pl-3">
+<label for="tags_input" class="block font-medium">Tags (at least one)<span class="text-error-300">*</span>:</label>
+<div class="text-token space-y-2 mt-1">
 
         {#if enterTag}
         <input on:keyup={enterNewTag}

@@ -113,20 +113,20 @@
 
 
 
-<div class="flex flex-col md:flex-row justify-between">
+<div class="flex flex-col md:flex-row justify-between gap-10">
 
-    <div class="flex flex-col space-y-1 w-full p-3 max-w-full min-w-0">
-        <label for="learningObjective" >Learning Objectives {#if adding}(at least one)<span class="text-error-300">*</span>{/if} :</label>
+    <div class="flex flex-col space-y-1 w-full max-w-full min-w-0">
+        <label for="learningObjective" class="block font-medium">Learning Objectives {#if adding}(at least one)<span class="text-error-300">*</span>{/if}:</label>
 
         <div class="w-full max-w-full">
             {#if adding}
-                <div class="w-full flex justify-between gap-2">
+                <div class="w-full flex justify-between items-center gap-2">
                     <input on:keydown={handleLOPress} on:blur={submitLO}  bind:this={loInput}
                            id="learningObjective" type="text" placeholder="Enter learning objective"
-                           class="mb-1 rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-500 focus:ring-0 "/>
+                           class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-500 focus:ring-0 "/>
                     <button on:click={submitLO} type="button" name="add_LO" inputmode="decimal"
-                            class="text-center">
-                        <Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-primary-600 hover:text-primary-500 dark:text-surface-100 dark:hover:text-primary-600" />
+                            class="ml-2 text-center text-surface-50 bg-primary-600 hover:bg-primary-500 rounded-full flex items-center justify-center w-7 h-7 min-w-7 min-h-7 self-center">
+                        <Icon icon="mdi:arrow-right-thick" width="20" height="20"  class="text-white" />
                     </button>
                 </div>
             {/if}
@@ -161,20 +161,20 @@
 
     </div>
 
-    <div class="flex flex-col space-y-1 w-full p-3 min-w-0">
+    <div class="flex flex-col space-y-1 w-full min-w-0">
         {#if !adding && priorKnowledge.length !== 0}
-            <label for="priorKnowledge" >Prior Knowledge:</label>
+            <label for="priorKnowledge" class="block font-medium">Prior Knowledge:</label>
         {:else if adding}
-            <label for="priorKnowledge" >Prior Knowledge:</label>
+            <label for="priorKnowledge" class="block font-medium">Prior Knowledge:</label>
         {/if}
         {#if adding}
-            <div class="flex w-full justify-between gap-2">
+            <div class="flex w-full justify-between items-center gap-2">
                 <input   bind:this={priorInput} on:blur={submitPrereq}
                          on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept"
-                         class="mb-1 rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-500 focus:ring-0"/>
+                         class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-500 focus:ring-0"/>
                 <button on:click={submitPrereq} type="button" name="add_prior" inputmode="decimal"
-                        class="text-center">
-                    <Icon icon="mdi:plus-circle" width="32" height="32"  class="bg-surface-0 text-primary-600 hover:text-primary-600 dark:text-surface-100 dark:hover:text-primary-600" />
+                        class="ml-2 text-center text-surface-50 bg-primary-600 hover:bg-primary-500 rounded-full flex items-center justify-center w-7 h-7 min-w-7 min-h-7 self-center">
+                    <Icon icon="mdi:arrow-right-thick" width="20" height="20"  class="text-white" />
                 </button>
             </div>
         {/if}

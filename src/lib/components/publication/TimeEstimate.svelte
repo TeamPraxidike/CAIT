@@ -34,7 +34,7 @@
 </script>
 
 <div>
-	<p>Time estimate:</p>
+	<h4 class="block font-medium">Time estimate:</h4>
 	<div class="flex items-center gap-4 bg-gray-100 p-4 rounded-xl w-fit">
 		<button
 			type="button"
