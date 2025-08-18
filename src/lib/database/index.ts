@@ -94,7 +94,6 @@ import {
 	addCoverPic,
 	coverPicFetcher,
 	updateCoverPic,
-	updateCircuitCoverPic,
 	updateFiles,
 } from '$lib/database/file';
 
@@ -254,7 +253,6 @@ export {
 	type NodeDiffActions,
 	type UploadMaterialFileFormat,
 	handleSimilarity,
-	updateCircuitCoverPic,
 	updateFiles,
 	coverPicFetcher,
 	updateCoverPic,

@@ -129,19 +129,27 @@ export async function addCoverPic(
 	type: string,
 	ownerId: string,
 	info: Buffer,
-	publicationId: number,
+	id: number, // id of the publication or course
+	isCourse: boolean = false,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	try {
 		const path = await fileSystem.saveFile(info, title, ownerId);
 		try {
+			const query: any = {
+				path: path,
+				title: title,
+				type,
+			}
+			if (isCourse) {
+				query.courseId = id;
+			} else {
+				query.publicationId = id;
+			}
+			console.log("AAAAAAAAAAA");
+			console.log(query);
 			return prismaContext.file.create({
-				data: {
-					path: path,
-					title: title,
-					type,
-					publicationId: publicationId, // Associate the cover with Publication
-				},
+				data: query,
 			});
 		} catch (errorDatabase) {
 			fileSystem.deleteFile(path);
@@ -212,15 +220,19 @@ export async function updateProfilePic(
 
 export async function updateCoverPic(
 	coverPic: { type: string; info: string } | null,
-	publicationId: number,
+	id: number, // id of the publication or course
 	userId: string,
+	isCourse: boolean = false,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
+	// handle both courses and publications
+	let query : any = {publicationId : id}
+	if (isCourse) {
+		query = {courseId : id}
+	}
 	// check if the publication already has a coverPic
 	const coverFile = await prismaContext.file.findUnique({
-		where: {
-			publicationId: publicationId,
-		},
+		where: query,
 	});
 
 	// remove if it does
@@ -237,40 +249,11 @@ export async function updateCoverPic(
 			coverPic.type,
 			userId,
 			buffer,
-			publicationId,
+			id,
+			isCourse,
 			prismaContext,
 		);
 	}
-}
-
-export async function updateCircuitCoverPic(
-	coverPic: { type: string; info: string },
-	publicationId: number,
-	userId: string,
-	prismaContext: Prisma.TransactionClient = prisma,
-) {
-	// check if the circuit already has a coverPic
-	const coverFile = await prismaContext.file.findUnique({
-		where: {
-			publicationId: publicationId,
-		},
-	});
-
-	// remove if it does
-	if (coverFile) {
-		await deleteFile(coverFile.path, prismaContext);
-	}
-
-	// upload new coverPic
-	const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
-	await addCoverPic(
-		'cover.jpg',
-		coverPic.type,
-		userId,
-		buffer,
-		publicationId,
-		prismaContext,
-	);
 }
 
 /**
