@@ -9,6 +9,8 @@
 	import CourseLevel from '$lib/components/publication/CourseLevel.svelte';
 	import type { Course } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { createEventDispatcher } from 'svelte';
 
 	export let close: () => void; // to close the modal
 	export let users: UserWithProfilePic[] = [];
@@ -21,15 +23,32 @@
 	export let onSuccess = () => {};
 	let id = existingCourse?.id ?? null;
 
-	let title = '';
-	let level: Level;
-	let learningObjectives: string[] = [];
-	let prerequisites: string[] = [];
+	let title = existingCourse?.courseName ?? '';
+	let level: Level = existingCourse?.educationalLevel as Level;
+	let learningObjectives: string[] = existingCourse?.learningObjectives ?? [];
+	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
 
 	type UserWithProfilePic = User & { profilePicData: string | null };
 	let maintainers: UserWithProfilePic[] = [];
 	const user = page.data.loggedUser as UserWithProfilePic;
 	const isEdit = !!existingCourse;
+
+	const modalStore = getModalStore();
+	const dispatch = createEventDispatcher();
+
+	const deleteConfirmModal: ModalSettings = {
+		type: 'confirm',
+		title: 'Are you sure you want to delete this course?',
+		body: 'It will be removed from all publications that are associated with it. Their metadata will remain the same.',
+		response: async (r: boolean) => {
+			if (r && id !== null) {
+				await fetch(`/api/course/${id}`, { method: 'DELETE' });
+				dispatch('courseDeleted', { courseId: id });
+				onSuccess();
+				close();
+			}
+		}
+	};
 
 
 	if (user) {
@@ -51,7 +70,7 @@
 
 <div class="modal-bg">
 	<form
-		action="?/publishCourse"
+		action={isEdit ? `?/editCourse` : "?/publishCourse"}
 		method="POST"
 		bind:this={form}
 		enctype="multipart/form-data"
@@ -62,6 +81,7 @@
 			formData.append('prerequisites', JSON.stringify(prerequisites));
 			formData.append('maintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
 			formData.append('level', level);
+			if (isEdit && id !== null) formData.append('id', id.toString());
 			formData.append('context', 'course-form')
 
 			close();
@@ -69,7 +89,7 @@
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
 
-		<h2 class="text-2xl font-bold mb-4">Create a Course</h2>
+		<h2 class="text-2xl font-bold mb-4">{isEdit ? 'Edit Course' : 'Create a Course'}</h2>
 
 		<div class="space-y-2">
 			<label for="title" class="block font-medium">Name<span class="text-error-300">*</span></label>
@@ -93,25 +113,19 @@
 
 
 		<div class="flex justify-end items-center pt-4">
+			{#if isEdit}
+				<button
+					type="button"
+					class="bg-surface-900 text-surface-50 dark:bg-surface-100 dark:text-surface-800 hover:bg-opacity-85 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition mr-auto"
+					on:click={() => modalStore.trigger(deleteConfirmModal)}>
+					Delete
+				</button>
+			{/if}
+
 			<div class="flex gap-3">
 				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition dark:text-surface-50">{isEdit ? 'Save' : 'Create'}</button>
 				<button type="button" class="bg-primary-600 hover:bg-primary-500 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition dark:text-surface-50" on:click={close}>Cancel</button>
 			</div>
-
-			{#if isEdit}
-				<button
-					type="button"
-					class="btn-danger text-sm px-5 py-2 ml-auto"
-					on:click={async () => {
-						if (confirm('Are you sure you want to delete this course?')) {
-							await fetch(`/api/course/${id}`, { method: 'DELETE' });
-							onSuccess();
-							close();
-						}
-					}}>
-					Delete
-				</button>
-			{/if}
 		</div>
 	</form>
 </div>

@@ -21,7 +21,7 @@
 				on:click={() => selectType(type)}
 				class="px-4 py-2 rounded-full border border-gray-300 text-sm leading-5 font-medium
 					   hover:bg-gray-100 hover:text-black transition
-					   {selectedTypes.indexOf(type) > -1 ? 'bg-primary-600 text-white border-primary-500' : 'bg-white text-gray-800'}"
+					   {selectedTypes.indexOf(type) > -1 ? 'border-primary-600 border-2 text-primary-700 bg-primary-50' : 'bg-white text-gray-800'}"
 			>
 				{type}
 			</button>
