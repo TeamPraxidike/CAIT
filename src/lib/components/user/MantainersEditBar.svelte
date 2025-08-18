@@ -90,9 +90,9 @@
 	};
 </script>
 
-<div class="flex flex-col gap-2 w-full">
+<div class="flex flex-col gap-1 w-full">
 	<label for="maintainers" class="block font-medium">Maintainers<span class="text-error-300">*</span>:</label>
-	<div class="flex flex-wrap flex-grow-0 mt-1 gap-1 items-center w-full">
+	<div class="flex flex-wrap flex-grow-0 gap-1 items-center w-full">
 		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={publisher.profilePicData}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			{#if maintainer.id !== publisher.id}

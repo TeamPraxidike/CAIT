@@ -42,7 +42,7 @@
 	</div>
 
 	<!-- Tags -->
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-2">
 		<h3 class="font-medium">Tags:</h3>
 		<div class="flex flex-wrap gap-2">
 			{#each tags as tag}
@@ -57,7 +57,7 @@
 	</div>
 
 	<!-- Maintainers -->
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-1">
 		<h3 class="font-medium">Maintainers:</h3>
 		<div class="flex flex-wrap gap-2">
 			<UserProp 

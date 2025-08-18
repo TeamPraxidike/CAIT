@@ -104,9 +104,11 @@
 			/>
 		</div>
 
-		<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
+		<div class="space-y-3">
+			<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
+			<CourseLevel bind:label={level} />
+		</div>
 
-		<CourseLevel bind:label={level} />
 		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
 						   bind:additionalMaintainers={additionalMaintainers} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />

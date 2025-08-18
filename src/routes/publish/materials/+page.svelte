@@ -598,7 +598,7 @@
 				</Step>
 				<Step locked={locks[2]}>
 					<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-					<div class="flex flex-col gap-10 mt-3">
+					<div class="flex flex-col gap-6 mt-3">
 						<div class="flex flex-col md:flex-row col-span-full items-center gap-10">
 							<TimeEstimate bind:totalMinutes={estimate}/>
 							<div class="w-full md:w-1/2	">
