@@ -195,6 +195,21 @@ export async function getPublicationById(id: number): Promise<Publication> {
 	});
 }
 
+/**
+ * This is a lightweight publication existence check
+ * @param id - id of the publication to look up
+ */
+export async function getPublicationByIdLight(id: number): Promise<{id: number, publisherId: string} | null>{
+	return prisma.publication.findFirst({
+		where: {
+			id: id
+		},
+		select: {
+			id: true,
+			publisherId: true
+		}
+	})
+}
 
 // export async function getAllPublications(publishers: string[], query: string, includeDrafts?: boolean): Promise<PublicationGet[]> {
 export async function getAllPublications(publishers: string[], query: string, includeDrafts?: boolean) {

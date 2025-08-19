@@ -11,7 +11,7 @@ export async function GET({ params, locals }) {
 		);
 		if (!comment)
 			return new Response(
-				JSON.stringify({ error: 'Publication not found' }),
+				JSON.stringify({ error: 'Comments for publication not found' }),
 				{
 					status: 404,
 				},
