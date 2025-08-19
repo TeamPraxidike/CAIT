@@ -39,6 +39,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			} else {
 				const filePath = publication.coverPic!.path;
 				coverPicData = (await coverPicFetcher(
+					null,
 					publication.coverPic,
 				)).data;
 				// const currentFileData = await fileSystem.readFile(filePath);

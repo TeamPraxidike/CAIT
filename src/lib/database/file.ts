@@ -57,7 +57,7 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
 			currentFileData = await fileSystem.readFileURL(filePath);
 		}
 		else {
-			currentFileData = (await fileSystem.readFile(filePath)).toString('base64');
+			currentFileData = (await fileSystem.readFile(filePath)).toString('base64'); //skipcheck
 		}
 
 		return {
@@ -114,7 +114,7 @@ export async function coverPicFetcher(
 		}
 		else {
 			// TODO: frontend expects urls currently, add base64 checks jic
-			currentFileData = (await fileSystem.readFile(filePath)).toString('base64');
+			currentFileData = (await fileSystem.readFile(filePath)).toString('base64'); //skipcheck
 		}
 
 		return {
@@ -199,7 +199,7 @@ export async function updateProfilePic(
 	// if received info about coverPic (so not default)
 	if (profilePic) {
 		// upload new coverPic
-		const buffer: Buffer = Buffer.from(profilePic.info, 'base64');
+		const buffer: Buffer = Buffer.from(profilePic.info, 'base64'); //correct, skipcheck
 		await addProfilePic(
 			'cover.jpg',
 			profilePic.type,
@@ -231,7 +231,7 @@ export async function updateCoverPic(
 	// if received info about coverPic (so not default)
 	if (coverPic) {
 		// upload new coverPic
-		const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
+		const buffer: Buffer = Buffer.from(coverPic.info, 'base64'); //correct, skipcheck
 		await addCoverPic(
 			'cover.jpg',
 			coverPic.type,
@@ -262,7 +262,7 @@ export async function updateCircuitCoverPic(
 	}
 
 	// upload new coverPic
-	const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
+	const buffer: Buffer = Buffer.from(coverPic.info, 'base64'); //correct
 	await addCoverPic(
 		'cover.jpg',
 		coverPic.type,
@@ -398,11 +398,11 @@ export async function updateFiles(
 	}
 
 	// edit existing files
-	for (const file of fileInfo.edit) {
-		const buffer: Buffer = Buffer.from(file.info, 'base64');
-
-		await editFile(file.path, file.title, buffer, prismaContext);
-	}
+	// for (const file of fileInfo.edit) {
+	// 	const buffer: Buffer = Buffer.from(file.info, 'base64');
+	//
+	// 	await editFile(file.path, file.title, buffer, prismaContext);
+	// }
 }
 
 /**

@@ -34,7 +34,7 @@ export const actions = {
 
 		if (profilePicFile instanceof File) {
 			const buffer = await profilePicFile.arrayBuffer();
-			const info = Buffer.from(buffer).toString('base64');
+			const info = Buffer.from(buffer).toString('base64'); //correct
 			profilePic = {
 				type: profilePicFile.type,
 				info,
