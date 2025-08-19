@@ -60,6 +60,8 @@ model User {
   reported         Publication[]             @relation("reported")
   usedPublications PublicationUsedInCourse[]
 
+  savedByAllTime SavedByAllTime[]
+
   likedComments Comment[] @relation("likedComments")
   likedReplies  Reply[]   @relation("likedReplies")
 
@@ -113,7 +115,8 @@ model Publication {
 
   node Node[]
 
-  savedByAllTime String[] @default([])
+  // savedByAllTime String[] @default([])
+  savedByAllTime SavedByAllTime[]
 
   coverPic File? @relation("CoverPic")
 
@@ -123,6 +126,15 @@ model Publication {
   materials    Material?
   circuit      Circuit?
   usedInCourse PublicationUsedInCourse[]
+}
+
+model SavedByAllTime {
+  publicationId Int
+  Publication   Publication @relation(fields: [publicationId], references: [id])
+  userId        String      @db.Uuid
+  User          User        @relation(fields: [userId], references: [id])
+
+  @@id([publicationId, userId])
 }
 
 model SimilarContent {

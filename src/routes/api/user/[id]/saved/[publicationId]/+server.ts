@@ -50,6 +50,7 @@ export async function POST({ params, locals }) {
 			status: 200,
 		});
 	} catch (error) {
+		console.error(error);
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
 }

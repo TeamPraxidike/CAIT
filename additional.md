@@ -1,2 +1,1 @@
-- Search through all files with `Publication not found` - oftentimes the `getPublicationById` method is used, which is very heavy. Use a more lightweight method
 - `savedByAllTime` should be converted to a table for performance and concurrency reasons
