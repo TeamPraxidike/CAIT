@@ -431,7 +431,7 @@ export async function handleFileTokens(
 			// Use Prisma's executeRaw to handle the vector type correctly
 
 			// Raw query failed.Code: `22021`.Message: `ERROR: invalid byte sequence for encoding "UTF8": 0x00
-			// TOOD: does replace work?
+			// TODO: does replace work?
 			await prisma.$executeRaw`
                 INSERT INTO "FileChunk" (content, metadata, embedding, "filePath")
                 VALUES (${chunk.pageContent.replace(/\u0000/g, '')},
@@ -443,23 +443,14 @@ export async function handleFileTokens(
 	}
 }
 
-// export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
-// 	return prisma.$queryRaw`
-// 	SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", embedding <#> ${embeddedUserQuery}::vector AS similarity
-// 	FROM public."FileChunk"
-//     WHERE embedding <#> ${embeddedUserQuery}::vector < -0.2
-// 	ORDER BY "filePath", embedding <#> ${embeddedUserQuery}::vector ASC
-// 	LIMIT 5;
-// 	`;
-// }
-
+// Select embeddings which are at least 40% similar to the user query, return at most 5
 export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
 	return prisma.$queryRaw`
-    SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", 
+    SELECT id, content, metadata, "filePath", 
            (1 - (embedding <=> ${embeddedUserQuery}::vector)) AS similarity
     FROM public."FileChunk"
-    WHERE embedding <=> ${embeddedUserQuery}::vector < 0.7  
-    ORDER BY "filePath", embedding <=> ${embeddedUserQuery}::vector ASC
+    WHERE embedding <=> ${embeddedUserQuery}::vector < 0.6  
+    ORDER BY embedding <=> ${embeddedUserQuery}::vector ASC
     LIMIT 5;
     `;
 }
