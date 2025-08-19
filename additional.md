@@ -1,1 +1,0 @@
-- `savedByAllTime` should be converted to a table for performance and concurrency reasons

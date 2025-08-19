@@ -17,10 +17,11 @@ export const GET: RequestHandler = async ({ url }) => {
 		const includeDraft = url.searchParams.get('includeDraft') === 'true' || false;
 		const publishers = p ? p.split(',') : [];
 		const query: string = url.searchParams.get('q') || '';
+		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const amount: number = Number(url.searchParams.get('amount')) || 9;
 
 		// let publications: PublicationGet[] = await getAllPublications(publishers, query, includeDraft);
-		let publications = await getAllPublications(publishers, query, includeDraft);
+		let publications = await getAllPublications(publishers, query, sort, includeDraft);
 
 		const ids = publications.map(p => p.id)
 		publications = publications.slice(0, amount)

@@ -102,7 +102,7 @@ export async function getAllMaterials(
 	type: MaterialType[],
 	sort: string,
 	query: string,
-	withFiles: boolean = false
+	withFiles: boolean = false,
 ) {
 // ): Promise<MaterialWithPublication[]> {
 	const where: any = { AND: [], NOT: null };

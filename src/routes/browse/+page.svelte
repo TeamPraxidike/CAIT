@@ -188,22 +188,25 @@
 		page = e.detail;
 		materials = [];
 		circuits = [];
-		changePage(amount, page);
+		fetchPromise = changePage(amount, page);
 	}
 
 	function onAmountChange(e: CustomEvent): void {
 		materials = [];
 		circuits = [];
 		amount = e.detail;
-		changePage(amount, page);
+		fetchPromise = changePage(amount, page);
 	}
 
-	const changePage = async (amount: number, pageNum: number) => {
+	async function changePage(amount: number, pageNum: number) {
 		const ids = pageType === 'materials' ? idsMat : idsCirc;
 		const queryParams = new URLSearchParams({
 			type: pageType,
 			ids: ids.slice(pageNum * amount, (pageNum + 1) * amount).join(',')
 		});
+
+		if (sortByText !== 'Most Recent') queryParams.set('sort', sortByText);
+
 		const s = pageType === 'materials' ? 'material' : 'circuit';
 		const url = `/api/publication/set?${queryParams.toString()}`;
 		materials = [];
@@ -218,25 +221,14 @@
 			})
 			.then(data => {
 				if (s === 'material') {
-					// materials = data.publications.map((x: Publication & {
-					// 	materials: Material & { files: string[] },
-					// 	coverPicData: string,
-					// 	publisher: User & { profilePicData: string }
-					// }) => ({
 					materials = data.publications.map(x => ({
 						id: x.materials.id,
 						publication: x,
 						coverPicData: x.coverPicData,
 						publisher: x.publisher,
-						// files: x.materials.files,
 						encapsulatingType: x.materials.encapsulatingType
 					}));
 				} else {
-					// circuits = data.publications.map((x: Publication & {
-					// 	circuit: Circuit,
-					// 	coverPicData: string,
-					// 	publisher: User & { profilePicData: string }
-					// }) => ({ id: x.circuit.id, publication: x, coverPicData: x.coverPicData, publisher: x.publisher }));
 					circuits = data.publications.map(x => ({
 						id: x.circuit.id,
 						publication: x,
