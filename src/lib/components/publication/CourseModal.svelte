@@ -115,18 +115,20 @@
 
 
 		<div class="flex justify-end items-center pt-4">
-			{#if isEdit}
+			<div class="flex gap-3">
 				<button
 					type="button"
-					class="bg-surface-900 text-surface-50 dark:bg-surface-100 dark:text-surface-800 hover:bg-opacity-85 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition mr-auto"
-					on:click={() => modalStore.trigger(deleteConfirmModal)}>
-					Delete
-				</button>
-			{/if}
-
-			<div class="flex gap-3">
-				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition dark:text-surface-50">{isEdit ? 'Save' : 'Create'}</button>
-				<button type="button" class="bg-primary-600 hover:bg-primary-500 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition dark:text-surface-50" on:click={close}>Cancel</button>
+					class="text-surface-700 hover:bg-surface-100 font-semibold py-2 px-4 rounded-xl transition"
+					on:click={close}>Cancel</button>
+				{#if isEdit}
+					<button
+						type="button"
+						class="bg-surface-900 text-white hover:bg-opacity-85 font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+						on:click={() => modalStore.trigger(deleteConfirmModal)}>
+						Delete
+					</button>
+				{/if}
+				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
 			</div>
 		</div>
 	</form>
