@@ -4,7 +4,7 @@ services:
   studio:
     build:
       context: ..
-      dockerfile: apps/studio/Dockerfile
+      dockerfile: studio/Dockerfile
       target: dev
     ports:
       - 8082:8082
