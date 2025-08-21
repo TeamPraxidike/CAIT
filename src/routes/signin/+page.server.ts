@@ -11,14 +11,31 @@ export const load: PageServerLoad = async (event) => {
 export const actions: Actions = {
 	login: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
-		const email = formData.get('email') as string;
-		const password = formData.get('password') as string;
+		// const email = formData.get('email') as string;
+		// const password = formData.get('password') as string;
 
-		const { error } = await supabase.auth.signInWithPassword({ email, password });
+		// const { error } = await supabase.auth.signInWithPassword({ email, password });
+		// if (error) {
+		// 	return fail(400, { email, incorrect: true, error: error.message });
+		// } else {
+		// 	redirect(303, '/browse');
+		// }
+
+		const { data, error } = await supabase.auth.signInWithSSO({
+			domain: 'dev-gibxq4rldhm2q1st.eu.auth0.com',
+			options: {
+				redirectTo: "http://localhost:5173/browse"
+			}
+		})
 		if (error) {
-			return fail(400, { email, incorrect: true, error: error.message });
+			console.log("EEEEEEROR");
+			return fail(400, { incorrect: true, error: error.message });
 		} else {
-			redirect(303, '/browse');
+			if (data?.url) {
+				console.log(data);
+				// redirect the user to the identity provider's authentication flow
+				redirect(303, data.url)
+			}
 		}
 	}
 };

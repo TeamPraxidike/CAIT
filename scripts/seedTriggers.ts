@@ -27,12 +27,15 @@ async function main() {
 		 SECURITY DEFINER
 		AS $function$
         BEGIN
+        
+        RAISE NOTICE 'New user data: %', to_jsonb(NEW);
+              
         INSERT INTO public."User" (id, email, "firstName", "lastName")
         VALUES (
                    NEW.id,
                    NEW.email,
-                   new.raw_user_meta_data ->> 'firstName',
-				   new.raw_user_meta_data ->> 'lastName'
+                   new.raw_user_meta_data -> 'custom_claims' ->> 'firstName',
+				   new.raw_user_meta_data -> 'custom_claims' ->> 'lastName'
                );
         RETURN NEW;
         END;
