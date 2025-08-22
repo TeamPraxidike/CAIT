@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { Course } from '$lib/database/courses';
-	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
 	import Icon from '@iconify/svelte';
+	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
+	import { deleteCourseById } from '$lib/util/coursesLogic';
 
 	const dispatch = createEventDispatcher();
-	const modalStore = getModalStore();
+	let confirmDelete: any;
 
 	export let selectedCourseId: number | null;
 	export let previousCourseId: number | null;
@@ -18,29 +19,20 @@
 		selectedCourseId = selectedCourseId === courseId ? null : courseId;
 	}
 
-	const modal: ModalSettings = {
-		type: 'confirm',
-		title: 'Are you sure you want to delete this course?',
-		body: 'It will be removed from all publications that are associated with it. Their metadata will remain the same.',
-		response: async (r: boolean) => {
-			if (r) {
-				const id = modal.meta.courseId;
-				dispatch('courseDeleted', { courseId: id }); // inform parent component, so that it can update the UI
-
-				await fetch(`/api/course/${id}`, {
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				});
-
-				if (id === selectedCourseId) {
-					selectedCourseId = null;
-				}
+	async function confirmAndDelete(courseId: number) {
+		try {
+			await deleteCourseById(courseId);
+			if (courseId === selectedCourseId) {
+				selectedCourseId = null;
 			}
+			dispatch('courseDeleted', { courseId });
+		} catch (e) {
+			console.error(e);
 		}
-	};
+	}
 </script>
+
+<ConfirmDeleteCourse bind:this={confirmDelete} />
 
 <button
 	type="button"
@@ -68,11 +60,7 @@
 			class="absolute -top-2 -right-2.5 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs cursor-pointer"
 			aria-label="Delete course"
 			on:click={() => {
-				// pass along which course to delete
-				modal.meta = {
-					courseId: course.id
-				};
-				modalStore.trigger(modal)
+				confirmDelete.open({ courseId: course.id, onConfirm: confirmAndDelete });
 			}}
 		>
 			<Icon icon="mdi:close" width="12" height="12" />

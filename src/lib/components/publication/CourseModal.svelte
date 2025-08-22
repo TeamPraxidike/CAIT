@@ -9,8 +9,9 @@
 	import CourseLevel from '$lib/components/publication/CourseLevel.svelte';
 	import type { Course } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
-	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
+	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
+	import { deleteCourseById } from '$lib/util/coursesLogic';
 
 	export let close: () => void; // to close the modal
 	export let users: UserWithProfilePic[] = [];
@@ -33,22 +34,20 @@
 	const user = page.data.loggedUser as UserWithProfilePic;
 	const isEdit = !!existingCourse;
 
-	const modalStore = getModalStore();
 	const dispatch = createEventDispatcher();
 
-	const deleteConfirmModal: ModalSettings = {
-		type: 'confirm',
-		title: 'Are you sure you want to delete this course?',
-		body: 'It will be removed from all publications that are associated with it. Their metadata will remain the same.',
-		response: async (r: boolean) => {
-			if (r && id !== null) {
-				await fetch(`/api/course/${id}`, { method: 'DELETE' });
-				dispatch('courseDeleted', { courseId: id });
-				onSuccess();
-				close();
-			}
+	let confirmDelete: any;
+
+	async function confirmAndDelete(courseId: number) {
+		try {
+			await deleteCourseById(courseId);
+			dispatch('courseDeleted', { courseId });
+			onSuccess();
+			close();
+		} catch (e) {
+			console.error(e);
 		}
-	};
+	}
 
 
 	if (user) {
@@ -67,6 +66,8 @@
 
 
 </script>
+
+<ConfirmDeleteCourse bind:this={confirmDelete} />
 
 <div class="modal-bg">
 	<form
@@ -110,7 +111,7 @@
 		</div>
 
 		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
-						   bind:additionalMaintainers={additionalMaintainers} />
+					   bind:additionalMaintainers={additionalMaintainers} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />
 
 
@@ -124,7 +125,7 @@
 					<button
 						type="button"
 						class="bg-surface-900 text-white hover:bg-opacity-85 font-semibold py-2 px-4 rounded-xl shadow-sm transition"
-						on:click={() => modalStore.trigger(deleteConfirmModal)}>
+						on:click={() => { if (id !== null) confirmDelete.open({ courseId: id, onConfirm: confirmAndDelete }); }}>
 						Delete
 					</button>
 				{/if}
