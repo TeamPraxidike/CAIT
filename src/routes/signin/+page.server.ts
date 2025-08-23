@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { env } from '$env/dynamic/public';
 
 import type { PageServerLoad, Actions } from './$types';
 
@@ -25,9 +26,11 @@ export const actions: Actions = {
 		}
 
 		const { data, error } = await supabase.auth.signInWithSSO({
-			domain: 'dev-gibxq4rldhm2q1st.eu.auth0.com',
+			domain: env.PUBLIC_SAML_IDP_DOMAIN,
 			options: {
-				redirectTo: "http://localhost:5173/signin/sso/success",
+				redirectTo: env.PUBLIC_SUPABASE_URL.includes("localhost") ?
+					"http://localhost:5173/signin/sso/success" :
+					"https://cait.beta.praxidike.org/signin/sso/success"
 			}
 		})
 		if (error) {

@@ -4,9 +4,9 @@
 	"private": true,
 	"scripts": {
 		"setup": "npm install && npx prisma generate",
-		"dev": "scripts/dev.sh",
-		"prebuild": "chmod +x scripts/dirname.sh && npx prisma generate && prisma migrate deploy",
-		"build": "npm run prebuild && vite build && scripts/dirname.sh",
+		"dev": "chmod +x scripts/createSAMLidp.sh && scripts/dev.sh",
+		"prebuild": "chmod +x scripts/dirname.sh && chmod +x scripts/createSAMLidp.sh. && npx prisma generate && prisma migrate deploy",
+		"build": "npm run prebuild && scripts/createSAMLidp.sh && vite build && scripts/dirname.sh",
 		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
