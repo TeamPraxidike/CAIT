@@ -44,3 +44,21 @@ export function changeCourse(newCourse: number | null, currentCourse: number | n
 		maintainers
 	};
 }
+
+export async function deleteCourseById(courseId: number): Promise<void> {
+	const res = await fetch(`/api/course/${courseId}`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+	if (!res.ok) {
+		let body = '';
+		try {
+			body = await res.text();
+		} catch {
+			// ignore
+		}
+		throw new Error(`Failed to delete course ${courseId}: ${res.status} ${body}`);
+	}
+}
