@@ -110,7 +110,7 @@
 	{#if warning}
 		<p class="text-error-300 dark:text-error-400">Upload at least one material</p>
 	{:else}
-		<h4>Uploaded materials</h4>
+		<h4 class="block font-medium">Uploaded materials</h4>
 	{/if}
 	{#if files}
 		<div class="flex flex-col gap-1">

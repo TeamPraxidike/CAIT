@@ -9,6 +9,9 @@
 	import CourseLevel from '$lib/components/publication/CourseLevel.svelte';
 	import type { Course } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import { createEventDispatcher } from 'svelte';
+	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
+	import { deleteCourseById } from '$lib/util/coursesLogic';
 
 	export let close: () => void; // to close the modal
 	export let users: UserWithProfilePic[] = [];
@@ -21,15 +24,30 @@
 	export let onSuccess = () => {};
 	let id = existingCourse?.id ?? null;
 
-	let title = '';
-	let level: Level;
-	let learningObjectives: string[] = [];
-	let prerequisites: string[] = [];
+	let title = existingCourse?.courseName ?? '';
+	let level: Level = existingCourse?.educationalLevel as Level;
+	let learningObjectives: string[] = existingCourse?.learningObjectives ?? [];
+	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
 
 	type UserWithProfilePic = User & { profilePicData: string | null };
 	let maintainers: UserWithProfilePic[] = [];
 	const user = page.data.loggedUser as UserWithProfilePic;
 	const isEdit = !!existingCourse;
+
+	const dispatch = createEventDispatcher();
+
+	let confirmDelete: any;
+
+	async function confirmAndDelete(courseId: number) {
+		try {
+			await deleteCourseById(courseId);
+			dispatch('courseDeleted', { courseId });
+			onSuccess();
+			close();
+		} catch (e) {
+			console.error(e);
+		}
+	}
 
 
 	if (user) {
@@ -49,9 +67,11 @@
 
 </script>
 
+<ConfirmDeleteCourse bind:this={confirmDelete} />
+
 <div class="modal-bg">
 	<form
-		action="?/publishCourse"
+		action={isEdit ? `?/editCourse` : "?/publishCourse"}
 		method="POST"
 		bind:this={form}
 		enctype="multipart/form-data"
@@ -62,6 +82,7 @@
 			formData.append('prerequisites', JSON.stringify(prerequisites));
 			formData.append('maintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
 			formData.append('level', level);
+			if (isEdit && id !== null) formData.append('id', id.toString());
 			formData.append('context', 'course-form')
 
 			close();
@@ -69,7 +90,7 @@
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
 
-		<h2 class="text-2xl font-bold mb-4">Create a Course</h2>
+		<h2 class="text-2xl font-bold mb-4">{isEdit ? 'Edit Course' : 'Create a Course'}</h2>
 
 		<div class="space-y-2">
 			<label for="title" class="block font-medium">Name<span class="text-error-300">*</span></label>
@@ -80,38 +101,36 @@
 				bind:value={title}
 				on:keydown={handleInputEnter}
 				required
-				class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+				class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0"
 			/>
 		</div>
 
-		<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
+		<div class="space-y-3">
+			<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
+			<CourseLevel bind:label={level} />
+		</div>
 
-		<CourseLevel bind:label={level} />
 		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
-						   bind:additionalMaintainers={additionalMaintainers} />
+					   bind:additionalMaintainers={additionalMaintainers} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />
 
 
 		<div class="flex justify-end items-center pt-4">
 			<div class="flex gap-3">
-				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
-				<button type="button" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition" on:click={close}>Cancel</button>
-			</div>
-
-			{#if isEdit}
 				<button
 					type="button"
-					class="btn-danger text-sm px-5 py-2 ml-auto"
-					on:click={async () => {
-						if (confirm('Are you sure you want to delete this course?')) {
-							await fetch(`/api/course/${id}`, { method: 'DELETE' });
-							onSuccess();
-							close();
-						}
-					}}>
-					Delete
-				</button>
-			{/if}
+					class="text-surface-700 hover:bg-surface-100 font-semibold py-2 px-4 rounded-xl transition"
+					on:click={close}>Cancel</button>
+				{#if isEdit}
+					<button
+						type="button"
+						class="bg-surface-900 text-white hover:bg-opacity-85 font-semibold py-2 px-4 rounded-xl shadow-sm transition"
+						on:click={() => { if (id !== null) confirmDelete.open({ courseId: id, onConfirm: confirmAndDelete }); }}>
+						Delete
+					</button>
+				{/if}
+				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
+			</div>
 		</div>
 	</form>
 </div>
