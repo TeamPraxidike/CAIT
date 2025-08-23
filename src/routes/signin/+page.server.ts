@@ -11,20 +11,23 @@ export const load: PageServerLoad = async (event) => {
 export const actions: Actions = {
 	login: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
-		// const email = formData.get('email') as string;
-		// const password = formData.get('password') as string;
+		const email = formData.get('email') as string;
+		const password = formData.get('password') as string;
+		const emailPasswordLogin = JSON.parse(formData.get('emailPasswordLogin') as string) as boolean;
 
-		// const { error } = await supabase.auth.signInWithPassword({ email, password });
-		// if (error) {
-		// 	return fail(400, { email, incorrect: true, error: error.message });
-		// } else {
-		// 	redirect(303, '/browse');
-		// }
+		if (emailPasswordLogin){
+			const { error } = await supabase.auth.signInWithPassword({ email, password });
+			if (error) {
+				return fail(400, { email, incorrect: true, error: error.message });
+			} else {
+				redirect(303, '/browse');
+			}
+		}
 
 		const { data, error } = await supabase.auth.signInWithSSO({
 			domain: 'dev-gibxq4rldhm2q1st.eu.auth0.com',
 			options: {
-				redirectTo: "http://localhost:5173/register/success",
+				redirectTo: "http://localhost:5173/signin/sso/success",
 			}
 		})
 		if (error) {

@@ -13,7 +13,7 @@
 		<ProgressRadial font={18} width="w-14"/>
 	{/if}
 	{#await data.putUsernameRequest}
-		<h1>Setting some things up</h1>
+		<h1 class="mr-8">Setting some things up</h1>
 		<ProgressRadial font={12} width="w-10"/>
 	{:then awaitedRequest}
 		<div class="fade-overlay col-span-full pt-20"
@@ -53,7 +53,7 @@
         width: 100%;
         height: 100%;
         z-index: 40;
-        background: linear-gradient(135deg, #ffffff 0%, #fcfcfd 100%);
+        background: transparent;
         filter: saturate(0.7);
         display: flex;
         align-items: center;

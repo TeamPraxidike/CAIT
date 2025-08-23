@@ -731,7 +731,7 @@
         width: 100%;
         height: 100%;
         z-index: 40;
-        background: linear-gradient(135deg, #ffffff 0%, #fcfcfd 100%);
+        background: transparent;
         filter: saturate(0.7);
         display: flex;
         align-items: center;

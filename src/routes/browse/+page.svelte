@@ -301,7 +301,7 @@
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
 
-<div class="col-span-full mt-32">
+<div class="col-span-full mt-24">
 	<SearchBar searchType="materials" bind:isSemanticActive={isSemanticActive} bind:inputKeywords={searchWord}
 			   on:press={() => searchActive = true}
 			   on:SearchQuery={onSearch} on:SemanticSearchQuery={onSemanticSearch} />
