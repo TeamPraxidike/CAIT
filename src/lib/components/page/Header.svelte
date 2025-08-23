@@ -76,7 +76,7 @@
     import { onDestroy, onMount } from 'svelte';
 
     let progress = 0;
-    let showProgressBar = false;
+    let progressBarVisible = false;
     let enterEndingInterval = true;
     let progressBarColor = '#00A6D6'
     let progressInterval: any = null;
@@ -84,71 +84,50 @@
     const DURATION_MS = 2500;
     const PLACEHOLDER_PROGRESS = 40;
 
-    $: if ($navigating && $navigating.complete !== null && !showProgressBar) {
+    function hideProgressBar(){
+        enterEndingInterval = false;
 
-        showProgressBar = true;
+        clearInterval(progressInterval);
+
+        setTimeout(() => {
+            progressBarColor = 'transparent';
+        }, 200)
+
+        setTimeout(() => {
+            progress = 0;
+        }, 200)
+
+        setTimeout(() => {
+            progressBarColor = '#00A6D6';
+            progressBarVisible = false;
+            enterEndingInterval = true;
+        }, 800);
+    }
+
+    $: if ($navigating && $navigating.complete !== null && !progressBarVisible) {
+
+        progressBarVisible = true;
         progress = 0;
 
         clearInterval(progressInterval);
 
         progressInterval = window.setInterval(() => {
             progress = Math.min(progress + 1, PLACEHOLDER_PROGRESS);
-            //
         }, DURATION_MS / PLACEHOLDER_PROGRESS);
 
         $navigating.complete.then(() => {
             clearInterval(progressInterval);
             progressInterval = window.setInterval(() => {
                 progress = Math.min(progress + 1, 100);
-                //
 
                 if (progress === 100 && enterEndingInterval) {
-
-
-                    enterEndingInterval = false;
-
-                    clearInterval(progressInterval);
-
-                    setTimeout(() => {
-                        progressBarColor = 'transparent';
-                    }, 200)
-
-                    setTimeout(() => {
-                        progress = 0;
-                    }, 200)
-
-                    setTimeout(() => {
-                        progressBarColor = '#00A6D6';
-                        showProgressBar = false;
-                        enterEndingInterval = true;
-                    }, 800);
+                    hideProgressBar();
                 }
             }, 3);
-            // hide the progress bar after the completion animation (500ms)
+        // if navigation is cancelled or fails, hide the bar immediately.
         }).catch(() => {
-            // if navigation is cancelled or fails, hide the bar immediately.
-
-            enterEndingInterval = false;
-
-            clearInterval(progressInterval);
-
-            setTimeout(() => {
-                progressBarColor = 'transparent';
-            }, 200)
-
-            setTimeout(() => {
-                progress = 0;
-            }, 200)
-
-            setTimeout(() => {
-                progressBarColor = '#00A6D6';
-                showProgressBar = false;
-                enterEndingInterval = true;
-            }, 800);
+            hideProgressBar();
         });
-    } else {
-
-        //clearInterval(progressInterval);
     }
 </script>
 

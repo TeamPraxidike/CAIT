@@ -24,15 +24,13 @@ export const actions: Actions = {
 		const { data, error } = await supabase.auth.signInWithSSO({
 			domain: 'dev-gibxq4rldhm2q1st.eu.auth0.com',
 			options: {
-				redirectTo: "http://localhost:5173/browse"
+				redirectTo: "http://localhost:5173/register/success",
 			}
 		})
 		if (error) {
-			console.log("EEEEEEROR");
 			return fail(400, { incorrect: true, error: error.message });
 		} else {
 			if (data?.url) {
-				console.log(data);
 				// redirect the user to the identity provider's authentication flow
 				redirect(303, data.url)
 			}

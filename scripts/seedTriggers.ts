@@ -34,8 +34,17 @@ async function main() {
         VALUES (
                    NEW.id,
                    NEW.email,
-                   new.raw_user_meta_data -> 'custom_claims' ->> 'firstName',
-				   new.raw_user_meta_data -> 'custom_claims' ->> 'lastName'
+--                 COALESCE takes the first non-null arg
+-- 					NULLIF returns null if a=b
+-- 			       fullName is used by Github and is the full name, otherwise we use Google
+                   COALESCE(
+                           NULLIF(NEW.raw_user_meta_data -> 'custom_claims' ->> 'firstName',''),
+                           split_part(NEW.raw_user_meta_data -> 'custom_claims' ->> 'fullName',' ',1)
+                   ),
+                   COALESCE(
+                           NULLIF(NEW.raw_user_meta_data -> 'custom_claims' ->> 'lastName',''),
+                           split_part(NEW.raw_user_meta_data -> 'custom_claims' ->> 'fullName',' ',2)
+                   )
                );
         RETURN NEW;
         END;
