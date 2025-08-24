@@ -22,7 +22,7 @@
 		goto('/browse');
 	} else if(form && form.status !== 200){
 		toastStore.trigger({
-			message: `Login fail ${form.error}`,
+			message: `Login fail: ${form.error}`,
 			background: 'bg-error-200',
 			classes: 'text-surface-900',
 		});
@@ -66,11 +66,6 @@
 			<hr class="my-4 text-surface-200">
 			<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/register">Create
 				one</a></p>
-			<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
-				{#if form?.incorrect}
-					<p>Error logging in: {form.error}</p>
-				{/if}
-			</div>
 		{/if}
 	</form>
 </div>
