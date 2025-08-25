@@ -104,7 +104,28 @@
 	let fileTUSUploadObjects: { [key: string]: any } = {}
 	$: fileTUSUploadObjects = fileTUSUploadObjects
 
+	async function downloadFileFromSupabase(f: FetchedFileItem){
+		const { data: blob, error } = await supabaseClient.storage
+			.from("uploadedFiles")
+			.download(f.fileId)
+
+		if (error) {
+			console.error('Error downloading file from Supabase:', error.message);
+			throw error;
+		}
+
+		if (!blob) {
+			console.error('Download succeeded but the returned blob is null.');
+			return null;
+		}
+
+		return new File([blob], f.name, {
+			type: blob.type,
+		});
+	}
+
 	let previousCourse: number | null = null;
+	let coverPicPromise: Promise<File | null> | null = null;
 	$: if (course !== previousCourse) {
 		const currentCourse = courses.find(c => c.id === course);
 		maintainers = [];
@@ -116,8 +137,17 @@
 		PKs = result.PKs;
 		maintainers = result.maintainers;
 
-		if (currentCourse && currentCourse.copyright !== "") {
-			copyright = currentCourse.copyright;
+		if (currentCourse) {
+			if (currentCourse.copyright !== "") {
+				copyright = currentCourse.copyright;
+			}
+			if (currentCourse?.coverPic?.data) {
+				downloadFileFromSupabase(currentCourse.coverPic).then(f => {
+					coverPic = f || undefined;
+				});
+			} else {
+				coverPic = undefined;
+			}
 		}
 	}
 
@@ -229,6 +259,7 @@
 
 	import * as tus from 'tus-js-client'
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
+	import type { FetchedFileItem } from '$lib/database';
 
 	// source: https://supabase.com/docs/guides/storage/uploads/resumable-uploads?queryGroups=language&language=js
 
@@ -553,7 +584,6 @@
 						/>
 					</div>
 				</div>
-
 					<CoverPicSelect bind:coverPic={coverPic} toastStore={toastStore} />
 				</div>
 				</Step>
@@ -825,6 +855,7 @@
 {#if showModal}
 	<CourseModal existingCourse={editingCourse} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
 				 bind:additionalMaintainers={courseMaintainers}
+				 bind:coverPic={coverPic}
 				 on:courseDeleted={(event) => {
 					const id = event.detail.courseId;
 					courses = courses.filter(c => c.id !== id);

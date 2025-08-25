@@ -7,12 +7,15 @@
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import CourseLevel from '$lib/components/publication/CourseLevel.svelte';
-	import type { Course } from '$lib/database/courses';
+	import type { Course, CourseWithCoverPic } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
 	import { deleteCourseById } from '$lib/util/coursesLogic';
+	import type { FetchedFileItem } from '$lib/database';
+
+	let supabaseClient = page.data.supabase;
 
 	export let close: () => void; // to close the modal
 	export let users: UserWithProfilePic[] = [];
@@ -21,9 +24,29 @@
 	export let publisher: UserWithProfilePic
 
 
-	export let existingCourse: Course | null;
+	export let existingCourse: CourseWithCoverPic | null;
 	export let onSuccess = () => {};
 	let id = existingCourse?.id ?? null;
+
+	async function downloadFileFromSupabase(f: FetchedFileItem){
+		const { data: blob, error } = await supabaseClient.storage
+			.from("uploadedFiles")
+			.download(f.fileId)
+
+		if (error) {
+			console.error('Error downloading file from Supabase:', error.message);
+			throw error;
+		}
+
+		if (!blob) {
+			console.error('Download succeeded but the returned blob is null.');
+			return null;
+		}
+
+		return new File([blob], f.name, {
+			type: blob.type,
+		});
+	}
 
 	let title = existingCourse?.courseName ?? '';
 	let level: Level = existingCourse?.educationalLevel as Level;
@@ -31,6 +54,11 @@
 	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
 	let copyright: string = existingCourse?.copyright ?? "";
 	let coverPic: File | undefined = undefined;
+	if (existingCourse) {
+		downloadFileFromSupabase(existingCourse.coverPic).then(f => {
+			coverPic = f || undefined;
+		})
+	}
 
 	type UserWithProfilePic = User & { profilePicData: string | null };
 	let maintainers: UserWithProfilePic[] = [];

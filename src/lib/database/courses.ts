@@ -3,6 +3,7 @@ import { type Level, Prisma, type PrismaClient } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import type { UserWithProfilePic } from '$lib/util/coursesLogic';
 import { profilePicFetcher } from '$lib/database/file';
+import type { FetchedFileItem } from '$lib/database/index';
 
 export type createCourseData = {
 	learningObjectives: string[];
@@ -27,6 +28,12 @@ export type Course = Prisma.CourseGetPayload<{
 		coverPic: true
 	}
 }>;
+
+export type CourseWithCoverPic = Prisma.CourseGetPayload<{
+	include: {maintainers : true}
+}> & {
+	coverPic: FetchedFileItem;
+};
 
 
 async function enrichMaintainers(course: Course & { maintainers: any[] }): Promise<CourseWithMaintainersAndProfilePic> {
