@@ -5,7 +5,6 @@
 	export let coverPic: File | undefined = undefined;
 	export let toastStore: any = null;
 
-	export let width: string = "w-full";
 
 	if (toastStore == null) {
 		toastStore = getToastStore();

@@ -15,6 +15,8 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	const { users } = await (await fetch(`/api/user`)).json();
 	const courses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended/user/${locals.user?.id}`)).json();
 	const allCourses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended`)).json();
+	console.log(courses);
+	console.log(allCourses);
 	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 

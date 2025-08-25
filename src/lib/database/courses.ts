@@ -22,7 +22,11 @@ export type CourseWithMaintainersAndProfilePic = Course & {
 	maintainers: UserWithProfilePic[];
 };
 
-export type Course = Prisma.CourseGetPayload<true>;
+export type Course = Prisma.CourseGetPayload<{
+	include: {
+		coverPic: true
+	}
+}>;
 
 
 async function enrichMaintainers(course: Course & { maintainers: any[] }): Promise<CourseWithMaintainersAndProfilePic> {
@@ -44,7 +48,8 @@ export async function getAllCoursesExtended(): Promise<CourseWithMaintainersAndP
 		include: {
 			maintainers: {
 				include: { profilePic: true }
-			}
+			},
+			coverPic: true
 		}
 	});
 
@@ -119,7 +124,8 @@ export async function findCourseByMantainerExtended(userId: string): Promise<Cou
 		include: {
 			maintainers: {
 				include: { profilePic: true }
-			}
+			},
+			coverPic: true
 		}
 	});
 
