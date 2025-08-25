@@ -5,8 +5,7 @@ import { type Difficulty, type Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
 import type {
-	CourseWithCoverPic,
-	CourseWithMaintainersAndProfilePic,
+	CourseWithCoverPic
 } from '$lib/database/courses';
 import { env } from '$env/dynamic/public';
 

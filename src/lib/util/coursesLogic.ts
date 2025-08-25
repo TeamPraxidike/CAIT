@@ -1,6 +1,5 @@
 import type {
 	CourseWithCoverPic,
-	CourseWithMaintainersAndProfilePic,
 } from '$lib/database/courses';
 import type {User} from '$lib/database/user';
 

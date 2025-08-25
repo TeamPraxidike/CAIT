@@ -14,8 +14,6 @@
 
 	export let originalCourseIds = courses.map(c => c.id);
 
-	let showMyCourses = false;
-
     // Show up to 10 courses; if more, show a "+N more…" chip at the end
     let maxVisible = 4;
     $: visibleCourses = Array.isArray(courses) ? courses.slice(0, maxVisible) : [];

@@ -7,13 +7,12 @@
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import CourseLevel from '$lib/components/publication/CourseLevel.svelte';
-	import type { Course, CourseWithCoverPic } from '$lib/database/courses';
+	import type { CourseWithCoverPic } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
 	import { deleteCourseById } from '$lib/util/coursesLogic';
-	import type { FetchedFileItem } from '$lib/database';
 	import { downloadFileFromSupabase } from '$lib/util/file';
 
 	let supabaseClient = page.data.supabase;

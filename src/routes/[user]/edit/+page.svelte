@@ -5,7 +5,6 @@
 	import { FileButton, getToastStore } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import type { FetchedFileItem } from '$lib/database';
 	import { onMount, tick } from 'svelte';
 	import { downloadFileFromSupabase } from '$lib/util/file';
 

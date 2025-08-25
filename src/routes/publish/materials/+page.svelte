@@ -7,7 +7,7 @@
 		Tag,
 		UserProp
 	} from '$lib';
-	import { FileButton, getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
+	import { getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
 	import type {  Difficulty, Tag as PrismaTag } from '@prisma/client';
@@ -29,7 +29,6 @@
 		getCover,
 		getFiles,
 		getMaterialSnapshot,
-		saveCover,
 		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata
 	} from '$lib/util/indexDB';
 	import { allUploadsDone, downloadFileFromSupabase } from '$lib/util/file';
@@ -42,7 +41,6 @@
 	import TimeEstimate from '$lib/components/publication/TimeEstimate.svelte';
 	import * as tus from 'tus-js-client'
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
-	import type { FetchedFileItem } from '$lib/database';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -153,10 +151,6 @@
 		}
 	}
 
-
-	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
-
-	let typeActive = false;
 	// cover
 	let coverPic: File | undefined = undefined;
 
