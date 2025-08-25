@@ -5,7 +5,7 @@
 	"scripts": {
 		"setup": "npm install && npx prisma generate",
 		"dev": "chmod +x scripts/createSAMLidp.sh && scripts/dev.sh",
-		"prebuild": "chmod +x scripts/dirname.sh && chmod +x scripts/createSAMLidp.sh. && npx prisma generate && prisma migrate deploy",
+		"prebuild": "chmod +x scripts/dirname.sh && chmod +x scripts/createSAMLidp.sh && npx prisma generate && prisma migrate deploy",
 		"build": "npm run prebuild && scripts/createSAMLidp.sh && vite build && scripts/dirname.sh",
 		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
