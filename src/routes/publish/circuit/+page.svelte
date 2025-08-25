@@ -252,7 +252,13 @@
 			formData.append('coverPic', JSON.stringify(circuitCoverPic));
 			formData.append("isDraft", JSON.stringify(markedAsDraft || draft));
       }}>
-	<Stepper on:submit={() => isSubmitting=true} on:next={onNextHandler} buttonCompleteType="submit" buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
+	<Stepper on:submit={() => isSubmitting=true} on:next={onNextHandler} buttonCompleteType="submit"
+			buttonBackLabel="← Back"
+			buttonBack="btn text-surface-800 border border-surface-600 bg-surface-200 dark:text-surface-50 dark:bg-surface-600"
+			buttonNextLabel="Next →"
+			buttonNext="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600"
+			buttonCompleteLabel="Complete"
+			buttonComplete="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600">
 		<Step locked="{locks[0]}">
 			<svelte:fragment slot="header">Create the circuit</svelte:fragment>
 <!--			<Circuit bind:nodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>-->
@@ -266,24 +272,26 @@
 			<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
 			<div class="flex flex-col gap-5 col-span-full">
 				<div class="w-full space-y-1">
-					<label for="circuitTitle" >Title<span class="text-error-300">*</span></label>
-					<input on:keydown={handleInputEnter} bind:value={title} id="circuitTitle" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Enter title" required/>
+					<label for="circuitTitle" class="block font-medium">Title<span class="text-error-300">*</span></label>
+					<input on:keydown={handleInputEnter} bind:value={title} id="circuitTitle" class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0" placeholder="Enter title" required/>
 				</div>
 				<div class="w-full space-y-1">
-					<label for="circuitDescription">Description<span class="text-error-300">*</span></label>
-					<textarea  bind:value={description} rows="5" id="circuitDescription" class="rounded-lg w-full dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 focus:ring-primary-500" placeholder="Explain your circuit" required />
+					<label for="circuitDescription" class="block font-medium">Description<span class="text-error-300">*</span></label>
+					<textarea  bind:value={description} rows="5" id="circuitDescription" class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0" placeholder="Explain your circuit" required />
 				</div>
 			</div>
 		</Step>
 		<Step locked="{locks[2]}">
 			<svelte:fragment slot="header">Additional Metadata</svelte:fragment>
-			<div class="flex flex-col justify-between gap-3 col-span-full">
+			<div class="flex flex-col justify-between gap-6 col-span-full mb-6">
 
 				<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={priorKnowledge} adding="{true}"/>
 
 				<div class="flex flex-col w-1/2">
 					<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users} bind:additionalMaintainers={additionalMaintainers}/>
-						<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
+				</div>
+				<div class="flex flex-col w-1/2">
+					<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 				</div>
 			</div>
 		</Step>
@@ -295,7 +303,7 @@
 			{#key circuitKey}
 				<SvelteFlowProvider>
 					<CircuitComponent dbNodes={circuitNodesPlaceholder}  publishing='{false}' bind:liked="{liked}" bind:saved={saved}/>
-				</SvelteFlowProvider>z`
+				</SvelteFlowProvider>
 			{/key}
 
 			{#if draft}

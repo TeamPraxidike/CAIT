@@ -207,9 +207,16 @@
 		});
 		isSubmitting = false;
 	} else if (form?.status == 200 && form?.context === 'course-form') {
-		originalCourseIds = [...originalCourseIds, form.course.id];
-		courses.push(form?.course);
-		courses = courses;
+		const updated = form.course;
+		const idx = courses.findIndex(c => c.id === updated.id);
+		if (idx !== -1) {
+			courses[idx] = updated;
+			courses = [...courses];
+		} else {
+			originalCourseIds = [...originalCourseIds, updated.id];
+			courses.push(updated);
+			courses = courses;
+		}
 		form = { ...form, context: "undefined" };
 	}
 
@@ -401,7 +408,15 @@
 			event.preventDefault();
 		}
 	};
-	function openModal() {
+	function openModal(courseToEdit: any = null) {
+		if (courseToEdit) {
+			editingCourse = courseToEdit;
+			// prefill maintainers for edit (exclude current user)
+			courseMaintainers = (courseToEdit.maintainers || []).filter((m: any) => m.id !== loggedUser.id);
+		} else {
+			editingCourse = null;
+			courseMaintainers = [];
+		}
 		showModal = true;
 	}
 
@@ -412,6 +427,7 @@
 
 	// const uploadFile
 	let showModal = false;
+	let editingCourse: any = null;
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
@@ -490,9 +506,12 @@
 					formData.append('course', course ? course.toString() : 'null');
 				  }} >
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
-					 buttonNext="btn dark:bg-surface-200"
-					 buttonCompleteLabel="Complete"
-					 buttonComplete="btn text-surface-50 bg-primary-500 dark:text-surface-50 dark:bg-primary-500">
+					buttonBackLabel="← Back"
+					buttonBack="btn text-surface-800 border border-surface-600 bg-surface-200 dark:text-surface-50 dark:bg-surface-600"
+					buttonNextLabel="Next →"
+					buttonNext="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600"
+					buttonCompleteLabel="Complete"
+					buttonComplete="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600">
 				<Step locked={locks[0]}>
 					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 					<UploadFilesForm
@@ -505,29 +524,32 @@
 						bind:files={files}/>
 				</Step>
 				<Step locked={locks[1]}>
-				<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-				<div class="grid grid-cols-2 gap-x-4 gap-y-2">
-					<label for="title">Title<span class="text-error-300">*</span></label>
-					<label for="coverPic">Cover Picture (Max. size: 2MB)</label>
+					<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
+					<div class="grid grid-cols-2 gap-x-4 gap-y-2">
+						<label for="title" class="block font-medium">Title<span class="text-error-300">*</span></label>
+						<label for="coverPic" class="block font-medium">Cover Picture (Max. size: 2MB)</label>
 
 
-				<div class="flex flex-col gap-2">
+				<div class="flex flex-col gap-2 mb-5">
 					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
-						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200">
-					<div class="flex flex-col gap-2">
-						<label for="content">Content<span class="text-error-300">*</span></label>
+						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
+					<div class="flex flex-col gap-1">
+						<label for="content" class="mt-1 block font-medium">Content<span class="text-error-300">*</span></label>
 						<SelectType bind:selectedTypes={selectedTypes}/>
-						<hr class="m-2">
-						<label for="course">Course<span class="text-error-300">*</span></label>
-						<SelectCourse on:showCourseModal={openModal}
-									  bind:selectedCourseId={course}
-									  courses={courses}
-									  allCourses={data.allCourses}
-									  bind:originalCourseIds={originalCourseIds}
-									  on:courseDeleted={(event) => {
-										  courses = courses.filter(c => c.id !== event.detail.courseId);
-										  courses = [...courses];
-									  }}
+						<hr class="my-3 mx-2">
+						<label for="course" class="block font-medium">Course<span class="text-error-300">*</span></label>
+						<SelectCourse on:showCourseModal={() => openModal(null)}
+						  bind:selectedCourseId={course}
+						  courses={courses}
+						  allCourses={data.allCourses}
+						  bind:originalCourseIds={originalCourseIds}
+						  on:courseEditRequest={(event) => {
+							openModal(event.detail.course);
+						  }}
+						  on:courseDeleted={(event) => {
+							  courses = courses.filter(c => c.id !== event.detail.courseId);
+							  courses = [...courses];
+						  }}
 						/>
 					</div>
 				</div>
@@ -537,31 +559,32 @@
 				</Step>
 				<Step locked={locks[2]}>
 					<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-					<div class="flex flex-col gap-4 p-3">
-						<div class="flex flex-col md:flex-row col-span-full items-center gap-4 p-3">
+					<div class="flex flex-col gap-6 mt-3">
+						<div class="flex flex-col md:flex-row col-span-full items-center gap-10">
 							<TimeEstimate bind:totalMinutes={estimate}/>
 							<div class="w-full md:w-1/2	">
-								<label for="copyright md-2">Copyright License (<a
+								<label for="copyright md-2" class="block font-medium">Copyright License (<a
 									href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
 									class="text-tertiary-700"> Check here how this applies to you</a>):</label>
 								<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter}
 									   placeholder="Leave blank if material is your own"
-									   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
+									   class="mt-1 rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 							</div>
 						</div>
 						<div class="w-full">
 							<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}
 											 adding="{true}"/>
 						</div>
-						<div class="flex flex-col w-full">
+						<div class="w-full">
 							<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
 											   bind:additionalMaintainers={maintainers} />
-							<div class="lg:w-1/2">
-								<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
-							</div>
 						</div>
+						<div class="lg:w-1/2">
+							<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
+						</div>
+
 						<textarea name="description" placeholder="Additional Description..." bind:value={description}
-								  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200" />
+								  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200 focus:border-primary-500 focus:ring-0" />
 					</div>
 				</Step>
 				<Step locked={isSubmitting}>
@@ -800,7 +823,14 @@
 </style>
 
 {#if showModal}
-	<CourseModal existingCourse={null} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-				 bind:additionalMaintainers={courseMaintainers}/>
+	<CourseModal existingCourse={editingCourse} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
+				 bind:additionalMaintainers={courseMaintainers}
+				 on:courseDeleted={(event) => {
+					const id = event.detail.courseId;
+					courses = courses.filter(c => c.id !== id);
+					originalCourseIds = originalCourseIds.filter(x => x !== id);
+					if (course === id) course = null;
+				}}
+	/>
 {/if}
 

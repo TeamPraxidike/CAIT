@@ -16,6 +16,11 @@
 
 	let showMyCourses = false;
 
+    // Show up to 10 courses; if more, show a "+N more…" chip at the end
+    let maxVisible = 4;
+    $: visibleCourses = Array.isArray(courses) ? courses.slice(0, maxVisible) : [];
+    $: hiddenCount = Array.isArray(courses) ? Math.max(0, courses.length - maxVisible) : 0;
+
 	let popupSettings: PopupSettings = {
 		event: 'focus-click',
 		target: 'popupAutocomplete',
@@ -66,6 +71,10 @@
 		dispatch('courseDeleted', { courseId });
 	}
 
+	function handleEdit(e: CustomEvent<{ course: Course }>) {
+		dispatch('courseEditRequest', { course: e.detail.course });
+	}
+
 	const openNewCourseModal = () => {
 		showModal = true;
 		dispatch('showCourseModal');
@@ -88,25 +97,30 @@
 <!--		<label for="Your Courses">Your Courses:</label>-->
 
 		{#if Array.isArray(courses) && courses.length > 0}
-			{#each courses as course}
+			{#each visibleCourses as course, idx}
 				{#if originalCourseIds.includes(course.id)}
 					<CourseButton
 						bind:course
 						bind:selectedCourseId
 						bind:previousCourseId
-						on:courseDeleted={handleDeletion}/>
+						on:courseDeleted={handleDeletion}
+						on:editCourse={handleEdit}/>
 				{:else}
 					<CourseButton
 						bind:course
 						bind:selectedCourseId
 						bind:previousCourseId
 						canDelete={false}
-						on:courseDeleted={handleDeletion}/>
-				{/if}
-				{#if course !== courses[courses.length - 1]}
-					<div class="w-px h-5 bg-gray-300 self-center"></div>
+						on:courseDeleted={handleDeletion}
+						on:editCourse={handleEdit}/>
 				{/if}
 			{/each}
+
+            {#if hiddenCount > 0}
+                <span class="self-center inline-flex items-center px-2 py-1 text-sm font-medium bg-white text-gray-800 select-none cursor-default">
+                    +{hiddenCount} more…
+                </span>
+            {/if}
 		{:else}
 			<p></p>
 		{/if}
@@ -118,18 +132,18 @@
 				Add a course
 			</button>
 		{:else}
-			<button type="button" name="add_maintainer" class="btn rounded-lg hover:bg-opacity-85 text-center"
-					on:click={() => openNewCourseModal()}>
-				<Icon icon="mdi:plus-circle" width="32" height="32"
-					  class="bg-surface-0 text-surface-800 hover:text-surface-600" />
-			</button>
+		<button type="button" name="add_maintainer" 
+				class="text-center flex items-center justify-center h-[32px]"
+				on:click={() => openNewCourseModal()}>
+			<Icon icon="mdi:plus-circle" width="32" height="32" class="bg-surface-0 text-primary-600 hover:text-primary-500 dark:text-surface-100 dark:hover:text-primary-600" />
+		</button>
 		{/if}
 	</div>
 
 <!--	<label for="browse"> Browse Courses</label>-->
 	<div class="w-1/2">
 		<input
-			class="input autocomplete"
+			class="input autocomplete mt-1 text-sm"
 			type="search"
 			name="autocomplete-search"
 			bind:value={inputPopupDemo}

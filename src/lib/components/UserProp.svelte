@@ -96,9 +96,9 @@
 		{/if}
 		<div class="w-full flex gap-2 items-center flex-none">
 			{#if userPhotoUrl !== null}
-				<img src={userPhotoUrl} alt="User Profile" class="w-6 h-6 rounded-full" />
+				<img src={userPhotoUrl} alt="User Profile" class="w-7 h-7 rounded-full" />
 			{:else}
-				<img src={defaultProfilePicturePath} alt="User Profile" class="w-6 h-6 border border-1 border-gray-300 rounded-full" />
+				<img src={defaultProfilePicturePath} alt="User Profile" class="w-7 h-7 border border-1 border-gray-300 rounded-full" />
 			{/if}
 			<div class="max-w-full items-center">
 				<span class="dark:text-surface-50 text-surface-900 max-w-full truncate">{user.firstName + " " + user.lastName}</span>

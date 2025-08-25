@@ -19,9 +19,9 @@
 	{#each levels as level}
 		<button
 			type="button"
-			class="px-4 py-2 rounded-full border text-sm flex items-center gap-2 cursor-pointer transition
-			       hover:bg-gray-100 relative group
-			       {label === level.label ? 'bg-primary-100 border-primary-500' : 'border-gray-300'} btn-secondary"
+			class="px-4 py-2 rounded-full border border-gray-300 text-sm flex items-center gap-2 cursor-pointer transition
+			       hover:bg-gray-100 hover:text-black relative group
+			       {label === level.label ? 'border-primary-600 border-2 text-primary-700 bg-primary-50' : 'bg-white text-gray-800'} btn-secondary"
 			on:click={() => select(level.label)}
 			title={level.label}
 		>

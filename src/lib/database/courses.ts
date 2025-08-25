@@ -67,6 +67,33 @@ export async function createCourse(course: createCourseData): Promise<Course> {
 	});
 }
 
+export type updateCourseData = {
+    id: number;
+    courseName: string;
+    educationalLevel: Level;
+    learningObjectives: string[];
+    prerequisites: string[];
+    maintainers: string[]; // user ids (excluding current user is allowed)
+    currentUserId: string; // ensure current user remains a maintainer
+}
+
+export async function updateCourse(data: updateCourseData): Promise<Course> {
+    const uniqueMaintainerIds = Array.from(new Set([data.currentUserId, ...data.maintainers]));
+
+    return prisma.course.update({
+        where: { id: data.id },
+        data: {
+            courseName: data.courseName,
+            educationalLevel: data.educationalLevel,
+            learningObjectives: data.learningObjectives,
+            prerequisites: data.prerequisites,
+            maintainers: {
+                set: uniqueMaintainerIds.map((id) => ({ id }))
+            }
+        }
+    });
+}
+
 export async function findCourseByNameExtended(courseName: string): Promise<CourseWithMaintainersAndProfilePic | null> {
 	const course = await prisma.course.findFirst({
 		where: { courseName },

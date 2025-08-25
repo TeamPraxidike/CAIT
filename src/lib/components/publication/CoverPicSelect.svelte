@@ -35,13 +35,13 @@
 </script>
 
 <div>
-	<div class="flex flex-col gap-2 h-full bg-surface-200
-										border-2 border-dashed border-surface-700 {width} min-h-24">
+	<div class="flex flex-col gap-2 min-h-56 bg-surface-200
+										border-2 border-dashed border-surface-700">
 		<div>
 			{#if coverPic}
 				<img src={URL.createObjectURL(coverPic)}
 					 alt="coverPicture"
-					 class="max-h-96 w-full object-contain h-full">
+					 class="max-h-96 min-h-56 w-full h-auto object-contain block">
 			{/if}
 		</div>
 	</div>
@@ -49,11 +49,11 @@
 	<div>
 		{#if coverPic}
 			<button on:click={() => coverPic = undefined} type="button"
-					class="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85">
+					class="mt-2 rounded-lg py-2 px-4 bg-surface-900 text-surface-50 dark:bg-surface-100 dark:text-surface-800 hover:bg-opacity-85">
 				Remove Cover Picture
 			</button>
 		{:else}
-			<FileButton button="rounded-lg py-2 px-4 bg-surface-900 text-surface-50 hover:bg-opacity-85"
+			<FileButton button="mt-2 rounded-lg py-2 px-4 bg-primary-600 text-white hover:bg-primary-500"
 						on:change={chooseCover} name="coverPhoto">
 				Upload Cover Picture
 			</FileButton>

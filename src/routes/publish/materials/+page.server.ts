@@ -192,4 +192,37 @@ export const actions = {
 			throw redirect(303, '/course/create');
 		}
 	},
+	editCourse: async ({ request, fetch, locals }) => {
+		const session = await locals.safeGetSession();
+		if (!session || !session.user) throw redirect(303, '/signin');
+
+		try {
+			const formData = await request.formData();
+			const id = Number(formData.get('id'));
+			const title = formData.get('title');
+			const level = formData.get('level');
+			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
+			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
+			const maintainers = JSON.parse(formData.get('maintainers') as string);
+
+			const payload = {
+				courseName: title,
+				educationalLevel: level,
+				learningObjectives,
+				prerequisites,
+				maintainers,
+			};
+
+			const res = await fetch(`/api/course/${id}` , {
+				method: 'PUT',
+				body: JSON.stringify(payload),
+			});
+
+			const updatedCourse = await res.json();
+			return { status: res.status, id: updatedCourse.id, context: 'course-form', course: updatedCourse };
+		} catch (error) {
+			console.error('Error updating course ', error);
+			return { status: 500, context: 'course-form' };
+		}
+	},
 } satisfies Actions;
