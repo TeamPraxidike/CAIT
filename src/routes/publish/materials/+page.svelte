@@ -128,7 +128,6 @@
 	// }
 
 	let previousCourse: number | null = null;
-	let coverPicPromise: Promise<File | null> | null = null;
 	$: if (course !== previousCourse) {
 		const currentCourse = courses.find(c => c.id === course);
 		maintainers = [];

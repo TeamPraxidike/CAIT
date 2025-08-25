@@ -36,7 +36,7 @@
 	let copyright: string = existingCourse?.copyright ?? "";
 	let coverPic: File | undefined = undefined;
 	if (existingCourse) {
-		downloadFileFromSupabase(existingCourse.coverPic).then(f => {
+		downloadFileFromSupabase(supabaseClient, existingCourse.coverPic).then(f => {
 			coverPic = f || undefined;
 		})
 	}
