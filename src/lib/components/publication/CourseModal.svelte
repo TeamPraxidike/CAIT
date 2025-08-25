@@ -29,7 +29,7 @@
 	let level: Level = existingCourse?.educationalLevel as Level;
 	let learningObjectives: string[] = existingCourse?.learningObjectives ?? [];
 	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
-	let copyright: string = "";
+	let copyright: string = existingCourse?.copyright ?? "";
 	let coverPic: File | undefined = undefined;
 
 	type UserWithProfilePic = User & { profilePicData: string | null };
