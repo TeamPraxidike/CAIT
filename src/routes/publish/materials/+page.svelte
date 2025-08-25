@@ -32,7 +32,7 @@
 		saveCover,
 		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata
 	} from '$lib/util/indexDB';
-	import { allUploadsDone } from '$lib/util/file'
+	import { allUploadsDone, downloadFileFromSupabase } from '$lib/util/file';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
@@ -40,6 +40,9 @@
 	import { changeCourse } from '$lib/util/coursesLogic';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import TimeEstimate from '$lib/components/publication/TimeEstimate.svelte';
+	import * as tus from 'tus-js-client'
+	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
+	import type { FetchedFileItem } from '$lib/database';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -104,25 +107,25 @@
 	let fileTUSUploadObjects: { [key: string]: any } = {}
 	$: fileTUSUploadObjects = fileTUSUploadObjects
 
-	async function downloadFileFromSupabase(f: FetchedFileItem){
-		const { data: blob, error } = await supabaseClient.storage
-			.from("uploadedFiles")
-			.download(f.fileId)
-
-		if (error) {
-			console.error('Error downloading file from Supabase:', error.message);
-			throw error;
-		}
-
-		if (!blob) {
-			console.error('Download succeeded but the returned blob is null.');
-			return null;
-		}
-
-		return new File([blob], f.name, {
-			type: blob.type,
-		});
-	}
+	// async function downloadFileFromSupabase(f: FetchedFileItem){
+	// 	const { data: blob, error } = await supabaseClient.storage
+	// 		.from("uploadedFiles")
+	// 		.download(f.fileId)
+	//
+	// 	if (error) {
+	// 		console.error('Error downloading file from Supabase:', error.message);
+	// 		throw error;
+	// 	}
+	//
+	// 	if (!blob) {
+	// 		console.error('Download succeeded but the returned blob is null.');
+	// 		return null;
+	// 	}
+	//
+	// 	return new File([blob], f.name, {
+	// 		type: blob.type,
+	// 	});
+	// }
 
 	let previousCourse: number | null = null;
 	let coverPicPromise: Promise<File | null> | null = null;
@@ -142,7 +145,7 @@
 				copyright = currentCourse.copyright;
 			}
 			if (currentCourse?.coverPic?.data) {
-				downloadFileFromSupabase(currentCourse.coverPic).then(f => {
+				downloadFileFromSupabase(supabaseClient, currentCourse.coverPic).then(f => {
 					coverPic = f || undefined;
 				});
 			} else {
@@ -256,10 +259,6 @@
 
 	let saveInterval: number | undefined = undefined;
 
-
-	import * as tus from 'tus-js-client'
-	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
-	import type { FetchedFileItem } from '$lib/database';
 
 	// source: https://supabase.com/docs/guides/storage/uploads/resumable-uploads?queryGroups=language&language=js
 

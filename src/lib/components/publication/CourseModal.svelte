@@ -14,6 +14,7 @@
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
 	import { deleteCourseById } from '$lib/util/coursesLogic';
 	import type { FetchedFileItem } from '$lib/database';
+	import { downloadFileFromSupabase } from '$lib/util/file';
 
 	let supabaseClient = page.data.supabase;
 
@@ -27,26 +28,6 @@
 	export let existingCourse: CourseWithCoverPic | null;
 	export let onSuccess = () => {};
 	let id = existingCourse?.id ?? null;
-
-	async function downloadFileFromSupabase(f: FetchedFileItem){
-		const { data: blob, error } = await supabaseClient.storage
-			.from("uploadedFiles")
-			.download(f.fileId)
-
-		if (error) {
-			console.error('Error downloading file from Supabase:', error.message);
-			throw error;
-		}
-
-		if (!blob) {
-			console.error('Download succeeded but the returned blob is null.');
-			return null;
-		}
-
-		return new File([blob], f.name, {
-			type: blob.type,
-		});
-	}
 
 	let title = existingCourse?.courseName ?? '';
 	let level: Level = existingCourse?.educationalLevel as Level;

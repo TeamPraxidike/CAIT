@@ -492,23 +492,3 @@ export async function getFilesForMaterial(
 		where: { materialId: materialId },
 	})
 }
-
-export async function downloadFileFromSupabase(supabaseClient: any, f: FetchedFileItem){
-	const { data: blob, error } = await supabaseClient.storage
-		.from("uploadedFiles")
-		.download(f.fileId)
-
-	if (error) {
-		console.error('Error downloading file from Supabase:', error.message);
-		throw error;
-	}
-
-	if (!blob) {
-		console.error('Download succeeded but the returned blob is null.');
-		return null;
-	}
-
-	return new File([blob], f.name, {
-		type: blob.type,
-	});
-}
