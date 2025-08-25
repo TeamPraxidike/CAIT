@@ -162,7 +162,7 @@ export const actions = {
 
 			if (coverPicFile instanceof File) {
 				const buffer = await coverPicFile.arrayBuffer();
-				const info = Buffer.from(buffer).toString('base64');
+				const info = Buffer.from(buffer).toString('base64'); //correct
 				coverPic = {
 					type: coverPicFile.type,
 					info,

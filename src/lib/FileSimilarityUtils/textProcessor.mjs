@@ -9,12 +9,7 @@ const stemmer = PorterStemmer;
 const ni = new NounInflector();
 //const present = new pkg.PresentVerbInflector();
 
-/**
- * Preprocesses and tokenizes text, used for TF-IDF
- * @param {string} text
- * @returns {string}
- */
-export function preprocessText(text) {
+export function preprocessTextLight(text){
     // trim the string to remove leading and trailing whitespace
     const trimmedStr = text.trim();
 
@@ -27,7 +22,16 @@ export function preprocessText(text) {
     // replace hyphen with '' (globally, not just once, that's why we use g)
     let removeHyphens = filteredText.replace(/-/g, '');
 
-    filteredText = removeHyphens.toLowerCase();
+    return removeHyphens.toLowerCase();
+}
+
+/**
+ * Preprocesses and tokenizes text, used for TF-IDF
+ * @param {string} text
+ * @returns {string}
+ */
+export function preprocessText(text) {
+    let filteredText = preprocessTextLight(text);
 
     // tokenize
     let tokens = tokenizer.tokenize(filteredText);

@@ -30,9 +30,9 @@ export async function PUT({ params, locals }) {
 			aboutMe: user.aboutMe,
 		};
 
-		await editUser(userData);
+		const editedUser = await editUser(userData);
 
-		return new Response(JSON.stringify(user), { status: 200 });
+		return new Response(JSON.stringify(editedUser), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}

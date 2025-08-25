@@ -57,7 +57,7 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
 			currentFileData = await fileSystem.readFileURL(filePath);
 		}
 		else {
-			currentFileData = (await fileSystem.readFile(filePath)).toString('base64');
+			currentFileData = (await fileSystem.readFile(filePath)).toString('base64'); //skipcheck
 		}
 
 		return {
@@ -114,7 +114,7 @@ export async function coverPicFetcher(
 		}
 		else {
 			// TODO: frontend expects urls currently, add base64 checks jic
-			currentFileData = (await fileSystem.readFile(filePath)).toString('base64');
+			currentFileData = (await fileSystem.readFile(filePath)).toString('base64'); //skipcheck
 		}
 
 		return {
@@ -199,7 +199,7 @@ export async function updateProfilePic(
 	// if received info about coverPic (so not default)
 	if (profilePic) {
 		// upload new coverPic
-		const buffer: Buffer = Buffer.from(profilePic.info, 'base64');
+		const buffer: Buffer = Buffer.from(profilePic.info, 'base64'); //correct, skipcheck
 		await addProfilePic(
 			'cover.jpg',
 			profilePic.type,
@@ -231,7 +231,7 @@ export async function updateCoverPic(
 	// if received info about coverPic (so not default)
 	if (coverPic) {
 		// upload new coverPic
-		const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
+		const buffer: Buffer = Buffer.from(coverPic.info, 'base64'); //correct, skipcheck
 		await addCoverPic(
 			'cover.jpg',
 			coverPic.type,
@@ -262,7 +262,7 @@ export async function updateCircuitCoverPic(
 	}
 
 	// upload new coverPic
-	const buffer: Buffer = Buffer.from(coverPic.info, 'base64');
+	const buffer: Buffer = Buffer.from(coverPic.info, 'base64'); //correct
 	await addCoverPic(
 		'cover.jpg',
 		coverPic.type,
@@ -398,11 +398,11 @@ export async function updateFiles(
 	}
 
 	// edit existing files
-	for (const file of fileInfo.edit) {
-		const buffer: Buffer = Buffer.from(file.info, 'base64');
-
-		await editFile(file.path, file.title, buffer, prismaContext);
-	}
+	// for (const file of fileInfo.edit) {
+	// 	const buffer: Buffer = Buffer.from(file.info, 'base64');
+	//
+	// 	await editFile(file.path, file.title, buffer, prismaContext);
+	// }
 }
 
 /**
@@ -431,7 +431,7 @@ export async function handleFileTokens(
 			// Use Prisma's executeRaw to handle the vector type correctly
 
 			// Raw query failed.Code: `22021`.Message: `ERROR: invalid byte sequence for encoding "UTF8": 0x00
-			// TOOD: does replace work?
+			// TODO: does replace work?
 			await prisma.$executeRaw`
                 INSERT INTO "FileChunk" (content, metadata, embedding, "filePath")
                 VALUES (${chunk.pageContent.replace(/\u0000/g, '')},
@@ -443,23 +443,14 @@ export async function handleFileTokens(
 	}
 }
 
-// export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
-// 	return prisma.$queryRaw`
-// 	SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", embedding <#> ${embeddedUserQuery}::vector AS similarity
-// 	FROM public."FileChunk"
-//     WHERE embedding <#> ${embeddedUserQuery}::vector < -0.2
-// 	ORDER BY "filePath", embedding <#> ${embeddedUserQuery}::vector ASC
-// 	LIMIT 5;
-// 	`;
-// }
-
+// Select embeddings which are at least 40% similar to the user query, return at most 5
 export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
 	return prisma.$queryRaw`
-    SELECT DISTINCT ON ("filePath") id, content, metadata, "filePath", 
+    SELECT id, content, metadata, "filePath", 
            (1 - (embedding <=> ${embeddedUserQuery}::vector)) AS similarity
     FROM public."FileChunk"
-    WHERE embedding <=> ${embeddedUserQuery}::vector < 0.7  
-    ORDER BY "filePath", embedding <=> ${embeddedUserQuery}::vector ASC
+    WHERE embedding <=> ${embeddedUserQuery}::vector < 0.6  
+    ORDER BY embedding <=> ${embeddedUserQuery}::vector ASC
     LIMIT 5;
     `;
 }

@@ -1,6 +1,7 @@
 import { prisma } from '$lib/database';
 import Fuse from 'fuse.js';
 import { Prisma } from '@prisma/client';
+import { sortSwitch } from '$lib/database/material.ts';
 
 
 export type Publication = Prisma.PublicationGetPayload<{
@@ -195,17 +196,37 @@ export async function getPublicationById(id: number): Promise<Publication> {
 	});
 }
 
+/**
+ * This is a lightweight publication existence check
+ * @param id - id of the publication to look up
+ */
+export async function getPublicationByIdLight(id: number): Promise<{id: number, publisherId: string} | null>{
+	return prisma.publication.findFirst({
+		where: {
+			id: id
+		},
+		select: {
+			id: true,
+			publisherId: true
+		}
+	})
+}
 
 // export async function getAllPublications(publishers: string[], query: string, includeDrafts?: boolean): Promise<PublicationGet[]> {
-export async function getAllPublications(publishers: string[], query: string, includeDrafts?: boolean) {
+export async function getAllPublications(publishers: string[], query: string,
+										 sort: string,
+										 includeDrafts?: boolean) {
 	const where: any = { AND: [] };
 
 	if (publishers.length > 0) {
 		where.AND.push({ publisherId: { in: publishers } });
 	}
 
+	const sortBy = sortSwitch(sort);
+
 	let publications = await prisma.publication.findMany({
 		where,
+		orderBy: sortBy.publication,
 		include: {
 			tags: true,
 			materials: true,

@@ -1,6 +1,6 @@
 import {
 	addNode,
-	type CircuitForm,
+	type CircuitForm, coverPicFetcher,
 	deleteCircuitByPublicationId,
 	deleteNode,
 	editNode,
@@ -49,13 +49,13 @@ export async function GET({ params, locals }) {
 			);
 		}
 
-		const filePath = circuit.publication.coverPic!.path;
-
-		const currentFileData = await fileSystem.readFile(filePath);
 
 		const circuitInfo = {
 			...circuit,
-			coverPicData: currentFileData.toString('base64'),
+			coverPicData: await coverPicFetcher(
+				null,
+				circuit.publication.coverPic
+			)
 		};
 
 		return new Response(JSON.stringify(circuitInfo), { status: 200 });

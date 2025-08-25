@@ -5,6 +5,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { getPublicationByIdLight } from '$lib/database/db.ts';
 
 export async function POST({ request, locals }) {
 	const body = await request.json();
@@ -27,7 +28,9 @@ export async function POST({ request, locals }) {
 					status: 404,
 				},
 			);
-		const publication = await getPublicationById(body.publicationId);
+		//const publication = await getPublicationById(body.publicationId);
+		const publication = await getPublicationByIdLight(body.publicationId);
+
 		if (publication?.publisherId === body.userId) {
 			await updateReputation(body.userId, 3);
 		} else {

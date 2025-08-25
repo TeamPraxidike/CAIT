@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
-import { getPublicationById } from '$lib/database/db';
+import { getPublicationById, getPublicationByIdLight } from '$lib/database/db';
 
 ////////////////////////////////////////////////
 //   HELPER METHODS
@@ -214,15 +214,22 @@ export async function updatePublicationConnectTags(
  * @param publicationId -
  */
 export async function updateAllTimeSaved(id: string, publicationId: number) {
-	const publication = await getPublicationById(publicationId);
+	//const publication = await getPublicationById(publicationId);
+	const publication = await getPublicationByIdLight(publicationId);
 	if (publication) {
-		let allTime = publication.savedByAllTime;
-		if (!allTime.includes(id)) {
-			allTime = [...allTime, id];
-			return prisma.publication.update({
-				where: { id: publicationId },
+		const allTime = await prisma.savedByAllTime.findUnique({
+			where: {
+				publicationId_userId: {
+					userId: id,
+					publicationId: publicationId
+				}
+			},
+		});
+		if (!allTime) {
+			return prisma.savedByAllTime.create({
 				data: {
-					savedByAllTime: allTime,
+					userId: id,
+					publicationId: publicationId
 				},
 			});
 		}

@@ -59,9 +59,10 @@ export async function GET({ params, url, locals }) {
 		const temp = [];
 		for (const publication of saved) {
 			if (publication.materials === null) {
-				const filePath = publication.coverPic!.path;
-				const currentFileData = await fileSystem.readFile(filePath);
-				const coverPicData = currentFileData.toString('base64');
+				const coverPicData = await coverPicFetcher(
+					null,
+					publication.coverPic
+				)
 				temp.push({ ...publication, coverPicData: coverPicData });
 			} else {
 				temp.push({

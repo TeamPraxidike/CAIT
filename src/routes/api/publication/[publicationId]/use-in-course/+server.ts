@@ -1,5 +1,6 @@
 import { coursesUsingPublication, getPublicationById } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { getPublicationByIdLight } from '$lib/database/db.ts';
 
 /**
  * Get all courses that use a publication
@@ -10,7 +11,9 @@ export async function GET({ params, locals }) {
 
 	const { publicationId } = params;
 
-	const publication = await getPublicationById(parseInt(publicationId));
+	//const publication = await getPublicationById(parseInt(publicationId));
+	const publication = await getPublicationByIdLight(parseInt(publicationId));
+
 	if (!publication)
 		return new Response(
 			JSON.stringify({ error: 'Publication not found' }),
