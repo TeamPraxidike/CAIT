@@ -34,7 +34,7 @@ export const actions = {
 
 		const fileList: string[] = data.getAll('file') as unknown as string[];
 		const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
-		if (!fileList || fileList.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
+		if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
 		// const add = await filesToAddOperation(fileList, fileURLs);
 
 		const add = fileList.concat(fileURLs).map((item: string) => {

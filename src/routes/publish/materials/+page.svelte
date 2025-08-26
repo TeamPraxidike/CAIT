@@ -452,7 +452,7 @@
 		materialType: selectedTypes,
 		isDraft: false
 	};
-	$: numMaterials = Math.max(fileURLs.length, files.length);
+	$: numMaterials = fileURLs.length + files.length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
 
@@ -518,7 +518,7 @@
 					formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 					formData.append('course', course ? course.toString() : 'null');
-				  }} >
+			  }}>
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					buttonBackLabel="← Back"
 					buttonBack="btn text-surface-800 border border-surface-600 bg-surface-200 dark:text-surface-50 dark:bg-surface-600"
@@ -542,7 +542,6 @@
 					<div class="grid grid-cols-2 gap-x-4 gap-y-2">
 						<label for="title" class="block font-medium">Title<span class="text-error-300">*</span></label>
 						<label for="coverPic" class="block font-medium">Cover Picture (Max. size: 2MB)</label>
-
 
 				<div class="flex flex-col gap-2 mb-5">
 					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
