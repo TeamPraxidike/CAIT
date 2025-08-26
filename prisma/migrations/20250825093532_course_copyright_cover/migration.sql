@@ -6,7 +6,7 @@
 
 */
 -- AlterTable
-ALTER TABLE "Course" ADD COLUMN     "copyright" TEXT NOT NULL;
+ALTER TABLE "Course" ADD COLUMN     "copyright" TEXT NOT NULL DEFAULT '';
 
 -- AlterTable
 ALTER TABLE "File" ADD COLUMN     "courseId" INTEGER;
