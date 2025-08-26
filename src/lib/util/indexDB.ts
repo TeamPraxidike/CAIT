@@ -83,6 +83,22 @@ export async function clearAllData() {
 	await deleteAllFileTUSMetadata();
 }
 
+/**
+ * Check if the time since lastOpened exceeds 30 minutes, and if so, clear all data.
+ * If using this function, make sure to also clear the data locally if it returns true (i.e., data was cleared from the database).
+ * @param lastOpened
+ */
+export async function clearIfTimeExceeded(lastOpened: number) {
+	const ageMs = Date.now() - lastOpened;
+
+	// if snapshot is older than 30 minutes, clear it
+	if (ageMs > 1000 * 60 * 30) {
+		await clearAllData();
+		return true;
+	}
+	return false;
+}
+
 // File operations, actually cool
 export async function saveFiles(files: File[]) {
 	const db = await initDB();

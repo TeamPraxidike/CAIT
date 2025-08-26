@@ -27,7 +27,7 @@
 		getFiles,
 		getMaterialSnapshot,
 		saveCover,
-		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, clearAllData
+		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, clearAllData, clearIfTimeExceeded
 	} from '$lib/util/indexDB';
 	import { allUploadsDone } from '$lib/util/file'
 	import { isMaterialDraft } from '$lib/util/validatePublication';
@@ -311,15 +311,8 @@
 			// THIS IS THE SNAPSHOT CODE (using indexDB)
 			let existing = await getMaterialSnapshot();
 
-			if (existing) {
-				const ageMs = Date.now() - existing.lastOpened;
-
-				// if snapshot is older than 30 minutes, clear it
-				if (ageMs > 1000 * 60 * 30) {
-					console.log('Clearing old snapshot');
-					await clearAllData();
-					existing = undefined;
-				}
+			if (existing && await clearIfTimeExceeded(existing.lastOpened)) {
+				existing = undefined; // clear snapshot locally
 			}
 
 			// Only hydrate from snapshot if it is still valid
