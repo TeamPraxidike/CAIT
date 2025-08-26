@@ -21,16 +21,13 @@
 	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	import {
-		clearFiles,
-		clearMaterialSnapshot,
-		deleteCover,
 		type FormSnapshot,
 		type FileTUSMetadata,
 		getCover,
 		getFiles,
 		getMaterialSnapshot,
 		saveCover,
-		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata
+		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, clearAllData
 	} from '$lib/util/indexDB';
 	import { allUploadsDone } from '$lib/util/file'
 	import { isMaterialDraft } from '$lib/util/validatePublication';
@@ -77,10 +74,7 @@
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
 	// learning objectives
 	let LOs: string[] = [];
-	$: LOs = LOs;
-
 	let PKs: string[] = [];
-	$: PKs = PKs;
 
 	// input data
 	let title: string = '';
@@ -183,10 +177,7 @@
 		}
 
 		Promise.all([
-			deleteCover(),
-			clearFiles(),
-			clearMaterialSnapshot(),
-			deleteAllFileTUSMetadata()
+			clearAllData()
 		]).then(async () => {
 			showAnimation = true;
 		}).catch(error => {
@@ -318,8 +309,40 @@
 		(async () => {
 
 			// THIS IS THE SNAPSHOT CODE (using indexDB)
+			let existing = await getMaterialSnapshot();
 
-			// get coverPic
+			if (existing) {
+				const ageMs = Date.now() - existing.lastOpened;
+
+				// if snapshot is older than 30 minutes, clear it
+				if (ageMs > 1000 * 60 * 30) {
+					console.log('Clearing old snapshot');
+					await clearAllData();
+					existing = undefined;
+				}
+			}
+
+			// Only hydrate from snapshot if it is still valid
+			if (existing) {
+				// TODO: This ?? business is meh, redo
+				title = existing.title;
+				description = existing.description;
+				tags = existing.tags;
+				newTags = existing.newTags;
+				LOs = existing.LOs;
+				PKs = existing.PKs;
+				selectedType = existing.selectedType ?? 'Select type';
+				difficulty = existing.difficulty ?? 'easy';
+				maintainers = existing.maintainers;
+				searchableUsers = existing.searchableUsers;
+				estimate = existing.estimate ?? 0;
+				copyright = existing.copyright ?? 'No copyright';
+				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
+				fileURLs = existing.fileURLs ?? [];
+			} else {
+				console.log('No valid snapshot found (either none existed or it was expired and cleared).');
+			}
+
 			const storedCover = await getCover();
 			if (storedCover) {
 				coverPic = storedCover; // single file
@@ -348,26 +371,6 @@
 				}
 			}
 
-			// if a metadata snapshot already exists, use it
-			const existing = await getMaterialSnapshot();
-			if (existing) {
-				// TODO: This ?? business is meh, redo
-				title = existing.title;
-				description = existing.description;
-				tags = existing.tags;
-				newTags = existing.newTags;
-				// LOs = existing.LOs;
-				// PKs = existing.PKs;
-				selectedType = existing.selectedType ?? 'Select type';
-				difficulty = existing.difficulty ?? 'easy';
-				maintainers = existing.maintainers;
-				searchableUsers = existing.searchableUsers;
-				estimate = existing.estimate ?? 0;
-				copyright = existing.copyright ?? 'No copyright';
-				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
-				fileURLs = existing.fileURLs ?? [];
-			}
-
 			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {
 				const data: FormSnapshot = {
@@ -384,12 +387,10 @@
 					estimate,
 					copyright,
 					fileURLs,
-					theoryApplicationRatio
+					theoryApplicationRatio,
+					lastOpened: Date.now()
 				};
 
-				// console.log('IN CONST SNAPSHOT');
-				// console.log('Saving material snapshot:', data);
-				// Store it in IndexedDB
 				saveMaterialSnapshot(data);
 			}, 2000);
 
@@ -871,4 +872,3 @@
 				}}
 	/>
 {/if}
-

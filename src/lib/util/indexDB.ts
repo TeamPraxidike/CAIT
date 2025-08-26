@@ -35,6 +35,7 @@ export type FormSnapshot = {
 	theoryApplicationRatio?: number;  // -- for materials ONLY
 	fileURLs?: string[]; // -- for materials ONLY
 	circuitNodes?: NodeInfo[]; // -- for circuits ONLY
+	lastOpened: number;
 };
 
 export async function initDB() {
@@ -73,6 +74,13 @@ export async function deleteCover() {
 	console.log("DELETING COVER");
 	const db = await initDB();
 	await db.delete(COVER_STORE, 'coverPic');
+}
+
+export async function clearAllData() {
+	await deleteCover();
+	await clearFiles();
+	await clearMaterialSnapshot();
+	await deleteAllFileTUSMetadata();
 }
 
 // File operations, actually cool
