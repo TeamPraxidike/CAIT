@@ -137,7 +137,7 @@
 		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
 					   bind:additionalMaintainers={additionalMaintainers} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />
-		<CoverPicSelect bind:coverPic={coverPic} width="w-1/2"/>
+		<CoverPicSelect bind:coverPic={coverPic}/>
 
 		<div class="flex justify-end items-center pt-4">
 			<div class="flex gap-3">

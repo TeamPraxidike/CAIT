@@ -847,7 +847,6 @@
 {#if showModal}
 	<CourseModal existingCourse={editingCourse} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
 				 bind:additionalMaintainers={courseMaintainers}
-				 bind:coverPic={coverPic}
 				 on:courseDeleted={(event) => {
 					const id = event.detail.courseId;
 					courses = courses.filter(c => c.id !== id);
