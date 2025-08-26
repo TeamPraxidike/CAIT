@@ -6,6 +6,7 @@ import {
 } from '$lib/database';
 import { isPublicationLiked } from '$lib/database/user';
 import { verifyAuth } from '$lib/database/auth';
+import { getPublicationByIdLight } from '$lib/database/db.ts';
 
 /**
  * Likes a publication
@@ -24,7 +25,8 @@ export async function POST({ params, locals }) {
 			status: 404,
 		});
 
-	const publication = await getPublicationById(parseInt(publicationId));
+	//const publication = await getPublicationById(parseInt(publicationId));
+	const publication = await getPublicationByIdLight(parseInt(publicationId));
 	if (!publication)
 		return new Response(
 			JSON.stringify({ error: 'Publication not found' }),
@@ -61,7 +63,9 @@ export async function GET({ params, locals }) {
 			status: 404,
 		});
 
-	const publication = await getPublicationById(parseInt(publicationId));
+	//const publication = await getPublicationById(parseInt(publicationId));
+	const publication = await getPublicationByIdLight(parseInt(publicationId));
+
 	if (!publication)
 		return new Response(
 			JSON.stringify({ error: 'Publication not found' }),

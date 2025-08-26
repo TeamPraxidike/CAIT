@@ -1,11 +1,15 @@
 import type { LayoutServerLoad } from './$types'
 
-export const load: LayoutServerLoad = async ({ locals, cookies, fetch }) => {
+export const load: LayoutServerLoad = async ({ locals, cookies, fetch, depends }) => {
   // const { session } = await safeGetSession()
   // return {
   //   session,
   //   cookies: cookies.getAll(),
   // }
+
+  // By calling depends(), you tell SvelteKit that this load function
+  // should be re-run whenever this dependency is invalidated.
+  depends('supabase:auth');
 
   const { session, user } = await locals.safeGetSession();
 

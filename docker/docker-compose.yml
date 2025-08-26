@@ -99,6 +99,9 @@ services:
       retries: 3
     restart: unless-stopped
     environment:
+      GOTRUE_SAML_ENABLED: ${GOTRUE_SAML_ENABLED}
+      GOTRUE_SAML_PRIVATE_KEY: ${GOTRUE_SAML_PRIVATE_KEY}
+
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: 9999
       API_EXTERNAL_URL: ${API_EXTERNAL_URL}

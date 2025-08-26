@@ -5,7 +5,7 @@ import { pythonKeywords } from './pythonKeywords.mjs';
 import { fileSystem } from '../indexJS.mjs';
 import { model } from '../similarityIndex.mjs';
 import CustomRecursiveCharacterTextSplitter from '../DocumentSplitter/Splitter.mjs'
-import { preprocessText } from './textProcessor.mjs';
+import { preprocessText, preprocessTextLight } from './textProcessor.mjs';
 
 export async function reader(filePath) {
     const extension = filePath.split('.').pop();
@@ -40,7 +40,7 @@ export async function reader(filePath) {
         const fileChunks = await Promise.all(
             chunks.map(async (content) => ({
                 pageContent: content,
-                embedding: await model.computeEmbeddingSingleText(preprocessText(content)),
+                embedding: await model.computeEmbeddingSingleText(preprocessTextLight(content)),
                 metadata: { extension: extension }
             }))
         );

@@ -27,7 +27,7 @@ export const actions: Actions = {
 		});
 		const user = await supabase.auth.getUser();
 		if (user.data.user == null) {
-			return fail(400, { email, firstName, lastName, incorrect: true, error: 'Error logging in' });
+			return fail(400, { email, firstName, lastName, incorrect: true, error: 'Could not create user account' });
 		}
 
 		// The default supabase signup method does not care about our custom usernames

@@ -1,6 +1,7 @@
 import {verifyAuth} from "$lib/database/auth";
 import {getPublicationById, getUserById} from "$lib/database";
 import {reportPublication} from "$lib/database/user";
+import { getPublicationByIdLight } from '$lib/database/db.ts';
 
 
 
@@ -22,7 +23,9 @@ export async function POST({ params, locals }) {
             status: 404,
         });
 
-    const publication = await getPublicationById(parseInt(publicationId));
+    //const publication = await getPublicationById(parseInt(publicationId));
+    const publication = await getPublicationByIdLight(parseInt(publicationId));
+
     if (!publication)
         return new Response(
             JSON.stringify({ error: 'Publication not found' }),

@@ -2,6 +2,10 @@
 ENV=$(grep -v '^#' .env | xargs)                                           # load the environment variables
 #source .env
 
+./scripts/createSAMLidp.sh
+
+echo "\nRunning migrations..."
+
 npx prisma migrate dev                                                              # run the migrations
 #npx tsx ./scripts/seedFileChunkTable.ts
 npx tsx ./scripts/seedTriggers.ts && npx tsx ./scripts/publicSchemaRLSPolicies.ts   # auth-public user connection + pub schema policies

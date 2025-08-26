@@ -20,36 +20,6 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
-/**
- * Helper function to convert a list of files to a list of objects that can be added to the database.
- * This function reads the file and converts it to a base64 string.
- * It then returns an object with the file's name, type, and base64 string.
- *
- * @param fileList the list of files to be added to the database of type `FileList`.
- * @param fileURLs the list of URLs pointing to files to be added to the database of type `FileList`.
- */
-async function filesToAddOperation(fileList: FileList, fileURLs: string[] = []) {
-	const addPromises = Array.from(fileList).map(async (file) => {
-		const buffer = await file.arrayBuffer();
-		const info = Buffer.from(buffer).toString('base64');
-
-		return {
-			title: file.name,
-			type: file.type,
-			info,
-		};
-	});
-	const addURLs = Array.from(fileURLs).map((url) => {
-		return {
-			title: url,
-			type: "URL",
-			info: url,
-		};
-	});
-
-	return (await Promise.all(addPromises)).concat(addURLs);
-}
-
 export const actions = {
 	/**
 	 * Publish a new material action.
@@ -84,7 +54,7 @@ export const actions = {
 
 		if (coverPicFile instanceof File) {
 			const buffer = await coverPicFile.arrayBuffer();
-			const info = Buffer.from(buffer).toString('base64');
+			const info = Buffer.from(buffer).toString('base64'); //correct
 			coverPic = {
 				type: coverPicFile.type,
 				info,

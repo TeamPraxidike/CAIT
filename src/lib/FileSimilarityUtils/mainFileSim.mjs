@@ -130,8 +130,6 @@ export async function getPubText(pubFiles) {
             pubFiles[i] = {filePath: pubFiles[i].path, tokens: pubFiles[i].text, skip: true}
         } else {
             // returns Promise<string> or Promise<null>, need to await to avoid sudden memory spikes
-            // const createdTokens = await reader(path.join(basePath, pubFiles[i].path))
-            //const createdTokens = await reader(pubFiles[i].path)
             const { text: createdTokens, chunks: fileChunks } = await reader(pubFiles[i].path)
             // pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false}
             pubFiles[i] = {filePath: pubFiles[i].path, tokens: createdTokens, skip: false, chunks: fileChunks}
@@ -144,7 +142,7 @@ export async function getPubText(pubFiles) {
     const finalText = new Set()
     const filesToUpdate = []
 
-     validContents.forEach(content => {
+    validContents.forEach(content => {
         // if file has not undergone parsing before
         if (content.skip === false){
             const text = preprocessText(content.tokens)

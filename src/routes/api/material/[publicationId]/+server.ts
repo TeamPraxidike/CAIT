@@ -73,7 +73,7 @@ export async function GET({ params, locals }) {
 					fileId: file.path,
 					name: file.title,
 					type: file.type,
-					data: currentFileData.toString('base64')
+					data: currentFileData.toString('base64') //skipcheck
 				});
 			}
 		}

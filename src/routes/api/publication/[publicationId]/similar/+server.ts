@@ -38,8 +38,10 @@ export async function GET({ locals, params }) {
                 )).data;
             } else {
                 const filePath = info.publication.coverPic!.path;
-                const currentFileData = await fileSystem.readFile(filePath);
-                coverPicData = currentFileData.toString('base64');
+                coverPicData = (await coverPicFetcher(
+                    null,
+                    info.publication.coverPic!,
+                )).data;
             }
             return {
                 ...info,

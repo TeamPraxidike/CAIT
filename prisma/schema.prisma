@@ -5,7 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["tracing"]
   // previewFeatures = ["postgresqlExtensions"]
 }
 
@@ -47,7 +48,7 @@ model User {
   firstName     String
   lastName      String
   username      String    @unique @default(dbgenerated("gen_random_uuid()"))
-  email         String    @unique @default("noemail@abv.bg")
+  email         String    @default("noemail@abv.bg")
   emailVerified DateTime? // TODO: REMOVE THIS
   reputation    Int       @default(0)
   password      String? // hashed password    // TODO: REMOVE THIS
@@ -58,6 +59,8 @@ model User {
   liked            Publication[]             @relation("liked")
   reported         Publication[]             @relation("reported")
   usedPublications PublicationUsedInCourse[]
+
+  savedByAllTime SavedByAllTime[]
 
   likedComments Comment[] @relation("likedComments")
   likedReplies  Reply[]   @relation("likedReplies")
@@ -112,7 +115,8 @@ model Publication {
 
   node Node[]
 
-  savedByAllTime String[] @default([])
+  // savedByAllTime String[] @default([])
+  savedByAllTime SavedByAllTime[]
 
   coverPic File? @relation("CoverPic")
 
@@ -122,6 +126,15 @@ model Publication {
   materials    Material?
   circuit      Circuit?
   usedInCourse PublicationUsedInCourse[]
+}
+
+model SavedByAllTime {
+  publicationId Int
+  Publication   Publication @relation(fields: [publicationId], references: [id])
+  userId        String      @db.Uuid
+  User          User        @relation(fields: [userId], references: [id])
+
+  @@id([publicationId, userId])
 }
 
 model SimilarContent {

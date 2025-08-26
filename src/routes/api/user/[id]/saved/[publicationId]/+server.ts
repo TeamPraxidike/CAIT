@@ -6,6 +6,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { getPublicationByIdLight } from '$lib/database/db.ts';
 
 /**
  * Saves a publication to a user's saved list
@@ -23,7 +24,9 @@ export async function POST({ params, locals }) {
 			status: 404,
 		});
 
-	const publication = await getPublicationById(parseInt(publicationId));
+	//const publication = await getPublicationById(parseInt(publicationId));
+	const publication = await getPublicationByIdLight(parseInt(publicationId));
+
 	if (!publication)
 		return new Response(
 			JSON.stringify({ error: 'Publication not found' }),
@@ -47,6 +50,7 @@ export async function POST({ params, locals }) {
 			status: 200,
 		});
 	} catch (error) {
+		console.error(error);
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
 }

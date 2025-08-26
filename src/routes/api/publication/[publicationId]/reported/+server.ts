@@ -2,6 +2,7 @@ import {verifyAuth} from "$lib/database/auth";
 import {getPublicationById} from "$lib/database";
 import {getReportsPublication} from "$lib/database/publication";
 import {isReported} from "$lib/database/user";
+import { getPublicationByIdLight } from '$lib/database/db.ts';
 
 /**
  * If you are an admin this returns all reports for a publication. If you are a user this returns just whether you have reported it
@@ -21,7 +22,9 @@ export async function GET({ params, locals }) {
     // todo: supabase admin check
     // if(!session.user.isAdmin) return isPublicationReported(parseInt(publicationId), session.user.id)
 
-    const publication = await getPublicationById(parseInt(publicationId));
+    //const publication = await getPublicationById(parseInt(publicationId));
+    const publication = await getPublicationByIdLight(parseInt(publicationId));
+
     if (!publication)
         return new Response(
             JSON.stringify({ error: 'Publication not found' }),
@@ -44,7 +47,9 @@ export async function GET({ params, locals }) {
  * @param userId
  */
 async function isPublicationReported(publicationId: number, userId: string) {
-    const publication = await getPublicationById(publicationId);
+    //const publication = await getPublicationById(publicationId);
+    const publication = await getPublicationByIdLight(publicationId);
+
     if (!publication)
         return new Response(
             JSON.stringify({ error: 'Publication not found' }),

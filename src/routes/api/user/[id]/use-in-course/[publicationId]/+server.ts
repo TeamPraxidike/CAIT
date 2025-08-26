@@ -5,6 +5,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { getPublicationByIdLight } from '$lib/database/db.ts';
 
 /**
  * Replaces ALL courses linked to this publication and user with a new set of courses
@@ -23,7 +24,9 @@ export async function POST({ params, request, locals }) {
 			status: 404,
 		});
 
-	const publication = await getPublicationById(parseInt(publicationId));
+	//const publication = await getPublicationById(parseInt(publicationId));
+	const publication = await getPublicationByIdLight(parseInt(publicationId));
+
 	if (!publication)
 		return new Response(
 			JSON.stringify({ error: 'Publication not found' }),

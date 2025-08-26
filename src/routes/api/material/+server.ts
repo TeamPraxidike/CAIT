@@ -66,15 +66,13 @@ export const GET: RequestHandler = async ({ url }) => {
 			diff,
 			type,
 			sort,
-			query
+			query,
+			false,
 		);
-
-		// materials = materials.filter((m: MaterialWithPublication) => !m.publication.isDraft);
 
 		const idsMat = materials.map(m => m.publicationId)
 
 		materials = materials.slice(0, amount)
-
 
 		for (const material of materials) {
 			material.publication.tags = reorderTags(
@@ -82,8 +80,6 @@ export const GET: RequestHandler = async ({ url }) => {
 				tags,
 			);
 		}
-
-
 
 		materials = await Promise.all(materials.map(async (material) => {
 			return {

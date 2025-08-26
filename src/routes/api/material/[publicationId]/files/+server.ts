@@ -47,7 +47,7 @@ export async function GET({ params, locals }) {
 			// TODO: This will break for LocalFileSystem
 			else {
 				currentFileData = (await fileSystem.readFile(file.path))
-					.toString('base64');
+					.toString('base64');//skipcheck
 			}
 			fileData.push({
 				fileId: file.path,
