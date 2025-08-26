@@ -21,15 +21,13 @@
 	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	import {
-		clearFiles,
-		clearMaterialSnapshot,
-		deleteCover,
 		type FormSnapshot,
 		type FileTUSMetadata,
 		getCover,
 		getFiles,
 		getMaterialSnapshot,
-		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata
+		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata,
+		saveCover, clearAllData, clearIfTimeExceeded
 	} from '$lib/util/indexDB';
 	import { allUploadsDone, downloadFileFromSupabase } from '$lib/util/file';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
@@ -78,10 +76,7 @@
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
 	// learning objectives
 	let LOs: string[] = [];
-	$: LOs = LOs;
-
 	let PKs: string[] = [];
-	$: PKs = PKs;
 
 	// input data
 	let title: string = '';
@@ -104,26 +99,6 @@
 	$: fileTUSProgress = fileTUSProgress
 	let fileTUSUploadObjects: { [key: string]: any } = {}
 	$: fileTUSUploadObjects = fileTUSUploadObjects
-
-	// async function downloadFileFromSupabase(f: FetchedFileItem){
-	// 	const { data: blob, error } = await supabaseClient.storage
-	// 		.from("uploadedFiles")
-	// 		.download(f.fileId)
-	//
-	// 	if (error) {
-	// 		console.error('Error downloading file from Supabase:', error.message);
-	// 		throw error;
-	// 	}
-	//
-	// 	if (!blob) {
-	// 		console.error('Download succeeded but the returned blob is null.');
-	// 		return null;
-	// 	}
-	//
-	// 	return new File([blob], f.name, {
-	// 		type: blob.type,
-	// 	});
-	// }
 
 	let previousCourse: number | null = null;
 	$: if (course !== previousCourse) {
@@ -194,10 +169,7 @@
 		}
 
 		Promise.all([
-			deleteCover(),
-			clearFiles(),
-			clearMaterialSnapshot(),
-			deleteAllFileTUSMetadata()
+			clearAllData()
 		]).then(async () => {
 			showAnimation = true;
 		}).catch(error => {
@@ -327,8 +299,33 @@
 		(async () => {
 
 			// THIS IS THE SNAPSHOT CODE (using indexDB)
+			let existing = await getMaterialSnapshot();
 
-			// get coverPic
+			if (existing && await clearIfTimeExceeded(existing.lastOpened)) {
+				existing = undefined; // clear snapshot locally
+			}
+
+			// Only hydrate from snapshot if it is still valid
+			if (existing) {
+				// TODO: This ?? business is meh, redo
+				title = existing.title;
+				description = existing.description;
+				tags = existing.tags;
+				newTags = existing.newTags;
+				LOs = existing.LOs;
+				PKs = existing.PKs;
+				selectedType = existing.selectedType ?? 'Select type';
+				difficulty = existing.difficulty ?? 'easy';
+				maintainers = existing.maintainers;
+				searchableUsers = existing.searchableUsers;
+				estimate = existing.estimate ?? 0;
+				copyright = existing.copyright ?? 'No copyright';
+				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
+				fileURLs = existing.fileURLs ?? [];
+			} else {
+				console.log('No valid snapshot found (either none existed or it was expired and cleared).');
+			}
+
 			const storedCover = await getCover();
 			if (storedCover) {
 				coverPic = storedCover; // single file
@@ -357,26 +354,6 @@
 				}
 			}
 
-			// if a metadata snapshot already exists, use it
-			const existing = await getMaterialSnapshot();
-			if (existing) {
-				// TODO: This ?? business is meh, redo
-				title = existing.title;
-				description = existing.description;
-				tags = existing.tags;
-				newTags = existing.newTags;
-				// LOs = existing.LOs;
-				// PKs = existing.PKs;
-				selectedType = existing.selectedType ?? 'Select type';
-				difficulty = existing.difficulty ?? 'easy';
-				maintainers = existing.maintainers;
-				searchableUsers = existing.searchableUsers;
-				estimate = existing.estimate ?? 0;
-				copyright = existing.copyright ?? 'No copyright';
-				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
-				fileURLs = existing.fileURLs ?? [];
-			}
-
 			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {
 				const data: FormSnapshot = {
@@ -393,12 +370,10 @@
 					estimate,
 					copyright,
 					fileURLs,
-					theoryApplicationRatio
+					theoryApplicationRatio,
+					lastOpened: Date.now()
 				};
 
-				// console.log('IN CONST SNAPSHOT');
-				// console.log('Saving material snapshot:', data);
-				// Store it in IndexedDB
 				saveMaterialSnapshot(data);
 			}, 2000);
 
@@ -461,7 +436,7 @@
 		materialType: selectedTypes,
 		isDraft: false
 	};
-	$: numMaterials = Math.max(fileURLs.length, files.length);
+	$: numMaterials = fileURLs.length + files.length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
 
@@ -527,7 +502,7 @@
 					formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 					formData.append('course', course ? course.toString() : 'null');
-				  }} >
+			  }}>
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					buttonBackLabel="← Back"
 					buttonBack="btn text-surface-800 border border-surface-600 bg-surface-200 dark:text-surface-50 dark:bg-surface-600"
@@ -551,7 +526,6 @@
 					<div class="grid grid-cols-2 gap-x-4 gap-y-2">
 						<label for="title" class="block font-medium">Title<span class="text-error-300">*</span></label>
 						<label for="coverPic" class="block font-medium">Cover Picture (Max. size: 2MB)</label>
-
 
 				<div class="flex flex-col gap-2 mb-5">
 					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
@@ -855,4 +829,3 @@
 				}}
 	/>
 {/if}
-

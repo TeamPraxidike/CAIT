@@ -17,7 +17,6 @@ export let numNodes = 2
 export let materialType = ['slides'];
 
 $: hasTitle = metadata && metadata.title && metadata.title.trim() !== '';
-$: hasDescription = metadata && metadata.description && metadata.description.trim() !== '';
 $: hasTags = metadata && metadata.tags && metadata.tags.length > 0;
 $: hasLOs = metadata && metadata.learningObjectives && metadata.learningObjectives.length > 0;
 
@@ -27,7 +26,6 @@ $: fieldsList = [
 		files <= 0 && 'File',
 		numNodes <= 1 && '2 Nodes',
 		!hasTitle && 'Title',
-		!hasDescription && 'Description',
 		!hasTags && 'Tags',
 		!hasLOs && 'Learning Objectives',
 		materialType.length <= 0 && 'Material Type'
