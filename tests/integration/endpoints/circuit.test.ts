@@ -5,7 +5,7 @@ import {
 	addNode,
 	getMaterialByPublicationId,
 	prisma,
-	updateCircuitCoverPic
+	updateCircuitCoverPic, updateCoverPic
 } from '$lib/database';
 import { createUniqueUser } from '../../utility/users';
 import { createUniqueCircuit, createUniqueMaterial } from '../../utility/publicationsUtility';
@@ -16,7 +16,7 @@ async function populate() {
 
 	// the prisma creation of a circuit does not update the profile picture, but the requests assume that it is updated and will crash if there is no
 	// picture. Because of that we need to give it some dummy data if we use prisma for creation.
-	await updateCircuitCoverPic(
+	await updateCoverPic(
 		{
 			info: "a",
 			type: "png"

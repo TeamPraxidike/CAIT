@@ -5,6 +5,7 @@ import {
 	type Tag,
 } from '@prisma/client';
 import type { FileTUSMetadata } from '$lib/util/indexDB';
+import type { FetchedFileItem } from '$lib/database';
 
 export function formatFileSize(bytes:number):string {
 	if (bytes < 0) return "0 B";
@@ -182,6 +183,27 @@ export function concatFileList(
 	});
 
 	return arr1.concat(arr2) as unknown as FileList;
+}
+
+
+export async function downloadFileFromSupabase(supabaseClient: any, f: FetchedFileItem){
+	const { data: blob, error } = await supabaseClient.storage
+		.from("uploadedFiles")
+		.download(f.fileId)
+
+	if (error) {
+		console.error('Error downloading file from Supabase:', error.message);
+		throw error;
+	}
+
+	if (!blob) {
+		console.error('Download succeeded but the returned blob is null.');
+		return null;
+	}
+
+	return new File([blob], f.name, {
+		type: blob.type,
+	});
 }
 
 /**

@@ -7,7 +7,7 @@ import {
 	handleEdges,
 	type NodeDiffActions,
 	prisma,
-	updateCircuitCoverPic,
+	updateCoverPic,
 	updateReputation
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
@@ -119,7 +119,7 @@ export async function POST({ request, locals }) {
 
 				// if no cover pic detected in post, throw error
 				if (coverPic) {
-					await updateCircuitCoverPic(
+					await updateCoverPic(
 						coverPic,
 						circuit.publicationId,
 						userId,

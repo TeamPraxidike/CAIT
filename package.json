@@ -89,6 +89,7 @@
 		"piscina": "^4.5.1",
 		"postgres": "^3.4.5",
 		"remove-markdown": "^0.5.0",
+		"sharp": "^0.34.3",
 		"supabase": "^2.34.3",
 		"threads": "^1.7.0",
 		"ts-node": "^10.9.2",

@@ -12,7 +12,7 @@ import {
 	type NodeDiffActions,
 	prisma,
 	updateCircuitByPublicationId,
-	updateCircuitCoverPic
+	updateCoverPic
 } from '$lib/database';
 import { Prisma } from '@prisma/client';
 import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
@@ -121,7 +121,7 @@ export async function PUT({ request, params, locals }) {
 
 			// if coverPic detected, change
 			if (coverPic) {
-				await updateCircuitCoverPic(
+				await updateCoverPic(
 					coverPic,
 					publicationId,
 					body.userId,

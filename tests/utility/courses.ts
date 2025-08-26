@@ -1,6 +1,6 @@
 import { createUniqueUser } from './users';
 import { createUniqueMaterial, generateRandomString, randomEnumValue } from './publicationsUtility';
-import { createCourse, linkCourseToPublication } from '$lib/database/courses';
+import { createCourse, type createCourseData, linkCourseToPublication } from '$lib/database/courses';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { Level } from '@prisma/client';
 
@@ -23,7 +23,7 @@ export async function publicationsWithCourses(numPublications: number = 5) {
 	}
 }
 
-export function generateCourseData(creatorID: string){
+export function generateCourseData(creatorID: string): createCourseData{
 	const los = Math.ceil(Math.random() * 5);
 	const prerequisites = Math.ceil(Math.random() * 5);
 
@@ -40,6 +40,8 @@ export function generateCourseData(creatorID: string){
 		prerequisites: prerequisitesArray,
 		educationalLevel: randomEnumValue(Level),
 		courseName: generateRandomString(10),
+		copyright: generateRandomString(10),
+		maintainers: [],
 		creatorId: creatorID
 	};
 }

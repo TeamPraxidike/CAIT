@@ -35,6 +35,7 @@ export type FormSnapshot = {
 	theoryApplicationRatio?: number;  // -- for materials ONLY
 	fileURLs?: string[]; // -- for materials ONLY
 	circuitNodes?: NodeInfo[]; // -- for circuits ONLY
+	lastOpened: number;
 };
 
 export async function initDB() {
@@ -73,6 +74,29 @@ export async function deleteCover() {
 	console.log("DELETING COVER");
 	const db = await initDB();
 	await db.delete(COVER_STORE, 'coverPic');
+}
+
+export async function clearAllData() {
+	await deleteCover();
+	await clearFiles();
+	await clearMaterialSnapshot();
+	await deleteAllFileTUSMetadata();
+}
+
+/**
+ * Check if the time since lastOpened exceeds 30 minutes, and if so, clear all data.
+ * If using this function, make sure to also clear the data locally if it returns true (i.e., data was cleared from the database).
+ * @param lastOpened
+ */
+export async function clearIfTimeExceeded(lastOpened: number) {
+	const ageMs = Date.now() - lastOpened;
+
+	// if snapshot is older than 30 minutes, clear it
+	if (ageMs > 1000 * 60 * 30) {
+		await clearAllData();
+		return true;
+	}
+	return false;
 }
 
 // File operations, actually cool

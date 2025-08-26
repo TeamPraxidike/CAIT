@@ -3,6 +3,7 @@ import { type Level, Prisma, type PrismaClient } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import type { UserWithProfilePic } from '$lib/util/coursesLogic';
 import { profilePicFetcher } from '$lib/database/file';
+import type { FetchedFileItem } from '$lib/database/index';
 
 export type createCourseData = {
 	learningObjectives: string[];
@@ -11,13 +12,28 @@ export type createCourseData = {
 	courseName: string;
 	creatorId: string;
 	maintainers: string[];
+	copyright: string;
+	coverPic: {
+		type: string;
+		info: string;
+	} | null;
 }
 
 export type CourseWithMaintainersAndProfilePic = Course & {
 	maintainers: UserWithProfilePic[];
 };
 
-export type Course = Prisma.CourseGetPayload<true>;
+export type Course = Prisma.CourseGetPayload<{
+	include: {
+		coverPic: true
+	}
+}>;
+
+export type CourseWithCoverPic = Prisma.CourseGetPayload<{
+	include: {maintainers : true}
+}> & {
+	coverPic: FetchedFileItem;
+};
 
 
 async function enrichMaintainers(course: Course & { maintainers: any[] }): Promise<CourseWithMaintainersAndProfilePic> {
@@ -39,7 +55,8 @@ export async function getAllCoursesExtended(): Promise<CourseWithMaintainersAndP
 		include: {
 			maintainers: {
 				include: { profilePic: true }
-			}
+			},
+			coverPic: true
 		}
 	});
 
@@ -54,6 +71,7 @@ export async function createCourse(course: createCourseData): Promise<Course> {
 			prerequisites: course.prerequisites,
 			educationalLevel: course.educationalLevel,
 			courseName: course.courseName,
+			copyright: course.copyright,
 			maintainers: {
 				connect: [{ id: course.creatorId }, ...course.maintainers.map(x => ({ id: x }))]
 			}
@@ -113,7 +131,8 @@ export async function findCourseByMantainerExtended(userId: string): Promise<Cou
 		include: {
 			maintainers: {
 				include: { profilePic: true }
-			}
+			},
+			coverPic: true
 		}
 	});
 
