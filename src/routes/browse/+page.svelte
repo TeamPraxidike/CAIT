@@ -14,22 +14,6 @@
 	let circuits: any[] = [];
 	let idsMat: any[] = [];
 	let idsCirc: any[] = [];
-	$: data.materials.then(matData => {
-		materials = matData.materials;
-		idsMat = matData.idsMat;
-	}).catch(e => {
-		idsMat = [];
-	});
-	$: data.circuits.then(circData => {
-		circuits = circData.circuits;
-		idsCirc = circData.idsCirc;
-	}).catch(e => {
-		idsCirc = [];
-	});
-
-	$: (async () => {
-
-	})
 
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
@@ -188,7 +172,7 @@
 		materials = [];
 		circuits = [];
 		amount = e.detail;
-		fetchPromise = changePage(amount, page);
+		fetchPromise = sendFiltersToAPI()
 	}
 
 	async function changePage(amount: number, pageNum: number) {
