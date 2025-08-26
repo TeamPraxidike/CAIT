@@ -289,5 +289,5 @@ model Course {
   publications       Publication[] @relation("CoursePublications")
   maintainers        User[]        @relation("CourseInstructors")
   coverPic           File?         @relation("CourseCoverPic")
-  copyright          String
+  copyright          String        @default("")
 }
