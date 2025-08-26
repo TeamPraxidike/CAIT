@@ -16,31 +16,23 @@
 	let idsCirc: any[] = [];
 	$: data.materials.then(matData => {
 		materials = matData.materials;
-		
+		idsMat = matData.idsMat;
 	}).catch(e => {
 		idsMat = [];
 	});
 	$: data.circuits.then(circData => {
 		circuits = circData.circuits;
-		
-	}).catch(e => {
-		idsCirc = [];
-	});
-	$: data.materials.then(matData => {
-		idsMat = matData.idsMat;
-		
-	}).catch(e => {
-		idsMat = [];
-	});
-	$: data.circuits.then(circData => {
 		idsCirc = circData.idsCirc;
-		
 	}).catch(e => {
 		idsCirc = [];
 	});
+
+	$: (async () => {
+
+	})
+
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
-	$: source = data.type === 'circuits' ? idsCirc : idsMat;
 	$: paginationSettings.size = source.length;
 
 
@@ -164,17 +156,18 @@
 			.then(d => {
 				// Handle the response data from the API
 				if (s === 'material') {
-
 					materials = d.materials;
 					idsMat = d.idsMat;
+					source = idsMat
 				} else {
 					circuits = d.circuits;
 					idsCirc = d.idsCirc;
+					source = idsCirc;
 				}
-				amount = 9;
 				page = 0;
-				paginationSettings.size = amount;
 				paginationSettings.page = 0;
+
+				console.log(source.length);
 
 			})
 			.catch(error => {
@@ -271,8 +264,26 @@
 			searchActive = true;
 			selectedTags = [];
 			selectedTags.push(data.selectedTag);
-			sendFiltersToAPI();
+			fetchPromise = sendFiltersToAPI();
 		}
+
+		data.materials.then((matData) => {
+			materials = matData.materials;
+			idsMat = matData.idsMat;
+			if (data.type !== 'circuits') source = idsMat;
+		}).catch((err) =>{
+			materials = [];
+			idsMat = [];
+		})
+
+		data.materials.then((circData) => {
+			circuits = circData.circuits;
+			idsCirc = circData.idsCirc;
+			if (data.type === 'circuits') source = idsCirc;
+		}).catch((err) =>{
+			circuits = [];
+			idsCirc = [];
+		})
 	});
 
 	let paginationSettings = {

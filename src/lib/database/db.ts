@@ -270,11 +270,12 @@ export async function getAllPublications(publishers: string[], query: string,
 }
 
 // export async function getAllPublicationsByIds(ids: number[]): Promise<Publication[]> {
-export async function getAllPublicationsByIds(ids: number[]) {
+export async function getAllPublicationsByIds(ids: number[], sort: string) {
 	return prisma.publication.findMany({
 		where: {
 			id: { in: ids },
 		},
+		orderBy: sortSwitch(sort).publication,
 		include: {
 			// usedInCourse: true,
 			usedInCourse: {
