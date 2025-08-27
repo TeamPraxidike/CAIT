@@ -120,8 +120,6 @@
 				downloadFileFromSupabase(supabaseClient, currentCourse.coverPic).then(f => {
 					coverPic = f || undefined;
 				});
-			} else {
-				coverPic = undefined;
 			}
 		}
 	}

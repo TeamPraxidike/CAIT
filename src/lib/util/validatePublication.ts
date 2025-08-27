@@ -24,7 +24,6 @@ export type MetadataWithURLs = Metadata & {
 
 export function validateMetadata(metadata: Omit<Metadata, "materialType">) {
 	return metadata.title.length >= PUBLICATION_PARAMETERS.titleLength &&
-		metadata.description.length >= PUBLICATION_PARAMETERS.descriptionLength &&
 		metadata.learningObjectives.length >= PUBLICATION_PARAMETERS.learningObjectivesMin &&
 		metadata.tags.length >= PUBLICATION_PARAMETERS.tagsMin
 }
