@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Course, CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
+	import type { Course, CourseWithCoverPic, CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
 	import { type PopupSettings } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
 	import Icon from '@iconify/svelte';
@@ -8,13 +8,11 @@
 
 	import {Autocomplete, type AutocompleteOption, popup} from "@skeletonlabs/skeleton";
 
-	export let courses: Course[] = []; // all courses by the user
-	export let allCourses: Course[]	= []; // all courses available in the system
+	export let courses: CourseWithCoverPic[] = []; // all courses by the user
+	export let allCourses: CourseWithCoverPic[]	= []; // all courses available in the system
 	export let selectedCourseId: number | null = null; // the id of the course that is selected
 
 	export let originalCourseIds = courses.map(c => c.id);
-
-	let showMyCourses = false;
 
     // Show up to 10 courses; if more, show a "+N more…" chip at the end
     let maxVisible = 4;

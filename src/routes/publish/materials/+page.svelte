@@ -7,7 +7,7 @@
 		Tag,
 		UserProp
 	} from '$lib';
-	import { FileButton, getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
+	import { getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageServerData } from './$types';
 	import type {  Difficulty, Tag as PrismaTag } from '@prisma/client';
@@ -21,18 +21,15 @@
 	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	import {
-		clearFiles,
-		clearMaterialSnapshot,
-		deleteCover,
 		type FormSnapshot,
 		type FileTUSMetadata,
 		getCover,
 		getFiles,
 		getMaterialSnapshot,
-		saveCover,
-		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata
+		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata,
+		saveCover, clearAllData, clearIfTimeExceeded
 	} from '$lib/util/indexDB';
-	import { allUploadsDone } from '$lib/util/file'
+	import { allUploadsDone, downloadFileFromSupabase } from '$lib/util/file';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
@@ -40,6 +37,8 @@
 	import { changeCourse } from '$lib/util/coursesLogic';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import TimeEstimate from '$lib/components/publication/TimeEstimate.svelte';
+	import * as tus from 'tus-js-client'
+	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -77,10 +76,7 @@
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
 	// learning objectives
 	let LOs: string[] = [];
-	$: LOs = LOs;
-
 	let PKs: string[] = [];
-	$: PKs = PKs;
 
 	// input data
 	let title: string = '';
@@ -106,6 +102,7 @@
 
 	let previousCourse: number | null = null;
 	$: if (course !== previousCourse) {
+		const currentCourse = courses.find(c => c.id === course);
 		maintainers = [];
 		const prev_temp = previousCourse;
 		previousCourse = course;
@@ -114,36 +111,25 @@
 		LOs = result.LOs;
 		PKs = result.PKs;
 		maintainers = result.maintainers;
-	}
 
-
-	let allTypes: { id: string, content: string }[] = MaterialTypes.map(x => ({ id: '0', content: x })); //array with all the tags MOCK
-
-	let typeActive = false;
-	// cover
-	let coverPic: File | undefined = undefined;
-
-	function chooseCover(e: Event) {
-		const eventFiles = (e.target as HTMLInputElement).files;
-		if (eventFiles && eventFiles[0]) {
-			const file = eventFiles[0];
-
-			if ((file.size / (1024*1024)) > 2) {
-				return;
+		if (currentCourse) {
+			if (currentCourse.copyright !== "") {
+				copyright = currentCourse.copyright;
 			}
-
-			if (file.type === 'image/jpeg' || file.type === 'image/png') {
-				coverPic = file;
-				// Persist coverPic to IndexedDB 
-				saveCover(file);
-			} else {
-				toastStore.trigger({
-					message: 'Invalid file type, please upload a .jpg or .png file',
-					background: 'bg-warning-200'
+			if (currentCourse?.coverPic?.data) {
+				downloadFileFromSupabase(supabaseClient, currentCourse.coverPic).then(f => {
+					coverPic = f || undefined;
 				});
+			} else {
+				coverPic = undefined;
 			}
 		}
 	}
+
+	// cover
+	let coverPic: File | undefined = undefined;
+
+
 
 	$: uid = page.data.session?.user.id;
 
@@ -183,10 +169,7 @@
 		}
 
 		Promise.all([
-			deleteCover(),
-			clearFiles(),
-			clearMaterialSnapshot(),
-			deleteAllFileTUSMetadata()
+			clearAllData()
 		]).then(async () => {
 			showAnimation = true;
 		}).catch(error => {
@@ -241,8 +224,6 @@
 
 	let saveInterval: number | undefined = undefined;
 
-
-	import * as tus from 'tus-js-client'
 
 	// source: https://supabase.com/docs/guides/storage/uploads/resumable-uploads?queryGroups=language&language=js
 
@@ -318,8 +299,33 @@
 		(async () => {
 
 			// THIS IS THE SNAPSHOT CODE (using indexDB)
+			let existing = await getMaterialSnapshot();
 
-			// get coverPic
+			if (existing && await clearIfTimeExceeded(existing.lastOpened)) {
+				existing = undefined; // clear snapshot locally
+			}
+
+			// Only hydrate from snapshot if it is still valid
+			if (existing) {
+				// TODO: This ?? business is meh, redo
+				title = existing.title;
+				description = existing.description;
+				tags = existing.tags;
+				newTags = existing.newTags;
+				LOs = existing.LOs;
+				PKs = existing.PKs;
+				selectedType = existing.selectedType ?? 'Select type';
+				difficulty = existing.difficulty ?? 'easy';
+				maintainers = existing.maintainers;
+				searchableUsers = existing.searchableUsers;
+				estimate = existing.estimate ?? 0;
+				copyright = existing.copyright ?? 'No copyright';
+				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
+				fileURLs = existing.fileURLs ?? [];
+			} else {
+				console.log('No valid snapshot found (either none existed or it was expired and cleared).');
+			}
+
 			const storedCover = await getCover();
 			if (storedCover) {
 				coverPic = storedCover; // single file
@@ -348,26 +354,6 @@
 				}
 			}
 
-			// if a metadata snapshot already exists, use it
-			const existing = await getMaterialSnapshot();
-			if (existing) {
-				// TODO: This ?? business is meh, redo
-				title = existing.title;
-				description = existing.description;
-				tags = existing.tags;
-				newTags = existing.newTags;
-				// LOs = existing.LOs;
-				// PKs = existing.PKs;
-				selectedType = existing.selectedType ?? 'Select type';
-				difficulty = existing.difficulty ?? 'easy';
-				maintainers = existing.maintainers;
-				searchableUsers = existing.searchableUsers;
-				estimate = existing.estimate ?? 0;
-				copyright = existing.copyright ?? 'No copyright';
-				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
-				fileURLs = existing.fileURLs ?? [];
-			}
-
 			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {
 				const data: FormSnapshot = {
@@ -384,12 +370,10 @@
 					estimate,
 					copyright,
 					fileURLs,
-					theoryApplicationRatio
+					theoryApplicationRatio,
+					lastOpened: Date.now()
 				};
 
-				// console.log('IN CONST SNAPSHOT');
-				// console.log('Saving material snapshot:', data);
-				// Store it in IndexedDB
 				saveMaterialSnapshot(data);
 			}, 2000);
 
@@ -452,7 +436,7 @@
 		materialType: selectedTypes,
 		isDraft: false
 	};
-	$: numMaterials = Math.max(fileURLs.length, files.length);
+	$: numMaterials = fileURLs.length + files.length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
 
@@ -518,7 +502,7 @@
 					formData.append('theoryToApplication', JSON.stringify(theoryApplicationRatio))
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 					formData.append('course', course ? course.toString() : 'null');
-				  }} >
+			  }}>
 			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 					buttonBackLabel="← Back"
 					buttonBack="btn text-surface-800 border border-surface-600 bg-surface-200 dark:text-surface-50 dark:bg-surface-600"
@@ -543,7 +527,6 @@
 						<label for="title" class="block font-medium">Title<span class="text-error-300">*</span></label>
 						<label for="coverPic" class="block font-medium">Cover Picture (Max. size: 2MB)</label>
 
-
 				<div class="flex flex-col gap-2 mb-5">
 					<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
 						   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
@@ -567,34 +550,8 @@
 						/>
 					</div>
 				</div>
-
-						<div>
-							<div class="flex flex-col gap-2 min-h-56 bg-surface-200
-										border-2 border-dashed border-surface-700">
-								<div>
-									{#if coverPic}
-										<img src={URL.createObjectURL(coverPic)}
-											 alt="coverPicture"
-											 class="max-h-96 min-h-56 w-full h-auto object-contain block">
-									{/if}
-								</div>
-							</div>
-
-							<div>
-								{#if coverPic}
-									<button on:click={() => coverPic = undefined} type="button"
-											class="mt-2 rounded-lg py-2 px-4 bg-surface-900 text-surface-50 dark:bg-surface-100 dark:text-surface-800 hover:bg-opacity-85">
-										Remove Cover Picture
-									</button>
-								{:else}
-									<FileButton button="mt-2 rounded-lg py-2 px-4 bg-primary-600 text-white hover:bg-primary-500"
-												on:change={chooseCover} name="coverPhoto">
-										Upload Cover Picture
-									</FileButton>
-								{/if}
-							</div>
-						</div>
-					</div>
+					<CoverPicSelect bind:coverPic={coverPic} toastStore={toastStore} />
+				</div>
 				</Step>
 				<Step locked={locks[2]}>
 					<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
@@ -621,7 +578,7 @@
 						<div class="lg:w-1/2">
 							<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
 						</div>
-						
+
 						<textarea name="description" placeholder="Additional Description..." bind:value={description}
 								  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200 focus:border-primary-500 focus:ring-0" />
 					</div>
@@ -872,4 +829,3 @@
 				}}
 	/>
 {/if}
-

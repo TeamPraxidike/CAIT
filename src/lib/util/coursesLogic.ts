@@ -1,9 +1,11 @@
-import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
+import type {
+	CourseWithCoverPic,
+} from '$lib/database/courses';
 import type {User} from '$lib/database/user';
 
 export type UserWithProfilePic = User & { profilePicData: string | null};
 
-export function changeCourse(newCourse: number | null, currentCourse: number | null, LOs: string[], PKs: string[] , courses: CourseWithMaintainersAndProfilePic[], maintainers: UserWithProfilePic[]){
+export function changeCourse(newCourse: number | null, currentCourse: number | null, LOs: string[], PKs: string[] , courses: CourseWithCoverPic[], maintainers: UserWithProfilePic[]){
 	// Remove learning objectives and prerequisites that are a part of the previous course
 	const prevCourse = courses.find(c => c.id === currentCourse);
 	LOs = LOs.filter(l => !prevCourse?.learningObjectives.includes(l));

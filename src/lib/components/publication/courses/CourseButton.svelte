@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Course } from '$lib/database/courses';
+	import type { Course, CourseWithCoverPic } from '$lib/database/courses';
 	import { createEventDispatcher } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
@@ -10,7 +10,7 @@
 
 	export let selectedCourseId: number | null;
 	export let previousCourseId: number | null;
-	export let course: Course;
+	export let course: CourseWithCoverPic;
 
 	export let canDelete = true;
 

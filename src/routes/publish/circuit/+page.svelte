@@ -18,7 +18,7 @@
 	// $: ({loggedUser} = data)
 
 	import {
-		saveCircuitSnapshot, getCircuitSnapshot, clearCircuitSnapshot, type FormSnapshot
+		saveCircuitSnapshot, getCircuitSnapshot, clearCircuitSnapshot, type FormSnapshot, clearIfTimeExceeded
 	} from '$lib/util/indexDB';
 	import { validateMetadata } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
@@ -145,7 +145,11 @@
 			// THIS IS THE SNAPSHOT CODE (using indexedDB)
 
 			// if a metadata snapshot already exists, use it
-			const existing = await getCircuitSnapshot();
+			let existing = await getCircuitSnapshot();
+			if (existing && await clearIfTimeExceeded(existing.lastOpened)) {
+				existing = undefined; // clear snapshot locally
+			}
+
 			if (existing) {
 				// TODO: This ?? business is meh, redo
 				title = existing.title;
@@ -156,7 +160,6 @@
 				priorKnowledge = existing.PKs;
 				additionalMaintainers = existing.maintainers;
 				searchableUsers = existing.searchableUsers;
-				circuitNodesPlaceholder = existing.circuitNodes ?? [];
 			}
 
 			circuitKey = Date.now();
@@ -172,7 +175,7 @@
 					PKs: priorKnowledge,
 					maintainers: additionalMaintainers,
 					searchableUsers,
-					circuitNodes: circuitNodesPlaceholder
+					lastOpened: Date.now()
 				};
 
 				console.log("IN CONST SNAPSHOT")
@@ -211,7 +214,7 @@
 	};
 	$: draft = !validateMetadata(metadata);
 
-	let bannerFieldsList = [];
+	let bannerFieldsList: string[] = [];
 	let showAnimation = false;
 	$: if (showAnimation) {
 		// tick() waits until the DOM has been updated
@@ -324,7 +327,7 @@
 		{#if isSubmitting}
 			<div class="col-span-full relative w-full">
 				<div class="absolute right-0 -top-[50px] z-10 bg-white pr-8 pl-20 py-3">
-					<ProgressRadial font="12" width="w-10"/>
+					<ProgressRadial font={12} width="w-10"/>
 				</div>
 			</div>
 		{/if}

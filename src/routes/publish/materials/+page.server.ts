@@ -4,7 +4,9 @@ import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database'
 import { type Difficulty, type Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
-import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
+import type {
+	CourseWithCoverPic
+} from '$lib/database/courses';
 import { env } from '$env/dynamic/public';
 
 
@@ -13,8 +15,8 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	const courses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended/user/${locals.user?.id}`)).json();
-	const allCourses: CourseWithMaintainersAndProfilePic[] = await (await fetch(`/api/course-extended`)).json();
+	const courses: CourseWithCoverPic[] = await (await fetch(`/api/course-extended/user/${locals.user?.id}`)).json();
+	const allCourses: CourseWithCoverPic[] = await (await fetch(`/api/course-extended`)).json();
 	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
@@ -34,7 +36,7 @@ export const actions = {
 
 		const fileList: string[] = data.getAll('file') as unknown as string[];
 		const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
-		if (!fileList || fileList.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
+		if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
 		// const add = await filesToAddOperation(fileList, fileURLs);
 
 		const add = fileList.concat(fileURLs).map((item: string) => {
@@ -127,13 +129,29 @@ export const actions = {
 			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
 			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
 			const maintainers = JSON.parse(formData.get('maintainers') as string);
+			const copyright = formData.get('copyright') as string;
+
+			const coverPicFile = formData.get('coverPic');
+			let coverPic = null;
+
+			if (coverPicFile instanceof File) {
+				const buffer = await coverPicFile.arrayBuffer();
+				const info = Buffer.from(buffer).toString('base64');
+				coverPic = {
+					type: coverPicFile.type,
+					info,
+				};
+			}
+
 			const courseData = {
 				learningObjectives: learningObjectives,
 				prerequisites: prerequisites,
 				educationalLevel: level,
 				courseName: title,
 				creatorId: locals.session?.user.id,
+				copyright: copyright,
 				maintainers: maintainers,
+				coverPic: coverPic,
 			};
 			const res = await fetch(`/api/course`, {
 				method: 'POST',

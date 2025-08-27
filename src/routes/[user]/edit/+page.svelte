@@ -5,8 +5,8 @@
 	import { FileButton, getToastStore } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import type { FetchedFileItem } from '$lib/database';
 	import { onMount, tick } from 'svelte';
+	import { downloadFileFromSupabase } from '$lib/util/file';
 
 	/* This is the data that was returned from the server */
 	export let data: LayoutData;
@@ -24,27 +24,6 @@
 			profilePicPromise = downloadFileFromSupabase(profilePicFetchedData);
 		}
 	});
-
-	//TODO: move this function to index and export
-	async function downloadFileFromSupabase(f: FetchedFileItem){
-		const { data: blob, error } = await supabaseClient.storage
-			.from("uploadedFiles")
-			.download(f.fileId)
-
-		if (error) {
-			console.error('Error downloading file from Supabase:', error.message);
-			throw error;
-		}
-
-		if (!blob) {
-			console.error('Download succeeded but the returned blob is null.');
-			return null;
-		}
-
-		return new File([blob], f.name, {
-			type: blob.type,
-		});
-	}
 
 	const toastStore = getToastStore();
 	$: if (form?.status === 400) {

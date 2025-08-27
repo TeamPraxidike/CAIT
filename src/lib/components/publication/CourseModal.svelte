@@ -7,11 +7,15 @@
 	import { page } from '$app/state';
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import CourseLevel from '$lib/components/publication/CourseLevel.svelte';
-	import type { Course } from '$lib/database/courses';
+	import type { CourseWithCoverPic } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
+	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
 	import { deleteCourseById } from '$lib/util/coursesLogic';
+	import { downloadFileFromSupabase } from '$lib/util/file';
+
+	let supabaseClient = page.data.supabase;
 
 	export let close: () => void; // to close the modal
 	export let users: UserWithProfilePic[] = [];
@@ -20,7 +24,7 @@
 	export let publisher: UserWithProfilePic
 
 
-	export let existingCourse: Course | null;
+	export let existingCourse: CourseWithCoverPic | null;
 	export let onSuccess = () => {};
 	let id = existingCourse?.id ?? null;
 
@@ -28,6 +32,13 @@
 	let level: Level = existingCourse?.educationalLevel as Level;
 	let learningObjectives: string[] = existingCourse?.learningObjectives ?? [];
 	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
+	let copyright: string = existingCourse?.copyright ?? "";
+	let coverPic: File | undefined = undefined;
+	if (existingCourse) {
+		downloadFileFromSupabase(supabaseClient, existingCourse.coverPic).then(f => {
+			coverPic = f || undefined;
+		})
+	}
 
 	type UserWithProfilePic = User & { profilePicData: string | null };
 	let maintainers: UserWithProfilePic[] = [];
@@ -83,10 +94,11 @@
 			formData.append('maintainers', JSON.stringify(additionalMaintainers.map(m => m.id)));
 			formData.append('level', level);
 			if (isEdit && id !== null) formData.append('id', id.toString());
-			formData.append('context', 'course-form')
+			formData.append('context', 'course-form');
+			formData.append('copyright', copyright);
+			formData.append('coverPic', coverPic || '');
 
 			close();
-
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
 
@@ -105,15 +117,27 @@
 			/>
 		</div>
 
+		<div class="flex flex-row justify-start items-center gap-10 mb-4">
 		<div class="space-y-3">
 			<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
 			<CourseLevel bind:label={level} />
+		</div>
+		<div>
+			<label for="copyright" class="block font-medium">Copyright</label>
+			<input type="text"
+				   name="copyright"
+				   bind:value={copyright}
+				   on:keydown={handleInputEnter}
+				   required
+				   class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+			/>
+		</div>
 		</div>
 
 		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
 					   bind:additionalMaintainers={additionalMaintainers} />
 		<MetadataLOandPK bind:LOs={learningObjectives} bind:priorKnowledge={prerequisites} adding="{true}" />
-
+		<CoverPicSelect bind:coverPic={coverPic}/>
 
 		<div class="flex justify-end items-center pt-4">
 			<div class="flex gap-3">
