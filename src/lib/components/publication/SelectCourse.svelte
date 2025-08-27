@@ -69,6 +69,10 @@
 		dispatch('courseDeleted', { courseId });
 	}
 
+	function handleDeselection(){
+		dispatch('deselectCourse');
+	}
+
 	function handleEdit(e: CustomEvent<{ course: Course }>) {
 		dispatch('courseEditRequest', { course: e.detail.course });
 	}
@@ -102,6 +106,7 @@
 						bind:selectedCourseId
 						bind:previousCourseId
 						on:courseDeleted={handleDeletion}
+						on:deselectCourse={handleDeselection}
 						on:editCourse={handleEdit}/>
 				{:else}
 					<CourseButton
@@ -110,6 +115,7 @@
 						bind:previousCourseId
 						canDelete={false}
 						on:courseDeleted={handleDeletion}
+						on:deselectCourse={handleDeselection}
 						on:editCourse={handleEdit}/>
 				{/if}
 			{/each}

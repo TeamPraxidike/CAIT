@@ -16,7 +16,12 @@
 
 	function selectType(courseId: number) {
 		previousCourseId = selectedCourseId;
-		selectedCourseId = selectedCourseId === courseId ? null : courseId;
+
+		// if we have clicked on the currently selected course
+		if (selectedCourseId === courseId){
+			dispatch('deselectCourse');
+			selectedCourseId = null;
+		} else selectedCourseId = courseId;
 	}
 
 	async function confirmAndDelete(courseId: number) {

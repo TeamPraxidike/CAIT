@@ -356,8 +356,8 @@
 								</a>
 								{#if isHoveredPfp}
 									<div
-											class="absolute top-full mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300"
-											style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
+											class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-surface-50 dark:bg-surface-800 shadow-md p-2 rounded-lg flex gap-2 items-center"
+											style="z-index: 9999;" transition:fly={{ y: 8, duration: 400 }}>
 
 										<div class="flex flex-col items-center">
 											<p>{publisher.firstName + " " + publisher.lastName}</p>
