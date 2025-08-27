@@ -172,7 +172,8 @@
 		materials = [];
 		circuits = [];
 		amount = e.detail;
-		fetchPromise = sendFiltersToAPI()
+		page = 0;
+		fetchPromise = changePage(amount, page);
 	}
 
 	async function changePage(amount: number, pageNum: number) {
