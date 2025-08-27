@@ -7,8 +7,9 @@ import { profilePicFetcher } from '$lib/database/file';
 export const GET: RequestHandler = async ({ url }) => {
 	try {
 		const p = url.searchParams.get('ids');
+		const sort = url.searchParams.get('sort') || 'Most Recent';
 		const ids = (p ? p.split(',') : []).map((n) => Number(n));
-		let publications = await getAllPublicationsByIds(ids);
+		let publications = await getAllPublicationsByIds(ids, sort);
 
 		publications = await Promise.all(publications.map(async (publication) => {
 			let coverPicData: string | null;

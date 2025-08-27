@@ -10,7 +10,7 @@
 	import type { CourseWithCoverPic } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
 	import { deleteCourseById } from '$lib/util/coursesLogic';
 	import { downloadFileFromSupabase } from '$lib/util/file';
@@ -35,9 +35,14 @@
 	let copyright: string = existingCourse?.copyright ?? "";
 	let coverPic: File | undefined = undefined;
 	if (existingCourse) {
-		downloadFileFromSupabase(supabaseClient, existingCourse.coverPic).then(f => {
-			coverPic = f || undefined;
-		})
+		// if data is not null, we have a custom cover picture, download it
+		if (existingCourse.coverPic.data){
+			downloadFileFromSupabase(supabaseClient, existingCourse.coverPic).then(f => {
+				coverPic = f || undefined;
+			})
+		} else {
+			coverPic = undefined;
+		}
 	}
 
 	type UserWithProfilePic = User & { profilePicData: string | null };
@@ -72,15 +77,21 @@
 
 
 	$: isFormValid = title.trim().length > 0 && level !== undefined && learningObjectives.length > 0;
-	// $: if ()
 
+	onMount(() => {
+		document.body.classList.add("overflow-hidden");
+	});
 
+	onDestroy(() => {
+		document.body.classList.remove("overflow-hidden");
+	});
 
+	export let showCourseProgressRadial = false;
 </script>
 
 <ConfirmDeleteCourse bind:this={confirmDelete} />
 
-<div class="modal-bg">
+<div class="modal-bg custom-scrollbar">
 	<form
 		action={isEdit ? `?/editCourse` : "?/publishCourse"}
 		method="POST"
@@ -98,6 +109,7 @@
 			formData.append('copyright', copyright);
 			formData.append('coverPic', coverPic || '');
 
+			showCourseProgressRadial = true;
 			close();
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
@@ -160,6 +172,11 @@
 </div>
 
 <style>
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #888 #f1f1f100; /* thumb color, track color */
+    }
+
     .modal-bg {
         position: fixed;
         inset: 0;
@@ -177,6 +194,10 @@
         border-radius: 1.25rem;
         width: 100%;
         max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
 </style>
+
+
