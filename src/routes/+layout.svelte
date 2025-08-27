@@ -85,21 +85,9 @@
 
 <div class="w-full min-h-screen dark:text-surface-50 text-surface-900 overflow-x-hidden">
 
-<!--	<div class="progress-bar-container">-->
-<!--&lt;!&ndash;		<div class="progress-bar-meter" style="width: {progress}%"></div>&ndash;&gt;-->
-<!--		<div class="progress-bar-meter" style="width: {progress}%"></div>-->
-
-<!--	</div>-->
-
 	<Grid pageGrid="{true}">
 		<slot />
 	</Grid>
 </div>
-
-<!--<SemanticSearch-->
-<!--	title="Semantic Search"-->
-<!--	placeholder="Ask about content..."-->
-<!--	apiEndpoint="/api/semanticsearch"-->
-<!--/>-->
 
 <Footer />

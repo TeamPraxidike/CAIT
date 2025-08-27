@@ -207,6 +207,9 @@
 	} else if (form?.status == 200 && form?.context === 'course-form') {
 		const updated = form.course;
 		const idx = courses.findIndex(c => c.id === updated.id);
+
+		showCourseProgressRadial = false;
+
 		if (idx !== -1) {
 			courses[idx] = updated;
 			courses = [...courses];
@@ -223,7 +226,7 @@
 	};
 
 	let saveInterval: number | undefined = undefined;
-
+	let showCourseProgressRadial = false;
 
 	// source: https://supabase.com/docs/guides/storage/uploads/resumable-uploads?queryGroups=language&language=js
 
@@ -415,6 +418,10 @@
 			editingCourse = null;
 			courseMaintainers = [];
 		}
+		tick().then(() => {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		});
+
 		showModal = true;
 	}
 
@@ -534,9 +541,17 @@
 						<label for="content" class="mt-1 block font-medium">Content<span class="text-error-300">*</span></label>
 						<SelectType bind:selectedTypes={selectedTypes}/>
 						<hr class="my-3 mx-2">
-						<label for="course" class="block font-medium">Course<span class="text-error-300">*</span></label>
+						<div class="flex items-center gap-2 h-[32px] mb-2">
+							<label for="course" class="font-medium flex items-center">
+								Course<span class="text-error-300">*</span>
+							</label>
+							{#if showCourseProgressRadial}
+								<ProgressRadial font={8} width="w-8" class="shrink-0" />
+							{/if}
+						</div>
 						<SelectCourse on:showCourseModal={() => openModal(null)}
 						  bind:selectedCourseId={course}
+						  bind:showCourseProgressRadial={showCourseProgressRadial}
 						  courses={courses}
 						  allCourses={data.allCourses}
 						  bind:originalCourseIds={originalCourseIds}
@@ -820,6 +835,7 @@
 
 {#if showModal}
 	<CourseModal existingCourse={editingCourse} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
+				 bind:showCourseProgressRadial={showCourseProgressRadial}
 				 bind:additionalMaintainers={courseMaintainers}
 				 on:courseDeleted={(event) => {
 					const id = event.detail.courseId;
