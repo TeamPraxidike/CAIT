@@ -35,9 +35,14 @@
 	let copyright: string = existingCourse?.copyright ?? "";
 	let coverPic: File | undefined = undefined;
 	if (existingCourse) {
-		downloadFileFromSupabase(supabaseClient, existingCourse.coverPic).then(f => {
-			coverPic = f || undefined;
-		})
+		// if data is not null, we have a custom cover picture, download it
+		if (existingCourse.coverPic.data){
+			downloadFileFromSupabase(supabaseClient, existingCourse.coverPic).then(f => {
+				coverPic = f || undefined;
+			})
+		} else {
+			coverPic = undefined;
+		}
 	}
 
 	type UserWithProfilePic = User & { profilePicData: string | null };

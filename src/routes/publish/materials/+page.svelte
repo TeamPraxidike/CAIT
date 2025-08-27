@@ -562,6 +562,9 @@
 							  courses = courses.filter(c => c.id !== event.detail.courseId);
 							  courses = [...courses];
 						  }}
+						  on:deselectCourse={() => {
+							  coverPic = undefined;
+						  }}
 						/>
 					</div>
 				</div>
