@@ -166,7 +166,6 @@ export const actions = {
 			return { status: res.status, id: newCourse.id, context: 'course-form', course: newCourse};
 		} catch (error) {
 			console.error("Error creating course ", error);
-			throw redirect(303, '/course/create');
 		}
 	},
 	editCourse: async ({ request, fetch, locals }) => {
