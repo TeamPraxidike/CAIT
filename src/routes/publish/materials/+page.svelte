@@ -39,6 +39,7 @@
 	import TimeEstimate from '$lib/components/publication/TimeEstimate.svelte';
 	import * as tus from 'tus-js-client'
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
+	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -407,7 +408,8 @@
 			event.preventDefault();
 		}
 	};
-	function openModal(courseToEdit: any = null) {
+	function openModal(courseToEdit: CourseWithCoverPic | null = null) {
+		console.log('Opening modal ', courseToEdit);
 		if (courseToEdit) {
 			editingCourse = courseToEdit;
 			// prefill maintainers for edit (exclude current user)
@@ -430,7 +432,7 @@
 
 	// const uploadFile
 	let showModal = false;
-	let editingCourse: any = null;
+	let editingCourse: CourseWithCoverPic | null = null;
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
@@ -549,7 +551,6 @@
 						</div>
 						<SelectCourse on:showCourseModal={() => openModal(null)}
 						  bind:selectedCourseId={course}
-						  bind:showCourseProgressRadial={showCourseProgressRadial}
 						  courses={courses}
 						  allCourses={data.allCourses}
 						  bind:originalCourseIds={originalCourseIds}

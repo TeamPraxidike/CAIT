@@ -20,6 +20,38 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
+async function extractCourseData(formData: FormData, locals: App.Locals) {
+	const title = formData.get('title');
+	const level = formData.get('level');
+	const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
+	const prerequisites = JSON.parse(formData.get('prerequisites') as string);
+	const maintainers = JSON.parse(formData.get('maintainers') as string);
+	const copyright = formData.get('copyright') as string;
+
+	const coverPicFile = formData.get('coverPic');
+	let coverPic = null;
+
+	if (coverPicFile instanceof File) {
+		const buffer = await coverPicFile.arrayBuffer();
+		const info = Buffer.from(buffer).toString('base64');
+		coverPic = {
+			type: coverPicFile.type,
+			info,
+		};
+	}
+
+	return {
+		learningObjectives: learningObjectives,
+		prerequisites: prerequisites,
+		educationalLevel: level,
+		courseName: title,
+		creatorId: locals.session?.user.id,
+		copyright: copyright,
+		maintainers: maintainers,
+		coverPic: coverPic,
+	};
+}
+
 export const actions = {
 	/**
 	 * Publish a new material action.
@@ -124,35 +156,8 @@ export const actions = {
 
 		try {
 			const formData = await request.formData();
-			const title = formData.get('title');
-			const level = formData.get('level');
-			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
-			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
-			const maintainers = JSON.parse(formData.get('maintainers') as string);
-			const copyright = formData.get('copyright') as string;
+			const courseData = extractCourseData(formData, locals);
 
-			const coverPicFile = formData.get('coverPic');
-			let coverPic = null;
-
-			if (coverPicFile instanceof File) {
-				const buffer = await coverPicFile.arrayBuffer();
-				const info = Buffer.from(buffer).toString('base64');
-				coverPic = {
-					type: coverPicFile.type,
-					info,
-				};
-			}
-
-			const courseData = {
-				learningObjectives: learningObjectives,
-				prerequisites: prerequisites,
-				educationalLevel: level,
-				courseName: title,
-				creatorId: locals.session?.user.id,
-				copyright: copyright,
-				maintainers: maintainers,
-				coverPic: coverPic,
-			};
 			const res = await fetch(`/api/course`, {
 				method: 'POST',
 				body: JSON.stringify(courseData),
@@ -170,24 +175,11 @@ export const actions = {
 
 		try {
 			const formData = await request.formData();
-			const id = Number(formData.get('id'));
-			const title = formData.get('title');
-			const level = formData.get('level');
-			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
-			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
-			const maintainers = JSON.parse(formData.get('maintainers') as string);
+			const courseData = await extractCourseData(formData, locals);
 
-			const payload = {
-				courseName: title,
-				educationalLevel: level,
-				learningObjectives,
-				prerequisites,
-				maintainers,
-			};
-
-			const res = await fetch(`/api/course/${id}` , {
+			const res = await fetch(`/api/course/${formData.get('id')}` , {
 				method: 'PUT',
-				body: JSON.stringify(payload),
+				body: JSON.stringify(courseData),
 			});
 
 			const updatedCourse = await res.json();

@@ -165,7 +165,11 @@
 						Delete
 					</button>
 				{/if}
-				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
+				<button class:opacity-50={!isFormValid} disabled={!isFormValid}
+						type="submit"
+						class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">
+					{isEdit ? 'Save' : 'Create'}
+				</button>
 			</div>
 		</div>
 	</form>

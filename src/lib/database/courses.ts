@@ -29,10 +29,9 @@ export type Course = Prisma.CourseGetPayload<{
 	}
 }>;
 
-export type CourseWithCoverPic = Prisma.CourseGetPayload<{
-	include: {maintainers : true}
-}> & {
+export type CourseWithCoverPic = Prisma.CourseGetPayload<true> & {
 	coverPic: FetchedFileItem;
+	maintainers: UserWithProfilePic[];
 };
 
 
@@ -87,6 +86,7 @@ export type updateCourseData = {
     prerequisites: string[];
     maintainers: string[]; // user ids (excluding current user is allowed)
     currentUserId: string; // ensure current user remains a maintainer
+	copyright: string;
 }
 
 export async function updateCourse(data: updateCourseData): Promise<Course> {
@@ -99,6 +99,8 @@ export async function updateCourse(data: updateCourseData): Promise<Course> {
             educationalLevel: data.educationalLevel,
             learningObjectives: data.learningObjectives,
             prerequisites: data.prerequisites,
+			copyright: data.copyright || '',
+
             maintainers: {
                 set: uniqueMaintainerIds.map((id) => ({ id }))
             }
