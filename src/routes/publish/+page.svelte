@@ -33,7 +33,8 @@
 		<h2 class="w-full text-md text-surface-500 text-opacity-80 dark:text-surface-300">Upload your materials or connect
 			materials in a circuit</h2>
 	</div>
-	<div class="flex-col flex md:flex-row items-center">
+
+	<div class="flex-col flex md:flex-row items-center gap-6">
 		<a
 			data-testid="goto_publish_material"
 			href={materialsPath}
@@ -418,5 +419,15 @@
 			{/if}
 		</a>
 
+	</div>
+
+	<!-- Tutorial Button -->
+	<div class="flex justify-center mb-4">
+		<a 
+			href="/onboarding/materials" 
+			class="btn bg-surface-100 dark:bg-surface-700 border-2 border-dashed border-primary-500 hover:bg-primary-50 dark:hover:bg-surface-600 text-primary-700 dark:text-primary-300 transition-all duration-300 px-6 py-3 rounded-lg font-medium"
+		>
+			📚 New to uploading? Watch tutorial
+		</a>
 	</div>
 </div>
