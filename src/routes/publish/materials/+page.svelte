@@ -836,6 +836,7 @@
 
 {#if showModal}
 	<CourseModal existingCourse={editingCourse} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
+				 bind:courses={courses}
 				 bind:showCourseProgressRadial={showCourseProgressRadial}
 				 bind:additionalMaintainers={courseMaintainers}
 				 on:courseDeleted={(event) => {
@@ -844,5 +845,9 @@
 					originalCourseIds = originalCourseIds.filter(x => x !== id);
 					if (course === id) course = null;
 				}}
+				 on:CourseCreated={(event) => {
+					 courses = [...courses, event.detail.course];
+					 originalCourseIds = [...originalCourseIds, event.detail.course.id];
+				 }}
 	/>
 {/if}

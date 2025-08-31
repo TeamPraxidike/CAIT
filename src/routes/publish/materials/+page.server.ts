@@ -156,12 +156,13 @@ export const actions = {
 
 		try {
 			const formData = await request.formData();
-			const courseData = extractCourseData(formData, locals);
+			const courseData = await extractCourseData(formData, locals);
 
 			const res = await fetch(`/api/course`, {
 				method: 'POST',
 				body: JSON.stringify(courseData),
 			});
+
 			const newCourse = await res.json();
 			return { status: res.status, id: newCourse.id, context: 'course-form', course: newCourse};
 		} catch (error) {
@@ -182,7 +183,6 @@ export const actions = {
 			});
 
 			const updatedCourse = await res.json();
-			console.log("Updated course from endpoint", updatedCourse);
 			return { status: res.status, id: updatedCourse.id, context: 'course-form', course: updatedCourse };
 		} catch (error) {
 			console.error('Error updating course ', error);

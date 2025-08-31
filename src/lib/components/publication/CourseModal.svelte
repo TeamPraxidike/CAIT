@@ -21,7 +21,8 @@
 	export let users: UserWithProfilePic[] = [];
 	export let additionalMaintainers: UserWithProfilePic[] = [];
 	export let searchableUsers = users;
-	export let publisher: UserWithProfilePic
+	export let publisher: UserWithProfilePic;
+	export let courses: CourseWithCoverPic[];
 
 
 	export let existingCourse: CourseWithCoverPic | null;
@@ -122,6 +123,8 @@
 					existingCourse.copyright = res.copyright;
 					existingCourse.coverPic = res.coverPic;
 					existingCourse.maintainers = res.maintainers;
+				} else {
+					dispatch("CourseCreated", { course: result.result.data.course });
 				}
 
 				close();
