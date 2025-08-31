@@ -15,6 +15,7 @@
 	import { deleteCourseById } from '$lib/util/coursesLogic';
 	import { downloadFileFromSupabase } from '$lib/util/file';
 	import { getToastStore } from '@skeletonlabs/skeleton';
+	import CourseButton from './courses/CourseButton.svelte';
 
 	let supabaseClient = page.data.supabase;
 
@@ -115,8 +116,10 @@
 
 			showCourseProgressRadial = true;
 			return (result) => {
+				if (!('data' in result.result)) return;
+
 				showCourseProgressRadial = false;
-				if (result.result.data.status === 400) {
+				if (result.result.data?.status === 400) {
 					toastStore.trigger({
 						message: 'There already exists a course with this name, please choose another one',
 						background: 'bg-warning-200'
@@ -125,7 +128,7 @@
 				}
 
 				if (isEdit && existingCourse) {
-					const res = result.result.data.course;
+					const res = result.result.data?.course;
 					existingCourse.courseName = res.courseName;
 					existingCourse.learningObjectives = res.learningObjectives;
 					existingCourse.prerequisites = res.prerequisites;
@@ -134,7 +137,7 @@
 					existingCourse.coverPic = res.coverPic;
 					existingCourse.maintainers = res.maintainers;
 				} else {
-					dispatch("courseCreated", { course: result.result.data.course });
+					dispatch("courseCreated", { course: result.result.data?.course });
 				}
 
 				close();
