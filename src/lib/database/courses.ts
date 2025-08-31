@@ -2,7 +2,7 @@
 import { type Level, Prisma, type PrismaClient } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import type { UserWithProfilePic } from '$lib/util/coursesLogic';
-import { profilePicFetcher } from '$lib/database/file';
+import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import type { FetchedFileItem } from '$lib/database/index';
 
 export type createCourseData = {
@@ -60,6 +60,22 @@ export async function getAllCoursesExtended(): Promise<CourseWithMaintainersAndP
 	});
 
 	return Promise.all(courses.map(enrichMaintainers));
+}
+
+export async function getCourseByIdExtended(courseId: number): Promise<CourseWithCoverPic> {
+	let course = await prisma.course.findUnique({
+		where: { id: courseId },
+		include: {
+			maintainers: {
+				include: { profilePic: true }
+			},
+			coverPic: true
+		}
+	});
+
+	// course = await enrichMaintainers(course)
+	const coverPic = await coverPicFetcher(null, course.coverPic);
+	return { ...course, coverPic }
 }
 
 

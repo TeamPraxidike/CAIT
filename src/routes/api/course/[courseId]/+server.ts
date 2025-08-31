@@ -1,6 +1,6 @@
 import { verifyAuth } from '$lib/database/auth';
-import { deleteCourse, updateCourse } from '$lib/database/courses';
-import { updateCoverPic } from '$lib/database';
+import { deleteCourse, getCourseByIdExtended, updateCourse } from '$lib/database/courses';
+import { coverPicFetcher, updateCoverPic } from '$lib/database';
 
 export async function DELETE({ locals, params }) {
 	const authError = await verifyAuth(locals, locals.session?.user.id);
@@ -39,7 +39,8 @@ export async function PUT({ locals, params, request }) {
 			body.creatorId,
 			isCourse
 		);
-        return new Response(JSON.stringify(updated), { status: 200 });
+
+        return new Response(JSON.stringify(await getCourseByIdExtended(courseId)), { status: 200 });
     } catch (error) {
         return new Response(JSON.stringify({ error }), { status: 500 });
     }

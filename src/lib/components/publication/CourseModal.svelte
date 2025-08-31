@@ -110,7 +110,22 @@
 			formData.append('coverPic', coverPic || '');
 
 			showCourseProgressRadial = true;
-			close();
+			return (result) => {
+				showCourseProgressRadial = false;
+
+				if (isEdit && existingCourse) {
+					const res = result.result.data.course;
+					existingCourse.courseName = res.courseName;
+					existingCourse.learningObjectives = res.learningObjectives;
+					existingCourse.prerequisites = res.prerequisites;
+					existingCourse.educationalLevel = res.educationalLevel;
+					existingCourse.copyright = res.copyright;
+					existingCourse.coverPic = res.coverPic;
+					existingCourse.maintainers = res.maintainers;
+				}
+
+				close();
+			};
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
 

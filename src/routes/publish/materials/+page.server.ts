@@ -183,6 +183,7 @@ export const actions = {
 			});
 
 			const updatedCourse = await res.json();
+			console.log("Updated course from endpoint", updatedCourse);
 			return { status: res.status, id: updatedCourse.id, context: 'course-form', course: updatedCourse };
 		} catch (error) {
 			console.error('Error updating course ', error);

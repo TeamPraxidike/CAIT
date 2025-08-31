@@ -409,7 +409,6 @@
 		}
 	};
 	function openModal(courseToEdit: CourseWithCoverPic | null = null) {
-		console.log('Opening modal ', courseToEdit);
 		if (courseToEdit) {
 			editingCourse = courseToEdit;
 			// prefill maintainers for edit (exclude current user)
