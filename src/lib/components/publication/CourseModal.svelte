@@ -14,6 +14,7 @@
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
 	import { deleteCourseById } from '$lib/util/coursesLogic';
 	import { downloadFileFromSupabase } from '$lib/util/file';
+	import { getToastStore } from '@skeletonlabs/skeleton';
 
 	let supabaseClient = page.data.supabase;
 
@@ -22,7 +23,6 @@
 	export let additionalMaintainers: UserWithProfilePic[] = [];
 	export let searchableUsers = users;
 	export let publisher: UserWithProfilePic;
-	export let courses: CourseWithCoverPic[];
 
 
 	export let existingCourse: CourseWithCoverPic | null;
@@ -35,6 +35,9 @@
 	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
 	let copyright: string = existingCourse?.copyright ?? "";
 	let coverPic: File | undefined = undefined;
+
+	const toastStore = getToastStore();
+
 	if (existingCourse) {
 		// if data is not null, we have a custom cover picture, download it
 		if (existingCourse.coverPic.data){
@@ -113,6 +116,13 @@
 			showCourseProgressRadial = true;
 			return (result) => {
 				showCourseProgressRadial = false;
+				if (result.result.data.status === 400) {
+					toastStore.trigger({
+						message: 'There already exists a course with this name, please choose another one',
+						background: 'bg-warning-200'
+					});
+					return;
+				}
 
 				if (isEdit && existingCourse) {
 					const res = result.result.data.course;
@@ -124,7 +134,7 @@
 					existingCourse.coverPic = res.coverPic;
 					existingCourse.maintainers = res.maintainers;
 				} else {
-					dispatch("CourseCreated", { course: result.result.data.course });
+					dispatch("courseCreated", { course: result.result.data.course });
 				}
 
 				close();
