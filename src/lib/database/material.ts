@@ -141,6 +141,11 @@ export async function getAllMaterials(
 							course: true,
 						},
 					},
+					course: {
+						select: {
+							educationalLevel: true
+						}
+					},
 					publisher: {
 						include: {
 							profilePic: true,
@@ -214,6 +219,7 @@ export async function createMaterialPublication(
 		timeEstimate: number;
 		theoryPractice: number;
 		isDraft: boolean;
+		course: number;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
@@ -233,6 +239,9 @@ export async function createMaterialPublication(
 					type: PublicationType.Material,
 					publisher: {
 						connect: { id: userId }
+					},
+					course: {
+						connect: { id: metaData.course }
 					},
 					isDraft: metaData.isDraft,
 				},

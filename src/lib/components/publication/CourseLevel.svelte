@@ -1,13 +1,9 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
+	import { LevelIconMap } from '$lib/util/file.js';
 
 	export let label = "";
 
-	const levels = [
-		{ label: 'Bachelor', icon: 'mdi:school' },
-		{ label: 'Master', icon: 'mdi:account-school' },
-		{ label: 'PhD', icon: 'mdi:brain' }
-	];
 
 	function select(level: string) {
 		label = level;
@@ -16,16 +12,16 @@
 
 <div class="flex gap-3">
 
-	{#each levels as level}
+	{#each LevelIconMap.entries() as [level, icon]}
 		<button
 			type="button"
 			class="px-4 py-2 rounded-full border border-gray-300 text-sm flex items-center gap-2 cursor-pointer transition
 			       hover:bg-gray-100 hover:text-black relative group
-			       {label === level.label ? 'border-primary-600 border-2 text-primary-700 bg-primary-50' : 'bg-white text-gray-800'} btn-secondary"
-			on:click={() => select(level.label)}
-			title={level.label}
+			       {label === level ? 'border-primary-600 border-2 text-primary-700 bg-primary-50' : 'bg-white text-gray-800'} btn-secondary"
+			on:click={() => select(level)}
+			title={level}
 		>
-			<Icon icon={level.icon} width="20" height="20" />
+			<Icon icon={icon} width="20" height="20" />
 		</button>
 	{/each}
 </div>

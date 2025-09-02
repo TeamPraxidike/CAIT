@@ -353,6 +353,13 @@ export const getIconForURL: Map<string, string> = new Map([
 	["github", "mdi:github"]
 ]);
 
+export const LevelIconMap: Map<string, string> = new Map([
+	["Bachelor", "mdi:school"],
+	["Master", "mdi:account-school"],
+	["PhD", "mdi:brain"]
+]);
+
+
 export const getURLIcon = (url: string): string => {
 	for (const [website, icon] of getIconForURL.entries()) {
 		if (url.includes(website)) {
