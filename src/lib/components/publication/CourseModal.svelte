@@ -14,6 +14,8 @@
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
 	import { deleteCourseById } from '$lib/util/coursesLogic';
 	import { downloadFileFromSupabase } from '$lib/util/file';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+	import CourseButton from './courses/CourseButton.svelte';
 
 	let supabaseClient = page.data.supabase;
 
@@ -21,7 +23,7 @@
 	export let users: UserWithProfilePic[] = [];
 	export let additionalMaintainers: UserWithProfilePic[] = [];
 	export let searchableUsers = users;
-	export let publisher: UserWithProfilePic
+	export let publisher: UserWithProfilePic;
 
 
 	export let existingCourse: CourseWithCoverPic | null;
@@ -34,6 +36,9 @@
 	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
 	let copyright: string = existingCourse?.copyright ?? "";
 	let coverPic: File | undefined = undefined;
+
+	const toastStore = getToastStore();
+
 	if (existingCourse) {
 		// if data is not null, we have a custom cover picture, download it
 		if (existingCourse.coverPic.data){
@@ -110,7 +115,33 @@
 			formData.append('coverPic', coverPic || '');
 
 			showCourseProgressRadial = true;
-			close();
+			return (result) => {
+				if (!('data' in result.result)) return;
+
+				showCourseProgressRadial = false;
+				if (result.result.data?.status === 400) {
+					toastStore.trigger({
+						message: 'There already exists a course with this name, please choose another one',
+						background: 'bg-warning-200'
+					});
+					return;
+				}
+
+				if (isEdit && existingCourse) {
+					const res = result.result.data?.course;
+					existingCourse.courseName = res.courseName;
+					existingCourse.learningObjectives = res.learningObjectives;
+					existingCourse.prerequisites = res.prerequisites;
+					existingCourse.educationalLevel = res.educationalLevel;
+					existingCourse.copyright = res.copyright;
+					existingCourse.coverPic = res.coverPic;
+					existingCourse.maintainers = res.maintainers;
+				} else {
+					dispatch("courseCreated", { course: result.result.data?.course });
+				}
+
+				close();
+			};
 		}}>
 		<input type="hidden" name="formContext" value="course-modal" />
 
@@ -165,7 +196,11 @@
 						Delete
 					</button>
 				{/if}
-				<button class:opacity-50={!isFormValid} disabled={!isFormValid} type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">{isEdit ? 'Save' : 'Create'}</button>
+				<button class:opacity-50={!isFormValid} disabled={!isFormValid}
+						type="submit"
+						class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-sm transition">
+					{isEdit ? 'Save' : 'Create'}
+				</button>
 			</div>
 		</div>
 	</form>
