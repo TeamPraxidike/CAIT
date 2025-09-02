@@ -20,6 +20,7 @@
     import {IconMapExtension, PublicationTypeIconMap} from '$lib/util/file';
 	import { coursesStore } from '$lib/stores/courses';
 	import {typeToHumanString} from "$lib/util/types";
+	import LevelIcon from '$lib/components/publication/card/LevelIcon.svelte';
 
 	export let publication: Publication & {
 		materials : Material
@@ -268,7 +269,7 @@
 								{/if}
 							</div>
 							<div class="self-center">
-								<DiffBar className="size-5" diff={publication.difficulty}></DiffBar>
+								<LevelIcon level={publication.course?.educationalLevel}/>
 							</div>
 						{/if}
 					</div>
