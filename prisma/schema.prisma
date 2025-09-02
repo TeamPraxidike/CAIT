@@ -23,12 +23,6 @@ enum Difficulty {
   hard
 }
 
-enum Level {
-  Bachelor
-  Master
-  PhD
-}
-
 enum MaterialType {
   video
   lectureNotes
@@ -284,7 +278,7 @@ model Course {
   id                 Int           @id @default(autoincrement())
   learningObjectives String[]
   prerequisites      String[]
-  educationalLevel   Level
+  educationalLevel   String
   courseName         String        @unique
   publications       Publication[] @relation("CoursePublications")
   maintainers        User[]        @relation("CourseInstructors")

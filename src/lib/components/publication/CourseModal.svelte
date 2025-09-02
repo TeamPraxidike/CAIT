@@ -29,7 +29,7 @@
 	let id = existingCourse?.id ?? null;
 
 	let title = existingCourse?.courseName ?? '';
-	let level: Level = existingCourse?.educationalLevel as Level;
+	let level: string = existingCourse?.educationalLevel ?? '';
 	let learningObjectives: string[] = existingCourse?.learningObjectives ?? [];
 	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
 	let copyright: string = existingCourse?.copyright ?? "";
@@ -76,7 +76,7 @@
 	let form:HTMLFormElement
 
 
-	$: isFormValid = title.trim().length > 0 && level !== undefined && learningObjectives.length > 0;
+	$: isFormValid = title.trim().length > 0 && level !== "" && learningObjectives.length > 0;
 
 	onMount(() => {
 		document.body.classList.add("overflow-hidden");

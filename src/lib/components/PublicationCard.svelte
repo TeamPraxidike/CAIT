@@ -8,7 +8,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { type Material, type Publication, PublicationType, type User } from '@prisma/client';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import {
 		getModalStore,
 		initializeStores,
@@ -48,7 +48,7 @@
 	export let materialType: string = "information";
 	export let forArrow: boolean = false;
 
-	const userId = $page.data?.session?.user?.id || '0';
+	const userId = page.data?.session?.user?.id || '0';
 
 	//used to differentiate if it's used in a normal browse or in the circuit browse
 	export let inCircuits: boolean = false;
