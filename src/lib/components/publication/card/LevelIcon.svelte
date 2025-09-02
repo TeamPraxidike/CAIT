@@ -4,9 +4,9 @@
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 
-	export let level: string;
+	export let level: string | undefined;
 
-	const icon = LevelIconMap.get(level) ?? "";
+	const icon = LevelIconMap.get(level ?? "") ?? "";
 
 	let hoverDiff: HTMLDivElement;
 	let isHovered = false;

@@ -1,7 +1,7 @@
 <script lang="ts">
 
 
-	import { DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
+	import { getDateDifference, Tag, UsedInCourse } from '$lib';
 
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
@@ -26,6 +26,7 @@
 		materials : Material
 		tags: { content: string }[],
 		usedInCourse: { course: string }[]
+		course: { educationalLevel: string } | null
 	};
 
 	export let publisher: User & { profilePicData: string };
