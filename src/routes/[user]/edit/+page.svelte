@@ -21,7 +21,7 @@
 		// if the data is not null, then we have info about the file
 		// so it is no the default, we need to download it
 		if (profilePicFetchedData.data){
-			profilePicPromise = downloadFileFromSupabase(profilePicFetchedData);
+			profilePicPromise = downloadFileFromSupabase(supabaseClient, profilePicFetchedData);
 		}
 	});
 
