@@ -124,9 +124,9 @@ model Publication {
 
 model SavedByAllTime {
   publicationId Int
-  Publication   Publication @relation(fields: [publicationId], references: [id])
+  Publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
   userId        String      @db.Uuid
-  User          User        @relation(fields: [userId], references: [id])
+  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([publicationId, userId])
 }
