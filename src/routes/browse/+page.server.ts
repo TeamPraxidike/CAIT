@@ -6,6 +6,7 @@ export async function load({ url, fetch, locals }) {
 
 	const type = url.searchParams.get('type') || 'materials';
 
+
 	async function fetchMaterials() {
 		if (type !== 'materials') {
 			return { materials: [], idsMat: [] };
