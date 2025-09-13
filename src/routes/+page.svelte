@@ -41,7 +41,7 @@
 </section>
 
 <main class="col-span-full flex flex-col gap-10 my-20">
-	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publicationCard.png" mdFlex="md:flex-row-reverse" iconList={true}/>
+	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publication.png" mdFlex="md:flex-row-reverse" iconList={true}/>
 	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/images/about/circuit.png"/>
 	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} img="/images/about/reputation.png" mdFlex="md:flex-row-reverse"/>
 </main>

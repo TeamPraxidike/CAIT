@@ -14,7 +14,7 @@
                     md:row-start-1 md:col-span-8
                     xl:col-start-1 xl:col-span-4">
             <h4>CAIT</h4>
-            <p class="text-surface-400">Community for AI Teachers: Contribute and search for
+            <p class="text-surface-400">Community Archive for Integrated Teaching: Contribute and search for
                 lecture materials, assignments, exam questions and more!</p>
             <div class="flex flex-row gap-2">
                 <Icon color="grey" height="25" icon="mdi:facebook" />
