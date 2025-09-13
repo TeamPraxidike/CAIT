@@ -261,7 +261,7 @@
 			idsMat = [];
 		})
 
-		data.materials.then((circData) => {
+		data.circuits.then((circData) => {
 			circuits = circData.circuits;
 			idsCirc = circData.idsCirc;
 			if (data.type === 'circuits') source = idsCirc;
@@ -405,7 +405,7 @@
 			<p style="color: red">Error while loading users. Reload the page to try again</p>
 		{/await}
 	{:else if pageType === "circuits"}
-		{#await fetchPromise ||  data.circuits}
+		{#await fetchPromise || data.circuits}
 			<p>Loading circuits...</p>
 		{:then _}
 			{#each circuits as circuit (circuit.id)}
