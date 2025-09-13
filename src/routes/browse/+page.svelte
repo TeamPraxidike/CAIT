@@ -151,8 +151,6 @@
 				page = 0;
 				paginationSettings.page = 0;
 
-				console.log(source.length);
-
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -245,6 +243,7 @@
 			content: (x.firstName + ' ' + x.lastName)
 		}));
 
+
 		if (data.selectedTag !== '') {
 			searchActive = true;
 			selectedTags = [];
@@ -253,22 +252,24 @@
 		}
 
 		data.materials.then((matData) => {
+
 			materials = matData.materials;
 			idsMat = matData.idsMat;
 			if (data.type !== 'circuits') source = idsMat;
 		}).catch((err) =>{
 			materials = [];
 			idsMat = [];
-		})
+		});
 
 		data.circuits.then((circData) => {
+
 			circuits = circData.circuits;
 			idsCirc = circData.idsCirc;
 			if (data.type === 'circuits') source = idsCirc;
 		}).catch((err) =>{
 			circuits = [];
 			idsCirc = [];
-		})
+		});
 	});
 
 	let paginationSettings = {

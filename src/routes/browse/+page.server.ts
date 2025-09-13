@@ -8,9 +8,10 @@ export async function load({ url, fetch, locals }) {
 
 
 	async function fetchMaterials() {
-		if (type !== 'materials') {
-			return { materials: [], idsMat: [] };
-		}
+		// if (type !== 'materials') {
+		// 	console.log("wont fetch materials")
+		// 	return { materials: [], idsMat: [] };
+		// }
 
 		try{
 			const res = await fetch(`/api/material`);
@@ -28,9 +29,10 @@ export async function load({ url, fetch, locals }) {
 	}
 
 	async function fetchCircuits() {
-		if (type !== 'circuits') {
-			return { circuits: [], idsCirc: [] };
-		}
+		// if (type !== 'circuits') {
+		// 	console.log("wont fetch circuits")
+		// 	return { circuits: [], idsCirc: [] };
+		// }
 
 		try{
 			const res = await fetch(`/api/circuit`);
