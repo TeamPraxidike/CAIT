@@ -42,9 +42,9 @@
 		<div class="flex flex-col space-y-1 items-start w-full md:pb-2">
 			<div class="w-full flex flex-col items-center">
 				{#if userPhotoUrl !== null}
-					<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
+					<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full object-cover" />
 				{:else}
-					<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full" />
+					<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full object-cover" />
 				{/if}
 				<div class="max-w-full items-center">
 					<span class="dark:text-surface-50 text-surface-900 max-w-full truncate md:text-2xl"

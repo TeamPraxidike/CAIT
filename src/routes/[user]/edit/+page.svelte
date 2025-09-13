@@ -112,7 +112,7 @@
 						Profile Picture
 					</h4>
 					<img src={URL.createObjectURL(profilePicResolved)}
-						 class="w-32 h-32 rounded-full" alt="profilePic">
+						 class="w-32 h-32 rounded-full object-cover" alt="profilePic">
 				</div>
 				<FileButton on:change={chosenPfpPromiseHandler} name="profilePic" accept="image/*"/>
 			{:catch error}
