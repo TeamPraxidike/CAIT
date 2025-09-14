@@ -320,15 +320,15 @@
 		/>
 	</div>
 
-	<DropdownSelect title="Type" multiselect={false} options={["materials", "people", "circuits"]}
+	<DropdownSelect title="Type" multiselect={false} options={["Materials", "Users", "Circuits"]}
 					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
 	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
 
 	{#if pageType !== "people"}
-		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}
-						bind:selected={selectedDiff} on:select={() => searchActive = true}
-						disabled={isSemanticActive}/>
+<!--		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}-->
+<!--						bind:selected={selectedDiff} on:select={() => searchActive = true}-->
+<!--						disabled={isSemanticActive}/>-->
 		<DropdownSelect title="Tags" multiselect={true} options={tags.map(x => x.content)}
 						bind:selected={selectedTags} on:select={() => searchActive = true}
 						disabled={isSemanticActive}/>

@@ -420,9 +420,6 @@
 				{:else}
 					<Icon icon="clarity:file-group-solid" class="text-xl text-primary-500" />
 				{/if}
-				<div class="self-center">
-					<DiffBar bind:diff="{diff}" className="w-4 h-4" />
-				</div>
 			{:else }
 				<Icon icon="mdi:graph" class="text-xl text-primary-500" />
 			{/if}
