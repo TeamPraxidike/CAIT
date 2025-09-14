@@ -36,18 +36,18 @@ export function mapToType(mt: string): MaterialType {
 }
 
 export const convertMaterial = (s: string): MaterialType => {
-	switch (s.toLowerCase()) {
-		case 'exam questions':
+	switch (s) {
+		case 'Exam':
 			return MaterialType.examQuestions;
-		case 'lecture notes':
+		case 'Lecture Notes':
 			return MaterialType.lectureNotes;
-		case 'slides':
+		case 'Slides':
 			return MaterialType.slides;
-		case 'assignment':
+		case 'Assignment':
 			return MaterialType.assignment;
-		case 'other':
+		case 'Other':
 			return MaterialType.other;
-		case 'video':
+		case 'Video':
 			return MaterialType.video;
 		default:
 			// Handle invalid input if necessary
