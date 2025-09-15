@@ -320,7 +320,7 @@
 		/>
 	</div>
 
-	<DropdownSelect title="Type" multiselect={false} options={["Materials", "Users", "Circuits"]}
+	<DropdownSelect title="Type" multiselect={false} options={["materials", "people", "circuits"]}
 					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
 	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
