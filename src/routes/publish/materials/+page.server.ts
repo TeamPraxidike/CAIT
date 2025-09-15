@@ -132,7 +132,7 @@ export const actions = {
 				theoryPractice: Number(data.get('theoryToApplication')),
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
-				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
+				materialType: JSON.parse(data.get('type')?.toString() as string).map((type: string) => convertMaterial(type)),
 				isDraft: isDraft,
 				fileURLs: fileURLs || [],
 				course: Number(data.get('course')?.toString()),

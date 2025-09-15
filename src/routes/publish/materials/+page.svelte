@@ -26,8 +26,8 @@
 		getCover,
 		getFiles,
 		getMaterialSnapshot,
-		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata,
-		saveCover, clearAllData, clearIfTimeExceeded
+		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata,
+		clearAllData, clearIfTimeExceeded
 	} from '$lib/util/indexDB';
 	import { allUploadsDone, downloadFileFromSupabase } from '$lib/util/file';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
