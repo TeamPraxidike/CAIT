@@ -17,7 +17,7 @@
 
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
-	$: paginationSettings.size = source.length;
+	$: paginationSettings.size = data.type === 'circuits' ? circuits.length : materials.length;
 
 
 	let users: (User & { posts: Publication[], profilePicData: string })[] = [];
@@ -127,8 +127,8 @@
 
 		const s = pageType === 'materials' ? 'material' : 'circuit';
 		const url = `/api/${s}?${queryParams.toString()}`;
-		materials = [];
-		circuits = [];
+		// materials = [];
+		// circuits = [];
 
 		return fetch(url)
 			.then(response => {
@@ -292,8 +292,8 @@
 		amount = 9;
 		paginationSettings.limit = amount;
 		paginationSettings.page = 0;
+		resetFilters();
 	};
-
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
