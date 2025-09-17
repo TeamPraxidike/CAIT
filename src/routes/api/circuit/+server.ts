@@ -123,6 +123,7 @@ export async function POST({ request, locals }) {
 						coverPic,
 						circuit.publicationId,
 						userId,
+						false,
 						prismaTransaction,
 					);
 				} else {
