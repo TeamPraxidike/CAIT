@@ -15,7 +15,7 @@
 	import type {
 		DisplayedMaterials, FullMaterial, NodeInfo
 	} from '$lib/components/circuits/methods/CircuitTypes';
-	import { onMount } from 'svelte';import Icon from '@iconify/svelte';
+	import { onMount } from 'svelte';
 	import { getModalStore, Modal, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import SearchElems from '$lib/components/circuits/components/SearchElems.svelte';
 	import TextThingy from '$lib/components/circuits/components/TextThingy.svelte';
@@ -369,11 +369,11 @@
 					<button type="button" class="btn text-surface-50 bg-success-500 dark:bg-success-500" on:click={fetchElements}>Insert Publications</button>
 				</div>
 			</div>
-			<div class="flex gap-4">
-				<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 dark:bg-transparent rounded-full h-full self-center">
-					<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center dark:text-surface"/>
-				</button>
-			</div>
+<!--			<div class="flex gap-4">-->
+<!--				<button type="button" on:click={() => {modalStore.trigger(modalHelp)}} class=" size-8 bg-surface-50 dark:bg-transparent rounded-full h-full self-center">-->
+<!--					<Icon icon="heroicons:question-mark-circle" class="size-8 text-surface-600 self-center dark:text-surface"/>-->
+<!--				</button>-->
+<!--			</div>-->
 		</div>
 	{/if}
 
