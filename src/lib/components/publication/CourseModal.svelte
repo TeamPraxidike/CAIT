@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		type Level,
 		type User
 	} from '@prisma/client';
 	import { enhance } from '$app/forms';
@@ -166,7 +165,7 @@
 			<CourseLevel bind:label={level} />
 		</div>
 		<div>
-			<label for="copyright" class="block font-medium">Copyright</label>
+			<label for="copyright" class="block font-medium">Copyright <span class="text-error-300">*</span></label>
 			<input type="text"
 				   name="copyright"
 				   bind:value={copyright}

@@ -223,7 +223,7 @@ export async function createMaterialPublication(
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
-	return prismaContext.material.create({
+	const query = {
 		data: {
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
@@ -240,9 +240,9 @@ export async function createMaterialPublication(
 					publisher: {
 						connect: { id: userId }
 					},
-					course: {
-						connect: { id: metaData.course }
-					},
+					...(metaData.course !== null && {
+						course: { connect: { id: metaData.course } },
+					}),
 					isDraft: metaData.isDraft,
 				},
 			},
@@ -250,7 +250,9 @@ export async function createMaterialPublication(
 		include: {
 			publication: true,
 		},
-	});
+	};
+
+	return prismaContext.material.create(query);
 }
 
 /**
