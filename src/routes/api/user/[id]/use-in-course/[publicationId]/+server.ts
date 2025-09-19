@@ -41,7 +41,7 @@ export async function POST({ params, request, locals }) {
 			body.courses,
 		);
 
-		await updateReputation(publication.publisherId, 15);
+		await updateReputation(publication.publisherId, 30);
 
 		return new Response('Successfully marked usage of publication', {
 			status: 200,

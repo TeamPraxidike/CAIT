@@ -38,9 +38,9 @@ export async function POST({ params, locals }) {
 
 		if (id !== publication.publisherId) {
 			if (response === 'Publication liked successfully') {
-				await updateReputation(publication.publisherId, 2);
+				await updateReputation(publication.publisherId, 10);
 			} else if (response === 'Publication unliked successfully') {
-				await updateReputation(publication.publisherId, -2);
+				await updateReputation(publication.publisherId, -10);
 			}
 		}
 

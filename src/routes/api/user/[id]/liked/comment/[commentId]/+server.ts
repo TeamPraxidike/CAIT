@@ -33,9 +33,9 @@ export async function POST({ params, locals }) {
 		const response = await likesCommentUpdate(id, parseInt(commentId));
 		if (id !== comment.userId) {
 			if (response === 'Comment liked successfully') {
-				await updateReputation(comment.userId, 1);
+				await updateReputation(comment.userId, 9);
 			} else if (response === 'Comment unliked successfully') {
-				await updateReputation(comment.userId, -1);
+				await updateReputation(comment.userId, -9);
 			}
 		}
 		return new Response(JSON.stringify({ message: response }), {

@@ -192,7 +192,7 @@ export async function POST({ request , locals}) {
 
 		await updateFiles(fileInfo, createdMaterial.id, userId);
 
-		await updateReputation(userId, 30);
+		await updateReputation(userId, 2);
 
 		const publicationId = createdMaterial.publicationId;
 		const materialId = createdMaterial.id;

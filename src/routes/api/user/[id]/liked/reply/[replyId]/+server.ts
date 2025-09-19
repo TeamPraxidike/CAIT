@@ -34,9 +34,9 @@ export async function POST({ params, locals }) {
 
 		if (id !== comment.userId) {
 			if (response === 'Reply liked successfully') {
-				await updateReputation(comment.userId, 1);
+				await updateReputation(comment.userId, 9);
 			} else if (response === 'Reply unliked successfully') {
-				await updateReputation(comment.userId, -1);
+				await updateReputation(comment.userId, -9);
 			}
 		}
 
