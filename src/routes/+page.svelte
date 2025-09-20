@@ -24,7 +24,7 @@
 		<section class="flex flex-col gap-4" aria-label="Hero section">
 			<h1 class="font-extrabold lg:font-bold md:text-2xl lg:text-3xl xl:text-4xl">CAIT</h1>
 			<h2 class="xl:pr-40 xl:text-1xl dark:text-surface-200">
-				Community for AI Teachers: Contribute and search for
+				Community Archive for Integrated Teaching: Contribute and search for
 				lecture materials, assignments, exam questions and more! 
 			</h2>
 		</section>
@@ -42,6 +42,6 @@
 
 <main class="col-span-full flex flex-col gap-10 my-20">
 	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publication.png" mdFlex="md:flex-row-reverse" iconList={true}/>
-	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/images/about/circuit.png"/>
+	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/images/about/circuit.png" isImageWider={true}/>
 	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} img="/images/about/reputation.png" mdFlex="md:flex-row-reverse"/>
 </main>

@@ -10,6 +10,10 @@
     export let mdFlex = 'md:flex-row'
     export let iconList = false;
 
+	// if the image is wider than it is high we get it looks very small so we need a different width
+	export let isImageWider = false;
+	const widthClass = isImageWider ? 'w-5/12' : 'w-1/3';
+
     const icons = ["akar-icons:video", "icon-park-solid:notes", "material-symbols:assignment", "mdi:presentation", "healthicons:i-exam-multiple-choice", "mage:dots-horizontal-circle"]
     const types = ["Video", "Lecture Notes", "Assignment", "Slides", "Exam Questions", "Other"]
 </script>
@@ -47,5 +51,5 @@
         </a>
             {/if}
     </div>
-    <img src="{img}" alt="{title}" class="md:w-1/3 rounded-lg "/>
+	<img src="{img}" alt="{title}" class="{widthClass} rounded-lg "/>
 </div>
