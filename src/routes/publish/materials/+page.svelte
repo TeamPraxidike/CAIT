@@ -618,8 +618,7 @@
 
 							<p class="text-surface-500 text-sm">
 								Time Estimate: {estimate || 'No estimate provided'} |
-								Type: {selectedType?.toUpperCase() || 'No type provided'} |
-								Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
+								Type: {selectedType?.toUpperCase() || 'No type provided'}
 							</p>
 
 							<FileTable operation="view" fileFormat="upload" bind:files={files} bind:fileURLs={fileURLs}
