@@ -362,7 +362,7 @@
 	{/if}
 </div>
 
-<div class="col-span-9 grid grid-cols-3 gap-2">
+<div class="col-span-9 grid grid-cols-3 gap-2 auto-rows-min">
 	{#if pageType !== 'people'}
 		<div class="col-span-full">
 			<Paginator
@@ -464,3 +464,4 @@
 		{/await}
 	{/if}
 </div>
+
