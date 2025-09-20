@@ -345,10 +345,10 @@
 						disabled={isSemanticActive}/>
 	{/if}
 
-	{#if pageType === 'circuits'}
-		<DropdownInput title="Minimum nodes:"
-					   bind:content={numberNodes} on:select={() => searchActive = true} />
-	{/if}
+	<!--{#if pageType === 'circuits'}-->
+	<!--	<DropdownInput title="Minimum nodes:"-->
+	<!--				   bind:content={numberNodes} on:select={() => searchActive = true} />-->
+	<!--{/if}-->
 	<button class="w-full rounded-sm py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
 			on:click={onSearch} disabled="{!searchActive}">
 		Search
