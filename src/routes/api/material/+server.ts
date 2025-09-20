@@ -165,13 +165,11 @@ export async function POST({ request , locals}) {
 	try {
 		const createdMaterial: MaterialWithPublicationNoFiles = await prisma.$transaction(
 			async (prismaTransaction: PrismaClient) => {
-				console.log("About to make material");
 				const material = await createMaterialPublication(
 					userId,
 					metaData,
 					prismaTransaction,
 				);
-				console.log("Material made");
 
 				await handleConnections(
 					tags,

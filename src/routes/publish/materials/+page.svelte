@@ -71,7 +71,7 @@
 
 	let courseMaintainers: UserWithProfilePic[] = [];
 	let originalCourseIds: number[] = courses.map(c => c.id);
-	let bannerFieldsList: string[];
+	let bannerFieldsList: string[] = [];
 
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
@@ -445,7 +445,10 @@
 	$: numMaterials = fileURLs.length + files.length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
-
+	// The selected type of the material is autofilled to 'Other' if none is selected but is still displayed in the banner to
+	// incentivize the user to fill it in. This is why here we have to check whether it is the only thing that is missing
+	// because if it the publication should not be a draft
+	$: showDraftMessage = (bannerFieldsList.length > 1 || !(bannerFieldsList.length == 1 && bannerFieldsList[0] == 'Material Type') || markedAsDraft);
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -690,7 +693,7 @@
 		</div>
 		<div class="success-text">Publication uploaded successfully</div>
 		<div class="success-subtext">
-			{#if bannerFieldsList.length !== 0 || markedAsDraft}
+			{#if showDraftMessage}
 				Your publication has been saved as a draft - only you can see it
 			{:else}
 				Your publication is now visible to all users of CAIT
