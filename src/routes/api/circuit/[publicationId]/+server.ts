@@ -125,6 +125,7 @@ export async function PUT({ request, params, locals }) {
 					coverPic,
 					publicationId,
 					body.userId,
+					false,
 					prismaTransaction,
 				);
 			}
@@ -172,7 +173,7 @@ export async function PUT({ request, params, locals }) {
 
 		const id = circuit.id;
 
-		enqueueCircuitComparison(id).catch(error => console.error(error))
+		enqueueCircuitComparison(publicationId).catch(error => console.error(error))
 
 		return new Response(JSON.stringify({ id }), { status: 200 });
 	} catch (error) {

@@ -1,12 +1,21 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { semanticSearchActive} from "$lib/stores/semanticSearchActive.ts";
 	import Icon from '@iconify/svelte';
 
-	export let searchType: 'materials' | 'users' | 'circuits' | 'my publications' | 'saved';
+	export let searchType: 'materials' | 'users' | 'circuits' | 'my publications' | 'saved' | 'content' = 'materials';
 	export let inputKeywords: string;
 	const dispatch = createEventDispatcher();
 
-	export let isSemanticActive: boolean;
+	// TODO: use the store instead of binding variables
+	export let isSemanticActive: boolean = false;
+
+	let inputField;
+
+	$: if ($semanticSearchActive){
+		inputField.focus();
+		searchType = 'content';
+	}
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		dispatch('press', { message: { searchType }, value: { inputKeywords } });
@@ -36,6 +45,7 @@
 	</button>
 	<!-- Search input field -->
 	<input type="text" bind:value={inputKeywords} on:keydown={handleKeyDown}
+		   bind:this={inputField}
 		   class="w-11/12 rounded-lg border-none focus:ring-0 h-full
 		   		  dark:bg-surface-900 text-surface-800 dark:text-surface-100"
 		   placeholder="Browse {searchType}">

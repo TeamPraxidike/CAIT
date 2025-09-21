@@ -40,7 +40,7 @@ export async function GET({ url }) {
 		);
 
 		// circuits = circuits.filter((c: CircuitWithPublisher) => !c.publication.isDraft);
-		const idsCirc = circuits.slice(c => c.publicationId)
+		const idsCirc = circuits.map(c => c.publicationId)
 		circuits = circuits.slice(0, amount)
 
 		circuits = await Promise.all(circuits.map(async circuit => {

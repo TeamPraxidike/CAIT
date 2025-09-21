@@ -124,6 +124,7 @@ export async function getAllCircuits(
 	limit: number,
 	sort: string,
 	query: string,
+	withNodes: boolean = false
 // ): Promise<CircuitWithPublisher[]> {
 ) {
 	const where: any = { AND: [] };
@@ -166,7 +167,7 @@ export async function getAllCircuits(
 					},
 				},
 			},
-			// nodes: true,
+			nodes: withNodes,
 		},
 	});
 
@@ -299,6 +300,9 @@ export async function getCircuitsContainingPublication(publicationId: number): P
 					publicationId: publicationId,
 				},
 			},
+			publication: {
+				isDraft: false
+			}
 		},
 		include: {
 			publication: {
