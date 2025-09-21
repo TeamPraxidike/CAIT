@@ -445,10 +445,11 @@
 	$: numMaterials = fileURLs.length + files.length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
+	// TODO: cool but it's not working as expected, I've removed one condition
 	// The selected type of the material is autofilled to 'Other' if none is selected but is still displayed in the banner to
 	// incentivize the user to fill it in. This is why here we have to check whether it is the only thing that is missing
 	// because if it the publication should not be a draft
-	$: showDraftMessage = (bannerFieldsList.length > 1 || !(bannerFieldsList.length == 1 && bannerFieldsList[0] == 'Material Type') || markedAsDraft);
+	$: showDraftMessage = (bannerFieldsList.length >= 1 || markedAsDraft);
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />

@@ -85,6 +85,9 @@ export async function getSimilarPublications(
             similarity: {
                 gte: 0.4,
             },
+            similarTo: {
+                isDraft: false
+            }
         },
         orderBy: {
             similarity: 'desc',

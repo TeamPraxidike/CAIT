@@ -4,9 +4,10 @@
 	import type { PageServerData } from './$types';
 	import type { Publication, User } from '@prisma/client';
 	import { onMount } from 'svelte';
-	import { type PaginationSettings, Paginator, SlideToggle } from '@skeletonlabs/skeleton';
+	import {type PaginationSettings, Paginator, ProgressRadial, SlideToggle} from '@skeletonlabs/skeleton';
 	import DropdownSelect from '$lib/components/designSystem/DropdownSelect.svelte';
 	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';
+	import {semanticSearchActive} from '$lib/stores/semanticSearchActive'
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -17,7 +18,7 @@
 
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
-	$: paginationSettings.size = data.type === 'circuits' ? circuits.length : materials.length;
+	$: paginationSettings.size = data.type === 'circuits' ? idsCirc.length : idsMat.length;
 
 
 	let users: (User & { posts: Publication[], profilePicData: string })[] = [];
@@ -25,6 +26,7 @@
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
 
+	let pageType = data.type;
 	$: pageType = data.type;
 	let sortOptions: string[] = ['Most Recent', 'Most Liked', 'Oldest'];
 	let sortByText = 'Sort By';
@@ -44,10 +46,11 @@
 	let numberNodes: string;
 
 	const resetFilters = () => {
-		page = 0;
-		amount = 9;
-		paginationSettings.page = 0;
-		paginationSettings.limit = amount;
+		// Todo: discuss expected behaviour
+		// page = 0;
+		// amount = 9;
+		// paginationSettings.page = 0;
+		// paginationSettings.limit = amount;
 		selectedTags = [];
 		selectedTypes = [];
 		selectedPublisherIDs = [];
@@ -69,10 +72,17 @@
 	let isSemanticActive = false;
 	$: isSemanticActive = isSemanticActive;
 
+	let lastPaginationType: string = pageType;
+
 	$: if (isSemanticActive) {
+		lastPaginationType = pageType
 		pageType = 'semantic';
-	} else {
-		pageType = 'materials';
+		// updates the store so we close all open dropdowns
+		$semanticSearchActive = true;
+	}
+	$: if (!isSemanticActive) {
+		pageType = lastPaginationType;
+		$semanticSearchActive = false;
 	}
 
 	let semanticPromise: Promise<any> | null = null;
@@ -161,14 +171,14 @@
 
 	function onPageChange(e: CustomEvent): void {
 		page = e.detail;
-		materials = [];
-		circuits = [];
+		// materials = [];
+		// circuits = [];
 		fetchPromise = changePage(amount, page);
 	}
 
 	function onAmountChange(e: CustomEvent): void {
-		materials = [];
-		circuits = [];
+		// materials = [];
+		// circuits = [];
 		amount = e.detail;
 		page = 0;
 		fetchPromise = changePage(amount, page);
@@ -185,8 +195,8 @@
 
 		const s = pageType === 'materials' ? 'material' : 'circuit';
 		const url = `/api/publication/set?${queryParams.toString()}`;
-		materials = [];
-		circuits = [];
+		// materials = [];
+		// circuits = [];
 		//Make a GET request to the API
 		return fetch(url)
 			.then(response => {
@@ -221,20 +231,20 @@
 	let searchActive = false;
 	$:applyBackground = searchActive ? 'bg-primary-600  hover:bg-opacity-75' : 'bg-surface-400';
 
-	const deleteFilters = (pageType: string) => {
-		if (pageType !== 'materials') {
-			page = 0;
-			amount = 9;
-			paginationSettings.page = 0;
-			paginationSettings.limit = amount;
-			selectedTags = [];
-			selectedTypes = [];
-			selectedPublisherIDs = [];
-			selectedDiff = [];
-		}
-	};
-
-	$: deleteFilters(pageType);
+	// const deleteFilters = (pageType: string) => {
+	// 	if (pageType !== 'materials') {
+	// 		page = 0;
+	// 		amount = 9;
+	// 		paginationSettings.page = 0;
+	// 		paginationSettings.limit = amount;
+	// 		selectedTags = [];
+	// 		selectedTypes = [];
+	// 		selectedPublisherIDs = [];
+	// 		selectedDiff = [];
+	// 	}
+	// };
+	//
+	// $: deleteFilters(pageType);
 
 	onMount(async () => {
 		users = (await data.users).users;
@@ -299,7 +309,7 @@
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
 
 <div class="col-span-full mt-24">
-	<SearchBar searchType="materials" bind:isSemanticActive={isSemanticActive} bind:inputKeywords={searchWord}
+	<SearchBar searchType={pageType} bind:isSemanticActive={isSemanticActive} bind:inputKeywords={searchWord}
 			   on:press={() => searchActive = true}
 			   on:SearchQuery={onSearch} on:SemanticSearchQuery={onSemanticSearch} />
 </div>
@@ -308,7 +318,7 @@
 
 	<div class="flex">
 		<div>
-			<span>Semantic Search</span> <br>
+			<span>Semantic Search<sup class="text-xs text-gray-500">Beta</sup> </span> <br>
 			<span class="text-surface-500 text-sm"><i>Semantically search over file contents</i></span>
 		</div>
 		<SlideToggle
@@ -363,7 +373,7 @@
 </div>
 
 <div class="col-span-9 grid grid-cols-3 gap-2 auto-rows-min">
-	{#if pageType !== 'people'}
+	{#if (pageType !== 'people') && (pageType !== 'semantic') }
 		<div class="col-span-full">
 			<Paginator
 				bind:settings={paginationSettings}
@@ -375,7 +385,10 @@
 	{/if}
 	{#if pageType === "materials"}
 		{#await fetchPromise || data.materials}
-			<p>Loading materials...</p>
+			<div class="flex flex-row gap-2">
+				<p>Loading materials...</p>
+				<ProgressRadial font={8} width="w-8" class="shrink-0" />
+			</div>
 		{:then materialsAwaited}
 			{#each materials as material (material.id)}
 <!--				<PublicationCard extensions="{getExtensions(material)}"-->
@@ -394,7 +407,10 @@
 		{/await}
 	{:else if pageType === "people"}
 		{#await fetchPromise || data.users}
-			<p>Loading users...</p>
+			<div class="flex flex-row gap-2">
+				<p>Loading users...</p>
+				<ProgressRadial font={8} width="w-8" class="shrink-0" />
+			</div>
 		{:then _}
 			{#each users as person (person.id)}
 				<UserProp view="search" posts="{person.posts.length}"
@@ -407,7 +423,10 @@
 		{/await}
 	{:else if pageType === "circuits"}
 		{#await fetchPromise || data.circuits}
-			<p>Loading circuits...</p>
+			<div class="flex flex-row gap-2">
+				<p>Loading circuits...</p>
+				<ProgressRadial font={8} width="w-8" class="shrink-0" />
+			</div>
 		{:then _}
 			{#each circuits as circuit (circuit.id)}
 				<PublicationCard publication="{circuit.publication}"
@@ -424,7 +443,10 @@
 		{/await}
 	{:else if isSemanticActive && semanticPromise !== null}
 		{#await semanticPromise}
-			<p>Loading results...</p>
+			<div class="flex flex-row gap-2">
+				<p>Loading results...</p>
+				<ProgressRadial font={8} width="w-8" class="shrink-0" />
+			</div>
 		{:then semanticResultsAwaited}
 			{#each semanticResultsAwaited as message}
 				<div

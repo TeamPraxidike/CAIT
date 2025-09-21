@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { slide } from "svelte/transition"
 	import { createEventDispatcher } from 'svelte';
+	import {semanticSearchActive} from "$lib/stores/semanticSearchActive.ts";
 
 	export let title: string = "";
 	export let options:string[] = [];
@@ -10,6 +11,17 @@
 	export let disabled: boolean = false;
 
 	let open = false;
+	let lastOpen: boolean = false;
+
+	// keep those separate (no else if)
+	// otherwise both will rerun because open is on the RHS
+	$: if ($semanticSearchActive === true) {
+		lastOpen = open;
+		open = false;
+	}
+	$: if ($semanticSearchActive === false){
+		open = lastOpen;
+	}
 
 	$: opened = options.map(option => {
 		if (multiselect) {

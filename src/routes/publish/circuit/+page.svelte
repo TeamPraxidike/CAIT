@@ -353,7 +353,7 @@
 					// showAnimation = false;
 					goto('/publish');
 				}}>
-			Publish something else
+			New Publication
 		</button>
 		<button type="button" class="success-btn
 				bg-[#fcfcfd] text-black border-2 border-[#007393]
