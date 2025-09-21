@@ -39,7 +39,7 @@
 				and the <a href="https://www.tudelft.nl/en/open-science/community" target="_blank" class="text-blue-500 underline">Open Science Community Delft</a>.
 			</p>
 			<p class="text-surface-700 dark:text-surface-200">
-				<b>CAIT is built for the community—so your ideas matter! Share your feedback at 	<i>cait-ewi@tudelft.nl</i>
+				<b>CAIT is built for the community—so your ideas matter! Share your feedback at 	<a href="malito:cait-ewi@tudelft.nl" class="text-blue-500 underline" target="_blank"><i>cait-ewi@tudelft.nl</i></a>
 					or request new features through our
 					<a href="https://docs.google.com/forms/d/e/1FAIpQLSfB_sNXSN1K-pun8c_wJDsEvVWxl9XShATj04fVpAyXiJT-9A/viewform" target="_blank"
 					   class="text-blue-500 underline">

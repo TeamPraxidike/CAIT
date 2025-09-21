@@ -41,7 +41,7 @@
                     md:row-start-2 md:col-span-4 xl:mt-0
                     xl:row-start-1 xl:col-start-9 xl:col-span-4">
             <h4>Contact</h4>
-            <p class="flex gap-2"><Icon color="grey" height="25" icon="mdi:email" /> cait-ewi@tudelft.nl</p>
+            <p class="flex gap-2"><Icon color="grey" height="25" icon="mdi:email" /> <a href="malito:cait-ewi@tudelft.nl" target="_blank">cait-ewi@tudelft.nl</a></p>
         </div>
     </Grid>
 </footer>

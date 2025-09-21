@@ -1,7 +1,7 @@
 import type { Actions, PageServerLoad } from './$types';
 
 import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
-import { type Difficulty, type Tag } from '@prisma/client';
+import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
 import type {
@@ -83,6 +83,10 @@ export const actions = {
 		const coverPicFile = data.get('coverPic');
 		const isDraft = data.get('isDraft')?.toString() === 'true';
 		let coverPic = null;
+		const materialTypes = JSON.parse(data.get('type')?.toString() as string).map((type: string) => convertMaterial(type));
+		if (materialTypes.length === 0) {
+			materialTypes.push(MaterialType.other)
+		}
 
 		if (coverPicFile instanceof File) {
 			const buffer = await coverPicFile.arrayBuffer();
@@ -132,7 +136,7 @@ export const actions = {
 				theoryPractice: Number(data.get('theoryToApplication')),
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
-				materialType: JSON.parse(data.get('type')?.toString() as string).map((type: string) => convertMaterial(type)),
+				materialType: materialTypes,
 				isDraft: isDraft,
 				fileURLs: fileURLs || [],
 				course: Number(data.get('course')?.toString()),

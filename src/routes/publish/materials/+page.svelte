@@ -71,7 +71,7 @@
 
 	let courseMaintainers: UserWithProfilePic[] = [];
 	let originalCourseIds: number[] = courses.map(c => c.id);
-	let bannerFieldsList: string[];
+	let bannerFieldsList: string[] = [];
 
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
@@ -445,7 +445,10 @@
 	$: numMaterials = fileURLs.length + files.length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
-
+	// The selected type of the material is autofilled to 'Other' if none is selected but is still displayed in the banner to
+	// incentivize the user to fill it in. This is why here we have to check whether it is the only thing that is missing
+	// because if it the publication should not be a draft
+	$: showDraftMessage = (bannerFieldsList.length > 1 || !(bannerFieldsList.length == 1 && bannerFieldsList[0] == 'Material Type') || markedAsDraft);
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -615,8 +618,7 @@
 
 							<p class="text-surface-500 text-sm">
 								Time Estimate: {estimate || 'No estimate provided'} |
-								Type: {selectedType?.toUpperCase() || 'No type provided'} |
-								Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
+								Type: {selectedType?.toUpperCase() || 'No type provided'}
 							</p>
 
 							<FileTable operation="view" fileFormat="upload" bind:files={files} bind:fileURLs={fileURLs}
@@ -690,7 +692,7 @@
 		</div>
 		<div class="success-text">Publication uploaded successfully</div>
 		<div class="success-subtext">
-			{#if bannerFieldsList.length !== 0 || markedAsDraft}
+			{#if showDraftMessage}
 				Your publication has been saved as a draft - only you can see it
 			{:else}
 				Your publication is now visible to all users of CAIT
@@ -703,7 +705,7 @@
 					// showAnimation = false;
 					goto('/publish');
 				}}>
-				Publish something else
+				New Publication
 			</button>
 			<button type="button" class="success-btn
 				bg-[#fcfcfd] text-black border-2 border-[#007393]

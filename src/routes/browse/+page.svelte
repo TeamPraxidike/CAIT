@@ -345,10 +345,10 @@
 						disabled={isSemanticActive}/>
 	{/if}
 
-	{#if pageType === 'circuits'}
-		<DropdownInput title="Minimum nodes:"
-					   bind:content={numberNodes} on:select={() => searchActive = true} />
-	{/if}
+	<!--{#if pageType === 'circuits'}-->
+	<!--	<DropdownInput title="Minimum nodes:"-->
+	<!--				   bind:content={numberNodes} on:select={() => searchActive = true} />-->
+	<!--{/if}-->
 	<button class="w-full rounded-sm py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
 			on:click={onSearch} disabled="{!searchActive}">
 		Search
@@ -362,7 +362,7 @@
 	{/if}
 </div>
 
-<div class="col-span-9 grid grid-cols-3 gap-2">
+<div class="col-span-9 grid grid-cols-3 gap-2 auto-rows-min">
 	{#if pageType !== 'people'}
 		<div class="col-span-full">
 			<Paginator
@@ -464,3 +464,4 @@
 		{/await}
 	{/if}
 </div>
+
