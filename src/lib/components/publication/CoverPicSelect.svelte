@@ -16,6 +16,10 @@
 			const file = eventFiles[0];
 
 			if ((file.size / (1024*1024)) > 2) {
+				toastStore.trigger({
+					message: 'File is too big, please upload a file smaller than 2MB',
+					background: 'bg-warning-200'
+				});
 				return;
 			}
 

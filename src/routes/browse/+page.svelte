@@ -17,7 +17,7 @@
 
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
-	$: paginationSettings.size = source.length;
+	$: paginationSettings.size = data.type === 'circuits' ? circuits.length : materials.length;
 
 
 	let users: (User & { posts: Publication[], profilePicData: string })[] = [];
@@ -127,8 +127,8 @@
 
 		const s = pageType === 'materials' ? 'material' : 'circuit';
 		const url = `/api/${s}?${queryParams.toString()}`;
-		materials = [];
-		circuits = [];
+		// materials = [];
+		// circuits = [];
 
 		return fetch(url)
 			.then(response => {
@@ -150,8 +150,6 @@
 				}
 				page = 0;
 				paginationSettings.page = 0;
-
-				console.log(source.length);
 
 			})
 			.catch(error => {
@@ -245,6 +243,7 @@
 			content: (x.firstName + ' ' + x.lastName)
 		}));
 
+
 		if (data.selectedTag !== '') {
 			searchActive = true;
 			selectedTags = [];
@@ -253,22 +252,24 @@
 		}
 
 		data.materials.then((matData) => {
+
 			materials = matData.materials;
 			idsMat = matData.idsMat;
 			if (data.type !== 'circuits') source = idsMat;
 		}).catch((err) =>{
 			materials = [];
 			idsMat = [];
-		})
+		});
 
-		data.materials.then((circData) => {
+		data.circuits.then((circData) => {
+
 			circuits = circData.circuits;
 			idsCirc = circData.idsCirc;
 			if (data.type === 'circuits') source = idsCirc;
 		}).catch((err) =>{
 			circuits = [];
 			idsCirc = [];
-		})
+		});
 	});
 
 	let paginationSettings = {
@@ -291,8 +292,8 @@
 		amount = 9;
 		paginationSettings.limit = amount;
 		paginationSettings.page = 0;
+		resetFilters();
 	};
-
 </script>
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
@@ -325,9 +326,9 @@
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
 
 	{#if pageType !== "people"}
-		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}
-						bind:selected={selectedDiff} on:select={() => searchActive = true}
-						disabled={isSemanticActive}/>
+<!--		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}-->
+<!--						bind:selected={selectedDiff} on:select={() => searchActive = true}-->
+<!--						disabled={isSemanticActive}/>-->
 		<DropdownSelect title="Tags" multiselect={true} options={tags.map(x => x.content)}
 						bind:selected={selectedTags} on:select={() => searchActive = true}
 						disabled={isSemanticActive}/>
@@ -344,10 +345,10 @@
 						disabled={isSemanticActive}/>
 	{/if}
 
-	{#if pageType === 'circuits'}
-		<DropdownInput title="Minimum nodes:"
-					   bind:content={numberNodes} on:select={() => searchActive = true} />
-	{/if}
+	<!--{#if pageType === 'circuits'}-->
+	<!--	<DropdownInput title="Minimum nodes:"-->
+	<!--				   bind:content={numberNodes} on:select={() => searchActive = true} />-->
+	<!--{/if}-->
 	<button class="w-full rounded-sm py-1.5 px-3 text-surface-100 shadow-lg {applyBackground}"
 			on:click={onSearch} disabled="{!searchActive}">
 		Search
@@ -361,7 +362,7 @@
 	{/if}
 </div>
 
-<div class="col-span-9 grid grid-cols-3 gap-2">
+<div class="col-span-9 grid grid-cols-3 gap-2 auto-rows-min">
 	{#if pageType !== 'people'}
 		<div class="col-span-full">
 			<Paginator
@@ -405,7 +406,7 @@
 			<p style="color: red">Error while loading users. Reload the page to try again</p>
 		{/await}
 	{:else if pageType === "circuits"}
-		{#await fetchPromise ||  data.circuits}
+		{#await fetchPromise || data.circuits}
 			<p>Loading circuits...</p>
 		{:then _}
 			{#each circuits as circuit (circuit.id)}
@@ -463,3 +464,4 @@
 		{/await}
 	{/if}
 </div>
+

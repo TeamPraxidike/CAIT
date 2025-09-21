@@ -21,7 +21,7 @@
 		// if the data is not null, then we have info about the file
 		// so it is no the default, we need to download it
 		if (profilePicFetchedData.data){
-			profilePicPromise = downloadFileFromSupabase(profilePicFetchedData);
+			profilePicPromise = downloadFileFromSupabase(supabaseClient, profilePicFetchedData);
 		}
 	});
 
@@ -112,7 +112,7 @@
 						Profile Picture
 					</h4>
 					<img src={URL.createObjectURL(profilePicResolved)}
-						 class="w-32 h-32 rounded-full" alt="profilePic">
+						 class="w-32 h-32 rounded-full object-cover" alt="profilePic">
 				</div>
 				<FileButton on:change={chosenPfpPromiseHandler} name="profilePic" accept="image/*"/>
 			{:catch error}

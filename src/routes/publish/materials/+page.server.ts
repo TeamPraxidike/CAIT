@@ -1,7 +1,7 @@
 import type { Actions, PageServerLoad } from './$types';
 
 import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
-import { type Difficulty, type Tag } from '@prisma/client';
+import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import { redirect } from '@sveltejs/kit';
 import type {
@@ -19,6 +19,38 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	const allCourses: CourseWithCoverPic[] = await (await fetch(`/api/course-extended`)).json();
 	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
+
+async function extractCourseData(formData: FormData, locals: App.Locals) {
+	const title = formData.get('title');
+	const level = formData.get('level');
+	const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
+	const prerequisites = JSON.parse(formData.get('prerequisites') as string);
+	const maintainers = JSON.parse(formData.get('maintainers') as string);
+	const copyright = formData.get('copyright') as string;
+
+	const coverPicFile = formData.get('coverPic');
+	let coverPic = null;
+
+	if (coverPicFile instanceof File) {
+		const buffer = await coverPicFile.arrayBuffer();
+		const info = Buffer.from(buffer).toString('base64');
+		coverPic = {
+			type: coverPicFile.type,
+			info,
+		};
+	}
+
+	return {
+		learningObjectives: learningObjectives,
+		prerequisites: prerequisites,
+		educationalLevel: level,
+		courseName: title,
+		creatorId: locals.session?.user.id,
+		copyright: copyright,
+		maintainers: maintainers,
+		coverPic: coverPic,
+	};
+}
 
 export const actions = {
 	/**
@@ -51,6 +83,10 @@ export const actions = {
 		const coverPicFile = data.get('coverPic');
 		const isDraft = data.get('isDraft')?.toString() === 'true';
 		let coverPic = null;
+		const materialTypes = JSON.parse(data.get('type')?.toString() as string).map((type: string) => convertMaterial(type));
+		if (materialTypes.length === 0) {
+			materialTypes.push(MaterialType.other)
+		}
 
 		if (coverPicFile instanceof File) {
 			const buffer = await coverPicFile.arrayBuffer();
@@ -100,7 +136,7 @@ export const actions = {
 				theoryPractice: Number(data.get('theoryToApplication')),
 				tags: JSON.parse(tagsDataEntry.toString()),
 				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
-				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
+				materialType: materialTypes,
 				isDraft: isDraft,
 				fileURLs: fileURLs || [],
 				course: Number(data.get('course')?.toString()),
@@ -124,44 +160,17 @@ export const actions = {
 
 		try {
 			const formData = await request.formData();
-			const title = formData.get('title');
-			const level = formData.get('level');
-			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
-			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
-			const maintainers = JSON.parse(formData.get('maintainers') as string);
-			const copyright = formData.get('copyright') as string;
+			const courseData = await extractCourseData(formData, locals);
 
-			const coverPicFile = formData.get('coverPic');
-			let coverPic = null;
-
-			if (coverPicFile instanceof File) {
-				const buffer = await coverPicFile.arrayBuffer();
-				const info = Buffer.from(buffer).toString('base64');
-				coverPic = {
-					type: coverPicFile.type,
-					info,
-				};
-			}
-
-			const courseData = {
-				learningObjectives: learningObjectives,
-				prerequisites: prerequisites,
-				educationalLevel: level,
-				courseName: title,
-				creatorId: locals.session?.user.id,
-				copyright: copyright,
-				maintainers: maintainers,
-				coverPic: coverPic,
-			};
 			const res = await fetch(`/api/course`, {
 				method: 'POST',
 				body: JSON.stringify(courseData),
 			});
+
 			const newCourse = await res.json();
 			return { status: res.status, id: newCourse.id, context: 'course-form', course: newCourse};
 		} catch (error) {
 			console.error("Error creating course ", error);
-			throw redirect(303, '/course/create');
 		}
 	},
 	editCourse: async ({ request, fetch, locals }) => {
@@ -170,24 +179,11 @@ export const actions = {
 
 		try {
 			const formData = await request.formData();
-			const id = Number(formData.get('id'));
-			const title = formData.get('title');
-			const level = formData.get('level');
-			const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
-			const prerequisites = JSON.parse(formData.get('prerequisites') as string);
-			const maintainers = JSON.parse(formData.get('maintainers') as string);
+			const courseData = await extractCourseData(formData, locals);
 
-			const payload = {
-				courseName: title,
-				educationalLevel: level,
-				learningObjectives,
-				prerequisites,
-				maintainers,
-			};
-
-			const res = await fetch(`/api/course/${id}` , {
+			const res = await fetch(`/api/course/${formData.get('id')}` , {
 				method: 'PUT',
-				body: JSON.stringify(payload),
+				body: JSON.stringify(courseData),
 			});
 
 			const updatedCourse = await res.json();

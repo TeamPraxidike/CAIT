@@ -30,7 +30,7 @@ export async function POST({ request, locals }) {
 		const comment = await getComment(body.commentId);
 
 		if (comment?.userId === body.userId) {
-			await updateReputation(body.userId, 3);
+			await updateReputation(body.userId, 2);
 		} else {
 			await updateReputation(body.userId, 5);
 		}

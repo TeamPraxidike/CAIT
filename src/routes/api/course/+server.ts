@@ -1,5 +1,5 @@
 import { verifyAuth } from '$lib/database/auth';
-import { createCourse, type createCourseData, findCourseByName, getAllCourses } from '$lib/database/courses';
+import { createCourse, type createCourseData, findCourseByName, getAllCourses, getCourseByIdExtended } from '$lib/database/courses';
 import { updateCoverPic } from '$lib/database';
 
 
@@ -47,7 +47,7 @@ export async function POST({ request, locals }) {
 			isCourse
 		);
 
-		return new Response(JSON.stringify(course), { status: 200 });
+		return new Response(JSON.stringify(await getCourseByIdExtended(course.id)), { status: 200 });
 	} catch (error) {
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}

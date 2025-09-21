@@ -83,20 +83,20 @@
             </div>
             <hr class="w-11/12">
 
-            <div class="flex gap-2 flex-wrap">
-                {#if currentlyAuth()}
-                    {#each courses as course}
-                    <div class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium
-					   hover:bg-gray-100 hover:text-black transition">
-                        {course}
-                    </div>
-                        {/each}
-                    <button class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium
-					   hover:bg-gray-100 hover:text-black transition" on:click={openModal}>
-                        Add Course
-                    </button>
-                {/if}
-            </div>
+<!--            <div class="flex gap-2 flex-wrap">-->
+<!--                {#if currentlyAuth()}-->
+<!--                    {#each courses as course}-->
+<!--                    <div class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium-->
+<!--					   hover:bg-gray-100 hover:text-black transition">-->
+<!--                        {course}-->
+<!--                    </div>-->
+<!--                        {/each}-->
+<!--                    <button class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium-->
+<!--					   hover:bg-gray-100 hover:text-black transition" on:click={openModal}>-->
+<!--                        Add Course-->
+<!--                    </button>-->
+<!--                {/if}-->
+<!--            </div>-->
         </div>
     </div>
     <hr class="w-full my-2 md:w-0">

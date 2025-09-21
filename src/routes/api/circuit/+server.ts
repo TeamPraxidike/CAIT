@@ -123,6 +123,7 @@ export async function POST({ request, locals }) {
 						coverPic,
 						circuit.publicationId,
 						userId,
+						false,
 						prismaTransaction,
 					);
 				} else {
@@ -147,7 +148,7 @@ export async function POST({ request, locals }) {
 				return circuit;
 			},
 		);
-		await updateReputation(userId, 50);
+		await updateReputation(userId, 3);
 
 		const id = createdCircuit.publicationId;
 

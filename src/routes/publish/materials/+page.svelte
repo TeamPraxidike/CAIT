@@ -26,8 +26,8 @@
 		getCover,
 		getFiles,
 		getMaterialSnapshot,
-		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata, deleteAllFileTUSMetadata,
-		saveCover, clearAllData, clearIfTimeExceeded
+		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata,
+		clearAllData, clearIfTimeExceeded
 	} from '$lib/util/indexDB';
 	import { allUploadsDone, downloadFileFromSupabase } from '$lib/util/file';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
@@ -39,6 +39,7 @@
 	import TimeEstimate from '$lib/components/publication/TimeEstimate.svelte';
 	import * as tus from 'tus-js-client'
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
+	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -70,7 +71,7 @@
 
 	let courseMaintainers: UserWithProfilePic[] = [];
 	let originalCourseIds: number[] = courses.map(c => c.id);
-	let bannerFieldsList: string[];
+	let bannerFieldsList: string[] = [];
 
 	let users: UserWithProfilePic[] = data.users;
 	let searchableUsers = users.filter((u) => u.id !== loggedUser.id);
@@ -407,7 +408,7 @@
 			event.preventDefault();
 		}
 	};
-	function openModal(courseToEdit: any = null) {
+	function openModal(courseToEdit: CourseWithCoverPic | null = null) {
 		if (courseToEdit) {
 			editingCourse = courseToEdit;
 			// prefill maintainers for edit (exclude current user)
@@ -430,7 +431,7 @@
 
 	// const uploadFile
 	let showModal = false;
-	let editingCourse: any = null;
+	let editingCourse: CourseWithCoverPic | null = null;
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
@@ -444,7 +445,10 @@
 	$: numMaterials = fileURLs.length + files.length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
-
+	// The selected type of the material is autofilled to 'Other' if none is selected but is still displayed in the banner to
+	// incentivize the user to fill it in. This is why here we have to check whether it is the only thing that is missing
+	// because if it the publication should not be a draft
+	$: showDraftMessage = (bannerFieldsList.length > 1 || !(bannerFieldsList.length == 1 && bannerFieldsList[0] == 'Material Type') || markedAsDraft);
 </script>
 
 <Meta title="Publish" description="CAIT" type="site" />
@@ -549,7 +553,6 @@
 						</div>
 						<SelectCourse on:showCourseModal={() => openModal(null)}
 						  bind:selectedCourseId={course}
-						  bind:showCourseProgressRadial={showCourseProgressRadial}
 						  courses={courses}
 						  allCourses={data.allCourses}
 						  bind:originalCourseIds={originalCourseIds}
@@ -615,8 +618,7 @@
 
 							<p class="text-surface-500 text-sm">
 								Time Estimate: {estimate || 'No estimate provided'} |
-								Type: {selectedType?.toUpperCase() || 'No type provided'} |
-								Difficulty: {difficulty?.toLowerCase() || 'No difficulty provided'}
+								Type: {selectedType?.toUpperCase() || 'No type provided'}
 							</p>
 
 							<FileTable operation="view" fileFormat="upload" bind:files={files} bind:fileURLs={fileURLs}
@@ -690,7 +692,7 @@
 		</div>
 		<div class="success-text">Publication uploaded successfully</div>
 		<div class="success-subtext">
-			{#if bannerFieldsList.length !== 0 || markedAsDraft}
+			{#if showDraftMessage}
 				Your publication has been saved as a draft - only you can see it
 			{:else}
 				Your publication is now visible to all users of CAIT
@@ -703,7 +705,7 @@
 					// showAnimation = false;
 					goto('/publish');
 				}}>
-				Publish something else
+				New Publication
 			</button>
 			<button type="button" class="success-btn
 				bg-[#fcfcfd] text-black border-2 border-[#007393]
@@ -844,5 +846,9 @@
 					originalCourseIds = originalCourseIds.filter(x => x !== id);
 					if (course === id) course = null;
 				}}
+				 on:courseCreated={(event) => {
+					 courses = [...courses, event.detail.course];
+					 originalCourseIds = [...originalCourseIds, event.detail.course.id];
+				 }}
 	/>
 {/if}

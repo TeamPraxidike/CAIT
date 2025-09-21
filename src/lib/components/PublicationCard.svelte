@@ -1,14 +1,14 @@
 <script lang="ts">
 
 
-	import { DiffBar, getDateDifference, Tag, UsedInCourse } from '$lib';
+	import { getDateDifference, Tag, UsedInCourse } from '$lib';
 
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { type Material, type Publication, PublicationType, type User } from '@prisma/client';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import {
 		getModalStore,
 		initializeStores,
@@ -20,11 +20,13 @@
     import {IconMapExtension, PublicationTypeIconMap} from '$lib/util/file';
 	import { coursesStore } from '$lib/stores/courses';
 	import {typeToHumanString} from "$lib/util/types";
+	import LevelIcon from '$lib/components/publication/card/LevelIcon.svelte';
 
 	export let publication: Publication & {
 		materials : Material
 		tags: { content: string }[],
 		usedInCourse: { course: string }[]
+		course: { educationalLevel: string } | null
 	};
 
 	export let publisher: User & { profilePicData: string };
@@ -48,7 +50,7 @@
 	export let materialType: string = "information";
 	export let forArrow: boolean = false;
 
-	const userId = $page.data?.session?.user?.id || '0';
+	const userId = page.data?.session?.user?.id || '0';
 
 	//used to differentiate if it's used in a normal browse or in the circuit browse
 	export let inCircuits: boolean = false;
@@ -268,7 +270,7 @@
 								{/if}
 							</div>
 							<div class="self-center">
-								<DiffBar className="size-5" diff={publication.difficulty}></DiffBar>
+								<LevelIcon level={publication.course?.educationalLevel}/>
 							</div>
 						{/if}
 					</div>

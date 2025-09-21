@@ -141,6 +141,11 @@ export async function getAllMaterials(
 							course: true,
 						},
 					},
+					course: {
+						select: {
+							educationalLevel: true
+						}
+					},
 					publisher: {
 						include: {
 							profilePic: true,
@@ -214,10 +219,11 @@ export async function createMaterialPublication(
 		timeEstimate: number;
 		theoryPractice: number;
 		isDraft: boolean;
+		course: number;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
-	return prismaContext.material.create({
+	const query = {
 		data: {
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
@@ -234,6 +240,9 @@ export async function createMaterialPublication(
 					publisher: {
 						connect: { id: userId }
 					},
+					...(metaData.course !== null && {
+						course: { connect: { id: metaData.course } },
+					}),
 					isDraft: metaData.isDraft,
 				},
 			},
@@ -241,7 +250,9 @@ export async function createMaterialPublication(
 		include: {
 			publication: true,
 		},
-	});
+	};
+
+	return prismaContext.material.create(query);
 }
 
 /**

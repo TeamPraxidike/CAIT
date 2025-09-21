@@ -23,12 +23,6 @@ enum Difficulty {
   hard
 }
 
-enum Level {
-  Bachelor
-  Master
-  PhD
-}
-
 enum MaterialType {
   video
   lectureNotes
@@ -130,9 +124,9 @@ model Publication {
 
 model SavedByAllTime {
   publicationId Int
-  Publication   Publication @relation(fields: [publicationId], references: [id])
+  Publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
   userId        String      @db.Uuid
-  User          User        @relation(fields: [userId], references: [id])
+  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([publicationId, userId])
 }
@@ -284,7 +278,7 @@ model Course {
   id                 Int           @id @default(autoincrement())
   learningObjectives String[]
   prerequisites      String[]
-  educationalLevel   Level
+  educationalLevel   String
   courseName         String        @unique
   publications       Publication[] @relation("CoursePublications")
   maintainers        User[]        @relation("CourseInstructors")
