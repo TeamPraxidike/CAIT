@@ -32,7 +32,7 @@ export async function POST({ request, locals }) {
 		const publication = await getPublicationByIdLight(body.publicationId);
 
 		if (publication?.publisherId === body.userId) {
-			await updateReputation(body.userId, 3);
+			await updateReputation(body.userId, 2);
 		} else {
 			await updateReputation(body.userId, 5);
 		}

@@ -42,7 +42,7 @@ export async function POST({ params, locals }) {
 					parseInt(publicationId),
 				);
 				if (savedBefore !== 'User saved previously') {
-					await updateReputation(publication.publisherId, 10);
+					await updateReputation(publication.publisherId, 22);
 				}
 			}
 		}
