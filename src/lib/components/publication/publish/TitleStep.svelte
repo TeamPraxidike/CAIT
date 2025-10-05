@@ -19,6 +19,8 @@
 	export let coverPic: File | undefined = undefined;
 	export let course: number | null = null;
 	export let loggedUser;
+	export let users: UserWithProfilePic[] = [];
+	export let searchableUsers: UserWithProfilePic[] = [];
 
 	const toastStore = getToastStore();
 	let editingCourse: CourseWithCoverPic | null = null;

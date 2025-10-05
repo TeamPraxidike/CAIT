@@ -40,6 +40,7 @@
 	import * as tus from 'tus-js-client'
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
+	import TitleStep from '$lib/components/publication/publish/TitleStep.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -533,45 +534,18 @@
 				</Step>
 				<Step locked={locks[1]}>
 					<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-					<div class="grid grid-cols-2 gap-x-4 gap-y-2">
-						<label for="title" class="block font-medium">Title<span class="text-error-300">*</span></label>
-						<label for="coverPic" class="block font-medium">Cover Picture (Max. size: 2MB)</label>
-
-						<div class="flex flex-col gap-2 mb-5">
-							<input type="text" name="title" placeholder="Title" bind:value={title} on:keydown={handleInputEnter}
-								   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
-							<div class="flex flex-col gap-1">
-								<label for="content" class="mt-1 block font-medium">Content<span class="text-error-300">*</span></label>
-								<SelectType bind:selectedTypes={selectedTypes}/>
-								<hr class="my-3 mx-2">
-								<div class="flex items-center gap-2 h-[32px] mb-2">
-									<label for="course" class="font-medium flex items-center">
-										Course<span class="text-error-300">*</span>
-									</label>
-									{#if showCourseProgressRadial}
-										<ProgressRadial font={8} width="w-8" class="shrink-0" />
-									{/if}
-								</div>
-								<SelectCourse on:showCourseModal={() => openModal(null)}
-								  bind:selectedCourseId={course}
-								  courses={courses}
-								  allCourses={data.allCourses}
-								  bind:originalCourseIds={originalCourseIds}
-								  on:courseEditRequest={(event) => {
-									openModal(event.detail.course);
-								  }}
-								  on:courseDeleted={(event) => {
-									  courses = courses.filter(c => c.id !== event.detail.courseId);
-									  courses = [...courses];
-								  }}
-								  on:deselectCourse={() => {
-									  coverPic = undefined;
-								  }}
-								/>
-							</div>
-							</div>
-							<CoverPicSelect bind:coverPic={coverPic} toastStore={toastStore} />
-					</div>
+					<TitleStep bind:title={title}
+							   bind:showCourseProgressRadial={showCourseProgressRadial}
+							   bind:selectedTypes={selectedTypes}
+							   bind:originalCourseIds={originalCourseIds}
+							   bind:courses={courses}
+							   bind:course={course}
+							   bind:coverPic={coverPic}
+							   bind:loggedUser={loggedUser}
+							   bind:searchableUsers={searchableUsers}
+							   allCourses={data.allCourses}
+							   users={users}>
+					</TitleStep>
 				</Step>
 				<Step locked={locks[2]}>
 					<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
