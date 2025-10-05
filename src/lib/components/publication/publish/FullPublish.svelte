@@ -8,20 +8,17 @@
 	import { enhance } from '$app/forms';
 	import { allUploadsDone } from '$lib/util/file';
 	import { getToastStore, ProgressRadial } from '@skeletonlabs/skeleton';
-	import type { ParamsImmutable, ParamsMutable, PublishParams } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
 	import { tick } from 'svelte';
 	import { clearAllData } from '$lib/util/indexDB.ts';
-	import type { ActionData } from '../../../../../.svelte-kit/types/src/routes/publish/materials/$types';
 
 
 	export let data: ParamsMutable;
 	export let paramsImmutable: ParamsImmutable;
-	export let form: ActionData;
+	export let showAnimation: boolean;
 
 	export let saveInterval: number | undefined = undefined;
-
 	const toastStore = getToastStore();
-	let showAnimation = false;
 	$: if (showAnimation) {
 		// tick() waits until the DOM has been updated
 		tick().then(() => {
@@ -32,7 +29,7 @@
 	// IMPORTANT - use contexts to separate form events
 	// otherwise, for example, any Course related form events get mistaken for
 	// events from the main form
-	$: if (form?.status === 200 && form?.context === 'publication-form') {
+	$: if (paramsImmutable.form?.status === 200 && paramsImmutable.form?.context === 'publication-form') {
 		console.log('Form submission successful:');
 		if (saveInterval) {
 			window.clearInterval(saveInterval);
@@ -45,7 +42,7 @@
 		}).catch(error => {
 			console.error('Error clearing data:', error);
 		});
-	} else if (form?.status === 400 && form?.context === 'publication-form') {
+	} else if (paramsImmutable.form?.status === 400 && paramsImmutable.form?.context === 'publication-form') {
 		console.log('Form submission failed with status 400:');
 		if (!allUploadsDone(data.fileTUSMetadata, data.files)){
 			toastStore.trigger({
@@ -55,18 +52,19 @@
 		}
 		else {
 			toastStore.trigger({
-				message: `Malformed information, please check your inputs: ${form?.message}`,
+				message: `Malformed information, please check your inputs: ${paramsImmutable.form?.message}`,
 				background: 'bg-warning-200',
 				classes: 'text-surface-900'
 			});
 		}
+		console.log(data);
 
 		data.isSubmitting = false;
-	} else if (form?.status === 418) {
+	} else if (paramsImmutable.form?.status === 418) {
 		console.log("error 418 ");
-		isSubmitting = false;
+		data.isSubmitting = false;
 		showAnimation = false;
-	} else if (form?.status === 500 && form?.context === 'publication-form') {
+	} else if (paramsImmutable.form?.status === 500 && paramsImmutable.form?.context === 'publication-form') {
 		console.log('Form submission failed with status 500:');
 		toastStore.trigger({
 			message: 'An error occurred, please try again later or contact support',
@@ -74,8 +72,8 @@
 			classes: 'text-surface-900'
 		});
 		data.isSubmitting = false;
-	} else if (form?.status == 200 && form?.context === 'course-form') {
-		const updated = form.course;
+	} else if (paramsImmutable.form?.status == 200 && paramsImmutable.form?.context === 'course-form') {
+		const updated = paramsImmutable.form.course;
 		const idx = data.courses.findIndex(c => c.id === updated.id);
 
 		data.showCourseProgressRadial = false;
@@ -88,7 +86,7 @@
 			data.courses.push(updated);
 			data.courses = data.courses;
 		}
-		form = { ...form, context: "undefined" };
+		paramsImmutable.form = { ...paramsImmutable.form, context: "undefined" };
 	}
 
 	let markedAsDraft = false;
@@ -128,7 +126,6 @@
 					// file key, so just remove it
 					formData.delete('file')
 					data.isSubmitting = true;
-					let willSubmit = true;
 
 					// check if all the file uploads (excluding cover picture) are done
 					if (!(allUploadsDone(data.fileTUSMetadata, data.files))){
@@ -155,7 +152,7 @@
 						formData.append('fileURLs', JSON.stringify(uploadFormat));
 					}
 
-					formData.append('userId', data.loggedUser.uid?.toString() || '');
+					formData.append('userId', paramsImmutable.uid?.toString() || '');
 					formData.append('title', data.title);
 					formData.append('description', data.description);
 					formData.append('type', JSON.stringify(data.selectedTypes));
@@ -194,7 +191,7 @@
 	<PublishConfirmation
 		bind:showDraftMessage={showDraftMessage}
 		username={data.loggedUser.username}
-		formId={form?.id}
+		formId={paramsImmutable.form?.id}
 	/>
 {/if}
 

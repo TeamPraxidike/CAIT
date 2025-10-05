@@ -34,7 +34,7 @@ export type ParamsImmutable = {
 	supabaseURL: string;
 	users: UserWithProfilePic[];
 	allCourses: CourseWithCoverPic[];
-	uid: number | null;
+	uid: string | undefined;
 	form: any;
 	allTags: PrismaTag[];
 };

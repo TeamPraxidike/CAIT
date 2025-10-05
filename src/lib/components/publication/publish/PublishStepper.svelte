@@ -4,12 +4,9 @@
 	import Preview from '$lib/components/publication/publish/Preview.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 	import { Step, Stepper } from '@skeletonlabs/skeleton';
-	import type { FileTUSMetadata } from '$lib/util/indexDB.ts';
-	import { changeCourse, type UserWithProfilePic } from '$lib/util/coursesLogic.ts';
-	import type {  Tag as PrismaTag } from '@prisma/client';
-	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
+	import { changeCourse } from '$lib/util/coursesLogic.ts';
 	import { downloadFileFromSupabase } from '$lib/util/file.ts';
-	import type { ParamsImmutable, ParamsMutable, PublishParams } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
 
 	export let data: ParamsMutable;
 	export let paramsImmutable: ParamsImmutable;
@@ -71,8 +68,8 @@
 	<Step>
 		<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
 		<TitleStep bind:data={data}
-				   paramsImmutable={paramsImmutable}>
-		</TitleStep>
+				   paramsImmutable={paramsImmutable}
+		/>
 	</Step>
 	<Step>
 		<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
