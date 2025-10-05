@@ -1,38 +1,38 @@
 <script lang="ts">
-import Icon from '@iconify/svelte';
+	import Icon from '@iconify/svelte';
 
-type Metadata = {
-	title?: string;
-	description?: string;
-	tags?: string[];
-	learningObjectives?: string[];
-};
+	type Metadata = {
+		title?: string;
+		description?: string;
+		tags?: string[];
+		learningObjectives?: string[];
+	};
 
-export let metadata: Metadata;
+	export let metadata: Metadata;
 
-// those values are given some values by default that make them not appear in the banner
-// If you dont pass anything to them, they will be considered as filled
-export let files = 1;
-export let numNodes = 2
-export let materialType = ['slides'];
+	// those values are given some values by default that make them not appear in the banner
+	// If you dont pass anything to them, they will be considered as filled
+	export let files = 1;
+	export let numNodes = 2
+	export let materialType = ['slides'];
 
-$: hasTitle = metadata && metadata.title && metadata.title.trim() !== '';
-$: hasTags = metadata && metadata.tags && metadata.tags.length > 0;
-$: hasLOs = metadata && metadata.learningObjectives && metadata.learningObjectives.length > 0;
+	$: hasTitle = metadata && metadata.title && metadata.title.trim() !== '';
+	$: hasTags = metadata && metadata.tags && metadata.tags.length > 0;
+	$: hasLOs = metadata && metadata.learningObjectives && metadata.learningObjectives.length > 0;
 
-export let fieldsList = []
+	export let fieldsList = []
 
-$: fieldsList = [
-		files <= 0 && 'File',
-		numNodes <= 1 && '2 Nodes',
-		!hasTitle && 'Title',
-		!hasTags && 'Tags',
-		!hasLOs && 'Learning Objectives',
-		materialType.length <= 0 && 'Material Type'
-	].filter(Boolean);
+	$: fieldsList = [
+			files <= 0 && 'File',
+			numNodes <= 1 && '2 Nodes',
+			!hasTitle && 'Title',
+			!hasTags && 'Tags',
+			!hasLOs && 'Learning Objectives',
+			materialType.length <= 0 && 'Material Type'
+		].filter(Boolean);
 
 
-$: show = true;
+	$: show = true;
 </script>
 
 {#if show && fieldsList.length > 0}
