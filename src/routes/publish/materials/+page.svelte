@@ -70,7 +70,6 @@
 	let courses = data.courses;
 	$: courses = courses;
 
-	let courseMaintainers: UserWithProfilePic[] = [];
 	let originalCourseIds: number[] = courses.map(c => c.id);
 	let bannerFieldsList: string[] = [];
 
@@ -409,30 +408,7 @@
 			event.preventDefault();
 		}
 	};
-	function openModal(courseToEdit: CourseWithCoverPic | null = null) {
-		if (courseToEdit) {
-			editingCourse = courseToEdit;
-			// prefill maintainers for edit (exclude current user)
-			courseMaintainers = (courseToEdit.maintainers || []).filter((m: any) => m.id !== loggedUser.id);
-		} else {
-			editingCourse = null;
-			courseMaintainers = [];
-		}
-		tick().then(() => {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		});
 
-		showModal = true;
-	}
-
-	function closeModal() {
-		showModal = false;
-	}
-
-
-	// const uploadFile
-	let showModal = false;
-	let editingCourse: CourseWithCoverPic | null = null;
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
@@ -810,20 +786,3 @@
         }
     }
 </style>
-
-{#if showModal}
-	<CourseModal existingCourse={editingCourse} close={closeModal} publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-				 bind:showCourseProgressRadial={showCourseProgressRadial}
-				 bind:additionalMaintainers={courseMaintainers}
-				 on:courseDeleted={(event) => {
-					const id = event.detail.courseId;
-					courses = courses.filter(c => c.id !== id);
-					originalCourseIds = originalCourseIds.filter(x => x !== id);
-					if (course === id) course = null;
-				}}
-				 on:courseCreated={(event) => {
-					 courses = [...courses, event.detail.course];
-					 originalCourseIds = [...originalCourseIds, event.detail.course.id];
-				 }}
-	/>
-{/if}
