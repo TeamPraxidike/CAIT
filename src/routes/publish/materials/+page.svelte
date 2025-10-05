@@ -33,6 +33,7 @@
 	import TitleStep from '$lib/components/publication/publish/TitleStep.svelte';
 	import MetaInfoStep from '$lib/components/publication/publish/MetaInfoStep.svelte';
 	import Preview from '$lib/components/publication/publish/Preview.svelte';
+	import PublishStepper from '$lib/components/publication/publish/PublishStepper.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -133,13 +134,6 @@
 	//$: supabaseClient = page.data.supabase;
 
 	const bucketName = "uploadedFiles"
-
-	/* LOCK = TRUE => LOCKED */
-	const locks: boolean[] = [false, false, false];
-
-	// $: locks[0] = files ? files.length === 0 : true;
-	// $: locks[1] = title.length < 1 || description.length < 1 || selectedType === "Select Type";
-	// $: locks[2] = tags.length < 1 || LOs.length<1;
 
 	const toastStore = getToastStore();
 	let showAnimation = false;
@@ -389,13 +383,6 @@
 		showAnimation = false;
 	});
 
-	const onNextHandler = () => {
-		window.scrollTo({
-			top: 0,
-			behavior: 'smooth'
-		});
-	};
-
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
@@ -477,80 +464,39 @@
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 					formData.append('course', course ? course.toString() : 'null');
 			  }}>
-			<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
-					buttonBackLabel="← Back"
-					buttonBack="btn text-surface-800 border border-surface-600 bg-surface-200 dark:text-surface-50 dark:bg-surface-600"
-					buttonNextLabel="Next →"
-					buttonNext="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600"
-					buttonCompleteLabel="Complete"
-					buttonComplete="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600">
-				<Step locked={locks[0]}>
-					<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
-					<UploadFilesForm
-						supabaseURL={supabaseURL}
-						bind:supabaseClient={supabaseClient}
-						bind:fileTUSMetadata={fileTUSMetadata}
-						bind:fileTUSProgress={fileTUSProgress}
-						bind:fileTUSUploadObjects={fileTUSUploadObjects}
-						bind:fileURLs={fileURLs}
-						bind:files={files}/>
-				</Step>
-				<Step locked={locks[1]}>
-					<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-					<TitleStep bind:title={title}
-							   bind:showCourseProgressRadial={showCourseProgressRadial}
-							   bind:selectedTypes={selectedTypes}
-							   bind:originalCourseIds={originalCourseIds}
-							   bind:courses={courses}
-							   bind:course={course}
-							   bind:coverPic={coverPic}
-							   bind:loggedUser={loggedUser}
-							   bind:searchableUsers={searchableUsers}
-							   allCourses={data.allCourses}
-							   users={users}>
-					</TitleStep>
-				</Step>
-				<Step locked={locks[2]}>
-					<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-					<MetaInfoStep bind:estimate={estimate}
-								  	bind:copyright={copyright}
-					              	bind:LOs={LOs}
-					 				bind:PKs={PKs}
-									bind:maintainers={maintainers}
-									bind:loggedUser={loggedUser}
-									bind:searchableUsers={searchableUsers}
-									users={users}
-									allTags={allTags}
-									bind:tags={tags}
-									bind:newTags={newTags}
-									bind:description={description}/>
-				</Step>
-				<Step locked={isSubmitting}>
-					<svelte:fragment slot="header">Review</svelte:fragment>
-					<Preview
-						title={title}
-						tags={tags}
-						description={description}
-						estimate={estimate}
-						selectedType={selectedType}
-						coverPic={coverPic}
-						files={files}
-						fileURLs={fileURLs}
-						fileTUSMetadata={fileTUSMetadata}
-						fileTUSProgress={fileTUSProgress}
-						fileTUSUploadObjects={fileTUSUploadObjects}
-						loggedUser={loggedUser}
-						maintainers={maintainers}
-						LOs={LOs}
-						PKs={PKs}
-						copyright={copyright}
-						draft={draft}
-						markedAsDraft={markedAsDraft}
-						supabaseClient={supabaseClient}
-					/>
+			<PublishStepper
+				bind:isSubmitting={isSubmitting}
+				supabaseURL={supabaseURL}
+				bind:supabaseClient={supabaseClient}
+				bind:fileTUSMetadata={fileTUSMetadata}
+				bind:fileTUSProgress={fileTUSProgress}
+				bind:fileTUSUploadObjects={fileTUSUploadObjects}
+				bind:fileURLs={fileURLs}
+				bind:files={files}
+				bind:title={title}
+				bind:showCourseProgressRadial={showCourseProgressRadial}
+				bind:selectedTypes={selectedTypes}
+				bind:originalCourseIds={originalCourseIds}
+				bind:courses={courses}
+				bind:course={course}
+				bind:coverPic={coverPic}
+				bind:loggedUser={loggedUser}
+				bind:searchableUsers={searchableUsers}
+				allCourses={data.allCourses}
+				users={users}
+				bind:estimate={estimate}
+				bind:copyright={copyright}
+				bind:LOs={LOs}
+				bind:PKs={PKs}
+				bind:maintainers={maintainers}
+				allTags={allTags}
+				bind:tags={tags}
+				bind:newTags={newTags}
+				bind:description={description}
+				draft={draft}
+				markedAsDraft={markedAsDraft}
+			/>
 
-				</Step>
-			</Stepper>
 		</form>
 
 		<!-- Loading Radial -->
