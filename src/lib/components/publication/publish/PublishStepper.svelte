@@ -5,9 +5,10 @@
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 	import { Step, Stepper } from '@skeletonlabs/skeleton';
 	import type { FileTUSMetadata } from '$lib/util/indexDB.ts';
-	import type { UserWithProfilePic } from '$lib/util/coursesLogic.ts';
+	import { changeCourse, type UserWithProfilePic } from '$lib/util/coursesLogic.ts';
 	import type {  Tag as PrismaTag } from '@prisma/client';
 	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
+	import { downloadFileFromSupabase } from '$lib/util/file.ts';
 
 	export let title: string = '';
 	export let tags: string[] = [];
@@ -48,6 +49,30 @@
 			behavior: 'smooth'
 		});
 	};
+
+	let previousCourse: number | null = null;
+	$: if (course !== previousCourse) {
+		const currentCourse = courses.find(c => c.id === course);
+		maintainers = [];
+		const prev_temp = previousCourse;
+		previousCourse = course;
+		const result = changeCourse(course, prev_temp, LOs, PKs, courses, maintainers);
+		course = result.course;
+		LOs = result.LOs;
+		PKs = result.PKs;
+		maintainers = result.maintainers;
+
+		if (currentCourse) {
+			if (currentCourse.copyright !== "") {
+				copyright = currentCourse.copyright;
+			}
+			if (currentCourse?.coverPic?.data) {
+				downloadFileFromSupabase(supabaseClient, currentCourse.coverPic).then(f => {
+					coverPic = f || undefined;
+				});
+			}
+		}
+	}
 </script>
 
 <Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}

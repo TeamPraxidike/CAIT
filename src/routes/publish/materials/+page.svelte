@@ -20,10 +20,9 @@
 		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata,
 		clearAllData, clearIfTimeExceeded
 	} from '$lib/util/indexDB';
-	import { allUploadsDone, downloadFileFromSupabase } from '$lib/util/file';
+	import { allUploadsDone } from '$lib/util/file';
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
-	import { changeCourse } from '$lib/util/coursesLogic';
 	import * as tus from 'tus-js-client'
 	import PublishStepper from '$lib/components/publication/publish/PublishStepper.svelte';
 	import PublishConfirmation from '$lib/components/publication/publish/PublishConfirmation.svelte';
@@ -87,35 +86,8 @@
 	let fileTUSUploadObjects: { [key: string]: any } = {};
 	$: fileTUSUploadObjects = fileTUSUploadObjects
 
-	let previousCourse: number | null = null;
-	$: if (course !== previousCourse) {
-		const currentCourse = courses.find(c => c.id === course);
-		maintainers = [];
-		const prev_temp = previousCourse;
-		previousCourse = course;
-		const result = changeCourse(course, prev_temp, LOs, PKs, courses, maintainers);
-		course = result.course;
-		LOs = result.LOs;
-		PKs = result.PKs;
-		maintainers = result.maintainers;
-
-		if (currentCourse) {
-			if (currentCourse.copyright !== "") {
-				copyright = currentCourse.copyright;
-			}
-			if (currentCourse?.coverPic?.data) {
-				downloadFileFromSupabase(supabaseClient, currentCourse.coverPic).then(f => {
-					coverPic = f || undefined;
-				});
-			}
-		}
-	}
-
 	// cover
 	let coverPic: File | undefined = undefined;
-
-
-
 	$: uid = page.data.session?.user.id;
 
 
