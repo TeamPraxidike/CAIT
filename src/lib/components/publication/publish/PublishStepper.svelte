@@ -9,39 +9,14 @@
 	import type {  Tag as PrismaTag } from '@prisma/client';
 	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
 	import { downloadFileFromSupabase } from '$lib/util/file.ts';
+	import type { ParamsImmutable, ParamsMutable, PublishParams } from '$lib/util/frontendTypes.ts';
 
-	export let title: string = '';
-	export let tags: string[] = [];
-	export let description: string = '';
-	export let estimate: number = 0;
-	export let selectedType: string = 'Select type';
-	export let coverPic: File | undefined = undefined;
-	export let files: FileList = [] as unknown as FileList;
-	export let fileURLs: string[] = [] as string[];
-	export let fileTUSMetadata: { [key: string] : FileTUSMetadata } = {};
-	export let fileTUSProgress: { [key: string]: any } = {};
-	export let fileTUSUploadObjects: { [key: string]: any } = {};
-	export let supabaseClient: any;
-	export let loggedUser: UserWithProfilePic;
-	export let maintainers: UserWithProfilePic[] = [];
-	export let LOs: string[] = [];
-	export let PKs: string[] = [];
-	export let copyright: string = '';
-	export let draft: boolean = false;
-	export let markedAsDraft: boolean = false;
-	export let searchableUsers: UserWithProfilePic[] = [];
-	export let users: UserWithProfilePic[] = [];
-	export let allTags: PrismaTag[] = [];
-	export let newTags: string[] = [];
-	export let showCourseProgressRadial: boolean = false;
-	export let selectedTypes: string[] = [];
-	export let originalCourseIds: number[] = [];
-	export let courses: CourseWithCoverPic[];
-	export let allCourses;
-	export let course: number | null = null;
+	export let data: ParamsMutable;
+	export let paramsImmutable: ParamsImmutable;
 
-	export let isSubmitting: boolean = false;
-	export let supabaseURL;
+	export let draft: boolean;
+	export let markedAsDraft: boolean;
+
 
 	const onNextHandler = () => {
 		window.scrollTo({
@@ -51,31 +26,31 @@
 	};
 
 	let previousCourse: number | null = null;
-	$: if (course !== previousCourse) {
-		const currentCourse = courses.find(c => c.id === course);
-		maintainers = [];
+	$: if (data.course !== previousCourse) {
+		const currentCourse = data.courses.find(c => c.id === data.course);
+		data.maintainers = [];
 		const prev_temp = previousCourse;
-		previousCourse = course;
-		const result = changeCourse(course, prev_temp, LOs, PKs, courses, maintainers);
-		course = result.course;
-		LOs = result.LOs;
-		PKs = result.PKs;
-		maintainers = result.maintainers;
+		previousCourse = data.course;
+		const result = changeCourse(data.course, prev_temp, data.LOs, data.PKs, data.courses, data.maintainers);
+		data.course = result.course;
+		data.LOs = result.LOs;
+		data.PKs = result.PKs;
+		data.maintainers = result.maintainers;
 
 		if (currentCourse) {
 			if (currentCourse.copyright !== "") {
-				copyright = currentCourse.copyright;
+				data.copyright = currentCourse.copyright;
 			}
 			if (currentCourse?.coverPic?.data) {
-				downloadFileFromSupabase(supabaseClient, currentCourse.coverPic).then(f => {
-					coverPic = f || undefined;
+				downloadFileFromSupabase(paramsImmutable.supabaseClient, currentCourse.coverPic).then(f => {
+					data.coverPic = f || undefined;
 				});
 			}
 		}
 	}
 </script>
 
-<Stepper on:submit={() => isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
+<Stepper on:submit={() => data.isSubmitting=true} buttonCompleteType="submit" on:step={onNextHandler}
 		 buttonBackLabel="← Back"
 		 buttonBack="btn text-surface-800 border border-surface-600 bg-surface-200 dark:text-surface-50 dark:bg-surface-600"
 		 buttonNextLabel="Next →"
@@ -85,66 +60,32 @@
 	<Step>
 		<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 		<UploadFilesForm
-			supabaseURL={supabaseURL}
-			bind:supabaseClient={supabaseClient}
-			bind:fileTUSMetadata={fileTUSMetadata}
-			bind:fileTUSProgress={fileTUSProgress}
-			bind:fileTUSUploadObjects={fileTUSUploadObjects}
-			bind:fileURLs={fileURLs}
-			bind:files={files}/>
+			supabaseURL={paramsImmutable.supabaseURL}
+			bind:supabaseClient={paramsImmutable.supabaseClient}
+			bind:fileTUSMetadata={data.fileTUSMetadata}
+			bind:fileTUSProgress={data.fileTUSProgress}
+			bind:fileTUSUploadObjects={data.fileTUSUploadObjects}
+			bind:fileURLs={data.fileURLs}
+			bind:files={data.files}/>
 	</Step>
 	<Step>
 		<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-		<TitleStep bind:title={title}
-				   bind:showCourseProgressRadial={showCourseProgressRadial}
-				   bind:selectedTypes={selectedTypes}
-				   bind:originalCourseIds={originalCourseIds}
-				   bind:courses={courses}
-				   bind:course={course}
-				   bind:coverPic={coverPic}
-				   bind:loggedUser={loggedUser}
-				   bind:searchableUsers={searchableUsers}
-				   allCourses={allCourses}
-				   users={users}>
+		<TitleStep bind:data={data}
+				   paramsImmutable={paramsImmutable}>
 		</TitleStep>
 	</Step>
 	<Step>
 		<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-		<MetaInfoStep bind:estimate={estimate}
-					  bind:copyright={copyright}
-					  bind:LOs={LOs}
-					  bind:PKs={PKs}
-					  bind:maintainers={maintainers}
-					  bind:loggedUser={loggedUser}
-					  bind:searchableUsers={searchableUsers}
-					  users={users}
-					  allTags={allTags}
-					  bind:tags={tags}
-					  bind:newTags={newTags}
-					  bind:description={description}/>
+		<MetaInfoStep bind:data={data}
+					  paramsImmutable={paramsImmutable}/>
 	</Step>
-	<Step locked={isSubmitting}>
+	<Step locked={data.isSubmitting}>
 		<svelte:fragment slot="header">Review</svelte:fragment>
 		<Preview
-			title={title}
-			tags={tags}
-			description={description}
-			estimate={estimate}
-			selectedType={selectedType}
-			coverPic={coverPic}
-			files={files}
-			fileURLs={fileURLs}
-			fileTUSMetadata={fileTUSMetadata}
-			fileTUSProgress={fileTUSProgress}
-			fileTUSUploadObjects={fileTUSUploadObjects}
-			loggedUser={loggedUser}
-			maintainers={maintainers}
-			LOs={LOs}
-			PKs={PKs}
-			copyright={copyright}
+			bind:data={data}
+			paramsImmutable={paramsImmutable}
 			draft={draft}
 			markedAsDraft={markedAsDraft}
-			supabaseClient={supabaseClient}
 		/>
 
 	</Step>

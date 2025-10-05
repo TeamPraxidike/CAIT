@@ -35,6 +35,7 @@
 	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
 	import { changeCourse } from '$lib/util/coursesLogic';
 	import type { SupabaseClient } from '@supabase/supabase-js';
+	import PublishStepper from '$lib/components/publication/publish/PublishStepper.svelte';
 
 
 
@@ -362,86 +363,38 @@
 
 	<hr class="my-10">
 
-	<div class="flex flex-col gap-2 pl-3">
-		<label for="title"> Title</label>
-		<input minlength="3" type="text" id="title" name="title" bind:value={title} on:keydown={handleInputEnter}
-			   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
-
-		<label for="description"> Description</label>
-		<textarea minlength="10" id="description" name="description" bind:value={description}
-				  class="rounded-lg h-40 resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400"
-		></textarea>
-
-		<SelectType bind:selectedTypes={selectedType}/>
-		<hr class="m-2">
-		<SelectCourse bind:selectedCourseId={course} courses={data.courses}/>
-		<div class="flex gap-4 items-center mt-6">
-			<DifficultySelection bind:difficulty={difficulty} />
-		</div>
-		<div class="flex flex-col items-start">
-			<label for="practice"> Theory to Practice Ratio: <br></label>
-			<TheoryAppBar bind:value={theoryApp}/>
-		</div>
-		<div class="flex flex-col md:flex-row col-span-full items-center gap-4">
-			<div class="w-full md:w-1/2">
-				<label for="estimate">Time Estimate (in minutes):</label>
-				<input min="0" type="number" name="estimate" bind:value={time} on:keydown={handleInputEnter} placeholder="How much time do the materials take"
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:ring-0 focus:border-primary-400">
-			</div>
-			<div class="w-full md:w-1/2">
-				<label for="copyright">Copyright License (<a href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
-															 class="text-tertiary-700" > Check here how this applies to you</a>):</label>
-				<input type="text" name="copyright" on:keydown={handleInputEnter} bind:value={copyright} placeholder="Leave blank if material is your own"
-					   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-400 focus:ring-0">
-			</div>
-		</div>
-	</div>
-
-	<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs} adding="{true}"/>
-	<MantainersEditBar publisher={serverData.publication.publisher} bind:additionalMaintainers={maintainers} bind:searchableUsers={browsingUsers} bind:users={users}  />
-
-	<div class="text-token w-full md:w-1/2 space-y-2 pl-3">
-		<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
-	</div>
-
-
-	{#if dataTransferPromise !== null}
-		{#await dataTransferPromise}
-			<p class="my-8">Loading files...</p>
-		{:then dataTransferAwaited}
-			<div class="mt-8">
-				<UploadFilesForm
-					supabaseURL={supabaseURL}
-					integrateWithIndexDB={false}
-					fetchedFiles={fetchedFiles}
-					bind:fileTUSMetadata={fileTUSMetadata}
-					bind:supabaseClient={supabaseClient}
-					bind:fileURLs={fileURLs}
-					bind:files={files}/>
-			</div>
-		{:catch error}
-			<!--TODO: Change color-->
-			<p style="color: red">Error while loading files. Reload the page to try again</p>
-		{/await}
-	{/if}
-
-	<div class="mt-4">
-		{#if coverPicPromise !== null}
-			{#await coverPicPromise}
-				<p>Loading cover picture</p>
-			{:then awaitedCoverPic}
-				<label for="coverPhoto">Cover Picture:</label>
-				<img src={URL.createObjectURL(awaitedCoverPic)} alt="Cover of publication">
-				<FileButton on:change={chooseCoverPromiseHandler} name="coverPhoto">Upload File</FileButton>
-			{:catch error}
-				<p>Error while loading cover picture</p>
-			{/await}
-		{:else}
-			<label for="coverPhoto">Cover Picture:</label>
-			<img src={defaultCoverPicturePath} alt="Cover of publication">
-			<FileButton on:change={chooseCoverPromiseHandler} name="coverPhoto">Upload File</FileButton>
-		{/if}
-	</div>
+	<PublishStepper
+		bind:isSubmitting={isSubmitting}
+		supabaseURL={supabaseURL}
+		bind:supabaseClient={supabaseClient}
+		bind:fileTUSMetadata={fileTUSMetadata}
+		bind:fileTUSProgress={fileTUSProgress}
+		bind:fileTUSUploadObjects={fileTUSUploadObjects}
+		bind:fileURLs={fileURLs}
+		bind:files={files}
+		bind:title={title}
+		bind:showCourseProgressRadial={showCourseProgressRadial}
+		bind:selectedTypes={selectedTypes}
+		bind:originalCourseIds={originalCourseIds}
+		bind:courses={courses}
+		bind:course={course}
+		bind:coverPic={coverPic}
+		bind:loggedUser={loggedUser}
+		bind:searchableUsers={searchableUsers}
+		allCourses={data.allCourses}
+		users={users}
+		bind:estimate={estimate}
+		bind:copyright={copyright}
+		bind:LOs={LOs}
+		bind:PKs={PKs}
+		bind:maintainers={maintainers}
+		allTags={allTags}
+		bind:tags={tags}
+		bind:newTags={newTags}
+		bind:description={description}
+		draft={draft}
+		markedAsDraft={markedAsDraft}
+	/>
 
 	{#if !draft }
 		<div class="flex flex-row justify-end items-center gap-2">
