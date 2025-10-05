@@ -41,6 +41,7 @@
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
 	import TitleStep from '$lib/components/publication/publish/TitleStep.svelte';
+	import MetaInfoStep from '$lib/components/publication/publish/MetaInfoStep.svelte';
 
 	/**
 	 * Convert an array of File objects into a real FileList.
@@ -403,11 +404,6 @@
 			behavior: 'smooth'
 		});
 	};
-	const handleInputEnter = (event: KeyboardEvent) => {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-		}
-	};
 
 	let markedAsDraft = false;
 	let draft = true;
@@ -525,33 +521,18 @@
 				</Step>
 				<Step locked={locks[2]}>
 					<svelte:fragment slot="header">Fill in meta information</svelte:fragment>
-					<div class="flex flex-col gap-6 mt-3">
-						<div class="flex flex-col md:flex-row col-span-full items-center gap-10">
-							<TimeEstimate bind:totalMinutes={estimate}/>
-							<div class="w-full md:w-1/2	">
-								<label for="copyright md-2" class="block font-medium">Copyright License (<a
-									href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
-									class="text-tertiary-700"> Check here how this applies to you</a>):</label>
-								<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter}
-									   placeholder="Leave blank if material is your own"
-									   class="mt-1 rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
-							</div>
-						</div>
-						<div class="w-full">
-							<MetadataLOandPK bind:LOs={LOs} bind:priorKnowledge={PKs}
-											 adding="{true}"/>
-						</div>
-						<div class="w-full">
-							<MantainersEditBar publisher={loggedUser} bind:searchableUsers={searchableUsers} users={users}
-											   bind:additionalMaintainers={maintainers} />
-						</div>
-						<div class="lg:w-1/2">
-							<TagsSelect allTags={allTags} bind:tags={tags} bind:newTags={newTags}/>
-						</div>
-
-						<textarea name="description" placeholder="Additional Description..." bind:value={description}
-								  class="min-h-60 rounded-lg h-full resize-y dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-200 focus:border-primary-500 focus:ring-0" />
-					</div>
+					<MetaInfoStep bind:estimate={estimate}
+								  	bind:copyright={copyright}
+					              	bind:LOs={LOs}
+					 				bind:PKs={PKs}
+									bind:maintainers={maintainers}
+									bind:loggedUser={loggedUser}
+									bind:searchableUsers={searchableUsers}
+									users={users}
+									allTags={allTags}
+									bind:tags={tags}
+									bind:newTags={newTags}
+									bind:description={description}/>
 				</Step>
 				<Step locked={isSubmitting}>
 					<svelte:fragment slot="header">Review</svelte:fragment>
