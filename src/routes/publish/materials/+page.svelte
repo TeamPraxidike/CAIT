@@ -2,7 +2,6 @@
 	import { fade } from 'svelte/transition';
 	import {
 		FileTable,
-		MaterialTypes,
 		Meta,
 		Tag,
 		UserProp
@@ -13,10 +12,6 @@
 	import type {  Difficulty, Tag as PrismaTag } from '@prisma/client';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
-	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
-	import SelectType from '$lib/components/publication/SelectType.svelte';
-	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
@@ -33,13 +28,8 @@
 	import { isMaterialDraft } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
-	import SelectCourse from '$lib/components/publication/SelectCourse.svelte';
 	import { changeCourse } from '$lib/util/coursesLogic';
-	import CourseModal from '$lib/components/publication/CourseModal.svelte';
-	import TimeEstimate from '$lib/components/publication/TimeEstimate.svelte';
 	import * as tus from 'tus-js-client'
-	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
-	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
 	import TitleStep from '$lib/components/publication/publish/TitleStep.svelte';
 	import MetaInfoStep from '$lib/components/publication/publish/MetaInfoStep.svelte';
 
