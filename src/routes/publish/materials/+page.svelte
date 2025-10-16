@@ -16,16 +16,8 @@
 	} from '$lib/util/indexDB';
 	import * as tus from 'tus-js-client';
 	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
-	import FullPublish from '$lib/components/publication/publish/FullPublish.svelte';
-
-	/**
-	 * Convert an array of File objects into a real FileList.
-	 */
-	export function arrayToFileList(files: File[]): FileList {
-		const dt = new DataTransfer();
-		files.forEach(file => dt.items.add(file));
-		return dt.files;
-	}
+	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
+	import { arrayToFileList } from '$lib/util/file.ts';
 
 	export let form: ActionData;
 	export let data: PageServerData;
@@ -306,6 +298,6 @@
 
 </script>
 
-<FullPublish bind:data={paramsMutable}
-			 paramsImmutable={paramsImmutable}
-			 bind:showAnimation={showAnimation} />
+<PublishWorkflow bind:data={paramsMutable}
+				 paramsImmutable={paramsImmutable}
+				 bind:showAnimation={showAnimation} />

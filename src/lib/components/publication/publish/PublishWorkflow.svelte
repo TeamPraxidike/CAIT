@@ -17,6 +17,8 @@
 	export let paramsImmutable: ParamsImmutable;
 	export let showAnimation: boolean;
 
+	export let edit = false;
+
 	export let saveInterval: number | undefined = undefined;
 	const toastStore = getToastStore();
 	$: if (showAnimation) {
@@ -120,7 +122,7 @@
 		 out:fade={{duration: 400}}>
 		<form method="POST"
 			  enctype="multipart/form-data"
-			  action="?/publish"
+			  action={edit ? "?/edit" : "?/publish"}
 			  use:enhance={({ formData }) => {
 					// apparently files are automatically appended to the form using the
 					// file key, so just remove it

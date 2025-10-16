@@ -7,17 +7,26 @@ import {
 } from '$lib/database';
 import type { Difficulty, Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
-import type { Course } from '$lib/database/courses';
+import type { Course, CourseWithCoverPic } from '$lib/database/courses';
 import { env } from '$env/dynamic/public';
+
+// export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
+// 	await parent();
+// 	const tagRes = await fetch('/api/tags');
+// 	const tags: Tag[] = await tagRes.json();
+// 	const usersRes = await fetch('/api/user');
+// 	const { users } = await usersRes.json();
+// 	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
+// 	return { tags, users, courses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
+// };
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
-	const tagRes = await fetch('/api/tags');
-	const tags: Tag[] = await tagRes.json();
-	const usersRes = await fetch('/api/user');
-	const { users } = await usersRes.json();
-	const courses: Course[] = await (await fetch(`/api/course/user/${locals.user?.id}`)).json();
-	return { tags, users, courses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
+	const tags: Tag[] = await (await fetch('/api/tags')).json();
+	const { users } = await (await fetch(`/api/user`)).json();
+	const courses: CourseWithCoverPic[] = await (await fetch(`/api/course-extended/user/${locals.user?.id}`)).json();
+	const allCourses: CourseWithCoverPic[] = await (await fetch(`/api/course-extended`)).json();
+	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
 export const actions = {
