@@ -1,6 +1,6 @@
 <script lang="ts">
     import {Grid, UserMenu} from '$lib';
-    import { LightSwitch, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+    import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
     import { page } from "$app/stores";
     import Icon from '@iconify/svelte';
     import { slide } from 'svelte/transition';
@@ -73,7 +73,7 @@
     const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 
     import { navigating } from '$app/stores'
-    import { onDestroy, onMount } from 'svelte';
+    import { onMount } from 'svelte';
 
     let progress = 0;
     let progressBarVisible = false;
@@ -165,8 +165,12 @@
                     </a>
                 {/if}
                 <div class="border-l border-surface-300 h-8"/>
-                <div>
-                    <LightSwitch />
+                <div class="">
+<!--                    <LightSwitch />-->
+					<a href="https://docs.google.com/forms/d/e/1FAIpQLSfB_sNXSN1K-pun8c_wJDsEvVWxl9XShATj04fVpAyXiJT-9A/viewform"
+					   class="hidden md:block btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-secondary-500 text-surface-50 hover:opacity-60 transition duration-400 ">
+						Request Feature
+					</a>
                 </div>
 
                 {#if loggedUser}
@@ -227,7 +231,11 @@
                         </a>
                     {/if}
                     <div class="xl:col-start-12">
-                        <LightSwitch />
+<!--                        <LightSwitch />-->
+						<a href="https://docs.google.com/forms/d/e/1FAIpQLSfB_sNXSN1K-pun8c_wJDsEvVWxl9XShATj04fVpAyXiJT-9A/viewform"
+						   class="btn rounded-lg md:py-1 lg:py-1.5 md:px-2 lg:px-3 bg-secondary-500 text-surface-50 hover:opacity-60 transition duration-400">
+							Request Feature
+						</a>
                     </div>
                 </div>
 
