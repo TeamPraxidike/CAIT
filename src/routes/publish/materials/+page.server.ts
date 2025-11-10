@@ -8,6 +8,7 @@ import type {
 	CourseWithCoverPic
 } from '$lib/database/courses';
 import { env } from '$env/dynamic/public';
+import { buildMaterialForm } from '$lib/util/frontendTypes.ts';
 
 
 
@@ -67,44 +68,14 @@ export const actions = {
 			return { status: 418, context: 'course-form'};
 		}
 
-		const fileList: string[] = data.getAll('file') as unknown as string[];
-		const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
-		if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
-		// const add = await filesToAddOperation(fileList, fileURLs);
+		const materialForm = await buildMaterialForm(data);
 
-		const add = fileList.concat(fileURLs).map((item: string) => {
-			return JSON.parse(item) as UploadMaterialFileFormat
-		});
-
-		const tagsDataEntry = data.get('tags');
-		if (!tagsDataEntry) return { status: 400, message: 'No tags provided', context: 'publication-form' };
-
-		const losDataEntry = data.get('learningObjectives');
-		const maintainersDataEntry = data.get('maintainers');
-		const coverPicFile = data.get('coverPic');
-		const isDraft = data.get('isDraft')?.toString() === 'true';
-		let coverPic = null;
-		const materialTypes = JSON.parse(data.get('type')?.toString() as string).map((type: string) => convertMaterial(type));
-		if (materialTypes.length === 0) {
-			materialTypes.push(MaterialType.other)
+		// if there was an error building the material form, return it directly
+		if (!materialForm || typeof materialForm !== 'object' || !('data' in materialForm)) {
+			return materialForm;
 		}
-
-		if (coverPicFile instanceof File) {
-			const buffer = await coverPicFile.arrayBuffer();
-			const info = Buffer.from(buffer).toString('base64'); //correct
-			coverPic = {
-				type: coverPicFile.type,
-				info,
-			};
-		}
-
-		const userId = data.get('userId')?.toString();
-		if (userId === undefined) throw new Error('User id is undefined');
-
-		const newTags = data.getAll('newTags') || '';
-		const newTagsJ = JSON.stringify(newTags);
-		const outerArray = JSON.parse(newTagsJ);
-		const newTagsArray: string[] = JSON.parse(outerArray[0]);
+		const material = materialForm.data;
+		const newTagsArray: string[] = materialForm.tags;
 
 		if (newTagsArray.length !== 0) {
 			const resTags = await fetch('/api/tags', {
@@ -119,36 +90,6 @@ export const actions = {
 			}
 		}
 
-		const material: MaterialForm = {
-			userId,
-			metaData: {
-				title: data.get('title')?.toString() || '',
-				description: data.get('description')?.toString() || '',
-				difficulty:
-					((
-						data.get('difficulty')?.toString() || ''
-					).toLowerCase() as Difficulty) || 'easy',
-				learningObjectives: JSON.parse(losDataEntry?.toString() || ''),
-				prerequisites: JSON.parse(
-					data.get('prerequisites')?.toString() || '',
-				),
-				copyright: data.get('copyright')?.toString() || '',
-				timeEstimate: Number(data.get('estimate')?.toString()),
-				theoryPractice: Number(data.get('theoryToApplication')),
-				tags: JSON.parse(tagsDataEntry.toString()),
-				maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
-				materialType: materialTypes,
-				isDraft: isDraft,
-				fileURLs: fileURLs || [],
-				course: Number(data.get('course')?.toString()),
-			},
-			coverPic,
-			fileDiff: {
-				add,
-				delete: [],
-				edit: [],
-			},
-		};
 		const res = await fetch('/api/material', {
 			method: 'POST',
 			body: JSON.stringify(material),
