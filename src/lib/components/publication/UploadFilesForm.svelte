@@ -55,7 +55,7 @@
 					bucketName: bucketName,
 					objectName: fileName,
 					contentType: contentType,
-					cacheControl: 3600,
+					cacheControl: "3600",
 				},
 				chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
 				onError: function (error) {

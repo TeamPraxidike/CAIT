@@ -63,11 +63,6 @@ export const actions = {
 		console.log('Publishing new material...');
 		const data = await request.formData();
 
-		// ignore if the context is not correct
-		if (data.get('context') === 'course-form') {
-			return { status: 418, context: 'course-form'};
-		}
-
 		const materialForm = await buildMaterialForm(data);
 
 		// if there was an error building the material form, return it directly

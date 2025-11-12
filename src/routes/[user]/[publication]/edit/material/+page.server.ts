@@ -5,10 +5,12 @@ import {
 	type FetchedFileItem,
 	type MaterialForm, type UploadMaterialFileFormat
 } from '$lib/database';
-import type { Difficulty, Tag } from '@prisma/client';
+import type { Difficulty, Material, Tag } from '@prisma/client';
 import { convertMaterial } from '$lib/util/types';
 import type { Course, CourseWithCoverPic } from '$lib/database/courses';
 import { env } from '$env/dynamic/public';
+import { log } from 'node:util';
+import { buildMaterialForm } from '$lib/util/frontendTypes.ts';
 
 // export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 // 	await parent();
@@ -35,30 +37,17 @@ export const actions = {
 
 		const userId = data.get('userId')?.toString() || '';
 		const mid = data.get('materialId')?.toString() || '';
-
-		const title = data.get('title')?.toString() || '';
-		const description = data.get('description')?.toString() || '';
-		const isMaterial = data.get('isMaterial')?.toString() || '';
-		const difficulty = data.get('difficulty')?.toString() || '';
-		const copyright = data.get('copyright')?.toString() || '';
-		const time = data.get('timeEstimate')?.toString() || '';
-		const theoryApp = data.get('theoryAppRatio')?.toString() || '';
-		const selectedTags = data.get('tags')?.toString() || '';
-		const isDraft = data.get('isDraft')?.toString()  === 'true';
-
-		//I need to get the separate strings here so I can create them as string[], but not sure how to do that
-		const newTags = data.getAll('newTags') || '';
-
-		const maintainers = data.get('maintainers')?.toString() || '';
-
-		const prior = data.get('PK')?.toString() || '';
-		const LOs = data.get('learning_objectives')?.toString() || '';
-
 		const publisherId = data.get('publisherId')?.toString() || '';
 
-		const newTagsS = JSON.stringify(newTags);
-		const outerArray = JSON.parse(newTagsS);
-		const newTagsArray: string[] = JSON.parse(outerArray[0]) || [];
+
+		const materialForm = await buildMaterialForm(data);
+
+		// if there was an error building the material form, return it directly
+		if (!materialForm || typeof materialForm !== 'object' || !('data' in materialForm)) {
+			return materialForm;
+		}
+		const material: MaterialForm & {materialId: number, publisherId: string} = {...materialForm.data, publisherId: publisherId, materialId: Number(mid)};
+		const newTagsArray: string[] = materialForm.tags;
 
 		if (newTagsArray.length !== 0) {
 			const resTags = await fetch('/api/tags', {
@@ -75,111 +64,51 @@ export const actions = {
 		if (userId === undefined) {
 			throw new Error('User Id was undefined');
 		}
-
 		/**
 		 * New file DATA (File list)
 		 */
-		const fileURLs = JSON.parse(data.get("fileURLs")?.toString() || '');
-		// const fileList: FileList = data.getAll(
-		// 	'file',
-		// ) as unknown as FileList;
-		const fileListUnformated: string[] = data.getAll('file') as unknown as string[];
-		const fileList: UploadMaterialFileFormat[] = fileListUnformated.map(item => {
-			return JSON.parse(item) as UploadMaterialFileFormat
-		})
+
+		// const fileList: string[] = data.getAll('file') as unknown as string[];
+		// const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
+		// if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
+
+		// const fileListUnformated: string[] = data.getAll('file') as unknown as string[];
+		// const fileList: UploadMaterialFileFormat[] = fileListUnformated.map(item => {
+		// 	return JSON.parse(item) as UploadMaterialFileFormat
+		// })
 
 		const oldFilesDataFormData = data.get('oldFilesData');
 		if (oldFilesDataFormData === null) {
 			return { status: 400, message: 'No old files provided' };
 		}
-
-		const oldFileData: FetchedFileArray = JSON.parse(
+		const oldFileData: string[] = JSON.parse(
 			oldFilesDataFormData.toString(),
 		);
 
-		// const fileArray: File[] =
-		// 	fileList.length === 0 ? [] : Array.from(fileList);
+		const currFiles = material.fileDiff.add ?? [];
+		const currFilesPaths = currFiles.map((x) => x.title);
+		const newFiles: typeof currFiles = [];
+		const deletedFiles: {path: string}[] = [];
 
-		const addInfo: { title: string; type: string; info: string }[] = [];
-
-		for (const file of fileList) {
-			// TODO: good edge case
-			//if (file.size === 0) continue;
-
-			// const arBuf = await file.arrayBuffer();
-			// const buffer = Buffer.from(arBuf);
-			// const base64String = buffer.toString('base64');
-
-			const index = oldFileData.findIndex(
-				(fData: FetchedFileItem) => fData.fileId === file.info,
-			);
-			if (index === -1) {
-				addInfo.push({
-					title: file.title,
-					type: file.type,
-					info: file.info,
-				});
-			} else {
-				oldFileData.splice(index, 1);
-			}
-		}
-
-		const deleteInfo = oldFileData.map((data: FetchedFileItem) => {
-			return {
-				path: data.fileId,
-			};
+		currFiles.forEach((file) => {
+			if (!oldFileData.some((f) => f === file.title)) newFiles.push(file);
 		});
-
-
-		const coverPicFile = data.get('coverPicMat');
-		let coverPic = null;
-
-		if (coverPicFile instanceof File) {
-			const buffer = await coverPicFile.arrayBuffer();
-			const info = Buffer.from(buffer).toString('base64'); //correct
-			coverPic = {
-				type: coverPicFile.type,
-				info,
-			};
-		}
-
-		const material: MaterialForm & {
-			materialId: number,
-			publisherId: string
-		} = {
-			materialId: Number(mid),
-			publisherId: publisherId,
-			userId: userId,
-			metaData: {
-				title: title,
-				description: description,
-				difficulty:
-					(difficulty.toLowerCase() as Difficulty) || 'easy',
-				learningObjectives: JSON.parse(LOs),
-				prerequisites: JSON.parse(prior),
-				copyright: data.get('copyright')?.toString() || '',
-				timeEstimate: Number(time),
-				theoryPractice: Number(theoryApp),
-				tags: JSON.parse(selectedTags),
-				maintainers: JSON.parse(maintainers),
-				materialType: (data.getAll('type') as string[]).map((type) => convertMaterial(type)),
-				isDraft: isDraft,
-				fileURLs: fileURLs || [],
-				course: Number(data.get('course')?.toString())
-			},
-			coverPic,
-			fileDiff: {
-				add: addInfo,
-				edit: [],
-				delete: deleteInfo,
-			},
-		};
+		oldFileData.forEach((file) => {
+			if (!currFilesPaths.includes(file)) {
+				deletedFiles.push({ path: file });
+			}
+		});
+		material.fileDiff.add = newFiles;
+		material.fileDiff.delete = deletedFiles; // TODO fix this
 
 		const res = await fetch('/api/material/' + params.publication, {
 			method: 'PUT',
 			body: JSON.stringify(material),
 		});
 
-		return { status: res.status };
+		return {
+			status: res.status,
+			context: 'publication-form'
+		};
 	},
 } satisfies Actions;

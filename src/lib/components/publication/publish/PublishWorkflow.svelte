@@ -17,7 +17,12 @@
 	export let paramsImmutable: ParamsImmutable;
 	export let showAnimation: boolean;
 
+	export let materialId: number | undefined = undefined;
 	export let edit = false;
+
+	// Editing mode needs to know what the original files were, so that it can delete only the ones that were removed
+	// Here we pass the path of the file
+	export let originalFiles: any[] = [];
 
 	export let saveInterval: number | undefined = undefined;
 	const toastStore = getToastStore();
@@ -168,6 +173,10 @@
 					formData.append('newTags', JSON.stringify(data.newTags));
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
 					formData.append('course', data.course ? data.course.toString() : 'null');
+					if (edit) {
+						formData.append('oldFilesData', JSON.stringify(originalFiles));
+						formData.append('materialId', materialId?.toString() || '');
+					}
 			  }}>
 			<PublishStepper
 				bind:data={data}

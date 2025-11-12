@@ -55,6 +55,11 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	message: string;
 	context: string
 }> {
+	// ignore if the context is not correct
+	if (data.get('context') === 'course-form') {
+		return { status: 418, context: 'course-form', message: 'Wrong context' };
+	}
+
 	const fileList: string[] = data.getAll('file') as unknown as string[];
 	const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
 	if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
