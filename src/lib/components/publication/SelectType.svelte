@@ -2,6 +2,13 @@
 	export let types: string[] = ["Video", "Lecture Notes", "Slides", "Assignment", "Exam", "Other"];
 	export let selectedTypes: string[] = [];
 
+	// These types are stored with lowercase first letters in the database and here we need them to be capitalized for display
+	// This is a really ugly solution, we just capitalize the first letter of each word in selectedTypes when we receive it
+	// Feel free to improve it
+	for (let i = 0; i < selectedTypes.length; i++) {
+		selectedTypes[i] = selectedTypes[i].toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
+	}
+
 	function selectType(type: string) {
 		if (selectedTypes.indexOf(type) > -1) {
 			selectedTypes = [] // remove this if you want to allow multiple selections
@@ -11,6 +18,8 @@
 			selectedTypes = [...selectedTypes, type];
 		}
 	}
+
+	console.log("Selected types:", selectedTypes);
 </script>
 
 <div class="grid grid-cols-1">

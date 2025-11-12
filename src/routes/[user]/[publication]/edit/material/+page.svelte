@@ -59,7 +59,7 @@
 	let course: number | null = data.pubView.publication.course?.id || null;
 	let estimate: number = data.pubView.publication.materials.timeEstimate || 0;
 	let copyright: string = data.pubView.publication.materials.copyright;
-	let selectedTypes: string[] = [];
+	let selectedTypes: string[] = [data.pubView.publication.materials.encapsulatingType];
 
 	// TODO: do I absolutely need these for reactivity?
 	// also, this whole system could be redesigned with event emitters
