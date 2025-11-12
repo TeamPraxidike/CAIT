@@ -1,14 +1,15 @@
 import type { Actions, PageServerLoad } from './$types';
 
-import { type MaterialForm, type UploadMaterialFileFormat } from '$lib/database';
-import { type Difficulty, MaterialType, type Tag } from '@prisma/client';
-import { convertMaterial } from '$lib/util/types';
-import { redirect } from '@sveltejs/kit';
+import { type Tag } from '@prisma/client';
 import type {
 	CourseWithCoverPic
 } from '$lib/database/courses';
 import { env } from '$env/dynamic/public';
 import { buildMaterialForm } from '$lib/util/frontendTypes.ts';
+import {
+	editCourseAction,
+	publishCourseAction,
+} from '$lib/server/courseActions.ts';
 
 
 
@@ -20,38 +21,6 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	const allCourses: CourseWithCoverPic[] = await (await fetch(`/api/course-extended`)).json();
 	return { tags, users, courses, allCourses, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
-
-async function extractCourseData(formData: FormData, locals: App.Locals) {
-	const title = formData.get('title');
-	const level = formData.get('level');
-	const learningObjectives = JSON.parse(formData.get('learningObjectives') as string);
-	const prerequisites = JSON.parse(formData.get('prerequisites') as string);
-	const maintainers = JSON.parse(formData.get('maintainers') as string);
-	const copyright = formData.get('copyright') as string;
-
-	const coverPicFile = formData.get('coverPic');
-	let coverPic = null;
-
-	if (coverPicFile instanceof File) {
-		const buffer = await coverPicFile.arrayBuffer();
-		const info = Buffer.from(buffer).toString('base64');
-		coverPic = {
-			type: coverPicFile.type,
-			info,
-		};
-	}
-
-	return {
-		learningObjectives: learningObjectives,
-		prerequisites: prerequisites,
-		educationalLevel: level,
-		courseName: title,
-		creatorId: locals.session?.user.id,
-		copyright: copyright,
-		maintainers: maintainers,
-		coverPic: coverPic,
-	};
-}
 
 export const actions = {
 	/**
@@ -91,43 +60,6 @@ export const actions = {
 		});
 		return { status: res.status, id: (await res.json()).id , context: 'publication-form'};
 	},
-	publishCourse: async ({request, fetch, locals}) => {
-		const session = await locals.safeGetSession();
-		if (!session || !session.user) throw redirect(303, '/signin');
-
-		try {
-			const formData = await request.formData();
-			const courseData = await extractCourseData(formData, locals);
-
-			const res = await fetch(`/api/course`, {
-				method: 'POST',
-				body: JSON.stringify(courseData),
-			});
-
-			const newCourse = await res.json();
-			return { status: res.status, id: newCourse.id, context: 'course-form', course: newCourse};
-		} catch (error) {
-			console.error("Error creating course ", error);
-		}
-	},
-	editCourse: async ({ request, fetch, locals }) => {
-		const session = await locals.safeGetSession();
-		if (!session || !session.user) throw redirect(303, '/signin');
-
-		try {
-			const formData = await request.formData();
-			const courseData = await extractCourseData(formData, locals);
-
-			const res = await fetch(`/api/course/${formData.get('id')}` , {
-				method: 'PUT',
-				body: JSON.stringify(courseData),
-			});
-
-			const updatedCourse = await res.json();
-			return { status: res.status, id: updatedCourse.id, context: 'course-form', course: updatedCourse };
-		} catch (error) {
-			console.error('Error updating course ', error);
-			return { status: 500, context: 'course-form' };
-		}
-	},
+	publishCourse: publishCourseAction,
+	editCourse: editCourseAction,
 } satisfies Actions;

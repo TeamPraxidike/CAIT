@@ -1,16 +1,15 @@
 import type { Actions, PageServerLoad } from './$types';
 import {
-	type CircuitForm,
-	type FetchedFileArray,
-	type FetchedFileItem,
-	type MaterialForm, type UploadMaterialFileFormat
+	type MaterialForm
 } from '$lib/database';
-import type { Difficulty, Material, Tag } from '@prisma/client';
-import { convertMaterial } from '$lib/util/types';
-import type { Course, CourseWithCoverPic } from '$lib/database/courses';
+import type { Tag } from '@prisma/client';
+import type { CourseWithCoverPic } from '$lib/database/courses';
 import { env } from '$env/dynamic/public';
-import { log } from 'node:util';
 import { buildMaterialForm } from '$lib/util/frontendTypes.ts';
+import {
+	editCourseAction,
+	publishCourseAction,
+} from '$lib/server/courseActions.ts';
 
 // export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 // 	await parent();
@@ -64,18 +63,7 @@ export const actions = {
 		if (userId === undefined) {
 			throw new Error('User Id was undefined');
 		}
-		/**
-		 * New file DATA (File list)
-		 */
 
-		// const fileList: string[] = data.getAll('file') as unknown as string[];
-		// const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
-		// if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
-
-		// const fileListUnformated: string[] = data.getAll('file') as unknown as string[];
-		// const fileList: UploadMaterialFileFormat[] = fileListUnformated.map(item => {
-		// 	return JSON.parse(item) as UploadMaterialFileFormat
-		// })
 
 		const oldFilesDataFormData = data.get('oldFilesData');
 		if (oldFilesDataFormData === null) {
@@ -111,4 +99,6 @@ export const actions = {
 			context: 'publication-form'
 		};
 	},
+	publishCourse: publishCourseAction,
+	editCourse: editCourseAction
 } satisfies Actions;
