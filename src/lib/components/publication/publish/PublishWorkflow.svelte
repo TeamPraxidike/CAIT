@@ -172,6 +172,8 @@
 					formData.append('coverPic', data.coverPic || '');
 					formData.append('newTags', JSON.stringify(data.newTags));
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
+					console.log("markedAsDraft", markedAsDraft);
+					console.log("draft", draft);
 					formData.append('course', data.course ? data.course.toString() : 'null');
 					if (edit) {
 						formData.append('oldFilesData', JSON.stringify(originalFiles));
@@ -181,10 +183,9 @@
 			<PublishStepper
 				bind:data={data}
 				paramsImmutable={paramsImmutable}
-				draft={draft}
-				markedAsDraft={markedAsDraft}
+				bind:draft={draft}
+				bind:markedAsDraft={markedAsDraft}
 			/>
-
 		</form>
 
 		<!-- Loading Radial -->

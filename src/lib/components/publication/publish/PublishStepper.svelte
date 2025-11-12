@@ -81,8 +81,8 @@
 		<Preview
 			bind:data={data}
 			paramsImmutable={paramsImmutable}
-			draft={draft}
-			markedAsDraft={markedAsDraft}
+			bind:draft={draft}
+			bind:markedAsDraft={markedAsDraft}
 		/>
 
 	</Step>
