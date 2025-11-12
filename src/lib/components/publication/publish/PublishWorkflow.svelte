@@ -202,7 +202,8 @@
 	<PublishConfirmation
 		bind:showDraftMessage={showDraftMessage}
 		username={data.loggedUser.username}
-		formId={paramsImmutable.form?.id}
+		formId={paramsImmutable.form?.id || materialId}
+		edit={edit}
 	/>
 {/if}
 

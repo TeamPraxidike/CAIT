@@ -6,9 +6,7 @@
 	} from '@prisma/client';
 	import {
 		arrayToFileList,
-		base64ToFile,
 		concatFileList,
-		createFileList,
 		downloadFileFromSupabase
 	} from '$lib/util/file';
 	import { page } from '$app/state';

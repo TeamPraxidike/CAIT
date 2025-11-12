@@ -5,6 +5,7 @@
 	export let showDraftMessage: boolean = false;
 	export let username: string;
 	export let formId: string;
+	export let edit = false;
 </script>
 
 <div class="fade-overlay col-span-full pt-20"
@@ -12,7 +13,13 @@
 	<div class="logo-container">
 		<img src="/images/about/CAIT_Logo_nobg.png" alt="Success" class="logo">
 	</div>
-	<div class="success-text">Publication uploaded successfully</div>
+	<div class="success-text">
+		{#if edit}
+			Publication updated successfully
+		{:else}
+			Publication uploaded successfully
+		{/if}
+	</div>
 	<div class="success-subtext">
 		{#if showDraftMessage}
 			Your publication has been saved as a draft - only you can see it
