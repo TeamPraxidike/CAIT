@@ -174,8 +174,6 @@ export async function enqueueCircuitComparison(publicationId: number): Promise<v
         const circuits = await getAllCircuits([], [], 0, '', '', true);
         const currentCircuit = await getCircuitByPublicationId(publicationId)
 
-        console.log(currentCircuit)
-
         const comparisons: {fromPubId: number, toPubId: number,
             similarityNode: Promise<number>, similarityMeta: Promise<ResultMeta>}[] = [];
 

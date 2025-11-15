@@ -19,7 +19,6 @@
 		}
 	}
 
-	console.log("Selected types:", selectedTypes);
 </script>
 
 <div class="grid grid-cols-1">

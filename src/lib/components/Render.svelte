@@ -69,8 +69,6 @@
 	}
 
 	async function getSupabaseFile(file: FetchedFileItem){
-		console.log(file);
-
 		const { data, error } = await supabaseClient
 			.storage
 			.from("uploadedFiles")

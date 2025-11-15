@@ -17,6 +17,7 @@
 	import { type UserWithProfilePic } from '$lib/util/coursesLogic';
 	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
 	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
+	import type {FetchedFileArray} from "$lib/database";
 
 
 	export let form: ActionData;
@@ -71,31 +72,29 @@
 	let fileTUSUploadObjects: { [key: string]: any } = {};
 	$: fileTUSUploadObjects = fileTUSUploadObjects
 
-
-	let filesReady = false;
 	onMount(() => {
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
 		(async () => {
-			const fetched = await data.fetchedFiles;
+			const fetched: FetchedFileArray = await data.fetchedFiles;
 			const downloaded = fetched
 				? await Promise.all(fetched.map((f) => downloadFileFromSupabase(supabaseClient, f)))
 				: [];
 			const fileArray: File[] = downloaded.filter((f): f is File => f instanceof File);
 			files = arrayToFileList(fileArray);
 
-			// I dont like that, but the check for upload completion depends on this metadata
-			// I add it here and I say that all files are already uploaded, but I dont know how to access the generatedName so I just put the normal one there
-			// Hopefully this wont cause issues
-			for (const f of files){
+
+			for (const f of fetched){
 				fileTUSMetadata[f.name] = {
 					originalName: f.name,
 					isDone: true,
-					generatedName: f.name
+					generatedName: f.fileId
 				}
 			}
-			filesReady = true;
-			originalFiles = Array.from(files).map(f => f.name);
+			originalFiles = Array.from(fetched).map(f => f.fileId);
+
+			paramsMutable.files = files;
+			paramsMutable.fileTUSMetadata = fileTUSMetadata;
 		})();
 
 		return () => {
@@ -143,30 +142,6 @@
 		uid,
 		form,
 		allTags
-	}
-
-	let initializedFromFetch = false;
-
-	// We need the initializedfromFetch variable because otherwise the statement runs every time files.length changes,
-	// overwriting any files added (or removed) by the user after the initial fetch
-	$: if (!initializedFromFetch && filesReady && files.length > 0) {
-		paramsMutable.files = files;
-
-		// ensure missing metadata just for the initially fetched files
-		for (const f of Array.from(paramsMutable.files)) {
-			if (!fileTUSMetadata[f.name]) {
-				fileTUSMetadata[f.name] = {
-					originalName: f.name,
-					isDone: true,
-					generatedName: f.name
-				};
-			}
-		}
-		paramsMutable.fileTUSMetadata = fileTUSMetadata;
-
-		paramsMutable = { ...paramsMutable };
-
-		initializedFromFetch = true;
 	}
 
 	export function changeFilezone(e: Event) {

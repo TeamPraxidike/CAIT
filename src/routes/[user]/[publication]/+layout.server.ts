@@ -65,7 +65,6 @@ export const load: LayoutServerLoad = async ({
 		}
 	}
 
-	console.log(pubView);
 	return {
 		userSpecificInfo,
 		pubView,

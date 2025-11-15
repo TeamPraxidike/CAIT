@@ -74,12 +74,12 @@ export const actions = {
 		);
 
 		const currFiles = material.fileDiff.add ?? [];
-		const currFilesPaths = currFiles.map((x) => x.title);
+		const currFilesPaths = currFiles.map((x) => x.info);
 		const newFiles: typeof currFiles = [];
 		const deletedFiles: {path: string}[] = [];
 
 		currFiles.forEach((file) => {
-			if (!oldFileData.some((f) => f === file.title)) newFiles.push(file);
+			if (!oldFileData.some((f) => f === file.info)) newFiles.push(file);
 		});
 		oldFileData.forEach((file) => {
 			if (!currFilesPaths.includes(file)) {
@@ -87,7 +87,7 @@ export const actions = {
 			}
 		});
 		material.fileDiff.add = newFiles;
-		material.fileDiff.delete = deletedFiles; // TODO fix this
+		material.fileDiff.delete = deletedFiles;
 
 		const res = await fetch('/api/material/' + params.publication, {
 			method: 'PUT',
@@ -96,6 +96,7 @@ export const actions = {
 
 		return {
 			status: res.status,
+			id: (await res.json()).id,
 			context: 'publication-form'
 		};
 	},

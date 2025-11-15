@@ -188,7 +188,7 @@ export async function PUT({ request, params, locals }) {
 				}
 			)}, 2000);
 
-		return new Response(JSON.stringify({ id: materialId }), { status: 200 });
+		return new Response(JSON.stringify({ id: publicationId }), { status: 200 });
 	} catch (error) {
 		console.error(error);
 		if (

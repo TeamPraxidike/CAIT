@@ -29,7 +29,6 @@ export const actions = {
 	 * @param fetch the fetch function to send requests to the server, *provided by SvelteKit*
 	 */
 	publish: async ({ request, fetch }) => {
-		console.log('Publishing new material...');
 		const data = await request.formData();
 
 		const materialForm = await buildMaterialForm(data);
