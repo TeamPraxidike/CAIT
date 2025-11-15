@@ -161,16 +161,6 @@
 		showAnimation = false;
 	};
 
-	onMount(() => {
-		(async () => {
-			window.addEventListener('beforeunload', handleBeforeUnload);
-
-			return () => {
-				window.removeEventListener('beforeunload', handleBeforeUnload);
-			};
-		})();
-	});
-
 	onDestroy(() => {
 		showAnimation = false;
 	});
