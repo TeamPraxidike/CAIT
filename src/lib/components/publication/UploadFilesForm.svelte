@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import { FileDropzone } from '@skeletonlabs/skeleton';
+	import {FileDropzone, ProgressRadial} from '@skeletonlabs/skeleton';
 	import { FileTable } from '$lib';
 	import { concatFileList } from '$lib/util/file';
 	import {
@@ -21,6 +21,8 @@
 	// TODO: either find a different solution or redo UploadFilesForm + FileTable
 	export let isEditContext: boolean = false;
 	export let fetchedFiles: FetchedFileArray | [] = [];
+
+	export let loadingFiles: boolean = false;
 
 	export let supabaseURL: string = 'http://localhost:8000';
 	const bucketName = "uploadedFiles"
@@ -215,9 +217,16 @@
 			</div>
 		</div>
 	</div>
-	<FileTable operation="edit" fileFormat="upload"
+	{#if loadingFiles}
+		<div class="flex flex-row gap-2">
+			<p>Loading files</p>
+			<ProgressRadial font={8} width="w-8" class="shrink-0" />
+		</div>
+	{:else}
+		<FileTable operation="edit" fileFormat="upload"
 			   isEditContext={isEditContext} fetchedFiles={fetchedFiles}
 			   bind:files={files} bind:fileURLs={fileURLs}
 			   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
 			   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>
+	{/if}
 </div>

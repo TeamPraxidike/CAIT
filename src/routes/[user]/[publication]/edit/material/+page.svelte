@@ -72,10 +72,15 @@
 	let fileTUSUploadObjects: { [key: string]: any } = {};
 	$: fileTUSUploadObjects = fileTUSUploadObjects
 
+	let loadingFiles: boolean;
+
+
+	// TODO: possibly move the file loading to a function which returns a promise
 	onMount(() => {
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
 		(async () => {
+			loadingFiles = true;
 			const fetched: FetchedFileArray = await data.fetchedFiles;
 			const downloaded = fetched
 				? await Promise.all(fetched.map((f) => downloadFileFromSupabase(supabaseClient, f)))
@@ -93,8 +98,13 @@
 			}
 			originalFiles = Array.from(fetched).map(f => f.fileId);
 
-			paramsMutable.files = files;
-			paramsMutable.fileTUSMetadata = fileTUSMetadata;
+			loadingFiles = false;
+
+			paramsMutable = {
+				...paramsMutable,
+				files: files,
+				fileTUSMetadata: fileTUSMetadata
+			};
 		})();
 
 		return () => {
@@ -170,5 +180,6 @@
 				 paramsImmutable={paramsImmutable}
 				 bind:showAnimation={showAnimation}
 				 edit={true}
+				 bind:loadingFiles={loadingFiles}
 				 originalFiles={originalFiles}
 				 materialId={materialId}/>

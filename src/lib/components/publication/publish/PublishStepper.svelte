@@ -14,6 +14,7 @@
 	export let draft: boolean;
 	export let markedAsDraft: boolean;
 	export let edit: boolean;
+	export let loadingFiles: boolean;
 
 
 	const onNextHandler = () => {
@@ -60,6 +61,7 @@
 		<UploadFilesForm
 			supabaseURL={paramsImmutable.supabaseURL}
 			isEditContext={edit}
+			bind:loadingFiles={loadingFiles}
 			bind:supabaseClient={paramsImmutable.supabaseClient}
 			bind:fileTUSMetadata={data.fileTUSMetadata}
 			bind:fileTUSProgress={data.fileTUSProgress}

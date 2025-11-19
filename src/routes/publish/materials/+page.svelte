@@ -73,7 +73,8 @@
 	$: uid = page.data.session?.user.id;
 	let showCourseProgressRadial = false;
 
-	let paramsMutable: ParamsMutable = {
+	let paramsMutable: ParamsMutable;
+	paramsMutable = {
 		isSubmitting,
 		fileTUSMetadata,
 		fileTUSProgress,
@@ -98,6 +99,7 @@
 		newTags,
 		description
 	}
+
 
 	let paramsImmutable: ParamsImmutable;
 	$: paramsImmutable = {
@@ -231,12 +233,18 @@
 			if (storedCover) {
 				coverPic = storedCover; // single file
 			}
+			else {
+				console.log('No cover snapshot');
+			}
 
 			// get multiple files (returns array<File>)
 			const storedFiles = await getFiles();
 			if (storedFiles.length > 0) {
 				// Rebuild a FileList from that array
 				files = arrayToFileList(storedFiles);
+			}
+			else {
+				console.log('No files snapshot');
 			}
 
 			// get file TUS metadata
@@ -255,23 +263,49 @@
 				}
 			}
 
+			paramsMutable = {
+				isSubmitting,
+				fileTUSMetadata,
+				fileTUSProgress,
+				fileTUSUploadObjects,
+				fileURLs,
+				files,
+				title,
+				showCourseProgressRadial,
+				selectedTypes,
+				originalCourseIds,
+				courses,
+				course,
+				coverPic,
+				loggedUser,
+				searchableUsers,
+				estimate,
+				copyright,
+				LOs,
+				PKs,
+				maintainers,
+				tags,
+				newTags,
+				description
+			};
+
 			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {
 				const data: FormSnapshot = {
-					title,
-					description,
-					tags,
-					newTags,
-					LOs,
-					PKs,
-					selectedType,
-					difficulty,
-					maintainers,
-					searchableUsers,
-					estimate,
-					copyright,
-					fileURLs,
-					theoryApplicationRatio,
+					title: paramsMutable.title,
+					description: paramsMutable.description,
+					tags: paramsMutable.tags,
+					newTags: paramsMutable.newTags,
+					LOs: paramsMutable.LOs,
+					PKs: paramsMutable.PKs,
+					selectedType: paramsMutable.selectedTypes,
+					difficulty: paramsMutable.selectedTypes,
+					maintainers: paramsMutable.maintainers,
+					searchableUsers: paramsMutable.searchableUsers,
+					estimate: paramsMutable.estimate,
+					copyright: paramsMutable.copyright,
+					fileURLs: paramsMutable.fileURLs,
+					theoryApplicationRatio: theoryApplicationRatio,
 					lastOpened: Date.now()
 				};
 
@@ -299,5 +333,6 @@
 </script>
 
 <PublishWorkflow bind:data={paramsMutable}
+				 edit={false}
 				 paramsImmutable={paramsImmutable}
 				 bind:showAnimation={showAnimation} />
