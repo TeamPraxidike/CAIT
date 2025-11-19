@@ -19,7 +19,7 @@
 
 	// these are purely for the editing page
 	// TODO: either find a different solution or redo UploadFilesForm + FileTable
-	export let integrateWithIndexDB: boolean = true;
+	export let isEditContext: boolean = false;
 	export let fetchedFiles: FetchedFileArray | [] = [];
 
 	export let supabaseURL: string = 'http://localhost:8000';
@@ -76,7 +76,7 @@
 					fileTUSMetadata[file.name]['isDone'] = true;
 					fileTUSMetadata = {...fileTUSMetadata};
 
-					if (integrateWithIndexDB){
+					if (!isEditContext){
 						// update indexedDB
 						await saveFileTUSMetadata(fileTUSMetadata[file.name]);
 					}
@@ -120,7 +120,7 @@
 			files = concatFileList(files, filesToUse);
 
 			// convert final FileList to an array and store in IndexedDB
-			if (integrateWithIndexDB){
+			if (!isEditContext){
 				await saveFiles(Array.from(files));
 			}
 
@@ -142,7 +142,7 @@
 					}
 
 					try{
-						if (integrateWithIndexDB){
+						if (!isEditContext){
 							// save metadata to indexedDB
 							await saveFileTUSMetadata(currentTUSMetadata)
 						}
@@ -156,7 +156,7 @@
 							supabaseClient, supabaseURL);
 					}
 					catch (e) {
-						if (integrateWithIndexDB){
+						if (!isEditContext){
 							await deleteFileTUSMetadata(pathFileNameGenerated);
 						}
 						if (fileTUSMetadata[currentTUSMetadata.originalName]){
@@ -216,7 +216,7 @@
 		</div>
 	</div>
 	<FileTable operation="edit" fileFormat="upload"
-			   integrateWithIndexDB={integrateWithIndexDB} fetchedFiles={fetchedFiles}
+			   isEditContext={isEditContext} fetchedFiles={fetchedFiles}
 			   bind:files={files} bind:fileURLs={fileURLs}
 			   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
 			   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>

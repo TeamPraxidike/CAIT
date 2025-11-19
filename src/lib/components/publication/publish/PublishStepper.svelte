@@ -13,6 +13,7 @@
 
 	export let draft: boolean;
 	export let markedAsDraft: boolean;
+	export let edit: boolean;
 
 
 	const onNextHandler = () => {
@@ -58,6 +59,7 @@
 		<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
 		<UploadFilesForm
 			supabaseURL={paramsImmutable.supabaseURL}
+			isEditContext={edit}
 			bind:supabaseClient={paramsImmutable.supabaseClient}
 			bind:fileTUSMetadata={data.fileTUSMetadata}
 			bind:fileTUSProgress={data.fileTUSProgress}

@@ -73,21 +73,26 @@ export const actions = {
 			oldFilesDataFormData.toString(),
 		);
 
-		const currFiles = material.fileDiff.add ?? [];
-		const currFilesPaths = currFiles.map((x) => x.info);
-		const newFiles: typeof currFiles = [];
-		const deletedFiles: {path: string}[] = [];
+		try{
+			const currFiles = material.fileDiff.add ?? [];
+			const currFilesPaths = currFiles.map((x) => x.info);
+			const newFiles: typeof currFiles = [];
+			const deletedFiles: {path: string}[] = [];
 
-		currFiles.forEach((file) => {
-			if (!oldFileData.some((f) => f === file.info)) newFiles.push(file);
-		});
-		oldFileData.forEach((file) => {
-			if (!currFilesPaths.includes(file)) {
-				deletedFiles.push({ path: file });
-			}
-		});
-		material.fileDiff.add = newFiles;
-		material.fileDiff.delete = deletedFiles;
+			currFiles.forEach((file) => {
+				if (!oldFileData.some((f) => f === file.info)) newFiles.push(file);
+			});
+			oldFileData.forEach((file) => {
+				if (!currFilesPaths.includes(file)) {
+					deletedFiles.push({ path: file });
+				}
+			});
+			material.fileDiff.add = newFiles;
+			material.fileDiff.delete = deletedFiles;
+		} catch (error){
+			console.log("filediff algorithm error");
+			return { status: 400, message: 'Error while updating files' };
+		}
 
 		const res = await fetch('/api/material/' + params.publication, {
 			method: 'PUT',

@@ -37,18 +37,25 @@
 	// otherwise, for example, any Course related form events get mistaken for
 	// events from the main form
 	$: if (paramsImmutable.form?.status === 200 && paramsImmutable.form?.context === 'publication-form') {
-		console.log('Form submission successful:');
-		if (saveInterval) {
-			window.clearInterval(saveInterval);
+		if (edit){
+			showAnimation = true;
 		}
 
-		Promise.all([
-			clearAllData()
-		]).then(async () => {
-			showAnimation = true;
-		}).catch(error => {
-			console.error('Error clearing data:', error);
-		});
+		// indexDB is active only during upload
+		else {
+			if (saveInterval) {
+				window.clearInterval(saveInterval);
+			}
+
+			Promise.all([
+				clearAllData()
+			]).then(async () => {
+				showAnimation = true;
+			}).catch(error => {
+				console.error('Error clearing data:', error);
+			});
+		}
+
 	} else if (paramsImmutable.form?.status === 400 && paramsImmutable.form?.context === 'publication-form') {
 		console.log('Form submission failed with status 400:');
 		if (!allUploadsDone(data.fileTUSMetadata, data.files)){
@@ -180,6 +187,7 @@
 			<PublishStepper
 				bind:data={data}
 				paramsImmutable={paramsImmutable}
+				edit={edit}
 				bind:draft={draft}
 				bind:markedAsDraft={markedAsDraft}
 			/>
