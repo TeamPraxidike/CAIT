@@ -19,7 +19,6 @@
 
 	export let materialId: number | undefined = undefined;
 	export let edit: boolean = false;
-	export let loadingFiles: boolean = false;
 
 	// Editing mode needs to know what the original files were, so that it can delete only the ones that were removed
 	// Here we pass the path of the file
@@ -189,7 +188,6 @@
 				bind:data={data}
 				paramsImmutable={paramsImmutable}
 				edit={edit}
-				bind:loadingFiles={loadingFiles}
 				bind:draft={draft}
 				bind:markedAsDraft={markedAsDraft}
 			/>

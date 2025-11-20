@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { LayoutServerData } from '../../$types';
 	import type { ActionData, PageServerData } from './$types';
+	import { fade } from 'svelte/transition';
 	import {
 		type Tag as PrismaTag
 	} from '@prisma/client';
@@ -18,6 +19,7 @@
 	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
 	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
 	import type {FetchedFileArray} from "$lib/database";
+	import {ProgressRadial} from "@skeletonlabs/skeleton";
 
 
 	export let form: ActionData;
@@ -40,7 +42,7 @@
 	let allTags: PrismaTag[] = data.tags;
 	let newTags: string[] = [];
 
-	let files: FileList = [] as unknown as FileList;
+	let files: FileList | Promise<FileList> = new Promise(() => {});
 	let fileURLs: string[] = data.pubView.publication.materials.fileURLs.map(x => x.url);
 	let maintainers: UserWithProfilePic[] = data.pubView.publication.maintainers;
 	let courses = data.courses;
@@ -62,6 +64,8 @@
 	let copyright: string = data.pubView.publication.materials.copyright;
 	let selectedTypes: string[] = [data.pubView.publication.materials.encapsulatingType];
 
+	let loadingFiles: boolean = false;
+
 	// TODO: do I absolutely need these for reactivity?
 	// also, this whole system could be redesigned with event emitters
 	// rather than binding values
@@ -72,8 +76,17 @@
 	let fileTUSUploadObjects: { [key: string]: any } = {};
 	$: fileTUSUploadObjects = fileTUSUploadObjects
 
-	let loadingFiles: boolean;
-
+	async function loadFiles(filesToLoad): Promise<FileList>{
+		const fetched: FetchedFileArray = await filesToLoad;
+		const downloaded = fetched
+				? await Promise.all(fetched.map((f) => downloadFileFromSupabase(supabaseClient, f)))
+				: [];
+		const fileArray: File[] = downloaded.filter((f): f is File => f instanceof File);
+		return {
+			fileList: arrayToFileList(fileArray),
+			fetched: fetched
+		};
+	}
 
 	// TODO: possibly move the file loading to a function which returns a promise
 	onMount(() => {
@@ -81,30 +94,27 @@
 
 		(async () => {
 			loadingFiles = true;
-			const fetched: FetchedFileArray = await data.fetchedFiles;
-			const downloaded = fetched
-				? await Promise.all(fetched.map((f) => downloadFileFromSupabase(supabaseClient, f)))
-				: [];
-			const fileArray: File[] = downloaded.filter((f): f is File => f instanceof File);
-			files = arrayToFileList(fileArray);
 
-
-			for (const f of fetched){
-				fileTUSMetadata[f.name] = {
-					originalName: f.name,
-					isDone: true,
-					generatedName: f.fileId
+			files = loadFiles(data.fetchedFiles).then((resolved) => {
+				for (const f of resolved.fetched){
+					fileTUSMetadata[f.name] = {
+						originalName: f.name,
+						isDone: true,
+						generatedName: f.fileId
+					}
 				}
-			}
-			originalFiles = Array.from(fetched).map(f => f.fileId);
+				originalFiles = Array.from(resolved.fetched).map(f => f.fileId);
 
-			loadingFiles = false;
+				paramsMutable = {
+					...paramsMutable,
+					files: resolved.fileList,
+					fileTUSMetadata: fileTUSMetadata
+				};
 
-			paramsMutable = {
-				...paramsMutable,
-				files: files,
-				fileTUSMetadata: fileTUSMetadata
-			};
+				return resolved.fileList;
+			}).finally(() => {
+				loadingFiles = false;
+			});
 		})();
 
 		return () => {
@@ -176,10 +186,21 @@
 	});
 </script>
 
-<PublishWorkflow bind:data={paramsMutable}
-				 paramsImmutable={paramsImmutable}
-				 bind:showAnimation={showAnimation}
-				 edit={true}
-				 bind:loadingFiles={loadingFiles}
-				 originalFiles={originalFiles}
-				 materialId={materialId}/>
+{#if loadingFiles}
+	<div in:fade={{ duration: 100, delay: 200 }} class="flex flex-row items-center justify-center gap-2 col-span-full pt-20">
+		<p>Loading content</p>
+		<ProgressRadial font={8} width="w-8" class="shrink-0" />
+	</div>
+{/if}
+
+{#await files then _}
+	<PublishWorkflow
+		bind:data={paramsMutable}
+		paramsImmutable={paramsImmutable}
+		bind:showAnimation={showAnimation}
+		edit={true}
+		originalFiles={originalFiles}
+		materialId={materialId}/>
+{:catch error}
+	<p class="flex items-center justify-center col-span-full pt-20">Could not load the files: "{error.message}". Please refresh the page.</p>
+{/await}
