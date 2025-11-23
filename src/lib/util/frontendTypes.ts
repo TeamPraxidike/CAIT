@@ -50,6 +50,13 @@ export type PublishParams = {
 	immutable: ParamsImmutable;
 }
 
+// Think we have a common file type, may be better to use it instead of this one
+export type URLtype = {
+	title: string;
+	info: string;
+	type: string
+}
+
 export async function buildMaterialForm(data: FormData): Promise<{data: MaterialForm, tags: string[]} | {
 	status: number;
 	message: string;
@@ -61,11 +68,11 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	}
 
 	const fileList: string[] = data.getAll('file') as unknown as string[];
-	const fileURLs: string[] = data.getAll('fileURLs') as unknown as string[];
+	const fileURLs: URLtype[] = data.getAll('fileURLs').map(x => JSON.parse(x.toString())) as URLtype[];
 	if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
 	// const add = await filesToAddOperation(fileList, fileURLs);
 
-	const add = fileList.concat(fileURLs).map((item: string) => {
+	const add = fileList.map((item: string) => {
 		return JSON.parse(item) as UploadMaterialFileFormat
 	});
 
@@ -98,7 +105,7 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	const newTagsJ = JSON.stringify(newTags);
 	const outerArray = JSON.parse(newTagsJ);
 	const newTagsArray: string[] = JSON.parse(outerArray[0]);
-
+	console.log("URLs ", fileURLs);
 	const dataForm = {
 		userId,
 		metaData: {
@@ -119,7 +126,7 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 			maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 			materialType: materialTypes,
 			isDraft: isDraft,
-			fileURLs: fileURLs || [],
+			fileURLs: fileURLs.map(x => x.title) || [],
 			course: Number(data.get('course')?.toString()),
 		},
 		coverPic,
