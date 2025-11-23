@@ -105,7 +105,6 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	const newTagsJ = JSON.stringify(newTags);
 	const outerArray = JSON.parse(newTagsJ);
 	const newTagsArray: string[] = JSON.parse(outerArray[0]);
-	console.log("URLs ", fileURLs);
 	const dataForm = {
 		userId,
 		metaData: {
