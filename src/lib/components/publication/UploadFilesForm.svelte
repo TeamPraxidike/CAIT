@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import { FileDropzone } from '@skeletonlabs/skeleton';
+	import {FileDropzone} from '@skeletonlabs/skeleton';
 	import { FileTable } from '$lib';
 	import { concatFileList } from '$lib/util/file';
 	import {
@@ -19,7 +19,7 @@
 
 	// these are purely for the editing page
 	// TODO: either find a different solution or redo UploadFilesForm + FileTable
-	export let integrateWithIndexDB: boolean = true;
+	export let isEditContext: boolean = false;
 	export let fetchedFiles: FetchedFileArray | [] = [];
 
 	export let supabaseURL: string = 'http://localhost:8000';
@@ -55,7 +55,7 @@
 					bucketName: bucketName,
 					objectName: fileName,
 					contentType: contentType,
-					cacheControl: 3600,
+					cacheControl: "3600",
 				},
 				chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
 				onError: function (error) {
@@ -65,7 +65,6 @@
 				},
 				onProgress: function (bytesUploaded, bytesTotal) {
 					const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
-					// console.log(bytesUploaded, bytesTotal, percentage + '%')
 
 					// use original name for clarity
 					fileTUSProgress[file.name] = percentage;
@@ -76,7 +75,7 @@
 					fileTUSMetadata[file.name]['isDone'] = true;
 					fileTUSMetadata = {...fileTUSMetadata};
 
-					if (integrateWithIndexDB){
+					if (!isEditContext){
 						// update indexedDB
 						await saveFileTUSMetadata(fileTUSMetadata[file.name]);
 					}
@@ -120,7 +119,7 @@
 			files = concatFileList(files, filesToUse);
 
 			// convert final FileList to an array and store in IndexedDB
-			if (integrateWithIndexDB){
+			if (!isEditContext){
 				await saveFiles(Array.from(files));
 			}
 
@@ -142,7 +141,7 @@
 					}
 
 					try{
-						if (integrateWithIndexDB){
+						if (!isEditContext){
 							// save metadata to indexedDB
 							await saveFileTUSMetadata(currentTUSMetadata)
 						}
@@ -156,7 +155,7 @@
 							supabaseClient, supabaseURL);
 					}
 					catch (e) {
-						if (integrateWithIndexDB){
+						if (!isEditContext){
 							await deleteFileTUSMetadata(pathFileNameGenerated);
 						}
 						if (fileTUSMetadata[currentTUSMetadata.originalName]){
@@ -216,8 +215,8 @@
 		</div>
 	</div>
 	<FileTable operation="edit" fileFormat="upload"
-			   integrateWithIndexDB={integrateWithIndexDB} fetchedFiles={fetchedFiles}
-			   bind:files={files} bind:fileURLs={fileURLs}
-			   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
-			   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>
+		   isEditContext={isEditContext} fetchedFiles={fetchedFiles}
+		   bind:files={files} bind:fileURLs={fileURLs}
+		   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
+		   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>
 </div>

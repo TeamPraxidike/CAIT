@@ -185,6 +185,14 @@ export function concatFileList(
 	return arr1.concat(arr2) as unknown as FileList;
 }
 
+/**
+ * Convert an array of File objects into a real FileList.
+ */
+export function arrayToFileList(files: File[]): FileList {
+	const dt = new DataTransfer();
+	files.forEach(file => dt.items.add(file));
+	return dt.files;
+}
 
 export async function downloadFileFromSupabase(supabaseClient: any, f: FetchedFileItem){
 	const { data: blob, error } = await supabaseClient.storage

@@ -26,7 +26,7 @@
 
 	// these are purely for the editing page
 	// TODO: either find a different solution or redo UploadFilesForm + FileTable
-	export let integrateWithIndexDB: boolean = true;
+	export let isEditContext: boolean = false;
 	export let fetchedFiles: FetchedFileArray | [] = [];
 
 
@@ -43,6 +43,18 @@
 		});
 	}
 
+	function removeFileConfirmationModal(file: File) {
+		ms.trigger({
+				type: 'confirm',
+				title: 'Confirm File Deletion',
+				body: `File "${file.name.length > 20 ? file.name.slice(0, 20) + '...' : file.name}" will be permanently
+				removed once you save your changes (during the last step). Are you sure you wish to proceed?`,
+				response: (r: boolean) => {
+					if (r) removeFile(file)
+				}
+		})
+	}
+
 	async function removeFile(file: File | FetchedFileItem) {
 		// this branch doesn't really get explored but will leave for clarity
 		if (fileFormat === 'fetch') {
@@ -52,28 +64,34 @@
 
 			// TODO error handling
 			try{
-				if (fileTUSMetadata[file.name] && fileTUSMetadata[file.name]['isDone']) {
-					await supabaseClient
-						.storage
-						.from('uploadedFiles')
-						.remove([fileTUSMetadata[file.name]['generatedName']]);
-				}
-				else if(!integrateWithIndexDB){
-					if (fileTUSUploadObjects[(file as File).name]){
+				// if on upload page
+				if (!isEditContext) {
+					// file user has chosen has already been uploaded
+					if (fileTUSMetadata[file.name] && fileTUSMetadata[file.name]['isDone']) {
+						await supabaseClient
+								.storage
+								.from('uploadedFiles')
+								.remove([fileTUSMetadata[file.name]['generatedName']]);
+					}
+					// file user has chosen is still being uploaded
+					else if (fileTUSUploadObjects[(file as File).name]){
 						fileTUSUploadObjects[(file as File).name].abort(true);
 						fileTUSUploadObjects = {...fileTUSUploadObjects};
 					}
-					return;
-					// the code below works, but it directly deletes the file
-					// we don't necessarily want that behaviour (accidental clicks happen)
-					// await supabaseClient
-					// 	.storage
-					// 	.from('uploadedFiles')
-					// 	.remove([fetchedFiles.find(x => x.name === file.name)?.fileId]);
 				}
-				else {
-					fileTUSUploadObjects[(file as File).name].abort(true);
-					fileTUSUploadObjects = {...fileTUSUploadObjects};
+				// if on edit page
+				else{
+					// file user has chosen has already been uploaded
+					if (fileTUSMetadata[file.name] && fileTUSMetadata[file.name]['isDone']) {
+						// NB: if the file has been uploaded, will delete later with the filediff action logic
+						// this is a no-op
+					}
+					// file user has chosen is still being uploaded
+					else if (fileTUSUploadObjects[(file as File).name]){
+
+						fileTUSUploadObjects[(file as File).name].abort(true);
+						fileTUSUploadObjects = {...fileTUSUploadObjects};
+					}
 				}
 			}
 			catch (e){
@@ -94,7 +112,7 @@
 				fileTUSUploadObjects = {...fileTUSUploadObjects};
 			}
 
-			if (integrateWithIndexDB){
+			if (!isEditContext){
 				await deleteFileTUSMetadata((file as File).name);
 				// this also deletes the indexDb file because it's a PUT operation
 				await saveFiles(Array.from(files))
@@ -134,7 +152,10 @@
 								<Icon class="xl:text-2xl" icon="material-symbols:download" />
 							</Download>
 						{:else if operation === 'edit'}
-							<button on:click={() => removeFile(file)} type="button" on:click|stopPropagation class="ml-auto flex gap-2 items-center">
+							<button on:click={() => {
+								if (!isEditContext) removeFile(file);
+								else removeFileConfirmationModal(file)
+							}} type="button" on:click|stopPropagation class="ml-auto flex gap-2 items-center">
 								<Icon class="xl:text-2xl" icon="mdi:delete" />
 							</button>
 						{/if}

@@ -94,8 +94,11 @@ export async function clearIfTimeExceeded(lastOpened: number) {
 	// if snapshot is older than 30 minutes, clear it
 	if (ageMs > 1000 * 60 * 30) {
 		await clearAllData();
+		console.log("Time exceeded, data cleared");
 		return true;
 	}
+
+	console.log("Time NOT exceeded, data NOT cleared");
 	return false;
 }
 

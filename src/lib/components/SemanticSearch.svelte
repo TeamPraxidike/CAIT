@@ -63,9 +63,6 @@
 			// Add new results to the data array
 			data = [...data, ...rJson.results];
 
-			console.log(rJson.results);
-			console.log(rJson.results[0]);
-
 			// Add bot response to chat
 			rJson.results.forEach((r:any, i:number) => {
 				const currentIndex = startIndex + i; // Calculate the correct index in data array
