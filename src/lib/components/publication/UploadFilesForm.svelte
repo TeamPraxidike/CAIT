@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import {FileDropzone, ProgressRadial} from '@skeletonlabs/skeleton';
+	import {FileDropzone} from '@skeletonlabs/skeleton';
 	import { FileTable } from '$lib';
 	import { concatFileList } from '$lib/util/file';
 	import {
@@ -65,7 +65,6 @@
 				},
 				onProgress: function (bytesUploaded, bytesTotal) {
 					const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
-					// console.log(bytesUploaded, bytesTotal, percentage + '%')
 
 					// use original name for clarity
 					fileTUSProgress[file.name] = percentage;

@@ -90,7 +90,6 @@ export const actions = {
 			material.fileDiff.add = newFiles;
 			material.fileDiff.delete = deletedFiles;
 		} catch (error){
-			console.log("filediff algorithm error");
 			return { status: 400, message: 'Error while updating files' };
 		}
 

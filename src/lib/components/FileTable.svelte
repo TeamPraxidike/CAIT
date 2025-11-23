@@ -66,10 +66,8 @@
 			try{
 				// if on upload page
 				if (!isEditContext) {
-					console.log("Integrated");
 					// file user has chosen has already been uploaded
 					if (fileTUSMetadata[file.name] && fileTUSMetadata[file.name]['isDone']) {
-						console.log("remove from supabase");
 						await supabaseClient
 								.storage
 								.from('uploadedFiles')
@@ -77,24 +75,19 @@
 					}
 					// file user has chosen is still being uploaded
 					else if (fileTUSUploadObjects[(file as File).name]){
-						console.log("abort from supabase");
 						fileTUSUploadObjects[(file as File).name].abort(true);
 						fileTUSUploadObjects = {...fileTUSUploadObjects};
 					}
 				}
 				// if on edit page
 				else{
-					console.log("Not integrated");
-
 					// file user has chosen has already been uploaded
 					if (fileTUSMetadata[file.name] && fileTUSMetadata[file.name]['isDone']) {
 						// NB: if the file has been uploaded, will delete later with the filediff action logic
 						// this is a no-op
-						console.log("in no-op");
 					}
 					// file user has chosen is still being uploaded
 					else if (fileTUSUploadObjects[(file as File).name]){
-						console.log("abort from supabase");
 
 						fileTUSUploadObjects[(file as File).name].abort(true);
 						fileTUSUploadObjects = {...fileTUSUploadObjects};
