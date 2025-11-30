@@ -14,7 +14,7 @@ export type Metadata = {
 	description: string;
 	learningObjectives: string[];
 	tags: string[];
-	materialType: string[];
+	materialType: string[] | undefined;
 	isDraft: boolean;
 };
 

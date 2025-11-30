@@ -113,10 +113,10 @@
 		description: data.description,
 		learningObjectives: data.LOs,
 		tags: data.tags,
-		materialType: dataMaterial.selectedTypes,
+		materialType: dataMaterial?.selectedTypes,
 		isDraft: false
 	};
-	$: numMaterials = dataMaterial.fileURLs.length + dataMaterial.files.length;
+	$: numMaterials = (dataMaterial?.fileURLs || []).length + (dataMaterial?.files || []).length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
 	let bannerFieldsList: string[] = [];
