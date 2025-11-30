@@ -8,17 +8,21 @@
 	import { enhance } from '$app/forms';
 	import { allUploadsDone } from '$lib/util/file';
 	import { getToastStore, ProgressRadial } from '@skeletonlabs/skeleton';
-	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 	import { tick } from 'svelte';
 	import { clearAllData } from '$lib/util/indexDB.ts';
 
 
 	export let data: ParamsMutable;
+	export let dataMaterial: ParamsMutableMaterial;
 	export let paramsImmutable: ParamsImmutable;
+
 	export let showAnimation: boolean;
 
 	export let materialId: number | undefined = undefined;
 	export let edit: boolean = false;
+	export let circuit: boolean = false;
+
 
 	// Editing mode needs to know what the original files were, so that it can delete only the ones that were removed
 	// Here we pass the path of the file
@@ -58,7 +62,7 @@
 
 	} else if (paramsImmutable.form?.status === 400 && paramsImmutable.form?.context === 'publication-form') {
 		console.log('Form submission failed with status 400:');
-		if (!allUploadsDone(data.fileTUSMetadata, data.files)){
+		if (!allUploadsDone(dataMaterial.fileTUSMetadata, dataMaterial.files)){
 			toastStore.trigger({
 				message: 'Some files are still being uploaded',
 				background: 'bg-warning-200'
@@ -87,17 +91,17 @@
 		data.isSubmitting = false;
 	} else if (paramsImmutable.form?.status == 200 && paramsImmutable.form?.context === 'course-form') {
 		const updated = paramsImmutable.form.course;
-		const idx = data.courses.findIndex(c => c.id === updated.id);
+		const idx = dataMaterial.courses.findIndex(c => c.id === updated.id);
 
-		data.showCourseProgressRadial = false;
+		dataMaterial.showCourseProgressRadial = false;
 
 		if (idx !== -1) {
-			data.courses[idx] = updated;
-			data.courses = [...data.courses];
+			dataMaterial.courses[idx] = updated;
+			dataMaterial.courses = [...dataMaterial.courses];
 		} else {
-			data.originalCourseIds = [...data.originalCourseIds, updated.id];
-			data.courses.push(updated);
-			data.courses = data.courses;
+			dataMaterial.originalCourseIds = [...dataMaterial.originalCourseIds, updated.id];
+			dataMaterial.courses.push(updated);
+			dataMaterial.courses = dataMaterial.courses;
 		}
 		paramsImmutable.form = { ...paramsImmutable.form, context: "undefined" };
 	}
@@ -109,10 +113,10 @@
 		description: data.description,
 		learningObjectives: data.LOs,
 		tags: data.tags,
-		materialType: data.selectedTypes,
+		materialType: dataMaterial.selectedTypes,
 		isDraft: false
 	};
-	$: numMaterials = data.fileURLs.length + data.files.length;
+	$: numMaterials = dataMaterial.fileURLs.length + dataMaterial.files.length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
 	let bannerFieldsList: string[] = [];
@@ -141,22 +145,22 @@
 					data.isSubmitting = true;
 
 					// check if all the file uploads (excluding cover picture) are done
-					if (!(allUploadsDone(data.fileTUSMetadata, data.files))){
+					if (!(allUploadsDone(dataMaterial.fileTUSMetadata, dataMaterial.files))){
 						// alert('Some files are still being uploaded');
 						data.isSubmitting = false;
 						return;
 					}
 
-					for (const f of data.files){
+					for (const f of dataMaterial.files){
 						let uploadFormat = {
 							title: f.name,
 							type: f.type,
-							info: data.fileTUSMetadata[f.name]['generatedName']
+							info: dataMaterial.fileTUSMetadata[f.name]['generatedName']
 						}
 						formData.append('file', JSON.stringify(uploadFormat));
 					}
 
-					for (const url of data.fileURLs){
+					for (const url of dataMaterial.fileURLs){
 						let uploadFormat = {
 							title: url,
 							type: "URL",
@@ -168,17 +172,17 @@
 					formData.append('userId', paramsImmutable.uid?.toString() || '');
 					formData.append('title', data.title);
 					formData.append('description', data.description);
-					formData.append('type', JSON.stringify(data.selectedTypes));
-					formData.append('estimate', JSON.stringify(data.estimate));
-					formData.append('copyright', data.copyright);
+					formData.append('type', JSON.stringify(dataMaterial.selectedTypes));
+					formData.append('estimate', JSON.stringify(dataMaterial.estimate));
+					formData.append('copyright', dataMaterial.copyright);
 					formData.append('tags', JSON.stringify(data.tags));
 					formData.append('maintainers', JSON.stringify(data.maintainers.map(m => m.id)));
 					formData.append('learningObjectives', JSON.stringify(data.LOs));
 					formData.append('prerequisites', JSON.stringify(data.PKs));
-					formData.append('coverPic', data.coverPic || '');
+					formData.append('coverPic', dataMaterial.coverPic || '');
 					formData.append('newTags', JSON.stringify(data.newTags));
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
-					formData.append('course', data.course ? data.course.toString() : 'null');
+					formData.append('course', dataMaterial.course ? dataMaterial.course.toString() : 'null');
 					if (edit) {
 						formData.append('oldFilesData', JSON.stringify(originalFiles));
 						formData.append('materialId', materialId?.toString() || '');
@@ -186,10 +190,12 @@
 			  }}>
 			<PublishStepper
 				bind:data={data}
+				bind:dataMaterial={dataMaterial}
 				paramsImmutable={paramsImmutable}
 				edit={edit}
 				bind:draft={draft}
 				bind:markedAsDraft={markedAsDraft}
+				circuit={circuit}
 			/>
 		</form>
 

@@ -3,9 +3,10 @@
 	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
-	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 
 	export let data: ParamsMutable;
+	export let dataMaterial: ParamsMutableMaterial;
 	export let paramsImmutable: ParamsImmutable;
 
 	const handleInputEnter = (event: KeyboardEvent) => {
@@ -17,12 +18,12 @@
 
 <div class="flex flex-col gap-6 mt-3">
 	<div class="flex flex-col md:flex-row col-span-full items-center gap-10">
-		<TimeEstimate bind:totalMinutes={data.estimate}/>
+		<TimeEstimate bind:totalMinutes={dataMaterial.estimate}/>
 		<div class="w-full md:w-1/2	">
 			<label for="copyright md-2" class="block font-medium">Copyright License (<a
 				href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
 				class="text-tertiary-700"> Check here how this applies to you</a>):</label>
-			<input type="text" name="copyright" bind:value={data.copyright} on:keydown={handleInputEnter}
+			<input type="text" name="copyright" bind:value={dataMaterial.copyright} on:keydown={handleInputEnter}
 				   placeholder="Leave blank if material is your own"
 				   class="mt-1 rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 		</div>

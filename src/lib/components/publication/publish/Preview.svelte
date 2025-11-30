@@ -2,9 +2,10 @@
 	import { FileTable, Tag, UserProp } from '$lib';
 	import type { FileTUSMetadata } from '$lib/util/indexDB.ts';
 	import type { UserWithProfilePic } from '$lib/util/coursesLogic.ts';
-	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 
 	export let data: ParamsMutable;
+	export let dataMaterial: ParamsMutableMaterial;
 	export let paramsImmutable: ParamsImmutable;
 
 	export let draft: boolean;
@@ -24,18 +25,18 @@
 		<p class="text-surface-800 text-sm">{data.description}</p>
 
 		<p class="text-surface-500 text-sm">
-			Time Estimate: {data.estimate || 'No estimate provided'} |
-			Type: {data.selectedTypes[0]?.toUpperCase() || 'No type provided'}
+			Time Estimate: {dataMaterial.estimate || 'No estimate provided'} |
+			Type: {dataMaterial.selectedTypes[0]?.toUpperCase() || 'No type provided'}
 		</p>
 
-		<FileTable operation="view" fileFormat="upload" bind:files={data.files} bind:fileURLs={data.fileURLs}
-				   bind:fileTUSMetadata={data.fileTUSMetadata} bind:fileTUSProgress={data.fileTUSProgress}
-				   bind:fileTUSUploadObjects={data.fileTUSUploadObjects} bind:supabaseClient={paramsImmutable.supabaseClient}/>
+		<FileTable operation="view" fileFormat="upload" bind:files={dataMaterial.files} bind:fileURLs={dataMaterial.fileURLs}
+				   bind:fileTUSMetadata={dataMaterial.fileTUSMetadata} bind:fileTUSProgress={dataMaterial.fileTUSProgress}
+				   bind:fileTUSUploadObjects={dataMaterial.fileTUSUploadObjects} bind:supabaseClient={paramsImmutable.supabaseClient}/>
 	</div>
 	<div class="col-span-4 flex flex-col gap-4">
-		{#if data.coverPic}
+		{#if dataMaterial.coverPic}
 			<p class="font-bold"> Cover Picture: </p>
-			<img src={URL.createObjectURL(data.coverPic)} alt="">
+			<img src={URL.createObjectURL(dataMaterial.coverPic)} alt="">
 		{/if}
 		<div class="flex flex-col">
 			<span class="font-bold">Maintainers:</span>
@@ -64,7 +65,7 @@
 		</div>
 		<div class="flex flex-col">
 			<span class="font-bold">Copyright:</span>
-			<span class="text-sm">{data.copyright || 'No copyright license'}</span>
+			<span class="text-sm">{dataMaterial.copyright || 'No copyright license'}</span>
 		</div>
 	</div>
 </div>

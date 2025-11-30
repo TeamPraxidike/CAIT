@@ -11,29 +11,33 @@ import { convertMaterial } from '$lib/util/types.ts';
 
 export type ParamsMutable = {
 	isSubmitting: boolean;
-	fileTUSMetadata: { [key: string] : FileTUSMetadata };
-	fileTUSProgress: { [key: string]: any };
-	fileTUSUploadObjects: { [key: string]: any };
-	fileURLs: string[];
-	files: FileList;
 	title: string;
-	showCourseProgressRadial: boolean;
-	selectedTypes: string[];
-	originalCourseIds: number[];
-	courses: CourseWithCoverPic[];
-	course: number | null;
-	coverPic: File | undefined;
 	loggedUser: any;
 	searchableUsers: UserWithProfilePic[];
-	estimate: number;
-	copyright: string;
 	LOs: string[];
 	PKs: string[];
 	maintainers: UserWithProfilePic[];
 	tags: string[];
 	newTags: string[];
 	description: string;
+}
+
+export type ParamsMutableMaterial = {
+	fileTUSMetadata: { [key: string] : FileTUSMetadata };
+	fileTUSProgress: { [key: string]: any };
+	fileTUSUploadObjects: { [key: string]: any };
+	fileURLs: string[];
+	files: FileList;
+	showCourseProgressRadial: boolean;
+	selectedTypes: string[];
+	originalCourseIds: number[];
+	courses: CourseWithCoverPic[];
+	course: number | null;
+	coverPic: File | undefined;
+	estimate: number;
+	copyright: string;
 };
+
 
 export type ParamsImmutable = {
 	supabaseClient: any;
