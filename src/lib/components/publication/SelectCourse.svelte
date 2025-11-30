@@ -14,9 +14,12 @@
 
 	export let originalCourseIds = courses.map(c => c.id);
 
-    // Show up to 10 courses; if more, show a "+N more…" chip at the end
+    // Show up to <maxVisible> courses; 
+	// if more, show a "+N more…" chip at the end
+	// if <showAllCourses> then show a scrollable box with all of them
     let maxVisible = 4;
-    $: visibleCourses = Array.isArray(courses) ? courses.slice(0, maxVisible) : [];
+	let showAllCourses = false;
+    $: visibleCourses = showAllCourses ? courses : (Array.isArray(courses) ? courses.slice(0, maxVisible) : []);
     $: hiddenCount = Array.isArray(courses) ? Math.max(0, courses.length - maxVisible) : 0;
 
 	let popupSettings: PopupSettings = {
@@ -99,32 +102,72 @@
 <!--		<label for="Your Courses">Your Courses:</label>-->
 
 		{#if Array.isArray(courses) && courses.length > 0}
-			{#each visibleCourses as course, idx}
-				{#if originalCourseIds.includes(course.id)}
-					<CourseButton
-						bind:course
-						bind:selectedCourseId
-						bind:previousCourseId
-						on:courseDeleted={handleDeletion}
-						on:deselectCourse={handleDeselection}
-						on:editCourse={handleEdit}/>
-				{:else}
-					<CourseButton
-						bind:course
-						bind:selectedCourseId
-						bind:previousCourseId
-						canDelete={false}
-						on:courseDeleted={handleDeletion}
-						on:deselectCourse={handleDeselection}
-						on:editCourse={handleEdit}/>
-				{/if}
-			{/each}
+			{#if showAllCourses}
+                <!-- Expanded scrollable view -->
+                <div class="w-full relative">
+                    <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2 bg-gray-50">
+                        <div class="flex flex-wrap gap-2">
+                            {#each courses as course}
+                                {#if originalCourseIds.includes(course.id)}
+                                    <CourseButton
+                                        bind:course
+                                        bind:selectedCourseId
+                                        bind:previousCourseId
+                                        on:courseDeleted={handleDeletion}
+                                        on:deselectCourse={handleDeselection}
+                                        on:editCourse={handleEdit}/>
+                                {:else}
+                                    <CourseButton
+                                        bind:course
+                                        bind:selectedCourseId
+                                        bind:previousCourseId
+                                        canDelete={false}
+                                        on:courseDeleted={handleDeletion}
+                                        on:deselectCourse={handleDeselection}
+                                        on:editCourse={handleEdit}/>
+                                {/if}
+                            {/each}
+                        </div>
+                    </div>
+                    <button 
+                        type="button"
+                        class="absolute -bottom-8 right-0 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                        on:click={() => showAllCourses = false}>
+                        Show less
+                    </button>
+                </div>
+            {:else}
+                <!-- Collapsed view -->
+				{#each visibleCourses as course, idx}
+					{#if originalCourseIds.includes(course.id)}
+						<CourseButton
+							bind:course
+							bind:selectedCourseId
+							bind:previousCourseId
+							on:courseDeleted={handleDeletion}
+							on:deselectCourse={handleDeselection}
+							on:editCourse={handleEdit}/>
+					{:else}
+						<CourseButton
+							bind:course
+							bind:selectedCourseId
+							bind:previousCourseId
+							canDelete={false}
+							on:courseDeleted={handleDeletion}
+							on:deselectCourse={handleDeselection}
+							on:editCourse={handleEdit}/>
+					{/if}
+				{/each}
 
-            {#if hiddenCount > 0}
-                <span class="self-center inline-flex items-center px-2 py-1 text-sm font-medium bg-white text-gray-800 select-none cursor-default">
-                    +{hiddenCount} more…
-                </span>
-            {/if}
+				{#if hiddenCount > 0}
+					<button
+						type="button"
+						class="self-center inline-flex items-center px-2 py-1 text-sm font-medium bg-white text-gray-800 hover:bg-gray-100 hover:text-gray-900 select-none cursor-pointer transition-colors duration-200 rounded"
+						on:click={() => showAllCourses = true}>
+						+{hiddenCount} more…
+					</button>
+				{/if}
+			{/if}
 		{:else}
 			<p></p>
 		{/if}
