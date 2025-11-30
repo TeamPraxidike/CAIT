@@ -178,7 +178,6 @@
 						formData.append('course', dataMaterial.course ? dataMaterial.course.toString() : 'null');
 					}
 
-
 					formData.append('userId', paramsImmutable.uid?.toString() || '');
 					formData.append('title', data.title);
 					formData.append('description', data.description);

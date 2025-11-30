@@ -40,6 +40,8 @@ export type ParamsMutableMaterial = {
 
 
 export type ParamsImmutable = {
+	liked: number[];
+	saved: number[];
 	supabaseClient: any;
 	supabaseURL: string;
 	users: UserWithProfilePic[];

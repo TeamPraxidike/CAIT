@@ -109,6 +109,8 @@
 		supabaseClient,
 		supabaseURL,
 		users,
+		liked: [],
+		saved: [],
 		allCourses: data.allCourses,
 		uid,
 		form,

@@ -66,7 +66,7 @@
 		 buttonCompleteLabel="Complete"
 		 buttonComplete="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600">
 	<Step>
-		<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
+		<svelte:fragment slot="header">{circuit ? "Create circuit" : "Upload files"}<span class="text-error-300">*</span></svelte:fragment>
 		{#if !circuit && dataMaterial}
 			<UploadFilesForm
 				supabaseURL={paramsImmutable.supabaseURL}
@@ -77,12 +77,12 @@
 				bind:fileTUSUploadObjects={dataMaterial.fileTUSUploadObjects}
 				bind:fileURLs={dataMaterial.fileURLs}
 				bind:files={dataMaterial.files}/>
-		<!--{:else}-->
-		<!--	<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>-->
-		<!--	&lt;!&ndash;{#key circuitKey}&ndash;&gt;-->
-		<!--		<SvelteFlowProvider>-->
-		<!--			<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{liked}" bind:saved={saved}/>-->
-		<!--		</SvelteFlowProvider>-->
+		{:else}
+<!--			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>-->
+			<!--{#key circuitKey}-->
+				<SvelteFlowProvider>
+					<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{paramsImmutable.liked}" bind:saved={paramsImmutable.saved}/>
+				</SvelteFlowProvider>
 			<!--{/key}-->
 
 		{/if}

@@ -1,6 +1,7 @@
 import type { Tag } from '@prisma/client';
 import type { Actions, PageServerLoad } from './$types';
 import { type CircuitForm, type FetchedFileArray } from '$lib/database';
+import { env } from '$env/dynamic/public';
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
@@ -27,7 +28,7 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 				: { saved: [], savedFileData: [] };
 	}
 
-	return { tags, users, liked: liked, saved: saved };
+	return { tags, users, liked: liked, saved: saved, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
 export const actions = {
