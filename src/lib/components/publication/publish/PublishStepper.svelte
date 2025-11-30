@@ -94,6 +94,10 @@
 					   bind:dataMaterial={dataMaterial}
 					   paramsImmutable={paramsImmutable}
 			/>
+		{:else}
+			<label for="title" class="block font-medium">Title<span class="text-error-300">*</span></label>
+			<input type="text" name="title" placeholder="Title" bind:value={data.title}
+				   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 		{/if}
 	</Step>
 	<Step>

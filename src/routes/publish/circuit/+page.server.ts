@@ -39,16 +39,16 @@ export const actions = {
 	 */
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
-		const pid = data.get('publisherId')?.toString();
+		const pid = data.get('userId')?.toString();
 		const title = data.get('title')?.toString() || '';
 		const description = data.get('description')?.toString() || '';
-		const selectedTags = data.get('selectedTags')?.toString() || '';
+		const selectedTags = data.get('tags')?.toString() || '';
 		//I need to get the separate strings here so I can create them as string[], but not sure how to do that
 		const newTags = data.getAll('newTags') || '';
 
 		const additionalMaintainers =
-			data.get('additionalMaintainers')?.toString() || '';
-		const prior = data.get('prior')?.toString() || '';
+			data.get('maintainers')?.toString() || '';
+		const prior = data.get('prerequisites')?.toString() || '';
 		const LOs = data.get('learningObjectives')?.toString() || '';
 		const isDraft = data.get('isDraft')?.toString() === 'true';
 
