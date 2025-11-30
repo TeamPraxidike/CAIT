@@ -12,7 +12,7 @@
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes.ts';
 
 	export let data: ParamsMutable;
-	export let dataMaterial: ParamsMutableMaterial;
+	export let dataMaterial: ParamsMutableMaterial | null;
 	export let paramsImmutable: ParamsImmutable;
 
 	export let draft: boolean;
@@ -34,8 +34,8 @@
 	};
 
 	let previousCourse: number | null = null;
-	$: if (dataMaterial.course !== previousCourse) {
-		const currentCourse = dataMaterial.courses.find(c => c.id === dataMaterial.course);
+	$: if (dataMaterial && dataMaterial.course !== previousCourse) {
+		const currentCourse = dataMaterial.courses.find(c => c.id === dataMaterial?.course);
 		data.maintainers = [];
 		const prev_temp = previousCourse;
 		previousCourse = dataMaterial.course;
@@ -51,7 +51,7 @@
 			}
 			if (currentCourse?.coverPic?.data) {
 				downloadFileFromSupabase(paramsImmutable.supabaseClient, currentCourse.coverPic).then(f => {
-					dataMaterial.coverPic = f || undefined;
+					dataMaterial ? dataMaterial.coverPic = f || undefined : undefined;
 				});
 			}
 		}
@@ -66,8 +66,8 @@
 		 buttonCompleteLabel="Complete"
 		 buttonComplete="btn text-surface-50 bg-primary-600 dark:text-surface-50 dark:bg-primary-600">
 	<Step>
-		<!--{#if !circuit}-->
-			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
+		<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>
+		{#if !circuit && dataMaterial}
 			<UploadFilesForm
 				supabaseURL={paramsImmutable.supabaseURL}
 				isEditContext={edit}
@@ -85,14 +85,16 @@
 		<!--		</SvelteFlowProvider>-->
 			<!--{/key}-->
 
-		<!--{/if}-->
+		{/if}
 	</Step>
 	<Step>
 		<svelte:fragment slot="header">Give your publication a title</svelte:fragment>
-		<TitleStep bind:data={data}
-				   bind:dataMaterial={dataMaterial}
-				   paramsImmutable={paramsImmutable}
-		/>
+		{#if !circuit && dataMaterial}
+			<TitleStep bind:data={data}
+					   bind:dataMaterial={dataMaterial}
+					   paramsImmutable={paramsImmutable}
+			/>
+		{/if}
 	</Step>
 	<Step>
 		<svelte:fragment slot="header">Fill in meta information</svelte:fragment>

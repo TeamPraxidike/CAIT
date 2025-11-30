@@ -14,7 +14,7 @@
 
 
 	export let data: ParamsMutable;
-	export let dataMaterial: ParamsMutableMaterial;
+	export let dataMaterial: ParamsMutableMaterial | null;
 	export let paramsImmutable: ParamsImmutable;
 
 	export let showAnimation: boolean;
@@ -60,7 +60,7 @@
 			});
 		}
 
-	} else if (paramsImmutable.form?.status === 400 && paramsImmutable.form?.context === 'publication-form') {
+	} else if (dataMaterial && paramsImmutable.form?.status === 400 && paramsImmutable.form?.context === 'publication-form') {
 		console.log('Form submission failed with status 400:');
 		if (!allUploadsDone(dataMaterial.fileTUSMetadata, dataMaterial.files)){
 			toastStore.trigger({
@@ -89,7 +89,7 @@
 			classes: 'text-surface-900'
 		});
 		data.isSubmitting = false;
-	} else if (paramsImmutable.form?.status == 200 && paramsImmutable.form?.context === 'course-form') {
+	} else if (dataMaterial && paramsImmutable.form?.status == 200 && paramsImmutable.form?.context === 'course-form') {
 		const updated = paramsImmutable.form.course;
 		const idx = dataMaterial.courses.findIndex(c => c.id === updated.id);
 
@@ -139,50 +139,56 @@
 			  enctype="multipart/form-data"
 			  action={edit ? "?/edit" : "?/publish"}
 			  use:enhance={({ formData }) => {
-					// apparently files are automatically appended to the form using the
-					// file key, so just remove it
-					formData.delete('file')
-					data.isSubmitting = true;
 
-					// check if all the file uploads (excluding cover picture) are done
-					if (!(allUploadsDone(dataMaterial.fileTUSMetadata, dataMaterial.files))){
-						// alert('Some files are still being uploaded');
-						data.isSubmitting = false;
-						return;
-					}
+				  	if (!circuit && dataMaterial) {
+					  	// apparently files are automatically appended to the form using the
+						// file key, so just remove it
+						formData.delete('file')
+						data.isSubmitting = true;
 
-					for (const f of dataMaterial.files){
-						let uploadFormat = {
-							title: f.name,
-							type: f.type,
-							info: dataMaterial.fileTUSMetadata[f.name]['generatedName']
+						// check if all the file uploads (excluding cover picture) are done
+						if (!(allUploadsDone(dataMaterial.fileTUSMetadata, dataMaterial.files))){
+							// alert('Some files are still being uploaded');
+							data.isSubmitting = false;
+							return;
 						}
-						formData.append('file', JSON.stringify(uploadFormat));
+
+						for (const f of dataMaterial.files){
+							let uploadFormat = {
+								title: f.name,
+								type: f.type,
+								info: dataMaterial.fileTUSMetadata[f.name]['generatedName']
+							}
+							formData.append('file', JSON.stringify(uploadFormat));
+						}
+
+						for (const url of dataMaterial.fileURLs){
+							let uploadFormat = {
+								title: url,
+								type: "URL",
+								info: url
+							}
+							formData.append('fileURLs', JSON.stringify(uploadFormat));
+						}
+
+						formData.append('type', JSON.stringify(dataMaterial.selectedTypes));
+						formData.append('estimate', JSON.stringify(dataMaterial.estimate));
+						formData.append('copyright', dataMaterial.copyright);
+						formData.append('coverPic', dataMaterial.coverPic || '');
+						formData.append('course', dataMaterial.course ? dataMaterial.course.toString() : 'null');
 					}
 
-					for (const url of dataMaterial.fileURLs){
-						let uploadFormat = {
-							title: url,
-							type: "URL",
-							info: url
-						}
-						formData.append('fileURLs', JSON.stringify(uploadFormat));
-					}
 
 					formData.append('userId', paramsImmutable.uid?.toString() || '');
 					formData.append('title', data.title);
 					formData.append('description', data.description);
-					formData.append('type', JSON.stringify(dataMaterial.selectedTypes));
-					formData.append('estimate', JSON.stringify(dataMaterial.estimate));
-					formData.append('copyright', dataMaterial.copyright);
 					formData.append('tags', JSON.stringify(data.tags));
 					formData.append('maintainers', JSON.stringify(data.maintainers.map(m => m.id)));
 					formData.append('learningObjectives', JSON.stringify(data.LOs));
 					formData.append('prerequisites', JSON.stringify(data.PKs));
-					formData.append('coverPic', dataMaterial.coverPic || '');
 					formData.append('newTags', JSON.stringify(data.newTags));
 					formData.append('isDraft', JSON.stringify(markedAsDraft || draft));
-					formData.append('course', dataMaterial.course ? dataMaterial.course.toString() : 'null');
+
 					if (edit) {
 						formData.append('oldFilesData', JSON.stringify(originalFiles));
 						formData.append('materialId', materialId?.toString() || '');

@@ -5,7 +5,7 @@
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 
 	export let data: ParamsMutable;
-	export let dataMaterial: ParamsMutableMaterial;
+	export let dataMaterial: ParamsMutableMaterial | null;
 	export let paramsImmutable: ParamsImmutable;
 
 	export let draft: boolean;
@@ -24,17 +24,19 @@
 
 		<p class="text-surface-800 text-sm">{data.description}</p>
 
-		<p class="text-surface-500 text-sm">
-			Time Estimate: {dataMaterial.estimate || 'No estimate provided'} |
-			Type: {dataMaterial.selectedTypes[0]?.toUpperCase() || 'No type provided'}
-		</p>
+		{#if dataMaterial}
+			<p class="text-surface-500 text-sm">
+				Time Estimate: {dataMaterial.estimate || 'No estimate provided'} |
+				Type: {dataMaterial.selectedTypes[0]?.toUpperCase() || 'No type provided'}
+			</p>
 
-		<FileTable operation="view" fileFormat="upload" bind:files={dataMaterial.files} bind:fileURLs={dataMaterial.fileURLs}
-				   bind:fileTUSMetadata={dataMaterial.fileTUSMetadata} bind:fileTUSProgress={dataMaterial.fileTUSProgress}
-				   bind:fileTUSUploadObjects={dataMaterial.fileTUSUploadObjects} bind:supabaseClient={paramsImmutable.supabaseClient}/>
+			<FileTable operation="view" fileFormat="upload" bind:files={dataMaterial.files} bind:fileURLs={dataMaterial.fileURLs}
+					   bind:fileTUSMetadata={dataMaterial.fileTUSMetadata} bind:fileTUSProgress={dataMaterial.fileTUSProgress}
+					   bind:fileTUSUploadObjects={dataMaterial.fileTUSUploadObjects} bind:supabaseClient={paramsImmutable.supabaseClient}/>
+		{/if}
 	</div>
 	<div class="col-span-4 flex flex-col gap-4">
-		{#if dataMaterial.coverPic}
+		{#if dataMaterial && dataMaterial.coverPic}
 			<p class="font-bold"> Cover Picture: </p>
 			<img src={URL.createObjectURL(dataMaterial.coverPic)} alt="">
 		{/if}
@@ -63,10 +65,12 @@
 				{/each}
 			</ul>
 		</div>
-		<div class="flex flex-col">
-			<span class="font-bold">Copyright:</span>
-			<span class="text-sm">{dataMaterial.copyright || 'No copyright license'}</span>
-		</div>
+		{#if dataMaterial}
+			<div class="flex flex-col">
+				<span class="font-bold">Copyright:</span>
+				<span class="text-sm">{dataMaterial.copyright || 'No copyright license'}</span>
+			</div>
+		{/if}
 	</div>
 </div>
 
