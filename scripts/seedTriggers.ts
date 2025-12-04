@@ -47,7 +47,17 @@ async function main() {
 	   			lastname := NULLIF(custom_claims ->> 'lastName','');
 	   			platform_id := NULLIF(custom_claims ->> 'platformId','');
 	   			institution_id := NULLIF(custom_claims ->> 'institutionId','');
-	   			
+
+				INSERT INTO public."User" (id, email, "firstName", "lastName", "platformId", "institutionId")
+				VALUES (
+						   NEW.id,
+						   NEW.email,
+						   firstname,
+						   lastname,
+				           platform_id,
+						   institution_id
+					   );
+				RETURN NEW;	   			
 --          If firstname is not null then it has to be GooGoo
         	ELSIF NULLIF(custom_claims ->> 'firstName','') IS NOT NULL THEN
 				firstname := NULLIF(custom_claims ->> 'firstName','');
