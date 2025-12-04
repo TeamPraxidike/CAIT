@@ -25,20 +25,38 @@ export const actions: Actions = {
 			}
 		}
 
-		const { data, error } = await supabase.auth.signInWithSSO({
-			domain: env.PUBLIC_SAML_IDP_DOMAIN,
-			options: {
-				redirectTo: env.PUBLIC_SUPABASE_URL.includes("localhost") ?
-					"http://localhost:5173/signin/sso/success" :
-					"https://cait.beta.praxidike.org/signin/sso/success"
+		if (env.PUBLIC_ENVIRONMENT === 'production') {
+			const { data, error } = await supabase.auth.signInWithSSO({
+				domain: env.PUBLIC_SRAM_SAML_IDP_DOMAIN,
+				options: {
+					redirectTo: "https://cait.beta.praxidike.org/signin/sso/success"
+				}
+			})
+			if (error) {
+				return fail(400, { incorrect: true, error: error.message });
+			} else {
+				if (data?.url) {
+					// redirect the user to the identity provider's authentication flow
+					redirect(303, data.url)
+				}
 			}
-		})
-		if (error) {
-			return fail(400, { incorrect: true, error: error.message });
-		} else {
-			if (data?.url) {
-				// redirect the user to the identity provider's authentication flow
-				redirect(303, data.url)
+		}
+		else{
+			const { data, error } = await supabase.auth.signInWithSSO({
+				domain: env.PUBLIC_SAML_IDP_DOMAIN,
+				options: {
+					redirectTo: env.PUBLIC_SUPABASE_URL.includes("localhost") ?
+						"http://localhost:5173/signin/sso/success" :
+						"https://cait.beta.praxidike.org/signin/sso/success"
+				}
+			})
+			if (error) {
+				return fail(400, { incorrect: true, error: error.message });
+			} else {
+				if (data?.url) {
+					// redirect the user to the identity provider's authentication flow
+					redirect(303, data.url)
+				}
 			}
 		}
 	}

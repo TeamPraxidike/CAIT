@@ -31,6 +31,8 @@ async function main() {
 			custom_claims jsonb := raw_meta -> 'custom_claims';
 			firstname text := 'placeholder';
 			lastname text := 'placeholder';
+			platform_id text := 'placeholder';
+			institution_id text := 'placeholder';
 			temp_second_split text := 'placeholder';
         BEGIN
 
@@ -39,8 +41,15 @@ async function main() {
 			firstname := raw_meta ->> 'firstName';
 			lastname := raw_meta ->> 'lastName';
 	   	ELSE
+-- 	   		If platformId is present then we are in the SRAM branch
+	   		IF NULLIF(custom_claims ->> 'platformId', '') IS NOT NULL THEN
+	   			firstname := NULLIF(custom_claims ->> 'firstName','');
+	   			lastname := NULLIF(custom_claims ->> 'lastName','');
+	   			platform_id := NULLIF(custom_claims ->> 'platformId','');
+	   			institution_id := NULLIF(custom_claims ->> 'institutionId','');
+	   			
 --          If firstname is not null then it has to be GooGoo
-        	IF NULLIF(custom_claims ->> 'firstName','') IS NOT NULL THEN
+        	ELSIF NULLIF(custom_claims ->> 'firstName','') IS NOT NULL THEN
 				firstname := NULLIF(custom_claims ->> 'firstName','');
 	   	
 --            	lastName could be null tho (WHY GOOGOO WHY?!?), check it
