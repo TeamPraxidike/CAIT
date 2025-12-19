@@ -9,6 +9,7 @@ export interface ChangeLogPayload {
 // The structure of the JSON file change log
 export interface FileChangeLog {
 	fileName: string;
+    fileType: string;
 	action: 'CREATED' | 'UPDATED' | 'DELETED';
 	comment?: string;
 }

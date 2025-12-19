@@ -177,6 +177,7 @@ export async function PUT({ request, params, locals }) {
 			for (const file of fileDiff.add) {
 				fileChangesLog.push({
 					fileName: file.title,
+					fileType: file.type,
 					action: 'CREATED',
 					comment: changeLog.fileComments?.[file.title] || '',
 				});
@@ -189,15 +190,17 @@ export async function PUT({ request, params, locals }) {
 				// Try to find the file in DB to get its human-readable title
 				const dbFile = await prisma.file.findUnique({
 					where: { path: fileToDelete.path },
-					select: { title: true },
+					select: { title: true, type: true},
 				});
 
-				const displayName = dbFile?.title || '';
+				const fileName = dbFile?.title || '';
+				const fileType = dbFile?.type || '';
 
 				fileChangesLog.push({
-					fileName: displayName,
+					fileName: fileName,
+					fileType: fileType,
 					action: 'DELETED',
-					comment: changeLog.fileComments?.[displayName] || '',
+					comment: changeLog.fileComments?.[fileName] || '',
 				});
 			}
 		}
