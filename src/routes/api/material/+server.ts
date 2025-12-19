@@ -209,6 +209,7 @@ export async function POST({ request, locals }) {
 			for (const file of fileInfo.add) {
 				initialFilesLog.push({
 					fileName: file.title,
+					fileType: file.type,
 					action: 'CREATED',
 					comment: '',
 				});
