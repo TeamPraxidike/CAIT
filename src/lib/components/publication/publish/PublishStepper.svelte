@@ -65,7 +65,8 @@
 			bind:fileTUSProgress={data.fileTUSProgress}
 			bind:fileTUSUploadObjects={data.fileTUSUploadObjects}
 			bind:fileURLs={data.fileURLs}
-			bind:files={data.files}/>
+			bind:files={data.files}
+			bind:fileChangeComments={data.fileComments}/>
 	</Step>
 	<Step>
 		<svelte:fragment slot="header">Give your publication a title</svelte:fragment>

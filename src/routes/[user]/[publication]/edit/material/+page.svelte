@@ -25,6 +25,8 @@
 	export let form: ActionData;
 	export let data: PageServerData & LayoutServerData;
 
+	let fileComments: Record<string, string> = {};
+
 	let showAnimation = false;
 
 	let originalFiles: string[] = [];
@@ -150,7 +152,8 @@
 		maintainers,
 		tags,
 		newTags,
-		description
+		description,
+		fileComments,
 	}
 
 	let paramsImmutable: ParamsImmutable;
