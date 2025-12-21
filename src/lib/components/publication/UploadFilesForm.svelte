@@ -17,6 +17,9 @@
 	export let fileTUSProgress: { [key: string]: any } = {}
 	export let fileTUSUploadObjects: { [key: string]: any } = {}
 
+	// reason given by user for the change
+	export let fileChangeComments: Record<string, string> = {};
+
 	// these are purely for the editing page
 	// TODO: either find a different solution or redo UploadFilesForm + FileTable
 	export let isEditContext: boolean = false;
@@ -214,9 +217,16 @@
 			</div>
 		</div>
 	</div>
-	<FileTable operation="edit" fileFormat="upload"
-		   isEditContext={isEditContext} fetchedFiles={fetchedFiles}
-		   bind:files={files} bind:fileURLs={fileURLs}
-		   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
-		   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>
+	<FileTable 
+        operation="edit" 
+        fileFormat="upload"
+        isEditContext={isEditContext} 
+        fetchedFiles={fetchedFiles}
+        bind:files={files} 
+        bind:fileURLs={fileURLs}
+        bind:fileTUSMetadata={fileTUSMetadata} 
+        bind:fileTUSProgress={fileTUSProgress}
+        bind:fileTUSUploadObjects={fileTUSUploadObjects} 
+        bind:supabaseClient={supabaseClient}
+        bind:fileChangeComments={fileChangeComments}  />
 </div>

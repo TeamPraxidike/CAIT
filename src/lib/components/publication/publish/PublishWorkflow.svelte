@@ -164,6 +164,12 @@
 						}
 						formData.append('fileURLs', JSON.stringify(uploadFormat));
 					}
+					
+					const changeLog = {
+						globalComment: '', // TODO: We aren't capturing a global comment for deletions yet
+						fileComments: data.fileComments
+					};
+					formData.append('changeLog', JSON.stringify(changeLog));
 
 					formData.append('userId', paramsImmutable.uid?.toString() || '');
 					formData.append('title', data.title);

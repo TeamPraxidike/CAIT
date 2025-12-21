@@ -30,6 +30,10 @@
 	export let fetchedFiles: FetchedFileArray | [] = [];
 
 
+	// reason given by user for the change
+	export let fileChangeComments: Record<string, string> = {};
+
+
 	export let progressBarColor = '#00A6D6'
 
 	const ms = getModalStore();
@@ -44,16 +48,32 @@
 	}
 
 	function removeFileConfirmationModal(file: File) {
-		ms.trigger({
-				type: 'confirm',
-				title: 'Confirm File Deletion',
-				body: `File "${file.name.length > 20 ? file.name.slice(0, 20) + '...' : file.name}" will be permanently
-				removed once you save your changes (during the last step). Are you sure you wish to proceed?`,
-				response: (r: boolean) => {
-					if (r) removeFile(file)
-				}
-		})
-	}
+        const fileName = file.name;
+
+        ms.trigger({
+            type: 'prompt',
+            title: 'Confirm File Deletion',
+            body: `File "${fileName.length > 20 ? fileName.slice(0, 20) + '...' : fileName}" will be permanently removed once you save your changes (during the last step). Are you sure you wish to proceed?`,
+            // Configuration for the input box
+            value: '', 
+            valueAttr: { 
+                type: 'text', 
+                minlength: 0, 
+                placeholder: 'Give reason for deletion (optional).', 
+                required: false 
+            },
+            response: (r: string | false) => {
+                // 'prompt' returns the string value on Confirm, or false on Cancel.
+                if (r !== false) {
+                    // 1. Capture the reason (key by filename)
+                    fileChangeComments[fileName] = r;
+                    
+                    // 2. Proceed with deletion
+                    removeFile(file);
+                }
+            }
+        })
+    }
 
 	async function removeFile(file: File | FetchedFileItem) {
 		// this branch doesn't really get explored but will leave for clarity

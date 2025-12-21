@@ -8,6 +8,7 @@ import {
 } from '@prisma/client';
 import type { MaterialForm, UploadMaterialFileFormat } from '$lib/database';
 import { convertMaterial } from '$lib/util/types.ts';
+import type { ChangeLogPayload } from '$lib/database/publicationHistory';
 
 export type ParamsMutable = {
 	isSubmitting: boolean;
@@ -33,6 +34,7 @@ export type ParamsMutable = {
 	tags: string[];
 	newTags: string[];
 	description: string;
+	fileComments: Record<string, string>;
 };
 
 export type ParamsImmutable = {
@@ -105,6 +107,11 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	const newTagsJ = JSON.stringify(newTags);
 	const outerArray = JSON.parse(newTagsJ);
 	const newTagsArray: string[] = JSON.parse(outerArray[0]);
+
+	let changeLog: ChangeLogPayload = JSON.parse(
+		data.get("changeLog")?.toString() || '{"globalComment": "", "fileComments": {}}'
+	);
+	
 	const dataForm = {
 		userId,
 		metaData: {
@@ -134,6 +141,7 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 			delete: [],
 			edit: [],
 		},
+		changeLog: changeLog,
 	};
 
 	return {data: dataForm, tags: newTagsArray}
