@@ -193,8 +193,13 @@ export async function PUT({ request, params, locals }) {
 					select: { title: true, type: true},
 				});
 
-				const fileName = dbFile?.title || '';
-				const fileType = dbFile?.type || '';
+				if (!dbFile) {
+                    console.warn(`Skipping log for file path not found in DB: ${fileToDelete.path}`);
+                    continue; 
+                }
+                
+                const fileName = dbFile.title;
+                const fileType = dbFile.type;
 
 				fileChangesLog.push({
 					fileName: fileName,
