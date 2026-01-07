@@ -18,12 +18,12 @@
 	<!--    Hero Text Group    -->
 	<div class="flex flex-col gap-9 z-10
                     md:mt-52 md:gap-6 md:col-start-1 md:col-span-3 md:row-start-1
-                    lg:mt-80 lg:gap-6 lg:col-start-1 lg:col-span-6">
+                    lg:mt-80 lg:gap-6 lg:col-start-1 lg:col-span-5">
 
 		<!--  Hero Heading  -->
 		<section class="flex flex-col gap-4" aria-label="Hero section">
-			<h1 class="font-extrabold lg:font-bold md:text-2xl lg:text-3xl xl:text-4xl">CAIT</h1>
-			<h2 class="xl:pr-40 xl:text-1xl dark:text-surface-200">
+			<img alt="Logo of CAIT with text" data-testid="xl-hero" class="w-1/2" src="/images/home/caitText.png">
+			<h2 class="xl:pr-10 xl:text-1xl dark:text-surface-200">
 				Community Archive for Integrated Teaching: Contribute and search for
 				lecture materials, assignments, exam questions and more! 
 			</h2>
@@ -34,7 +34,7 @@
 			</button>
 		</a>
 	</div>
-	<section class="w-full sm:w-1/2 md:col-span-3 md:w-full lg:col-start-7 lg:col-span-6 xl:p-4" aria-label="Hero image">
+	<section class="w-full md:col-span-3 md:w-full lg:col-start-6 lg:col-span-7" aria-label="Hero image">
 		<img alt="Hero welcoming art" data-testid="xl-hero" class="w-full" src="/images/home/heroArt.png">
 	</section>
 	<hr class="col-span-full row-start-2">
