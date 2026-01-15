@@ -128,10 +128,10 @@ export async function PUT({ request, params, locals }) {
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
 
-	// format: { globalComment: string, fileComments: { [fileName]: string } }
+	// format: { globalComment: string, fileComments: { added: { [fileName]: string }, deleted: { [fileName]: string } } }
 	const changeLog: ChangeLogPayload = body.changeLog || {
 		globalComment: '',
-		fileComments: {},
+		fileComments: { added: {}, deleted: {} },
 	};
 
 	const authError = await verifyAuth(locals, body.userId);
@@ -179,7 +179,7 @@ export async function PUT({ request, params, locals }) {
 					fileName: file.title,
 					fileType: file.type,
 					action: 'CREATED',
-					comment: changeLog.fileComments?.[file.title] || '',
+					comment: changeLog.fileComments?.added?.[file.title] || '',
 				});
 			}
 		}
@@ -190,22 +190,24 @@ export async function PUT({ request, params, locals }) {
 				// Try to find the file in DB to get its human-readable title
 				const dbFile = await prisma.file.findUnique({
 					where: { path: fileToDelete.path },
-					select: { title: true, type: true},
+					select: { title: true, type: true },
 				});
 
 				if (!dbFile) {
-                    console.warn(`Skipping log for file path not found in DB: ${fileToDelete.path}`);
-                    continue; 
-                }
-                
-                const fileName = dbFile.title;
-                const fileType = dbFile.type;
+					console.warn(
+						`Skipping log for file path not found in DB: ${fileToDelete.path}`,
+					);
+					continue;
+				}
+
+				const fileName = dbFile.title;
+				const fileType = dbFile.type;
 
 				fileChangesLog.push({
 					fileName: fileName,
 					fileType: fileType,
 					action: 'DELETED',
-					comment: changeLog.fileComments?.[fileName] || '',
+					comment: changeLog.fileComments?.deleted?.[fileName] || '',
 				});
 			}
 		}
