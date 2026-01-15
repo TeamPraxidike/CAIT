@@ -21,7 +21,10 @@
         getModalStore,
         getToastStore,
         type ModalSettings,
-        type ToastSettings
+        type ToastSettings,
+        Avatar,
+        Accordion,
+        AccordionItem
     } from '@skeletonlabs/skeleton';
     import {goto} from '$app/navigation';
     import { IconMapExtension, saveFile} from '$lib/util/file';
@@ -523,6 +526,9 @@
 			<Tab bind:group={tabSet} name="Related" value={2}>
 				Related
 			</Tab>
+			<Tab bind:group={tabSet} name="Activity Log" value={3}>
+				Activity Log
+			</Tab>
 
 			<svelte:fragment slot="panel">
 				{#if tabSet === 0}
@@ -625,6 +631,68 @@
 					{:catch error}
 						<!--TODO: Change color-->
 						<p style="color: red">Error while loading circuits. Reload the page to try again</p>
+					{/await}
+				{:else if tabSet === 3}
+					{#await data.history}
+						<p>Loading history...</p>
+					{:then history}
+						<div class="flex flex-col gap-4 mt-4">
+							{#if history.length === 0}
+								<p class="text-surface-500">No activity recorded yet.</p>
+							{:else}
+								{#each history as event}
+									<div class="card p-4 variant-filled-surface">
+										<header class="flex justify-between items-center mb-2">
+											<div class="flex items-center gap-2">
+												{#if event.user}
+													{#if event.user.profilePicData}
+														<Avatar src={event.user.profilePicData} width="w-8" />
+													{:else}
+														<Avatar initials="{event.user.firstName[0]}{event.user.lastName[0]}" width="w-8" />
+													{/if}
+													<span class="font-bold">{event.user.firstName} {event.user.lastName}</span>
+												{:else}
+													<span class="font-bold italic">Unknown User</span>
+												{/if}
+												<span class="badge variant-soft-primary">{event.action}</span>
+											</div>
+											<div class="text-sm opacity-70">
+												{new Date(event.createdAt).toLocaleDateString()} {new Date(event.createdAt).toLocaleTimeString()}
+											</div>
+										</header>
+										<section>
+											{#if event.comment}
+												<p class="mb-2">{event.comment}</p>
+											{/if}
+											{#if event.meta && event.meta.fileChanges && event.meta.fileChanges.length > 0}
+												<Accordion>
+													<AccordionItem>
+														<svelte:fragment slot="summary">Files changed ({event.meta.fileChanges.length})</svelte:fragment>
+														<svelte:fragment slot="content">
+															<div class="flex flex-col gap-2">
+																{#each event.meta.fileChanges as fileChange}
+																	<div class="flex items-center gap-2 text-sm">
+																		{#if fileChange.action === 'CREATED'}
+																			<Icon icon="material-symbols:add-circle-outline" class="text-success-500 text-lg" />
+																		{:else if fileChange.action === 'DELETED'}
+																			<Icon icon="material-symbols:delete-outline" class="text-error-500 text-lg" />
+																		{/if}
+																		<span class="font-mono font-bold">{fileChange.fileName}</span>
+																		{#if fileChange.comment}
+																			<span class="opacity-70">- {fileChange.comment}</span>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
+														</svelte:fragment>
+													</AccordionItem>
+												</Accordion>
+											{/if}
+										</section>
+									</div>
+								{/each}
+							{/if}
+						</div>
 					{/await}
 				{/if}
 			</svelte:fragment>
