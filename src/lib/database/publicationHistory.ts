@@ -3,13 +3,16 @@ export interface ChangeLogPayload {
 	globalComment: string;
 
 	// Comment per file
-	fileComments: Record<string, string>;
+	fileComments: {
+		added: Record<string, string>;
+		deleted: Record<string, string>;
+	};
 }
 
 // The structure of the JSON file change log
 export interface FileChangeLog {
 	fileName: string;
-    fileType: string;
+	fileType: string;
 	action: 'CREATED' | 'UPDATED' | 'DELETED';
 	comment?: string;
 }

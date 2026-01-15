@@ -97,7 +97,8 @@
 		maintainers,
 		tags,
 		newTags,
-		description
+		description,
+		fileComments: { added: {}, deleted: {} }
 	}
 
 
@@ -286,7 +287,8 @@
 				maintainers,
 				tags,
 				newTags,
-				description
+				description,
+				fileComments: { added: {}, deleted: {} }
 			};
 
 			// start a 2-sec interval that captures a snapshot

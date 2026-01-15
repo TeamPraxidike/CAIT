@@ -12,7 +12,7 @@ import type { ChangeLogPayload } from '$lib/database/publicationHistory';
 
 export type ParamsMutable = {
 	isSubmitting: boolean;
-	fileTUSMetadata: { [key: string] : FileTUSMetadata };
+	fileTUSMetadata: { [key: string]: FileTUSMetadata };
 	fileTUSProgress: { [key: string]: any };
 	fileTUSUploadObjects: { [key: string]: any };
 	fileURLs: string[];
@@ -34,7 +34,10 @@ export type ParamsMutable = {
 	tags: string[];
 	newTags: string[];
 	description: string;
-	fileComments: Record<string, string>;
+	fileComments: {
+		added: Record<string, string>;
+		deleted: Record<string, string>;
+	};
 };
 
 export type ParamsImmutable = {
@@ -50,45 +53,66 @@ export type ParamsImmutable = {
 export type PublishParams = {
 	mutable: ParamsMutable;
 	immutable: ParamsImmutable;
-}
+};
 
 // Think we have a common file type, may be better to use it instead of this one
 export type URLtype = {
 	title: string;
 	info: string;
-	type: string
-}
+	type: string;
+};
 
-export async function buildMaterialForm(data: FormData): Promise<{data: MaterialForm, tags: string[]} | {
-	status: number;
-	message: string;
-	context: string
-}> {
+export async function buildMaterialForm(data: FormData): Promise<
+	| { data: MaterialForm; tags: string[] }
+	| {
+			status: number;
+			message: string;
+			context: string;
+	  }
+> {
 	// ignore if the context is not correct
 	if (data.get('context') === 'course-form') {
-		return { status: 418, context: 'course-form', message: 'Wrong context' };
+		return {
+			status: 418,
+			context: 'course-form',
+			message: 'Wrong context',
+		};
 	}
 
 	const fileList: string[] = data.getAll('file') as unknown as string[];
-	const fileURLs: URLtype[] = data.getAll('fileURLs').map(x => JSON.parse(x.toString())) as URLtype[];
-	if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1) return { status: 400, message: 'No files provided', context: 'publication-form'};
+	const fileURLs: URLtype[] = data
+		.getAll('fileURLs')
+		.map((x) => JSON.parse(x.toString())) as URLtype[];
+	if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1)
+		return {
+			status: 400,
+			message: 'No files provided',
+			context: 'publication-form',
+		};
 	// const add = await filesToAddOperation(fileList, fileURLs);
 
 	const add = fileList.map((item: string) => {
-		return JSON.parse(item) as UploadMaterialFileFormat
+		return JSON.parse(item) as UploadMaterialFileFormat;
 	});
 
 	const tagsDataEntry = data.get('tags');
-	if (!tagsDataEntry) return { status: 400, message: 'No tags provided', context: 'publication-form' };
+	if (!tagsDataEntry)
+		return {
+			status: 400,
+			message: 'No tags provided',
+			context: 'publication-form',
+		};
 
 	const losDataEntry = data.get('learningObjectives');
 	const maintainersDataEntry = data.get('maintainers');
 	const coverPicFile = data.get('coverPic');
 	const isDraft = data.get('isDraft')?.toString() === 'true';
 	let coverPic = null;
-	const materialTypes = JSON.parse(data.get('type')?.toString() as string).map((type: string) => convertMaterial(type));
+	const materialTypes = JSON.parse(
+		data.get('type')?.toString() as string,
+	).map((type: string) => convertMaterial(type));
 	if (materialTypes.length === 0) {
-		materialTypes.push(MaterialType.other)
+		materialTypes.push(MaterialType.other);
 	}
 
 	if (coverPicFile instanceof File) {
@@ -109,9 +133,10 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	const newTagsArray: string[] = JSON.parse(outerArray[0]);
 
 	let changeLog: ChangeLogPayload = JSON.parse(
-		data.get("changeLog")?.toString() || '{"globalComment": "", "fileComments": {}}'
+		data.get('changeLog')?.toString() ||
+			'{"globalComment": "", "fileComments": { "added": {}, "deleted": {} }}',
 	);
-	
+
 	const dataForm = {
 		userId,
 		metaData: {
@@ -132,7 +157,7 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 			maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 			materialType: materialTypes,
 			isDraft: isDraft,
-			fileURLs: fileURLs.map(x => x.title) || [],
+			fileURLs: fileURLs.map((x) => x.title) || [],
 			course: Number(data.get('course')?.toString()),
 		},
 		coverPic,
@@ -144,5 +169,5 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 		changeLog: changeLog,
 	};
 
-	return {data: dataForm, tags: newTagsArray}
+	return { data: dataForm, tags: newTagsArray };
 }
