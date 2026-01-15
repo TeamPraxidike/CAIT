@@ -194,7 +194,7 @@
 					}
 
 					const changeLog = {
-						globalComment: '', // TODO: We aren't capturing a global comment for deletions yet
+						globalComment: data.globalComment,
 						fileComments: {
 							added: cleanAddedComments,
 							deleted: cleanDeletedComments

@@ -69,6 +69,13 @@
 	</div>
 </div>
 
+<div class="mt-4">
+	<label class="label">
+		<span class="font-bold">Comment on changes (Optional)</span>
+		<textarea class="textarea" rows="3" placeholder="Describe the changes made..." bind:value={data.globalComment}></textarea>
+	</label>
+</div>
+
 {#if !draft}
 	<div class="flex flex-row justify-end items-center gap-2">
 		<p class="pl-3">Save as a draft: </p>
