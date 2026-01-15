@@ -38,6 +38,7 @@ export type ParamsMutable = {
 		added: Record<string, string>;
 		deleted: Record<string, string>;
 	};
+	globalComment: string;
 };
 
 export type ParamsImmutable = {

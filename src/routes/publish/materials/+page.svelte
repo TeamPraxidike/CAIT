@@ -98,7 +98,8 @@
 		tags,
 		newTags,
 		description,
-		fileComments: { added: {}, deleted: {} }
+		fileComments: { added: {}, deleted: {} },
+		globalComment: ''
 	}
 
 
@@ -288,7 +289,8 @@
 				tags,
 				newTags,
 				description,
-				fileComments: { added: {}, deleted: {} }
+				fileComments: { added: {}, deleted: {} },
+				globalComment: ''
 			};
 
 			// start a 2-sec interval that captures a snapshot
