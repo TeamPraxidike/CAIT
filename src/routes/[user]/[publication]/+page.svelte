@@ -657,12 +657,12 @@
 												<span class="badge variant-soft-primary">{event.action}</span>
 											</div>
 											<div class="text-sm opacity-70">
-												{new Date(event.createdAt).toLocaleDateString()} {new Date(event.createdAt).toLocaleTimeString()}
+												{new Date(event.createdAt).toLocaleDateString('en-GB')} {new Date(event.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
 											</div>
 										</header>
 										<section>
 											{#if event.comment}
-												<p class="mb-2">{event.comment}</p>
+												<p class="mb-2 break-all whitespace-pre-wrap">{event.comment}</p>
 											{/if}
 											{#if event.meta && event.meta.fileChanges && event.meta.fileChanges.length > 0}
 												<Accordion>
@@ -671,15 +671,17 @@
 														<svelte:fragment slot="content">
 															<div class="flex flex-col gap-2">
 																{#each event.meta.fileChanges as fileChange}
-																	<div class="flex items-center gap-2 text-sm">
-																		{#if fileChange.action === 'CREATED'}
-																			<Icon icon="material-symbols:add-circle-outline" class="text-success-500 text-lg" />
-																		{:else if fileChange.action === 'DELETED'}
-																			<Icon icon="material-symbols:delete-outline" class="text-error-500 text-lg" />
-																		{/if}
-																		<span class="font-mono font-bold">{fileChange.fileName}</span>
+																	<div class="text-sm w-full pl-6 -indent-6">
+																		<span class="inline-block align-text-bottom mr-1">
+																			{#if fileChange.action === 'CREATED'}
+																				<Icon icon="material-symbols:add-circle-outline" class="text-success-500 text-lg" />
+																			{:else if fileChange.action === 'DELETED'}
+																				<Icon icon="material-symbols:delete-outline" class="text-error-500 text-lg" />
+																			{/if}
+																		</span>
+																		<span class="font-mono font-bold mr-1">{fileChange.fileName}</span>
 																		{#if fileChange.comment}
-																			<span class="opacity-70">- {fileChange.comment}</span>
+																			<span class="opacity-70 break-all whitespace-pre-wrap">- {fileChange.comment}</span>
 																		{/if}
 																	</div>
 																{/each}
