@@ -248,7 +248,7 @@ export async function PUT({ request, params, locals }) {
 					publicationId: publicationId,
 					userId: userId,
 
-					comment: changeLog.globalComment,
+					comment: changeLog.globalComment || '',
 
 					meta: {
 						actorSnapshot: createActorSnapshot(sessionUser),
