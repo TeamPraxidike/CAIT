@@ -1,1 +1,5 @@
 providers = ['node']
+
+[phases.setup]
+# vps setup also includes openssl
+nixPkgs = ["nodejs_22", "openssl"]

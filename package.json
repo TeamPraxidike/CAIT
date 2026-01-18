@@ -18,6 +18,9 @@
 		"test:e2e:report": "scripts/run-e2e.sh && playwright show-report",
 		"test:e2e:generator": "npx playwright codegen localhost:5173/"
 	},
+	"engines": {
+		"node": ">=22"
+	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.9.1",
 		"@esbuild-plugins/tsconfig-paths": "^0.1.2",
