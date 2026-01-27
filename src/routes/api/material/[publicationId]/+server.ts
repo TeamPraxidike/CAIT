@@ -32,7 +32,6 @@ import { getMaintainers, getPublisher } from '$lib/database/publication';
 import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 import { profilePicFetcher } from '$lib/database/file';
 import {
-	createActorSnapshot,
 	type ChangeLogPayload,
 	type FileChangeLog,
 } from '$lib/database/publicationHistory.js';
@@ -240,8 +239,6 @@ export async function PUT({ request, params, locals }) {
 
 		// Log if files changed or if user wrote comment about the update
 		if (hasMaterialChanges || hasGlobalComment) {
-			const sessionUser = locals.session?.user;
-
 			await prisma.publicationHistory.create({
 				data: {
 					action: PublicationEventType.UPDATE,
@@ -251,7 +248,6 @@ export async function PUT({ request, params, locals }) {
 					comment: changeLog.globalComment || '',
 
 					meta: {
-						actorSnapshot: createActorSnapshot(sessionUser),
 						fileChanges: fileChangesLog,
 					},
 				},

@@ -652,6 +652,7 @@
 													{/if}
 													<span class="font-bold">{event.user.firstName} {event.user.lastName}</span>
 												{:else}
+												    <Avatar initials="?" width="w-8" />
 													<span class="font-bold italic">Unknown User</span>
 												{/if}
 												<span class="badge variant-soft-primary">{event.action}</span>

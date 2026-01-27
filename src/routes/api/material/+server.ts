@@ -23,10 +23,7 @@ import {
 import { verifyAuth } from '$lib/database/auth';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { isMaterialValid } from '$lib/util/validatePublication';
-import {
-	createActorSnapshot,
-	type FileChangeLog,
-} from '$lib/database/publicationHistory';
+import { type FileChangeLog } from '$lib/database/publicationHistory';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -224,7 +221,6 @@ export async function POST({ request, locals }) {
 				userId: userId,
 				comment: '',
 				meta: {
-					actorSnapshot: createActorSnapshot(session.user),
 					fileChanges: initialFilesLog,
 				},
 			},

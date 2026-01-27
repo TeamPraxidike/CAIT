@@ -17,6 +17,7 @@ export interface FileChangeLog {
 	comment?: string;
 }
 
+// * Currently not used, but kept for future reference
 export interface ActorSnapshot {
 	name: string;
 	email: string;
@@ -24,10 +25,10 @@ export interface ActorSnapshot {
 }
 
 export interface HistoryMeta {
-	actorSnapshot: ActorSnapshot;
 	fileChanges: FileChangeLog[];
 }
 
+// * Currently not used, but kept for future reference
 export function createActorSnapshot(user: any): ActorSnapshot {
 	if (!user) {
 		return {

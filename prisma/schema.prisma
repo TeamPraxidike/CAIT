@@ -141,8 +141,8 @@ model PublicationHistory {
   // Optional user explanation on the change
   comment String?
 
-  // Snapshot data. We maintain information necessary to the history log (ex. even if a file is deleted we still maintain its name here or last known user name in case of user deletion)
-  // Contains: { actorSnapshot, fileChanges: [{ fileName, action, comment }] }
+  // Snapshot data. We maintain information necessary to the history log (ex. even if a file is deleted we still maintain its name here)
+  // Contains: { fileChanges: [{ fileName, action, comment }] }
   meta Json?
 
   // Who made this change: optional so log survives user deletion
