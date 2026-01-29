@@ -14,6 +14,7 @@
 	export let draft: boolean;
 	export let markedAsDraft: boolean;
 	export let edit: boolean;
+	export let originalFileIds: string[] = [];
 
 
 	const onNextHandler = () => {
@@ -60,12 +61,14 @@
 		<UploadFilesForm
 			supabaseURL={paramsImmutable.supabaseURL}
 			isEditContext={edit}
+			originalFileIds={originalFileIds}
 			bind:supabaseClient={paramsImmutable.supabaseClient}
 			bind:fileTUSMetadata={data.fileTUSMetadata}
 			bind:fileTUSProgress={data.fileTUSProgress}
 			bind:fileTUSUploadObjects={data.fileTUSUploadObjects}
 			bind:fileURLs={data.fileURLs}
-			bind:files={data.files}/>
+			bind:files={data.files}
+			bind:fileChangeComments={data.fileComments}/>
 	</Step>
 	<Step>
 		<svelte:fragment slot="header">Give your publication a title</svelte:fragment>

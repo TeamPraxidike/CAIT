@@ -15,10 +15,15 @@ import { enqueueMaterialComparison } from '$lib/PiscinaUtils/runner';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import { mapToDifficulty, mapToType } from '$lib';
 
-import type { PrismaClient, Tag} from '@prisma/client';
+import {
+	type PrismaClient,
+	type Tag,
+	PublicationEventType,
+} from '@prisma/client';
 import { verifyAuth } from '$lib/database/auth';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
 import { isMaterialValid } from '$lib/util/validatePublication';
+import { type FileChangeLog } from '$lib/database/publicationHistory';
 
 const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 	const tagsC = tags.map((x) => x.content);
@@ -70,9 +75,9 @@ export const GET: RequestHandler = async ({ url }) => {
 			false,
 		);
 
-		const idsMat = materials.map(m => m.publicationId)
+		const idsMat = materials.map((m) => m.publicationId);
 
-		materials = materials.slice(0, amount)
+		materials = materials.slice(0, amount);
 
 		for (const material of materials) {
 			material.publication.tags = reorderTags(
@@ -81,30 +86,34 @@ export const GET: RequestHandler = async ({ url }) => {
 			);
 		}
 
-		materials = await Promise.all(materials.map(async (material) => {
-			return {
-				...material,
-				publisher: {
-					...material.publication.publisher,
-					profilePicData: (await profilePicFetcher(
-						material.publication.publisher.profilePic,
-					)).data,
-				},
-				coverPicData: (await coverPicFetcher(
-					material.encapsulatingType,
-					material.publication.coverPic,
-				)).data,
-			};
-		}));
-
-
+		materials = await Promise.all(
+			materials.map(async (material) => {
+				return {
+					...material,
+					publisher: {
+						...material.publication.publisher,
+						profilePicData: (
+							await profilePicFetcher(
+								material.publication.publisher.profilePic,
+							)
+						).data,
+					},
+					coverPicData: (
+						await coverPicFetcher(
+							material.encapsulatingType,
+							material.publication.coverPic,
+						)
+					).data,
+				};
+			}),
+		);
 
 		return new Response(
 			JSON.stringify({
 				//materials: materials.slice(0, amount),
 				materials: materials,
 				//idsMat: materials.map((m) => m.publicationId),
-				idsMat: idsMat
+				idsMat: idsMat,
 			}),
 			{
 				status: 200,
@@ -127,13 +136,12 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 };
 
-
 /**
  * Create a publication of type material
  * @param request
  * @param params
  */
-export async function POST({ request , locals}) {
+export async function POST({ request, locals }) {
 	// Authentication step
 	// return 401 if user not authenticated
 	// Add 400 Bad Request check
@@ -142,7 +150,9 @@ export async function POST({ request , locals}) {
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
 
-	if ((await locals.safeGetSession()).user!.id !== body.userId) {
+	const session = await locals.safeGetSession();
+
+	if (session.user!.id !== body.userId) {
 		return new Response(
 			JSON.stringify({
 				error: 'Bad Request - User IDs not matching',
@@ -158,48 +168,76 @@ export async function POST({ request , locals}) {
 	const fileInfo: FileDiffActions = body.fileDiff;
 	const coverPic = body.coverPic;
 
-	if(!isMaterialValid(metaData, fileInfo)) {
+	if (!isMaterialValid(metaData, fileInfo)) {
 		metaData.isDraft = true;
 	}
 
 	try {
-		const createdMaterial: MaterialWithPublicationNoFiles = await prisma.$transaction(
-			async (prismaTransaction: PrismaClient) => {
-				const material = await createMaterialPublication(
-					userId,
-					metaData,
-					prismaTransaction,
-				);
+		const createdMaterial: MaterialWithPublicationNoFiles =
+			await prisma.$transaction(
+				async (prismaTransaction: PrismaClient) => {
+					const material = await createMaterialPublication(
+						userId,
+						metaData,
+						prismaTransaction,
+					);
 
-				await handleConnections(
-					tags,
-					maintainers,
-					material.publicationId,
-					prismaTransaction,
-				);
+					await handleConnections(
+						tags,
+						maintainers,
+						material.publicationId,
+						prismaTransaction,
+					);
 
-				return material;
-			},
-		);
+					return material;
+				},
+			);
 
-		await updateCoverPic(
-			coverPic,
-			createdMaterial.publicationId,
-			userId
-		);
+		await updateCoverPic(coverPic, createdMaterial.publicationId, userId);
 
 		await updateFiles(fileInfo, createdMaterial.id, userId);
 
 		await updateReputation(userId, 2);
 
+		// == Handle logging for the newly created material ==
+		// Prepare the File List
+		const initialFilesLog: FileChangeLog[] = [];
+		if (fileInfo.add && fileInfo.add.length > 0) {
+			for (const file of fileInfo.add) {
+				initialFilesLog.push({
+					fileName: file.title,
+					fileType: file.type,
+					action: 'CREATED',
+					comment: '',
+				});
+			}
+		}
+
+		// Create the Genesis Log Entry
+		await prisma.publicationHistory.create({
+			data: {
+				action: PublicationEventType.CREATE,
+				publicationId: createdMaterial.publicationId,
+				userId: userId,
+				comment: '',
+				meta: {
+					fileChanges: initialFilesLog,
+				},
+			},
+		});
+
+		// ===================================================
+
 		const publicationId = createdMaterial.publicationId;
 		const materialId = createdMaterial.id;
 
 		setTimeout(() => {
-			enqueueMaterialComparison(publicationId, materialId).catch((error) => {
-				console.error(error);
-			}
-		)}, 2000);
+			enqueueMaterialComparison(publicationId, materialId).catch(
+				(error) => {
+					console.error(error);
+				},
+			);
+		}, 2000);
 
 		return new Response(JSON.stringify({ id: publicationId }), {
 			status: 200,
@@ -211,4 +249,3 @@ export async function POST({ request , locals}) {
 		});
 	}
 }
-

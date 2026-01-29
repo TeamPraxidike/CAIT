@@ -23,6 +23,8 @@
 	// Editing mode needs to know what the original files were, so that it can delete only the ones that were removed
 	// Here we pass the path of the file
 	export let originalFiles: any[] = [];
+	// Here we pass the name of the file
+	export let originalFileNames: string[] = [];
 
 	export let saveInterval: number | undefined = undefined;
 	const toastStore = getToastStore();
@@ -165,6 +167,41 @@
 						formData.append('fileURLs', JSON.stringify(uploadFormat));
 					}
 
+					// Cleanup: Ensure we only send "added" comments for files that are actually in the final list
+					// This handles the "Add -> Delete" case where the add never really happened
+					const activeFileNames = new Set(Array.from(data.files).map(f => f.name));
+					const cleanAddedComments = {};
+
+					for (const [fileName, comment] of Object.entries(data.fileComments.added)) {
+						if (activeFileNames.has(fileName)) {
+							cleanAddedComments[fileName] = comment;
+						}
+					}
+
+					// Cleanup: Ensure we only send "deleted" comments for files that were actually original
+					// and are no longer in the active list.
+					// This handles the "Add (transient) -> Delete" case where we shouldn't log a delete.
+					const cleanDeletedComments = {};
+					const originalFileNamesSet = new Set(originalFileNames);
+
+					for (const [fileName, comment] of Object.entries(data.fileComments.deleted)) {
+						// Only keep comment if:
+						// 1. The file was originally present (so it's a real deletion)
+						// 2. The file is NOT currently present (if it is, it's not deleted)
+						if (originalFileNamesSet.has(fileName) && !activeFileNames.has(fileName)) {
+							cleanDeletedComments[fileName] = comment;
+						}
+					}
+
+					const changeLog = {
+						globalComment: data.globalComment,
+						fileComments: {
+							added: cleanAddedComments,
+							deleted: cleanDeletedComments
+						}
+					};
+					formData.append('changeLog', JSON.stringify(changeLog));
+
 					formData.append('userId', paramsImmutable.uid?.toString() || '');
 					formData.append('title', data.title);
 					formData.append('description', data.description);
@@ -188,6 +225,7 @@
 				bind:data={data}
 				paramsImmutable={paramsImmutable}
 				edit={edit}
+				originalFileIds={originalFiles}
 				bind:draft={draft}
 				bind:markedAsDraft={markedAsDraft}
 			/>

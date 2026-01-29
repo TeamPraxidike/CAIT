@@ -40,18 +40,23 @@ export const load: PageServerLoad = async ({
 		try {
 			// Gets circuits that contain the current publication
 			// Todo: change hideous api path -> what does "all" mean??
-			const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
+			const circuitRes = await fetch(
+				`/api/circuit/${params.publication}/all`,
+			);
 			if (!circuitRes.ok && circuitRes.status === 404) {
 				return null;
-			}
-			else if (!circuitRes.ok){
+			} else if (!circuitRes.ok) {
 				// something definitely went wrong here
-				throw new Error(`Failed to load files: ${circuitRes.statusText}`);
+				throw new Error(
+					`Failed to load files: ${circuitRes.statusText}`,
+				);
 			}
 			return await circuitRes.json();
-		}
-		catch (err) {
-			console.error('Error while circuits that contain pub, page.server:\n', err);
+		} catch (err) {
+			console.error(
+				'Error while circuits that contain pub, page.server:\n',
+				err,
+			);
 		}
 	}
 
@@ -64,15 +69,37 @@ export const load: PageServerLoad = async ({
 
 			if (!similarRes.ok && similarRes.status === 404) {
 				return null;
-			}
-			else if (!similarRes.ok){
+			} else if (!similarRes.ok) {
 				// something definitely went wrong here
-				throw new Error(`Failed to get similar publications: ${similarRes.statusText}`);
+				throw new Error(
+					`Failed to get similar publications: ${similarRes.statusText}`,
+				);
 			}
 			return await similarRes.json();
+		} catch (err) {
+			console.error(
+				'Error while circuits that contain pub, page.server:\n',
+				err,
+			);
 		}
-		catch (err) {
-			console.error('Error while circuits that contain pub, page.server:\n', err);
+	}
+
+	async function getHistory() {
+		try {
+			const historyRes = await fetch(
+				`/api/publication/${params.publication}/history`,
+			);
+			if (!historyRes.ok) {
+				console.error(
+					'Failed to fetch history:',
+					historyRes.statusText,
+				);
+				return [];
+			}
+			return await historyRes.json();
+		} catch (err) {
+			console.error('Error fetching history:', err);
+			return [];
 		}
 	}
 
@@ -82,6 +109,7 @@ export const load: PageServerLoad = async ({
 		liked: liked,
 		saved: saved,
 		reported: reported,
+		history: getHistory(),
 	};
 };
 

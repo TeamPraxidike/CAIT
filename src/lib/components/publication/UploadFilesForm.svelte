@@ -17,10 +17,17 @@
 	export let fileTUSProgress: { [key: string]: any } = {}
 	export let fileTUSUploadObjects: { [key: string]: any } = {}
 
+	// reason given by user for the change
+	export let fileChangeComments: {
+		added: Record<string, string>;
+		deleted: Record<string, string>;
+	} = { added: {}, deleted: {} };
+
 	// these are purely for the editing page
 	// TODO: either find a different solution or redo UploadFilesForm + FileTable
 	export let isEditContext: boolean = false;
 	export let fetchedFiles: FetchedFileArray | [] = [];
+	export let originalFileIds: string[] = [];
 
 	export let supabaseURL: string = 'http://localhost:8000';
 	const bucketName = "uploadedFiles"
@@ -214,9 +221,16 @@
 			</div>
 		</div>
 	</div>
-	<FileTable operation="edit" fileFormat="upload"
-		   isEditContext={isEditContext} fetchedFiles={fetchedFiles}
-		   bind:files={files} bind:fileURLs={fileURLs}
-		   bind:fileTUSMetadata={fileTUSMetadata} bind:fileTUSProgress={fileTUSProgress}
-		   bind:fileTUSUploadObjects={fileTUSUploadObjects} bind:supabaseClient={supabaseClient}/>
+	<FileTable
+        operation="edit"
+        fileFormat="upload"
+        isEditContext={isEditContext}
+        originalFileIds={originalFileIds}
+        bind:files={files}
+        bind:fileURLs={fileURLs}
+        bind:fileTUSMetadata={fileTUSMetadata}
+        bind:fileTUSProgress={fileTUSProgress}
+        bind:fileTUSUploadObjects={fileTUSUploadObjects}
+        bind:supabaseClient={supabaseClient}
+        bind:fileChangeComments={fileChangeComments}  />
 </div>
