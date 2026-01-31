@@ -2,7 +2,7 @@
 	import { Meta, Section } from '$lib';
 
 	const repText = 'The reputation system in the platform is based on the quantity and quality of the publications a user publishes.' +
-		' It reflects on the activity of the user and how others rate their publications and comments.It is directly proportional ' +
+		' It reflects on the activity of the user and how others rate their publications and comments. It is directly proportional ' +
 		'to the number of publications, comments made and stars a user has received. If another user saves or indicates that they ' +
 		'use your publication, this will be reflected in an increase of your reputation.'
 	const matDescription = 'The smallest and most common unit of publication on the platform represents a collection of files, which are described by the users with metadata such as title, publication, difficulty and tags. One such collection can include files of a variety of types (PDF, Python notebook and more).';

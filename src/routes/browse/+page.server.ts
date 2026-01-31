@@ -67,6 +67,22 @@ export async function load({ url, fetch, locals }) {
 
 	}
 
+	async function fetchCourses() {
+		try{
+			const res = await fetch(`/api/course`);
+
+			if (!res.ok) {
+				throw new Error(`Failed to load courses in browse: ${res.statusText}`);
+			}
+			console.log(res);
+			return res.json();
+		}
+		catch (err) {
+			console.error('Error while getting courses, page.server:\n', err);
+		}
+
+	}
+
 
 	let liked: number[] = [];
 	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
@@ -96,7 +112,7 @@ export async function load({ url, fetch, locals }) {
 
 		tags = await (await fetch(`/api/tags`)).json();
 	}
-
+	
 	return {
 		selectedTag,
 		type,
@@ -106,6 +122,7 @@ export async function load({ url, fetch, locals }) {
 		materials: fetchMaterials(),
 		users: fetchUsers(),
 		circuits: fetchCircuits(),
+		courses: fetchCourses(),
 		tags,
 		liked,
 		saved,
