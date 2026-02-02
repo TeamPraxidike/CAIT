@@ -124,18 +124,7 @@
 			classes: 'text-surface-900',
 		});
 	}
-	const onNextHandler = async (event: CustomEvent) => {
-			window.scrollTo({
-				top: 0,
-				behavior: 'smooth'
-			});
-		if (event.detail.step === 0) {
-			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 
-			nodeActions = nodeDiffActions;
-			circuitCoverPic = coverPic;
-		}
-	}
 	let circuitNodesPlaceholder: NodeInfo[] = [];
 	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
 
@@ -249,6 +238,7 @@
 
 <PublishWorkflow bind:data={paramsMutable}
 				 dataMaterial={null}
+				 dataCircuit={null}
 				 edit={false}
 				 paramsImmutable={paramsImmutable}
 				 bind:showAnimation={showAnimation}

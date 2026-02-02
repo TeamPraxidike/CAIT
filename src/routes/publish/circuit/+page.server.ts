@@ -39,6 +39,9 @@ export const actions = {
 	 */
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
+
+		console.log("Form data received:", data);
+
 		const pid = data.get('userId')?.toString();
 		const title = data.get('title')?.toString() || '';
 		const description = data.get('description')?.toString() || '';
@@ -53,9 +56,11 @@ export const actions = {
 		const isDraft = data.get('isDraft')?.toString() === 'true';
 
 		//circuit data does not get carried over to the submission of the form, don't know why
-		const circuitData = data.get('circuitData')?.toString() || '';
+		const circuitData = data.get('circuitData')?.toString() || '[]';
 
-		const circuitCoverPic = data.get('coverPic')?.toString() || '';
+
+		const circuitCoverPic = data.get('coverPic')?.toString() || '{}';
+
 
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);

@@ -8,13 +8,20 @@
 	import { enhance } from '$app/forms';
 	import { allUploadsDone } from '$lib/util/file';
 	import { getToastStore, ProgressRadial } from '@skeletonlabs/skeleton';
-	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
+	import type {
+		ParamsImmutable,
+		ParamsMutable,
+		ParamsMutableCircuit,
+		ParamsMutableMaterial
+	} from '$lib/util/frontendTypes.ts';
 	import { tick } from 'svelte';
 	import { clearAllData } from '$lib/util/indexDB.ts';
+	import PublishStepperCircuit from '$lib/components/publication/PublishStepperCircuit.svelte';
 
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial | null;
+	export let dataCircuit: ParamsMutableCircuit | null;
 	export let paramsImmutable: ParamsImmutable;
 
 	export let showAnimation: boolean;
@@ -176,6 +183,10 @@
 						formData.append('copyright', dataMaterial.copyright);
 						formData.append('coverPic', dataMaterial.coverPic || '');
 						formData.append('course', dataMaterial.course ? dataMaterial.course.toString() : 'null');
+					} else if (dataCircuit) {
+						data.isSubmitting = true;
+						formData.append('circuitData', JSON.stringify(dataCircuit.circuitData));
+						formData.append('coverPic', JSON.stringify(dataCircuit.coverPic) || '');
 					}
 
 					formData.append('userId', paramsImmutable.uid?.toString() || '');
@@ -193,15 +204,27 @@
 						formData.append('materialId', materialId?.toString() || '');
 					}
 			  }}>
-			<PublishStepper
-				bind:data={data}
-				bind:dataMaterial={dataMaterial}
-				paramsImmutable={paramsImmutable}
-				edit={edit}
-				bind:draft={draft}
-				bind:markedAsDraft={markedAsDraft}
-				circuit={circuit}
-			/>
+
+			{#if !circuit}
+				<PublishStepper
+					bind:data={data}
+					bind:dataMaterial={dataMaterial}
+					paramsImmutable={paramsImmutable}
+					edit={edit}
+					bind:draft={draft}
+					bind:markedAsDraft={markedAsDraft}
+					circuit={circuit}
+				/>
+			{:else}
+				<PublishStepperCircuit
+					bind:data={data}
+					bind:dataCircuit={dataCircuit}
+					paramsImmutable={paramsImmutable}
+					bind:draft={draft}
+					bind:markedAsDraft={markedAsDraft}
+				/>
+			{/if}
+
 		</form>
 
 		<!-- Loading Radial -->

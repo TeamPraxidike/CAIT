@@ -6,7 +6,11 @@ import {
 	MaterialType,
 	type Tag as PrismaTag,
 } from '@prisma/client';
-import type { MaterialForm, UploadMaterialFileFormat } from '$lib/database';
+import type {
+	MaterialForm,
+	NodeDiffActions,
+	UploadMaterialFileFormat,
+} from '$lib/database';
 import { convertMaterial } from '$lib/util/types.ts';
 
 export type ParamsMutable = {
@@ -37,6 +41,11 @@ export type ParamsMutableMaterial = {
 	estimate: number;
 	copyright: string;
 };
+
+export type ParamsMutableCircuit = {
+	circuitData: NodeDiffActions;
+	coverPic: File | undefined;
+}
 
 
 export type ParamsImmutable = {

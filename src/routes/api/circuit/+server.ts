@@ -88,17 +88,21 @@ export async function POST({ request, locals }) {
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
 
+	console.log("POST - received body:", body);
 	const tags = body.metaData.tags;
 	const maintainers = body.metaData.maintainers;
 	const metaData = body.metaData;
 	const userId = body.userId;
 	const nodeInfo: NodeDiffActions = body.nodeDiff;
+
 	const coverPic = body.coverPic;
 	const numNodes = body.nodeDiff.numNodes;
 
 	if (!validateMetadata(metaData)) {
 		metaData.isDraft = true;
 	}
+
+	console.log("POST - metadata is validated:", metaData);
 
 	try {
 		const createdCircuit: CircuitWithPublication = await prisma.$transaction(
@@ -109,6 +113,7 @@ export async function POST({ request, locals }) {
 					metaData,
 					prismaTransaction,
 				);
+				console.log("POST - created circuit publication:", circuit);
 
 				await handleConnections(
 					tags,
