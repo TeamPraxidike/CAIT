@@ -69,7 +69,7 @@ export async function load({ url, fetch, locals }) {
 
 	async function fetchCourses() {
 		try{
-			const res = await fetch(`/api/course`);
+			const res = await fetch(`/api/course-extended`);
 
 			if (!res.ok) {
 				throw new Error(`Failed to load courses in browse: ${res.statusText}`);

@@ -239,3 +239,4 @@ export async function getAllCourses(): Promise<Course[]> {
 	return prisma.course.findMany();
 }
 
+

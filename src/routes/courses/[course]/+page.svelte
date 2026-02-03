@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Meta, PublicationCard, UserProfileBar } from '$lib';
+    import CourseProfileBar  from '$lib/components/course/CourseProfileBar.svelte';
 	import type { LayoutData, PageServerData } from './$types';
     import { type Material, type Publication, PublicationType, type Tag, type User } from '@prisma/client';
 	import type { FetchedFileItem } from '$lib/database';
@@ -49,7 +50,7 @@
 
 <!-- <UserProfileBar user={user} userPhotoUrl={profilePic.data} bind:tabset={tabSet}/> -->
 
-
+<CourseProfileBar ></CourseProfileBar>
 
 <div class="col-span-8">
     asdf

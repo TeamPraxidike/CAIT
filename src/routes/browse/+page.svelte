@@ -23,7 +23,7 @@
 
 
 	let users: (User & { posts: Publication[], profilePicData: string })[] = [];
-	let courses: (Course)[] = [];
+	let courses: (Course& {coverPic: {data: string, fileId: string} })[] = [];
 	let tags = data.tags;
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
@@ -207,6 +207,8 @@
 				return response.json();
 			})
 			.then(data => {
+				console.log("iets");
+				console.log(s);
 				if (s === 'material') {
 					materials = data.publications.map(x => ({
 						id: x.materials.id,
@@ -249,12 +251,15 @@
 
 	onMount(async () => {
 		users = (await data.users).users;
+		console.log("users");
+		console.log(users);
 		allPublishersObjects = users.map((x: any) => ({
 			id: x.id,
 			content: (x.firstName + ' ' + x.lastName)
 		}));
 
 		courses = (await data.courses);
+		console.log("course");
 		console.log(courses);
 
 
@@ -266,6 +271,8 @@
 		}
 
 		data.materials.then((matData) => {
+			console.log('matDAta')
+			console.log(matData);
 
 			materials = matData.materials;
 			idsMat = matData.idsMat;
@@ -454,9 +461,10 @@
 			{#each courses as course (course.id)}
 				<!-- console.log(course.id); -->
 				<!-- <p style="color: red"> {course.id} - {course.courseName}</p> -->
+				 {console.log(course)}
 				<CourseCard view="search" course={course} 
 						  className="col-span-1"
-						  coursePhotoUrl={null}></CourseCard>
+						  coursePhotoUrl={course.coverPic.data}></CourseCard>
 				
 			{/each}
 		{:catch _}
