@@ -1,27 +1,19 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
-	import { CircuitComponent, Meta, PublishReview } from '$lib';
+	import { CircuitComponent, Meta } from '$lib';
 	import type { ActionData, PageServerData } from './$types';
-	import { enhance } from '$app/forms';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
-	import { getToastStore, ProgressRadial, Step, Stepper } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
 	import { page } from '$app/state';
-	import MetadataLOandPK from '$lib/components/MetadataLOandPK.svelte';
-	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
-	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
-	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
 	// $: ({loggedUser} = data)
 
 	import {
-		saveCircuitSnapshot, getCircuitSnapshot, clearCircuitSnapshot, type FormSnapshot, clearIfTimeExceeded
+		saveCircuitSnapshot, getCircuitSnapshot, type FormSnapshot, clearIfTimeExceeded
 	} from '$lib/util/indexDB';
 	import { validateMetadata } from '$lib/util/validatePublication';
-	import Banner from '$lib/components/publication/Banner.svelte';
 	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableCircuit } from '$lib/util/frontendTypes.ts';
 	import type { CourseWithCoverPic } from '$lib/database/courses.ts';

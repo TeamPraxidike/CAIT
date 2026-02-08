@@ -2,7 +2,7 @@
 	import type { ActionData, PageServerData } from './$types';
 	import type {  Difficulty, Tag as PrismaTag } from '@prisma/client';
 	import { page } from '$app/state';
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	import {

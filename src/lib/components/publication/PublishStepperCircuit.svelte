@@ -1,11 +1,7 @@
 <script lang="ts">
-	import TitleStep from '$lib/components/publication/publish/TitleStep.svelte';
 	import MetaInfoStep from '$lib/components/publication/publish/MetaInfoStep.svelte';
 	import Preview from '$lib/components/publication/publish/Preview.svelte';
-	import UploadFilesForm from '$lib/components/publication/UploadFilesForm.svelte';
 	import { Step, Stepper } from '@skeletonlabs/skeleton';
-	import { changeCourse } from '$lib/util/coursesLogic.ts';
-	import { downloadFileFromSupabase } from '$lib/util/file.ts';
 	import type {
 		ParamsImmutable,
 		ParamsMutable,
@@ -14,7 +10,6 @@
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import { CircuitComponent } from '$lib';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes.ts';
-	import { isUndefinedType } from 'eslint-plugin-svelte/lib/utils/ts-utils';
 
 	export let data: ParamsMutable;
 	export let dataCircuit: ParamsMutableCircuit | null;
