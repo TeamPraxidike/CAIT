@@ -44,7 +44,7 @@ export type ParamsMutableMaterial = {
 
 export type ParamsMutableCircuit = {
 	circuitData: NodeDiffActions;
-	coverPic: File | undefined;
+	coverPic: {type: string, info: string} | undefined;
 }
 
 

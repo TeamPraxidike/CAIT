@@ -40,8 +40,6 @@ export const actions = {
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
 
-		console.log("Form data received:", data);
-
 		const pid = data.get('userId')?.toString();
 		const title = data.get('title')?.toString() || '';
 		const description = data.get('description')?.toString() || '';
@@ -101,6 +99,6 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(circuit),
 		});
-		return { status: res.status, id: (await res.json()).id };
+		return { status: res.status, id: (await res.json()).id, context: 'publication-form' };
 	},
 } satisfies Actions;

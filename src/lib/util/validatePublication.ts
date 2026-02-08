@@ -10,6 +10,7 @@ export const PUBLICATION_PARAMETERS = {
 }
 
 export type Metadata = {
+	isCircuit: boolean;
 	title: string;
 	description: string;
 	learningObjectives: string[];
@@ -36,6 +37,7 @@ export function isMaterialValid(metadata: MetadataWithURLs, fileInfo: FileDiffAc
 }
 
 export function isMaterialDraft(metadata: Metadata, numFiles: number) {
+	if (metadata.isCircuit) return false;
 	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return true;
 	return !validateMetadata(metadata) ||
 		numFiles < PUBLICATION_PARAMETERS.filesMin;

@@ -341,4 +341,5 @@
 				 bind:dataMaterial={paramsMutableMaterial}
 				 edit={false}
 				 paramsImmutable={paramsImmutable}
-				 bind:showAnimation={showAnimation} />
+				 bind:showAnimation={showAnimation}
+				dataCircuit={null}/>

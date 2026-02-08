@@ -23,9 +23,10 @@
 	import { validateMetadata } from '$lib/util/validatePublication';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
-	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable, ParamsMutableCircuit } from '$lib/util/frontendTypes.ts';
 	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
 
+	export let form: ActionData;
 	export let data: PageServerData;
 
 	let circuitRef : InstanceType<typeof CircuitComponent>;
@@ -67,8 +68,13 @@
 	let nodeActions: NodeDiffActions;
 	let circuitCoverPic: {type: string, info: string};
 
-	let paramsMutable: ParamsMutable;
-	paramsMutable = {
+	let dataCircuit: ParamsMutableCircuit = {
+		circuitData: {numNodes: 0, add: [], delete: [], edit: [], next: []},
+		coverPic: undefined
+	};
+
+
+	let paramsMutable: ParamsMutable= {
 		isSubmitting,
 		title,
 		loggedUser,
@@ -92,38 +98,9 @@
 		uid,
 		form,
 		allTags
-	}
+	};
 
-	export let form: ActionData;
-	const toastStore = getToastStore();
 
-	$: if (form?.status === 200) {
-		if (saveInterval) {
-			window.clearInterval(saveInterval);
-		}
-
-		Promise.all([
-			clearCircuitSnapshot()
-		]).then(() => {
-			// toastStore.trigger({
-			// 	message: 'Circuit Added successfully',
-			// 	background: 'bg-success-200',
-			// 	classes: 'text-surface-900',
-			// });
-
-			showAnimation = true;
-			// goto(`/${loggedUser.username}/${form?.id}`);
-		}).catch(error => {
-			console.error('Error clearing data:', error);
-		});
-		// goto(`/${loggedUser.username}/${form?.id}`);
-	} else if (form?.status === 500) {
-		toastStore.trigger({
-			message: `Malformed information, please check your inputs: ${form?.message}`,
-			background: 'bg-error-200',
-			classes: 'text-surface-900',
-		});
-	}
 
 	let circuitNodesPlaceholder: NodeInfo[] = [];
 	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
@@ -238,7 +215,7 @@
 
 <PublishWorkflow bind:data={paramsMutable}
 				 dataMaterial={null}
-				 dataCircuit={null}
+				 bind:dataCircuit={dataCircuit}
 				 edit={false}
 				 paramsImmutable={paramsImmutable}
 				 bind:showAnimation={showAnimation}

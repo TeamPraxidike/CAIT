@@ -2,6 +2,7 @@
 	import Icon from '@iconify/svelte';
 
 	type Metadata = {
+		isCircuit: boolean;
 		title?: string;
 		description?: string;
 		tags?: string[];
@@ -23,12 +24,12 @@
 	export let fieldsList = []
 
 	$: fieldsList = [
-			files <= 0 && 'File',
-			numNodes <= 1 && '2 Nodes',
+			!metadata.isCircuit && files <= 0 && 'File',
+			metadata.isCircuit && numNodes <= 1 && '2 Nodes',
 			!hasTitle && 'Title',
 			!hasTags && 'Tags',
 			!hasLOs && 'Learning Objectives',
-			materialType.length <= 0 && 'Material Type'
+			!metadata.isCircuit && materialType.length <= 0 && 'Material Type'
 		].filter(Boolean);
 
 

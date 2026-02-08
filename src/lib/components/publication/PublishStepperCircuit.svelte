@@ -46,8 +46,12 @@
 		if (event.detail.step === 0) {
 			let { nodeDiffActions, coverPic } = await circuitRef.publishCircuit();
 
-			dataCircuit.circuitData = nodeDiffActions;
-			dataCircuit.coverPic = coverPic;
+			// Reassign the entire object to ensure Svelte's reactivity detects the change
+			dataCircuit = {
+				...dataCircuit,
+				circuitData: nodeDiffActions,
+				coverPic: coverPic
+			};
 		}
 	}
 

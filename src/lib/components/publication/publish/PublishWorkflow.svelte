@@ -37,22 +37,23 @@
 
 	export let saveInterval: number | undefined = undefined;
 	const toastStore = getToastStore();
-	$: if (showAnimation) {
-		// tick() waits until the DOM has been updated
-		tick().then(() => {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		});
-	}
+
+
+	// Debug: track paramsImmutable.form changes in child component
+
+
+
 
 	// IMPORTANT - use contexts to separate form events
 	// otherwise, for example, any Course related form events get mistaken for
 	// events from the main form
 	$: if (paramsImmutable.form?.status === 200 && paramsImmutable.form?.context === 'publication-form') {
-		if (edit){
+		if (edit || circuit){
+			// For edit mode or circuit publishing, no indexDB cleanup needed
 			showAnimation = true;
 		}
 
-		// indexDB is active only during upload
+		// indexDB is active only during material upload (not circuits)
 		else {
 			if (saveInterval) {
 				window.clearInterval(saveInterval);
@@ -67,9 +68,10 @@
 			});
 		}
 
-	} else if (dataMaterial && paramsImmutable.form?.status === 400 && paramsImmutable.form?.context === 'publication-form') {
-		console.log('Form submission failed with status 400:');
-		if (!allUploadsDone(dataMaterial.fileTUSMetadata, dataMaterial.files)){
+	} else if (paramsImmutable.form?.status === 400 && paramsImmutable.form?.context === 'publication-form') {
+		console.log('Form submission failed with status 400:', paramsImmutable.form);
+
+		if (dataMaterial && !allUploadsDone(dataMaterial.fileTUSMetadata, dataMaterial.files)){
 			toastStore.trigger({
 				message: 'Some files are still being uploaded',
 				background: 'bg-warning-200'
@@ -77,7 +79,7 @@
 		}
 		else {
 			toastStore.trigger({
-				message: `Malformed information, please check your inputs: ${paramsImmutable.form?.message}`,
+				message: `Malformed information, please check your inputs: ${form?.message}`,
 				background: 'bg-warning-200',
 				classes: 'text-surface-900'
 			});
@@ -116,6 +118,7 @@
 	let markedAsDraft = false;
 	let draft = true;
 	$: metadata = {
+		isCircuit: circuit,
 		title: data.title,
 		description: data.description,
 		learningObjectives: data.LOs,
@@ -183,7 +186,7 @@
 						formData.append('copyright', dataMaterial.copyright);
 						formData.append('coverPic', dataMaterial.coverPic || '');
 						formData.append('course', dataMaterial.course ? dataMaterial.course.toString() : 'null');
-					} else if (dataCircuit) {
+					} else if (circuit && dataCircuit) {
 						data.isSubmitting = true;
 						formData.append('circuitData', JSON.stringify(dataCircuit.circuitData));
 						formData.append('coverPic', JSON.stringify(dataCircuit.coverPic) || '');

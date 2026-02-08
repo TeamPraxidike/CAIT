@@ -88,7 +88,6 @@ export async function POST({ request, locals }) {
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
 
-	console.log("POST - received body:", body);
 	const tags = body.metaData.tags;
 	const maintainers = body.metaData.maintainers;
 	const metaData = body.metaData;
@@ -113,7 +112,6 @@ export async function POST({ request, locals }) {
 					metaData,
 					prismaTransaction,
 				);
-				console.log("POST - created circuit publication:", circuit);
 
 				await handleConnections(
 					tags,
