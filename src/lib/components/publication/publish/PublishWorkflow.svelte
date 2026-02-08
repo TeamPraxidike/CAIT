@@ -14,7 +14,6 @@
 		ParamsMutableCircuit,
 		ParamsMutableMaterial
 	} from '$lib/util/frontendTypes.ts';
-	import { tick } from 'svelte';
 	import { clearAllData } from '$lib/util/indexDB.ts';
 	import PublishStepperCircuit from '$lib/components/publication/PublishStepperCircuit.svelte';
 
@@ -79,7 +78,7 @@
 		}
 		else {
 			toastStore.trigger({
-				message: `Malformed information, please check your inputs: ${form?.message}`,
+				message: `Malformed information, please check your inputs: ${paramsImmutable.form?.message}`,
 				background: 'bg-warning-200',
 				classes: 'text-surface-900'
 			});
@@ -126,6 +125,7 @@
 		materialType: dataMaterial?.selectedTypes,
 		isDraft: false
 	};
+	$: numNodes = dataCircuit ? dataCircuit.circuitData.numNodes : 0;
 	$: numMaterials = (dataMaterial?.fileURLs || []).length + (dataMaterial?.files || []).length;
 	$: draft = isMaterialDraft(metadata, numMaterials);
 
@@ -140,7 +140,7 @@
 
 {#if !showAnimation}
 	<div class="col-span-full" out:fade={{duration: 400}}>
-		<Banner bind:fieldsList={bannerFieldsList} metadata={metadata} files={numMaterials} materialType={metadata.materialType}/>
+		<Banner bind:fieldsList={bannerFieldsList} metadata={metadata} files={numMaterials} materialType={metadata.materialType} numNodes={numNodes}/>
 	</div>
 
 	<div class="form-container col-span-full px-5 pt-5 pb-5 shadow"

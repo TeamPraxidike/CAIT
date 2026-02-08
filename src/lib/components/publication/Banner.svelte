@@ -25,7 +25,7 @@
 
 	$: fieldsList = [
 			!metadata.isCircuit && files <= 0 && 'File',
-			metadata.isCircuit && numNodes <= 1 && '2 Nodes',
+			// metadata.isCircuit && numNodes <= 1 && '2 Nodes',
 			!hasTitle && 'Title',
 			!hasTags && 'Tags',
 			!hasLOs && 'Learning Objectives',
