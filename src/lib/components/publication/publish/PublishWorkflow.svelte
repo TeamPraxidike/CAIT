@@ -19,8 +19,8 @@
 
 
 	export let data: ParamsMutable;
-	export let dataMaterial: ParamsMutableMaterial | null;
-	export let dataCircuit: ParamsMutableCircuit | null;
+	export let dataMaterial: ParamsMutableMaterial | null = null;
+	export let dataCircuit: ParamsMutableCircuit | null = null;
 	export let paramsImmutable: ParamsImmutable;
 
 	export let showAnimation: boolean;
