@@ -2,7 +2,7 @@
 	import type { ActionData, PageServerData } from './$types';
 	import type {  Difficulty, Tag as PrismaTag } from '@prisma/client';
 	import { page } from '$app/state';
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import {type UserWithProfilePic} from '$lib/util/coursesLogic';
 
 	import {
@@ -15,7 +15,7 @@
 		clearIfTimeExceeded
 	} from '$lib/util/indexDB';
 	import * as tus from 'tus-js-client';
-	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
 	import { arrayToFileList } from '$lib/util/file.ts';
 
@@ -76,22 +76,9 @@
 	let paramsMutable: ParamsMutable;
 	paramsMutable = {
 		isSubmitting,
-		fileTUSMetadata,
-		fileTUSProgress,
-		fileTUSUploadObjects,
-		fileURLs,
-		files,
 		title,
-		showCourseProgressRadial,
-		selectedTypes,
-		originalCourseIds,
-		courses,
-		course,
-		coverPic,
 		loggedUser,
 		searchableUsers,
-		estimate,
-		copyright,
 		LOs,
 		PKs,
 		maintainers,
@@ -100,12 +87,30 @@
 		description
 	}
 
+	let paramsMutableMaterial: ParamsMutableMaterial = {
+		fileTUSMetadata,
+		fileTUSProgress,
+		fileTUSUploadObjects,
+		fileURLs,
+		files,
+		showCourseProgressRadial,
+		selectedTypes,
+		originalCourseIds,
+		courses,
+		course,
+		coverPic,
+		estimate,
+		copyright,
+	}
+
 
 	let paramsImmutable: ParamsImmutable;
 	$: paramsImmutable = {
 		supabaseClient,
 		supabaseURL,
 		users,
+		liked: [],
+		saved: [],
 		allCourses: data.allCourses,
 		uid,
 		form,
@@ -298,13 +303,13 @@
 					newTags: paramsMutable.newTags,
 					LOs: paramsMutable.LOs,
 					PKs: paramsMutable.PKs,
-					selectedType: paramsMutable.selectedTypes,
-					difficulty: paramsMutable.selectedTypes,
+					selectedType: paramsMutableMaterial.selectedTypes,
+					difficulty: paramsMutableMaterial.selectedTypes,
 					maintainers: paramsMutable.maintainers,
 					searchableUsers: paramsMutable.searchableUsers,
-					estimate: paramsMutable.estimate,
-					copyright: paramsMutable.copyright,
-					fileURLs: paramsMutable.fileURLs,
+					estimate: paramsMutableMaterial.estimate,
+					copyright: paramsMutableMaterial.copyright,
+					fileURLs: paramsMutableMaterial.fileURLs,
 					theoryApplicationRatio: theoryApplicationRatio,
 					lastOpened: Date.now()
 				};
@@ -333,6 +338,8 @@
 </script>
 
 <PublishWorkflow bind:data={paramsMutable}
+				 bind:dataMaterial={paramsMutableMaterial}
 				 edit={false}
 				 paramsImmutable={paramsImmutable}
-				 bind:showAnimation={showAnimation} />
+				 bind:showAnimation={showAnimation}
+				dataCircuit={null}/>
