@@ -1,5 +1,5 @@
 
-import { type Level, Prisma, type PrismaClient } from '@prisma/client';
+import { type Level, Prisma, type PrismaClient, type Publication } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import type { UserWithProfilePic } from '$lib/util/coursesLogic';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
@@ -95,33 +95,33 @@ export async function createCourse(course: createCourseData): Promise<Course> {
 }
 
 export type updateCourseData = {
-    id: number;
-    courseName: string;
-    educationalLevel: Level;
-    learningObjectives: string[];
-    prerequisites: string[];
-    maintainers: string[]; // user ids (excluding current user is allowed)
-    currentUserId: string; // ensure current user remains a maintainer
+	id: number;
+	courseName: string;
+	educationalLevel: Level;
+	learningObjectives: string[];
+	prerequisites: string[];
+	maintainers: string[]; // user ids (excluding current user is allowed)
+	currentUserId: string; // ensure current user remains a maintainer
 	copyright: string;
 }
 
 export async function updateCourse(data: updateCourseData): Promise<Course> {
-    const uniqueMaintainerIds = Array.from(new Set([data.currentUserId, ...data.maintainers]));
+	const uniqueMaintainerIds = Array.from(new Set([data.currentUserId, ...data.maintainers]));
 
-    return prisma.course.update({
-        where: { id: data.id },
-        data: {
-            courseName: data.courseName,
-            educationalLevel: data.educationalLevel,
-            learningObjectives: data.learningObjectives,
-            prerequisites: data.prerequisites,
+	return prisma.course.update({
+		where: { id: data.id },
+		data: {
+			courseName: data.courseName,
+			educationalLevel: data.educationalLevel,
+			learningObjectives: data.learningObjectives,
+			prerequisites: data.prerequisites,
 			copyright: data.copyright || '',
 
-            maintainers: {
-                set: uniqueMaintainerIds.map((id) => ({ id }))
-            }
-        }
-    });
+			maintainers: {
+				set: uniqueMaintainerIds.map((id) => ({ id }))
+			}
+		}
+	});
 }
 
 export async function findCourseByNameExtended(courseName: string): Promise<CourseWithMaintainersAndProfilePic | null> {
@@ -239,4 +239,40 @@ export async function getAllCourses(): Promise<Course[]> {
 	return prisma.course.findMany();
 }
 
+
+export async function getPublicationsForCourse(c: Number): Promise<Publication[]> {
+	return await prisma.publication.findMany({
+		where: { courseId: c },
+		orderBy: { createdAt: 'desc' },
+		include: {
+			maintainers: true,
+			tags: true,
+			comments: {
+				include: {
+					user: true,
+					replies: true,
+					likedBy: true
+				}
+			},
+			publisher: true,
+			savedBy: true,
+			likedBy: true,
+			reportedBy: true,
+			node: true,
+			savedByAllTime: true,
+			coverPic: true,
+			similarToThis: true,
+			thisSimilarTo: true,
+			materials: true,
+			circuit: true,
+			usedInCourse: true,
+			course: true
+		} // optional, if you want newest first
+	});
+
+	// return Promise.all(publications.map(async (pub ) => ({
+	// 	...pub,
+	// 	// coverPicData: (await coverPicFetcher(null, pub)).data
+	// })))
+}
 

@@ -24,14 +24,42 @@ export const load: PageServerLoad = async ({
 			error: pubsRes.statusText,
 		};
 	}
-	
+
+
+
+
 	// todo: remove the ID filter here and do that on the internal end of the server
 	const coursename = params.course;
 
-	const courses: CourseWithMaintainersAndProfilePic[] = (await pubsRes.json());
-	
+	const course: CourseWithMaintainersAndProfilePic = (await pubsRes.json()).find((c: { courseName: string; }) => c.courseName === coursename);
+
+
+	async function getPubsInCourse() {
+		try {
+			// const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
+			const res = await fetch(`/api/course/${course.id}/publications`)
+			console.log(`/api/course/${course.id}/publications`)
+
+			// const pubRes = await fetch(`/api/publications/set?ids=${course.publications.join(',')}`)
+			if (!res.ok && res.status === 404) {
+				return null;
+			}
+			else if (!res.ok) {
+				// something definitely went wrong here
+				throw new Error(`Failed to load files: ${res.statusText}`);
+			}
+			return await res.json();
+		}
+		catch (err) {
+			console.error('Error while circuits that contain pub, page.server:\n', err);
+		}
+	}
+
+
 	return {
-		course: courses.find(c => c.courseName === coursename)
+		course: course,
+		session: session,
+		pubsInCourse: getPubsInCourse(),
 	}
 
 	// // Check if the user is viewing their own profile and return his saved publications
@@ -81,7 +109,7 @@ export const load: PageServerLoad = async ({
 	// 		? { saved: [] }
 	// 		: await savedByUserRes.json();
 	// const publications: ExtendedPublication[] = (await pubsRes.json()).publications;
-	
+
 	// return {
 	// 	publications,
 	// 	saved,

@@ -3,6 +3,7 @@
 	// import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
 	import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
+	import { UserProp } from '$lib';
 
 	export let course: CourseWithMaintainersAndProfilePic | undefined;
 	if (!course) {
@@ -50,7 +51,7 @@
 	<img
 		src={coverpic ? coverpic : defaultProfilePicturePath}
 		alt="course}"
-		class="w-full h-auto object-cover border" />
+		class="w-full h-auto object-cover border rounded" />
 
 	<div
 		class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
@@ -59,103 +60,63 @@
                 xl:w-full">
 		<h2 class="text-lg md:text-xl">{courseName}</h2>
 	</div>
-    <hr class="w-11/12">
-	<div class="flex flex-col">
-		<span class="font-bold text-surface-800">Learning Objectives</span>
-		<ul class="list-inside">
-			{#if course?.learningObjectives.length === 0}
-				<span>No learning objectives have been indicated</span>
-			{:else}
-				{#each course?.learningObjectives as lo}
-					<li class="list text-surface-700 text-sm list-disc">
-						{lo}
-					</li>
-				{/each}
-			{/if}
-		</ul>
+	<hr class="w-11/12" />
+	<div class="flex items-start gap-2">
+		<div class="flex flex-col">
+			<span class="font-bold text-surface-800">Learning Objectives</span>
+			<ul class="list-inside">
+				{#if course?.learningObjectives.length === 0}
+					<span>No learning objectives have been indicated</span>
+				{:else}
+					{#each course?.learningObjectives as lo}
+						<li class="list text-surface-700 text-sm list-disc">
+							{lo}
+						</li>
+					{/each}
+				{/if}
+			</ul>
+		</div>
+		<div class="flex flex-col">
+			<span class="font-bold text-surface-800">Prior Knowledge:</span>
+			<ul class="list-inside">
+				{#if course?.prerequisites.length === 0}
+					<span class="text-surface-800"
+						>No prior knowledge has been indicated</span>
+				{:else}
+					{#each course?.prerequisites as pk}
+						<li class="list text-surface-700 text-sm list-disc">
+							{pk}
+						</li>
+					{/each}
+				{/if}
+			</ul>
+		</div>
 	</div>
-	<div class="flex flex-col">
-		<span class="font-bold text-surface-800">Prior Knowledge:</span>
-		<ul class="list-inside">
-			{#if course?.prerequisites.length === 0}
-				<span class="text-surface-800"
-					>No prior knowledge has been indicated</span>
-			{:else}
-				{#each course?.prerequisites as pk}
-					<li class="list text-surface-700 text-sm list-disc">
-						{pk}
-					</li>
-				{/each}
-			{/if}
-		</ul>
+
+	<div class="flex gap-4">
+		<p class="lg:text-sm 2xl:text-base">
+			<span class="font-bold text-surface-800">Level:</span> {course?.educationalLevel}
+		</p>
+		<p class="lg:text-sm 2xl:text-base">
+			<span class="font-bold text-surface-800">Copyright:</span> {course?.copyright}
+		</p>
 	</div>
+	<hr class="w-11/12" />
+	<div class="flex flex-col">
+		<span class="font-bold text-surface-800">Maintainers:</span>
+		<div class="flex flex-col">
+			{#each course?.maintainers as maintainer}
+				<UserProp
+					role="Maintainer"
+					userPhotoUrl={maintainer.profilePicData}
+					view="material"
+					user={maintainer} />
+			{/each}
+		</div>
+	</div>
+    
 </div>
-<!-- <div class="hidden md:flex items-start flex-col gap-4 text-surface-700 dark:text-surface-200 ">
-            <p class="lg:text-sm 2xl:text-base">Email: {user.email}</p>
-            <hr class="w-11/12">
 
-            {#if user.aboutMe !== ''}
-                <p class="text-surface-700 text-sm dark:text-surface-400">
-                    {user.aboutMe}
-                </p>
-            {/if}
-            <div class="flex gap-2">
-                {#if numPosts !== 0}
-                    <button class="variant-soft-primary hidden md:block p-2 rounded-lg"
-                    on:click={() => tabset = 0}>{numPosts} {numPosts > 1 ? "Publications" : "Publication"}</button>
-                {/if}
-                {#if currentlyAuth() && numDrafts !== 0}
-                    <button class="variant-soft-primary hidden md:block p-2 rounded-lg"
-                    on:click={() => tabset=2}>{numDrafts} {numDrafts > 1 ? "Drafts" : "Draft"}</button>
-                {/if}
-            </div>
-
-            <div class="flex gap-2 flex-wrap">
-                {#if currentlyAuth()}
-                    <div class="flex gap-2">
-                        <a type="button" href="/{user.username}/edit"  class="btn bg-surface-800 text-surface-50 rounded-lg
-                           dark:bg-surface-700">Edit Profile</a>
-                    </div>
-                {/if}
-            </div>
-            <hr class="w-11/12">
-
-<!--            <div class="flex gap-2 flex-wrap">-->
-<!--                {#if currentlyAuth()}-->
-<!--                    {#each courses as course}-->
-<!--                    <div class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium-->
-<!--					   hover:bg-gray-100 hover:text-black transition">-->
-<!--                        {course}-->
-<!--                    </div>-->
-<!--                        {/each}-->
-<!--                    <button class="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium-->
-<!--					   hover:bg-gray-100 hover:text-black transition" on:click={openModal}>-->
-<!--                        Add Course-->
-<!--                    </button>-->
-<!--                {/if}-->
-<!--            </div>-->
-<!-- </div>
-    </div>
-    <hr class="w-full my-2 md:w-0">
-
-    <!--  VISIBLE ON PHONES   -->
-<!-- <div class="px-4 w-full dark:text-surface-200 flex flex-col items-stretch gap-4
-                md:hidden">
-        <p>Email: {user.email}</p>
-        <p class="text-surface-700 dark:text-surface-400">
-            {user.aboutMe}
-        </p>
-        {#if currentlyAuth()}
-            <div class="flex gap-4">
-                <a type="button" href="./edit" class="btn bg-surface-800 text-surface-50 rounded-lg
-                               dark:bg-surface-700">Edit Profile</a>
-                <button class="btn bg-surface-800 text-surface-50 rounded-lg
-                               dark:bg-surface-700">Settings</button>
-            </div>
-        {/if}
-    </div>
-
-    <div class="flex gap-2"> -->
 
 {#if showModal}
 	<CourseModal
