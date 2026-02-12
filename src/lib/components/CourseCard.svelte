@@ -6,12 +6,12 @@
 
 	// data coming in
 	// export let item: any;
-    export let view: 'home' | 'publish' | 'material' | 'search';
-    export let course: Course;
-	export let className: string = 'col-span-2';
+	export let view: 'home' | 'publish' | 'material' | 'search';
+	export let course: Course;
+	export let className: string = 'col-span-4 lg:col-span-3 3xl:col-span-2';
 	export let coursePhotoUrl: string | null;
 
-    const defaultCoursePicturePath = "/defaultCoverPic/assignment.jpg"
+	const defaultCoursePicturePath = '/defaultCoverPic/assignment.jpg';
 	const randomNumber = Math.floor(Math.random() * 1000);
 	let hoverName = '' + course.courseName + randomNumber;
 	const popupHoverTop: PopupSettings = {
@@ -19,8 +19,8 @@
 		target: hoverName,
 		placement: 'top',
 		middleware: {
-			offset: 2
-		}
+			offset: 2,
+		},
 	};
 
 	// events going out
@@ -32,32 +32,52 @@
 </script>
 
 <!-- markup -->
-{#if view === "search"}
-	<a href='/courses/{course.courseName}' style="height:fit-content"
-	   class="{className} flex md:h-60 text-surface-800 dark:text-surface-50 overflow-hidden card dark:bg-surface-700 p-2 md:p-3  card-hover bg-surface-50 hover:cursor-pointer rounded-lg hover:shadow-lg shadow">
+<!-- {#if view === "search"} -->
+
+<div class="{className} flex items-center">
+	<a
+		href="/courses/{course.courseName}"
+		style="height:fit-content"
+		class=" w-full h-[360px] rounded-lg shadow-md bg-surface-50 dark:bg-surface-800 border dark:border-none">
 		<div class="flex flex-col space-y-1 items-start w-full md:pb-2">
-			<div class="w-full flex flex-col items-center">
-				{#if coursePhotoUrl !== null}
-					<img src={coursePhotoUrl} alt="Course Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full object-cover" />
-				{:else}
-					<img src={defaultCoursePicturePath} alt="Course Profile" class="w-10 h-10 md:w-20 md:h-20 rounded-full object-cover" />
-				{/if}
-				<div class="max-w-full items-center">
-					<span class="dark:text-surface-50 text-surface-900 max-w-full truncate md:text-2xl"
-						 use:popup={popupHoverTop}>{course.courseName}</span>
-					<hr class="dark:bg-surface-50 bg-surface-300" />
-				</div>
+			<div class="w-full relative h-2/5 rounded-t-lg">
+				<img
+					src={coursePhotoUrl ?? defaultCoursePicturePath}
+					alt="Course Profile"
+					class="w-full aspect-[2/1] object-cover rounded-t-lg" />
 			</div>
-			<div class="flex justify-between items-start w-full">
-				<span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">ID: {course.id}</span>
-				<span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Level: {course.educationalLevel}</span>
+			<hr class="w-full" />
+			<div class="w-full text-center px-3">
+				<span
+					class="dark:text-surface-50 text-surface-900 max-w-full truncate md:text-2xl"
+					use:popup={popupHoverTop}>{course.courseName}</span>
+				<!-- <hr class="dark:bg-surface-50 bg-surface-300" /> -->
+			</div>
+			<!-- <hr class="w-11/12 items-center" /> -->
+			<div class="flex justify-between items-start w-full px-4">
+				<span
+					class="dark:text-surface-50 text-surface-800 text-xs md:text-sm"
+					>Copyright: {course.copyright}</span>
+				<span
+					class="dark:text-surface-50 text-surface-800 text-xs md:text-sm"
+					>Level: {course.educationalLevel}</span>
+			</div>
+			<hr class="w-full" />
+			<div class="flex justify-between items-start w-full px-4">
+				<span
+					class="dark:text-surface-50 text-surface-800 text-xs md:text-sm"
+					> {course.id}</span>
+				<span
+					class="dark:text-surface-50 text-surface-800 text-xs md:text-sm"
+					>Number of pubs in course: {NaN}</span>
 			</div>
 		</div>
 	</a>
-{:else}
+</div>
+<!-- {:else}
 
 
-{/if}
+{/if} -->
 
 <!-- <style>
 	.card {

@@ -459,9 +459,6 @@
 			</div>
 		{:then _}
 			{#each courses as course (course.id)}
-				<!-- console.log(course.id); -->
-				<!-- <p style="color: red"> {course.id} - {course.courseName}</p> -->
-				 {console.log(course)}
 				<CourseCard view="search" course={course} 
 						  className="col-span-1"
 						  coursePhotoUrl={course.coverPic.data}></CourseCard>

@@ -140,7 +140,8 @@
 				{#await data.pubsInCourse}
 					<p>loading publications</p>
 				{:then x}
-				<!-- {console.log(x)} -->
+				<!-- {console.log("xd")}
+				{console.log(x)} -->
 					{#each x as publication (publication.id)}
 						<!-- TODO: FIX IMGSRC, LIKED and SAVED -->
                          <!-- {console.log(publication)} -->
@@ -150,7 +151,7 @@
 							liked={undefined}
 							saved={undefined}
 							materialType={publication.type}
-							publisher={publication.publisherId}
+							publisher={publication.publisher}
 							className="col-span-1" />
 					{/each}
 				{:catch error}
@@ -195,7 +196,9 @@
 					{/each}
 				{/each}
 			{:else if tabSet === 2}
-				asdf
+				
+				<span class="bg-red-600"
+					>Currently related work is not yet being retrieved</span>
 			{/if}
 		</svelte:fragment>
 	</TabGroup>
