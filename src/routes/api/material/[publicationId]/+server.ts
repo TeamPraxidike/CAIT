@@ -12,18 +12,29 @@ import {
 	prisma,
 	updateCoverPic,
 	updateFiles,
-	updateMaterialByPublicationId
+	updateMaterialByPublicationId,
 } from '$lib/database';
 
-import { type File as PrismaFile, Prisma, type PrismaClient } from '@prisma/client';
-import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
-
+import {
+	type File as PrismaFile,
+	Prisma,
+	type PrismaClient,
+	PublicationEventType,
+} from '@prisma/client';
+import {
+	canEditOrRemove,
+	unauthResponse,
+	verifyAuth,
+} from '$lib/database/auth';
 
 import { enqueueMaterialComparison } from '$lib/PiscinaUtils/runner';
 import { getMaintainers, getPublisher } from '$lib/database/publication';
 import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 import { profilePicFetcher } from '$lib/database/file';
-
+import {
+	type ChangeLogPayload,
+	type FileChangeLog,
+} from '$lib/database/publicationHistory.js';
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -56,13 +67,13 @@ export async function GET({ params, locals }) {
 
 		for (const file of material.files) {
 			//const currentFileData = await fileSystem.readFile(file.path);
-			if (fileSystem instanceof SupabaseFileSystem){
+			if (fileSystem instanceof SupabaseFileSystem) {
 				const currentFileData = await fileSystem.readFileURL(file.path);
 				fileData.push({
 					fileId: file.path,
 					name: file.title,
 					type: file.type,
-					data: currentFileData
+					data: currentFileData,
 				});
 			}
 			// TODO: This will break on the frontend (when using LocalFileSystem)
@@ -73,7 +84,7 @@ export async function GET({ params, locals }) {
 					fileId: file.path,
 					name: file.title,
 					type: file.type,
-					data: currentFileData.toString('base64') //skipcheck
+					data: currentFileData.toString('base64'), //skipcheck
 				});
 			}
 		}
@@ -86,10 +97,8 @@ export async function GET({ params, locals }) {
 
 		// publisher profile pic
 		// TODO: this needs a type, not questionable type assertions
-		(material.publication.publisher as any).profilePicData = await profilePicFetcher(
-			material.publication.publisher.profilePic
-		);
-
+		(material.publication.publisher as any).profilePicData =
+			await profilePicFetcher(material.publication.publisher.profilePic);
 
 		return new Response(
 			JSON.stringify({ material, fileData, coverFileData }),
@@ -106,22 +115,26 @@ export async function GET({ params, locals }) {
 }
 
 export async function PUT({ request, params, locals }) {
+	// Parse the body
 	const body: MaterialForm & {
 		materialId: number;
-		publisherId: string
+		publisherId: string;
 	} = await request.json();
-	
-	const authError = await verifyAuth(locals, body.userId);
-	if (authError) return authError;
-	// TODO: cleanup
-	const material = body;
-	const metaData = material.metaData;
-	const publisherId = material.publisherId;
-	// const userId = material.userId;
-	const fileInfo: FileDiffActions = material.fileDiff;
+
+	const { metaData, publisherId, coverPic, fileDiff, userId, materialId } =
+		body;
+
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
-	const coverPic = material.coverPic;
+
+	// format: { globalComment: string, fileComments: { added: { [fileName]: string }, deleted: { [fileName]: string } } }
+	const changeLog: ChangeLogPayload = body.changeLog || {
+		globalComment: '',
+		fileComments: { added: {}, deleted: {} },
+	};
+
+	const authError = await verifyAuth(locals, body.userId);
+	if (authError) return authError;
 
 	const publicationId = parseInt(params.publicationId);
 
@@ -136,7 +149,10 @@ export async function PUT({ request, params, locals }) {
 
 	try {
 		// TODO: should we trust frontend for this info? Probably not...
-		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
+		const maintainerIds =
+			(await getMaintainers(publicationId))?.maintainers?.map(
+				(m) => m.id,
+			) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
 
@@ -147,9 +163,55 @@ export async function PUT({ request, params, locals }) {
 			);
 		}
 
-		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
+		if (
+			!(await canEditOrRemove(locals, publisherId, maintainerIds, 'EDIT'))
+		)
 			return unauthResponse();
 
+		// Prepare the history data for the changelog
+		const fileChangesLog: FileChangeLog[] = [];
+
+		// Handle added files
+		if (fileDiff.add && fileDiff.add.length > 0) {
+			for (const file of fileDiff.add) {
+				fileChangesLog.push({
+					fileName: file.title,
+					fileType: file.type,
+					action: 'CREATED',
+					comment: changeLog.fileComments?.added?.[file.title] || '',
+				});
+			}
+		}
+
+		// Handle deleted files
+		if (fileDiff.delete && fileDiff.delete.length > 0) {
+			for (const fileToDelete of fileDiff.delete) {
+				// Try to find the file in DB to get its human-readable title
+				const dbFile = await prisma.file.findUnique({
+					where: { path: fileToDelete.path },
+					select: { title: true, type: true },
+				});
+
+				if (!dbFile) {
+					console.warn(
+						`Skipping log for file path not found in DB: ${fileToDelete.path}`,
+					);
+					continue;
+				}
+
+				const fileName = dbFile.title;
+				const fileType = dbFile.type;
+
+				fileChangesLog.push({
+					fileName: fileName,
+					fileType: fileType,
+					action: 'DELETED',
+					comment: changeLog.fileComments?.deleted?.[fileName] || '',
+				});
+			}
+		}
+
+		// Perform actual updates to the publication elements
 		const updatedMaterial = await prisma.$transaction(
 			async (prismaTransaction: PrismaClient) => {
 				await handleConnections(
@@ -167,28 +229,45 @@ export async function PUT({ request, params, locals }) {
 			},
 		);
 
-		await updateCoverPic(
-			coverPic,
-			publicationId,
-			body.userId
-		);
+		await updateCoverPic(coverPic, publicationId, body.userId);
 
-		await updateFiles(
-			fileInfo,
-			body.materialId,
-			body.userId
-		);
+		await updateFiles(fileDiff, body.materialId, body.userId);
+
+		// Write the history log
+		const hasMaterialChanges = fileChangesLog.length > 0;
+		const hasGlobalComment = !!changeLog.globalComment;
+
+		// Log if files changed or if user wrote comment about the update
+		if (hasMaterialChanges || hasGlobalComment) {
+			await prisma.publicationHistory.create({
+				data: {
+					action: PublicationEventType.UPDATE,
+					publicationId: publicationId,
+					userId: userId,
+
+					comment: changeLog.globalComment || '',
+
+					meta: {
+						fileChanges: fileChangesLog,
+					},
+				},
+			});
+		}
 
 		const materialId = updatedMaterial.id;
 
 		// enqueueMaterialComparison(publicationId, materialId).catch(error => console.error(error))
 		setTimeout(() => {
-			enqueueMaterialComparison(publicationId, materialId).catch((error) => {
+			enqueueMaterialComparison(publicationId, materialId).catch(
+				(error) => {
 					console.error(error);
-				}
-			)}, 2000);
+				},
+			);
+		}, 2000);
 
-		return new Response(JSON.stringify({ id: publicationId }), { status: 200 });
+		return new Response(JSON.stringify({ id: publicationId }), {
+			status: 200,
+		});
 	} catch (error) {
 		console.error(error);
 		if (
@@ -208,6 +287,7 @@ export async function PUT({ request, params, locals }) {
 	}
 }
 
+// @note: This endpoint does not need the log to be updates as it also deletes the publication which cascades to the history logs
 export async function DELETE({ params, locals }) {
 	const publicationId = parseInt(params.publicationId);
 
@@ -226,11 +306,21 @@ export async function DELETE({ params, locals }) {
 
 	try {
 		// TODO: should we trust frontend for this info? Probably not...
-		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
+		const maintainerIds =
+			(await getMaintainers(publicationId))?.maintainers?.map(
+				(m) => m.id,
+			) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
 
-		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "REMOVE")))
+		if (
+			!(await canEditOrRemove(
+				locals,
+				publisherId,
+				maintainerIds,
+				'REMOVE',
+			))
+		)
 			return unauthResponse();
 
 		const material = await prisma.$transaction(

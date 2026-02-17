@@ -27,7 +27,14 @@
 	// these are purely for the editing page
 	// TODO: either find a different solution or redo UploadFilesForm + FileTable
 	export let isEditContext: boolean = false;
-	export let fetchedFiles: FetchedFileArray | [] = [];
+	export let originalFileIds: string[] = [];
+
+
+	// reason given by user for the change
+	export let fileChangeComments: {
+		added: Record<string, string>;
+		deleted: Record<string, string>;
+	} = { added: {}, deleted: {} };
 
 
 	export let progressBarColor = '#00A6D6'
@@ -43,17 +50,33 @@
 		});
 	}
 
-	function removeFileConfirmationModal(file: File) {
-		ms.trigger({
-				type: 'confirm',
-				title: 'Confirm File Deletion',
-				body: `File "${file.name.length > 20 ? file.name.slice(0, 20) + '...' : file.name}" will be permanently
-				removed once you save your changes (during the last step). Are you sure you wish to proceed?`,
-				response: (r: boolean) => {
-					if (r) removeFile(file)
-				}
-		})
-	}
+	function removeFileConfirmationModal(file: File | FetchedFileItem) {
+        const fileName = file.name || '';
+
+        ms.trigger({
+            type: 'prompt',
+            title: 'Confirm File Deletion',
+            body: `File "${fileName.length > 20 ? fileName.slice(0, 20) + '...' : fileName}" will be permanently removed once you save your changes (during the last step). Are you sure you wish to proceed?`,
+            // Configuration for the input box
+            value: fileChangeComments.deleted[fileName] || '',
+            valueAttr: {
+                type: 'text',
+                minlength: 0,
+                placeholder: 'Give reason for deletion (optional).',
+                required: false
+            },
+            response: (r: string | false) => {
+                // 'prompt' returns the string value on Confirm, or false on Cancel.
+                if (r !== false) {
+                    // 1. Capture the reason (key by filename)
+                    fileChangeComments.deleted[fileName] = r;
+
+                    // 2. Proceed with deletion
+                    removeFile(file);
+                }
+            }
+        })
+    }
 
 	async function removeFile(file: File | FetchedFileItem) {
 		// this branch doesn't really get explored but will leave for clarity
@@ -67,11 +90,11 @@
 				// if on upload page
 				if (!isEditContext) {
 					// file user has chosen has already been uploaded
-					if (fileTUSMetadata[file.name] && fileTUSMetadata[file.name]['isDone']) {
+					if (fileTUSMetadata[file.name || ''] && fileTUSMetadata[file.name || '']['isDone']) {
 						await supabaseClient
 								.storage
 								.from('uploadedFiles')
-								.remove([fileTUSMetadata[file.name]['generatedName']]);
+								.remove([fileTUSMetadata[file.name || '']['generatedName']]);
 					}
 					// file user has chosen is still being uploaded
 					else if (fileTUSUploadObjects[(file as File).name]){
@@ -82,7 +105,7 @@
 				// if on edit page
 				else{
 					// file user has chosen has already been uploaded
-					if (fileTUSMetadata[file.name] && fileTUSMetadata[file.name]['isDone']) {
+					if (fileTUSMetadata[file.name || ''] && fileTUSMetadata[file.name || '']['isDone']) {
 						// NB: if the file has been uploaded, will delete later with the filediff action logic
 						// this is a no-op
 					}
@@ -122,6 +145,24 @@
 	function removeURL(url: string) {
 		fileURLs = Array.from(fileURLs).filter(x => x !== url) as string[];
 	}
+
+	function isNewFile(file: File | FetchedFileItem) {
+		if (!isEditContext) return false;
+		if ('fileId' in file) return false;
+		// If we have metadata, check if the ID matches an original file
+		const fileName = file.name || '';
+		if (fileTUSMetadata[fileName]) {
+			return !originalFileIds.includes(fileTUSMetadata[fileName].generatedName);
+		}
+		return true;
+	}
+
+	let visibleComments: Record<string, boolean> = {};
+
+	function toggleComment(name: string) {
+		visibleComments[name] = !visibleComments[name];
+		visibleComments = {...visibleComments};
+	}
 </script>
 
 <div class="rounded-lg p-1">
@@ -152,14 +193,26 @@
 								<Icon class="xl:text-2xl" icon="material-symbols:download" />
 							</Download>
 						{:else if operation === 'edit'}
-							<button on:click={() => {
-								if (!isEditContext) removeFile(file);
-								else removeFileConfirmationModal(file)
-							}} type="button" on:click|stopPropagation class="ml-auto flex gap-2 items-center">
-								<Icon class="xl:text-2xl" icon="mdi:delete" />
-							</button>
+							<div class="ml-auto flex gap-2 items-center">
+								{#if isNewFile(file)}
+									<button type="button" on:click|stopPropagation={() => toggleComment(file.name || '')} class="hover:text-primary-500" title="Add comment">
+										<Icon class="xl:text-2xl" icon="mdi:comment-edit" />
+									</button>
+								{/if}
+								<button on:click={() => {
+									if (!isEditContext) removeFile(file);
+									else removeFileConfirmationModal(file)
+								}} type="button" on:click|stopPropagation>
+									<Icon class="xl:text-2xl" icon="mdi:delete" />
+								</button>
+							</div>
 						{/if}
 					</button>
+					{#if visibleComments[file.name || '']}
+						<div class="p-2 bg-gray-50 dark:bg-surface-700 flex gap-2 items-center" transition:slide>
+							<input type="text" class="input p-1" placeholder="Reason for adding this file..." bind:value={fileChangeComments.added[file.name || '']} on:click|stopPropagation />
+						</div>
+					{/if}
 				</div>
 
 			{/each}

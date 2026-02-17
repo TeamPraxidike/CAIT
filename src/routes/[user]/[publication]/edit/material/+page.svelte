@@ -25,9 +25,15 @@
 	export let form: ActionData;
 	export let data: PageServerData & LayoutServerData;
 
+	let fileComments: {
+		added: Record<string, string>;
+		deleted: Record<string, string>;
+	} = { added: {}, deleted: {} };
+
 	let showAnimation = false;
 
 	let originalFiles: string[] = [];
+	let originalFileNames: string[] = [];
 
 	const supabaseURL: string = data.PUBLIC_SUPABASE_URL;
 	let supabaseClient: any = page.data.supabase;
@@ -104,6 +110,7 @@
 					}
 				}
 				originalFiles = Array.from(resolved.fetched).map(f => f.fileId);
+				originalFileNames = Array.from(resolved.fetched).map(f => f.name || '');
 
 				paramsMutable = {
 					...paramsMutable,
@@ -150,7 +157,8 @@
 		maintainers,
 		tags,
 		newTags,
-		description
+		description,
+		fileComments,
 	}
 
 	let paramsImmutable: ParamsImmutable;
@@ -200,6 +208,7 @@
 		bind:showAnimation={showAnimation}
 		edit={true}
 		originalFiles={originalFiles}
+		originalFileNames={originalFileNames}
 		materialId={materialId}/>
 {:catch error}
 	<p class="flex items-center justify-center col-span-full pt-20">Could not load the files: "{error.message}". Please refresh the page.</p>

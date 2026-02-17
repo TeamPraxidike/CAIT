@@ -37,6 +37,11 @@ enum PublicationType {
   Circuit
 }
 
+enum PublicationEventType {
+  CREATE   // The Genesis event of the publication
+  UPDATE   // Every other event
+}
+
 model User {
   id            String    @id @default(uuid()) @db.Uuid
   firstName     String
@@ -66,8 +71,10 @@ model User {
   replies     Reply[]
   isAdmin     Boolean       @default(false)
 
-  profilePic File?    @relation("ProfilePic")
-  courses    Course[] @relation("CourseInstructors")
+  profilePic           File?                @relation("ProfilePic")
+  courses              Course[]             @relation("CourseInstructors")
+
+  publicationHistory PublicationHistory[]
 }
 
 model PublicationUsedInCourse {
@@ -122,6 +129,29 @@ model Publication {
   materials    Material?
   circuit      Circuit?
   usedInCourse PublicationUsedInCourse[]
+
+  history PublicationHistory[]
+}
+
+model PublicationHistory {
+  id        String                       @id @default(uuid())
+  createdAt DateTime                     @default(now())
+  action    PublicationEventType
+
+  // Optional user explanation on the change
+  comment String?
+
+  // Snapshot data. We maintain information necessary to the history log (ex. even if a file is deleted we still maintain its name here)
+  // Contains: { fileChanges: [{ fileName, action, comment }] }
+  meta Json?
+
+  // Who made this change: optional so log survives user deletion
+  userId String? @db.Uuid
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Which publication was this log about?
+  publicationId Int
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 }
 
 model SavedByAllTime {
