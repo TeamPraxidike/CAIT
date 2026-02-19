@@ -86,14 +86,9 @@
 		const replies = [
 			...comments[commentIndex].replies,
 			{
-				id: event.detail.content.id,
-				userId: event.detail.content.userId,
-				commentId: event.detail.content.commentId,
 				likes: 0,
-				content: event.detail.content.content,
-				createdAt: event.detail.content.createdAt,
-				updatedAt: event.detail.content.updatedAt,
 				user: loggedUser,
+				...event.detail.content
 			},
 		];
 		if (commentIndex !== -1) {
@@ -140,11 +135,8 @@
 				{#await data.pubsInCourse}
 					<p>loading publications</p>
 				{:then x}
-				<!-- {console.log("xd")}
-				{console.log(x)} -->
 					{#each x as publication (publication.id)}
 						<!-- TODO: FIX IMGSRC, LIKED and SAVED -->
-                         <!-- {console.log(publication)} -->
 						<PublicationCard
 							imgSrc={null} 
 							publication={publication}

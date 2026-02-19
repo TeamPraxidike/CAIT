@@ -6,7 +6,7 @@
 
 	// data coming in
 	// export let item: any;
-	export let view: 'home' | 'publish' | 'material' | 'search';
+	// export let view: 'home' | 'publish' | 'material' | 'search';
 	export let course: Course;
 	export let className: string = 'col-span-4 lg:col-span-3 3xl:col-span-2';
 	export let coursePhotoUrl: string | null;

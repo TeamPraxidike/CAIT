@@ -207,8 +207,6 @@
 				return response.json();
 			})
 			.then(data => {
-				console.log("iets");
-				console.log(s);
 				if (s === 'material') {
 					materials = data.publications.map(x => ({
 						id: x.materials.id,
@@ -251,16 +249,13 @@
 
 	onMount(async () => {
 		users = (await data.users).users;
-		console.log("users");
-		console.log(users);
+		
 		allPublishersObjects = users.map((x: any) => ({
 			id: x.id,
 			content: (x.firstName + ' ' + x.lastName)
 		}));
 
 		courses = (await data.courses);
-		console.log("course");
-		console.log(courses);
 
 
 		if (data.selectedTag !== '') {
@@ -271,8 +266,6 @@
 		}
 
 		data.materials.then((matData) => {
-			console.log('matDAta')
-			console.log(matData);
 
 			materials = matData.materials;
 			idsMat = matData.idsMat;
@@ -459,7 +452,7 @@
 			</div>
 		{:then _}
 			{#each courses as course (course.id)}
-				<CourseCard view="search" course={course} 
+				<CourseCard course={course} 
 						  className="col-span-1"
 						  coursePhotoUrl={course.coverPic.data}></CourseCard>
 				

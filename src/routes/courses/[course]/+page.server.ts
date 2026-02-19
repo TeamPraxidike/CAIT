@@ -38,7 +38,6 @@ export const load: PageServerLoad = async ({
 		try {
 			// const circuitRes = await fetch(`/api/circuit/${params.publication}/all`);
 			const res = await fetch(`/api/course/${course.id}/publications`)
-			console.log(`/api/course/${course.id}/publications`)
 
 			// const pubRes = await fetch(`/api/publications/set?ids=${course.publications.join(',')}`)
 			if (!res.ok && res.status === 404) {
@@ -51,7 +50,7 @@ export const load: PageServerLoad = async ({
 			return await res.json();
 		}
 		catch (err) {
-			console.error('Error while circuits that contain pub, page.server:\n', err);
+			console.error('Error while loading publications for course, page.server:\n', err);
 		}
 	}
 

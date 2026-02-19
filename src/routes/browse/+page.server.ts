@@ -8,10 +8,7 @@ export async function load({ url, fetch, locals }) {
 
 
 	async function fetchMaterials() {
-		// if (type !== 'materials') {
-		// 	console.log("wont fetch materials")
-		// 	return { materials: [], idsMat: [] };
-		// }
+		
 
 		try{
 			const res = await fetch(`/api/material`);
@@ -29,10 +26,6 @@ export async function load({ url, fetch, locals }) {
 	}
 
 	async function fetchCircuits() {
-		// if (type !== 'circuits') {
-		// 	console.log("wont fetch circuits")
-		// 	return { circuits: [], idsCirc: [] };
-		// }
 
 		try{
 			const res = await fetch(`/api/circuit`);
@@ -74,7 +67,6 @@ export async function load({ url, fetch, locals }) {
 			if (!res.ok) {
 				throw new Error(`Failed to load courses in browse: ${res.statusText}`);
 			}
-			console.log(res);
 			return res.json();
 		}
 		catch (err) {

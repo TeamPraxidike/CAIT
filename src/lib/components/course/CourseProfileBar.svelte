@@ -12,7 +12,6 @@
 		);
 	}
 
-	console.log(course?.coverPic);
 	let coverpic = course?.coverPic?.data;
 
 	// export let userPhotoUrl: string;
@@ -65,10 +64,10 @@
 		<div class="flex flex-col">
 			<span class="font-bold text-surface-800">Learning Objectives</span>
 			<ul class="list-inside">
-				{#if course?.learningObjectives.length === 0}
+				{#if course.learningObjectives.length === 0}
 					<span>No learning objectives have been indicated</span>
 				{:else}
-					{#each course?.learningObjectives as lo}
+					{#each course.learningObjectives as lo}
 						<li class="list text-surface-700 text-sm list-disc">
 							{lo}
 						</li>

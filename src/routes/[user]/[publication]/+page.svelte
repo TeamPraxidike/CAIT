@@ -261,15 +261,10 @@
 		let commentIndex = comments.findIndex(c => c.id === event.detail.content.commentId);
 		const replies = [
 			...comments[commentIndex].replies,
-			{
-				id: event.detail.content.id,
-				userId: event.detail.content.userId,
-				commentId: event.detail.content.commentId,
+			{	
 				likes: 0,
-				content: event.detail.content.content,
-				createdAt: event.detail.content.createdAt,
-				updatedAt: event.detail.content.updatedAt,
-				user: loggedUser
+				user: loggedUser,
+				...event.detail.content
 			}
 		]
 		if (commentIndex !== -1) {
@@ -331,7 +326,6 @@
 	// Assures currently displayed tab is 0 (materials/circuit)
 	function handleTabEvent(event: any) {
 		const { tabValue } = event.detail;
-		//console.log(tabValue);
 		tabSet = tabValue;
 	}
 
