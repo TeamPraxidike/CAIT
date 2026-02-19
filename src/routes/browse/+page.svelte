@@ -2,12 +2,13 @@
 	import { MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
-	import type { Publication, User } from '@prisma/client';
+	import type { Publication, User, Course } from '@prisma/client';
 	import { onMount } from 'svelte';
 	import {type PaginationSettings, Paginator, ProgressRadial, SlideToggle} from '@skeletonlabs/skeleton';
 	import DropdownSelect from '$lib/components/designSystem/DropdownSelect.svelte';
 	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';
 	import {semanticSearchActive} from '$lib/stores/semanticSearchActive'
+	import CourseCard from '$lib/components/CourseCard.svelte';
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -15,6 +16,7 @@
 	let circuits: any[] = [];
 	let idsMat: any[] = [];
 	let idsCirc: any[] = [];
+	
 
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
@@ -22,6 +24,7 @@
 
 
 	let users: (User & { posts: Publication[], profilePicData: string })[] = [];
+	let courses: (Course& {coverPic: {data: string, fileId: string} })[] = [];
 	let tags = data.tags;
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
@@ -160,7 +163,6 @@
 				}
 				page = 0;
 				paginationSettings.page = 0;
-
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -248,10 +250,13 @@
 
 	onMount(async () => {
 		users = (await data.users).users;
+		
 		allPublishersObjects = users.map((x: any) => ({
 			id: x.id,
 			content: (x.firstName + ' ' + x.lastName)
 		}));
+
+		courses = (await data.courses);
 
 
 		if (data.selectedTag !== '') {
@@ -272,7 +277,6 @@
 		});
 
 		data.circuits.then((circData) => {
-
 			circuits = circData.circuits;
 			idsCirc = circData.idsCirc;
 			if (data.type === 'circuits') source = idsCirc;
@@ -330,7 +334,7 @@
 		/>
 	</div>
 
-	<DropdownSelect title="Type" multiselect={false} options={["materials", "people", "circuits"]}
+	<DropdownSelect title="Type" multiselect={false} options={["materials", "people", "circuits", "courses"]}
 					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
 	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
@@ -440,6 +444,23 @@
 		{:catch error}
 			<!--TODO: Change color-->
 			<p style="color: red">Error while loading circuits. Reload the page to try again</p>
+		{/await}
+	{:else if pageType === "courses"}
+		{#await fetchPromise || data.courses}
+			<div class="flex flex-row gap-2">
+				<p>Loading courses...</p>
+				<ProgressRadial font={8} width="w-8" class="shrink-0" />
+			</div>
+		{:then _}
+			{#each courses as course (course.id)}
+				<CourseCard course={course} 
+						  className="col-span-1"
+						  coursePhotoUrl={course.coverPic.data}></CourseCard>
+				
+			{/each}
+		{:catch _}
+			<!--TODO: Change color-->
+			<p style="color: red">Error while loading users. Reload the page to try again</p>
 		{/await}
 	{:else if isSemanticActive && semanticPromise !== null}
 		{#await semanticPromise}
