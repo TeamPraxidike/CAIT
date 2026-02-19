@@ -240,7 +240,34 @@ export async function getAllCourses(): Promise<Course[]> {
 }
 
 
-export async function getPublicationsForCourse(c: Number): Promise<Publication[]> {
+export type PublicationWithRelations = Prisma.PublicationGetPayload<{
+  include: {
+    maintainers: true;
+    tags: true;
+    comments: {
+      include: {
+        user: true;
+        replies: true;
+        likedBy: true;
+      };
+    };
+    publisher: true;
+    savedBy: true;
+    likedBy: true;
+    reportedBy: true;
+    node: true;
+    savedByAllTime: true;
+    coverPic: true;
+    similarToThis: true;
+    thisSimilarTo: true;
+    materials: true;
+    circuit: true;
+    usedInCourse: true;
+    course: true;
+  };
+}>;
+
+export async function getPublicationsForCourse(c: Number): Promise<PublicationWithRelations[]> {
 	return await prisma.publication.findMany({
 		where: { courseId: c },
 		orderBy: { createdAt: 'desc' },

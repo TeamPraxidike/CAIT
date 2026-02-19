@@ -137,8 +137,9 @@
 				{:then x}
 					{#each x as publication (publication.id)}
 						<!-- TODO: FIX IMGSRC, LIKED and SAVED -->
+						 
 						<PublicationCard
-							imgSrc={null} 
+							imgSrc={publication.coverPicData?.data} 
 							publication={publication}
 							liked={undefined}
 							saved={undefined}

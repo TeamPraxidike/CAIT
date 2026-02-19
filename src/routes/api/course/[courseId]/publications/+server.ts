@@ -1,6 +1,6 @@
 import { verifyAuth } from '$lib/database/auth';
 import { createCourse, type createCourseData, findCourseByName, getAllCourses, getCourseByIdExtended, getPublicationsForCourse } from '$lib/database/courses';
-import { updateCoverPic } from '$lib/database';
+import { coverPicFetcher, updateCoverPic } from '$lib/database';
 
 
 export async function GET({ locals, params }) {
@@ -9,8 +9,18 @@ export async function GET({ locals, params }) {
 
     try {
         let id = Number(params.courseId)
-        const courses = await getPublicationsForCourse(id);
-        return new Response(JSON.stringify(courses), { status: 200 });
+        let publications = await getPublicationsForCourse(id);
+        publications = await Promise.all(publications.map(async (publication) => {
+            return  {
+                ...publication,
+                coverPicData: (await coverPicFetcher(
+                    null,
+                    publication.coverPic
+                ))
+            }
+        }))
+
+        return new Response(JSON.stringify(publications), { status: 200 });
     } catch (error) {
         return new Response(JSON.stringify({ error }), { status: 500 });
     }

@@ -16,6 +16,7 @@
 	let circuits: any[] = [];
 	let idsMat: any[] = [];
 	let idsCirc: any[] = [];
+	
 
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
