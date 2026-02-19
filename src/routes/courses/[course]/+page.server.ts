@@ -3,6 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import type { User } from '@prisma/client';
 import { PublicationType } from '@prisma/client';
 import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
+import type { FetchedFileArray } from '$lib/database';
 // import type { ExtendedPublication } from '../api/course/+server';
 
 export const load: PageServerLoad = async ({
@@ -25,6 +26,29 @@ export const load: PageServerLoad = async ({
 		};
 	}
 
+	let liked: number[] = [];
+	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
+		saved: [],
+		savedFileData: [],
+	};
+	if (session && session.user) {
+		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
+		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
+
+		const savedResponse = await fetch(
+			`/api/user/${session.user.id}/saved?fullPublications=false`,
+		);
+
+		if (savedResponse.status) {
+			const responseBody = await savedResponse.text();
+			saved = responseBody
+				? JSON.parse(responseBody)
+				: { saved: [], savedFileData: [] };
+		} else {
+			saved = { saved: [], savedFileData: [] };
+		}
+
+	}
 
 
 
@@ -59,6 +83,8 @@ export const load: PageServerLoad = async ({
 		course: course,
 		session: session,
 		pubsInCourse: getPubsInCourse(),
+		liked,
+		saved,
 	}
 
 	// // Check if the user is viewing their own profile and return his saved publications

@@ -31,6 +31,8 @@
 
 	let likedComments: number[] = [];
 	let likedReplies: number[] = [];
+	let liked = data.liked as number[];
+	let saved = data.saved.saved as number[];
 
 	let course = data.course;
 
@@ -141,8 +143,8 @@
 						<PublicationCard
 							imgSrc={publication.coverPicData?.data} 
 							publication={publication}
-							liked={undefined}
-							saved={undefined}
+							liked={liked.includes(publication.id)}
+							saved={saved.includes(publication.id)}
 							materialType={publication.type}
 							publisher={publication.publisher}
 							className="col-span-1" />
