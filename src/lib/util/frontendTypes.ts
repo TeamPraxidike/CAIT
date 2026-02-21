@@ -57,6 +57,34 @@ export type URLtype = {
 	type: string
 }
 
+export const PageType = {
+  MATERIALS: "materials",
+  CIRCUITS: "circuits",
+  PEOPLE: "people",
+  COURSES: "courses",
+  SEMANTIC: "semantic",
+  UNDEFINED: "UNDEFINED",
+} as const;
+
+export type PageType = typeof PageType[keyof typeof PageType];
+
+export function isPageType(value: unknown): value is PageType {
+  return typeof value === "string" &&
+    Object.values(PageType).includes(value as PageType);
+}
+
+export function toPageType(value: unknown): PageType {
+  return isPageType(value) ? value : PageType.UNDEFINED;
+}
+
+export const BROWSABLE_PAGE_TYPES: PageType[] = [
+  PageType.MATERIALS,
+  PageType.CIRCUITS,
+  PageType.PEOPLE,
+  PageType.COURSES,
+];
+
+
 export async function buildMaterialForm(data: FormData): Promise<{data: MaterialForm, tags: string[]} | {
 	status: number;
 	message: string;

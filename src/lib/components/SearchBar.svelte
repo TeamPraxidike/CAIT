@@ -2,8 +2,9 @@
 	import { createEventDispatcher } from 'svelte';
 	import { semanticSearchActive} from "$lib/stores/semanticSearchActive.ts";
 	import Icon from '@iconify/svelte';
+	import type { PageType } from '$lib/util/frontendTypes';
 
-	export let searchType: 'materials' | 'users' | 'circuits' | 'my publications' | 'saved' | 'content' = 'materials';
+	export let searchType: PageType;
 	export let inputKeywords: string;
 	const dispatch = createEventDispatcher();
 

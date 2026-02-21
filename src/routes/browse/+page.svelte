@@ -9,6 +9,7 @@
 	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';
 	import {semanticSearchActive} from '$lib/stores/semanticSearchActive'
 	import CourseCard from '$lib/components/CourseCard.svelte';
+	import { BROWSABLE_PAGE_TYPES, PageType, toPageType } from '$lib/util/frontendTypes';
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -29,27 +30,6 @@
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
 
-	
-	enum PageType {
-		MATERIALS ="materials",
-		CIRCUITS = "circuits",
-		PEOPLE = "people",
-		COURSES = "courses",
-		SEMANTIC = "semantic",
-		UNDEFINED = "UNDEFINED"
-	}
-
-	function isPageType(value: string): value is PageType {
-		return Object.values(PageType).includes(value as PageType);
-	}
-
-	function toPageType(value: string): PageType {
-		return isPageType(value) ? value : PageType.UNDEFINED;
-	}
-
-	function getBrowsablePageTypes(): PageType[] {
-		return Object.values(PageType).filter((x) => x !== PageType.SEMANTIC).filter((x) => x !== PageType.UNDEFINED)
-	}
 
 
 	let pageType: PageType = toPageType(data.type);
@@ -357,7 +337,7 @@
 		/>
 	</div>
 
-	<DropdownSelect title="Type" multiselect={false} options={getBrowsablePageTypes()}
+	<DropdownSelect title="Type" multiselect={false} options={BROWSABLE_PAGE_TYPES}
 					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
 	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
