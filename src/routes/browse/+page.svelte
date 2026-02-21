@@ -29,8 +29,31 @@
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
 
-	let pageType = data.type;
-	$: pageType = data.type;
+	
+	enum PageType {
+		MATERIALS ="materials",
+		CIRCUITS = "circuits",
+		PEOPLE = "people",
+		COURSES = "courses",
+		SEMANTIC = "semantic",
+		UNDEFINED = "UNDEFINED"
+	}
+
+	function isPageType(value: string): value is PageType {
+		return Object.values(PageType).includes(value as PageType);
+	}
+
+	function toPageType(value: string): PageType {
+		return isPageType(value) ? value : PageType.UNDEFINED;
+	}
+
+	function getBrowsablePageTypes(): PageType[] {
+		return Object.values(PageType).filter((x) => x !== PageType.SEMANTIC).filter((x) => x !== PageType.UNDEFINED)
+	}
+
+
+	let pageType: PageType = toPageType(data.type);
+	$: pageType = toPageType(data.type);
 	let sortOptions: string[] = ['Most Recent', 'Most Liked', 'Oldest'];
 	let sortByText = 'Sort By';
 	let selectedDiff: ('Easy' | 'Medium' | 'Hard')[] = [];
@@ -75,11 +98,11 @@
 	let isSemanticActive = false;
 	$: isSemanticActive = isSemanticActive;
 
-	let lastPaginationType: string = pageType;
+	let lastPaginationType: PageType = pageType;
 
 	$: if (isSemanticActive) {
 		lastPaginationType = pageType
-		pageType = 'semantic';
+		pageType = PageType.SEMANTIC;
 		// updates the store so we close all open dropdowns
 		$semanticSearchActive = true;
 	}
@@ -138,7 +161,7 @@
 		if (searchWord !== '') queryParams.set('q', searchWord);
 		if (numberNodes != undefined && Number.parseInt(numberNodes) !== 0) queryParams.set('limit', numberNodes);
 
-		const s = pageType === 'materials' ? 'material' : 'circuit';
+		const s = pageType === PageType.MATERIALS ? 'material' : 'circuit';
 		const url = `/api/${s}?${queryParams.toString()}`;
 		// materials = [];
 		// circuits = [];
@@ -187,7 +210,7 @@
 	}
 
 	async function changePage(amount: number, pageNum: number) {
-		const ids = pageType === 'materials' ? idsMat : idsCirc;
+		const ids = pageType === PageType.MATERIALS ? idsMat : idsCirc;
 		const queryParams = new URLSearchParams({
 			type: pageType,
 			ids: ids.slice(pageNum * amount, (pageNum + 1) * amount).join(',')
@@ -195,7 +218,7 @@
 
 		if (sortByText !== 'Most Recent') queryParams.set('sort', sortByText);
 
-		const s = pageType === 'materials' ? 'material' : 'circuit';
+		const s = pageType === PageType.MATERIALS ? 'material' : 'circuit';
 		const url = `/api/publication/set?${queryParams.toString()}`;
 		// materials = [];
 		// circuits = [];
@@ -334,12 +357,12 @@
 		/>
 	</div>
 
-	<DropdownSelect title="Type" multiselect={false} options={["materials", "people", "circuits", "courses"]}
+	<DropdownSelect title="Type" multiselect={false} options={getBrowsablePageTypes()}
 					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
 	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
 
-	{#if pageType !== "people"}
+	{#if pageType !== PageType.PEOPLE}
 <!--		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}-->
 <!--						bind:selected={selectedDiff} on:select={() => searchActive = true}-->
 <!--						disabled={isSemanticActive}/>-->
@@ -353,7 +376,7 @@
 						disabled={isSemanticActive}/>
 	{/if}
 
-	{#if pageType === 'materials'}
+	{#if pageType === PageType.MATERIALS}
 		<DropdownSelect title="Content" multiselect={true} options={allTypes}
 						bind:selected={selectedTypes} on:select={() => searchActive = true}
 						disabled={isSemanticActive}/>
@@ -377,7 +400,7 @@
 </div>
 
 <div class="col-span-9 grid grid-cols-3 gap-2 auto-rows-min">
-	{#if (pageType !== 'people') && (pageType !== 'semantic') }
+	{#if (pageType !== PageType.PEOPLE) && (pageType !== PageType.SEMANTIC) }
 		<div class="col-span-full">
 			<Paginator
 				bind:settings={paginationSettings}
@@ -387,7 +410,7 @@
 			/>
 		</div>
 	{/if}
-	{#if pageType === "materials"}
+	{#if pageType === PageType.MATERIALS}
 		{#await fetchPromise || data.materials}
 			<div class="flex flex-row gap-2">
 				<p>Loading materials...</p>
@@ -409,7 +432,7 @@
 			<!--TODO: Change color-->
 			<p style="color: red">Error while loading materials. Reload the page to try again</p>
 		{/await}
-	{:else if pageType === "people"}
+	{:else if pageType === PageType.PEOPLE}
 		{#await fetchPromise || data.users}
 			<div class="flex flex-row gap-2">
 				<p>Loading users...</p>
@@ -425,7 +448,7 @@
 			<!--TODO: Change color-->
 			<p style="color: red">Error while loading users. Reload the page to try again</p>
 		{/await}
-	{:else if pageType === "circuits"}
+	{:else if pageType === PageType.CIRCUITS}
 		{#await fetchPromise || data.circuits}
 			<div class="flex flex-row gap-2">
 				<p>Loading circuits...</p>
@@ -445,7 +468,7 @@
 			<!--TODO: Change color-->
 			<p style="color: red">Error while loading circuits. Reload the page to try again</p>
 		{/await}
-	{:else if pageType === "courses"}
+	{:else if pageType === PageType.COURSES}
 		{#await fetchPromise || data.courses}
 			<div class="flex flex-row gap-2">
 				<p>Loading courses...</p>
