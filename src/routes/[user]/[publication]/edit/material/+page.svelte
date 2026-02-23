@@ -149,6 +149,7 @@
 		newTags,
 		description,
 		fileComments,
+		globalComment: ""
 	}
 
 	let paramsMutableMaterial: ParamsMutableMaterial = {

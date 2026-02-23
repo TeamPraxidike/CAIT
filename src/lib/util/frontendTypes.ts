@@ -16,7 +16,6 @@ import type { ChangeLogPayload } from '$lib/database/publicationHistory';
 
 export type ParamsMutable = {
 	isSubmitting: boolean;
-	fileTUSMetadata: { [key: string]: FileTUSMetadata };
 	title: string;
 	loggedUser: any;
 	searchableUsers: UserWithProfilePic[];
