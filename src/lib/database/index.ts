@@ -126,6 +126,7 @@ type MaterialForm = {
 	};
 	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;
+	changeLog: ChangeLogPayload;
 };
 
 type UserCreateForm = {
@@ -228,6 +229,7 @@ type NodeDiffActions = {
 
 import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
+import type { ChangeLogPayload } from '$lib/database/publicationHistory';
 
 export const basePath = "uploadedFiles"
 let fileSystem: SupabaseFileSystem | LocalFileSystem;

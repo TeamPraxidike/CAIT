@@ -19,6 +19,7 @@
 	export let markedAsDraft: boolean;
 	export let edit: boolean;
 	export let circuit: boolean = false;
+	export let originalFileIds: string[] = [];
 
 	let circuitNodesPlaceholder: NodeInfo[] = [];
 	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
@@ -76,7 +77,10 @@
 				bind:fileTUSProgress={dataMaterial.fileTUSProgress}
 				bind:fileTUSUploadObjects={dataMaterial.fileTUSUploadObjects}
 				bind:fileURLs={dataMaterial.fileURLs}
-				bind:files={dataMaterial.files}/>
+				bind:files={dataMaterial.files}
+				originalFileIds={originalFileIds}
+				bind:fileChangeComments={data.fileComments}
+			/>
 		{:else}
 <!--			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>-->
 			<!--{#key circuitKey}-->

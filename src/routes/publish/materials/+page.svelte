@@ -84,7 +84,9 @@
 		maintainers,
 		tags,
 		newTags,
-		description
+		description,
+		fileComments: { added: {}, deleted: {} },
+		globalComment: ''
 	}
 
 	let paramsMutableMaterial: ParamsMutableMaterial = {
@@ -291,7 +293,9 @@
 				maintainers,
 				tags,
 				newTags,
-				description
+				description,
+				fileComments: { added: {}, deleted: {} },
+				globalComment: ''
 			};
 
 			// start a 2-sec interval that captures a snapshot

@@ -33,6 +33,8 @@
 	// Editing mode needs to know what the original files were, so that it can delete only the ones that were removed
 	// Here we pass the path of the file
 	export let originalFiles: any[] = [];
+	// Here we pass the name of the file
+	export let originalFileNames: string[] = [];
 
 	export let saveInterval: number | undefined = undefined;
 	const toastStore = getToastStore();
@@ -135,6 +137,44 @@
 	// incentivize the user to fill it in. This is why here we have to check whether it is the only thing that is missing
 	// because if it the publication should not be a draft
 	$: showDraftMessage = (bannerFieldsList.length >= 1 || markedAsDraft);
+
+	function buildChangeLog(
+		fileComments: { added: Record<string, string>; deleted: Record<string, string> },
+		files: FileList | null | undefined,
+		origFileNames: string[],
+		globalComment: string
+	) {
+
+		const activeFileNames = new Set(files ? Array.from(files).map(f => f.name) : []);
+		const origFileNamesSet = new Set(origFileNames);
+
+		// Cleanup: Ensure we only send "added" comments for files that are actually in the final list
+		// This handles the "Add -> Delete" case where the add never really happened
+		const cleanAddedComments: Record<string, string> = {};
+		for (const [fileName, comment] of Object.entries(fileComments.added)) {
+			if (activeFileNames.has(fileName)) {
+				cleanAddedComments[fileName] = comment;
+			}
+		}
+
+		// Cleanup: Ensure we only send "deleted" comments for files that were actually original
+		// and are no longer in the active list.
+		// This handles the "Add (transient) -> Delete" case where we shouldn't log a delete.
+		const cleanDeletedComments: Record<string, string> = {};
+		for (const [fileName, comment] of Object.entries(fileComments.deleted)) {
+			if (origFileNamesSet.has(fileName) && !activeFileNames.has(fileName)) {
+				cleanDeletedComments[fileName] = comment;
+			}
+		}
+
+		return {
+			globalComment,
+			fileComments: {
+				added: cleanAddedComments,
+				deleted: cleanDeletedComments
+			}
+		};
+	}
 </script>
 <Meta title="Publish" description="CAIT" type="site" />
 
@@ -186,11 +226,24 @@
 						formData.append('copyright', dataMaterial.copyright);
 						formData.append('coverPic', dataMaterial.coverPic || '');
 						formData.append('course', dataMaterial.course ? dataMaterial.course.toString() : 'null');
+
+						// For now we only use the changelog for materials
+						// It should be made available for circuits too
+						const changeLog = buildChangeLog(
+							data.fileComments,
+							dataMaterial?.files ?? new DataTransfer().files,
+							originalFileNames,
+							data.globalComment
+						);
+						formData.append('changeLog', JSON.stringify(changeLog));
 					} else if (circuit && dataCircuit) {
 						data.isSubmitting = true;
 						formData.append('circuitData', JSON.stringify(dataCircuit.circuitData));
 						formData.append('coverPic', JSON.stringify(dataCircuit.coverPic) || '');
 					}
+
+
+
 
 					formData.append('userId', paramsImmutable.uid?.toString() || '');
 					formData.append('title', data.title);
@@ -206,7 +259,8 @@
 						formData.append('oldFilesData', JSON.stringify(originalFiles));
 						formData.append('materialId', materialId?.toString() || '');
 					}
-			  }}>
+			  }
+		 }>
 
 			{#if !circuit}
 				<PublishStepper
@@ -214,6 +268,7 @@
 					bind:dataMaterial={dataMaterial}
 					paramsImmutable={paramsImmutable}
 					edit={edit}
+					originalFileIds={originalFiles}
 					bind:draft={draft}
 					bind:markedAsDraft={markedAsDraft}
 					circuit={circuit}

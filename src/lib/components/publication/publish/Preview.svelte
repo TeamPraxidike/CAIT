@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { FileTable, Tag, UserProp } from '$lib';
-	import type { FileTUSMetadata } from '$lib/util/indexDB.ts';
-	import type { UserWithProfilePic } from '$lib/util/coursesLogic.ts';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 
 	export let data: ParamsMutable;
@@ -72,6 +70,13 @@
 			</div>
 		{/if}
 	</div>
+</div>
+
+<div class="mt-4">
+	<label class="label">
+		<span class="font-bold">Comment on changes (Optional)</span>
+		<textarea class="textarea" rows="3" placeholder="Describe the changes made..." bind:value={data.globalComment}></textarea>
+	</label>
 </div>
 
 {#if !draft}

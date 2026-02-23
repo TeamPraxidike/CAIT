@@ -22,4 +22,4 @@ if [ "$FILESYSTEM" = "SUPABASE" ]; then
   npx tsx ./scripts/seedBucket.ts
 fi
 
-npx vite dev                                                               # start the development server
+npx vite dev "$@"                                                               # start the development server
