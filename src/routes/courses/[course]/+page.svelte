@@ -90,7 +90,7 @@
 			{
 				likes: 0,
 				user: loggedUser,
-				...event.detail.content
+				...event.detail.content,
 			},
 		];
 		if (commentIndex !== -1) {
@@ -120,44 +120,41 @@
 			value={0}>
 			Materials
 		</Tab>
-		<Tab
+		<!-- <Tab
 			bind:group={tabSet}
 			name="Discussion"
 			value={1}>
 			Discussion
-		</Tab>
-		<Tab
-			bind:group={tabSet}
-			name="Related"
-			value={2}>
-			Related
-		</Tab>
+		</Tab> -->
 		<svelte:fragment slot="panel">
 			{#if tabSet === 0}
 				{#await data.pubsInCourse}
 					<p>loading publications</p>
 				{:then x}
-					{#each x as publication (publication.id)}
-						<!-- TODO: FIX IMGSRC, LIKED and SAVED -->
-						 
-						<PublicationCard
-							imgSrc={publication.coverPicData?.data} 
-							publication={publication}
-							liked={liked.includes(publication.id)}
-							saved={saved.includes(publication.id)}
-							materialType={publication.type}
-							publisher={publication.publisher}
-							className="col-span-1" />
-					{/each}
+					{#if x.length == 0}
+						<span>This course is Empty</span>
+					{:else}
+						{#each x as publication (publication.id)}
+							<!-- TODO: FIX IMGSRC, LIKED and SAVED -->
+
+							<PublicationCard
+								imgSrc={publication.coverPicData?.data}
+								{publication}
+								liked={liked.includes(publication.id)}
+								saved={saved.includes(publication.id)}
+								materialType={publication.type}
+								publisher={publication.publisher}
+								className="col-span-1" />
+						{/each}
+					{/if}
 				{:catch error}
 					<p>Error</p>
 				{/await}
-			{:else if tabSet === 1}
-				<!-- TODO: add course comment functionality -->
+			<!-- {:else if tabSet === 1}
 				<span class="bg-red-600"
 					>Currently commenting does not work, as courses do not
 					support comments to be added</span>
-				<!--    DISCUSSION -->
+					
 				{#if data.session?.user && course?.id}
 					<AddInteractionForm
 						publisher={loggedUser}
@@ -189,11 +186,7 @@
 								.lastName}"
 							liked={likedReplies.includes(reply.id)} />
 					{/each}
-				{/each}
-			{:else if tabSet === 2}
-				
-				<span class="bg-red-600"
-					>Currently related work is not yet being retrieved</span>
+				{/each} -->
 			{/if}
 		</svelte:fragment>
 	</TabGroup>
