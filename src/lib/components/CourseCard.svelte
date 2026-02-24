@@ -10,6 +10,7 @@
 	export let course: Course;
 	export let className: string = 'col-span-4 lg:col-span-3 3xl:col-span-2';
 	export let coursePhotoUrl: string | null;
+	export let numPubs: number = NaN;
 
 	const defaultCoursePicturePath = '/defaultCoverPic/assignment.jpg';
 	const randomNumber = Math.floor(Math.random() * 1000);
@@ -69,7 +70,7 @@
 					> {course.id}</span>
 				<span
 					class="dark:text-surface-50 text-surface-800 text-xs md:text-sm"
-					>Number of pubs in course: {NaN}</span>
+					>Contains {numPubs} {numPubs == 1 ? "item" : "items"}</span>
 			</div>
 		</div>
 	</a>

@@ -10,6 +10,7 @@
 	import {semanticSearchActive} from '$lib/stores/semanticSearchActive'
 	import CourseCard from '$lib/components/CourseCard.svelte';
 	import { BROWSABLE_PAGE_TYPES, PageType, toPageType } from '$lib/util/frontendTypes';
+	import type { CourseWithProcessedProfilePic } from '../api/course-extended/+server';
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -25,7 +26,7 @@
 
 
 	let users: (User & { posts: Publication[], profilePicData: string })[] = [];
-	let courses: (Course& {coverPic: {data: string, fileId: string} })[] = [];
+	let courses: CourseWithProcessedProfilePic[] = [];
 	let tags = data.tags;
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
@@ -458,7 +459,8 @@
 			{#each courses as course (course.id)}
 				<CourseCard course={course} 
 						  className="col-span-1"
-						  coursePhotoUrl={course.coverPic.data}></CourseCard>
+						  coursePhotoUrl={course.coverPic.data}
+						  numPubs={course.publications.length}></CourseCard>
 				
 			{/each}
 		{:catch _}

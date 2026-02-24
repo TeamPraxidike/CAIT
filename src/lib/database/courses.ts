@@ -25,7 +25,8 @@ export type CourseWithMaintainersAndProfilePic = Course & {
 
 export type Course = Prisma.CourseGetPayload<{
 	include: {
-		coverPic: true
+		coverPic: true,
+		publications: true
 	}
 }>;
 
@@ -55,7 +56,8 @@ export async function getAllCoursesExtended(): Promise<CourseWithMaintainersAndP
 			maintainers: {
 				include: { profilePic: true }
 			},
-			coverPic: true
+			coverPic: true,
+			publications: true
 		}
 	});
 

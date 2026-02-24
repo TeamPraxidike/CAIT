@@ -1,5 +1,6 @@
 import type { FetchedFileArray } from '$lib/database';
 import type { User } from '@prisma/client';
+import type { CourseWithProcessedProfilePic } from '../api/course-extended/+server';
 
 export async function load({ url, fetch, locals }) {
 	const session = await locals.safeGetSession();
@@ -60,7 +61,7 @@ export async function load({ url, fetch, locals }) {
 
 	}
 
-	async function fetchCourses() {
+	async function fetchCourses(): Promise<CourseWithProcessedProfilePic[]> {
 		try{
 			const res = await fetch(`/api/course-extended`);
 
@@ -71,6 +72,7 @@ export async function load({ url, fetch, locals }) {
 		}
 		catch (err) {
 			console.error('Error while getting courses, page.server:\n', err);
+			throw err;
 		}
 
 	}
