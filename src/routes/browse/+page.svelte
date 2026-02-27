@@ -11,6 +11,7 @@
 	import CourseCard from '$lib/components/CourseCard.svelte';
 	import { BROWSABLE_PAGE_TYPES, PageType, toPageType } from '$lib/util/frontendTypes';
 	import type { CourseWithProcessedProfilePic } from '../api/course-extended/+server';
+	import BrowseCardShell from '$lib/components/BrowseCardShell.svelte';
 
 	export let data: PageServerData;
 	let searchWord: string = '';

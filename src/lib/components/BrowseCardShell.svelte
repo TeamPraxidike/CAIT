@@ -10,7 +10,7 @@
 
 	// Optional: allow different card heights if needed
 	export let heightClass = 'h-[360px]';
-    const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
+	const defaultCoverPicturePath = '/defaultCoverPic/assignment.jpg';
 </script>
 
 <div class="{className} flex items-center">
@@ -21,37 +21,41 @@
 		class=" w-full h-[360px] rounded-lg shadow-md bg-surface-50 dark:bg-surface-800 border dark:border-none">
 		<div class="w-full relative h-2/5 rounded-t-lg">
 			<slot name="badge" />
-            <a
-                href={href}
-                class="flex-none"
-                aria-label="">
-                <slot name="cover">
-                <img
-                    class="w-full h-full object-cover rounded-t-lg hover:shadow-md"
-                    src={defaultCoverPicturePath}
-                    alt="" />
-                </slot>
-                
-            </a>
+			<a
+				{href}
+				class="flex-none"
+				aria-label="">
+				<slot name="cover">
+					<img
+						class="w-full h-full object-cover rounded-t-lg hover:shadow-md"
+						src={defaultCoverPicturePath}
+						alt="" />
+				</slot>
+			</a>
 		</div>
 		<div
 			class="flex flex-col justify-between px-2 py-2 w-full h-3/5 border-t border-surface-300 dark:border-surface-700 items-center justify-elements-center">
 			<!-- Title and difficulty -->
 			<div class="w-full">
-				<div class="flex justify-between items-start">
-					<slot name="title" />
-					<div class="flex gap-2">
+				<div class="flex items-start justify-between gap-2">
+					<!-- Title region: takes remaining space and can shrink -->
+					<div class="flex-1 min-w-0">
+						<slot name="title" />
+					</div>
+
+					<!-- Icons region: fixed-size, stays on the right -->
+					<div class="shrink-0 flex items-center gap-2">
 						<slot name="icons" />
 					</div>
 				</div>
 				<slot name="meta" />
 			</div>
-            {#if description}
-                <p
-                    class="w-full line-clamp-3 text-xs text-surface-700 dark:text-surface-400">
-                    {description}
-                </p>
-            {/if}
+			{#if description}
+				<p
+					class="w-full line-clamp-3 text-xs text-surface-700 dark:text-surface-400">
+					{description}
+				</p>
+			{/if}
 
 			<slot name="tags" />
 			<div class="w-full space-y-2">
@@ -62,11 +66,11 @@
 					</div>
 
 					<div class="flex gap-1 items-center pr-5">
-						<div
-							class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg">
-							<slot name="like-and-save">like and save</slot>
+                        <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
+						
+                            <slot name="like-and-save"></slot>
 						</div>
-						<slot name="user-pfp">show the user here</slot>
+						<slot name="user-pfp"></slot>
 					</div>
 				</div>
 			</div>
