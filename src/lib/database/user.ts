@@ -1,7 +1,6 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
 
-
 export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
 	include: {
 		posts: {
@@ -31,27 +30,27 @@ export type LikesOfUser = Prisma.UserGetPayload<{select: {liked: true}}>;
 
 export type LikedComments = Prisma.UserGetPayload<{
 	select: {
-		likedComments: true,
-	}
+		likedComments: true;
+	};
 }>;
 
 export type LikedReplies = Prisma.UserGetPayload<{
 	select: {
-		likedReplies: true,
-	}
+		likedReplies: true;
+	};
 }>;
 
 export type UserPosts = Prisma.UserGetPayload<{
 	include: {
-		posts: true,
-		profilePic: true,
-	}
+		posts: true;
+		profilePic: true;
+	};
 }>;
 
 export type TUserWithProfilePic = Prisma.UserGetPayload<{
 	include: {
-		profilePic: true,
-	}
+		profilePic: true;
+	};
 }> | null;
 
 export type User = Prisma.UserGetPayload<true>;
@@ -124,7 +123,6 @@ async function generateUsername(firstName: string, lastName: string) {
 	return username;
 }
 
-
 /**
  * Returns the user with the given id.
  * @param id
@@ -175,6 +173,37 @@ export async function getUserByUsername(
 }
 
 /**
+ * Searches users by username, first name, or last name for the mention suggestion dropdown.
+ *
+ * @param query - The search string
+ * @param take - Maximum number of users to return (default: 5)
+ * @param prismaContext
+ */
+export async function searchUsersByQuery(
+	query: string,
+	take: number = 5,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	return prismaContext.user.findMany({
+		where: {
+			OR: [
+				{ username: { contains: query, mode: 'insensitive' } },
+				{ firstName: { contains: query, mode: 'insensitive' } },
+				{ lastName: { contains: query, mode: 'insensitive' } },
+			],
+		},
+		select: {
+			id: true,
+			username: true,
+			firstName: true,
+			lastName: true,
+			profilePic: true, // Fetch the profile pic relation if you want avatars in the dropdown
+		},
+		take: take,
+	});
+}
+
+/**
  * Deletes a user from the database
  * @param userId
  * @param prismaContext
@@ -210,7 +239,10 @@ export async function editUser(
 	user: userEditData,
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<User> {
-	const username: string = await generateUsername(user.firstName, user.lastName);
+	const username: string = await generateUsername(
+		user.firstName,
+		user.lastName,
+	);
 
 	return prismaContext.user.update({
 		where: {
@@ -277,30 +309,32 @@ export async function likePublication(userId: string, publicationId: number) {
  * @param publicationId
  */
 async function like(userId: string, publicationId: number) {
-	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
-		await prismaTransaction.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				liked: {
-					connect: {
-						id: publicationId,
+	await prisma.$transaction(
+		async (prismaTransaction: Prisma.TransactionClient) => {
+			await prismaTransaction.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					liked: {
+						connect: {
+							id: publicationId,
+						},
 					},
 				},
-			},
-		});
-		await prismaTransaction.publication.update({
-			where: {
-				id: publicationId,
-			},
-			data: {
-				likes: {
-					increment: 1,
+			});
+			await prismaTransaction.publication.update({
+				where: {
+					id: publicationId,
 				},
-			},
-		});
-	});
+				data: {
+					likes: {
+						increment: 1,
+					},
+				},
+			});
+		},
+	);
 }
 
 /**
@@ -311,37 +345,41 @@ async function like(userId: string, publicationId: number) {
  * @param publicationId
  */
 async function unlike(userId: string, publicationId: number) {
-	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
-		await prismaTransaction.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				liked: {
-					disconnect: {
-						id: publicationId,
+	await prisma.$transaction(
+		async (prismaTransaction: Prisma.TransactionClient) => {
+			await prismaTransaction.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					liked: {
+						disconnect: {
+							id: publicationId,
+						},
 					},
 				},
-			},
-		});
-		await prismaTransaction.publication.update({
-			where: {
-				id: publicationId,
-			},
-			data: {
-				likes: {
-					decrement: 1,
+			});
+			await prismaTransaction.publication.update({
+				where: {
+					id: publicationId,
 				},
-			},
-		});
-	});
+				data: {
+					likes: {
+						decrement: 1,
+					},
+				},
+			});
+		},
+	);
 }
 
 /**
  * returns a list with all liked publications of a user
  * @param userId
  */
-export async function getLikedPublications(userId: string): Promise<LikesOfUser> {
+export async function getLikedPublications(
+	userId: string,
+): Promise<LikesOfUser> {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,
@@ -401,30 +439,32 @@ export async function likesCommentUpdate(userId: string, commentId: number) {
  * @param commentId
  */
 async function likeComment(userId: string, commentId: number) {
-	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
-		await prismaTransaction.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				likedComments: {
-					connect: {
-						id: commentId,
+	await prisma.$transaction(
+		async (prismaTransaction: Prisma.TransactionClient) => {
+			await prismaTransaction.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					likedComments: {
+						connect: {
+							id: commentId,
+						},
 					},
 				},
-			},
-		});
-		await prismaTransaction.comment.update({
-			where: {
-				id: commentId,
-			},
-			data: {
-				likes: {
-					increment: 1,
+			});
+			await prismaTransaction.comment.update({
+				where: {
+					id: commentId,
 				},
-			},
-		});
-	});
+				data: {
+					likes: {
+						increment: 1,
+					},
+				},
+			});
+		},
+	);
 }
 
 /**
@@ -435,32 +475,33 @@ async function likeComment(userId: string, commentId: number) {
  * @param commentId
  */
 async function unlikeComment(userId: string, commentId: number) {
-	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
-		await prismaTransaction.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				likedComments: {
-					disconnect: {
-						id: commentId,
+	await prisma.$transaction(
+		async (prismaTransaction: Prisma.TransactionClient) => {
+			await prismaTransaction.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					likedComments: {
+						disconnect: {
+							id: commentId,
+						},
 					},
 				},
-			},
-		});
-		await prismaTransaction.comment.update({
-			where: {
-				id: commentId,
-			},
-			data: {
-				likes: {
-					decrement: 1,
+			});
+			await prismaTransaction.comment.update({
+				where: {
+					id: commentId,
 				},
-			},
-		});
-	});
+				data: {
+					likes: {
+						decrement: 1,
+					},
+				},
+			});
+		},
+	);
 }
-
 
 /**
  * returns a list with all liked comment of a user
@@ -505,30 +546,32 @@ export async function likesReplyUpdate(userId: string, replyId: number) {
  * @param replyId
  */
 async function likeReply(userId: string, replyId: number) {
-	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
-		await prismaTransaction.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				likedReplies: {
-					connect: {
-						id: replyId,
+	await prisma.$transaction(
+		async (prismaTransaction: Prisma.TransactionClient) => {
+			await prismaTransaction.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					likedReplies: {
+						connect: {
+							id: replyId,
+						},
 					},
 				},
-			},
-		});
-		await prismaTransaction.reply.update({
-			where: {
-				id: replyId,
-			},
-			data: {
-				likes: {
-					increment: 1,
+			});
+			await prismaTransaction.reply.update({
+				where: {
+					id: replyId,
 				},
-			},
-		});
-	});
+				data: {
+					likes: {
+						increment: 1,
+					},
+				},
+			});
+		},
+	);
 }
 
 /**
@@ -539,30 +582,32 @@ async function likeReply(userId: string, replyId: number) {
  * @param replyId
  */
 async function unlikeReply(userId: string, replyId: number) {
-	await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
-		await prismaTransaction.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				likedReplies: {
-					disconnect: {
-						id: replyId,
+	await prisma.$transaction(
+		async (prismaTransaction: Prisma.TransactionClient) => {
+			await prismaTransaction.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					likedReplies: {
+						disconnect: {
+							id: replyId,
+						},
 					},
 				},
-			},
-		});
-		await prismaTransaction.reply.update({
-			where: {
-				id: replyId,
-			},
-			data: {
-				likes: {
-					decrement: 1,
+			});
+			await prismaTransaction.reply.update({
+				where: {
+					id: replyId,
 				},
-			},
-		});
-	});
+				data: {
+					likes: {
+						decrement: 1,
+					},
+				},
+			});
+		},
+	);
 }
 
 /**
@@ -580,25 +625,31 @@ export async function getLikedReplies(userId: string): Promise<LikedReplies> {
 	});
 }
 
-export async function isReported(userId: string, publicationId: number): Promise<boolean> {
-	return prisma.user.findUnique({
-		where: {
-			id: userId
-		},
-		select: {
-			reported: {
-				where: {
-					id: publicationId,
-				},
-				select: {
-					id: true,
+export async function isReported(
+	userId: string,
+	publicationId: number,
+): Promise<boolean> {
+	return prisma.user
+		.findUnique({
+			where: {
+				id: userId,
+			},
+			select: {
+				reported: {
+					where: {
+						id: publicationId,
+					},
+					select: {
+						id: true,
+					},
 				},
 			},
-		}
-	}).then((reported: {reported: {id: number}[]} )=> {
-		if(reported === null) throw new Error("Unable to fetch reported applications")
-		return reported.reported.map(x => x.id).includes(publicationId);
-	});
+		})
+		.then((reported: { reported: { id: number }[] }) => {
+			if (reported === null)
+				throw new Error('Unable to fetch reported applications');
+			return reported.reported.map((x) => x.id).includes(publicationId);
+		});
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {
@@ -612,11 +663,11 @@ export async function isAdmin(userId: string): Promise<boolean> {
 export async function reportPublication(userId: string, publicationId: number) {
 	const reported = await prisma.publication.findUnique({
 		where: {
-			id: publicationId
+			id: publicationId,
 		},
 		select: {
-			reportedBy: true
-		}
+			reportedBy: true,
+		},
 	});
 	if (reported === null) throw Error('Reported publications were not found');
 	if (reported.reportedBy.map((x: User) => x.id).includes(userId)) {
@@ -627,7 +678,6 @@ export async function reportPublication(userId: string, publicationId: number) {
 		return 'Publication reported successfully';
 	}
 }
-
 
 /**
  * Method for liking a reply, adds it to the user's likedReplies and increases the counter in the reply atomically
