@@ -128,6 +128,8 @@
 		</Tab> -->
 		<svelte:fragment slot="panel">
 			{#if tabSet === 0}
+			<div class="col-span-9 grid grid-cols-3 gap-2 auto-rows-min">
+				
 				{#await data.pubsInCourse}
 					<p>loading publications</p>
 				{:then x}
@@ -150,6 +152,8 @@
 				{:catch error}
 					<p>Error</p>
 				{/await}
+			
+			</div>
 			<!-- {:else if tabSet === 1}
 				<span class="bg-red-600"
 					>Currently commenting does not work, as courses do not

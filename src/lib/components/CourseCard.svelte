@@ -105,6 +105,7 @@
 	forArrow={false}
 	href={`/courses/${course.courseName}`}
 	titleText={course.courseName}
+	description="Contains {numPubs} {numPubs == 1 ? 'item' : 'items'}"
 	onCoverClick={resetTab}>
 	
 	<img
@@ -123,6 +124,8 @@
 		</div>
 	</div>
 
+
+	
 	<div
 		slot="tags"
 		bind:this={container}
