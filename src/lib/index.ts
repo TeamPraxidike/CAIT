@@ -1,6 +1,8 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 // Components
+import RichTextEditor from '$lib/components/generic/RichTextEditor.svelte';
+import RichTextRenderer from '$lib/components/generic/RichTextRenderer.svelte';
 import Meta from '$lib/components/page/Meta.svelte';
 import Header from '$lib/components/page/Header.svelte';
 import Grid from '$lib/components/generic/Grid.svelte';
@@ -29,14 +31,20 @@ import type { UserSanitizedWithProfilePicData } from '$lib/util/types';
 
 // util
 import { getDateDifference } from '$lib/util/date';
-import { formatFileSize } from "$lib/util/file"
+import { formatFileSize } from '$lib/util/file';
 import { mapToType, mapToDifficulty, MaterialTypes } from '$lib/util/types';
+import {
+	parseContent,
+	toEditorContent,
+	extractPlainText,
+	extractMentionedUserIds,
+	escapeHtml,
+} from '$lib/util/content';
 
 const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
 
 import AddInteractionForm from '$lib/components/AddInteractionForm.svelte';
-
 
 export {
 	formatFileSize,
@@ -70,6 +78,15 @@ export {
 	PublishReview,
 	HorizontalScroll,
 	MaterialTypes,
+	// Rich text editor
+	RichTextEditor,
+	RichTextRenderer,
+	// Content utilities
+	parseContent,
+	toEditorContent,
+	extractPlainText,
+	extractMentionedUserIds,
+	escapeHtml,
 };
 
 export type { UserSanitizedWithProfilePicData };
