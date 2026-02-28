@@ -1,6 +1,8 @@
 <script lang="ts">
 	export let className = '';
 	export let forArrow = false;
+	export let onCoverClick = () => {};
+	export let titleText: string;
 
 	// Cover
 	export let href: string;
@@ -8,8 +10,6 @@
 	// Content
 	export let description: string | null = null;
 
-	// Optional: allow different card heights if needed
-	export let heightClass = 'h-[360px]';
 	const defaultCoverPicturePath = '/defaultCoverPic/assignment.jpg';
 </script>
 
@@ -24,7 +24,8 @@
 			<a
 				{href}
 				class="flex-none"
-				aria-label="">
+				aria-label=""
+				on:click={onCoverClick}>
 				<slot name="cover">
 					<img
 						class="w-full h-full object-cover rounded-t-lg hover:shadow-md"
@@ -40,7 +41,12 @@
 				<div class="flex items-start justify-between gap-2">
 					<!-- Title region: takes remaining space and can shrink -->
 					<div class="flex-1 min-w-0">
-						<slot name="title" />
+						<a
+							href={href}
+							class="block line-clamp-2 font-bold text-surface-700 text-sm dark:text-surface-200 hover:text-surface-500"
+							on:click={onCoverClick}>
+							{titleText}
+						</a>
 					</div>
 
 					<!-- Icons region: fixed-size, stays on the right -->
@@ -58,6 +64,7 @@
 			{/if}
 
 			<slot name="tags" />
+
 			<div class="w-full space-y-2">
 				<hr class="opacity-50" />
 				<div class="w-full flex justify-between">
@@ -65,16 +72,15 @@
 						<slot name="interaction-buttons">buttons</slot>
 					</div>
 
-					<div class="flex gap-1 items-center pr-5">
-                        <div class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg ">
+					<div class="flex gap-1 items-center {$$slots['like-and-save'] ? 'pr-5' : 'pr-0'}">
+						<slot name="like-and-save"></slot>
 						
-                            <slot name="like-and-save"></slot>
-						</div>
 						<slot name="user-pfp"></slot>
 					</div>
 				</div>
 			</div>
 		</div>
+		<slot name="modal"/>
 	</div>
 
 	<!-- <Modal components={modalRegistry} /> -->

@@ -101,22 +101,19 @@
 <!-- {#if view === "search"} -->
 
 <BrowseCardShell
-	{className}
+	className={className}
 	forArrow={false}
-	href={`/courses/${course.courseName}`}>
+	href={`/courses/${course.courseName}`}
+	titleText={course.courseName}
+	onCoverClick={resetTab}>
+	
 	<img
 		slot="cover"
 		class="w-full h-full object-cover rounded-t-lg hover:shadow-md"
 		src={coursePhotoUrl ?? defaultCoursePicturePath}
 		alt="Course Profile" />
 
-	<a
-		slot="title"
-		href={`/courses/${course.courseName}`}
-		class="block line-clamp-2 font-bold text-surface-700 text-sm dark:text-surface-200 hover:text-surface-500"
-		on:click={resetTab}>
-		{course.courseName}
-	</a>
+
 
 	<div
 		slot="icons"
@@ -148,38 +145,37 @@
 
 	
 
+
 	<div
 		slot="user-pfp"
-		class="flex gap-1 items-center ">
-		<div
-			bind:this={pfpElement}
-			class="relative inline-flex items-center">
-			<a
-				href="/{course.maintainers[0].username}"
-				class="flex-none">
-				<img
-					class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
-					src={course.maintainers[0].profilePicData
-						? course.maintainers[0].profilePicData
-						: defaultProfilePicturePath}
-					alt="CAIT Logo" />
-			</a>
-			{#if isHoveredPfp}
-				<div
-					class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-surface-50 dark:bg-surface-800 shadow-md p-2 rounded-lg flex gap-2 items-center"
-					style="z-index: 9999;"
-					transition:fly={{ y: 8, duration: 400 }}>
-					<div class="flex flex-col items-center">
-						<p>
-							{course.maintainers[0].firstName +
-								' ' +
-								course.maintainers[0].lastName}
-						</p>
-					</div>
+		bind:this={pfpElement}
+		class="relative inline-flex items-center">
+		<a
+			href="/{course.maintainers[0].username}"
+			class="flex-none">
+			<img
+				class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
+				src={course.maintainers[0].profilePicData
+					? course.maintainers[0].profilePicData
+					: defaultProfilePicturePath}
+				alt="CAIT Logo" />
+		</a>
+		{#if isHoveredPfp}
+			<div
+				class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-surface-50 dark:bg-surface-800 shadow-md p-2 rounded-lg flex gap-2 items-center"
+				style="z-index: 9999;"
+				transition:fly={{ y: 8, duration: 400 }}>
+				<div class="flex flex-col items-center">
+					<p>
+						{course.maintainers[0].firstName +
+							' ' +
+							course.maintainers[0].lastName}
+					</p>
 				</div>
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
+
 </BrowseCardShell>
 
 <!-- <div class="{className} flex items-center">
