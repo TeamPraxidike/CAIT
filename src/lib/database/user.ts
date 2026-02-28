@@ -197,7 +197,7 @@ export async function searchUsersByQuery(
 			username: true,
 			firstName: true,
 			lastName: true,
-			profilePic: true, // Fetch the profile pic relation if you want avatars in the dropdown
+			profilePic: true,
 		},
 		take: take,
 	});
