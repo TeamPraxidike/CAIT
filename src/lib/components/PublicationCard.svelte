@@ -43,7 +43,7 @@
 	export let saved: boolean = true;
 	export let tags: string[] = publication.tags.map(tag => tag.content);
 	export let imgSrc: string | null;
-	export let markAsUsed: boolean = false;
+	// export let markAsUsed: boolean = false;
 	export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
 	export let extensions: string[] = [];
@@ -227,12 +227,12 @@
 				<div class="absolute mt-2 right-1 text-xs p-1 rounded-md bg-warning-100 text-warning-700 font-bold">
 					<p class="text-sm font-semibold">Draft</p>
 				</div>
-			{:else if used === 1}
-				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
-					Used in {used} course</p>
-			{:else if used > 0}
-				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
-					Used in {used} courses</p>
+			<!--{:else if used === 1}-->
+			<!--	<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">-->
+			<!--		Used in {used} course</p>-->
+			<!--{:else if used > 0}-->
+			<!--	<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">-->
+			<!--		Used in {used} courses</p>-->
 			{/if}
 			<a href="../{publisher.username}/{publication.id}" class="flex-none" aria-label="Go to publication {publication.title}"
 			   on:click={resetTab}>
@@ -325,11 +325,11 @@
 							</div>
 						{/if}
 
-						{#if markAsUsed}
-							<button type="button" on:click={() => modalStore.trigger(modal)}>
-								<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>
-							</button>
-						{/if}
+						<!--{#if markAsUsed}-->
+						<!--	<button type="button" on:click={() => modalStore.trigger(modal)}>-->
+						<!--		<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>-->
+						<!--	</button>-->
+						<!--{/if}-->
 					</div>
 
 					<div class="flex gap-1 items-center pr-5">
