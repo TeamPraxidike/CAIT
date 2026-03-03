@@ -397,8 +397,8 @@
 		|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")
 		|| loggedUser.isAdmin}
 			<div class="space-x-1">
-				{#if pubView.publication.publisherId === page.data.session?.user.id
-				|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")}
+				{#if (pubView.publication.publisherId === page.data.session?.user.id
+				|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")) && pubView.isMaterial}
 					<button bind:this={hoverEdit}
 							on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit/material`)}
 							type="button" class="btn self-center p-0 m-0">
