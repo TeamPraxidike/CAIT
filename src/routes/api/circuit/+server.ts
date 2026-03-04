@@ -93,12 +93,15 @@ export async function POST({ request, locals }) {
 	const metaData = body.metaData;
 	const userId = body.userId;
 	const nodeInfo: NodeDiffActions = body.nodeDiff;
+
 	const coverPic = body.coverPic;
 	const numNodes = body.nodeDiff.numNodes;
 
 	if (!validateMetadata(metaData)) {
 		metaData.isDraft = true;
 	}
+
+	console.log("POST - metadata is validated:", metaData);
 
 	try {
 		const createdCircuit: CircuitWithPublication = await prisma.$transaction(

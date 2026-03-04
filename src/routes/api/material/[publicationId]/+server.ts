@@ -3,7 +3,6 @@ import {
 	deleteMaterialByPublicationId,
 	type FetchedFileArray,
 	type FetchedFileItem,
-	type FileDiffActions,
 	fileSystem,
 	getMaterialByPublicationId,
 	getPublisherId,

@@ -210,7 +210,7 @@
 					name="url"
 					placeholder="https://example.com"
 					class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0"
-					bind:value = {fileURL}
+					bind:value={fileURL}
 				/>
 				<button
 					on:click={appendFileURLtoList}

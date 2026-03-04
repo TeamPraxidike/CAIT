@@ -1,6 +1,7 @@
 import type { Tag } from '@prisma/client';
 import type { Actions, PageServerLoad } from './$types';
 import { type CircuitForm, type FetchedFileArray } from '$lib/database';
+import { env } from '$env/dynamic/public';
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
@@ -27,7 +28,7 @@ export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 				: { saved: [], savedFileData: [] };
 	}
 
-	return { tags, users, liked: liked, saved: saved };
+	return { tags, users, liked: liked, saved: saved, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
 export const actions = {
@@ -38,23 +39,26 @@ export const actions = {
 	 */
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
-		const pid = data.get('publisherId')?.toString();
+
+		const pid = data.get('userId')?.toString();
 		const title = data.get('title')?.toString() || '';
 		const description = data.get('description')?.toString() || '';
-		const selectedTags = data.get('selectedTags')?.toString() || '';
+		const selectedTags = data.get('tags')?.toString() || '';
 		//I need to get the separate strings here so I can create them as string[], but not sure how to do that
 		const newTags = data.getAll('newTags') || '';
 
 		const additionalMaintainers =
-			data.get('additionalMaintainers')?.toString() || '';
-		const prior = data.get('prior')?.toString() || '';
+			data.get('maintainers')?.toString() || '';
+		const prior = data.get('prerequisites')?.toString() || '';
 		const LOs = data.get('learningObjectives')?.toString() || '';
 		const isDraft = data.get('isDraft')?.toString() === 'true';
 
 		//circuit data does not get carried over to the submission of the form, don't know why
-		const circuitData = data.get('circuitData')?.toString() || '';
+		const circuitData = data.get('circuitData')?.toString() || '[]';
 
-		const circuitCoverPic = data.get('coverPic')?.toString() || '';
+
+		const circuitCoverPic = data.get('coverPic')?.toString() || '{}';
+
 
 		const newTagsJ = JSON.stringify(newTags);
 		const outerArray = JSON.parse(newTagsJ);
@@ -95,6 +99,6 @@ export const actions = {
 			method: 'POST',
 			body: JSON.stringify(circuit),
 		});
-		return { status: res.status, id: (await res.json()).id };
+		return { status: res.status, id: (await res.json()).id, context: 'publication-form' };
 	},
 } satisfies Actions;

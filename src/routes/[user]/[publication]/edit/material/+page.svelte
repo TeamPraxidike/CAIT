@@ -16,7 +16,7 @@
 		type FileTUSMetadata,
 	} from '$lib/util/indexDB';
 	import { type UserWithProfilePic } from '$lib/util/coursesLogic';
-	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
 	import type {FetchedFileArray} from "$lib/database";
 	import {ProgressRadial} from "@skeletonlabs/skeleton";
@@ -114,9 +114,12 @@
 
 				paramsMutable = {
 					...paramsMutable,
+				};
+				paramsMutableMaterial = {
+					...paramsMutableMaterial,
 					files: resolved.fileList,
 					fileTUSMetadata: fileTUSMetadata
-				};
+				}
 
 				return resolved.fileList;
 			}).finally(() => {
@@ -136,22 +139,9 @@
 
 	let paramsMutable: ParamsMutable = {
 		isSubmitting,
-		fileTUSMetadata,
-		fileTUSProgress,
-		fileTUSUploadObjects,
-		fileURLs,
-		files,
 		title,
-		showCourseProgressRadial,
-		selectedTypes,
-		originalCourseIds,
-		courses,
-		course,
-		coverPic,
 		loggedUser,
 		searchableUsers,
-		estimate,
-		copyright,
 		LOs,
 		PKs,
 		maintainers,
@@ -159,6 +149,22 @@
 		newTags,
 		description,
 		fileComments,
+	}
+
+	let paramsMutableMaterial: ParamsMutableMaterial = {
+		fileTUSMetadata,
+		fileTUSProgress,
+		fileTUSUploadObjects,
+		fileURLs,
+		files,
+		showCourseProgressRadial,
+		selectedTypes,
+		originalCourseIds,
+		courses,
+		course,
+		coverPic,
+		estimate,
+		copyright
 	}
 
 	let paramsImmutable: ParamsImmutable;
@@ -204,6 +210,7 @@
 {#await files then _}
 	<PublishWorkflow
 		bind:data={paramsMutable}
+		bind:dataMaterial={paramsMutableMaterial}
 		paramsImmutable={paramsImmutable}
 		bind:showAnimation={showAnimation}
 		edit={true}
