@@ -14,11 +14,16 @@
     type NavOption = {
         text: string;
         link: string;
+        dropDown?: NavOption[];
     }
     const navOptions : NavOption[] = [
         { text: 'Home', link: '/' },
+        { text: 'Browse', link: '/browse?type=materials', dropDown: [
+            {text: 'Materials', link: '/browse?type=materials'},
+            {text: "People", link: '/browse?type=people'},
+            {text: 'Circuits', link: '/browse?type=circuits'}
+        ]},
         { text: 'About', link: '/about' },
-        { text: 'Browse', link: '/browse?type=materials' },
     ]
 
     const popupHover: PopupSettings = {
@@ -131,8 +136,8 @@
     }
 </script>
 
-<header class="w-full sticky top-0 z-50">
-    <div class="w-full shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none overflow-x-hidden">
+<header  class="sticky top-0 z-[2000] w-full">
+    <div class="w-full shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none ">
         <!--   Progress Bar     -->
         <!-- apparently there is a component for this in Skeleton... TODO? (https://v2.skeleton.dev/components/progress-bars) -->
         <div class="progress-bar-container z-100">
@@ -143,16 +148,70 @@
             <a href="/" class = "col-start-1" on:click={confirmPublishReset}>
                 <enhanced:img class="h-16 w-16" src="/static/images/favicons/favicon-128.png" alt="CAIT Logo"/>
             </a>
-
-            <div class="hidden col-start-2 col-span-7 gap-6 lg:gap-12 items-center md:flex">
+            
+            <!-- <div class="hidden col-start-2 col-span-7 gap-6 lg:gap-12 items-center md:flex">
                 {#each navOptions as opt}
-                    <a class="group transition text-surface-800 dark:text-surface-50 h-full flex items-center" href={opt.link} on:click={confirmPublishReset}>
+                    <div>
+                        <a class="group transition text-surface-800 dark:text-surface-50 h-full flex items-center" href={opt.link} on:click={confirmPublishReset}>
                         <span class="bg-left-bottom bg-gradient-to-r from-primary-400 to-primary-400 bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-300 ease-in">
                             {opt.text}
                         </span>
                     </a>
+                        {#if opt.dropDown?.length}
+                            <div 
+                                class="invisible absolute left-0 top-full z-50 mt-2 w-48 translate-y-1 rounded-lg border border-gray-200 bg-white p-2 opacity-0 shadow-lg transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+                            >
+                                {#each opt.dropDown as dropDownItem}
+                                    <a 
+                                        href={dropDownItem.link}
+                                        class="block rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
+                                    >
+                                        {dropDownItem.text}
+                                    </a>
+                                {/each}
+                            </div>
+                        {/if}
+                    
+                    </div>
+                    
+                    
+                {/each}
+            </div> -->
+
+            <div class="hidden col-start-2 col-span-7 gap-6 lg:gap-12 items-center md:flex">
+                {#each navOptions as opt}
+                    <div class="relative group">
+                        <a
+                            href={opt.link}
+                            on:click={confirmPublishReset}
+                            class="flex items-center text-surface-800 transition dark:text-surface-50  "
+                        
+                        >
+                            <span class="bg-left-bottom bg-gradient-to-r from-primary-400 to-primary-400 bg-[length:0%_2px] bg-no-repeat transition-all duration-300 ease-in group-hover:bg-[length:100%_2px]">
+                                {opt.text}
+                            </span>
+                            
+                        </a>
+                        {#if opt.dropDown?.length}
+                            <div class="absolute hidden group-hover:block bg-white" >
+                                {#each opt.dropDown as item}
+                                   <a
+                                        href={item.link}
+                                        class="block rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
+                                    > 
+                                        <span class="">
+                                            {item.text}
+
+                                        </span>
+                                    </a>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+                        
                 {/each}
             </div>
+            
 
             <div class="z-60 hidden md:flex col-start-11 col-span-2 md:gap-2 xl:gap-4 items-center justify-self-end">
                 {#if loggedUser}
@@ -268,4 +327,5 @@
         height: 100%;
         transition: width 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     }
+
 </style>
