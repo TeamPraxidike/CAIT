@@ -49,7 +49,7 @@
 
 	export let extensions: string[] = [];
 	export let materialType: string = "information";
-	export let forArrow: boolean = false;
+	export const forArrow: boolean = false;
 
 	const userId = page.data?.session?.user?.id || '0';
 
@@ -305,12 +305,10 @@
 				</div>
 			{/if}
 	</div>
-			</div>
-			<div class="w-full space-y-2">
-				<hr class="opacity-50">
-				<div class="w-full flex justify-between">
-					<div class="w-full flex justify-left space-x-4">
-						{#if !inCircuits}
+						
+
+	<span slot="interaction-buttons">
+		{#if !inCircuits}
 							<a href="/{publisher.username}/{publication.id}"
 							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"
 							   on:click={resetTab}>View</a>
@@ -336,35 +334,6 @@
 						<!--		<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>-->
 						<!--	</button>-->
 						<!--{/if}-->
-					</div>
-
-	<span slot="interaction-buttons">
-		{#if !inCircuits}
-			<a href="/{publisher.username}/{publication.id}"
-				class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"
-				on:click={resetTab}>View</a>
-		{:else if !selected}
-			<button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
-							on:click="{select}">Select
-			</button>
-		{:else}
-			<button type="button" class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
-							use:popup={popupClickPubCard}>Remove
-			</button>
-			<div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
-				<div class="flex gap-2">
-					<button type="button" id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
-					<button type="button" id="close" class="btn variant-filled bg-surface-600">Go Back</button>
-				</div>
-				<div class="arrow bg-surface-100-token" />
-			</div>
-		{/if}
-
-		{#if markAsUsed}
-			<button type="button" on:click={() => modalStore.trigger(modal)}>
-				<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>
-			</button>
-		{/if}
 	</span>
 
 	<div slot="like-and-save" class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg">
@@ -410,16 +379,4 @@
 
 
 
-<style>
-    .carrow {
-
-        border-top: 12px solid transparent;
-        border-bottom: 12px solid transparent;
-        border-right: 8px solid #DBDBE1;
-        /*top: -16px; !* Adjust as needed to position the arrow *!*/
-        /*left: 50%; !* Center the arrow horizontally *!*/
-        transform: translateX(10%);
-
-    }
-</style>
 
