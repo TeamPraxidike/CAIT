@@ -7,9 +7,10 @@
 	import { tick } from 'svelte';
 	import type { UserWithProfilePic } from '$lib/util/coursesLogic.ts';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
-	import type { ParamsImmutable, ParamsMutable } from '$lib/util/frontendTypes.ts';
+	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 
 	export let data: ParamsMutable;
+	export let dataMaterial: ParamsMutableMaterial;
 	export let paramsImmutable: ParamsImmutable;
 
 	const toastStore = getToastStore();
@@ -54,51 +55,51 @@
 			   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 		<div class="flex flex-col gap-1">
 			<label for="content" class="mt-1 block font-medium">Content<span class="text-error-300">*</span></label>
-			<SelectType bind:selectedTypes={data.selectedTypes}/>
+			<SelectType bind:selectedTypes={dataMaterial.selectedTypes}/>
 			<hr class="my-3 mx-2">
 			<div class="flex items-center gap-2 h-[32px] mb-2">
 				<label for="course" class="font-medium flex items-center">
 					Course<span class="text-error-300">*</span>
 				</label>
-				{#if data.showCourseProgressRadial}
+				{#if dataMaterial.showCourseProgressRadial}
 					<ProgressRadial font={8} width="w-8" class="shrink-0" />
 				{/if}
 			</div>
 			<SelectCourse on:showCourseModal={() => openModal(null)}
-						  bind:selectedCourseId={data.course}
-						  courses={data.courses}
+						  bind:selectedCourseId={dataMaterial.course}
+						  courses={dataMaterial.courses}
 						  allCourses={paramsImmutable.allCourses}
-						  bind:originalCourseIds={data.originalCourseIds}
+						  bind:originalCourseIds={dataMaterial.originalCourseIds}
 						  on:courseEditRequest={(event) => {
 									openModal(event.detail.course);
 								  }}
 						  on:courseDeleted={(event) => {
-									  data.courses = data.courses.filter(c => c.id !== event.detail.courseId);
-									  data.courses = [...data.courses];
+									  dataMaterial.courses = dataMaterial.courses.filter(c => c.id !== event.detail.courseId);
+									  dataMaterial.courses = [...dataMaterial.courses];
 								  }}
 						  on:deselectCourse={() => {
-									  data.coverPic = undefined;
+									  dataMaterial.coverPic = undefined;
 								  }}
 			/>
 		</div>
 	</div>
-	<CoverPicSelect bind:coverPic={data.coverPic} toastStore={toastStore} />
+	<CoverPicSelect bind:coverPic={dataMaterial.coverPic} toastStore={toastStore} />
 </div>
 
 
 {#if showModal}
 	<CourseModal existingCourse={editingCourse} close={closeModal} publisher={data.loggedUser} bind:searchableUsers={data.searchableUsers} users={paramsImmutable.users}
-				 bind:showCourseProgressRadial={data.showCourseProgressRadial}
+				 bind:showCourseProgressRadial={dataMaterial.showCourseProgressRadial}
 				 bind:additionalMaintainers={courseMaintainers}
 				 on:courseDeleted={(event) => {
 					const id = event.detail.courseId;
-					data.courses = data.courses.filter(c => c.id !== id);
-					data.originalCourseIds = data.originalCourseIds.filter(x => x !== id);
-					if (data.course === id) data.course = null;
+					dataMaterial.courses = dataMaterial.courses.filter(c => c.id !== id);
+					dataMaterial.originalCourseIds = dataMaterial.originalCourseIds.filter(x => x !== id);
+					if (dataMaterial.course === id) dataMaterial.course = null;
 				}}
 				 on:courseCreated={(event) => {
-					 data.courses = [...data.courses, event.detail.course];
-					 data.originalCourseIds = [...data.originalCourseIds, event.detail.course.id];
+					 dataMaterial.courses = [...dataMaterial.courses, event.detail.course];
+					 dataMaterial.originalCourseIds = [...dataMaterial.originalCourseIds, event.detail.course.id];
 				 }}
 	/>
 {/if}

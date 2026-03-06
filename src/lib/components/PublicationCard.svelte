@@ -44,7 +44,7 @@
 	export let saved: boolean = true;
 	export let tags: string[] = publication.tags.map(tag => tag.content);
 	export let imgSrc: string | null;
-	export let markAsUsed: boolean = false;
+	// export let markAsUsed: boolean = false;
 	export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
 	export let extensions: string[] = [];
@@ -233,12 +233,12 @@
 				<div class="absolute mt-2 right-1 text-xs p-1 rounded-md bg-warning-100 text-warning-700 font-bold">
 					<p class="text-sm font-semibold">Draft</p>
 				</div>
-			{:else if used === 1}
-				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
-					Used in {used} course</p>
-			{:else if used > 0}
-				<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">
-					Used in {used} courses</p>
+			<!--{:else if used === 1}-->
+			<!--	<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">-->
+			<!--		Used in {used} course</p>-->
+			<!--{:else if used > 0}-->
+			<!--	<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">-->
+			<!--		Used in {used} courses</p>-->
 			{/if}
 	</div>
 
@@ -305,6 +305,38 @@
 				</div>
 			{/if}
 	</div>
+			</div>
+			<div class="w-full space-y-2">
+				<hr class="opacity-50">
+				<div class="w-full flex justify-between">
+					<div class="w-full flex justify-left space-x-4">
+						{#if !inCircuits}
+							<a href="/{publisher.username}/{publication.id}"
+							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"
+							   on:click={resetTab}>View</a>
+						{:else if !selected}
+							<button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
+											on:click="{select}">Select
+							</button>
+						{:else}
+							<button type="button" class="py-1 px-4 bg-error-500 text-surface-50 rounded-lg hover:bg-opacity-85"
+											use:popup={popupClickPubCard}>Remove
+							</button>
+							<div class="card p-4 max-w-sm" data-popup="{popupName}" style="z-index: 999">
+								<div class="flex gap-2">
+									<button type="button" id="remove" on:click="{remove}" class="btn variant-filled-error">Confirm</button>
+									<button type="button" id="close" class="btn variant-filled bg-surface-600">Go Back</button>
+								</div>
+								<div class="arrow bg-surface-100-token" />
+							</div>
+						{/if}
+
+						<!--{#if markAsUsed}-->
+						<!--	<button type="button" on:click={() => modalStore.trigger(modal)}>-->
+						<!--		<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>-->
+						<!--	</button>-->
+						<!--{/if}-->
+					</div>
 
 	<span slot="interaction-buttons">
 		{#if !inCircuits}
