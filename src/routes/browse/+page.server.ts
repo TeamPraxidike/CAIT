@@ -1,5 +1,6 @@
 import type { FetchedFileArray } from '$lib/database';
 import type { User } from '@prisma/client';
+import type { CourseWithProcessedProfilePic } from '../api/course-extended/+server';
 
 export async function load({ url, fetch, locals }) {
 	const session = await locals.safeGetSession();
@@ -8,10 +9,7 @@ export async function load({ url, fetch, locals }) {
 
 
 	async function fetchMaterials() {
-		// if (type !== 'materials') {
-		// 	console.log("wont fetch materials")
-		// 	return { materials: [], idsMat: [] };
-		// }
+		
 
 		try{
 			const res = await fetch(`/api/material`);
@@ -29,10 +27,6 @@ export async function load({ url, fetch, locals }) {
 	}
 
 	async function fetchCircuits() {
-		// if (type !== 'circuits') {
-		// 	console.log("wont fetch circuits")
-		// 	return { circuits: [], idsCirc: [] };
-		// }
 
 		try{
 			const res = await fetch(`/api/circuit`);
@@ -67,6 +61,22 @@ export async function load({ url, fetch, locals }) {
 
 	}
 
+	async function fetchCourses(): Promise<CourseWithProcessedProfilePic[]> {
+		try{
+			const res = await fetch(`/api/course-extended`);
+
+			if (!res.ok) {
+				throw new Error(`Failed to load courses in browse: ${res.statusText}`);
+			}
+			return res.json();
+		}
+		catch (err) {
+			console.error('Error while getting courses, page.server:\n', err);
+			throw err;
+		}
+
+	}
+
 
 	let liked: number[] = [];
 	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
@@ -96,7 +106,7 @@ export async function load({ url, fetch, locals }) {
 
 		tags = await (await fetch(`/api/tags`)).json();
 	}
-
+	
 	return {
 		selectedTag,
 		type,
@@ -106,6 +116,7 @@ export async function load({ url, fetch, locals }) {
 		materials: fetchMaterials(),
 		users: fetchUsers(),
 		circuits: fetchCircuits(),
+		courses: fetchCourses(),
 		tags,
 		liked,
 		saved,
