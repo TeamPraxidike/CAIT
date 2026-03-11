@@ -138,13 +138,13 @@
 					{:else}
 						{#each x as publication (publication.id)}
 							<!-- TODO: FIX IMGSRC, LIKED and SAVED -->
-
+							 
 							<PublicationCard
 								imgSrc={publication.coverPicData?.data}
-								{publication}
+								publication={publication}
 								liked={liked.includes(publication.id)}
 								saved={saved.includes(publication.id)}
-								materialType={publication.type}
+								materialType={publication.materials.encapsulatingType}
 								publisher={publication.publisher}
 								className="col-span-1" />
 						{/each}
