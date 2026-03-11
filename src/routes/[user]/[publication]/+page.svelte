@@ -462,14 +462,7 @@
 		</div>
 
 		<div class="flex">
-			<div class="w-2/3">
-				<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">
-					{pubView.publication.description}
-				</p>
-			</div>
-
-			<div class="w-1/3">
-				<div class="flex flex-col">
+				<div class=" w-1/2  pr-12">
 					<span class="font-bold text-surface-800">Learning Objectives:</span>
 					<ul class="list-inside">
 						{#if pubView.publication.learningObjectives.length === 0}
@@ -492,19 +485,23 @@
 							{/each}
 						{/if}
 					</ul>
-				</div>
 			</div>
 			
+			
 		</div>
-
+		
+		<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">
+			<span class="font-bold text-surface-800">Description:</span>
+			{pubView.publication.description}
+		</p>
 		<div class="w-full flex justify-between">
 			<div>
 				{#if isMaterial}
 					{#if pubView.publication.materials.timeEstimate}
-						<p class="text-surface-700 text-sm mt-4"> Time
-							Estimate: {pubView.publication.materials.timeEstimate} </p>
+						<p class="text-surface-800 mt-4"> 
+							<span class="font-bold">Time Estimate:</span> {pubView.publication.materials.timeEstimate} </p>
 					{/if}
-					<p class="text-surface-700 text-sm">Copyright: {pubView.publication.materials.copyright}</p>
+					<p class="text-surface-800 "><span class="font-bold">Copyright:</span> {pubView.publication.materials.copyright}</p>
 				{/if}
 			</div>
 			<div class="col-span-full flex flex-col items-start mt-2">
