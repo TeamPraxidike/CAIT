@@ -469,10 +469,10 @@
 			<div>
 				{#if isMaterial}
 					{#if pubView.publication.materials.timeEstimate}
-						<p class="text-surface-400 text-sm mt-4"> Time
+						<p class="text-surface-700 text-sm mt-4"> Time
 							Estimate: {pubView.publication.materials.timeEstimate} </p>
 					{/if}
-					<p class="text-surface-400 text-sm">Copyright: {pubView.publication.materials.copyright}</p>
+					<p class="text-surface-700 text-sm">Copyright: {pubView.publication.materials.copyright}</p>
 				{/if}
 			</div>
 			<div class="col-span-full flex flex-col items-start mt-2">
