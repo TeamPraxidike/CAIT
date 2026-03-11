@@ -34,7 +34,7 @@
 
     let dropDown: boolean = false;
 
-    const toggleDropDown = () => dropDown = !dropDown;
+    const toggleDropDown = () => {dropDown = !dropDown; console.log(dropDown)}
 
     onMount(() => {
         const handleResize = () => {
@@ -149,66 +149,45 @@
                 <enhanced:img class="h-16 w-16" src="/static/images/favicons/favicon-128.png" alt="CAIT Logo"/>
             </a>
             
-            <!-- <div class="hidden col-start-2 col-span-7 gap-6 lg:gap-12 items-center md:flex">
-                {#each navOptions as opt}
-                    <div>
-                        <a class="group transition text-surface-800 dark:text-surface-50 h-full flex items-center" href={opt.link} on:click={confirmPublishReset}>
-                        <span class="bg-left-bottom bg-gradient-to-r from-primary-400 to-primary-400 bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-300 ease-in">
-                            {opt.text}
-                        </span>
-                    </a>
-                        {#if opt.dropDown?.length}
-                            <div 
-                                class="invisible absolute left-0 top-full z-50 mt-2 w-48 translate-y-1 rounded-lg border border-gray-200 bg-white p-2 opacity-0 shadow-lg transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
-                            >
-                                {#each opt.dropDown as dropDownItem}
-                                    <a 
-                                        href={dropDownItem.link}
-                                        class="block rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
-                                    >
-                                        {dropDownItem.text}
-                                    </a>
-                                {/each}
-                            </div>
-                        {/if}
-                    
-                    </div>
-                    
-                    
-                {/each}
-            </div> -->
 
-            <div class="hidden col-start-2 col-span-7 gap-6 lg:gap-12 items-center md:flex">
+            <div class="hidden col-start-2 col-span-7 items-center gap-6 md:flex lg:gap-12">
                 {#each navOptions as opt}
                     <div class="relative group">
                         <a
                             href={opt.link}
                             on:click={confirmPublishReset}
-                            class="flex items-center text-surface-800 transition dark:text-surface-50  "
-                        
+                            class="flex items-center text-surface-800 transition dark:text-surface-50"
                         >
-                            <span class="bg-left-bottom bg-gradient-to-r from-primary-400 to-primary-400 bg-[length:0%_2px] bg-no-repeat transition-all duration-300 ease-in group-hover:bg-[length:100%_2px]">
+                            <span
+                                class="bg-left-bottom bg-gradient-to-r from-primary-400 to-primary-400 bg-[length:0%_2px] bg-no-repeat transition-all duration-300 ease-in group-hover:bg-[length:100%_2px] group-focus-within:bg-[length:100%_2px]"
+                            >
                                 {opt.text}
                             </span>
-                            
                         </a>
-                        {#if opt.dropDown?.length}
-                            <div class="absolute hidden group-hover:block bg-white" >
-                                {#each opt.dropDown as item}
-                                   <a
-                                        href={item.link}
-                                        class="block rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
-                                    > 
-                                        <span class="">
-                                            {item.text}
 
-                                        </span>
-                                    </a>
-                                {/each}
+                        {#if opt.dropDown?.length}
+                            <div
+                                class="absolute left-0 top-full z-20 hidden pt-3 group-hover:block group-focus-within:block"
+                            >
+                                <div class="relative min-w-[220px] rounded-xl border border-surface-200 bg-surface-50 shadow-lg">
+                                    <div
+                                        class="absolute left-6 top-0 h-3 w-3 -translate-y-1/2 rotate-45 border-l border-t border-surface-200 bg-surface-50"
+                                    ></div>
+
+                                    <div class="p-2">
+                                        {#each opt.dropDown as item}
+                                            <a
+                                                href={item.link}
+                                                class="block whitespace-nowrap rounded-lg px-4 py-3 text-sm text-surface-700 transition hover:bg-surface-100 hover:text-surface-900"
+                                            >
+                                                {item.text}
+                                            </a>
+                                        {/each}
+                                    </div>
+                                </div>
                             </div>
                         {/if}
                     </div>
-                        
                 {/each}
             </div>
             
