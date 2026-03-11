@@ -699,7 +699,7 @@
 	{#key pubView.publication.id}
 		<!--   RIGHT SINGLE 1/4 COLUMN   -->
 		<div class="flex flex-col gap-4">
-			<div class="flex gap-2">
+			<div class="flex flex-col gap-2">
 				<UserProp role="Publisher"
 						  userPhotoUrl={pubView.publication.publisher.profilePicData}
 						  view="material"
