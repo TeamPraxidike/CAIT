@@ -711,8 +711,10 @@
 						  view="material"
 						  bind:user={pubView.publication.publisher} />
 				{#each pubView.publication.maintainers as maintainer}
-					<UserProp role="Maintainer" userPhotoUrl={maintainer.profilePicData}
-							  view="material" user={maintainer} />
+					{#if maintainer.id != pubView.publication.publisher.id}
+						<UserProp role="Maintainer" userPhotoUrl={maintainer.profilePicData}
+								view="material" user={maintainer} />
+					{/if}
 				{/each}
 			</div>
 
