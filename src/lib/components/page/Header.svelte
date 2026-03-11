@@ -138,7 +138,7 @@
 </script>
 
 <header  class="sticky top-0 z-[2000] w-full">
-    <div class="w-full shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none ">
+    <div class="w-full shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none overflow-x-hidden">
         <!--   Progress Bar     -->
         <!-- apparently there is a component for this in Skeleton... TODO? (https://v2.skeleton.dev/components/progress-bars) -->
         <div class="progress-bar-container z-100">
