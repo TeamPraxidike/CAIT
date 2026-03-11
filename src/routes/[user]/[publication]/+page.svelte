@@ -719,9 +719,9 @@
 			</div>
 
 			{#if pubView.publication.course !== null}
-				<div class="text-surface-500 text-sm">
+				<div class="text-surface-700 text-sm">
 					<span>Part of the</span>
-					<span class="font-semibold">{pubView.publication.course.courseName}</span>
+					<a href={`/courses/${pubView.publication.course.courseName}`} class="font-semibold text-primary-600 hover:underline">{pubView.publication.course.courseName}</a>
 					<span>course</span>
 				</div>
 			{/if}
