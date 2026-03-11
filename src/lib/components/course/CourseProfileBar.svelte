@@ -49,8 +49,8 @@
 	<!--{/if}-->
 	<img
 		src={coverpic ? coverpic : defaultProfilePicturePath}
-		alt="course}"
-		class="w-full h-auto object-cover border rounded" />
+		alt="course"
+		class="w-full max-h-[400px] object-cover border rounded" />
 
 	<div
 		class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center

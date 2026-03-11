@@ -48,6 +48,10 @@
 	let loggedUser = page.data.loggedUser;
 	const userId = page.data.session?.user.id;
 
+	let imgSrc: string|null = null;
+	
+	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
+
 	let supabaseClient = page.data.supabase;
 	let tabSet: number = 0;
 	let pubView: PublicationView;
@@ -128,6 +132,7 @@
 		comments = data.pubView.publication.comments;
 		tags = pubView.publication.tags.map(tag => tag.content) as string[];
 		created = getDateDifference(data.pubView.publication.updatedAt, new Date()) as string;
+		imgSrc = pubView.coverFileData?.data;
 	}
 
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
@@ -699,6 +704,7 @@
 	{#key pubView.publication.id}
 		<!--   RIGHT SINGLE 1/4 COLUMN   -->
 		<div class="flex flex-col gap-4">
+			<img src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="Cover" class="w-full max-h-[400px] object-cover border rounded"/>
 			<div class="flex flex-col gap-2">
 				<UserProp role="Publisher"
 						  userPhotoUrl={pubView.publication.publisher.profilePicData}
