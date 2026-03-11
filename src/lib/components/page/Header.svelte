@@ -21,6 +21,7 @@
         { text: 'Browse', link: '/browse?type=materials', dropDown: [
             {text: 'Materials', link: '/browse?type=materials'},
             {text: "People", link: '/browse?type=people'},
+            {text: "Courses", link: '/browse?type=courses'},
             {text: 'Circuits', link: '/browse?type=circuits'}
         ]},
         { text: 'About', link: '/about' },
@@ -34,7 +35,7 @@
 
     let dropDown: boolean = false;
 
-    const toggleDropDown = () => {dropDown = !dropDown; console.log(dropDown)}
+    const toggleDropDown = () => dropDown = !dropDown
 
     onMount(() => {
         const handleResize = () => {
