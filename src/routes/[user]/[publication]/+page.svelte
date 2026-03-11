@@ -733,7 +733,7 @@
 	{#key pubView.publication.id}
 		<!--   RIGHT SINGLE 1/4 COLUMN   -->
 		<div class="flex flex-col gap-4">
-			<img src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="Cover" class="w-full max-h-[400px] object-cover border rounded"/>
+			<img src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="Cover" class="w-full max-h-[400px] object-cover border rounded select-none" draggable="false"/>
 			<div class="flex flex-col gap-2">
 				<UserProp role="Publisher"
 						  userPhotoUrl={pubView.publication.publisher.profilePicData}
