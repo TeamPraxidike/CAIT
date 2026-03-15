@@ -36,7 +36,7 @@
 		{/if}
 	</div>
 	<div class="col-span-4 flex flex-col gap-4">
-		{#if dataMaterial?.coverPic}
+		{#if dataMaterial && dataMaterial.coverPic}
 			<p class="font-bold"> Cover Picture: </p>
 			<img src={URL.createObjectURL(dataMaterial.coverPic)} alt="">
 		{/if}

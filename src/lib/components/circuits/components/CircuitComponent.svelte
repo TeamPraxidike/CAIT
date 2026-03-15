@@ -286,7 +286,9 @@
 	}
 
 	const fetchElements = async () => {
+		console.log("ELEMENTS FETCHING");
 		const fetchedMaterials: DisplayedMaterials = await fetchMaterials()
+		console.log("Fetched materials: ", fetchedMaterials);
 		displayedMaterials = fetchedMaterials.displayedMaterials
 		displayIds = fetchedMaterials.displayedIds
 		addActive = true

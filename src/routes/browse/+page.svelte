@@ -2,12 +2,16 @@
 	import { MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
-	import type { Publication, User } from '@prisma/client';
+	import type { Publication, User, Course } from '@prisma/client';
 	import { onMount } from 'svelte';
 	import {type PaginationSettings, Paginator, ProgressRadial, SlideToggle} from '@skeletonlabs/skeleton';
 	import DropdownSelect from '$lib/components/designSystem/DropdownSelect.svelte';
 	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';
 	import {semanticSearchActive} from '$lib/stores/semanticSearchActive'
+	import CourseCard from '$lib/components/CourseCard.svelte';
+	import { BROWSABLE_PAGE_TYPES, PageType, toPageType } from '$lib/util/frontendTypes';
+	import type { CourseWithProcessedProfilePic } from '../api/course-extended/+server';
+	import BrowseCardShell from '$lib/components/BrowseCardShell.svelte';
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -15,6 +19,7 @@
 	let circuits: any[] = [];
 	let idsMat: any[] = [];
 	let idsCirc: any[] = [];
+	
 
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
@@ -22,12 +27,15 @@
 
 
 	let users: (User & { posts: Publication[], profilePicData: string })[] = [];
+	let courses: CourseWithProcessedProfilePic[] = [];
 	let tags = data.tags;
 	let liked = data.liked as number[];
 	let saved = data.saved.saved as number[];
 
-	let pageType = data.type;
-	$: pageType = data.type;
+
+
+	let pageType: PageType = toPageType(data.type);
+	$: pageType = toPageType(data.type);
 	let sortOptions: string[] = ['Most Recent', 'Most Liked', 'Oldest'];
 	let sortByText = 'Sort By';
 	let selectedDiff: ('Easy' | 'Medium' | 'Hard')[] = [];
@@ -72,11 +80,11 @@
 	let isSemanticActive = false;
 	$: isSemanticActive = isSemanticActive;
 
-	let lastPaginationType: string = pageType;
+	let lastPaginationType: PageType = pageType;
 
 	$: if (isSemanticActive) {
 		lastPaginationType = pageType
-		pageType = 'semantic';
+		pageType = PageType.SEMANTIC;
 		// updates the store so we close all open dropdowns
 		$semanticSearchActive = true;
 	}
@@ -135,7 +143,7 @@
 		if (searchWord !== '') queryParams.set('q', searchWord);
 		if (numberNodes != undefined && Number.parseInt(numberNodes) !== 0) queryParams.set('limit', numberNodes);
 
-		const s = pageType === 'materials' ? 'material' : 'circuit';
+		const s = pageType === PageType.MATERIALS ? 'material' : 'circuit';
 		const url = `/api/${s}?${queryParams.toString()}`;
 		// materials = [];
 		// circuits = [];
@@ -160,7 +168,6 @@
 				}
 				page = 0;
 				paginationSettings.page = 0;
-
 			})
 			.catch(error => {
 				console.error('There was a problem with the fetch operation:', error);
@@ -185,7 +192,7 @@
 	}
 
 	async function changePage(amount: number, pageNum: number) {
-		const ids = pageType === 'materials' ? idsMat : idsCirc;
+		const ids = pageType === PageType.MATERIALS ? idsMat : idsCirc;
 		const queryParams = new URLSearchParams({
 			type: pageType,
 			ids: ids.slice(pageNum * amount, (pageNum + 1) * amount).join(',')
@@ -193,7 +200,7 @@
 
 		if (sortByText !== 'Most Recent') queryParams.set('sort', sortByText);
 
-		const s = pageType === 'materials' ? 'material' : 'circuit';
+		const s = pageType === PageType.MATERIALS ? 'material' : 'circuit';
 		const url = `/api/publication/set?${queryParams.toString()}`;
 		// materials = [];
 		// circuits = [];
@@ -248,10 +255,13 @@
 
 	onMount(async () => {
 		users = (await data.users).users;
+		
 		allPublishersObjects = users.map((x: any) => ({
 			id: x.id,
 			content: (x.firstName + ' ' + x.lastName)
 		}));
+
+		courses = (await data.courses);
 
 
 		if (data.selectedTag !== '') {
@@ -272,7 +282,6 @@
 		});
 
 		data.circuits.then((circData) => {
-
 			circuits = circData.circuits;
 			idsCirc = circData.idsCirc;
 			if (data.type === 'circuits') source = idsCirc;
@@ -330,12 +339,12 @@
 		/>
 	</div>
 
-	<DropdownSelect title="Type" multiselect={false} options={["materials", "people", "circuits"]}
+	<DropdownSelect title="Type" multiselect={false} options={BROWSABLE_PAGE_TYPES}
 					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
 	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
 					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
 
-	{#if pageType !== "people"}
+	{#if pageType !== PageType.PEOPLE}
 <!--		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}-->
 <!--						bind:selected={selectedDiff} on:select={() => searchActive = true}-->
 <!--						disabled={isSemanticActive}/>-->
@@ -349,7 +358,7 @@
 						disabled={isSemanticActive}/>
 	{/if}
 
-	{#if pageType === 'materials'}
+	{#if pageType === PageType.MATERIALS}
 		<DropdownSelect title="Content" multiselect={true} options={allTypes}
 						bind:selected={selectedTypes} on:select={() => searchActive = true}
 						disabled={isSemanticActive}/>
@@ -373,7 +382,7 @@
 </div>
 
 <div class="col-span-9 grid grid-cols-3 gap-2 auto-rows-min">
-	{#if (pageType !== 'people') && (pageType !== 'semantic') }
+	{#if (pageType !== PageType.PEOPLE) && (pageType !== PageType.SEMANTIC) }
 		<div class="col-span-full">
 			<Paginator
 				bind:settings={paginationSettings}
@@ -383,7 +392,7 @@
 			/>
 		</div>
 	{/if}
-	{#if pageType === "materials"}
+	{#if pageType === PageType.MATERIALS}
 		{#await fetchPromise || data.materials}
 			<div class="flex flex-row gap-2">
 				<p>Loading materials...</p>
@@ -405,7 +414,7 @@
 			<!--TODO: Change color-->
 			<p style="color: red">Error while loading materials. Reload the page to try again</p>
 		{/await}
-	{:else if pageType === "people"}
+	{:else if pageType === PageType.PEOPLE}
 		{#await fetchPromise || data.users}
 			<div class="flex flex-row gap-2">
 				<p>Loading users...</p>
@@ -421,7 +430,7 @@
 			<!--TODO: Change color-->
 			<p style="color: red">Error while loading users. Reload the page to try again</p>
 		{/await}
-	{:else if pageType === "circuits"}
+	{:else if pageType === PageType.CIRCUITS}
 		{#await fetchPromise || data.circuits}
 			<div class="flex flex-row gap-2">
 				<p>Loading circuits...</p>
@@ -440,6 +449,24 @@
 		{:catch error}
 			<!--TODO: Change color-->
 			<p style="color: red">Error while loading circuits. Reload the page to try again</p>
+		{/await}
+	{:else if pageType === PageType.COURSES}
+		{#await fetchPromise || data.courses}
+			<div class="flex flex-row gap-2">
+				<p>Loading courses...</p>
+				<ProgressRadial font={8} width="w-8" class="shrink-0" />
+			</div>
+		{:then _}
+			{#each courses as course (course.id)}
+				<CourseCard course={course} 
+						  className="col-span-1"
+						  coursePhotoUrl={course.coverPic.data}
+						  numPubs={course.publications.length}></CourseCard>
+				
+			{/each}
+		{:catch _}
+			<!--TODO: Change color-->
+			<p style="color: red">Error while loading users. Reload the page to try again</p>
 		{/await}
 	{:else if isSemanticActive && semanticPromise !== null}
 		{#await semanticPromise}

@@ -168,6 +168,22 @@
 		copyright
 	}
 
+	let paramsMutableMaterial: ParamsMutableMaterial = {
+		fileTUSMetadata,
+		fileTUSProgress,
+		fileTUSUploadObjects,
+		fileURLs,
+		files,
+		showCourseProgressRadial,
+		selectedTypes,
+		originalCourseIds,
+		courses,
+		course,
+		coverPic,
+		estimate,
+		copyright
+	}
+
 	let paramsImmutable: ParamsImmutable;
 	$: paramsImmutable = {
 		supabaseClient,
