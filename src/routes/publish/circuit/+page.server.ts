@@ -1,6 +1,6 @@
 import type { Tag } from '@prisma/client';
 import type { Actions, PageServerLoad } from './$types';
-import { type CircuitForm, type FetchedFileArray } from '$lib/database';
+import { type CircuitForm } from '$lib/database';
 import { env } from '$env/dynamic/public';
 import { loadCircuitData } from '$lib/util/frontendTypes.ts';
 

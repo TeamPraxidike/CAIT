@@ -4,7 +4,6 @@
 		AddInteractionForm,
 		CircuitComponent,
 		Comment,
-		DiffBar,
 		FileTable,
 		getDateDifference, HorizontalScroll,
 		Meta, Tag,

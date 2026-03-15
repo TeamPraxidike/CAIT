@@ -1,31 +1,19 @@
 <script lang="ts">
 	import type { LayoutServerData } from '../../$types';
 	import type { ActionData, PageServerData } from './$types';
-	import { fade } from 'svelte/transition';
 	import {
 		PublicationType,
 		type Tag as PrismaTag
 	} from '@prisma/client';
-	import {
-		arrayToFileList,
-		concatFileList,
-		downloadFileFromSupabase
-	} from '$lib/util/file';
 	import { page } from '$app/state';
 	import { onDestroy, onMount } from 'svelte';
-	import {
-		type FileTUSMetadata,
-	} from '$lib/util/indexDB';
 	import { type UserWithProfilePic } from '$lib/util/coursesLogic';
 	import type {
 		ParamsImmutable,
 		ParamsMutable,
-		ParamsMutableCircuit,
-		ParamsMutableMaterial
+		ParamsMutableCircuit
 	} from '$lib/util/frontendTypes.ts';
 	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
-	import type {FetchedFileArray} from "$lib/database";
-	import {ProgressRadial} from "@skeletonlabs/skeleton";
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes.ts';
 
 

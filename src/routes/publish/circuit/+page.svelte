@@ -213,5 +213,6 @@
 				 edit={false}
 				 paramsImmutable={paramsImmutable}
 				 bind:showAnimation={showAnimation}
-				 circuit={true}/>
+				 circuit={true}
+/>
 
