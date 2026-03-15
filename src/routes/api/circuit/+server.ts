@@ -101,8 +101,6 @@ export async function POST({ request, locals }) {
 		metaData.isDraft = true;
 	}
 
-	console.log("POST - metadata is validated:", metaData);
-
 	try {
 		const createdCircuit: CircuitWithPublication = await prisma.$transaction(
 			async (prismaTransaction: any) => {

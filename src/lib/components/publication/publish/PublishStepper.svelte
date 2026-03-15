@@ -118,6 +118,7 @@
 			paramsImmutable={paramsImmutable}
 			bind:draft={draft}
 			bind:markedAsDraft={markedAsDraft}
+			isCircuit={circuit}
 		/>
 
 	</Step>

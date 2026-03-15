@@ -2,33 +2,16 @@ import type { Tag } from '@prisma/client';
 import type { Actions, PageServerLoad } from './$types';
 import { type CircuitForm, type FetchedFileArray } from '$lib/database';
 import { env } from '$env/dynamic/public';
+import { loadCircuitData } from '$lib/util/frontendTypes.ts';
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
 	const tags: Tag[] = await (await fetch('/api/tags')).json();
 	const { users } = await (await fetch(`/api/user`)).json();
-	let liked: number[] = [];
-	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
-		saved: [],
-		savedFileData: [],
-	};
 
-	const session = await locals.safeGetSession();
+	const res = await loadCircuitData(locals, fetch);
 
-	if (session && session.user) {
-		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
-		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
-
-		const savedResponse = await fetch(
-			`/api/user/${session.user.id}/saved?fullPublications=false`,
-		);
-		saved =
-			savedResponse.status === 200
-				? await savedResponse.json()
-				: { saved: [], savedFileData: [] };
-	}
-
-	return { tags, users, liked: liked, saved: saved, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
+	return { tags, users, liked: res.liked, saved: res.saved, PUBLIC_SUPABASE_URL: env.PUBLIC_SUPABASE_URL };
 };
 
 export const actions = {

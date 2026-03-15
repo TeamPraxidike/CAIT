@@ -6,6 +6,8 @@
 	export let dataMaterial: ParamsMutableMaterial | null;
 	export let paramsImmutable: ParamsImmutable;
 
+	export let isCircuit = dataMaterial == null;
+
 	export let draft: boolean;
 	export let markedAsDraft: boolean;
 </script>
@@ -22,7 +24,7 @@
 
 		<p class="text-surface-800 text-sm">{data.description}</p>
 
-		{#if dataMaterial}
+		{#if !isCircuit && dataMaterial}
 			<p class="text-surface-500 text-sm">
 				Time Estimate: {dataMaterial.estimate || 'No estimate provided'} |
 				Type: {dataMaterial.selectedTypes[0]?.toUpperCase() || 'No type provided'}
@@ -34,7 +36,7 @@
 		{/if}
 	</div>
 	<div class="col-span-4 flex flex-col gap-4">
-		{#if dataMaterial && dataMaterial.coverPic}
+		{#if dataMaterial?.coverPic}
 			<p class="font-bold"> Cover Picture: </p>
 			<img src={URL.createObjectURL(dataMaterial.coverPic)} alt="">
 		{/if}
@@ -63,10 +65,10 @@
 				{/each}
 			</ul>
 		</div>
-		{#if dataMaterial}
+		{#if !isCircuit}
 			<div class="flex flex-col">
 				<span class="font-bold">Copyright:</span>
-				<span class="text-sm">{dataMaterial.copyright || 'No copyright license'}</span>
+				<span class="text-sm">{dataMaterial?.copyright || 'No copyright license'}</span>
 			</div>
 		{/if}
 	</div>
