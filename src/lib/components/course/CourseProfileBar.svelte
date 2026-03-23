@@ -101,12 +101,13 @@
 		</p>
 	</div>
 	<hr class="w-11/12" />
-	<div class="flex flex-col">
+	<div class="flex flex-col gap-4 w-full">
 		<span class="font-bold text-surface-800">Maintainers:</span>
-		<div class="flex flex-col">
+		<div class="flex flex-col gap-2 ">
 			{#each course?.maintainers as maintainer}
 				<UserProp
 					role="Maintainer"
+					subject={course}
 					userPhotoUrl={maintainer.profilePicData}
 					view="material"
 					user={maintainer} />

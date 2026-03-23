@@ -740,6 +740,7 @@
 						  view="material"
 						  bind:user={pubView.publication.publisher} 
 						  subject={pubView.publication}/>
+						  
 				{#each pubView.publication.maintainers as maintainer}
 					{#if maintainer.id != pubView.publication.publisher.id}
 						<UserProp role="Maintainer" userPhotoUrl={maintainer.profilePicData}
