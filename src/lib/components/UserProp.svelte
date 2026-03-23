@@ -81,7 +81,7 @@
 				</div>
 			</a>
 			{#if subject}
-				<ContactUser user={user} subject={subject}/>
+				<ContactUser target_user={user} subject={subject}/>
 			{/if}
 		</div>
 		
