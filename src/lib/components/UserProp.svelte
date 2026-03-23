@@ -65,10 +65,10 @@
 {:else if view === "material"}
 
 	<div class="flex flex-col items-center">
-		<a href='/{user.username}' type="button" style="height:fit-content"
-			class="[&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover
-					bg-surface-50 hover:cursor-pointer rounded-lg w-full">
-			<div class="flex gap-2 items-center space-y-1 w-full flex-none">
+		<div style="height:fit-content"
+			class=" md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover
+					bg-surface-50 hover:cursor-pointer rounded-lg w-full flex-col flex">
+			<a href='/{user.username}' type="button" class="flex gap-2 items-center space-y-1 w-full flex-none">
 				{#if userPhotoUrl !== null}
 					<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 rounded-full" />
 				{:else}
@@ -79,11 +79,12 @@
 					<hr class="dark:bg-surface-50 bg-surface-300" />
 					<div class="text-sm md:text-md ">{role}</div>
 				</div>
-			</div>
-		</a>
-		{#if subject}
-			<ContactUser user={user} subject={subject}/>
-		{/if}
+			</a>
+			{#if subject}
+				<ContactUser user={user} subject={subject}/>
+			{/if}
+		</div>
+		
 	</div>
 	
 
