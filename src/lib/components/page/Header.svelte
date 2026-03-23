@@ -179,7 +179,7 @@
                                         {#each opt.dropDown as item}
                                             <a
                                                 href={item.link}
-                                                class="block whitespace-nowrap rounded-lg px-4 py-3 text-sm text-surface-700 transition hover:bg-surface-100 hover:text-surface-900"
+                                                class="block whitespace-nowrap rounded-lg px-4 py-3 text-sm text-surface-700 transition hover:bg-surface-200 hover:text-surface-900"
                                             >
                                                 {item.text}
                                             </a>
