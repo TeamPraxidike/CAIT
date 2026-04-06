@@ -5,11 +5,20 @@ import {
 	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { validateTiptapJson } from '$lib/server/validateTiptapJson';
 
 export async function POST({ request, locals }) {
 	const body = await request.json();
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
+
+	const contentValidation = validateTiptapJson(body.content);
+	if (!contentValidation.valid) {
+		return new Response(
+			JSON.stringify({ error: contentValidation.error }),
+			{ status: 400 },
+		);
+	}
 
 	try {
 		const replyData: createReplyData = {

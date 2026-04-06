@@ -5,6 +5,7 @@ import {
 	type editCommentData,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { validateTiptapJson } from '$lib/server/validateTiptapJson';
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -50,8 +51,14 @@ export async function PUT({ params, request, locals }) {
 
 	const authError = await verifyAuth(locals, comment.userId);
 	if (authError) return authError;
-	try {
+	const validation = validateTiptapJson(body.content);
+	if (!validation.valid) {
+		return new Response(JSON.stringify({ error: validation.error }), {
+			status: 400,
+		});
+	}
 
+	try {
 		const commentData: editCommentData = {
 			id: parseInt(params.commentId),
 			content: body.content,

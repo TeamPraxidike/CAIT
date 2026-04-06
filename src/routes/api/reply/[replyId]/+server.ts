@@ -1,10 +1,12 @@
 import {
 	deleteReply,
 	type editReplyData,
-	getReply, getUserById,
-	updateReply
+	getReply,
+	getUserById,
+	updateReply,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { validateTiptapJson } from '$lib/server/validateTiptapJson';
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -46,6 +48,13 @@ export async function PUT({ params, request, locals }) {
 
 	const authError = await verifyAuth(locals, reply.userId);
 	if (authError) return authError;
+
+	const validation = validateTiptapJson(body.content);
+	if (!validation.valid) {
+		return new Response(JSON.stringify({ error: validation.error }), {
+			status: 400,
+		});
+	}
 
 	try {
 		const replyData: editReplyData = {

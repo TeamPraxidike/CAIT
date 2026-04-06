@@ -9,6 +9,7 @@ import {
 	updateFiles,
 	updateReputation,
 } from '$lib/database';
+import { validateOptionalTiptapJson } from '$lib/server/validateTiptapJson';
 import type { RequestHandler } from '@sveltejs/kit';
 import { enqueueMaterialComparison } from '$lib/PiscinaUtils/runner';
 
@@ -173,6 +174,16 @@ export async function POST({ request, locals }) {
 
 	if (!isMaterialValid(metaData, fileInfo)) {
 		metaData.isDraft = true;
+	}
+
+	const changeLog = body.changeLog;
+	if (changeLog?.globalComment) {
+		const validation = validateOptionalTiptapJson(changeLog.globalComment);
+		if (!validation.valid) {
+			return new Response(JSON.stringify({ error: validation.error }), {
+				status: 400,
+			});
+		}
 	}
 
 	try {

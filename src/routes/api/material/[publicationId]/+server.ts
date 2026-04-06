@@ -34,6 +34,7 @@ import {
 	type ChangeLogPayload,
 	type FileChangeLog,
 } from '$lib/database/publicationHistory.js';
+import { validateOptionalTiptapJson } from '$lib/server/validateTiptapJson';
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -134,6 +135,16 @@ export async function PUT({ request, params, locals }) {
 
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
+
+	const commentValidation = validateOptionalTiptapJson(
+		changeLog.globalComment,
+	);
+	if (!commentValidation.valid) {
+		return new Response(
+			JSON.stringify({ error: commentValidation.error }),
+			{ status: 400 },
+		);
+	}
 
 	const publicationId = parseInt(params.publicationId);
 
