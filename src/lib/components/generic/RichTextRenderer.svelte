@@ -2,12 +2,9 @@
 	RichTextRenderer.svelte
 
 	A lightweight, read-only renderer for content stored by the RichTextEditor.
-	Instead of mounting a full TipTap editor instance, it uses `generateHTML`
-	from `@tiptap/core` to convert stored TipTap JSON into an HTML string,
-	which is then rendered via Svelte's `{@html ...}` directive.
-
-	For legacy plain-text content (created before the rich text editor was
-	introduced), it falls back to simple HTML-escaped text wrapped in a `<p>`.
+	It uses `generateHTML` from `@tiptap/core` to convert stored TipTap JSON
+	into an HTML string, sanitizes it with DOMPurify to prevent XSS, then
+	renders it via Svelte's `{@html ...}` directive.
 
 	Mention nodes are rendered as clickable chips that link to the mentioned
 	user's profile page.
@@ -17,64 +14,66 @@
 -->
 <script lang="ts">
 	import { generateHTML } from '@tiptap/core';
+	import DOMPurify from 'dompurify';
 	import { getExtensions } from './tiptapExtensions';
-	import { parseContent, escapeHtml } from '$lib/util/content';
 
 	// ── Props ──────────────────────────────────────────────────────────────
 
-	/** The raw `content` string */
+	/** The raw `content` string (JSON-serialised TipTap document). */
 	export let content: string = '';
 
 	/** Additional CSS classes applied to the outer wrapper. */
 	export let rendererClass = '';
 
-	// ── Derived HTML ──────────────────────────────────────────────────────
+	// ── Setup ─────────────────────────────────────────────────────────────
 
 	/**
 	 * Cache the extensions array so it isn't recreated on every reactive
-	 * update.  No suggestion config is needed for read-only rendering.
+	 * update. No suggestion config is needed for read-only rendering.
 	 */
 	const extensions = getExtensions();
 
 	/**
-	 * Reactively produce an HTML string whenever `content` changes.
+	 * DOMPurify configuration. We rely on DOMPurify's sensible defaults for
+	 * standard HTML tags and attributes — only the custom data attributes
+	 * used by mention chips need to be explicitly allowed.
+	 */
+	const PURIFY_CONFIG = {
+		ADD_ATTR: ['data-type', 'data-id', 'data-username'],
+	};
+
+	// ── Derived HTML ──────────────────────────────────────────────────────
+
+	/**
+	 * Reactively produce a sanitized HTML string whenever `content` changes.
 	 *
-	 * - TipTap JSON content is rendered through `generateHTML` so that
-	 *   mention chips (and all other node types) are faithfully reproduced.
-	 * - Legacy plain-text content is escaped and wrapped in `<p>` tags,
-	 *   preserving line breaks as separate paragraphs.
+	 * Pipeline: JSON string → parse → generateHTML → DOMPurify.sanitize → {@html}
 	 */
 	$: html = buildHtml(content);
 
 	function buildHtml(raw: string): string {
 		if (!raw) return '';
 
-		const parsed = parseContent(raw);
-
-		if (parsed.kind === 'json') {
-			try {
-				return generateHTML(parsed.data, extensions);
-			} catch (err) {
-				// If the JSON is somehow malformed, fall back to plain text
-				// rather than crashing the UI.
-				console.error('[RichTextRenderer] Failed to generate HTML from JSON content:', err);
-				return plainTextToHtml(raw);
-			}
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(raw);
+		} catch {
+			console.error('[RichTextRenderer] Content is not valid JSON');
+			return '';
 		}
 
-		return plainTextToHtml(parsed.data);
-	}
+		if (!parsed || typeof parsed !== 'object' || (parsed as any).type !== 'doc') {
+			console.error('[RichTextRenderer] Content is not a valid TipTap document');
+			return '';
+		}
 
-	/**
-	 * Converts a plain-text string to simple HTML, splitting on newlines
-	 * and wrapping each line in a `<p>`.
-	 */
-	function plainTextToHtml(text: string): string {
-		if (!text) return '';
-		return text
-			.split('\n')
-			.map((line) => `<p>${escapeHtml(line) || '<br>'}</p>`)
-			.join('');
+		try {
+			const unsanitized = generateHTML(parsed as Record<string, any>, extensions);
+			return DOMPurify.sanitize(unsanitized, PURIFY_CONFIG);
+		} catch (err) {
+			console.error('[RichTextRenderer] Failed to generate HTML from content:', err);
+			return '';
+		}
 	}
 </script>
 
