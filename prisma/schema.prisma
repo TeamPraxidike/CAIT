@@ -38,8 +38,8 @@ enum PublicationType {
 }
 
 enum PublicationEventType {
-  CREATE   // The Genesis event of the publication
-  UPDATE   // Every other event
+  CREATE // The Genesis event of the publication
+  UPDATE // Every other event
 }
 
 model User {
@@ -71,8 +71,8 @@ model User {
   replies     Reply[]
   isAdmin     Boolean       @default(false)
 
-  profilePic           File?                @relation("ProfilePic")
-  courses              Course[]             @relation("CourseInstructors")
+  profilePic File?    @relation("ProfilePic")
+  courses    Course[] @relation("CourseInstructors")
 
   publicationHistory PublicationHistory[]
 }
@@ -134,12 +134,12 @@ model Publication {
 }
 
 model PublicationHistory {
-  id        String                       @id @default(uuid())
-  createdAt DateTime                     @default(now())
+  id        String               @id @default(uuid())
+  createdAt DateTime             @default(now())
   action    PublicationEventType
 
   // Optional user explanation on the change
-  comment String?
+  comment Json?
 
   // Snapshot data. We maintain information necessary to the history log (ex. even if a file is deleted we still maintain its name here)
   // Contains: { fileChanges: [{ fileName, action, comment }] }
@@ -284,7 +284,7 @@ model Comment {
   replies   Reply[]
   likes     Int      @default(0)
   likedBy   User[]   @relation("likedComments")
-  content   String
+  content   Json
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
@@ -301,7 +301,7 @@ model Reply {
   likes   Int    @default(0)
   likedBy User[] @relation("likedReplies")
 
-  content   String
+  content   Json
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
