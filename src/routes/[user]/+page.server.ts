@@ -32,12 +32,17 @@ export const load: PageServerLoad = async ({
 		throw new Error('Failed to fetch saved materials');
 	}
 
+	console.log(pageUserSavedResponses.status);
+
 	let pageUserLikedResponses = await fetch(
 		`/api/user/${layoutData.user.id}/liked?fullPublications=true`,
 	);
 	if (![200, 204].includes(pageUserLikedResponses.status)) {
 		throw new Error('Failed to fetch saved materials');
 	}
+
+	console.log(pageUserLikedResponses.status);
+
 
 	// Fetch saved results to see if the current user has saved these Publications
 	const mySavedResults = await fetch(
@@ -46,6 +51,8 @@ export const load: PageServerLoad = async ({
 	if (![200, 204].includes(mySavedResults.status)) {
 		throw new Error('Failed to fetch saved by user materials');
 	}
+
+
 
 	const myLikedResponses = await fetch(`/api/user/${session.user.id}/liked`);
 	const likedByUser =
@@ -63,7 +70,6 @@ export const load: PageServerLoad = async ({
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
-
 	for (let i = 0; i < saved.length; i++) {
 		if (saved[i].type === PublicationType.Circuit) {
 			savedFileData.splice(i, 0, 'no data');
@@ -74,7 +80,7 @@ export const load: PageServerLoad = async ({
 		pageUserLikedResponses === null || pageUserLikedResponses.status === 204
 			? { liked: [], likedFileData: [] }
 			: await pageUserLikedResponses.json();
-	// console.log(likedJson)
+	// // console.log(likedJson)
 	const liked = likedJson.liked;
 	const likedFileData = likedJson.likedFileData;
 

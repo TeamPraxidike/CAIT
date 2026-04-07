@@ -10,6 +10,25 @@ import { profilePicFetcher } from '$lib/database/file';
 import Fuse from 'fuse.js';
 import type { Publication } from '@prisma/client';
 
+function filterLiked(liked: any, query: string) {
+	if (query !== '') {
+		const p = liked;
+		const searcher = new Fuse(p, {
+			keys: [
+				{ name: 'title', weight: 0.4 },
+				{ name: 'description', weight: 0.4 },
+				{ name: 'learningObjectives', weight: 0.2 },
+			],
+			isCaseSensitive: false,
+			threshold: 0.6,
+			shouldSort: true,
+		});
+		liked = searcher.search(query).map((m) => m.item);
+	}
+	return liked;
+}
+
+
 /**
  * Gets the liked publications of a user
  * @param params
@@ -65,8 +84,18 @@ export async function GET({ params, url, locals }) {
 			}
 			liked = temp;
 		}
-	} else liked = likedResponse.liked.map((x) => x.id);
-
+	} else {
+		liked = likedResponse.liked.map((x) => x.id);	if (liked.length === 0) return new Response(null, { status: 204 });
+		return new Response(
+				JSON.stringify(
+					liked
+				),
+				{
+					status: 200,
+				},
+			);
+	}
+	liked = filterLiked(liked, query);
 	if (liked.length === 0) return new Response(null, { status: 204 });
 	return new Response(
 			JSON.stringify({

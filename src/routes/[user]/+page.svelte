@@ -80,7 +80,7 @@
                             <div class="col-span-1">
                                 <PublicationCard imgSrc={publication.coverPicData}
                                                     publication={publication}
-                                                    liked={liked.includes(publication.id)}
+                                                    liked={data.likedByUser.includes(publication.id)}
                                                     courses={posts[i].usedInCourse.map(x => x.course)}
                                                     saved={data.savedByUser.includes(publication.id)}
                                                     publisher={publication.publisher}
