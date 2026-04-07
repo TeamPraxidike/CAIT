@@ -36,8 +36,9 @@ function filterSaved(saved: any, query: string) {
  */
 export async function GET({ params, url, locals }) {
 	const { id } = params;
-	const authError = await verifyAuth(locals, id);
-	if (authError) return authError;
+	// const authError = await verifyAuth(locals, id);
+	// if (authError) return authError;
+	
 
 	const user = await getUserById(id);
 
@@ -53,7 +54,6 @@ export async function GET({ params, url, locals }) {
 		});
 	let saved;
 	const fileData: FetchedFileArray = [];
-
 	if (url.searchParams.get('fullPublications') === 'true') {
 		saved = savedResponse.saved;
 		const temp = [];
@@ -96,7 +96,6 @@ export async function GET({ params, url, locals }) {
 
 	saved = filterSaved(saved, query);
 	if (saved.length === 0) return new Response(null, { status: 204 });
-
 	return new Response(
 		JSON.stringify({
 			saved: saved,

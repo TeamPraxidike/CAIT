@@ -20,6 +20,36 @@ export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
 
 export type LikesOfUser = Prisma.UserGetPayload<{select: {liked: true}}>;
 
+export type LikedPublicationsResult = Prisma.UserGetPayload<{
+	select: {
+		liked: {
+			include: {
+				tags: true,
+				materials: {
+					include: {
+						files: true,
+					},
+				},
+				circuit: true,
+				coverPic: true,
+				usedInCourse: {
+					select: {
+						course: true,
+					},
+					where: {
+						userId: string,
+					},
+				},
+				publisher: {
+					include: {
+						profilePic: true,
+					},
+				},
+			},
+		},
+	},
+}>;
+
 export type LikedComments = Prisma.UserGetPayload<{
 	select: {
 		likedComments: true,
@@ -332,13 +362,37 @@ async function unlike(userId: string, publicationId: number) {
  * returns a list with all liked publications of a user
  * @param userId
  */
-export async function getLikedPublications(userId: string): Promise<LikesOfUser> {
+export async function getLikedPublications(userId: string): Promise<LikedPublicationsResult> {
 	return prisma.user.findUnique({
 		where: {
 			id: userId,
 		},
 		select: {
-			liked: true,
+			liked: {
+				include: {
+					tags: true,
+					materials: {
+						include: {
+							files: true,
+						},
+					},
+					circuit: true,
+					coverPic: true,
+					usedInCourse: {
+						select: {
+							course: true,
+						},
+						where: {
+							userId: userId,
+						},
+					},
+					publisher: {
+						include: {
+							profilePic: true,
+						},
+					},
+				},
+			},
 		},
 	});
 }

@@ -24,28 +24,32 @@ export const load: PageServerLoad = async ({
 		};
 	}
 
-	// Check if the user is viewing their own profile and return his saved publications
-	let savedRes = null;
-	if (session.user.id === layoutData.user.id) {
-		savedRes = await fetch(
-			`/api/user/${session.user.id}/saved?fullPublications=true`,
-		);
-		if (![200, 204].includes(savedRes.status)) {
-			throw new Error('Failed to fetch saved materials');
-		}
+	// Return the saved publications for the Profile being checked
+	let pageUserSavedResponses = await fetch(
+		`/api/user/${layoutData.user.id}/saved?fullPublications=true`,
+	);
+	if (![200, 204].includes(pageUserSavedResponses.status)) {
+		throw new Error('Failed to fetch saved materials');
 	}
 
-	// If the user is viewing another user's profile, fetch saved publications of that user so that they can be marked
-	const savedByUserRes = await fetch(
+	let pageUserLikedResponses = await fetch(
+		`/api/user/${layoutData.user.id}/liked?fullPublications=true`,
+	);
+	if (![200, 204].includes(pageUserLikedResponses.status)) {
+		throw new Error('Failed to fetch saved materials');
+	}
+
+	// Fetch saved results to see if the current user has saved these Publications
+	const mySavedResults = await fetch(
 		`/api/user/${session.user.id}/saved?fullPublications=false`,
 	);
-	if (![200, 204].includes(savedByUserRes.status)) {
+	if (![200, 204].includes(mySavedResults.status)) {
 		throw new Error('Failed to fetch saved by user materials');
 	}
 
-	const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
-	const liked =
-		likedResponse.status === 200 ? await likedResponse.json() : [];
+	const myLikedResponses = await fetch(`/api/user/${session.user.id}/liked`);
+	const likedByUser =
+		myLikedResponses.status === 200 ? await myLikedResponses.json() : [];
 
 	const usedResponse = await fetch(
 		`/api/user/${session.user.id}/use-in-course`,
@@ -53,9 +57,9 @@ export const load: PageServerLoad = async ({
 	const used = usedResponse.status === 200 ? await usedResponse.json() : [];
 
 	const savedJson =
-		savedRes === null || savedRes.status === 204
+		pageUserSavedResponses === null || pageUserSavedResponses.status === 204
 			? { saved: [], savedFileData: [] }
-			: await savedRes.json();
+			: await pageUserSavedResponses.json();
 	const saved = savedJson.saved;
 	const savedFileData = savedJson.savedFileData;
 
@@ -66,17 +70,33 @@ export const load: PageServerLoad = async ({
 		}
 	}
 
+	const likedJson =
+		pageUserLikedResponses === null || pageUserLikedResponses.status === 204
+			? { liked: [], likedFileData: [] }
+			: await pageUserLikedResponses.json();
+	// console.log(likedJson)
+	const liked = likedJson.liked;
+	const likedFileData = likedJson.likedFileData;
+
+
+	for (let i = 0; i < liked.length; i++) {
+		if (liked[i].type === PublicationType.Circuit) {
+			likedFileData.splice(i, 0, 'no data');
+		}
+	}
+
 	const savedByUser =
-		savedByUserRes.status === 204
+		mySavedResults.status === 204
 			? { saved: [] }
-			: await savedByUserRes.json();
+			: await mySavedResults.json();
 	const publications: ExtendedPublication[] = (await pubsRes.json()).publications;
 	
 	return {
 		publications,
 		saved,
-		savedFileData,
 		liked,
+		savedFileData,
+		likedByUser: likedByUser,
 		used,
 		savedByUser: savedByUser.saved,
 	};
