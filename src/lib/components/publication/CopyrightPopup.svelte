@@ -166,7 +166,7 @@
 
 			<div
 				class="max-h-[calc(90vh-145px)] overflow-y-auto space-y-6 px-6 py-5">
-				<div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+				<div class="rounded-xl border border-gray-200 bg-surface-50 p-4">
 					<div class="flex items-start justify-between gap-4">
 						<div>
 							<h3 class="text-sm font-semibold text-gray-900">
@@ -180,7 +180,7 @@
 						<button
 							type="button"
 							on:click={resetState}
-							class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
+							class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-surface-50">
 							Reset
 						</button>
 					</div>
@@ -190,7 +190,7 @@
 					<div class="rounded-xl border border-gray-200 p-4">
 						<div class="mb-3 flex items-start gap-3">
 							<div
-								class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-lg">
+								class="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-100 text-lg">
 								🌍
 							</div>
 							<div>
@@ -233,7 +233,7 @@
 						<div class="rounded-xl border border-gray-200 p-4">
 							<div class="mb-3 flex items-start gap-3">
 								<div
-									class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-lg">
+									class="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-100 text-lg">
 									💼
 								</div>
 								<div>
@@ -274,7 +274,7 @@
 						<div class="rounded-xl border border-gray-200 p-4">
 							<div class="mb-3 flex items-start gap-3">
 								<div
-									class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-lg">
+									class="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-100 text-lg">
 									✏️
 								</div>
 								<div>
@@ -316,7 +316,7 @@
 							<div class="rounded-xl border border-gray-200 p-4">
 								<div class="mb-3 flex items-start gap-3">
 									<div
-										class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-lg">
+										class="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-100 text-lg">
 										🔁
 									</div>
 									<div>
@@ -357,23 +357,23 @@
 					{/if}
 				</div>
 
-				<div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+				<div class="rounded-xl border border-gray-200 bg-surface-50 p-4">
 					<div class="flex flex-wrap items-center gap-2">
 						<button
 							type="button"
 							on:click={setSuggestedMode}
-							class:!bg-gray-900={!customMode}
+							class:!bg-surface-900={!customMode}
 							class:!text-white={!customMode}
-							class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100">
+							class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-surface-100">
 							Use suggested license
 						</button>
 
 						<button
 							type="button"
 							on:click={setCustomMode}
-							class:!bg-gray-900={customMode}
+							class:!bg-surface-900={customMode}
 							class:!text-white={customMode}
-							class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100">
+							class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-surface-100">
 							Enter custom license
 						</button>
 					</div>
@@ -431,7 +431,7 @@
 					<button
 						type="button"
 						on:click={close}
-						class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+						class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-surface-50">
 						Cancel
 					</button>
 
