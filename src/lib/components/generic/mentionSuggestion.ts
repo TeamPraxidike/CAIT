@@ -5,7 +5,9 @@ import type { MentionSuggestionConfig } from './tiptapExtensions';
 export const mentionSuggestion: MentionSuggestionConfig = {
 	// Fetch data from the user search API
 	items: async ({ query }) => {
-		const response = await fetch(`/api/user/search?q=${query}`);
+		const response = await fetch(
+			`/api/user/search?q=${encodeURIComponent(query)}`,
+		);
 		if (!response.ok) return [];
 		return response.json();
 	},

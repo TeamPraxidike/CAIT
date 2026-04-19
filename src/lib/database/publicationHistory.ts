@@ -1,6 +1,6 @@
 export interface ChangeLogPayload {
-	// The main comment for the entire update
-	globalComment: string;
+	// The main comment for the entire update.
+	globalComment: Prisma.InputJsonValue;
 
 	// Comment per file
 	fileComments: {

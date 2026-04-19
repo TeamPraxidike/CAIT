@@ -1,11 +1,14 @@
 /**
- * Utilities for parsing and working with rich text content stored in the database.
+ * Utilities for working with rich text content stored in the database.
  *
- * Comments and replies store their `content` field as a plain string. Historically
- * this was raw plain text. With the introduction of the TipTap rich text editor,
- * new content is stored as a JSON-serialised TipTap document. These helpers let
- * the application transparently handle both formats so that legacy plain-text
- * comments continue to render correctly alongside new rich-text ones.
+ * Comments, replies, and publication history entries store their content as
+ * TipTap JSON (a ProseMirror document tree). Because these columns use
+ * Prisma's `Json` type, reads return an already-parsed JavaScript object — no
+ * `JSON.parse` step is required in application code.
+ *
+ * These helpers provide typed walks over that structure for common tasks
+ * such as extracting plain text or collecting mentioned user IDs (e.g. for
+ * notification fan-out).
  */
 
 /**
@@ -13,7 +16,7 @@
  */
 export interface TiptapDocument {
 	type: 'doc';
-	content: TiptapNode[];
+	content?: TiptapNode[];
 }
 
 /**
@@ -27,71 +30,24 @@ export interface TiptapNode {
 }
 
 /**
- * Discriminated result of {@link parseContent}.
+ * Extracts a plain-text representation from a TipTap JSON document.
+ *
+ * Mention nodes are serialised as `@label`. Block-level children of the root
+ * document are separated by newlines so that multi-paragraph content remains
+ * readable when rendered as plain text (e.g. in clipboard copies).
+ *
+ * @param doc - A parsed TipTap document, typically read straight from a
+ *   Prisma `Json` column.
+ * @returns A human-readable plain-text string. Returns an empty string if the
+ *   document is nullish or malformed.
  */
-export type ParsedContent =
-	| { kind: 'json'; data: TiptapDocument }
-	| { kind: 'text'; data: string };
-
-/**
- * Attempts to interpret a raw content string as TipTap JSON.
- *
- * - If the string is valid JSON whose top-level `type` is `"doc"`, it is
- *   returned as a structured {@link TiptapDocument}.
- * - Otherwise the string is treated as legacy plain text.
- *
- * This function never throws.
- *
- * @param raw - The raw `content` value from a Comment or Reply record.
- * @returns A discriminated union indicating the detected format.
- */
-export function parseContent(raw: string): ParsedContent {
-	if (!raw) {
-		return { kind: 'text', data: '' };
+export function extractPlainText(
+	doc: TiptapDocument | null | undefined,
+): string {
+	if (!doc || doc.type !== 'doc') {
+		return '';
 	}
-
-	try {
-		const parsed = JSON.parse(raw);
-		if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
-			return { kind: 'json', data: parsed as TiptapDocument };
-		}
-	} catch {
-		// Not valid JSON – fall through to plain-text path.
-	}
-
-	return { kind: 'text', data: raw };
-}
-
-/**
- * Returns the TipTap-compatible `content` value that can be passed directly to
- * the TipTap `Editor` constructor or to `generateHTML`.
- *
- * - For JSON content it returns the parsed object.
- * - For plain text it returns the raw string (TipTap accepts HTML/text strings
- *   as initial content and will wrap them in a paragraph automatically).
- *
- * @param raw - The raw `content` value from the database.
- */
-export function toEditorContent(raw: string): TiptapDocument | string {
-	const parsed = parseContent(raw);
-	return parsed.kind === 'json' ? parsed.data : parsed.data;
-}
-
-/**
- * Extracts a plain-text representation from a raw content string, regardless
- * of whether it is legacy plain text or TipTap JSON.
- *
- * Mention nodes are serialised as `@label`.
- *
- * @param raw - The raw `content` value from the database.
- * @returns A human-readable plain-text string.
- */
-export function extractPlainText(raw: string): string {
-	const parsed = parseContent(raw);
-	if (parsed.kind === 'text') {
-		return parsed.data;
-	}
-	return walkTextNodes(parsed.data);
+	return walkTextNodes(doc);
 }
 
 /**
@@ -112,28 +68,28 @@ function walkTextNodes(node: TiptapNode): string {
 		return '';
 	}
 
-	const childText = node.content.map(walkTextNodes).join('');
-
-	// Insert line breaks between block-level nodes (paragraphs, headings, etc.)
+	// Insert line breaks between block-level children of the document root
+	// so multi-paragraph content stays readable as plain text.
 	if (node.type === 'doc') {
 		return node.content.map(walkTextNodes).join('\n');
 	}
 
-	return childText;
+	return node.content.map(walkTextNodes).join('');
 }
 
 /**
- * Extracts the unique user IDs of all `@mention` nodes found in a raw content
- * string.
+ * Extracts the unique user IDs of all `@mention` nodes found in a TipTap
+ * document.
  *
- *
- * @param raw - The raw `content` value from the database.
+ * @param doc - A parsed TipTap document, typically read straight from a
+ *   Prisma `Json` column.
  * @returns An array of unique user ID strings (UUIDs). Returns an empty array
- *   for legacy plain-text content.
+ *   if the document is nullish or contains no mentions.
  */
-export function extractMentionedUserIds(raw: string): string[] {
-	const parsed = parseContent(raw);
-	if (parsed.kind === 'text') {
+export function extractMentionedUserIds(
+	doc: TiptapDocument | null | undefined,
+): string[] {
+	if (!doc || doc.type !== 'doc') {
 		return [];
 	}
 
@@ -148,23 +104,6 @@ export function extractMentionedUserIds(raw: string): string[] {
 		}
 	}
 
-	walk(parsed.data);
+	walk(doc);
 	return [...new Set(ids)];
-}
-
-/**
- * Escapes a plain-text string so it can be safely interpolated into HTML via
- * `{@html ...}`.
- *
- * @param text - The raw text to escape.
- * @returns The escaped string with `&`, `<`, `>`, `"` and `'` replaced by
- *   their HTML entity equivalents.
- */
-export function escapeHtml(text: string): string {
-	return text
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;');
 }

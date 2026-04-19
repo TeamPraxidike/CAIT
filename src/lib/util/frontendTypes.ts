@@ -31,11 +31,11 @@ export type ParamsMutable = {
 		added: Record<string, string>;
 		deleted: Record<string, string>;
 	};
-	globalComment: string;
-}
+	globalComment: object;
+};
 
 export type ParamsMutableMaterial = {
-	fileTUSMetadata: { [key: string] : FileTUSMetadata };
+	fileTUSMetadata: { [key: string]: FileTUSMetadata };
 	fileTUSProgress: { [key: string]: any };
 	fileTUSUploadObjects: { [key: string]: any };
 	fileURLs: string[];
@@ -52,10 +52,9 @@ export type ParamsMutableMaterial = {
 
 export type ParamsMutableCircuit = {
 	circuitData: NodeDiffActions;
-	coverPic: {type: string, info: string} | undefined;
-	nodeInfo: NodeInfo[]
-}
-
+	coverPic: { type: string; info: string } | undefined;
+	nodeInfo: NodeInfo[];
+};
 
 export type ParamsImmutable = {
 	liked: number[];
@@ -82,38 +81,42 @@ export type URLtype = {
 };
 
 export const PageType = {
-  MATERIALS: "materials",
-  CIRCUITS: "circuits",
-  PEOPLE: "people",
-  COURSES: "courses",
-  SEMANTIC: "semantic",
-  UNDEFINED: "UNDEFINED",
+	MATERIALS: 'materials',
+	CIRCUITS: 'circuits',
+	PEOPLE: 'people',
+	COURSES: 'courses',
+	SEMANTIC: 'semantic',
+	UNDEFINED: 'UNDEFINED',
 } as const;
 
-export type PageType = typeof PageType[keyof typeof PageType];
+export type PageType = (typeof PageType)[keyof typeof PageType];
 
 export function isPageType(value: unknown): value is PageType {
-  return typeof value === "string" &&
-    Object.values(PageType).includes(value as PageType);
+	return (
+		typeof value === 'string' &&
+		Object.values(PageType).includes(value as PageType)
+	);
 }
 
 export function toPageType(value: unknown): PageType {
-  return isPageType(value) ? value : PageType.UNDEFINED;
+	return isPageType(value) ? value : PageType.UNDEFINED;
 }
 
 export const BROWSABLE_PAGE_TYPES: PageType[] = [
-  PageType.MATERIALS,
-  PageType.CIRCUITS,
-  PageType.PEOPLE,
-  PageType.COURSES,
+	PageType.MATERIALS,
+	PageType.CIRCUITS,
+	PageType.PEOPLE,
+	PageType.COURSES,
 ];
 
-
-export async function buildMaterialForm(data: FormData): Promise<{data: MaterialForm, tags: string[]} | {
-	status: number;
-	message: string;
-	context: string
-}> {
+export async function buildMaterialForm(data: FormData): Promise<
+	| { data: MaterialForm; tags: string[] }
+	| {
+			status: number;
+			message: string;
+			context: string;
+	  }
+> {
 	// ignore if the context is not correct
 	if (data.get('context') === 'course-form') {
 		return {
@@ -216,7 +219,10 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	return { data: dataForm, tags: newTagsArray };
 }
 
-export async function loadCircuitData(locals: App.Locals, fetch: typeof globalThis.fetch) {
+export async function loadCircuitData(
+	locals: App.Locals,
+	fetch: typeof globalThis.fetch,
+) {
 	let liked: number[] = [];
 	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
 		saved: [],
@@ -240,4 +246,3 @@ export async function loadCircuitData(locals: App.Locals, fetch: typeof globalTh
 
 	return { liked, saved };
 }
-

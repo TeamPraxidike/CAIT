@@ -33,13 +33,7 @@ import type { UserSanitizedWithProfilePicData } from '$lib/util/types';
 import { getDateDifference } from '$lib/util/date';
 import { formatFileSize } from '$lib/util/file';
 import { mapToType, mapToDifficulty, MaterialTypes } from '$lib/util/types';
-import {
-	parseContent,
-	toEditorContent,
-	extractPlainText,
-	extractMentionedUserIds,
-	escapeHtml,
-} from '$lib/util/content';
+import { extractPlainText, extractMentionedUserIds } from '$lib/util/content';
 
 const lorem =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus ea necessitatibus fugiat, sequi obcaecati aspernatur ipsum, eaque cumque recusandae, quam asperiores quod nostrum iste amet quaerat error similique vero illo?';
@@ -82,11 +76,8 @@ export {
 	RichTextEditor,
 	RichTextRenderer,
 	// Content utilities
-	parseContent,
-	toEditorContent,
 	extractPlainText,
 	extractMentionedUserIds,
-	escapeHtml,
 };
 
 export type { UserSanitizedWithProfilePicData };

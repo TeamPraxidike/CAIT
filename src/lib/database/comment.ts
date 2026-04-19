@@ -3,13 +3,13 @@ import { Prisma } from '@prisma/client';
 
 export type editCommentData = {
 	id: number;
-	content: string;
+	content: Prisma.InputJsonValue;
 };
 
 export type createCommentData = {
 	userId: string;
 	publicationId: number;
-	content: string;
+	content: Prisma.InputJsonValue;
 };
 
 export type CommentWithRepliesAndUsers = Prisma.CommentGetPayload<{
