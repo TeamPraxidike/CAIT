@@ -1,12 +1,12 @@
 <script lang="ts">
     import type { Comment, Reply, User } from '@prisma/client';
-    import {createEventDispatcher, onMount} from 'svelte';
+    import {createEventDispatcher, onMount, afterUpdate} from 'svelte';
     import Icon from '@iconify/svelte';
     import { getModalStore, getToastStore, type PopupSettings } from '@skeletonlabs/skeleton';
     import {popup} from '@skeletonlabs/skeleton';
     import { getDateDifference, AddInteractionForm, RichTextEditor, RichTextRenderer } from '$lib';
     import { mentionSuggestion } from '$lib/components/generic/mentionSuggestion';
-    import { extractPlainText } from '$lib/util/content';
+    import { extractPlainText, trimTrailingEmptyNodes, type TiptapDocument } from '$lib/util/content';
 
     //assuming that you create the comment object before creating the components when adding a new comment,
     // having all info available in it
@@ -21,7 +21,7 @@
     let browsingUser = commenter.id || 0
     let popupName = isReply ? `reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}` : `comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}`;
     let user = interaction.userId
-    let content = interaction.content
+    let content: TiptapDocument = interaction.content as TiptapDocument
     let likes = interaction.likes
     let created: string
     let edited = ""
@@ -30,6 +30,8 @@
 
     //let content: HTMLParagraphElement
     let commentDiv: HTMLDivElement
+    let contentDiv: HTMLDivElement;
+    let isTruncated = false;
 
     let editing = false;
     let editorRef: RichTextEditor;
@@ -108,8 +110,9 @@
     }
 
     async function saveChanges() {
-        const next = editorRef?.getJSON();
-        if (!next) return;
+        const raw = editorRef?.getJSON();
+        if (!raw) return;
+        const next = trimTrailingEmptyNodes(raw as TiptapDocument);
         editing = false;
         content = next;
         const url = isReply
@@ -167,11 +170,25 @@
     let display = 'hidden';
     $:display = isDisplayedAdded ? 'flex':'hidden'
 
+    function checkTruncation() {
+        if (contentDiv) {
+            isTruncated = contentDiv.scrollHeight > contentDiv.clientHeight;
+        }
+    }
+
     onMount(() => {
         created = getDateDifference(interaction.createdAt, new Date())
 
         if ((new Date(interaction.updatedAt).getTime() - new Date(interaction.createdAt).getTime() > 10))
             edited = "Edited " + getDateDifference(interaction.updatedAt, new Date())
+
+        checkTruncation();
+    })
+
+    afterUpdate(() => {
+        if (!editing) {
+            checkTruncation();
+        }
     })
 
     const popupMenu: PopupSettings = {
@@ -222,13 +239,16 @@
                     </button>
                 </div>
             {:else}
-                <div id="commentText"
+                <div bind:this={contentDiv}
+                     id="commentText"
                      class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full break-words overflow-hidden">
                     <RichTextRenderer content={JSON.stringify(content)} />
                 </div>
-                <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
-                    {isExpanded ? 'Show Less' : 'Show More'}
-                </button>
+                {#if isTruncated || isExpanded}
+                    <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
+                        {isExpanded ? 'Show Less' : 'Show More'}
+                    </button>
+                {/if}
             {/if}
         </div>
 

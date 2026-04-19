@@ -3,6 +3,7 @@
 	import List from '$lib/components/publication/preview/List.svelte';
 	import { FileTable, Tag, UserProp, RichTextEditor } from '$lib';
 	import { mentionSuggestion } from '$lib/components/generic/mentionSuggestion';
+	import { trimTrailingEmptyNodes, type TiptapDocument } from '$lib/util/content';
 	import type { FileTUSMetadata } from '$lib/util/indexDB.ts';
 	import type { UserWithProfilePic } from '$lib/util/coursesLogic.ts';
 
@@ -27,7 +28,11 @@
 	function handleEditorUpdate() {
 		if (!editorRef) return;
 		const json = editorRef.getJSON();
-		data.globalComment = json as object ?? { type: 'doc', content: [] };
+		if (!json) {
+			data.globalComment = { type: 'doc', content: [] };
+			return;
+		}
+		data.globalComment = trimTrailingEmptyNodes(json as TiptapDocument);
 	}
 </script>
 

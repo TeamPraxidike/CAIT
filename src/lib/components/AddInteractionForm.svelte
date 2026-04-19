@@ -4,8 +4,15 @@
 	import type { User } from '@prisma/client';
 	import { RichTextEditor } from '$lib';
 	import { mentionSuggestion } from '$lib/components/generic/mentionSuggestion';
+	import { trimTrailingEmptyNodes, type TiptapDocument } from '$lib/util/content';
 
 	let isFocused = false;
+
+	function getEditorContent(): string {
+		const raw = editorRef?.getJSON();
+		const trimmed = raw ? trimTrailingEmptyNodes(raw as TiptapDocument) : { type: 'doc', content: [] };
+		return JSON.stringify(trimmed);
+	}
 
 	export let addComment: boolean;
 	export let commentId = 0;
@@ -59,7 +66,7 @@
 		 src={publisher.profilePicData ? publisher.profilePicData : defaultProfilePicturePath}
 		 alt="CAIT Logo" />
 	<form method="POST" class="flex-grow" use:enhance={({ formData }) => {
-        formData.set('comment', JSON.stringify(editorRef.getJSON()));
+        formData.set('comment', getEditorContent());
         formData.append('userId',userId.toString());
 				formData.append('isComment', addComment.toString());
 				formData.append('commentId', commentId.toString());
