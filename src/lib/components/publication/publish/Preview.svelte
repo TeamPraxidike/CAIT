@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { FileTable, Tag, UserProp } from '$lib';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 	import List from '$lib/components/publication/preview/List.svelte';
+	import { FileTable, Tag, UserProp, RichTextEditor } from '$lib';
+	import { mentionSuggestion } from '$lib/components/generic/mentionSuggestion';
+	import type { FileTUSMetadata } from '$lib/util/indexDB.ts';
+	import type { UserWithProfilePic } from '$lib/util/coursesLogic.ts';
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial | null;
@@ -11,6 +14,21 @@
 
 	export let draft: boolean;
 	export let markedAsDraft: boolean;
+
+	let editorRef: RichTextEditor;
+
+	/**
+	 * Sync the editor content back to `data.globalComment` on every keystroke
+	 * so that PublishWorkflow can read it at submit time without needing a
+	 * direct reference to the editor.
+	 *
+	 * NOTE: This has a performance hit because we are calling getJSON() on every keystroke, but since our comment is probably small this should not be noticeable
+	 */
+	function handleEditorUpdate() {
+		if (!editorRef) return;
+		const json = editorRef.getJSON();
+		data.globalComment = json as object ?? { type: 'doc', content: [] };
+	}
 </script>
 
 <div class="grid grid-cols-12 gap-8">
@@ -64,7 +82,14 @@
 <div class="mt-4">
 	<label class="label">
 		<span class="font-bold">Comment on changes (Optional)</span>
-		<textarea class="textarea" rows="3" placeholder="Describe the changes made..." bind:value={data.globalComment}></textarea>
+		<RichTextEditor
+			bind:this={editorRef}
+			placeholder="Describe the changes made..."
+			content={data.globalComment ? JSON.stringify(data.globalComment) : ''}
+			{mentionSuggestion}
+			editorClass="min-h-[80px]"
+			on:update={handleEditorUpdate}
+		/>
 	</label>
 </div>
 

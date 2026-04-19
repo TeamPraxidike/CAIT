@@ -181,7 +181,7 @@ export async function buildMaterialForm(data: FormData): Promise<
 
 	const changeLog: ChangeLogPayload = JSON.parse(
 		data.get('changeLog')?.toString() ||
-			'{"globalComment": "", "fileComments": { "added": {}, "deleted": {} }}',
+			'{"globalComment": {"type":"doc","content":[]}, "fileComments": { "added": {}, "deleted": {} }}',
 	);
 
 	const dataForm = {

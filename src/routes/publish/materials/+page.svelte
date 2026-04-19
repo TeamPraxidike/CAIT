@@ -86,7 +86,7 @@
 		newTags,
 		description,
 		fileComments: { added: {}, deleted: {} },
-		globalComment: ''
+		globalComment: { type: 'doc', content: [] }
 	}
 
 	let paramsMutableMaterial: ParamsMutableMaterial = {
@@ -282,7 +282,7 @@
 				newTags,
 				description,
 				fileComments: { added: {}, deleted: {} },
-				globalComment: ''
+				globalComment: { type: 'doc', content: [] }
 			};
 
 			paramsMutableMaterial = {

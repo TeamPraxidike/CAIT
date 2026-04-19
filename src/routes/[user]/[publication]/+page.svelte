@@ -7,7 +7,8 @@
 		FileTable,
 		getDateDifference, HorizontalScroll,
 		Meta, Tag,
-		UserProp
+		UserProp,
+		RichTextRenderer
 	} from '$lib';
     import {fly} from 'svelte/transition';
     import {TabGroup, Tab} from '@skeletonlabs/skeleton';
@@ -706,7 +707,9 @@
 										</header>
 										<section>
 											{#if event.comment}
-												<p class="mb-2 break-all whitespace-pre-wrap">{event.comment}</p>
+												<div class="mb-2 break-all">
+													<RichTextRenderer content={JSON.stringify(event.comment)} />
+												</div>
 											{/if}
 											{#if event.meta && event.meta.fileChanges && event.meta.fileChanges.length > 0}
 												<Accordion>

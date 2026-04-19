@@ -79,7 +79,7 @@
 
 <div
     class="
-        prose prose-sm dark:prose-invert max-w-none w-full {rendererClass}
+         w-full {rendererClass}
 
         /** -- Pure Tailwind Mention Chip Styling -- */
         [&_.mention-chip]:inline-flex

@@ -1,3 +1,5 @@
+import type { Prisma } from '@prisma/client';
+
 export interface ChangeLogPayload {
 	// The main comment for the entire update.
 	globalComment: Prisma.InputJsonValue;

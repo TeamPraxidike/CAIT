@@ -174,18 +174,25 @@
 	}
 </script>
 
-<div class="textarea p-0 relative {editorClass}">
+<!-- svelte-ignore a11y-no-static-element-interactions a11y-click-events-have-key-events -->
+<div
+    class="textarea p-0 relative flex flex-col cursor-text {editorClass}"
+    on:click={() => editor?.commands.focus()}
+>
     <div
         bind:this={element}
         class="
-            editor-content prose prose-sm dark:prose-invert max-w-none w-full p-3
+            editor-content w-full flex-1 p-3
 
-            /* -- Pure Tailwind Placeholder Styling -- */
-            [&_p.is-editor-empty::before]:content-[attr(data-placeholder)]
-            [&_p.is-editor-empty::before]:text-surface-400
-            [&_p.is-editor-empty::before]:float-left
-            [&_p.is-editor-empty::before]:h-0
-            [&_p.is-editor-empty::before]:pointer-events-none
+            /* Placeholder configuration */
+            [&_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]
+            [&_p.is-editor-empty:first-child::before]:text-surface-400
+            [&_p.is-editor-empty:first-child::before]:float-left
+            [&_p.is-editor-empty:first-child::before]:h-0
+            [&_p.is-editor-empty:first-child::before]:pointer-events-none
+
+            [&_.tiptap]:h-full /* Force editable zone to stretch to the bottom */
+            [&_.tiptap]:outline-none
         "
     ></div>
 </div>
