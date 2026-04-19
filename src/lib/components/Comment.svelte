@@ -4,7 +4,9 @@
     import Icon from '@iconify/svelte';
     import { getModalStore, getToastStore, type PopupSettings } from '@skeletonlabs/skeleton';
     import {popup} from '@skeletonlabs/skeleton';
-    import { getDateDifference, AddInteractionForm } from '$lib';
+    import { getDateDifference, AddInteractionForm, RichTextEditor, RichTextRenderer } from '$lib';
+    import { mentionSuggestion } from '$lib/components/generic/mentionSuggestion';
+    import { extractPlainText } from '$lib/util/content';
 
     //assuming that you create the comment object before creating the components when adding a new comment,
     // having all info available in it
@@ -19,7 +21,7 @@
     let browsingUser = commenter.id || 0
     let popupName = isReply ? `reply ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}` : `comment ${interaction.id} at ${new Date(interaction.createdAt).toDateString()}`;
     let user = interaction.userId
-    let text = interaction.content
+    let content = interaction.content
     let likes = interaction.likes
     let created: string
     let edited = ""
@@ -30,7 +32,7 @@
     let commentDiv: HTMLDivElement
 
     let editing = false;
-    let newText = '';
+    let editorRef: RichTextEditor;
 
     $:lineClamp = isExpanded ? "line-clamp-none" : isReply ? "line-clamp-2":"line-clamp-3"
     $:created = getDateDifference(interaction.createdAt, new Date())
@@ -39,7 +41,6 @@
 
     const startEditing = () => {
         editing = true;
-        newText = text;
     }
 
 
@@ -52,7 +53,7 @@
     }
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(text)
+        navigator.clipboard.writeText(extractPlainText(content as any))
             .then(() => {
                 toastStore.trigger({
                     message: 'Copied to clipboard',
@@ -107,32 +108,20 @@
     }
 
     async function saveChanges() {
-        //same as above method for this one
-        text = newText;
+        const next = editorRef?.getJSON();
+        if (!next) return;
         editing = false;
-        if (isReply){
-            try {
-                 await fetch(`/api/reply/${interaction.id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({content:text})
-                })
-                //not sure if this should be here
-                // setTimeout(() => {
-                //     window.location.reload();
-                // }, 50);
-            } catch (e) {
-                console.error(e);
-            }
-        }
-        else{
-            try {
-                await fetch(`/api/comment/${interaction.id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({content:text})
-                })
-            } catch (e) {
-                console.error(e);
-            }
+        content = next;
+        const url = isReply
+            ? `/api/reply/${interaction.id}`
+            : `/api/comment/${interaction.id}`;
+        try {
+            await fetch(url, {
+                method: 'PUT',
+                body: JSON.stringify({ content: next })
+            });
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -221,21 +210,25 @@
         <div class="mb-2 w-full">
             {#if editing}
                 <div>
-                    <textarea rows="5"
-                              class="border-b border-surface-200 border-opacity-50 dark:border-surface-100 dark:border-opacity-50 text-surface-800 text-opacity-90 dark:text-opacity-90 dark:bg-surface-800 dark:text-surface-50 w-full"
-                              bind:value={newText} />
+                    <RichTextEditor
+                        bind:this={editorRef}
+                        content={JSON.stringify(content)}
+                        {mentionSuggestion}
+                        editorClass="min-h-[80px]"
+                    />
                     <button
                       class="btn float-right rounded-lg dark:bg-surface-800 hover:variant-filled-primary dark:hover:bg-surface-700 text-surface:700 variant-soft-primary"
                       on:click={saveChanges}>Save
                     </button>
                 </div>
-            {:else }
-                <p
-                  id="commentText"
-                  class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full break-words">{text}</p>
-                    <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
-                        {isExpanded ? 'Show Less' : 'Show More'}
-                    </button>
+            {:else}
+                <div id="commentText"
+                     class="text-surface-800 text-opacity-95 dark:text-opacity-95 dark:text-surface-50 {lineClamp} mt-2 text-md w-full break-words overflow-hidden">
+                    <RichTextRenderer content={JSON.stringify(content)} />
+                </div>
+                <button on:click={expandAction} class="hover:underline text-surface-500 text-xs">
+                    {isExpanded ? 'Show Less' : 'Show More'}
+                </button>
             {/if}
         </div>
 

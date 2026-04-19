@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { enhance, applyAction } from '$app/forms';
 	import type { User } from '@prisma/client';
+	import { RichTextEditor } from '$lib';
+	import { mentionSuggestion } from '$lib/components/generic/mentionSuggestion';
 
 	let isFocused = false;
-	let originalHeight: string;
-
 
 	export let addComment: boolean;
 	export let commentId = 0;
@@ -16,30 +16,24 @@
 	let userId = publisher.id || 0;
 
 	let text = addComment ? 'Comment' : 'Reply';
-	let commentText = '';
-	let textarea: HTMLTextAreaElement;
-
-	function adjustHeight() {
-		textarea.style.height = 'auto';
-		textarea.style.height = textarea.scrollHeight + 'px';
-	}
+	let editorRef: RichTextEditor;
+	let isEmpty = true;
 
 	function handleFocus() {
 		isFocused = true;
 	}
 
 	function handleBlur() {
-		if (commentText === '') {
+		if (isEmpty) {
 			isFocused = false;
 		}
 	}
 
 	function handleCancel() {
-		commentText = '';
+		editorRef?.clearContent();
+		isEmpty = true;
 		isFocused = false;
-		textarea.style.height = originalHeight;
 		dispatch('cancelEventForum');
-
 	}
 
 	const dispatch = createEventDispatcher();
@@ -50,15 +44,10 @@
 	function addCommentHandle(content: any) {
 		dispatch('addedReply', { content: content });
 
-		commentText = '';
+		editorRef?.clearContent();
+		isEmpty = true;
 		isFocused = false;
-		textarea.style.height = originalHeight;
 	}
-
-	onMount(() => {
-		originalHeight = getComputedStyle(textarea).height;
-	})
-	;
 
 	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 
@@ -70,6 +59,7 @@
 		 src={publisher.profilePicData ? publisher.profilePicData : defaultProfilePicturePath}
 		 alt="CAIT Logo" />
 	<form method="POST" class="flex-grow" use:enhance={({ formData }) => {
+        formData.set('comment', JSON.stringify(editorRef.getJSON()));
         formData.append('userId',userId.toString());
 				formData.append('isComment', addComment.toString());
 				formData.append('commentId', commentId.toString());
@@ -87,17 +77,15 @@
 						}
 				};
       }}>
-			<textarea
-				name="comment"
-				bind:this={textarea}
-				class="w-full border-0 border-surface-300 resize-none overflow-hidden rounded-lg shadow-primary-500 shadow-sm dark:text-surface-800 ring-0
-				 focus:border-b focus:border-primary-500 focus:ring-0 my-2"
-				placeholder="{addComment ? 'Start a discussion...' : 'Write a response...'}  "
-				rows="1"
-				bind:value={commentText}
-				on:input={adjustHeight}
+			<RichTextEditor
+				bind:this={editorRef}
+				placeholder={addComment ? 'Start a discussion...' : 'Write a response...'}
+				{mentionSuggestion}
+				editorClass="my-2 shadow-primary-500 shadow-sm"
+				on:update={(e) => { isEmpty = e.detail.isEmpty; }}
 				on:focus={handleFocus}
-				on:blur={handleBlur}></textarea>
+				on:blur={handleBlur}
+			/>
 
 		<div class="flex justify-end mt-2 gap-2 {isFocused ? 'flex' : 'hidden'}">
 			<button

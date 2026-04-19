@@ -1,3 +1,4 @@
+import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import type { FetchedFileArray } from '$lib/database';
 
@@ -117,6 +118,14 @@ export const actions = {
 	comment: async ({ request, fetch }) => {
 		const data = await request.formData();
 
+		const rawComment = data.get('comment')?.toString() || '';
+		let parsedContent: unknown;
+		try {
+			parsedContent = JSON.parse(rawComment);
+		} catch {
+			return fail(400, { message: 'Invalid comment content' });
+		}
+
 		const isComment = JSON.parse(
 			data.get('isComment')?.toString() || 'true',
 		);
@@ -124,7 +133,7 @@ export const actions = {
 
 		if (isComment) {
 			const comment = {
-				content: data.get('comment'),
+				content: parsedContent,
 				userId: data.get('userId')?.toString() || '',
 				publicationId: parseInt(
 					data.get('publicationId')?.toString() || '',
@@ -136,7 +145,7 @@ export const actions = {
 			});
 		} else {
 			const reply = {
-				content: data.get('comment'),
+				content: parsedContent,
 				userId: data.get('userId')?.toString() || '',
 				commentId: parseInt(data.get('commentId')?.toString() || ''),
 			};
