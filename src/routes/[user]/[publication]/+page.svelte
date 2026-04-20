@@ -40,6 +40,7 @@
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import type { FetchedFileArray } from '$lib/database';
 	import List from '$lib/components/publication/preview/List.svelte';
+	import CircuitContributorList from '$lib/components/publication/preview/CircuitContributorList.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -374,6 +375,20 @@
 			};
 		}
 	});
+
+	type CircuitContributor = {
+		publisherId: string;
+		username: string;
+		profilePicData?: string | null;
+	};
+
+	$: circuitContributors = isMaterial
+		? []
+		: pubView.publication.circuit.nodes.map((node): CircuitContributor => ({
+			publisherId: node.publication.publisherId,
+			username: node.publication.publisher.username,
+			profilePicData: node.publication.publisher.profilePicData,
+		}));
 </script>
 
 <Meta title={pubView.publication.title} description="CAIT" type="site" />
@@ -721,6 +736,10 @@
 
 			<List list={pubView.publication.learningObjectives} isLO={true} />
 			<List list={pubView.publication.prerequisites} isLO={false} />
+
+			{#if !isMaterial}
+				<CircuitContributorList contributors={circuitContributors} />
+			{/if}
 		</div>
 	{/key}
 </div>
