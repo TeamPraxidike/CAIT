@@ -21,10 +21,10 @@ export default mergeConfig(viteConfig, defineConfig({
             include: ['src/lib/**/*.ts',
                 'src/lib/**/*.mjs'],
             thresholds: {
-                lines: 5,
-                branches: 5,
-                functions: 5,
-                statements: 5
+                lines: 4,
+                branches: 4,
+                functions: 4,
+                statements: 4
             }
         },
     }

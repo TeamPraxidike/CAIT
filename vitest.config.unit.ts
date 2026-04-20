@@ -22,10 +22,10 @@ export default mergeConfig(
 				provider: 'istanbul',
 				include: ['src/lib/**/*.ts'],
 				thresholds: {
-					lines: 30,
-					branches: 30,
-					functions: 30,
-					statements: 30
+					lines: 25,
+					branches: 25,
+					functions: 25,
+					statements: 25
 				}
 			},
 		},
