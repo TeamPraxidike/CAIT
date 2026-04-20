@@ -8,13 +8,24 @@ export default mergeConfig(viteConfig, defineConfig({
         //pool: "forks", // no threads
         maxConcurrency: 5, // Run max 5 concurrent tests at a time
         setupFiles: ['tests/integration/setup.ts'],
+        retry: 2,
+        reporters: process.env.GITHUB_ACTIONS === 'true'
+            ? ['default', 'github-actions']
+            : ['default'],
         coverage: {
             enabled: true,
-            reporter: ['text'],
+            reportOnFailure: true,
             provider: 'istanbul',
-            reportsDirectory: './reports/coverage',
+            reporter: ['text', 'html', 'json-summary', 'json'],
+            reportsDirectory: './reports/coverage/integration',
             include: ['src/lib/**/*.ts',
-                'src/lib/**/*.mjs']
+                'src/lib/**/*.mjs'],
+            thresholds: {
+                lines: 80,
+                branches: 80,
+                functions: 80,
+                statements: 80
+            }
         },
     }
 }));

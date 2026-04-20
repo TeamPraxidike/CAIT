@@ -1,0 +1,128 @@
+# =============================================================================
+# CI/CD Pipeline
+# =============================================================================
+#
+# Two-stage pipeline that gates merges to main:
+#   Stage 1 (test):  Unit + integration tests on GH Actions runner
+#   Stage 2 (e2e):   Playwright E2E against a real staging deployment
+#
+# Both stages must pass before a PR can be merged to main.
+# Merging to main triggers production deploy via Coolify (existing setup).
+#
+# REQUIRED GITHUB SECRETS:
+#   STAGING_COOLIFY_API_TOKEN  - Coolify API bearer token (deploy-scoped)
+#   STAGING_COOLIFY_APP_UUID   - UUID of the staging application in Coolify
+#   STAGING_COOLIFY_BASE_URL   - Coolify instance URL (e.g. https://coolify.staging.example.com)
+#   STAGING_URL                - Public staging app URL (e.g. https://staging.example.com)
+#   STAGING_SUPABASE_URL       - Staging Supabase API URL
+#   STAGING_SERVICE_ROLE_KEY   - Staging Supabase service_role key
+#   STAGING_SSH_HOST           - Staging VPS IP or hostname
+#   STAGING_SSH_USER           - SSH user on staging VPS
+#   STAGING_SSH_KEY            - Private SSH key for staging VPS access
+#   STAGING_DB_CONNECTION      - Prisma connection string for staging DB
+#                                (used by the reset script over SSH)
+#
+# REQUIRED BRANCH PROTECTION RULES ON main:
+#   - Require status checks: "Unit & Integration Tests" and "Staging E2E"
+#   - Require branches to be up to date before merging
+# =============================================================================
+
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+
+# =============================================================================
+# WHY NO WORKFLOW-LEVEL CONCURRENCY:
+#
+# We need different concurrency strategies per job:
+#   - unit-integration: cancel-in-progress per PR (fast feedback on new pushes)
+#   - e2e:  queue globally (staging is a shared single resource)
+#
+# Workflow-level concurrency would force one strategy for both.
+# =============================================================================
+
+jobs:
+  # ===========================================================================
+  # STAGE 1: Unit & Integration Tests
+  # ===========================================================================
+  #
+  # Runs Vitest against a local Supabase subset.
+  #
+  # Concurrency: cancel-in-progress PER PR. If you push again to the same PR
+  # while tests are running, the old run is killed immediately. No point
+  # finishing tests on stale code.
+  # ===========================================================================
+  unit-integration:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    concurrency:
+      group: test-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    # -------------------------------------------------------------------------
+    # maximum amount of time a job or step can run before GitHub automatically cancels it 
+    # -------------------------------------------------------------------------
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        # use Node version enforced for the project
+        # see https://github.com/actions/setup-node
+        with:
+          node-version-file: '.nvmrc'
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # -----------------------------------------------------------------------
+      - name: Run Unit Tests
+        run: npm run test:unit
+
+      - name: Run Integration Tests
+        run: npm run test:integration
+
+      - name: Upload unit coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit
+          path: reports/coverage/unit
+          retention-days: 7
+
+      - name: Upload integration coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-integration
+          path: reports/coverage/integration
+          retention-days: 7
+
+      # https://github.com/davelosert/vitest-coverage-report-action
+      - name: Report Unit Coverage
+        # Set if: always() to also generate the report if tests are failing
+        # Only works if you set `reportOnFailure: true` in your vite config as specified above
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: Unit
+          json-summary-path: reports/coverage/unit/coverage-summary.json
+          json-final-path: reports/coverage/unit/coverage-final.json
+          vite-config-path: vitest.config.unit.ts
+
+      - name: Report Integration Coverage
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: Integration
+          json-summary-path: reports/coverage/integration/coverage-summary.json
+          json-final-path: reports/coverage/integration/coverage-final.json
+          vite-config-path: vitest.config.integration.ts

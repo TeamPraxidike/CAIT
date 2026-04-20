@@ -4,15 +4,15 @@ set -euo pipefail
 export NODE_ENV=test
 
 # ---------------------------------------------------------------------------
-# 1. Start Supabase services (skip in CI — the workflow handles this)
+# Start Supabase services (skip in CI — the workflow handles this)
 # ---------------------------------------------------------------------------
-if [ -z "${CI:-}" ]; then
-  echo "Starting Supabase services..."
-  docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci up -d
-fi
+#if [ -z "${CI:-}" ]; then
+echo "Starting Supabase services..."
+docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci up -d
+#fi
 
 # ---------------------------------------------------------------------------
-# 2. Wait for services to be ready
+# Wait for services to be ready
 # ---------------------------------------------------------------------------
 COMPOSE="docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci"
 
@@ -31,7 +31,8 @@ wait_healthy db
 wait_healthy kong
 
 # ---------------------------------------------------------------------------
-# 3. Set env vars for the SvelteKit app
+# Set env vars for the SvelteKit app (THESE ARE NOT PROD SECRETS)
+# we can also include a .env.ci file for sveltekit, but it's not a priority
 # ---------------------------------------------------------------------------
 export DATABASE_URL="postgres://postgres.1:123@localhost:6543/postgres?pgbouncer=true"
 export SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.PqdH6E8yzZhWwB_c9o9e4LjdYXDTbEf5tdAqbBIrzKQ
@@ -46,13 +47,7 @@ export PUBLIC_SRAM_SAML_IDP_DOMAIN=sram.surf.nl
 export PUBLIC_ENVIRONMENT="dev"
 
 # ---------------------------------------------------------------------------
-# 4. Run migrations
-# ---------------------------------------------------------------------------
-#echo "Running Prisma migrations..."
-#npx prisma migrate deploy
-
-# ---------------------------------------------------------------------------
-# 5. Build and start preview server
+# Build and start preview server
 # ---------------------------------------------------------------------------
 echo "Building app..."
 npm run build
@@ -71,7 +66,7 @@ done
 echo "Preview server is ready."
 
 # ---------------------------------------------------------------------------
-# 6. Run integration tests
+# Run integration tests
 # ---------------------------------------------------------------------------
 echo "Running integration tests..."
 # temp disable exit-on-error to capture test result
@@ -81,16 +76,16 @@ TEST_EXIT=$?
 set -e
 
 # ---------------------------------------------------------------------------
-# 7. Cleanup
+# Cleanup
 # ---------------------------------------------------------------------------
 echo "Stopping preview server..."
 kill $SERVER_PID 2>/dev/null || true
 SOCKET_PID=$(lsof -t -i :4173 2>/dev/null || true)
 [ -n "$SOCKET_PID" ] && kill $SOCKET_PID 2>/dev/null || true
 
-if [ -z "${CI:-}" ]; then
-  echo "Stopping Supabase services..."
-  docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci down -v
-fi
+#if [ -z "${CI:-}" ]; then
+echo "Stopping Supabase services..."
+docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci down -v
+#fi
 
 exit $TEST_EXIT
