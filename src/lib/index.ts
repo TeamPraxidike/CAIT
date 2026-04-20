@@ -25,6 +25,7 @@ import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
 import UsedInCourse from '$lib/components/UsedInCourse.svelte';
 import PublishReview from '$lib/components/PublishReview.svelte';
+import type { UserSanitizedWithProfilePicData } from '$lib/util/types';
 
 // util
 import { getDateDifference } from '$lib/util/date';
@@ -68,5 +69,8 @@ export {
 	UsedInCourse,
 	PublishReview,
 	HorizontalScroll,
-	MaterialTypes
+	MaterialTypes,
 };
+
+export type { UserSanitizedWithProfilePicData };
+
