@@ -39,6 +39,7 @@
     import { SvelteFlowProvider } from '@xyflow/svelte';
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import type { FetchedFileArray } from '$lib/database';
+	import List from '$lib/components/publication/preview/List.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -718,30 +719,8 @@
 				</div>
 			{/if}
 
-			<div class="flex flex-col">
-				<span class="font-bold text-surface-800">Learning Objectives:</span>
-				<ul class="list-inside">
-					{#if pubView.publication.learningObjectives.length === 0}
-						<span>No learning objectives have been indicated</span>
-					{:else}
-						{#each pubView.publication.learningObjectives as lo}
-							<li class="list text-surface-700 text-sm list-disc">{lo}</li>
-						{/each}
-					{/if}
-				</ul>
-			</div>
-			<div class="flex flex-col">
-				<span class="font-bold text-surface-800">Prior Knowledge:</span>
-				<ul class="list-inside">
-					{#if pubView.publication.prerequisites.length === 0}
-						<span class="text-surface-800">No prior knowledge has been indicated</span>
-					{:else}
-						{#each pubView.publication.prerequisites as pk}
-							<li class="list text-surface-700 text-sm list-disc">{pk}</li>
-						{/each}
-					{/if}
-				</ul>
-			</div>
+			<List list={pubView.publication.learningObjectives} isLO={true} />
+			<List list={pubView.publication.prerequisites} isLO={false} />
 		</div>
 	{/key}
 </div>
