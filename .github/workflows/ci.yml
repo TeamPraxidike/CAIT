@@ -4,26 +4,13 @@
 #
 # Two-stage pipeline that gates merges to main:
 #   Stage 1 (test):  Unit + integration tests on GH Actions runner
-#   Stage 2 (e2e):   Playwright E2E against a real staging deployment
+#   [TODO] Stage 2 (e2e):   Playwright E2E against a real staging deployment
 #
 # Both stages must pass before a PR can be merged to main.
 # Merging to main triggers production deploy via Coolify (existing setup).
 #
-# REQUIRED GITHUB SECRETS:
-#   STAGING_COOLIFY_API_TOKEN  - Coolify API bearer token (deploy-scoped)
-#   STAGING_COOLIFY_APP_UUID   - UUID of the staging application in Coolify
-#   STAGING_COOLIFY_BASE_URL   - Coolify instance URL (e.g. https://coolify.staging.example.com)
-#   STAGING_URL                - Public staging app URL (e.g. https://staging.example.com)
-#   STAGING_SUPABASE_URL       - Staging Supabase API URL
-#   STAGING_SERVICE_ROLE_KEY   - Staging Supabase service_role key
-#   STAGING_SSH_HOST           - Staging VPS IP or hostname
-#   STAGING_SSH_USER           - SSH user on staging VPS
-#   STAGING_SSH_KEY            - Private SSH key for staging VPS access
-#   STAGING_DB_CONNECTION      - Prisma connection string for staging DB
-#                                (used by the reset script over SSH)
-#
 # REQUIRED BRANCH PROTECTION RULES ON main:
-#   - Require status checks: "Unit & Integration Tests" and "Staging E2E"
+#   - Require status checks for unit-integration and e2e
 #   - Require branches to be up to date before merging
 # =============================================================================
 
