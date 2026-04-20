@@ -104,6 +104,7 @@ jobs:
           # Wait for Docker to be ready
           timeout 30 sh -c 'until docker info > /dev/null 2>&1; do sleep 1; done'
 
+
       - uses: actions/setup-node@v4
         # use Node version enforced for the project
         # see https://github.com/actions/setup-node
@@ -118,6 +119,12 @@ jobs:
       # (slightly) different from .env.ci
       - name: Load app env
         run: cat cicd/.env.app.ci >> "$GITHUB_ENV"
+
+      # cache the docker images (since it takes a while to pull them each time)
+      - name: Cache Docker Images
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('cicd/docker-compose.ci.yml') }}
 
       # -----------------------------------------------------------------------
       - name: Run Unit Tests
