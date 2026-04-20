@@ -131,6 +131,7 @@ jobs:
         with:
           path: ~/.docker-cache
           key: docker-${{ runner.os }}-${{ hashFiles('cicd/docker-compose.ci.yml') }}
+          save-always: true
 
       - name: Load cached images
         if: always() && steps.docker-cache.outputs.cache-hit == 'true'
