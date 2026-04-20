@@ -80,6 +80,7 @@ jobs:
         run: npm run test:unit
 
       - name: Run Integration Tests
+        if: always()
         run: npm run test:integration
 
       - name: Upload unit coverage
