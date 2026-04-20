@@ -11,7 +11,7 @@
 <div class="fade-overlay col-span-full pt-20"
 	 in:fade={{ delay: 600, duration: 400 }} out:fade={{duration: 300}}>
 	<div class="logo-container">
-		<img src="/images/about/CAIT_Logo_nobg.png" alt="Success" class="logo">
+		<img src="/images/about/cait_logo_big.png" alt="Success" class="logo">
 	</div>
 	<div class="success-text">
 		{#if edit}
