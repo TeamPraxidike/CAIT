@@ -29,14 +29,6 @@ wait_healthy() {
 
 wait_healthy db
 wait_healthy analytics
-
-sleep 10
-echo "=== supavisor logs ==="
-docker compose -f cicd/docker-compose.ci.yml logs supavisor
-echo "=== container status ==="
-docker compose -f cicd/docker-compose.ci.yml ps
-
-
 wait_healthy supavisor
 wait_healthy kong
 
