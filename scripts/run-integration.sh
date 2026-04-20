@@ -19,16 +19,24 @@ COMPOSE="docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci"
 wait_healthy() {
   local service=$1
   echo "Waiting for $service to be healthy..."
-  for i in $(seq 1 120); do
+  for i in $(seq 1 60); do
     STATUS=$($COMPOSE ps $service --format '{{.Health}}' 2>/dev/null || echo "unknown")
     [ "$STATUS" = "healthy" ] && echo "$service is healthy." && return 0
-    [ "$i" -eq 120 ] && echo "ERROR: $service not healthy (status: $STATUS)" && exit 1
+    [ "$i" -eq 60 ] && echo "ERROR: $service not healthy (status: $STATUS)" && exit 1
     sleep 2
   done
 }
 
 wait_healthy db
 wait_healthy analytics
+
+sleep 20
+echo "=== supavisor logs ==="
+docker compose -f cicd/docker-compose.ci.yml logs supavisor
+echo "=== container status ==="
+docker compose -f cicd/docker-compose.ci.yml ps
+
+
 wait_healthy supavisor
 wait_healthy kong
 
