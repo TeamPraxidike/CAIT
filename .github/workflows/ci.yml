@@ -120,19 +120,35 @@ jobs:
       - name: Load app env
         run: cat cicd/.env.app.ci >> "$GITHUB_ENV"
 
-      # cache the docker images (since it takes a while to pull them each time)
-      - name: Cache Docker Images
-        uses: ScribeMD/docker-cache@0.5.0
-        with:
-          key: docker-${{ runner.os }}-${{ hashFiles('cicd/docker-compose.ci.yml') }}
-
       # -----------------------------------------------------------------------
       - name: Run Unit Tests
         run: npm run test:unit
 
+      - name: Restore Docker Image cache
+        id: docker-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.docker-cache
+          key: docker-${{ runner.os }}-${{ hashFiles('cicd/docker-compose.ci.yml') }}
+
+      - name: Load cached images
+        if: steps.docker-cache.outputs.cache-hit == 'true'
+        run: |
+          for f in ~/.docker-cache/*.tar; do docker load -i "$f"; done
+
       - name: Run Integration Tests
         if: always()
         run: npm run test:integration
+
+      - name: Save images to cache
+        if: steps.docker-cache.outputs.cache-hit != 'true' && always()
+        run: |
+          mkdir -p ~/.docker-cache
+          docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci config --images | while read img; do
+            fname=$(echo "$img" | tr '/:' '__')
+            docker save "$img" -o ~/.docker-cache/"$fname".tar
+          done
+
 
       - name: Upload unit coverage
         if: always()
