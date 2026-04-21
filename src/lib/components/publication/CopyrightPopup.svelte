@@ -395,11 +395,19 @@
 											class="w-full rounded-xl object-contain bg-white" />
 									</a>
 								</div>
-
 								<p class="mt-3 text-sm text-gray-600">
-									Use this reference to help decide which license is appropriate for your situation.
+									(click to enlarge)
 								</p>
-
+								{#if ownershipStatus === 'yes'}
+									<p class="mt-3 text-sm text-red-600">
+										<!-- Creative Commons licenses by Voter CC BY-SA. -->
+										 TODO: PUT THE CORRECT LICENSE INFO HERE
+									</p>
+								{:else}
+									<p class="mt-3 text-sm text-red-600">
+										 TODO: PUT THE CORRECT LICENSE INFO HERE
+									</p>
+								{/if}
 								<a
 									href={ownershipReference.infoHref}
 									target="_blank"
