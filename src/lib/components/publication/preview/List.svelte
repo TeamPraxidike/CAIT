@@ -12,7 +12,7 @@
 	<span class="font-bold text-surface-800">{title}:</span>
 	<ul class="list-inside break-words">
 		{#if list.length === 0}
-			<span class="break-words">{emptyMessage}</span>
+			<li class="break-words">{emptyMessage}</li>
 		{:else}
 			{#each list as listItem}
 				<li class="list text-surface-700 text-sm list-disc break-words">{listItem}</li>
