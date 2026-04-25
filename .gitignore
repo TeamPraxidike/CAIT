@@ -14,3 +14,4 @@ static/uploadedFiles
 /seed.ts
 .direnv/
 static/nutrient-viewer-lib
+*.swp

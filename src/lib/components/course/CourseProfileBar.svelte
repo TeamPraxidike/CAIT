@@ -49,8 +49,8 @@
 	<!--{/if}-->
 	<img
 		src={coverpic ? coverpic : defaultProfilePicturePath}
-		alt="course}"
-		class="w-full h-auto object-cover border rounded" />
+		alt="course"
+		class="w-full max-h-[400px] object-cover border rounded" />
 
 	<div
 		class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
@@ -101,12 +101,13 @@
 		</p>
 	</div>
 	<hr class="w-11/12" />
-	<div class="flex flex-col">
+	<div class="flex flex-col gap-4 w-full">
 		<span class="font-bold text-surface-800">Maintainers:</span>
-		<div class="flex flex-col">
+		<div class="flex flex-col gap-2 ">
 			{#each course?.maintainers as maintainer}
 				<UserProp
 					role="Maintainer"
+					subject={course}
 					userPhotoUrl={maintainer.profilePicData}
 					view="material"
 					user={maintainer} />

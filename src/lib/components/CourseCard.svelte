@@ -110,7 +110,8 @@
 	
 	<img
 		slot="cover"
-		class="w-full h-full object-cover rounded-t-lg hover:shadow-md"
+		draggable="false"
+		class="w-full h-full object-cover rounded-t-lg hover:shadow-md select-none"
 		src={coursePhotoUrl ?? defaultCoursePicturePath}
 		alt="Course Profile" />
 
