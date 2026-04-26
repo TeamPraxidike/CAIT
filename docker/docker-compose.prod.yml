@@ -262,6 +262,7 @@ services:
 
   minio-createbucket:
     image: minio/mc
+    restart: "no"
     depends_on:
       minio:
         condition: service_healthy
