@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-npx prisma migrate deploy
+npx prisma generate && npx prisma migrate deploy
 
 chmod +x scripts/createSAMLidp.sh
 ./scripts/createSAMLidp.sh
