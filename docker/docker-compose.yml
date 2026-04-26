@@ -63,9 +63,13 @@ services:
       analytics:
         condition: service_healthy
     environment:
+      KONG_STORAGE_CONNECT_TIMEOUT: '60'
+      KONG_STORAGE_WRITE_TIMEOUT: '3600'
+      KONG_STORAGE_READ_TIMEOUT: '3600'
+      KONG_STORAGE_REQUEST_BUFFERING: 'false'
+      KONG_STORAGE_RESPONSE_BUFFERING: 'false'
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
-      KONG_PORT_MAPS: '443:8000'
       # https://github.com/supabase/cli/issues/14
       KONG_DNS_ORDER: LAST,A,CNAME
       KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
@@ -313,6 +317,9 @@ services:
       REGION: stub
       ENABLE_IMAGE_TRANSFORMATION: "true"
       IMGPROXY_URL: http://imgproxy:5001
+#      REQUEST_ALLOW_X_FORWARDED_PATH: 'true'
+#      TUS_URL_PATH: upload/resumable
+      TUS_URL_PATH: /storage/v1/upload/resumable
     volumes:
       - ./volumes/storage:/var/lib/storage:z
 
