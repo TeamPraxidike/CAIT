@@ -5,9 +5,10 @@
 	"scripts": {
 		"setup": "npm install && npx prisma generate",
 		"dev": "chmod +x scripts/createSAMLidp.sh && scripts/dev.sh",
-		"prebuild": "chmod +x scripts/dirname.sh && chmod +x scripts/createSAMLidp.sh && npx prisma generate && prisma migrate deploy",
-		"build": "npm run prebuild && scripts/createSAMLidp.sh && vite build && scripts/dirname.sh",
-		"preview": "vite preview",
+		"prebuild": "chmod +x scripts/dirname.sh && npx prisma generate",
+		"build": "vite build && scripts/dirname.sh",
+		"start:preview": "chmod +x scripts/init-db.sh && scripts/init-db.sh && vite preview",
+		"start": "chmod +x scripts/init-db.sh && scripts/init-db.sh && node build",
 		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
