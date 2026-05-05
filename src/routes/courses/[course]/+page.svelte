@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
 		Meta,
-		PublicationCard,
+		PublicationCard
 	} from '$lib';
 	import CourseProfileBar from '$lib/components/course/CourseProfileBar.svelte';
 	import type { LayoutData, PageServerData } from './$types';

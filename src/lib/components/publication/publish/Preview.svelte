@@ -7,6 +7,8 @@
 	export let dataMaterial: ParamsMutableMaterial | null;
 	export let paramsImmutable: ParamsImmutable;
 
+	export let isCircuit = dataMaterial == null;
+
 	export let draft: boolean;
 	export let markedAsDraft: boolean;
 </script>
@@ -23,7 +25,7 @@
 
 		<p class="text-surface-800 text-sm">{data.description}</p>
 
-		{#if dataMaterial}
+		{#if !isCircuit && dataMaterial}
 			<p class="text-surface-500 text-sm">
 				Time Estimate: {dataMaterial.estimate || 'No estimate provided'} |
 				Type: {dataMaterial.selectedTypes[0]?.toUpperCase() || 'No type provided'}
@@ -50,10 +52,10 @@
 		</div>
 		<List list={data.LOs} isLO={true} />
 		<List list={data.PKs} isLO={false} />
-		{#if dataMaterial}
+		{#if !isCircuit}
 			<div class="flex flex-col">
 				<span class="font-bold">Copyright:</span>
-				<span class="text-sm">{dataMaterial.copyright || 'No copyright license'}</span>
+				<span class="text-sm">{dataMaterial?.copyright || 'No copyright license'}</span>
 			</div>
 		{/if}
 	</div>

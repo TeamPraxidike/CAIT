@@ -79,13 +79,11 @@ export async function PUT({ request, params, locals }) {
 		circuitId: number,
 		publisherId: string
 	} = await request.json();
-
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
 
 	const metaData = body.metaData;
 	// const userId = circuit.userId;
-	const publisherId = body.publisherId;
 	const nodeInfo: NodeDiffActions = body.nodeDiff;
 	const tags = metaData.tags;
 	const maintainers = metaData.maintainers;
@@ -160,7 +158,6 @@ export async function PUT({ request, params, locals }) {
 					prismaTransaction,
 				);
 			}
-
 			await handleEdges(body.circuitId, nodeInfo.next, prismaTransaction);
 
 			return await updateCircuitByPublicationId(
@@ -170,12 +167,8 @@ export async function PUT({ request, params, locals }) {
 				prismaTransaction,
 			);
 		});
-
-		const id = circuit.id;
-
 		enqueueCircuitComparison(publicationId).catch(error => console.error(error))
-
-		return new Response(JSON.stringify({ id }), { status: 200 });
+		return new Response(JSON.stringify({ id: publicationId }), { status: 200 });
 	} catch (error) {
 		console.error(error);
 		if (

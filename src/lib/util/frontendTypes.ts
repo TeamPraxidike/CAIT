@@ -7,16 +7,17 @@ import {
 	type Tag as PrismaTag,
 } from '@prisma/client';
 import type {
+	FetchedFileArray,
 	MaterialForm,
 	NodeDiffActions,
 	UploadMaterialFileFormat,
 } from '$lib/database';
 import { convertMaterial } from '$lib/util/types.ts';
 import type { ChangeLogPayload } from '$lib/database/publicationHistory';
+import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes.ts';
 
 export type ParamsMutable = {
 	isSubmitting: boolean;
-	fileTUSMetadata: { [key: string]: FileTUSMetadata };
 	title: string;
 	loggedUser: any;
 	searchableUsers: UserWithProfilePic[];
@@ -52,6 +53,7 @@ export type ParamsMutableMaterial = {
 export type ParamsMutableCircuit = {
 	circuitData: NodeDiffActions;
 	coverPic: {type: string, info: string} | undefined;
+	nodeInfo: NodeInfo[]
 }
 
 
@@ -174,7 +176,7 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	const outerArray = JSON.parse(newTagsJ);
 	const newTagsArray: string[] = JSON.parse(outerArray[0]);
 
-	let changeLog: ChangeLogPayload = JSON.parse(
+	const changeLog: ChangeLogPayload = JSON.parse(
 		data.get('changeLog')?.toString() ||
 			'{"globalComment": "", "fileComments": { "added": {}, "deleted": {} }}',
 	);
@@ -213,3 +215,29 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 
 	return { data: dataForm, tags: newTagsArray };
 }
+
+export async function loadCircuitData(locals: App.Locals, fetch: typeof globalThis.fetch) {
+	let liked: number[] = [];
+	let saved: { saved: number[]; savedFileData: FetchedFileArray } = {
+		saved: [],
+		savedFileData: [],
+	};
+
+	const session = await locals.safeGetSession();
+
+	if (session && session.user) {
+		const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
+		liked = likedResponse.status === 200 ? await likedResponse.json() : [];
+
+		const savedResponse = await fetch(
+			`/api/user/${session.user.id}/saved?fullPublications=false`,
+		);
+		saved =
+			savedResponse.status === 200
+				? await savedResponse.json()
+				: { saved: [], savedFileData: [] };
+	}
+
+	return { liked, saved };
+}
+

@@ -272,22 +272,9 @@
 
 			paramsMutable = {
 				isSubmitting,
-				fileTUSMetadata,
-				fileTUSProgress,
-				fileTUSUploadObjects,
-				fileURLs,
-				files,
 				title,
-				showCourseProgressRadial,
-				selectedTypes,
-				originalCourseIds,
-				courses,
-				course,
-				coverPic,
 				loggedUser,
 				searchableUsers,
-				estimate,
-				copyright,
 				LOs,
 				PKs,
 				maintainers,
@@ -297,6 +284,22 @@
 				fileComments: { added: {}, deleted: {} },
 				globalComment: ''
 			};
+
+			paramsMutableMaterial = {
+				fileTUSMetadata,
+				fileTUSProgress,
+				fileTUSUploadObjects,
+				fileURLs,
+				files,
+				showCourseProgressRadial,
+				selectedTypes,
+				originalCourseIds,
+				courses,
+				course,
+				coverPic,
+				estimate,
+				copyright,
+			}
 
 			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {

@@ -35,7 +35,6 @@ export async function handleEdges(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	//TODO: check if node is connected to itself (improper behaviour)
-
 	const edgeData = next.flatMap(({ fromId, toId }) =>
 		toId.map((toIdValue) => ({
 			circuitId: circuitId,
