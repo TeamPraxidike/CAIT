@@ -1,26 +1,17 @@
 <script lang="ts">
 	import {
-		AddInteractionForm,
 		Meta,
-		PublicationCard,
-		UserProfileBar,
-		Comment,
+		PublicationCard
 	} from '$lib';
 	import CourseProfileBar from '$lib/components/course/CourseProfileBar.svelte';
 	import type { LayoutData, PageServerData } from './$types';
 	import {
-		type Material,
-		type Publication,
-		PublicationType,
-		type Tag,
 		type User,
 		type Reply,
 		type Comment as PrismaComment,
 	} from '@prisma/client';
-	import type { FetchedFileItem } from '$lib/database';
 	import { page } from '$app/state';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
-	import type { ExtendedPublication } from '../../api/publication/+server';
 
 	/* This is the data that was returned from the server */
 	export let data: LayoutData & PageServerData;

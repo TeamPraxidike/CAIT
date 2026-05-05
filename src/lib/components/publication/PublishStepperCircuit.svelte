@@ -22,11 +22,12 @@
 	if (!dataCircuit) {
 		dataCircuit = {
 			circuitData: {numNodes: 0, add: [], delete: [], edit: [], next: []},
-			coverPic: undefined
+			coverPic: undefined,
+			nodeInfo: [],
 		};
 	}
 
-	let circuitNodesPlaceholder: NodeInfo[] = [];
+	let circuitNodesPlaceholder: NodeInfo[] = dataCircuit.nodeInfo;
 	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
 
 	let circuitRef : InstanceType<typeof CircuitComponent>;
@@ -45,7 +46,8 @@
 			dataCircuit = {
 				...dataCircuit,
 				circuitData: nodeDiffActions,
-				coverPic: coverPic
+				coverPic: coverPic,
+				nodeInfo: circuitNodesPlaceholder,
 			};
 		}
 	}

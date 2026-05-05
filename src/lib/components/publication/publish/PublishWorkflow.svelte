@@ -39,12 +39,6 @@
 	export let saveInterval: number | undefined = undefined;
 	const toastStore = getToastStore();
 
-
-	// Debug: track paramsImmutable.form changes in child component
-
-
-
-
 	// IMPORTANT - use contexts to separate form events
 	// otherwise, for example, any Course related form events get mistaken for
 	// events from the main form
@@ -189,7 +183,6 @@
 			  enctype="multipart/form-data"
 			  action={edit ? "?/edit" : "?/publish"}
 			  use:enhance={({ formData }) => {
-
 				  	if (!circuit && dataMaterial) {
 					  	// apparently files are automatically appended to the form using the
 						// file key, so just remove it
@@ -241,9 +234,6 @@
 						formData.append('circuitData', JSON.stringify(dataCircuit.circuitData));
 						formData.append('coverPic', JSON.stringify(dataCircuit.coverPic) || '');
 					}
-
-
-
 
 					formData.append('userId', paramsImmutable.uid?.toString() || '');
 					formData.append('title', data.title);

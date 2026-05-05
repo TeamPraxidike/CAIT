@@ -272,22 +272,9 @@
 
 			paramsMutable = {
 				isSubmitting,
-				fileTUSMetadata,
-				fileTUSProgress,
-				fileTUSUploadObjects,
-				fileURLs,
-				files,
 				title,
-				showCourseProgressRadial,
-				selectedTypes,
-				originalCourseIds,
-				courses,
-				course,
-				coverPic,
 				loggedUser,
 				searchableUsers,
-				estimate,
-				copyright,
 				LOs,
 				PKs,
 				maintainers,
@@ -298,6 +285,22 @@
 				globalComment: ''
 			};
 
+			paramsMutableMaterial = {
+				fileTUSMetadata,
+				fileTUSProgress,
+				fileTUSUploadObjects,
+				fileURLs,
+				files,
+				showCourseProgressRadial,
+				selectedTypes,
+				originalCourseIds,
+				courses,
+				course,
+				coverPic,
+				estimate,
+				copyright,
+			}
+
 			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {
 				const data: FormSnapshot = {
@@ -307,8 +310,7 @@
 					newTags: paramsMutable.newTags,
 					LOs: paramsMutable.LOs,
 					PKs: paramsMutable.PKs,
-					selectedType: paramsMutableMaterial.selectedTypes,
-					difficulty: paramsMutableMaterial.selectedTypes,
+					selectedType: paramsMutableMaterial.selectedTypes[0],
 					maintainers: paramsMutable.maintainers,
 					searchableUsers: paramsMutable.searchableUsers,
 					estimate: paramsMutableMaterial.estimate,

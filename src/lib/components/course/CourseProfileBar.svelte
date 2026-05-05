@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	// import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
 	import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import { UserProp } from '$lib';

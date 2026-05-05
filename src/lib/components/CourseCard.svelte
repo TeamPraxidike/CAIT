@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { Course } from '@prisma/client';
-	import { popup } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import LevelIcon from './publication/card/LevelIcon.svelte';
