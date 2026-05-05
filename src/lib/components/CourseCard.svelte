@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { Course } from '@prisma/client';
-	import { popup } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import LevelIcon from './publication/card/LevelIcon.svelte';
@@ -110,7 +108,8 @@
 	
 	<img
 		slot="cover"
-		class="w-full h-full object-cover rounded-t-lg hover:shadow-md"
+		draggable="false"
+		class="w-full h-full object-cover rounded-t-lg hover:shadow-md select-none"
 		src={coursePhotoUrl ?? defaultCoursePicturePath}
 		alt="Course Profile" />
 

@@ -28,8 +28,9 @@
 				on:click={onCoverClick}>
 				<slot name="cover">
 					<img
-						class="w-full h-full object-cover rounded-t-lg hover:shadow-md"
+						class="w-full h-full object-cover rounded-t-lg hover:shadow-md select-none"
 						src={defaultCoverPicturePath}
+						draggable="false"
 						alt="" />
 				</slot>
 			</a>

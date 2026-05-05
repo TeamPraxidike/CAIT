@@ -242,7 +242,7 @@
 			{/if}
 	</div>
 
-	<img slot="cover" class="w-full h-full object-cover rounded-t-lg hover:shadow-md" src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="" />
+	<img draggable="false" slot="cover" class="w-full h-full object-cover rounded-t-lg hover:shadow-md select-none" src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="" />
 
 
 	<div slot="icons" class="flex gap-2">

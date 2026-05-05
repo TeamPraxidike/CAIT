@@ -27,8 +27,8 @@ export const load: LayoutServerLoad = async ({
 	const session = locals.session
 	if (!session || !session.user) throw redirect(303, '/signin');
 
-	const pRes = await fetch(`/api/publication/${params.publication}`);
-	if (pRes.status !== 200) error(pRes.status, pRes.statusText);
+	const publicationResponse = await fetch(`/api/publication/${params.publication}`);
+	if (publicationResponse.status !== 200) error(publicationResponse.status, publicationResponse.statusText);
 
 	const userRes = await fetch(
 		`/api/user/${session.user.id}/publicationInfo/${params.publication}`,
@@ -36,7 +36,7 @@ export const load: LayoutServerLoad = async ({
 	if (userRes.status !== 200) error(userRes.status, userRes.statusText);
 
 	const userSpecificInfo = await userRes.json();
-	const pubView: PublicationView = await pRes.json();
+	const pubView: PublicationView = await publicationResponse.json();
 
 	const cRes = await fetch(`/api/user/${session.user.id}/liked/comment`);
 	const rRes = await fetch(`/api/user/${session.user.id}/liked/reply`);

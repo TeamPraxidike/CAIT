@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { popup } from '@skeletonlabs/skeleton';
-	import type { User } from '@prisma/client';
+	import type { Course, User } from '@prisma/client';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import ContactUser from './user/ContactUser.svelte';
+	import type { Publication } from '$lib/database/db';
 
 
 	export let view: 'home' | 'publish' | 'material' | 'search';
@@ -11,6 +13,7 @@
 	export let userPhotoUrl: string | null;
 	export let role: 'Maintainer' | 'Publisher' | null;
 	export let className: string = 'col-span-2';
+	export let subject: Publication|Course|undefined = undefined;
 
 	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 
@@ -61,22 +64,29 @@
 
 {:else if view === "material"}
 
-	<a href='/{user.username}' type="button" style="height:fit-content"
-		 class="[&>*]:pointer-events-none md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover
-		 		bg-surface-50 hover:cursor-pointer rounded-lg w-full">
-		<div class="flex gap-2 items-center space-y-1 w-full flex-none">
-			{#if userPhotoUrl !== null}
-				<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 rounded-full" />
-			{:else}
-				<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 rounded-full" />
+	<div class="flex flex-col items-center">
+		<div style="height:fit-content"
+			class=" md:col-span-1 overflow-hidden card dark:bg-surface-700 p-2 card-hover
+					bg-surface-50 hover:cursor-pointer rounded-lg w-full flex-col flex">
+			<a href='/{user.username}' type="button" class="flex gap-2 items-center space-y-1 w-full flex-none">
+				{#if userPhotoUrl !== null}
+					<img src={userPhotoUrl} alt="User Profile" class="w-10 h-10 rounded-full" />
+				{:else}
+					<img src={defaultProfilePicturePath} alt="User Profile" class="w-10 h-10 rounded-full" />
+				{/if}
+				<div class="max-w-full items-center flex-none">
+					<span class="dark:text-surface-50 text-surface-900 max-w-full truncate flex-none">{user.firstName.slice(0,1) + ". " + user.lastName}</span>
+					<hr class="dark:bg-surface-50 bg-surface-300" />
+					<div class="text-sm md:text-md ">{role}</div>
+				</div>
+			</a>
+			{#if subject}
+				<ContactUser target_user={user} subject={subject}/>
 			{/if}
-			<div class="max-w-full items-center flex-none">
-				<span class="dark:text-surface-50 text-surface-900 max-w-full truncate flex-none">{user.firstName.slice(0,1) + ". " + user.lastName}</span>
-				<hr class="dark:bg-surface-50 bg-surface-300" />
-				<div class="text-sm md:text-md ">{role}</div>
-			</div>
 		</div>
-	</a>
+		
+	</div>
+	
 
 {:else if view === "publish"}
 	<div class="flex relative text-surface-800 dark:text-surface-50 overflow-hidden
@@ -127,3 +137,4 @@
 	</a>
 
 {/if}
+

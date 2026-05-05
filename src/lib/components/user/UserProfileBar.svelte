@@ -2,6 +2,7 @@
     import { page } from '$app/state';
     import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
     import CourseModal from '$lib/components/publication/CourseModal.svelte';
+	import ContactUser from './ContactUser.svelte';
 
     export let user:TUserWithPostsAndProfilePic;
     if (!user) {
@@ -80,6 +81,12 @@
                            dark:bg-surface-700">Edit Profile</a>
                     </div>
                 {/if}
+            </div>
+            <div class="flex gap-2 flex-wrap">
+                
+
+				    <ContactUser target_user={user}  style="btn bg-surface-800 text-surface-50 rounded-lg
+                           dark:bg-surface-700"/>
             </div>
             <hr class="w-11/12">
 
