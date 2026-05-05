@@ -12,7 +12,7 @@
 		getFiles,
 		getMaterialSnapshot,
 		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata,
-		clearIfTimeExceeded
+		clearIfTimeExceeded, clearMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import * as tus from 'tus-js-client';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
@@ -303,6 +303,9 @@
 
 			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {
+				if (showAnimation) {
+					return;
+				}
 				const data: FormSnapshot = {
 					title: paramsMutable.title,
 					description: paramsMutable.description,
@@ -341,6 +344,15 @@
 		showAnimation = false;
 	});
 
+	$: if (showAnimation) {
+		(async () => {
+			try {
+				await clearMaterialSnapshot();
+			} catch (error) {
+				console.error('Failed to clear material snapshot after submission:', error);
+			}
+		})();
+	}
 </script>
 
 <PublishWorkflow bind:data={paramsMutable}
@@ -348,4 +360,4 @@
 				 edit={false}
 				 paramsImmutable={paramsImmutable}
 				 bind:showAnimation={showAnimation}
-				dataCircuit={null}/>
+				 dataCircuit={null}/>

@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { Meta, Section } from '$lib';
+	import type { PageServerData } from './$types';
+
+	export let data: PageServerData;
 
 	const repText = 'The reputation system in the platform is based on the quantity and quality of the publications a user publishes.' +
 		' It reflects on the activity of the user and how others rate their publications and comments. It is directly proportional ' +
@@ -40,8 +43,12 @@
 	<hr class="col-span-full row-start-2">
 </section>
 
+
+
+
+
 <main class="col-span-full flex flex-col gap-10 my-20">
 	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publication.png" mdFlex="md:flex-row-reverse" iconList={true}/>
 	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/images/about/circuit.png" isImageWider={true}/>
-	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} img="/images/about/reputation.png" mdFlex="md:flex-row-reverse"/>
+	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} userList={data.topUsers} mdFlex="md:flex-row-reverse"/>
 </main>

@@ -46,7 +46,7 @@
 						form </a>. Help us make CAIT a space where educators can build better teaching, together. </b>
 			</p>
 		</div>
-		<img src="/images/about/cait_logo_big.png" alt="CAIT logo" class="md:w-1/3 rounded-lg "/>
+		<img src="/images/about/cait_logo_big.png" alt="CAIT logo" class="md:w-1/4 rounded-lg "/>
 	</div>
 
 	<div class="flex flex-row justify-center gap-10">

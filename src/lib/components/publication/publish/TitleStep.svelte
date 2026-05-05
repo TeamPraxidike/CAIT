@@ -59,7 +59,7 @@
 			<hr class="my-3 mx-2">
 			<div class="flex items-center gap-2 h-[32px] mb-2">
 				<label for="course" class="font-medium flex items-center">
-					Course<span class="text-error-300">*</span>
+					Course
 				</label>
 				{#if dataMaterial.showCourseProgressRadial}
 					<ProgressRadial font={8} width="w-8" class="shrink-0" />

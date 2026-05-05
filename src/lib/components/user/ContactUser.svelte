@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Publication } from "$lib/database/db";
 	import type { Course, User } from "@prisma/client";
-	import { stringFromBase64URL } from "@supabase/ssr";
 
     export let target_user:User;
     export let subject: Publication|Course|undefined = undefined;

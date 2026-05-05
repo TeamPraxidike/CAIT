@@ -1,4 +1,5 @@
 import { Difficulty, MaterialType } from '@prisma/client';
+import type { UserSanitized } from '$lib/database/user.ts';
 
 export const MaterialTypes = ["Video", "Lecture Notes", "Slides", "Assignment", "Exam Questions", "Other"];
 
@@ -14,6 +15,9 @@ export function mapToDifficulty(difficulty: string): Difficulty {
 			throw new Error(`Invalid difficulty: ${difficulty}`);
 	}
 }
+export type UserSanitizedWithProfilePicData = Omit<UserSanitized, 'profilePic'> & {
+	profilePicData: string | null;
+};
 
 export function mapToType(mt: string): MaterialType {
 	switch (mt.toLowerCase()) {

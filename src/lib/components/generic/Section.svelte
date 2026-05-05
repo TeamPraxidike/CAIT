@@ -1,5 +1,7 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
+	import type { UserSanitizedWithProfilePicData } from '$lib';
+	import UsersDisplay from '$lib/components/user/UsersDisplay.svelte';
 
     export let title: string;
     export let subtitle: string;
@@ -9,10 +11,15 @@
     export let img = '';
     export let mdFlex = 'md:flex-row'
     export let iconList = false;
+	// allow null so TypeScript won't complain when no users are passed
+	export let userList: UserSanitizedWithProfilePicData[] | null = null;
 
 	// if the image is wider than it is high we get it looks very small so we need a different width
 	export let isImageWider = false;
 	const widthClass = isImageWider ? 'w-5/12' : 'w-1/3';
+	// make the container wider when showing the user list (use 2/3 so it takes more space)
+	$: containerClass = userList ? 'md:w-2/3 lg:w-2/3 w-full' : widthClass;
+
 
     const icons = ["akar-icons:video", "icon-park-solid:notes", "material-symbols:assignment", "mdi:presentation", "healthicons:i-exam-multiple-choice", "mage:dots-horizontal-circle"]
     const types = ["Video", "Lecture Notes", "Assignment", "Slides", "Exam Questions", "Other"]
@@ -51,5 +58,15 @@
         </a>
             {/if}
     </div>
-	<img src="{img}" alt="{title}" class="{widthClass} rounded-lg "/>
+
+	<div class="{containerClass} flex items-center justify-center">
+		{#if userList}
+			<div class="w-full bg-surface-50 dark:bg-surface-800 p-4 rounded-lg shadow-md min-h-[180px]">
+				<!-- UsersDisplay should fill the wrapper -->
+				<UsersDisplay users={userList} />
+			</div>
+		{:else}
+			<img src={img} alt={title} class="w-full rounded-lg object-cover" />
+		{/if}
+	</div>
 </div>

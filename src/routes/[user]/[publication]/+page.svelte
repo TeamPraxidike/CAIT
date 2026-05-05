@@ -38,6 +38,8 @@
     import { SvelteFlowProvider } from '@xyflow/svelte';
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import type { FetchedFileArray } from '$lib/database';
+	import List from '$lib/components/publication/preview/List.svelte';
+	import CircuitContributorList from '$lib/components/publication/preview/CircuitContributorList.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -48,7 +50,7 @@
 	const userId = page.data.session?.user.id;
 
 	let imgSrc: string|null = null;
-	
+
 	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
 
 	let supabaseClient = page.data.supabase;
@@ -377,6 +379,20 @@
 			};
 		}
 	});
+
+	type CircuitContributor = {
+		publisherId: string;
+		username: string;
+		profilePicData?: string | null;
+	};
+
+	$: circuitContributors = isMaterial
+		? []
+		: pubView.publication.circuit.nodes.map((node): CircuitContributor => ({
+			publisherId: node.publication.publisherId,
+			username: node.publication.publisher.username,
+			profilePicData: node.publication.publisher.profilePicData,
+		}));
 </script>
 
 <Meta title={pubView.publication.title} description="CAIT" type="site" />
@@ -485,10 +501,10 @@
 						{/if}
 					</ul>
 			</div>
-			
-			
+
+
 		</div>
-		
+
 		<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">
 			<span class="font-bold text-surface-800">Description:</span>
 			{pubView.publication.description}
@@ -497,7 +513,7 @@
 			<div>
 				{#if isMaterial}
 					{#if pubView.publication.materials.timeEstimate}
-						<p class="text-surface-800 mt-4"> 
+						<p class="text-surface-800 mt-4">
 							<span class="font-bold">Time Estimate:</span> {pubView.publication.materials.timeEstimate} </p>
 					{/if}
 					<p class="text-surface-800 "><span class="font-bold">Copyright:</span> {pubView.publication.materials.copyright}</p>
@@ -737,9 +753,9 @@
 				<UserProp role="Publisher"
 						  userPhotoUrl={pubView.publication.publisher.profilePicData}
 						  view="material"
-						  bind:user={pubView.publication.publisher} 
+						  bind:user={pubView.publication.publisher}
 						  subject={pubView.publication}/>
-						  
+
 				{#each pubView.publication.maintainers as maintainer}
 					{#if maintainer.id != pubView.publication.publisher.id}
 						<UserProp role="Maintainer" userPhotoUrl={maintainer.profilePicData}
@@ -756,30 +772,12 @@
 				</div>
 			{/if}
 
-			<!-- <div class="flex flex-col">
-				<span class="font-bold text-surface-800">Learning Objectives:</span>
-				<ul class="list-inside">
-					{#if pubView.publication.learningObjectives.length === 0}
-						<span>No learning objectives have been indicated</span>
-					{:else}
-						{#each pubView.publication.learningObjectives as lo}
-							<li class="list text-surface-700 text-sm list-disc">{lo}</li>
-						{/each}
-					{/if}
-				</ul>
-			</div>
-			<div class="flex flex-col">
-				<span class="font-bold text-surface-800">Prior Knowledge:</span>
-				<ul class="list-inside">
-					{#if pubView.publication.prerequisites.length === 0}
-						<span class="text-surface-800">No prior knowledge has been indicated</span>
-					{:else}
-						{#each pubView.publication.prerequisites as pk}
-							<li class="list text-surface-700 text-sm list-disc">{pk}</li>
-						{/each}
-					{/if}
-				</ul>
-			</div> -->
+			<List list={pubView.publication.learningObjectives} isLO={true} />
+			<List list={pubView.publication.prerequisites} isLO={false} />
+
+			{#if !isMaterial}
+				<CircuitContributorList contributors={circuitContributors} />
+			{/if}
 		</div>
 	{/key}
 </div>

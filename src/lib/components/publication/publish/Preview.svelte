@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { FileTable, Tag, UserProp } from '$lib';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
+	import List from '$lib/components/publication/preview/List.svelte';
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial | null;
@@ -49,22 +50,8 @@
 				{/each}
 			</div>
 		</div>
-		<div class="flex flex-col">
-			<span class="font-bold">Learning Objectives:</span>
-			<ul class="list-inside">
-				{#each data.LOs as lo}
-					<li class="list text-sm list-disc">{lo}</li>
-				{/each}
-			</ul>
-		</div>
-		<div class="flex flex-col">
-			<span class="font-bold">Prior Knowledge:</span>
-			<ul class="list-inside">
-				{#each data.PKs as pk}
-					<li class="list text-sm list-disc">{pk}</li>
-				{/each}
-			</ul>
-		</div>
+		<List list={data.LOs} isLO={true} />
+		<List list={data.PKs} isLO={false} />
 		{#if !isCircuit}
 			<div class="flex flex-col">
 				<span class="font-bold">Copyright:</span>

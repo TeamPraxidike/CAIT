@@ -18,6 +18,15 @@ export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
 	};
 }> | null;
 
+export type UserSanitized = {
+	firstName: string;
+	lastName: string;
+	username: string;
+	aboutMe: string;
+	profilePic: any;
+	reputation: number;
+}
+
 export type LikesOfUser = Prisma.UserGetPayload<{select: {liked: true}}>;
 
 export type LikedComments = Prisma.UserGetPayload<{
@@ -662,4 +671,22 @@ async function unreport(userId: string, publicationId: number) {
 			},
 		},
 	});
+}
+
+
+export async function getTopKUsers(k: number): Promise<UserSanitized[]> {
+	return prisma.user.findMany({
+		take: k,
+		orderBy: {
+			reputation: 'desc',
+		},
+		select: {
+			firstName: true,
+			lastName: true,
+			username: true,
+			aboutMe: true,
+			profilePic: true,
+			reputation: true
+		}
+	})
 }
