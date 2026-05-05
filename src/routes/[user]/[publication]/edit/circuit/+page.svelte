@@ -81,7 +81,7 @@
 
 	let dataCircuit: ParamsMutableCircuit;
 
-	$: dataCircuit = {
+	dataCircuit = {
 		circuitData: {numNodes: 0, add: [], delete: [], edit: [], next: []},
 		coverPic: undefined,
 		nodeInfo: data.pubView.publication.circuit?.nodes?.map(node => ({
@@ -100,8 +100,8 @@
 
 	let paramsImmutable: ParamsImmutable;
 	$: paramsImmutable = {
-		liked: [],
-		saved: [],
+		liked: data.liked,
+		saved: data.saved.saved,
 		supabaseClient,
 		supabaseURL,
 		users,

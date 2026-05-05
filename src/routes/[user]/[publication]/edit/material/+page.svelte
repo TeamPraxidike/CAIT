@@ -168,24 +168,12 @@
 		copyright
 	}
 
-	let paramsMutableMaterial: ParamsMutableMaterial = {
-		fileTUSMetadata,
-		fileTUSProgress,
-		fileTUSUploadObjects,
-		fileURLs,
-		files,
-		showCourseProgressRadial,
-		selectedTypes,
-		originalCourseIds,
-		courses,
-		course,
-		coverPic,
-		estimate,
-		copyright
-	}
 
 	let paramsImmutable: ParamsImmutable;
 	$: paramsImmutable = {
+		// liked and saved are not used for materials, pass dummy values
+		liked: [],
+		saved: [],
 		supabaseClient,
 		supabaseURL,
 		users,

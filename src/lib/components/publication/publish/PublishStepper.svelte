@@ -7,9 +7,6 @@
 	import { changeCourse } from '$lib/util/coursesLogic.ts';
 	import { downloadFileFromSupabase } from '$lib/util/file.ts';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
-	import { SvelteFlowProvider } from '@xyflow/svelte';
-	import { CircuitComponent } from '$lib';
-	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes.ts';
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial | null;
@@ -21,11 +18,6 @@
 	export let circuit: boolean = false;
 	export let originalFileIds: string[] = [];
 
-	let circuitNodesPlaceholder: NodeInfo[] = [];
-	$: circuitNodesPlaceholder = circuitNodesPlaceholder;
-
-	let circuitRef : InstanceType<typeof CircuitComponent>;
-	$: circuitRef = circuitRef;
 
 	const onNextHandler = () => {
 		window.scrollTo({
@@ -81,14 +73,6 @@
 				originalFileIds={originalFileIds}
 				bind:fileChangeComments={data.fileComments}
 			/>
-		{:else}
-<!--			<svelte:fragment slot="header">Upload files<span class="text-error-300">*</span></svelte:fragment>-->
-			<!--{#key circuitKey}-->
-				<SvelteFlowProvider>
-					<CircuitComponent bind:dbNodes={circuitNodesPlaceholder} bind:this={circuitRef} publishing="{true}" bind:liked="{paramsImmutable.liked}" bind:saved={paramsImmutable.saved}/>
-				</SvelteFlowProvider>
-			<!--{/key}-->
-
 		{/if}
 	</Step>
 	<Step>
@@ -98,10 +82,6 @@
 					   bind:dataMaterial={dataMaterial}
 					   paramsImmutable={paramsImmutable}
 			/>
-		{:else}
-			<label for="title" class="block font-medium">Title<span class="text-error-300">*</span></label>
-			<input type="text" name="title" placeholder="Title" bind:value={data.title}
-				   class="rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 		{/if}
 	</Step>
 	<Step>
@@ -120,6 +100,5 @@
 			bind:markedAsDraft={markedAsDraft}
 			isCircuit={circuit}
 		/>
-
 	</Step>
 </Stepper>
