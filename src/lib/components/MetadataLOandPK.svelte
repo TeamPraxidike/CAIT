@@ -49,14 +49,8 @@
 
     const handleLOPress = (event: KeyboardEvent) =>{
         if (event.key === 'Enter' && loInput.value!=='' ){
-            if(LOs.includes(loInput.value)){
-                triggerRepeatInput("Learning Objective",loInput.value);
-            }else{
-                LOs = [...LOs, ...separateByNewline(loInput.value)];
-                loInput.value = "";
-                event.preventDefault();
-            }
-
+            submitLO();
+			event.preventDefault();
         }
     }
 
@@ -75,36 +69,45 @@
 
     const handlePriorPress = (event: KeyboardEvent) =>{
         if (event.key === 'Enter' && priorInput.value!=='' ){
-            if(priorKnowledge.includes(priorInput.value)){
-                triggerRepeatInput("Prior Knowledge",priorInput.value);
-            }else{
-                priorKnowledge = [...priorKnowledge, ...separateByNewline(priorInput.value)];
-                priorInput.value = "";
-                event.preventDefault();
-            }
-
+			submitPrereq()
+			event.preventDefault();
         }
     }
 
-    const submitLO = () => {
-        if (LOs.includes(loInput.value)) {
-            triggerRepeatInput("Learning Objective",loInput.value)
-        } else {
-            if(loInput.value!=='') {
-                LOs = [...LOs, loInput.value];
-                loInput.value = "";
-            }
-        }
-    }
 
-    const submitPrereq = () => {
-        if (priorKnowledge.includes(priorInput.value)) {
-            triggerRepeatInput("Prior Knowledge",priorInput.value)
-        }  if(priorInput.value!=='') {
-            priorKnowledge = [...priorKnowledge, priorInput.value];
-            priorInput.value = "";
-        }
-    }
+	const submitLO = () => {
+		const entries = separateByNewline(loInput.value);
+
+		entries.forEach(entry => {
+			const trimmed = entry.trim();
+			if (trimmed === '') return;
+
+			if (LOs.includes(trimmed)) {
+				triggerRepeatInput("Learning Objective", trimmed);
+			} else {
+				LOs = [...LOs, trimmed];
+			}
+		});
+
+		loInput.value = "";
+	};
+
+	const submitPrereq = () => {
+		const entries = separateByNewline(priorInput.value);
+
+		entries.forEach(entry => {
+			const trimmed = entry.trim();
+			if (trimmed === '') return;
+
+			if (priorKnowledge.includes(trimmed)) {
+				triggerRepeatInput("Prior Knowledge", trimmed);
+			} else {
+				priorKnowledge = [...priorKnowledge, trimmed];
+			}
+		});
+
+		priorInput.value = "";
+	};
 
     const deleteLO = (lo: string) => {
         LOs = LOs.filter(x => x !== lo);

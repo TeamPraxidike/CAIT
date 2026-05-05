@@ -22,7 +22,6 @@ export type UserSanitized = {
 	firstName: string;
 	lastName: string;
 	username: string;
-	email: string;
 	aboutMe: string;
 	profilePic: any;
 	reputation: number;
@@ -685,7 +684,6 @@ export async function getTopKUsers(k: number): Promise<UserSanitized[]> {
 			firstName: true,
 			lastName: true,
 			username: true,
-			email: true,
 			aboutMe: true,
 			profilePic: true,
 			reputation: true
