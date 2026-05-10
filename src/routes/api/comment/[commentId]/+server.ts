@@ -31,6 +31,10 @@ export async function DELETE({ params, locals }) {
 	const { commentId } = params;
 
 	const comment = await getComment(parseInt(commentId));
+	if (!comment)
+		return new Response(JSON.stringify({ error: 'Comment not found' }), {
+			status: 404,
+		});
 
 	const authError = await verifyAuth(locals, comment.userId);
 	if (authError) return authError;
@@ -47,7 +51,11 @@ export async function DELETE({ params, locals }) {
 
 export async function PUT({ params, request, locals }) {
 	const body = await request.json();
-	const comment = await getComment(parseInt(body.commentId));
+	const comment = await getComment(parseInt(params.commentId));
+	if (!comment)
+		return new Response(JSON.stringify({ error: 'Comment not found' }), {
+			status: 404,
+		});
 
 	const authError = await verifyAuth(locals, comment.userId);
 	if (authError) return authError;

@@ -233,7 +233,7 @@ export async function POST({ request, locals }) {
 				action: PublicationEventType.CREATE,
 				publicationId: createdMaterial.publicationId,
 				userId: userId,
-				comment: '',
+				comment: changeLog?.globalComment || '',
 				meta: {
 					fileChanges: initialFilesLog,
 				},

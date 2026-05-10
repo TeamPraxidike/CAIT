@@ -245,7 +245,11 @@ export async function PUT({ request, params, locals }) {
 
 		// Write the history log
 		const hasMaterialChanges = fileChangesLog.length > 0;
-		const hasGlobalComment = !!changeLog.globalComment;
+		const hasGlobalComment =
+			changeLog.globalComment &&
+			typeof changeLog.globalComment === 'object' &&
+			Array.isArray((changeLog.globalComment as any).content) &&
+			(changeLog.globalComment as any).content.length > 0;
 
 		// Log if files changed or if user wrote comment about the update
 		if (hasMaterialChanges || hasGlobalComment) {

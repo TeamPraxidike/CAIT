@@ -15,6 +15,8 @@
 
     // Called by TipTap to handle keyboard navigation
     export function onKeyDown({ event }: { event: KeyboardEvent }) {
+        if (items.length === 0) return false;
+
         if (event.key === 'ArrowUp') {
             selectedIndex = (selectedIndex + items.length - 1) % items.length;
             return true;

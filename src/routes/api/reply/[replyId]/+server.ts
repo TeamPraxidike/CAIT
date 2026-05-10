@@ -28,6 +28,10 @@ export async function GET({ params, locals }) {
 export async function DELETE({ params, locals }) {
 	const { replyId } = params;
 	const reply = await getReply(parseInt(replyId));
+	if (!reply)
+		return new Response(JSON.stringify({ error: 'Reply not found' }), {
+			status: 404,
+		});
 
 	const authError = await verifyAuth(locals, reply.userId);
 	if (authError) return authError;
@@ -44,7 +48,11 @@ export async function DELETE({ params, locals }) {
 
 export async function PUT({ params, request, locals }) {
 	const body = await request.json();
-	const reply = await getReply(parseInt(body.replyId));
+	const reply = await getReply(parseInt(params.replyId));
+	if (!reply)
+		return new Response(JSON.stringify({ error: 'Reply not found' }), {
+			status: 404,
+		});
 
 	const authError = await verifyAuth(locals, reply.userId);
 	if (authError) return authError;
