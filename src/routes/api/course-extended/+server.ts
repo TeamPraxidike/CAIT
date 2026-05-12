@@ -1,9 +1,5 @@
-import { verifyAuth } from '$lib/database/auth';
 import {
 	type CourseWithMaintainersAndProfilePic,
-	createCourse,
-	type createCourseData,
-	findCourseByNameExtended,
 	getAllCoursesExtended
 } from '$lib/database/courses';
 import { coverPicFetcher, type FetchedFileItem } from '$lib/database';
@@ -11,10 +7,7 @@ import { coverPicFetcher, type FetchedFileItem } from '$lib/database';
 export type CourseWithProcessedProfilePic = Omit<CourseWithMaintainersAndProfilePic, "coverPic"> & {
 	coverPic: FetchedFileItem
 }
-export async function GET({ locals }) {
-	const authError = await verifyAuth(locals, locals.user?.id);
-	if (authError) return authError;
-
+export async function GET() {
 	try {
 		const courses: CourseWithMaintainersAndProfilePic[] = await getAllCoursesExtended();
 		const coursesWithAdditionalInfo: CourseWithProcessedProfilePic[] = await Promise.all(
