@@ -46,6 +46,7 @@
 
 		{#if editTimer}
 			<input
+				autofocus
 				type="number"
 				min="0"
 				bind:value={totalMinutes}
@@ -58,12 +59,11 @@
 				}}
 			/>
 		{:else}
-			<div class="text-lg font-semibold text-center min-w-[80px]"
-				 role="button"
+			<button type="button" class="text-lg font-semibold text-center min-w-[80px]"
 				 tabindex="0"
-				 on:dblclick={() => editTimer = !editTimer}>
+				 on:click={() => editTimer = true}>
 				{formatTime(totalMinutes)}
-			</div>
+			</button>
 		{/if}
 
 		<button

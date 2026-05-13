@@ -4,7 +4,6 @@
 		AddInteractionForm,
 		CircuitComponent,
 		Comment,
-		DiffBar,
 		FileTable,
 		getDateDifference, HorizontalScroll,
 		Meta, Tag,
@@ -39,6 +38,8 @@
     import { SvelteFlowProvider } from '@xyflow/svelte';
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import type { FetchedFileArray } from '$lib/database';
+	import List from '$lib/components/publication/preview/List.svelte';
+	import CircuitContributorList from '$lib/components/publication/preview/CircuitContributorList.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -47,6 +48,10 @@
 	//$: ({ loggedUser } = data);
 	let loggedUser = page.data.loggedUser;
 	const userId = page.data.session?.user.id;
+
+	let imgSrc: string|null = null;
+
+	const defaultCoverPicturePath = "/defaultCoverPic/assignment.jpg"
 
 	let supabaseClient = page.data.supabase;
 	let tabSet: number = 0;
@@ -128,6 +133,7 @@
 		comments = data.pubView.publication.comments;
 		tags = pubView.publication.tags.map(tag => tag.content) as string[];
 		created = getDateDifference(data.pubView.publication.updatedAt, new Date()) as string;
+		imgSrc = pubView.coverFileData?.data;
 	}
 
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
@@ -373,6 +379,20 @@
 			};
 		}
 	});
+
+	type CircuitContributor = {
+		publisherId: string;
+		username: string;
+		profilePicData?: string | null;
+	};
+
+	$: circuitContributors = isMaterial
+		? []
+		: pubView.publication.circuit.nodes.map((node): CircuitContributor => ({
+			publisherId: node.publication.publisherId,
+			username: node.publication.publisher.username,
+			profilePicData: node.publication.publisher.profilePicData,
+		}));
 </script>
 
 <Meta title={pubView.publication.title} description="CAIT" type="site" />
@@ -391,10 +411,10 @@
 		|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")
 		|| loggedUser.isAdmin}
 			<div class="space-x-1">
-				{#if (pubView.publication.publisherId === page.data.session?.user.id
-				|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")) && pubView.isMaterial}
+				{#if pubView.publication.publisherId === page.data.session?.user.id
+				|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")}
 					<button bind:this={hoverEdit}
-							on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit/material`)}
+							on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit/${isMaterial ? 'material' : 'circuit'}`)}
 							type="button" class="btn self-center p-0 m-0">
 						<Icon icon={editIcon} width="24" class="text-surface-700" />
 					</button>
@@ -456,18 +476,47 @@
 			</div>
 		</div>
 
+		<div class="flex">
+				<div class=" w-1/2  pr-12">
+					<span class="font-bold text-surface-800">Learning Objectives:</span>
+					<ul class="list-inside">
+						{#if pubView.publication.learningObjectives.length === 0}
+							<span>No learning objectives have been indicated</span>
+						{:else}
+							{#each pubView.publication.learningObjectives as lo}
+								<li class="list text-surface-700 text-sm list-disc">{lo}</li>
+							{/each}
+						{/if}
+					</ul>
+				</div>
+				<div class="flex flex-col">
+					<span class="font-bold text-surface-800">Prior Knowledge:</span>
+					<ul class="list-inside">
+						{#if pubView.publication.prerequisites.length === 0}
+							<span class="text-surface-800">No prior knowledge has been indicated</span>
+						{:else}
+							{#each pubView.publication.prerequisites as pk}
+								<li class="list text-surface-700 text-sm list-disc">{pk}</li>
+							{/each}
+						{/if}
+					</ul>
+			</div>
+
+
+		</div>
+
 		<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">
+			<span class="font-bold text-surface-800">Description:</span>
 			{pubView.publication.description}
 		</p>
-
 		<div class="w-full flex justify-between">
 			<div>
 				{#if isMaterial}
 					{#if pubView.publication.materials.timeEstimate}
-						<p class="text-surface-400 text-sm mt-4"> Time
-							Estimate: {pubView.publication.materials.timeEstimate} </p>
+						<p class="text-surface-800 mt-4">
+							<span class="font-bold">Time Estimate:</span> {pubView.publication.materials.timeEstimate} </p>
 					{/if}
-					<p class="text-surface-400 text-sm">Copyright: {pubView.publication.materials.copyright}</p>
+					<p class="text-surface-800 "><span class="font-bold">Copyright:</span> {pubView.publication.materials.copyright}</p>
 				{/if}
 			</div>
 			<div class="col-span-full flex flex-col items-start mt-2">
@@ -699,49 +748,36 @@
 	{#key pubView.publication.id}
 		<!--   RIGHT SINGLE 1/4 COLUMN   -->
 		<div class="flex flex-col gap-4">
-			<div class="flex gap-2">
+			<img src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="Cover" class="w-full max-h-[400px] object-cover border rounded select-none" draggable="false"/>
+			<div class="flex flex-col gap-2">
 				<UserProp role="Publisher"
 						  userPhotoUrl={pubView.publication.publisher.profilePicData}
 						  view="material"
-						  bind:user={pubView.publication.publisher} />
+						  bind:user={pubView.publication.publisher}
+						  subject={pubView.publication}/>
+
 				{#each pubView.publication.maintainers as maintainer}
-					<UserProp role="Maintainer" userPhotoUrl={maintainer.profilePicData}
-							  view="material" user={maintainer} />
+					{#if maintainer.id != pubView.publication.publisher.id}
+						<UserProp role="Maintainer" userPhotoUrl={maintainer.profilePicData}
+								view="material" user={maintainer} subject={pubView.publication} />
+					{/if}
 				{/each}
 			</div>
 
 			{#if pubView.publication.course !== null}
-				<div class="text-surface-500 text-sm">
+				<div class="text-surface-700 text-sm">
 					<span>Part of the</span>
-					<span class="font-semibold">{pubView.publication.course.courseName}</span>
+					<a href={`/courses/${pubView.publication.course.courseName}`} class="font-semibold text-primary-600 hover:underline">{pubView.publication.course.courseName}</a>
 					<span>course</span>
 				</div>
 			{/if}
 
-			<div class="flex flex-col">
-				<span class="font-bold text-surface-800">Learning Objectives:</span>
-				<ul class="list-inside">
-					{#if pubView.publication.learningObjectives.length === 0}
-						<span>No learning objectives have been indicated</span>
-					{:else}
-						{#each pubView.publication.learningObjectives as lo}
-							<li class="list text-surface-700 text-sm list-disc">{lo}</li>
-						{/each}
-					{/if}
-				</ul>
-			</div>
-			<div class="flex flex-col">
-				<span class="font-bold text-surface-800">Prior Knowledge:</span>
-				<ul class="list-inside">
-					{#if pubView.publication.prerequisites.length === 0}
-						<span class="text-surface-800">No prior knowledge has been indicated</span>
-					{:else}
-						{#each pubView.publication.prerequisites as pk}
-							<li class="list text-surface-700 text-sm list-disc">{pk}</li>
-						{/each}
-					{/if}
-				</ul>
-			</div>
+			<List list={pubView.publication.learningObjectives} isLO={true} />
+			<List list={pubView.publication.prerequisites} isLO={false} />
+
+			{#if !isMaterial}
+				<CircuitContributorList contributors={circuitContributors} />
+			{/if}
 		</div>
 	{/key}
 </div>

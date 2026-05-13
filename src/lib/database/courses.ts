@@ -1,5 +1,5 @@
 
-import { type Level, Prisma, type PrismaClient, type Publication } from '@prisma/client';
+import { type Level, Prisma, type PrismaClient } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import type { UserWithProfilePic } from '$lib/util/coursesLogic';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';

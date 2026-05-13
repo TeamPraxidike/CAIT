@@ -12,7 +12,7 @@
 		getFiles,
 		getMaterialSnapshot,
 		saveMaterialSnapshot, getFileTUSMetadata, saveFileTUSMetadata,
-		clearIfTimeExceeded
+		clearIfTimeExceeded, clearMaterialSnapshot
 	} from '$lib/util/indexDB';
 	import * as tus from 'tus-js-client';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
@@ -272,22 +272,9 @@
 
 			paramsMutable = {
 				isSubmitting,
-				fileTUSMetadata,
-				fileTUSProgress,
-				fileTUSUploadObjects,
-				fileURLs,
-				files,
 				title,
-				showCourseProgressRadial,
-				selectedTypes,
-				originalCourseIds,
-				courses,
-				course,
-				coverPic,
 				loggedUser,
 				searchableUsers,
-				estimate,
-				copyright,
 				LOs,
 				PKs,
 				maintainers,
@@ -298,8 +285,27 @@
 				globalComment: ''
 			};
 
+			paramsMutableMaterial = {
+				fileTUSMetadata,
+				fileTUSProgress,
+				fileTUSUploadObjects,
+				fileURLs,
+				files,
+				showCourseProgressRadial,
+				selectedTypes,
+				originalCourseIds,
+				courses,
+				course,
+				coverPic,
+				estimate,
+				copyright,
+			}
+
 			// start a 2-sec interval that captures a snapshot
 			saveInterval = window.setInterval(() => {
+				if (showAnimation) {
+					return;
+				}
 				const data: FormSnapshot = {
 					title: paramsMutable.title,
 					description: paramsMutable.description,
@@ -307,8 +313,7 @@
 					newTags: paramsMutable.newTags,
 					LOs: paramsMutable.LOs,
 					PKs: paramsMutable.PKs,
-					selectedType: paramsMutableMaterial.selectedTypes,
-					difficulty: paramsMutableMaterial.selectedTypes,
+					selectedType: paramsMutableMaterial.selectedTypes[0],
 					maintainers: paramsMutable.maintainers,
 					searchableUsers: paramsMutable.searchableUsers,
 					estimate: paramsMutableMaterial.estimate,
@@ -339,6 +344,15 @@
 		showAnimation = false;
 	});
 
+	$: if (showAnimation) {
+		(async () => {
+			try {
+				await clearMaterialSnapshot();
+			} catch (error) {
+				console.error('Failed to clear material snapshot after submission:', error);
+			}
+		})();
+	}
 </script>
 
 <PublishWorkflow bind:data={paramsMutable}
@@ -346,4 +360,4 @@
 				 edit={false}
 				 paramsImmutable={paramsImmutable}
 				 bind:showAnimation={showAnimation}
-				dataCircuit={null}/>
+				 dataCircuit={null}/>

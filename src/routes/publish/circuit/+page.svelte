@@ -2,13 +2,11 @@
 	import { CircuitComponent, Meta } from '$lib';
 	import type { ActionData, PageServerData } from './$types';
 	import type { Tag as PrismaTag, User } from '@prisma/client';
-	import { goto } from '$app/navigation';
 	import type { NodeDiffActions } from '$lib/database';
 	import { page } from '$app/state';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 
-	// $: ({loggedUser} = data)
 
 	import {
 		saveCircuitSnapshot, getCircuitSnapshot, type FormSnapshot, clearIfTimeExceeded
@@ -35,8 +33,6 @@
 
 	let allTags: PrismaTag[] = data.tags;
 	let users = data.users as UserWithProfilePic[];
-	let liked = data.liked as number[];
-	let saved = data.saved.saved as number[];
 
 	let isSubmitting: boolean = false;
 
@@ -62,7 +58,8 @@
 
 	let dataCircuit: ParamsMutableCircuit = {
 		circuitData: {numNodes: 0, add: [], delete: [], edit: [], next: []},
-		coverPic: undefined
+		coverPic: undefined,
+		nodeInfo: [],
 	};
 
 
@@ -76,7 +73,12 @@
 		maintainers: additionalMaintainers,
 		tags,
 		newTags,
-		description
+		description,
+		fileComments: { // currently we do not have logs for circuits, initialise them as empty
+			added: {},
+			deleted: {}
+		},
+		globalComment: ""
 	}
 
 	let paramsImmutable: ParamsImmutable;
@@ -211,122 +213,6 @@
 				 edit={false}
 				 paramsImmutable={paramsImmutable}
 				 bind:showAnimation={showAnimation}
-				 circuit={true}/>
+				 circuit={true}
+/>
 
-
-<!--<style>-->
-<!--    .form-container {-->
-<!--        position: relative;-->
-<!--    }-->
-
-<!--    .fade-overlay {-->
-<!--        position: relative;-->
-<!--        width: 100%;-->
-<!--        height: 100%;-->
-<!--        z-index: 40;-->
-<!--        background: transparent;-->
-<!--        filter: saturate(0.7);-->
-<!--        display: flex;-->
-<!--        align-items: center;-->
-<!--        justify-content: center;-->
-<!--        flex-direction: column;-->
-<!--        gap: 2rem;-->
-<!--    }-->
-
-<!--    .logo-container {-->
-<!--        opacity: 0;-->
-<!--        animation: slide-in-logo 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;-->
-<!--    }-->
-
-<!--    .logo {-->
-<!--        width: 200px;-->
-<!--        height: 200px;-->
-<!--        max-width: 80vw;-->
-<!--        max-height: 80vh;-->
-<!--        object-fit: contain;-->
-<!--    }-->
-
-<!--    .success-text {-->
-<!--        color: black;-->
-<!--        font-size: 1.5rem;-->
-<!--        font-weight: 500;-->
-<!--        text-align: center;-->
-<!--        opacity: 0;-->
-<!--        animation: slide-in-content 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;-->
-<!--    }-->
-
-<!--    .success-subtext {-->
-<!--        color: black;-->
-<!--        font-size: 1.0rem;-->
-<!--        font-weight: 350;-->
-<!--        text-align: center;-->
-<!--        opacity: 0;-->
-<!--        animation: slide-in-content 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;-->
-<!--    }-->
-
-<!--    .button-container {-->
-<!--        display: flex;-->
-<!--        gap: 1rem;-->
-<!--        justify-content: center;-->
-<!--        align-items: center;-->
-<!--        flex-wrap: wrap;-->
-<!--        opacity: 0;-->
-<!--        animation: slide-in-content 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.7s forwards;-->
-<!--    }-->
-
-<!--    .success-btn {-->
-<!--        padding: 0.75rem 1.5rem;-->
-<!--        border-radius: 0.5rem;-->
-<!--        font-weight: 600;-->
-<!--        font-size: 1rem;-->
-<!--        cursor: pointer;-->
-<!--        min-width: 160px;-->
-<!--        text-align: center;-->
-<!--        transition: background-color 0.3s ease, opacity 0.3s ease, border-color 0.3s ease;-->
-<!--    }-->
-
-
-<!--    @keyframes slide-in-logo {-->
-<!--        from {-->
-<!--            transform: scale(0.4) translateY(20px);-->
-<!--            opacity: 0;-->
-<!--        }-->
-<!--        to {-->
-<!--            transform: scale(1) translateY(0);-->
-<!--            opacity: 1;-->
-<!--        }-->
-<!--    }-->
-
-<!--    @keyframes slide-in-content {-->
-<!--        from {-->
-<!--            transform: translateY(20px);-->
-<!--            opacity: 0;-->
-<!--        }-->
-<!--        to {-->
-<!--            transform: translateY(0);-->
-<!--            opacity: 1;-->
-<!--        }-->
-<!--    }-->
-
-<!--    @media (max-width: 640px) {-->
-<!--        .button-container {-->
-<!--            flex-direction: column;-->
-<!--            gap: 0.75rem;-->
-<!--        }-->
-<!--    }-->
-
-<!--    @media (max-width: 768px) {-->
-<!--        .logo {-->
-<!--            width: 150px;-->
-<!--            height: 150px;-->
-<!--        }-->
-
-<!--        .success-text {-->
-<!--            font-size: 1rem;-->
-<!--        }-->
-
-<!--        .success-subtext {-->
-<!--            font-size: 0.75rem;-->
-<!--        }-->
-<!--    }-->
-<!--</style>-->

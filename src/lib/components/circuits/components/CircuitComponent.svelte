@@ -128,8 +128,18 @@
 
 	let store;
 
+	// Deep copy of the original nodes at mount time, used to compute diffs in publishCircuit
+	let originalNodes: { publicationId: number; x: number; y: number }[] = [];
+
 	onMount(async () => {
 		store = currentFlow?.store;
+
+		// Save the original node positions before any modifications
+		originalNodes = dbNodes.map(node => ({
+			publicationId: node.id,
+			x: node.posX,
+			y: node.posY
+		}));
 
 		dbNodes.forEach(node => {
 			const remove = () => removeNode(node.id)
@@ -218,29 +228,51 @@
 		const del: ({ publicationId: number }[]) = [];
 		const edit: ({ publicationId: number; x: number; y: number }[]) = [];
 		const next: { fromId: number; toId: number[] }[] = [];
-		//
-		$nodes.forEach(node => {
-			add.push(({ publicationId: Number(node.id), x: Number(node.position.x), y: Number(node.position.y) }));
-			del.push(({ publicationId: Number(node.id) }));
-			edit.push(({ publicationId: Number(node.id), x: Number(node.position.x), y: Number(node.position.y) }));
 
-			let curNode = dbNodes.filter(x=>x.id === Number(node.id))[0]
-			curNode.posY = Number(node.position.y);
-			curNode.posX = Number(node.position.x);
+		// Build a map of original nodes for quick lookup
+		const originalNodeMap = new Map(originalNodes.map(n => [n.publicationId, n]));
+		// Track which original nodes are still present
+		const currentNodeIds = new Set<number>();
+
+		$nodes.forEach(node => {
+			const pubId = Number(node.id);
+			const x = Number(node.position.x);
+			const y = Number(node.position.y);
+			currentNodeIds.add(pubId);
+
+			const originalNode = originalNodeMap.get(pubId);
+			if (!originalNode) {
+				// Node didn't exist originally — it was added
+				add.push({ publicationId: pubId, x, y });
+			} else if (originalNode.x !== x || originalNode.y !== y) {
+				// Node existed but position changed — it was edited
+				edit.push({ publicationId: pubId, x, y });
+			}
+			// If node existed and position hasn't changed, no action needed
+
+			let curNode = dbNodes.filter(x=>x.id === pubId)[0]
+			curNode.posY = y;
+			curNode.posX = x;
 
 			curNode.next = [];
 			let toID: number[] = $edges.filter(edge => edge.source === node.id).map(edge => {
 				const targetId = Number(edge.target);
 				curNode.next.push({
 					circuitId: 1,
-					fromPublicationId: Number(node.id),
+					fromPublicationId: pubId,
 					toPublicationId: targetId,
 				})
 				return targetId;
 			});
-			next.push(({ fromId: Number(node.id), toId: toID }));
+			next.push(({ fromId: pubId, toId: toID }));
 		})
 
+		// Nodes that were in the original set but are no longer present — they were deleted
+		for (const originalNode of originalNodes) {
+			if (!currentNodeIds.has(originalNode.publicationId)) {
+				del.push({ publicationId: originalNode.publicationId });
+			}
+		}
 
 		nodeDiffActions = {numNodes, add, delete:del, edit, next };
 

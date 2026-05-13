@@ -1,7 +1,7 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
     import {getToastStore} from "@skeletonlabs/skeleton";
-    let loInput: HTMLInputElement;
+    let loInput: HTMLTextAreaElement;
     export let LOs: string[] = [];
     export let adding:boolean;
     $: LOs = LOs;
@@ -16,7 +16,7 @@
     let hoverIndexLO: number;
     let displayButton = false;
     let displayButtonLO = false;
-    let priorInput: HTMLInputElement;
+    let priorInput: HTMLTextAreaElement;
 
     export let priorKnowledge:string[] = [];
     $: priorKnowledge = priorKnowledge;
@@ -29,6 +29,10 @@
             background: 'bg-warning-200'
         });
     }
+
+	const separateByNewline = (text: string) => {
+		return text.split('\n').map(line => line.trim()).filter(line => line !== '');
+	}
 
     const handlePKEdit = (event: KeyboardEvent) => {
         if(event.key === 'Enter'){
@@ -45,14 +49,8 @@
 
     const handleLOPress = (event: KeyboardEvent) =>{
         if (event.key === 'Enter' && loInput.value!=='' ){
-            if(LOs.includes(loInput.value)){
-                triggerRepeatInput("Learning Objective",loInput.value);
-            }else{
-                LOs = [...LOs, loInput.value];
-                loInput.value = "";
-                event.preventDefault();
-            }
-
+            submitLO();
+			event.preventDefault();
         }
     }
 
@@ -71,37 +69,45 @@
 
     const handlePriorPress = (event: KeyboardEvent) =>{
         if (event.key === 'Enter' && priorInput.value!=='' ){
-            if(priorKnowledge.includes(priorInput.value)){
-                triggerRepeatInput("Prior Knowledge",priorInput.value);
-
-            }else{
-                priorKnowledge = [...priorKnowledge, priorInput.value];
-                priorInput.value = "";
-                event.preventDefault();
-            }
-
+			submitPrereq()
+			event.preventDefault();
         }
     }
 
-    const submitLO = () => {
-        if (LOs.includes(loInput.value)) {
-            triggerRepeatInput("Learning Objective",loInput.value)
-        } else {
-            if(loInput.value!=='') {
-                LOs = [...LOs, loInput.value];
-                loInput.value = "";
-            }
-        }
-    }
 
-    const submitPrereq = () => {
-        if (priorKnowledge.includes(priorInput.value)) {
-            triggerRepeatInput("Prior Knowledge",priorInput.value)
-        }  if(priorInput.value!=='') {
-            priorKnowledge = [...priorKnowledge, priorInput.value];
-            priorInput.value = "";
-        }
-    }
+	const submitLO = () => {
+		const entries = separateByNewline(loInput.value);
+
+		entries.forEach(entry => {
+			const trimmed = entry.trim();
+			if (trimmed === '') return;
+
+			if (LOs.includes(trimmed)) {
+				triggerRepeatInput("Learning Objective", trimmed);
+			} else {
+				LOs = [...LOs, trimmed];
+			}
+		});
+
+		loInput.value = "";
+	};
+
+	const submitPrereq = () => {
+		const entries = separateByNewline(priorInput.value);
+
+		entries.forEach(entry => {
+			const trimmed = entry.trim();
+			if (trimmed === '') return;
+
+			if (priorKnowledge.includes(trimmed)) {
+				triggerRepeatInput("Prior Knowledge", trimmed);
+			} else {
+				priorKnowledge = [...priorKnowledge, trimmed];
+			}
+		});
+
+		priorInput.value = "";
+	};
 
     const deleteLO = (lo: string) => {
         LOs = LOs.filter(x => x !== lo);
@@ -121,9 +127,14 @@
         <div class="w-full max-w-full">
             {#if adding}
                 <div class="w-full flex justify-between items-center gap-2">
-                    <input on:keydown={handleLOPress} on:blur={submitLO}  bind:this={loInput}
-                           id="learningObjective" type="text" placeholder="Enter learning objective"
-                           class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-500 focus:ring-0 "/>
+				<textarea
+					on:keydown={handleLOPress}
+					bind:this={loInput}
+					id="learningObjective"
+					placeholder="Enter learning objective(s), one per line"
+					rows="3"
+					class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-500 focus:ring-0 "
+				></textarea>
                     <button on:click={submitLO} type="button" name="add_LO" inputmode="decimal"
                             class="ml-2 text-center text-surface-50 bg-primary-600 hover:bg-primary-500 rounded-full flex items-center justify-center w-7 h-7 min-w-7 min-h-7 self-center">
                         <Icon icon="mdi:arrow-right-thick" width="20" height="20"  class="text-white" />
@@ -169,9 +180,14 @@
         {/if}
         {#if adding}
             <div class="flex w-full justify-between items-center gap-2">
-                <input   bind:this={priorInput} on:blur={submitPrereq}
-                         on:keydown={handlePriorPress} id="priorKnowledge" type="text" placeholder="Enter needed concept"
-                         class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-500 focus:ring-0"/>
+               <textarea
+				   on:keydown={handlePriorPress}
+				   bind:this={priorInput}
+				   id="priorKnowledge"
+				   placeholder="Enter required prior knowledge, one per line"
+				   rows="3"
+				   class="rounded-lg dark:bg-surface-800 bg-surface-50 text-surface-700 dark:text-surface-400 w-full focus:border-primary-500 focus:ring-0 "
+			   ></textarea>
                 <button on:click={submitPrereq} type="button" name="add_prior" inputmode="decimal"
                         class="ml-2 text-center text-surface-50 bg-primary-600 hover:bg-primary-500 rounded-full flex items-center justify-center w-7 h-7 min-w-7 min-h-7 self-center">
                     <Icon icon="mdi:arrow-right-thick" width="20" height="20"  class="text-white" />

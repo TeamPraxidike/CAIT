@@ -215,8 +215,8 @@
 				<button
 					on:click={appendFileURLtoList}
 					type="button"
-					class="text-center text-surface-50 bg-primary-600 hover:bg-primary-500 rounded-full p-0.5 flex items-center justify-center w-8 h-8 min-w-8 min-h-8">
-	                    <Icon icon="mdi:arrow-right-thick" width="20" height="20"  class="text-white" />
+					class="text-center text-surface-50 bg-primary-600 hover:bg-primary-500 rounded-full p-2 flex items-center justify-center px-4 py-2">
+					Add
 	            </button>
 			</div>
 		</div>

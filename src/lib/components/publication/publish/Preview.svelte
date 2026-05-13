@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { FileTable, Tag, UserProp } from '$lib';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
+	import List from '$lib/components/publication/preview/List.svelte';
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial | null;
 	export let paramsImmutable: ParamsImmutable;
+
+	export let isCircuit = dataMaterial == null;
 
 	export let draft: boolean;
 	export let markedAsDraft: boolean;
@@ -22,7 +25,7 @@
 
 		<p class="text-surface-800 text-sm">{data.description}</p>
 
-		{#if dataMaterial}
+		{#if !isCircuit && dataMaterial}
 			<p class="text-surface-500 text-sm">
 				Time Estimate: {dataMaterial.estimate || 'No estimate provided'} |
 				Type: {dataMaterial.selectedTypes[0]?.toUpperCase() || 'No type provided'}
@@ -47,26 +50,12 @@
 				{/each}
 			</div>
 		</div>
-		<div class="flex flex-col">
-			<span class="font-bold">Learning Objectives:</span>
-			<ul class="list-inside">
-				{#each data.LOs as lo}
-					<li class="list text-sm list-disc">{lo}</li>
-				{/each}
-			</ul>
-		</div>
-		<div class="flex flex-col">
-			<span class="font-bold">Prior Knowledge:</span>
-			<ul class="list-inside">
-				{#each data.PKs as pk}
-					<li class="list text-sm list-disc">{pk}</li>
-				{/each}
-			</ul>
-		</div>
-		{#if dataMaterial}
+		<List list={data.LOs} isLO={true} />
+		<List list={data.PKs} isLO={false} />
+		{#if !isCircuit}
 			<div class="flex flex-col">
 				<span class="font-bold">Copyright:</span>
-				<span class="text-sm">{dataMaterial.copyright || 'No copyright license'}</span>
+				<span class="text-sm">{dataMaterial?.copyright || 'No copyright license'}</span>
 			</div>
 		{/if}
 	</div>

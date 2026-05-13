@@ -11,7 +11,7 @@
 <div class="fade-overlay col-span-full pt-20"
 	 in:fade={{ delay: 600, duration: 400 }} out:fade={{duration: 300}}>
 	<div class="logo-container">
-		<img src="/images/about/CAIT_Logo_nobg.png" alt="Success" class="logo">
+		<img src="/images/about/cait_logo_big.png" alt="Success" class="logo">
 	</div>
 	<div class="success-text">
 		{#if edit}
@@ -22,9 +22,13 @@
 	</div>
 	<div class="success-subtext">
 		{#if showDraftMessage}
-			Your publication has been saved as a draft - only you can see it
+			<span class="font-bold bg-secondary-100 text-secondary-800 border border-secondary-400 rounded-lg px-4 py-2 flex items-center gap-2">
+    			Your publication has been saved as a draft - only you can see it
+			</span>
 		{:else}
-			Your publication is now visible to all users of CAIT
+			<span class="font-bold px-4 flex items-center">
+    			Your publication is now visible to all users of CAIT
+			</span>
 		{/if}
 	</div>
 	<div class="button-container">
