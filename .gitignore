@@ -15,3 +15,9 @@ static/uploadedFiles
 .direnv/
 static/nutrient-viewer-lib
 *.swp
+TODO
+playwright-report
+test-results
+scripts/check-supabase-health.sh
+scripts/check-sveltekit-health.sh
+scripts/stop-and-wait.sh
