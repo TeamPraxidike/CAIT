@@ -3,19 +3,45 @@ set -euo pipefail
 
 export NODE_ENV=test
 
+# early exit if 4173 is occupied
+# TODO: this could be better, vite will try to use the next available, you can also try to follow that logic
+if lsof -i :4173 &>/dev/null; then
+    echo "ERROR: Port 4173 is already in use"
+    lsof -i :4173
+    exit 1
+fi
+
+SERVER_PID=""
+
 # ---------------------------------------------------------------------------
-# Start Supabase services (skip in CI — the workflow handles this)
+# Determine compose command based on environment
 # ---------------------------------------------------------------------------
-#if [ -z "${CI:-}" ]; then
-echo "Starting Supabase services..."
-docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci up -d
-#fi
+if [ -n "${CI:-}" ]; then
+  echo "Starting Supabase services for CI integration tests..."
+  COMPOSE="docker compose -f docker/docker-compose.yml -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci"
+else
+  echo "Starting Supabase services for local integration tests..."
+  COMPOSE="docker compose -f docker/docker-compose.yml --env-file docker/.env"
+fi
+
+cleanup() {
+  echo "Cleaning up..."
+  [ -n "$SERVER_PID" ] && kill $SERVER_PID 2>/dev/null || true
+  PORT_PID=$(lsof -t -i :4173 2>/dev/null || true)
+  [ -n "$PORT_PID" ] && kill $PORT_PID 2>/dev/null || true
+  $COMPOSE down -v
+}
+trap cleanup EXIT
+
+if [ -n "${CI:-}" ]; then
+  $COMPOSE up -d db analytics supavisor kong auth rest storage imgproxy minio minio-createbucket
+else
+  $COMPOSE up -d
+fi
 
 # ---------------------------------------------------------------------------
 # Wait for services to be ready
 # ---------------------------------------------------------------------------
-COMPOSE="docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci"
-
 wait_healthy() {
   local service=$1
   echo "Waiting for $service to be healthy..."
@@ -33,20 +59,13 @@ wait_healthy supavisor
 wait_healthy kong
 
 # ---------------------------------------------------------------------------
-# Set env vars for the SvelteKit app (THESE ARE NOT PROD SECRETS)
-# we can also include a .env.ci file for sveltekit, but it's not a priority
+# Set env vars for the SvelteKit app
 # ---------------------------------------------------------------------------
-export DATABASE_URL=postgres://postgres.1:123@localhost:6543/postgres?pgbouncer=true
-export SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.PqdH6E8yzZhWwB_c9o9e4LjdYXDTbEf5tdAqbBIrzKQ
-export DIRECT_URL=postgres://postgres.1:123@localhost:5432/postgres
-export PUBLIC_SUPABASE_URL=http://localhost:8000
-export PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE
-export FILESYSTEM=SUPABASE
-export SAML_METADATA_IDP_URL=https://dev-gibxq4rldhm2q1st.eu.auth0.com/samlp/metadata/A7xXQ9i7TlNy98eaPhNbQAczMFVLTLxq
-export SRAM_SAML_METADATA_IDP_URL=https://meta.sram.surf.nl/metadata/proxy_idp.xml
-export PUBLIC_SAML_IDP_DOMAIN=dev-gibxq4rldhm2q1st.eu.auth0.com
-export PUBLIC_SRAM_SAML_IDP_DOMAIN=sram.surf.nl
-export PUBLIC_ENVIRONMENT=dev
+if [ -n "${CI:-}" ]; then
+  set -a && source cicd/.env.app.ci && set +a
+else
+  set -a && source .env && set +a
+fi
 
 # ---------------------------------------------------------------------------
 # Build and start preview server
@@ -57,9 +76,7 @@ npm run build
 echo "Starting preview server..."
 npm run preview &
 SERVER_PID=$!
-echo "Preview server PID: $SERVER_PID"
 
-# Wait for preview server to be ready
 for i in $(seq 1 15); do
   curl -sf http://localhost:4173/ > /dev/null 2>&1 && break
   [ "$i" -eq 15 ] && echo "ERROR: Preview server not ready" && exit 1
@@ -71,23 +88,4 @@ echo "Preview server is ready."
 # Run integration tests
 # ---------------------------------------------------------------------------
 echo "Running integration tests..."
-# temp disable exit-on-error to capture test result
-set +e
 npx vitest run -c ./vitest.config.integration.ts
-TEST_EXIT=$?
-set -e
-
-# ---------------------------------------------------------------------------
-# Cleanup
-# ---------------------------------------------------------------------------
-echo "Stopping preview server..."
-kill $SERVER_PID 2>/dev/null || true
-SOCKET_PID=$(lsof -t -i :4173 2>/dev/null || true)
-[ -n "$SOCKET_PID" ] && kill $SOCKET_PID 2>/dev/null || true
-
-#if [ -z "${CI:-}" ]; then
-echo "Stopping Supabase services..."
-docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci down -v
-#fi
-
-exit $TEST_EXIT
