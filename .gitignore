@@ -18,6 +18,3 @@ static/nutrient-viewer-lib
 TODO
 playwright-report
 test-results
-scripts/check-supabase-health.sh
-scripts/check-sveltekit-health.sh
-scripts/stop-and-wait.sh

@@ -66,4 +66,61 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git push --force origin HEAD:refs/heads/staging
-      
+
+      # -----------------------------------------------------------------------
+      # STEP 2: Stop both applications so we deploy fresh
+      # -----------------------------------------------------------------------
+      - name: Stop both applications
+        run: bash scripts/cicd/stop-and-wait.sh
+        env:
+          COOLIFY_URL: ${{ secrets.STAGING_COOLIFY_BASE_URL }}
+          TOKEN: ${{ secrets.STAGING_COOLIFY_API_TOKEN }}
+          SUPABASE_UUID: ${{ secrets.STAGING_COOLIFY_SUPABASE_UUID }}
+          SVELTEKIT_UUID: ${{ secrets.STAGING_COOLIFY_SVELTEKIT_UUID }}
+
+      # -----------------------------------------------------------------------
+      # STEP 3: Deploy Supabase and wait for all services to be healthy
+      # -----------------------------------------------------------------------
+      - name: Deploy and health-check Supabase
+        run: bash scripts/cicd/check-supabase-health.sh
+        env:
+          COOLIFY_URL: ${{ secrets.STAGING_COOLIFY_BASE_URL }}
+          TOKEN: ${{ secrets.STAGING_COOLIFY_API_TOKEN }}
+          SUPABASE_UUID: ${{ secrets.STAGING_COOLIFY_SUPABASE_UUID }}
+          SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          ANON_KEY: ${{ secrets.STAGING_ANON_KEY }}
+          DASH_USER: ${{ secrets.STAGING_DASHBOARD_USERNAME }}
+          DASH_PASS: ${{ secrets.STAGING_DASHBOARD_PASSWORD }}
+
+      # -----------------------------------------------------------------------
+      # STEP 4: Deploy SvelteKit and wait for it to be healthy
+      # init-db.sh runs on startup (migrations, triggers, RLS, buckets)
+      # -----------------------------------------------------------------------
+      - name: Deploy and health-check SvelteKit
+        run: bash scripts/cicd/check-sveltekit-health.sh
+        env:
+          COOLIFY_URL: ${{ secrets.STAGING_COOLIFY_BASE_URL }}
+          TOKEN: ${{ secrets.STAGING_COOLIFY_API_TOKEN }}
+          SVELTEKIT_UUID: ${{ secrets.STAGING_COOLIFY_SVELTEKIT_UUID }}
+          SVELTEKIT_URL: ${{ secrets.STAGING_URL }}
+
+      # -----------------------------------------------------------------------
+      # STEP 5: Run Playwright E2E tests
+      # globalSetup handles DB truncation and seeding via Supabase admin API
+      # -----------------------------------------------------------------------
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          CI: true
+          STAGING_URL: ${{ secrets.STAGING_URL }}
+
+      # -----------------------------------------------------------------------
+      # STEP 6: Upload test report (even on failure)
+      # -----------------------------------------------------------------------
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
