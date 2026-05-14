@@ -2,6 +2,10 @@ import { createUser, prisma, type UserCreateForm } from '$lib/database';
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 import type { PrismaClient } from '@prisma/client';
 import type { User } from '$lib/database/user';
+import { verifyAuth } from '$lib/database/auth.ts';
+import {
+	sensitive_fields_user_json,
+} from '$lib/util/sensitive_fields.ts';
 
 /**
  * Create a new user
@@ -36,14 +40,11 @@ export async function POST({ request }) {
 }
 
 // get all users
-export async function GET() {
+export async function GET({locals}) {
 	try {
-		// let users: UserPosts[] = await prisma.user.findMany({
-		// 	include: {
-		// 		posts: true,
-		// 		profilePic: true,
-		// 	},
-		// });
+		const authError = await verifyAuth(locals);
+		let sensitive_fields = {}
+		if (authError) sensitive_fields = sensitive_fields_user_json
 
 		let users = await prisma.user.findMany({
 			select: {
@@ -53,6 +54,7 @@ export async function GET() {
 				username: true,
 				reputation: true,
 				profilePic: true,
+				...sensitive_fields,
 				// TODO: maybe just use a count and return the number of posts directly?
 				posts: {
 					select: {

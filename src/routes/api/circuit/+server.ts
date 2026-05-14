@@ -19,7 +19,13 @@ import {
 import { profilePicFetcher } from '$lib/database/file';
 import { validateMetadata } from '$lib/util/validatePublication';
 
-export async function GET({ url }) {
+export async function GET({ url, locals }) {
+	const authError = await verifyAuth(locals);
+	let return_sensitive_fields = true;
+	if (authError) {
+		return_sensitive_fields = false;
+	}
+
 	try {
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
@@ -37,6 +43,8 @@ export async function GET({ url }) {
 			limit,
 			sort,
 			query,
+			false,
+			return_sensitive_fields
 		);
 
 		// circuits = circuits.filter((c: CircuitWithPublisher) => !c.publication.isDraft);

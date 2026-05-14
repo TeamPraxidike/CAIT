@@ -2,6 +2,7 @@ import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
 import { Difficulty, PublicationType } from '@prisma/client';
 import Fuse from 'fuse.js';
+import { sensitive_fields_user } from '$lib/util/sensitive_fields.ts';
 
 export type CircuitWithNodesAndPublication = Prisma.CircuitGetPayload<{
 	include: {
@@ -124,7 +125,8 @@ export async function getAllCircuits(
 	limit: number,
 	sort: string,
 	query: string,
-	withNodes: boolean = false
+	withNodes: boolean = false,
+	return_sensitive_fields: boolean = true,
 // ): Promise<CircuitWithPublisher[]> {
 ) {
 	const where: any = { AND: [] };
@@ -161,9 +163,7 @@ export async function getAllCircuits(
 						},
 					},
 					publisher: {
-						include: {
-							profilePic: true,
-						},
+						...sensitive_fields_user(return_sensitive_fields)
 					},
 				},
 			},

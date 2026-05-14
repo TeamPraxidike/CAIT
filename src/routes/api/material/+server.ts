@@ -46,8 +46,14 @@ const reorderTags = (tags: Tag[], search: string[]): Tag[] => {
 /**
  * Get all materials
  */
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ url, locals }) => {
 	try {
+		const authError = await verifyAuth(locals);
+		let return_sensitive_fields = true;
+		if (authError) {
+			return_sensitive_fields = false;
+		}
+
 		const t = url.searchParams.get('tags');
 		const tags = t ? t.split(',') : [];
 
@@ -73,6 +79,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			sort,
 			query,
 			false,
+			return_sensitive_fields
 		);
 
 		const idsMat = materials.map((m) => m.publicationId);
