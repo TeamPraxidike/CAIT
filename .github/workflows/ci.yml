@@ -208,13 +208,8 @@ jobs:
     steps:
       # -----------------------------------------------------------------------
       # Check out the merge commit.
-      # fetch-depth: 0 is required for the force-push to work.
-      # it takes all historical commits instead of just a subset
-      # TODO: establish whether this is slow or not
       # -----------------------------------------------------------------------
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       # use the nvmrc setup to enforce Node version
       - uses: actions/setup-node@v4
