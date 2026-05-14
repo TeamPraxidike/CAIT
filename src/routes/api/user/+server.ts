@@ -3,6 +3,9 @@ import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 import type { PrismaClient } from '@prisma/client';
 import type { User } from '$lib/database/user';
 import { verifyAuth } from '$lib/database/auth.ts';
+import {
+	sensitive_fields_user_json,
+} from '$lib/util/sensitive_fields.ts';
 
 /**
  * Create a new user
@@ -40,14 +43,10 @@ export async function POST({ request }) {
 export async function GET({locals}) {
 	try {
 		const authError = await verifyAuth(locals);
-
 		let sensitive_fields = {}
-		if (authError) sensitive_fields = {
-			email: false,
-			institutionId: false,
-			platformId: false,
-		}
+		if (authError) sensitive_fields = sensitive_fields_user_json
 
+		console.log("GET - authError:", authError);
 		let users = await prisma.user.findMany({
 			select: {
 				id: true,
