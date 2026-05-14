@@ -81,7 +81,7 @@ jobs:
       # STEP 3: Deploy Supabase and wait for all services to be healthy
       # -----------------------------------------------------------------------
       - name: Deploy and health-check Supabase
-        run: bash scripts/cicd/check-supabase-health.sh
+        run: bash scripts/cicd/deploy-supabase-to-staging.sh
         env:
           COOLIFY_URL: ${{ secrets.STAGING_COOLIFY_BASE_URL }}
           TOKEN: ${{ secrets.STAGING_COOLIFY_API_TOKEN }}
@@ -96,7 +96,7 @@ jobs:
       # init-db.sh runs on startup (migrations, triggers, RLS, buckets)
       # -----------------------------------------------------------------------
       - name: Deploy and health-check SvelteKit
-        run: bash scripts/cicd/check-sveltekit-health.sh
+        run: bash scripts/cicd/deploy-sveltekit-to-staging.sh
         env:
           COOLIFY_URL: ${{ secrets.STAGING_COOLIFY_BASE_URL }}
           TOKEN: ${{ secrets.STAGING_COOLIFY_API_TOKEN }}
