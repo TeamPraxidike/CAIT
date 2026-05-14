@@ -22,9 +22,7 @@ import { validateMetadata } from '$lib/util/validatePublication';
 export async function GET({ url, locals }) {
 	const authError = await verifyAuth(locals);
 	let return_sensitive_fields = true;
-	console.log("GET - authError:", authError);
 	if (authError) {
-		console.log("GET - No auth, hiding sensitive fields");
 		return_sensitive_fields = false;
 	}
 

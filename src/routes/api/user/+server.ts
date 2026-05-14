@@ -66,8 +66,6 @@ export async function GET({locals}) {
 			},
 		});
 
-		console.log('Fetched users:', users);
-
 		users = await Promise.all(users.map(async (user) => {
 			return {
 				...user,

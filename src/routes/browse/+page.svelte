@@ -18,8 +18,6 @@
 	let idsMat: any[] = [];
 	let idsCirc: any[] = [];
 
-	console.log(data);
-
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
 	$: paginationSettings.size = data.type === 'circuits' ? idsCirc.length : idsMat.length;
