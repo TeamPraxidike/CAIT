@@ -287,7 +287,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} "docker ps --format '{{.Names}}'"
     
           DB_CONTAINER=$(ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
-            "docker ps --format '{{.Names}}' | grep '^supabase-db'")
+            "docker ps --format '{{.Names}}' | grep '^db-'")
           echo "Found container: $DB_CONTAINER"
     
           ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
