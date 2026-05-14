@@ -47,6 +47,7 @@ export const sortSwitch = (sort: string) => {
 };
 import Fuse from 'fuse.js';
 import { linkCourseToPublication, removeCourseFromPublication } from '$lib/database/courses';
+import { sensitive_fields_user } from '$lib/util/sensitive_fields.ts';
 
 /**
  * [GET] Returns a publication of type Material with the given id.
@@ -103,6 +104,7 @@ export async function getAllMaterials(
 	sort: string,
 	query: string,
 	withFiles: boolean = false,
+	return_sensitive_fields: boolean = true
 ) {
 // ): Promise<MaterialWithPublication[]> {
 	const where: any = { AND: [], NOT: null };
@@ -127,6 +129,7 @@ export async function getAllMaterials(
 
 	where.NOT = {publication: { isDraft: true } }
 
+
 	const sortBy = sortSwitch(sort);
 	let materials = await prisma.material.findMany({
 		where,
@@ -147,9 +150,7 @@ export async function getAllMaterials(
 						}
 					},
 					publisher: {
-						include: {
-							profilePic: true,
-						},
+						...sensitive_fields_user(return_sensitive_fields)
 					},
 				},
 			},
