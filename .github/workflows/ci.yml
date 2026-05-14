@@ -2,8 +2,7 @@ name: CI Pipeline
 
 on:
   pull_request:
-    # TODO: change this if necessary, cicd branch currently has this on main
-    branches: [staging]
+    branches: [main]
 
 jobs:
   e2e:
