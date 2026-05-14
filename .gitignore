@@ -15,3 +15,6 @@ static/uploadedFiles
 .direnv/
 static/nutrient-viewer-lib
 *.swp
+TODO
+playwright-report
+test-results
