@@ -46,7 +46,6 @@ export async function GET({locals}) {
 		let sensitive_fields = {}
 		if (authError) sensitive_fields = sensitive_fields_user_json
 
-		console.log("GET - authError:", authError);
 		let users = await prisma.user.findMany({
 			select: {
 				id: true,
