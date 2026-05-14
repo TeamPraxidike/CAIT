@@ -190,6 +190,7 @@ jobs:
           vite-config-path: vitest.config.integration.ts
 
   e2e:
+    # TODO: add a needs: unit-integration section
     name: End-to-End tests with playwright
     runs-on: ubuntu-latest
     permissions:
