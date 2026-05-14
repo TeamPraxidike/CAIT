@@ -14,7 +14,7 @@
 		"lint": "eslint .",
 		"test:unit": "vitest --coverage -c ./vitest.config.unit.ts",
 		"test:integration": "scripts/run-integration.sh",
-		"test:e2e:dev": "scripts/run-e2e.dev.sh"
+		"test:e2e": "scripts/run-e2e.sh"
 	},
 	"engines": {
 		"node": ">=22"

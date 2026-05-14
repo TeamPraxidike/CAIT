@@ -91,6 +91,29 @@ jobs:
           DASH_USER: ${{ secrets.STAGING_DASHBOARD_USERNAME }}
           DASH_PASS: ${{ secrets.STAGING_DASHBOARD_PASSWORD }}
 
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+
+      - name: Wipe staging database
+        run: |
+          DB_CONTAINER=$(ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
+            "docker ps --format '{{.Names}}' | grep '^supabase-db'")
+          ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
+            "docker exec $DB_CONTAINER psql -U supabase_admin -d postgres -c \"
+              DO \\\$\\\$
+              DECLARE r RECORD;
+              BEGIN
+                FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != '_prisma_migrations')
+                LOOP
+                  EXECUTE format('TRUNCATE TABLE public.%I RESTART IDENTITY CASCADE', r.tablename);
+                END LOOP;
+              END
+              \\\$\\\$;
+            \""
+
+
       # -----------------------------------------------------------------------
       # STEP 4: Deploy SvelteKit and wait for it to be healthy
       # init-db.sh runs on startup (migrations, triggers, RLS, buckets)
