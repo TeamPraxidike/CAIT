@@ -283,8 +283,13 @@ jobs:
 
       - name: Wipe staging database
         run: |
+          echo "Listing containers..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} "docker ps --format '{{.Names}}'"
+    
           DB_CONTAINER=$(ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
             "docker ps --format '{{.Names}}' | grep '^supabase-db'")
+          echo "Found container: $DB_CONTAINER"
+    
           ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
             "docker exec $DB_CONTAINER psql -U supabase_admin -d postgres -c \"
               DO \\\$\\\$
@@ -297,7 +302,6 @@ jobs:
               END
               \\\$\\\$;
             \""
-
 
       # -----------------------------------------------------------------------
       # STEP 4: Deploy SvelteKit and wait for it to be healthy

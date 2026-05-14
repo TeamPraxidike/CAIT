@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"setup": "npm install && npx prisma generate",
-		"dev": "chmod +x scripts/createSAMLidp.sh && scripts/dev.sh",
+		"dev": "chmod +x scripts/createSAMLidp.sh && chmod +x scripts/dev.sh && scripts/dev.sh",
 		"build": "chmod +x scripts/dirname.sh && vite build && scripts/dirname.sh",
 		"start:preview": "chmod +x scripts/init-db.sh && scripts/init-db.sh && vite preview",
 		"start": "chmod +x scripts/init-db.sh && scripts/init-db.sh && node build",
@@ -14,7 +14,7 @@
 		"lint": "eslint .",
 		"test:unit": "vitest --coverage -c ./vitest.config.unit.ts",
 		"test:integration": "chmod +x scripts/run-integration.sh && scripts/run-integration.sh",
-		"test:e2e": "scripts/run-e2e.sh"
+		"test:e2e": "chmod +x scripts/run-e2e.sh && scripts/run-e2e.sh"
 	},
 	"engines": {
 		"node": ">=22"

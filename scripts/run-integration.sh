@@ -65,6 +65,23 @@ if [ -n "${CI:-}" ]; then
   set -a && source cicd/.env.app.ci && set +a
 else
   set -a && source .env && set +a
+
+  # TODO: split local dev and local test environments at some point
+  echo "Wiping database..."
+
+  # skip prisma migrations, otherwise it will try to reapply all of them and crash
+  # because the tables/columns/constraints already exist, we're just removing rows
+  docker exec supabase-db psql -U supabase_admin -d postgres -c "
+    DO \$\$
+    DECLARE r RECORD;
+    BEGIN
+      FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != '_prisma_migrations')
+      LOOP
+        EXECUTE format('TRUNCATE TABLE public.%I RESTART IDENTITY CASCADE', r.tablename);
+      END LOOP;
+    END
+    \$\$;
+  "
 fi
 
 # ---------------------------------------------------------------------------
@@ -74,7 +91,7 @@ echo "Building app..."
 npm run build
 
 echo "Starting preview server..."
-npm run preview &
+npm run start:preview &
 SERVER_PID=$!
 
 for i in $(seq 1 15); do
