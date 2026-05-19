@@ -2,24 +2,23 @@ import { describe, it, expect, vi } from 'vitest';
 import { prisma } from '$lib/database';
 import { getPublicationById, getAllPublications } from '$lib/database/db';
 import Fuse from 'fuse.js';
+import { createUniqueMaterial } from '../utility/publicationsUtility.ts';
+import { createUniqueUser } from '../utility/users.ts';
+
+const mockUser = await createUniqueUser()
+const mockPublication = await createUniqueMaterial(mockUser.id);
 
 describe('getPublicationById', () => {
 	it('should return a publication with the given id', async () => {
-		const mockPublication = {
-			id: 1,
-			title: 'Test Publication',
-			tags: [],
-			publisher: {},
-		};
 		prisma.publication.findUnique = vi
 			.fn()
 			.mockResolvedValue(mockPublication);
 
-		const result = await getPublicationById(1);
+		const result = await getPublicationById(mockPublication.id);
 
 		expect(result).toEqual(mockPublication);
 		expect(prisma.publication.findUnique).toHaveBeenCalledWith({
-			where: { id: 1 },
+			where: { id: mockPublication.id },
 			include: {
 				usedInCourse: true,
 				tags: true,
@@ -55,7 +54,14 @@ describe('getPublicationById', () => {
 				materials: {
 					include: {
 						publication: true,
-						files: true,
+						files: {
+							select: {
+								path: true,
+								title: true,
+								type: true,
+							},
+						},
+						fileURLs: true,
 					},
 				},
 				circuit: {
@@ -84,6 +90,15 @@ describe('getPublicationById', () => {
 								next: true,
 							},
 						},
+					},
+				},
+				course: {
+					select: {
+						id: true,
+						courseName: true,
+						learningObjectives: true,
+						prerequisites: true,
+						educationalLevel: true,
 					},
 				},
 			},
@@ -93,11 +108,12 @@ describe('getPublicationById', () => {
 	it('should return null if publication is not found', async () => {
 		prisma.publication.findUnique = vi.fn().mockResolvedValue(null);
 
-		const result = await getPublicationById(999);
+		const id = 45674598;
+		const result = await getPublicationById(id);
 
 		expect(result).toBeNull();
 		expect(prisma.publication.findUnique).toHaveBeenCalledWith({
-			where: { id: 999 },
+			where: { id: id },
 			include: {
 				usedInCourse: true,
 				tags: true,
@@ -133,7 +149,14 @@ describe('getPublicationById', () => {
 				materials: {
 					include: {
 						publication: true,
-						files: true,
+						files: {
+							select: {
+								path: true,
+								title: true,
+								type: true,
+							},
+						},
+						fileURLs: true,
 					},
 				},
 				circuit: {
@@ -164,6 +187,15 @@ describe('getPublicationById', () => {
 						},
 					},
 				},
+				course: {
+					select: {
+						id: true,
+						courseName: true,
+						learningObjectives: true,
+						prerequisites: true,
+						educationalLevel: true,
+					},
+				},
 			},
 		});
 	});
@@ -171,19 +203,20 @@ describe('getPublicationById', () => {
 
 describe('getAllPublications', () => {
 	it('should return publications filtered by publisher IDs', async () => {
-		const mockPublications = [
-			{ id: 1, title: 'Test Publication', publisherId: '1', tags: [] },
-		];
+		const mockPublications = [mockPublication]
 		prisma.publication.findMany = vi
 			.fn()
 			.mockResolvedValue(mockPublications);
 
-		const result = await getAllPublications(['1'], '');
+		const result = await getAllPublications([mockUser.id], '', 'Most Liked');
 
 		expect(result).toEqual(mockPublications);
 		expect(prisma.publication.findMany).toHaveBeenCalledWith({
 			where: {
-				AND: [{ publisherId: { in: ['1'] } }],
+				AND: [{ publisherId: { in: [mockUser.id] } }],
+			},
+			orderBy: {
+				likes: 'desc',
 			},
 			include: {
 				tags: true,
@@ -191,7 +224,10 @@ describe('getAllPublications', () => {
 				circuit: true,
 				coverPic: true,
 				publisher: {
-					include: {
+					select: {
+						firstName: true,
+						lastName: true,
+						username: true,
 						profilePic: true,
 					},
 				},
@@ -218,7 +254,7 @@ describe('getAllPublications', () => {
 			.fn()
 			.mockResolvedValue(mockPublications);
 
-		const result = await getAllPublications([], 'Test');
+		const result = await getAllPublications([], 'Test', 'Most Liked');
 
 		const searcher = new Fuse(mockPublications, {
 			keys: [
@@ -238,13 +274,19 @@ describe('getAllPublications', () => {
 			where: {
 				AND: [],
 			},
+			orderBy: {
+				likes: 'desc',
+			},
 			include: {
 				tags: true,
 				materials: true,
 				circuit: true,
 				coverPic: true,
 				publisher: {
-					include: {
+					select: {
+						firstName: true,
+						lastName: true,
+						username: true,
 						profilePic: true,
 					},
 				},
@@ -265,12 +307,15 @@ describe('getAllPublications', () => {
 			.fn()
 			.mockResolvedValue(mockPublications);
 
-		const result = await getAllPublications([], '');
+		const result = await getAllPublications([], '', 'Most Liked');
 
 		expect(result).toEqual(mockPublications);
 		expect(prisma.publication.findMany).toHaveBeenCalledWith({
 			where: {
 				AND: [],
+			},
+			orderBy: {
+				likes: 'desc',
 			},
 			include: {
 				tags: true,
@@ -278,7 +323,10 @@ describe('getAllPublications', () => {
 				circuit: true,
 				coverPic: true,
 				publisher: {
-					include: {
+					select: {
+						firstName: true,
+						lastName: true,
+						username: true,
 						profilePic: true,
 					},
 				},

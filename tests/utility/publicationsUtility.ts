@@ -114,7 +114,7 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 		materialType,
 		timeEstimate,
 		theoryPractice,
-		course: 0,
+		course: null,
 		isDraft: false
 	}
 
