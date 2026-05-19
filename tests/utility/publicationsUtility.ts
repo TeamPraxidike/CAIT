@@ -82,6 +82,13 @@ export async function createMaterialData(userId: string): Promise<MaterialForm> 
 			delete: [],
 			edit: []
 		},
+		changeLog: {
+			globalComment: generateRandomString(),
+			fileComments: {
+				added: {},
+				deleted: {}
+			}
+		},
 		coverPic: null
 	}
 }
@@ -107,6 +114,7 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 		materialType,
 		timeEstimate,
 		theoryPractice,
+		course: 0,
 		isDraft: false
 	}
 
