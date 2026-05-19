@@ -15,6 +15,7 @@
 	import { downloadFileFromSupabase } from '$lib/util/file';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import CourseButton from './courses/CourseButton.svelte';
+	import CopyrightPopup from './CopyrightPopup.svelte';
 
 	let supabaseClient = page.data.supabase;
 
@@ -35,6 +36,8 @@
 	let prerequisites: string[] = existingCourse?.prerequisites ?? [];
 	let copyright: string = existingCourse?.copyright ?? "";
 	let coverPic: File | undefined = undefined;
+
+	let popupOpen = false;
 
 	const toastStore = getToastStore();
 
@@ -91,6 +94,16 @@
 	});
 
 	export let showCourseProgressRadial = false;
+
+	let licenseValue = '';
+	let customLicenseText = '';
+
+	function handleApply(event: CustomEvent) {
+		licenseValue = event.detail.value;
+		customLicenseText = event.detail.customLicenseText;
+		popupOpen = false;
+		copyright = licenseValue
+  	}
 </script>
 
 <ConfirmDeleteCourse bind:this={confirmDelete} />
@@ -160,20 +173,39 @@
 		</div>
 
 		<div class="flex flex-row justify-start items-center gap-10 mb-4">
-		<div class="space-y-3">
-			<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
-			<CourseLevel bind:label={level} />
-		</div>
-		<div>
-			<label for="copyright" class="block font-medium">Copyright <span class="text-error-300">*</span></label>
-			<input type="text"
-				   name="copyright"
-				   bind:value={copyright}
-				   on:keydown={handleInputEnter}
-				   required
-				   class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
-			/>
-		</div>
+			<div class="space-y-3">
+				<label for="Level" class="block font-medium">Education Level<span class="text-error-300">*</span></label>
+				<CourseLevel bind:label={level} />
+			</div>
+			<!-- <div>
+				<label for="copyright" class="block font-medium">Copyright <span class="text-error-300">*</span></label>
+				<input type="text"
+					name="copyright"
+					bind:value={copyright}
+					on:keydown={handleInputEnter}
+					required
+					class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+				/>
+			</div> -->
+
+			<div class="w-full md:w-1/2	">
+				<label for="copyright md-2" class="block font-medium">Copyright License (<a
+					href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
+					class="text-tertiary-700"> Check here how this applies to you</a>):</label>
+				<div class="flex flex-row ">
+					<input type="text" name="copyright" bind:value={copyright} on:keydown={handleInputEnter} 
+					required
+						placeholder="Enter License"
+						class="mt-1 mr-1 rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
+					
+						<button class="inline-flex items-center shrink-0 p-2 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 dark:text-surface-50" on:click={()=> (popupOpen = true)}> License picker </button>
+					{#if popupOpen}
+						<CopyrightPopup on:close={()=>(popupOpen = false)} on:apply={handleApply}/>
+						
+					{/if}
+				</div>
+
+			</div>
 		</div>
 
 		<MantainersEditBar publisher={publisher} bind:searchableUsers={searchableUsers} users={users}
