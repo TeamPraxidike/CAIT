@@ -28,42 +28,7 @@
 		}
   	}
 
-// let licenseValue = 'mit';
 
-//   const licenses = [
-//     {
-//       value: 'mit',
-//       label: 'MIT',
-//       summary: 'Very permissive. Good default for open source.',
-//       allowsCommercial: true,
-//       requiresAttribution: true,
-//       requiresCopyleft: false,
-//       description:
-//         'Anyone can use, modify, and distribute the software, including commercially, as long as the copyright and license notice stay with it.'
-//     },
-//     {
-//       value: 'apache-2.0',
-//       label: 'Apache 2.0',
-//       summary: 'Permissive with explicit patent protection.',
-//       allowsCommercial: true,
-//       requiresAttribution: true,
-//       requiresCopyleft: false,
-//       description:
-//         'Allows use, modification, and distribution, including commercial use. It also includes an explicit patent license.'
-//     },
-//     {
-//       value: 'gpl-3.0',
-//       label: 'GPL-3.0',
-//       summary: 'Strong copyleft. Derivatives must stay open.',
-//       allowsCommercial: true,
-//       requiresAttribution: true,
-//       requiresCopyleft: true,
-//       description:
-//         'You can use and distribute it, but modified or combined distributions generally need to remain under GPL-compatible terms.'
-//     }
-// ]
-//   $: selectedLicense =
-//     licenses.find((item) => item.value === licenseValue) ?? licenses[0];
 </script>
 
 <div class="flex flex-col gap-6 mt-3">
@@ -73,47 +38,6 @@
 		<div class="flex flex-col md:flex-row col-span-full items-center gap-10">
 			<TimeEstimate bind:totalMinutes={dataMaterial.estimate}/>
 			<div class="w-full md:w-1/2	">
-			
-<!-- <label class="block space-y-2">
-  <span class="text-sm font-medium">License</span>
-
-  <select
-    bind:value={licenseValue}
-    class="w-64 rounded-md border bg-white px-3 py-2 text-sm"
-  >
-    {#each licenses as item}
-      <option value={item.value}>{item.label}</option>
-    {/each}
-  </select>
-</label>
-
-<div class="mt-4 w-96 rounded-lg border bg-white p-4 space-y-3">
-  <div>
-    <h3 class="text-sm font-semibold">{selectedLicense.label}</h3>
-    <p class="text-sm text-gray-600">{selectedLicense.summary}</p>
-  </div>
-
-  <p class="text-sm text-gray-700">
-    {selectedLicense.description}
-  </p>
-
-  <div class="grid grid-cols-1 gap-2 text-sm">
-    <div class="flex items-center justify-between rounded border px-3 py-2">
-      <span>Commercial use</span>
-      <span>{selectedLicense.allowsCommercial ? 'Yes' : 'No'}</span>
-    </div>
-
-    <div class="flex items-center justify-between rounded border px-3 py-2">
-      <span>Attribution required</span>
-      <span>{selectedLicense.requiresAttribution ? 'Yes' : 'No'}</span>
-    </div>
-
-    <div class="flex items-center justify-between rounded border px-3 py-2">
-      <span>Copyleft</span>
-      <span>{selectedLicense.requiresCopyleft ? 'Yes' : 'No'}</span>
-    </div>
-  </div>
-</div> -->
 				<label for="copyright md-2" class="block font-medium">Copyright License (<a
 					href="https://www.tudelft.nl/library/support/copyright#c911762" target=”_blank”
 					class="text-tertiary-700"> Check here how this applies to you</a>):</label>

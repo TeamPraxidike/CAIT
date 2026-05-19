@@ -16,6 +16,7 @@
 		allowsDerivatives: boolean;
 		requiresSameLicense: boolean;
 		waivesRights: boolean;
+		isDefault: boolean;
 	};
 
 	type OwnershipStatus = 'yes' | 'no' | null;
@@ -23,14 +24,15 @@
 	const licenses: LicenseOption[] = [
 		{
 			value: 'CC BY',
-			label: 'CC BY',
+			label: 'CC BY (Recommended by TU Delft)',
 			summary: 'Attribution required. Commercial use and adaptations allowed.',
 			description:
 				'Others may copy, distribute, remix, adapt, and build upon the work, including for commercial purposes, as long as they give appropriate credit.',
 			allowsCommercial: true,
 			allowsDerivatives: true,
 			requiresSameLicense: false,
-			waivesRights: false
+			waivesRights: false,
+			isDefault: true,
 		},
 		{
 			value: 'CC BY-SA',
@@ -42,7 +44,8 @@
 			allowsCommercial: true,
 			allowsDerivatives: true,
 			requiresSameLicense: true,
-			waivesRights: false
+			waivesRights: false,
+			isDefault: false,
 		},
 		{
 			value: 'CC BY-ND',
@@ -54,7 +57,8 @@
 			allowsCommercial: true,
 			allowsDerivatives: false,
 			requiresSameLicense: false,
-			waivesRights: false
+			waivesRights: false,
+			isDefault: false,
 		},
 		{
 			value: 'CC BY-NC',
@@ -65,7 +69,8 @@
 			allowsCommercial: false,
 			allowsDerivatives: true,
 			requiresSameLicense: false,
-			waivesRights: false
+			waivesRights: false,
+			isDefault: false,
 		},
 		{
 			value: 'CC BY-NC-SA',
@@ -77,7 +82,8 @@
 			allowsCommercial: false,
 			allowsDerivatives: true,
 			requiresSameLicense: true,
-			waivesRights: false
+			waivesRights: false,
+			isDefault: false,
 		},
 		{
 			value: 'CC BY-NC-ND',
@@ -89,7 +95,8 @@
 			allowsCommercial: false,
 			allowsDerivatives: false,
 			requiresSameLicense: false,
-			waivesRights: false
+			waivesRights: false,
+			isDefault: false,
 		}
 	];
 
@@ -98,7 +105,7 @@
 	let ownershipStatus: OwnershipStatus = null;
 	let customMode = false;
 	let customLicenseText = '';
-	let selectedLicenseValue = '';
+	let selectedLicenseValue = 'CC BY';
 
 	function resetState() {
 		const hasKnownInitialValue = initialValue && predefinedValues.has(initialValue);
@@ -123,14 +130,14 @@
 					imageSrc: '/images/copyright/copyright_creative_commons.jpg',
 					imageAlt: 'Reference image for users who own the material',
 					infoHref: 'https://www.tudelft.nl/library/support/copyright',
-					infoLabel: 'More info about licence usage at the TU Delft'
+					infoLabel: 'Click here for more info about licenses'
 				}
 			: ownershipStatus === 'no'
 				? {
 						imageSrc: '/images/copyright/copyright_combinations.png',
 						imageAlt: 'Reference image for users who do not own the material',
 						infoHref: 'https://meta.wikimedia.org/wiki/Open_Content_-_A_Practical_Guide_to_Using_Creative_Commons_Licences/The_Creative_Commons_licencing_scheme#Mixing_SA_material_with_Open_Content_under_different_licences_%E2%80%93_the_licence_compatibility_problem',
-						infoLabel: 'More info about license compatability'
+						infoLabel: 'Click here for more info about licenses'
 					}
 				: null;
 
@@ -250,12 +257,12 @@
 									<h3 class="text-sm font-semibold text-gray-900">
 										License selection
 									</h3>
-									<p class="mt-1 text-sm text-gray-600">
+									<!-- <p class="mt-1 text-sm text-gray-600">
 										Ownership status:
 										<span class="font-medium text-gray-900">
 											{ownershipStatus === 'yes' ? 'You own the material' : 'You do not own the material'}
 										</span>
-									</p>
+									</p> -->
 								</div>
 
 								<button
@@ -382,8 +389,14 @@
 						{#if ownershipReference}
 							<aside class="rounded-xl border border-gray-200 bg-white p-4">
 								<h3 class="text-sm font-semibold text-gray-900">Reference</h3>
-
-								<div class="mt-3 overflow-hidden rounded-xl border border-gray-200 bg-surface-50 p-2">
+								<a
+									href={ownershipReference.infoHref}
+									target="_blank"
+									rel="noreferrer"
+									class="mt-3 inline-flex text-lg font-medium text-blue-600 hover:underline ">
+									{ownershipReference.infoLabel}
+								</a>
+								<div class="mt-3 overflow-hidden  bg-surface-50 p-2">
 									<a
 										href={ownershipReference.imageSrc}
 										target="_blank"
@@ -392,29 +405,31 @@
 										<img
 											src={ownershipReference.imageSrc}
 											alt={ownershipReference.imageAlt}
-											class="w-full rounded-xl object-contain bg-white" />
+											class="w-full  object-contain bg-white" />
 									</a>
 								</div>
 								<p class="mt-3 text-sm text-gray-600">
 									(click to enlarge)
 								</p>
 								{#if ownershipStatus === 'yes'}
-									<p class="mt-3 text-sm text-red-600">
+									<p class="mt-3 text-sm ">
 										<!-- Creative Commons licenses by Voter CC BY-SA. -->
-										 TODO: PUT THE CORRECT LICENSE INFO HERE
+										 <a href="https://foter.com/blog/how-to-attribute-creative-commons-photos/" class="mt-3 inline-flex  font-medium text-blue-600 hover:underline ">Creative Commons licenses
+										 </a>
+										 by Voter
+										 <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="mt-3 inline-flex  font-medium text-blue-600 hover:underline ">CC BY-SA
+										 </a>
 									</p>
 								{:else}
-									<p class="mt-3 text-sm text-red-600">
-										 TODO: PUT THE CORRECT LICENSE INFO HERE
+									<p class="mt-3 text-sm ">
+										 <a href="https://wikimedia.de/w/images.homepage/b/ba/Open_Content_A_Practical_Guide_to_Using_Open_Content_Licences_web.pdf" class="mt-3 inline-flex  font-medium text-blue-600 hover:underline ">A Practical Guide to Using Open Content Licences
+										 </a>
+										 by Markus Büsges, leomaria designbüro
+										 <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="mt-3 inline-flex  font-medium text-blue-600 hover:underline ">CC BY-SA
+										 </a>
 									</p>
 								{/if}
-								<a
-									href={ownershipReference.infoHref}
-									target="_blank"
-									rel="noreferrer"
-									class="mt-3 inline-flex text-sm font-medium text-blue-600 hover:underline">
-									{ownershipReference.infoLabel}
-								</a>
+								
 							</aside>
 						{/if}
 					</div>
