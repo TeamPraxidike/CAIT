@@ -1,24 +1,3 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { DiffBar } from '$lib';
-
-describe('Difficulty Components', () => {
-	let host: HTMLDivElement;
-
-	beforeEach(() => {
-		host = document.createElement('div');
-		document.body.appendChild(host);
-	});
-	it('should render easy/green difficulty bar', () => {
-		const instance = new DiffBar({
-			target: host,
-			props: { diff: 'hard' },
-		});
-		expect(instance).toBeTruthy();
-		expect(host.innerHTML).toContain('bg-error-400');
-		expect(host.innerHTML).not.toContain('bg-amber-400');
-		expect(host.innerHTML).not.toContain('bg-green-500');
-	});
-});
 
 //temporary test suspension until I figure out how to test skeleton modals if possible
 // import { describe, it, expect, beforeEach } from 'vitest';

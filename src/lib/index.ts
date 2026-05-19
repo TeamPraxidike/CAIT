@@ -17,7 +17,6 @@ import Section from '$lib/components/generic/Section.svelte';
 import TheoryAppBar from '$lib/components/TheoryAppBar.svelte';
 import PublicationCard from '$lib/components/PublicationCard.svelte';
 import Comment from '$lib/components/Comment.svelte';
-import Filter from '$lib/components/Filter.svelte';
 import CircuitComponent from '$lib/components/circuits/components/CircuitComponent.svelte';
 import Download from '$lib/components/generic/Download.svelte';
 import HorizontalScroll from '$lib/components/HorizontalScroll.svelte';
@@ -63,7 +62,6 @@ export {
 	Footer,
 	Section,
 	lorem,
-	Filter,
 	CircuitComponent,
 	AddInteractionForm,
 	UsedInCourse,
