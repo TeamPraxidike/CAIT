@@ -2,7 +2,7 @@ import { createUniqueUser } from './users';
 import { createUniqueMaterial, generateRandomString, randomEnumValue } from './publicationsUtility';
 import { createCourse, type createCourseData, linkCourseToPublication } from '$lib/database/courses';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
-import { Level } from '@prisma/client';
+let Level = ["Bachelor", "Master", "PhD"]
 
 export async function publicationsWithCourses(numPublications: number = 5) {
 	const user = await createUniqueUser();
@@ -42,7 +42,8 @@ export function generateCourseData(creatorID: string): createCourseData{
 		courseName: generateRandomString(10),
 		copyright: generateRandomString(10),
 		maintainers: [],
-		creatorId: creatorID
+		creatorId: creatorID,
+		coverPic: null
 	};
 }
 

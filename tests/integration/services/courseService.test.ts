@@ -14,6 +14,7 @@ describe('Courses CRUD', () => {
 
 	it('should add one course successfully', async () => {
 		const user = await createUniqueUser();
+		expect(user).toBeDefined();
 		const course = await createRandomCourse(user.id);
 		expect(course).toBeDefined();
 	});
