@@ -219,7 +219,7 @@ export async function createMaterialPublication(
 		timeEstimate: number;
 		theoryPractice: number;
 		isDraft: boolean;
-		course: number;
+		course: number|null;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
