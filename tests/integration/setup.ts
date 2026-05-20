@@ -64,4 +64,4 @@ export async function resetTagsTable() {
 	}
 }
 
-export const testingUrl = 'http://localhost:4173/api';
+export const apiTestingUrl = 'http://localhost:4173/api';

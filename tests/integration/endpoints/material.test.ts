@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { resetMaterialTable, testingUrl } from '../setup';
+import { resetMaterialTable, apiTestingUrl } from '../setup';
 import { createUniqueUser } from '../../utility/users';
 import { createMaterialData, createUniqueMaterial } from '../../utility/publicationsUtility';
 import type { User } from '$lib/database/user';
@@ -14,7 +14,7 @@ it('should be AEY', () => {
 describe('Materials', async () => {
     describe('[GET] /material/:id', () => {
         it('should respond with 404 if the publication of type material does not exist', async () => {
-            const response = await fetch(`${testingUrl}/material/8534853`, {
+            const response = await fetch(`${apiTestingUrl}/material/8534853`, {
                 method: 'GET',
             });
             expect(response.status).toBe(404);
@@ -24,7 +24,7 @@ describe('Materials', async () => {
         });
 
         it('should respond with 400 if the id is < 0', async () => {
-            const response = await fetch(`${testingUrl}/material/-1`, {
+            const response = await fetch(`${apiTestingUrl}/material/-1`, {
                 method: 'GET',
             });
             expect(response.status).toBe(400);
@@ -34,7 +34,7 @@ describe('Materials', async () => {
         });
 
         it('should respond with 400 if the id is = 0', async () => {
-            const response = await fetch(`${testingUrl}/material/0`, {
+            const response = await fetch(`${apiTestingUrl}/material/0`, {
                 method: 'GET',
             });
             expect(response.status).toBe(400);
@@ -44,7 +44,7 @@ describe('Materials', async () => {
         });
 
         it('should respond with 400 if the id is malformed', async () => {
-            const response = await fetch(`${testingUrl}/material/yoan`, {
+            const response = await fetch(`${apiTestingUrl}/material/yoan`, {
                 method: 'GET',
             });
             expect(response.status).toBe(400);
@@ -58,7 +58,7 @@ describe('Materials', async () => {
             const material = await createUniqueMaterial(user.id);
 
             const response = await fetch(
-                `${testingUrl}/material/${material.publicationId}`,
+                `${apiTestingUrl}/material/${material.publicationId}`,
                 { method: 'GET' },
             );
             expect(response.status).toBe(200);
@@ -81,7 +81,7 @@ describe('Materials', async () => {
             const user = await createUniqueUser();
             await createUniqueMaterial(user.id);
 
-            const response = await fetch(`${testingUrl}/material`, { method: 'GET' });
+            const response = await fetch(`${apiTestingUrl}/material`, { method: 'GET' });
             expect(response.status).toBe(200);
 
             const responseBody = await response.json();
@@ -174,7 +174,7 @@ describe('Materials', async () => {
 
     describe('[DELETE] /material/:id', () => {
         it('should respond with 400 if the id is < 0', async () => {
-            const response = await fetch(`${testingUrl}/material/-1`, {
+            const response = await fetch(`${apiTestingUrl}/material/-1`, {
                 method: 'DELETE',
             });
             expect(response.status).toBe(400);
@@ -260,7 +260,7 @@ describe('Materials', async () => {
 
 
             const response = await fetch(
-                `${testingUrl}/material/${material.publication.id}`,
+                `${apiTestingUrl}/material/${material.publication.id}`,
                 {
                     method: 'PUT',
                     headers: {
@@ -296,7 +296,7 @@ describe('Materials', async () => {
             editData.metaData.course = NaN;
 
             const response = await fetch(
-                `${testingUrl}/material/${material.publication.id}`,
+                `${apiTestingUrl}/material/${material.publication.id}`,
                 {
                     method: 'PUT',
                     headers: {

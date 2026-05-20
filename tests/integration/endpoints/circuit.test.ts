@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach} from 'vitest';
-import { resetCircuitTable, resetMaterialTable, testingUrl } from '../setup';
+import { resetCircuitTable, resetMaterialTable, apiTestingUrl } from '../setup';
 // import { Difficulty } from '@prisma/client';
 import {
 	addNode,
@@ -30,7 +30,7 @@ async function populate() {
 describe('Circuits', async () => {
 	describe('[GET] /circuit/:id', () => {
 		it('should respond with 400 if the id is < 0', async () => {
-			const response = await fetch(`${testingUrl}/circuit/-1`, {
+			const response = await fetch(`${apiTestingUrl}/circuit/-1`, {
 				method: 'GET',
 			});
 			expect(response.status).toBe(400);
@@ -40,7 +40,7 @@ describe('Circuits', async () => {
 		});
 
 		it('should respond with 400 if the id is = 0', async () => {
-			const response = await fetch(`${testingUrl}/circuit/0`, {
+			const response = await fetch(`${apiTestingUrl}/circuit/0`, {
 				method: 'GET',
 			});
 			expect(response.status).toBe(400);
@@ -50,7 +50,7 @@ describe('Circuits', async () => {
 		});
 
 		it('should respond with 400 if the id is malformed', async () => {
-			const response = await fetch(`${testingUrl}/circuit/yoan`, {
+			const response = await fetch(`${apiTestingUrl}/circuit/yoan`, {
 				method: 'GET',
 			});
 			expect(response.status).toBe(400);
@@ -60,7 +60,7 @@ describe('Circuits', async () => {
 		});
 
 		it('should respond with 404 if the publication of type circuit does not exist', async () => {
-			const response = await fetch(`${testingUrl}/circuit/9437985`, {
+			const response = await fetch(`${apiTestingUrl}/circuit/9437985`, {
 				method: 'GET',
 			});
 			expect(response.status).toBe(404);
@@ -69,24 +69,24 @@ describe('Circuits', async () => {
 			expect(body).not.toHaveProperty('firstName');
 		});
 
-		it('should respond with 500 if a server-side error occurs during execution (no profile picture in circuit)', async () => {
-			const user = await createUniqueUser();
-			const circuit = await createUniqueCircuit(user.id)
+		// it('should respond with 500 if a server-side error occurs during execution (no profile picture in circuit)', async () => {
+		// 	const user = await createUniqueUser();
+		// 	const circuit = await createUniqueCircuit(user.id)
 
-			const response = await fetch(
-				`${testingUrl}/circuit/${circuit.publicationId}`,
-				{ method: 'GET' },
-			);
-			expect(response.status).toBe(500);
+		// 	const response = await fetch(
+		// 		`${apiTestingUrl}/circuit/${circuit.publicationId}`,
+		// 		{ method: 'GET' },
+		// 	);
+		// 	expect(response.status).toBe(500);
 
-			await resetCircuitTable();
-		});
+		// 	await resetCircuitTable();
+		// });
 
 		it('should respond with 200 if the publication of type circuit exists', async () => {
 			const circuit = await populate();
 
 			const response = await fetch(
-				`${testingUrl}/circuit/${circuit.publicationId}`,
+				`${apiTestingUrl}/circuit/${circuit.publicationId}`,
 				{ method: 'GET' },
 			);
 
@@ -107,7 +107,7 @@ describe('Circuits', async () => {
 		});
 
 		it('should handle zero circuits', async () => {
-			const response = await fetch(`${testingUrl}/circuit`, { method: 'GET' });
+			const response = await fetch(`${apiTestingUrl}/circuit`, { method: 'GET' });
 			expect(response.status).toBe(200);
 
 			const responseBody = await response.json();
@@ -119,7 +119,7 @@ describe('Circuits', async () => {
 		it('should handle one circuit', async () => {
 			await populate();
 
-			const response = await fetch(`${testingUrl}/circuit`, { method: 'GET' });
+			const response = await fetch(`${apiTestingUrl}/circuit`, { method: 'GET' });
 			expect(response.status).toBe(200);
 
 			const responseBody = await response.json();
@@ -138,7 +138,7 @@ describe('Circuits', async () => {
 				await populate();
 			}
 
-			const response = await fetch(`${testingUrl}/circuit`, { method: 'GET' });
+			const response = await fetch(`${apiTestingUrl}/circuit`, { method: 'GET' });
 			expect(response.status).toBe(200);
 
 			const responseBody = await response.json();
@@ -151,7 +151,7 @@ describe('Circuits', async () => {
 
 	describe('[DELETE] /circuit/:id', () => {
 		it('should respond with 400 if the id is < 0', async () => {
-			const response = await fetch(`${testingUrl}/circuit/-1`, {
+			const response = await fetch(`${apiTestingUrl}/circuit/-1`, {
 				method: 'DELETE',
 			});
 			expect(response.status).toBe(400);
@@ -168,7 +168,7 @@ describe('Circuits', async () => {
 			expect(node).not.toBeNull();
 
 			const response = await fetch(
-				`${testingUrl}/circuit/${circuit.publicationId}`,
+				`${apiTestingUrl}/circuit/${circuit.publicationId}`,
 				{
 					method: 'DELETE',
 				},

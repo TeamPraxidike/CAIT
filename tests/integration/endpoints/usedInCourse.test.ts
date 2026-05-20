@@ -3,7 +3,7 @@ import {
 	addPublicationToUsedInCourse,
 	prisma,
 } from '$lib/database';
-import { testingUrl } from '../setup';
+import { apiTestingUrl } from '../setup';
 import { createUniqueUser } from '../../utility/users';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
 import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
@@ -15,7 +15,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 			const publication = await createUniqueMaterial(user.id);
 
 			const response = await fetch(
-				`${testingUrl}/user/${user.id}/use-in-course/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/use-in-course/${publication.publicationId}`,
 				{
 					method: 'POST',
 					headers: {
@@ -35,7 +35,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 		expect(response.status).toBe(200);
 
 		const response2 = await fetch(
-			`${testingUrl}/publication/${publication.publicationId}/use-in-course`,
+			`${apiTestingUrl}/publication/${publication.publicationId}/use-in-course`,
 		);
 		expect(response2.status).toBe(200);
 
@@ -48,7 +48,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 
 	it('should return 404 when user does not exist', async () => {
 		const response = await fetch(
-			`${testingUrl}/user/${uuid()}/use-in-course/${34567890}`,
+			`${apiTestingUrl}/user/${uuid()}/use-in-course/${34567890}`,
 			{
 				method: 'POST',
 			},
@@ -62,7 +62,7 @@ describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 		const user = await createUniqueUser();
 
 		const response = await fetch(
-			`${testingUrl}/user/${user.id}/use-in-course/${34567890}`,
+			`${apiTestingUrl}/user/${user.id}/use-in-course/${34567890}`,
 			{
 				method: 'POST',
 			},
@@ -79,14 +79,14 @@ describe('[GET] /publication/{publicationId}/used-in-course', () => {
 		const publication = await createUniqueMaterial(user.id);
 
 		const response = await fetch(
-			`${testingUrl}/publication/${publication.publicationId}/use-in-course`,
+			`${apiTestingUrl}/publication/${publication.publicationId}/use-in-course`,
 		);
 		expect(response.status).toBe(204);
 	});
 
 	it('should return 404 when no publication', async () => {
 		const response = await fetch(
-			`${testingUrl}/publication/${456787}/use-in-course`,
+			`${apiTestingUrl}/publication/${456787}/use-in-course`,
 		);
 		expect(response.status).toBe(404);
 	});
@@ -97,14 +97,14 @@ describe('[GET] /user/[id]/use-in-course', () => {
 		const user = await createUniqueUser();
 
 		const response = await fetch(
-			`${testingUrl}/user/${user.id}/use-in-course`,
+			`${apiTestingUrl}/user/${user.id}/use-in-course`,
 		);
 		expect(response.status).toBe(204);
 	});
 
 	it('should return 404 when no user', async () => {
 		const response = await fetch(
-			`${testingUrl}/user/${uuid()}/use-in-course`,
+			`${apiTestingUrl}/user/${uuid()}/use-in-course`,
 		);
 		expect(response.status).toBe(404);
 	});
@@ -126,7 +126,7 @@ describe('[GET] /user/[id]/use-in-course', () => {
 		);
 
 		const response = await fetch(
-			`${testingUrl}/user/${user.id}/use-in-course`,
+			`${apiTestingUrl}/user/${user.id}/use-in-course`,
 		);
 		expect(response.status).toBe(200);
 		const body = await response.json();
