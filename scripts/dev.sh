@@ -32,6 +32,7 @@ wait_healthy() {
   echo "Waiting for $service to be healthy..."
   for i in $(seq 1 60); do
     STATUS=$($COMPOSE ps $service --format '{{.Health}}' 2>/dev/null || echo "unknown")
+    # STATUS=$($COMPOSE ps $service --format '{{.Health}}' 2>/dev/null || $COMPOSE ps $service | grep -o healthy 2>/dev/null || echo "unknown")
     [ "$STATUS" = "healthy" ] && echo "$service is healthy." && return 0
     [ "$i" -eq 60 ] && echo "ERROR: $service not healthy (status: $STATUS)" && exit 1
     sleep 2
