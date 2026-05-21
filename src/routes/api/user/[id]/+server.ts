@@ -82,9 +82,9 @@ export async function DELETE({ params, locals }) {
 		});
 
 		return new Response(JSON.stringify(user), { status: 200 });
-	} catch (error) {
+	} catch (error:any) {
 		if (
-			error == "User not found"
+			error == "User not found" || error.code == "P2025"
 		) {
 			return new Response(JSON.stringify({ error: 'User not found' }), {
 				status: 404,

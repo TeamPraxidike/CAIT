@@ -26,10 +26,19 @@ export async function POST({ request }) {
 
 		if (error.code === 'P2002') {
 			return new Response(JSON.stringify('Email already exists'), {
-				status: 400,
+				status: 409,
 				statusText: 'Email already exists',
 			});
 		}
+
+		if (error instanceof TypeError) {
+			return new Response(JSON.stringify({ error: "Malformed request body"}), {
+				status: 400,
+				statusText: "Malformed Request"
+			})
+		}
+
+
 
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}

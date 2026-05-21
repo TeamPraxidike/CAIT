@@ -27,6 +27,14 @@ async function populate() {
 	return circuit;
 }
 
+
+// does the same as populate, but at a fraction of the cost (~10x faster)
+async function populateWithoutCoverPic() {
+	const user = await createUniqueUser()
+	const circuit = await createUniqueCircuit(user.id);
+	return circuit;
+}
+
 describe('Circuits', async () => {
 	describe('[GET] /circuit/:id', () => {
 		it('should respond with 400 if the id is < 0', async () => {
@@ -135,7 +143,7 @@ describe('Circuits', async () => {
 		it('should handle two or more (random number) circuits', async () => {
 			const randomNumber = Math.round(Math.random() * 8) + 2;
 			for (let i = 0; i < randomNumber; i++) {
-				await populate();
+				await populateWithoutCoverPic(); // doing this with coverpic times out the tests sinces putting the pic there takes ~1 second
 			}
 
 			const response = await fetch(`${apiTestingUrl}/circuit`, { method: 'GET' });
