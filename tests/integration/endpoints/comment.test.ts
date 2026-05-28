@@ -286,10 +286,9 @@ describe('COMMENT API', () => {
                 });
                 expect(delResponse.status).toBe(200);
                 
-                
-                const newComment = await createUniqueComment(user, material);
+                let newContent = generateRandomString();
 
-                const editComment = { metaData: { ...createCommentInputObject(newComment.user.id, newComment.publicationId, newComment.content),  } };
+                const editComment = { content: newContent, commentId: comment.id};
                 const resp = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
                     method: 'PUT',
                     headers: {
@@ -297,29 +296,101 @@ describe('COMMENT API', () => {
                     },
 				    body: JSON.stringify(editComment),
 			    });
-                expect(resp.status).toBe(400);
+                expect(resp.status).toBe(404);
             });
 
         });
     });
 
-    describe('/api/comment/publication', () =>{
-        describe('GET', () => {
-
-        });
-
-        describe('POST', () => {
-            
-        });
-    });
+    // describe('/api/comment/publication', () =>{
+    //     describe('GET', () => {
+    //         it("should 404 since this is not an endpoint", async () => {
+    //             const resp = await fetch(`${apiTestingUrl}/comment/publication`, {
+    //                 method: 'GET',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 },
+	// 		    });
+    //             expect(resp.status).toBe(404);
+    //         })
+    //     });
+    // });
 
     describe('/api/comment/publication/[publicationId]', () =>{
-        describe('GET', () => {
-
+        let user:User;
+        let material: MaterialWithPublicationNoFiles;
+        let comment:CommentWithRepliesAndLiked;
+        let randomContent:string;
+        beforeEach(async () => {
+            user = await createUniqueUser();
+            expect(user).toBeDefined();
+            material = await createUniqueMaterial(user.id);
+            expect(material).toBeDefined();
+            randomContent = generateRandomString();
+            const commentInput = createCommentInputObject(user.id, material.publicationId, randomContent);
+            let response = await fetch(`${apiTestingUrl}/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(commentInput),
+            });
+            expect(response.status).toBe(200);
+            comment = (await response.json());
         });
 
-        describe('POST', () => {
-            
+
+        describe('GET', () => {
+            it("should retrieve the comments with code 200", async () => {
+                const resp = await fetch(`${apiTestingUrl}/comment/publication/${material.publicationId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+			    });
+                expect(resp.status).toBe(200);
+                let comments = await resp.json();
+                expect(comments).toHaveLength(1);
+                
+                expect(comments[0]).toHaveProperty(
+                    'userId',
+                    user.id
+                )
+                expect(comments[0]).toHaveProperty(
+                    'publicationId',
+                    material.publicationId
+                )
+                expect(comments[0]).toHaveProperty(
+                    'content',
+                    randomContent
+                )
+            })
+
+            it("should 404 when retrieving non-existend publications", async () => {
+                const resp = await fetch(`${apiTestingUrl}/comment/publication/${material.publicationId+100000000000}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+			    });
+                
+                expect(resp.status).toBe(404);
+
+            });
+
+            it("should 200 and return an empty list if a publication has no comments", async () => {
+                
+                let material2 = await createUniqueMaterial(user.id);
+                const resp = await fetch(`${apiTestingUrl}/comment/publication/${material2.publicationId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+			    });
+                expect(resp.status).toBe(200);
+                let comments = await resp.json();
+                expect(comments).toHaveLength(0);
+            })
         });
     });
 });
