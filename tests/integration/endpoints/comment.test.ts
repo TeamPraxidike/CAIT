@@ -229,9 +229,11 @@ describe('COMMENT API', () => {
 
         describe('PUT', () => {
             it('should succesfully edit already existing comments', async () => {
-                const newComment = await createUniqueComment(user, material);
+                // const newComment = await createUniqueComment(user, material);
 
-                const editComment = { metaData: { ...createCommentInputObject(newComment.user.id, newComment.publicationId, newComment.content),  } };
+                let newContent = generateRandomString();
+                // const editComment = { metaData: { ...createCommentInputObject(newComment.user.id, newComment.publicationId, newComment.content),  } };
+                const editComment = { content: newContent, commentId: comment.id}
                 const resp = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
                     method: 'PUT',
                     headers: {
@@ -244,9 +246,36 @@ describe('COMMENT API', () => {
                 expect(newcomment).toHaveProperty("id", comment.id);
                 expect(newcomment).toHaveProperty("userId", comment.userId);
                 expect(newcomment).toHaveProperty("publicationId", comment.publicationId);
-                expect(newcomment).toHaveProperty("content", comment.content);
+                expect(newcomment).toHaveProperty("content", newContent);
+
+                let getResponse = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                expect(getResponse.status).toBe(200);
+                let responseComment = (await getResponse.json());
+
+                expect(responseComment.id).toBe(comment.id);
+                expect(responseComment.userId).toBe(comment.userId);
+                expect(responseComment.content).toBe(newContent);
 
             });
+
+            it('should make sure the commentid in the body equals commentid in the params', async () => {
+                let newContent = generateRandomString();
+                const editComment = { content: newContent, commentId: comment.id + 1}
+                const resp = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+				    body: JSON.stringify(editComment),
+			    });
+                const newcomment = await resp.json();
+                expect(resp.status).toBe(409);
+            })
 
             it('should fail gracefull when editing non-existing comments', async () => {
                 let delResponse = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
