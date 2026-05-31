@@ -198,7 +198,7 @@
 						placeholder="Enter License"
 						class="mt-1 mr-1 rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 					
-						<button class="inline-flex items-center shrink-0 p-2 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 dark:text-surface-50" on:click={()=> (popupOpen = true)}> License picker </button>
+						<button class="inline-flex items-center shrink-0 p-2 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 dark:text-surface-50" on:click={()=> (popupOpen = true)} type="button"> License picker </button>
 					{#if popupOpen}
 						<CopyrightPopup on:close={()=>(popupOpen = false)} on:apply={handleApply}/>
 						
