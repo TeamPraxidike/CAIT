@@ -3,9 +3,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	export let open = false;
 	export let initialValue = '';
-	export let initialCustomLicenseText = '';
 
 	type LicenseOption = {
 		value: string;
@@ -107,19 +105,6 @@
 	let customLicenseText = '';
 	let selectedLicenseValue = 'CC BY';
 
-	function resetState() {
-		const hasKnownInitialValue = initialValue && predefinedValues.has(initialValue);
-
-		ownershipStatus = null;
-		customMode = !!initialValue && !hasKnownInitialValue;
-		selectedLicenseValue = hasKnownInitialValue ? initialValue : '';
-		customLicenseText =
-			customMode ? initialValue : initialCustomLicenseText || '';
-	}
-
-	$: if (open) {
-		resetState();
-	}
 
 	$: selectedLicense =
 		licenses.find((item) => item.value === selectedLicenseValue) ?? null;
