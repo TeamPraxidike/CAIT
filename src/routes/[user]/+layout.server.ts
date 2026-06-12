@@ -1,6 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { error, redirect } from '@sveltejs/kit';
 import type { TGETuser } from '../api/user/[id]/+server';
+import { getUserMemberSince } from '$lib/database/user';
 
 /**
  * User is the slug in the parameter.
@@ -36,8 +37,11 @@ export const load: LayoutServerLoad = async ({
 		error(404, 'User not found');
 	}
 
+	const memberSince = await getUserMemberSince(user.user.id);
+
 	return {
 		user: user.user,
 		profilePic: user.profilePicData,
+		memberSince: memberSince ?? undefined,
 	};
 };

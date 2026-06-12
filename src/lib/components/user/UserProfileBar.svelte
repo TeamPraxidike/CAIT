@@ -3,6 +3,7 @@
     import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
     import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import ContactUser from './ContactUser.svelte';
+	import { formatMemberSince } from '$lib/util/date';
 
     export let user:TUserWithPostsAndProfilePic;
     if (!user) {
@@ -11,6 +12,7 @@
 
     export let userPhotoUrl: string;
     export let tabset: number;
+    export let memberSince: Date | undefined = undefined;
 
     const numPosts = user.posts.filter((x) => !x.isDraft).length
     const numDrafts = user.posts.filter((x) => x.isDraft).length
@@ -56,6 +58,9 @@
 
         <div class="hidden md:flex items-start flex-col gap-4 text-surface-700 dark:text-surface-200 ">
             <p class="lg:text-sm 2xl:text-base">Email: {user.email}</p>
+            {#if memberSince}
+                <p class="lg:text-sm 2xl:text-base text-surface-500 dark:text-surface-400">Member since {formatMemberSince(memberSince)}</p>
+            {/if}
             <hr class="w-11/12">
 
             {#if user.aboutMe !== ''}
@@ -112,6 +117,9 @@
     <div class="px-4 w-full dark:text-surface-200 flex flex-col items-stretch gap-4
                 md:hidden">
         <p>Email: {user.email}</p>
+        {#if memberSince}
+            <p class="text-sm text-surface-500 dark:text-surface-400">Member since {formatMemberSince(memberSince)}</p>
+        {/if}
         <p class="text-surface-700 dark:text-surface-400">
             {user.aboutMe}
         </p>
