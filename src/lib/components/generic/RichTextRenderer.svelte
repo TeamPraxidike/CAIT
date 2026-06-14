@@ -14,7 +14,7 @@
 -->
 <script lang="ts">
 	import { generateHTML } from '@tiptap/core';
-	import DOMPurify from 'dompurify';
+	import DOMPurify from 'isomorphic-dompurify';
 	import { getExtensions } from './tiptapExtensions';
 
 	// ── Props ──────────────────────────────────────────────────────────────
