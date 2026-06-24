@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
+	import ShareButton from '../ShareButton.svelte';
 	import { UserProp } from '$lib';
 
 	export let course: CourseWithMaintainersAndProfilePic | undefined;
@@ -50,12 +51,12 @@
 		alt="course"
 		class="w-full max-h-[400px] object-cover border rounded" />
 
-	<div
-		class="flex px-2 justify-center gap-x-4 gap-y-2 flex-wrap items-center
-                sm:flex-col sm:items-start
-                md:w-7/12 md:justify-start
-                xl:w-full">
+	<div class="flex w-full px-2 justify-between items-center gap-2">
 		<h2 class="text-lg md:text-xl">{courseName}</h2>
+		<ShareButton
+			path={`/courses/${encodeURIComponent(courseName)}`}
+			title={courseName}
+			style="flex items-center btn text-surface-500 px-2 py-1 border rounded-lg self-center" />
 	</div>
 	<hr class="w-11/12" />
 	<div class="flex items-start gap-2">
