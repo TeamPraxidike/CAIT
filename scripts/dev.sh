@@ -9,6 +9,7 @@ echo "\nRunning migrations..."
 npx prisma migrate dev                                                              # run the migrations
 #npx tsx ./scripts/seedFileChunkTable.ts
 npx tsx ./scripts/seedTriggers.ts && npx tsx ./scripts/publicSchemaRLSPolicies.ts   # auth-public user connection + pub schema policies
+#npx tsx ./scripts/seedTestData.ts
 #npx tsx ./scripts/seedFileChunkTable.ts
 
 
