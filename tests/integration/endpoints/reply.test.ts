@@ -35,6 +35,15 @@ describe('REPLY API', () => {
                 expect(stored).toHaveLength(1);
                 expect(stored[0]).toMatchObject({ userId: user.id, content });
             });
+
+            it('should respond with 404 when replying to a comment that does not exist', async () => {
+                const response = await json(
+                    'POST',
+                    '/reply',
+                    createReplyInputObject(user.id, 999999999, generateRandomString()),
+                );
+                expect(response.status).toBe(404);
+            });
         });
     });
 
@@ -70,12 +79,24 @@ describe('REPLY API', () => {
                 const getResponse = await json('GET', `/reply/${reply.id}`);
                 expect((await getResponse.json()).content).toBe(content);
             });
+
+            it('should respond with 404 when editing a reply that does not exist', async () => {
+                const response = await json('PUT', '/reply/999999999', {
+                    replyId: 999999999,
+                    content: generateRandomString(),
+                });
+                expect(response.status).toBe(404);
+            });
         });
 
         describe('DELETE', () => {
             it('should delete the reply with a 200 and then 404 on retrieval', async () => {
                 expect((await json('DELETE', `/reply/${reply.id}`)).status).toBe(200);
                 expect((await json('GET', `/reply/${reply.id}`)).status).toBe(404);
+            });
+
+            it('should respond with 404 when deleting a reply that does not exist', async () => {
+                expect((await json('DELETE', '/reply/999999999')).status).toBe(404);
             });
         });
     });
