@@ -38,7 +38,7 @@
 		{title}
 	</div>
 	<div class="break-words max-w-full">
-		<span class="font-medium">Description:</span> {description} <br>
+		<span class="font-medium">Description:</span> <span class="whitespace-pre-wrap">{description}</span> <br>
 	</div>
 
 	<!-- Tags -->
