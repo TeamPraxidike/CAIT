@@ -1,14 +1,27 @@
 import { describe, expect, it, beforeEach} from 'vitest';
 import { resetCircuitTable, resetMaterialTable, apiTestingUrl } from '../setup';
-// import { Difficulty } from '@prisma/client';
+import { Difficulty } from '@prisma/client';
+import type { User } from '@prisma/client';
 import {
 	addNode,
 	getMaterialByPublicationId,
 	prisma,
-	updateCircuitCoverPic, updateCoverPic
+	updateCoverPic
 } from '$lib/database';
+import {
+	getCircuitByPublicationId,
+	getAllCircuits,
+	updateCircuitByPublicationId,
+	getCircuitsContainingPublication,
+	deleteCircuitByPublicationId,
+} from '$lib/database/circuit';
 import { createUniqueUser } from '../../utility/users';
-import { createUniqueCircuit, createUniqueMaterial } from '../../utility/publicationsUtility';
+import {
+	createUniqueCircuit,
+	createUniqueMaterial,
+	generateRandomString,
+	randomEnumValue,
+} from '../../utility/publicationsUtility';
 
 async function populate() {
 	const user = await createUniqueUser()
@@ -198,6 +211,64 @@ describe('Circuits', async () => {
 
 			await resetCircuitTable();
 			await resetMaterialTable();
+		});
+	});
+
+	describe('circuit data layer', () => {
+		let user: User;
+		beforeEach(async () => {
+			user = await createUniqueUser();
+		});
+
+		it('creates and fetches a circuit by its publication id', async () => {
+			const circuit = await createUniqueCircuit(user.id);
+
+			const fetched = await getCircuitByPublicationId(circuit.publicationId);
+			expect(fetched).not.toBeNull();
+			expect(fetched!.publicationId).toBe(circuit.publicationId);
+			expect(fetched!.nodes).toHaveLength(0);
+		});
+
+		it('lists a publisher\'s circuits, fuzzy-searches and applies filters', async () => {
+			const circuit = await createUniqueCircuit(user.id);
+
+			const all = await getAllCircuits([], [user.id], 0, 'Most Recent', '');
+			expect(all.map((c: { publicationId: number }) => c.publicationId)).toEqual([circuit.publicationId]);
+
+			const searched = await getAllCircuits([], [user.id], 0, 'Most Recent', circuit.publication.title);
+			expect(searched[0].publicationId).toBe(circuit.publicationId);
+
+			// tag + node-count filters exclude a tag-less, node-less circuit
+			const filtered = await getAllCircuits(['no-such-tag'], [user.id], 1, 'Oldest', '');
+			expect(filtered).toHaveLength(0);
+		});
+
+		it('updates a circuit through the data layer', async () => {
+			const circuit = await createUniqueCircuit(user.id);
+			const title = generateRandomString();
+
+			const updated = await updateCircuitByPublicationId(circuit.publicationId, 2, {
+				title,
+				description: generateRandomString(50),
+				difficulty: randomEnumValue(Difficulty),
+				learningObjectives: [generateRandomString()],
+				prerequisites: [generateRandomString()],
+				isDraft: false,
+			});
+			expect(updated.numNodes).toBe(2);
+			expect(updated.publication.title).toBe(title);
+		});
+
+		it('finds circuits containing a publication and deletes them', async () => {
+			const circuit = await createUniqueCircuit(user.id);
+			const material = await createUniqueMaterial(user.id);
+			await addNode(circuit.id, material.publicationId, 0, 0);
+
+			const containing = await getCircuitsContainingPublication(material.publicationId);
+			expect(containing.map((c) => c.publicationId)).toContain(circuit.publicationId);
+
+			await deleteCircuitByPublicationId(circuit.publicationId);
+			expect(await getCircuitByPublicationId(circuit.publicationId)).toBeNull();
 		});
 	});
 });
