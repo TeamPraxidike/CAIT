@@ -121,10 +121,12 @@ describe('create materials', () => {
 				'Basic knowledge of classical physics',
 				'Familiarity with algebra and calculus',
 			],
-			materialType: MaterialType.other,
+			materialType: [MaterialType.other],
 			copyright: '© 2024 Quantum Learning Inc.',
 			timeEstimate: 120, // time in minutes
 			theoryPractice: 70,
+			isDraft: false,
+			course: null
 		});
 		expect(material).toMatchObject({
 			id: 3,
@@ -142,6 +144,8 @@ describe('update materials', () => {
 			coverPic: 'cover1.jpg',
 			publicationId: 1,
 		});
+		prisma.publication.findUnique = vi.fn().mockResolvedValue({})
+		prisma.publication.update = vi.fn().mockResolvedValue({})
 
 		const material = await updateMaterialByPublicationId(11, {
 			title: 'Introduction to Quantum Physics',
@@ -158,10 +162,13 @@ describe('update materials', () => {
 				'Basic knowledge of classical physics',
 				'Familiarity with algebra and calculus',
 			],
-			materialType: MaterialType.other,
+			materialType: [MaterialType.other],
 			copyright: '© 2024 Quantum Learning Inc.',
 			timeEstimate: 120, // time in minutes
 			theoryPractice: 70,
+			fileURLs: [],
+			isDraft: false,
+			course: null,
 		});
 		expect(material).toMatchObject({
 			id: 3,

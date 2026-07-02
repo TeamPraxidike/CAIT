@@ -49,15 +49,15 @@ describe('Local File Handling', () => {
 		const pathSaved = await fileSystem.saveFile(binaryData, 'blob2.txt');
 		createdFiles.push(pathSaved);
 
-		const data = fileSystem.readFile(pathSaved);
+		const data = await fileSystem.readFile(pathSaved);
 		expect(data.toString()).toEqual('Hello I am a blob, my name is blob');
 
 		await fileSystem.editFile(pathSaved, Buffer.from('I am a new blob'));
 
-		const data2 = fileSystem.readFile(pathSaved);
+		const data2 = await fileSystem.readFile(pathSaved);
 		expect(data2.toString()).toEqual('I am a new blob');
 
 		fileSystem.deleteFile(pathSaved);
-		expect(() => fileSystem.readFile(pathSaved)).toThrowError();
+		expect(async () => await fileSystem.readFile(pathSaved)).toThrowError();
 	});
 });

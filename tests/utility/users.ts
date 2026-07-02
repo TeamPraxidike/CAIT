@@ -1,6 +1,22 @@
 import { createUser, type User } from '$lib/database/user';
 import { expect } from 'vitest';
 
+// This can be used for unit tests where we dont spin up a database
+export const userMock = {
+	id: "2",
+	firstName: "User",
+	lastName: "User",
+	username: "UserUser",
+	email: "user@user",
+	emailVerified: null,
+	reputation: 40,
+	password: null,
+	aboutMe: "",
+	platformId: "31",
+	institutionId: "3",
+	isAdmin: false
+}
+
 const firstNames = ["Martin", "Joan", "Vasko", "Bobi", "Kiril", "John", "Jane", "Alice", "Bob", "Ivan", "Maria", "Petar", "Georgi", "Stefan", "Dimitar", "Nikolay", "Todor", "Viktor", "Elena", "Sofia"];
 const lastNames = ["Damyanov", "Guenov", "Marinov", "Popov", "Panayotov", "Petrov", "Ivanov", "Georgiev", "Dimitrov", "Kolev", "Smith", "Doe", "Johnson", "Brown"];
 const emailProviders = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "example.com", ".abv.bg", "mail.bg", "yandex.com", "icloud.com", "protonmail.com"];

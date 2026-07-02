@@ -57,7 +57,7 @@ const piscina = new Piscina({
  * @param pubANodes
  * @param pubBNodes
  */
-async function compareNodesInBackground(pubANodes: number[], pubBNodes: number[]): Promise<number> {
+export async function compareNodesInBackground(pubANodes: number[], pubBNodes: number[]): Promise<number> {
     return piscina.run({ pubANodes, pubBNodes }, {name: 'compareNodes'});
 }
 
@@ -66,7 +66,7 @@ async function compareNodesInBackground(pubANodes: number[], pubBNodes: number[]
  * @param pubAMeta
  * @param pubBMeta
  */
-async function compareMetaInBackground(pubAMeta: PublicationMeta, pubBMeta: PublicationMeta): Promise<ResultMeta> {
+export async function compareMetaInBackground(pubAMeta: PublicationMeta, pubBMeta: PublicationMeta): Promise<ResultMeta> {
     return piscina.run({ pubA: pubAMeta, pubB: pubBMeta }, {name: 'compareMeta'});
 }
 
@@ -75,7 +75,7 @@ async function compareMetaInBackground(pubAMeta: PublicationMeta, pubBMeta: Publ
  * @param pubAFiles
  * @param pubBFiles
  */
-async function compareFilesInBackground(pubAFiles: PrismaFile[], pubBFiles: PrismaFile[]): Promise<ResultFile> {
+export async function compareFilesInBackground(pubAFiles: PrismaFile[], pubBFiles: PrismaFile[]): Promise<ResultFile> {
     return piscina.run({ pubAFiles, pubBFiles }, {name: 'compareFiles'});
 }
 
@@ -83,7 +83,7 @@ async function compareFilesInBackground(pubAFiles: PrismaFile[], pubBFiles: Pris
  * Method which sends task to a worker thread (complete initial parsing of uploaded/edited publication)
  * @param pubFiles
  */
-async function initialMaterialFileParseInBackground(pubFiles: PrismaFile[]): Promise<FileTokenInfo> {
+export async function initialMaterialFileParseInBackground(pubFiles: PrismaFile[]): Promise<FileTokenInfo> {
     return piscina.run({ pubFiles }, {name: 'initialParse'});
 }
 
@@ -188,7 +188,6 @@ export async function enqueueCircuitComparison(publicationId: number): Promise<v
 
         for (let i = 0; i < circuits.length; i++) {
             if (circuits[i].publicationId !== publicationId) {
-
                 const pubBMeta: PublicationMeta = {
                     title: circuits[i].publication.title,
                     description: circuits[i].publication.description,

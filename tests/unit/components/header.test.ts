@@ -9,11 +9,10 @@ import {
 	offset,
 	shift,
 } from '@floating-ui/dom';
-import { storePopup } from '@skeletonlabs/skeleton';
-import { createUniqueUser } from '../../utility/users.ts';
+import { userMock } from '../../utility/users.ts';
 // Header import is loaded dynamically after SvelteKit store mocks.
 
-const mockUser = { ...(await createUniqueUser()), profilePicData: 'null' };
+const mockUser = { ...userMock, profilePicData: 'null' };
 
 
 type PageStoreData = {

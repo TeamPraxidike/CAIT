@@ -235,6 +235,8 @@ export async function updateAllTimeSaved(id: string, publicationId: number) {
 		}
 		return 'User saved previously';
 	}
+
+	throw Error("Publication not found");
 }
 
 export async function getReportsPublication(publicationId: number): Promise<PublicationReportsCount> {

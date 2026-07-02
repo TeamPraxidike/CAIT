@@ -9,11 +9,10 @@ import {
 	arrow,
 } from '@floating-ui/dom';
 import { storePopup } from '@skeletonlabs/skeleton';
-import { createUniqueUser } from '../../utility/users.ts';
+import { userMock } from '../../utility/users.ts';
 
 storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
-const userMock = await createUniqueUser();
 
 describe('User Components', () => {
 	let host: HTMLDivElement;

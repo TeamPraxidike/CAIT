@@ -29,7 +29,7 @@ describe('profilePicFetcher', () => {
 		vi.clearAllMocks();
 	});
 
-	it('should return default profile pic if profilePic is null', () => {
+	it('should return default profile pic if profilePic is null', async () => {
 		const filePath = path.join(
 			'static',
 			'defaultProfilePic',
@@ -38,14 +38,14 @@ describe('profilePicFetcher', () => {
 		const mockFileData = Buffer.from('defaultProfilePicData');
 		fs.readFileSync = vi.fn().mockReturnValue(mockFileData);
 
-		const result = profilePicFetcher(null);
+		const result = await profilePicFetcher(null);
 		expect(result).toEqual({
 			fileId: filePath,
-			data: mockFileData.toString('base64'),
+			data: null,
 		});
 	});
 
-	it('should return profile pic data if profilePic is provided', () => {
+	it('should return profile pic data if profilePic is provided', async () => {
 		const profilePic = {
 			path: 'profilePicPath',
 			title: 'ivan',
@@ -54,11 +54,12 @@ describe('profilePicFetcher', () => {
 			userId: null,
 			publicationId: null,
 			materialId: null,
+			courseId: null
 		};
 		const mockFileData = Buffer.from('profilePicData');
 		fileSystem.readFile = vi.fn().mockReturnValue(mockFileData);
 
-		const result = profilePicFetcher(profilePic);
+		const result = await profilePicFetcher(profilePic);
 		expect(result).toEqual({
 			fileId: 'profilePicPath',
 			data: mockFileData.toString('base64'),
@@ -71,7 +72,7 @@ describe('coverPicFetcher', () => {
 		vi.clearAllMocks();
 	});
 
-	it('should return default cover pic if coverPic is null', () => {
+	it('should return default cover pic if coverPic is null', async () => {
 		const encapsulatingType = 'assignment';
 		const filePath = path.join(
 			'static',
@@ -79,16 +80,16 @@ describe('coverPicFetcher', () => {
 			`${encapsulatingType}.jpg`,
 		);
 		const mockFileData = Buffer.from('defaultCoverPicData');
-		fs.readFileSync = vi.fn().mockReturnValue(mockFileData);
 
-		const result = coverPicFetcher(encapsulatingType, null);
+
+		const result = await coverPicFetcher(encapsulatingType, null);
 		expect(result).toEqual({
 			fileId: filePath,
-			data: mockFileData.toString('base64'),
+			data: null,
 		});
 	});
 
-	it('should return cover pic data if coverPic is provided', () => {
+	it('should return cover pic data if coverPic is provided', async () => {
 		const coverPic = {
 			path: 'coverPicPath',
 			title: 'ivan',
@@ -97,11 +98,12 @@ describe('coverPicFetcher', () => {
 			userId: null,
 			publicationId: null,
 			materialId: null,
+			courseId: null
 		};
 		const mockFileData = Buffer.from('coverPicData');
 		fileSystem.readFile = vi.fn().mockReturnValue(mockFileData);
 
-		const result = coverPicFetcher('assignment', coverPic);
+		const result = await coverPicFetcher('assignment', coverPic);
 		expect(result).toEqual({
 			fileId: 'coverPicPath',
 			data: mockFileData.toString('base64'),
@@ -125,7 +127,7 @@ describe('addCoverPic', () => {
 			publicationId: 1,
 		});
 
-		const result = await addCoverPic('cover.jpg', 'image/jpeg', info, 1);
+		const result = await addCoverPic('cover.jpg', 'image/jpeg', "user", info, 1);
 		expect(result).toEqual({
 			path: mockPath,
 			title: 'cover.jpg',
@@ -149,7 +151,7 @@ describe('addCoverPic', () => {
 			.mockRejectedValue(new Error('File system error'));
 
 		await expect(
-			addCoverPic('cover.jpg', 'image/jpeg', info, 1),
+			addCoverPic('cover.jpg', 'image/jpeg', 'user', info, 1, false),
 		).rejects.toThrow('Rollback');
 	});
 });
@@ -220,7 +222,7 @@ describe('addFile', () => {
 			materialId: 1,
 		});
 
-		const result = await addFile('file.jpg', 'image/jpeg', info, 1);
+		const result = await addFile('file.jpg', 'image/jpeg', "user", info, 1);
 		expect(result).toEqual({
 			path: mockPath,
 			title: 'file.jpg',
@@ -244,8 +246,8 @@ describe('addFile', () => {
 			.mockRejectedValue(new Error('File system error'));
 
 		await expect(
-			addFile('file.jpg', 'image/jpeg', info, 1),
-		).rejects.toThrow('Rollback');
+			addFile('file.jpg', 'image/jpeg', "user", info, 1),
+		).rejects.toThrow('Rollback File system');
 	});
 });
 
@@ -283,8 +285,9 @@ describe('handleFileTokens', () => {
 	});
 
 	it('should update file tokens in database', async () => {
-		const filesToUpdate = [{ filePath: 'filePath', tokens: 'newTokens' }];
+		const filesToUpdate = [{ filePath: 'filePath', tokens: 'newTokens', chunks: [] }];
 		prisma.file.update = vi.fn().mockResolvedValue(undefined);
+		prisma.fileChunk.deleteMany = vi.fn().mockResolvedValue(undefined);
 
 		await handleFileTokens(filesToUpdate);
 

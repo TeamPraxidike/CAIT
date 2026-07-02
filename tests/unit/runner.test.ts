@@ -319,7 +319,7 @@ describe('comparison functions', () => {
 			difficulty: 0.4});
 
 		// Call the function that uses the mocks
-		await piscinaUtilsModule.enqueueMaterialComparison(1, 1, mockPiscinaInstance);
+		await piscinaUtilsModule.enqueueMaterialComparison(1, 1);
 
 		// Assert that the mocks were called with the correct arguments
 		expect(getFilesMock).toHaveBeenCalledWith(1);
@@ -349,7 +349,17 @@ describe('comparison functions', () => {
 	});
 
 	it('should enqueue circuit comparison', async () => {
-		const mockCircuits = [{ publicationId: 2 }];
+		const mockCircuits = [{ publicationId: 2,
+			publication: {
+				title: 'Title',
+				description: 'Description',
+				learningObjectives: ['LO'],
+				prerequisites: ['PR'],
+				tags: [{ content: 'tag' }],
+				difficulty: 'EASY'
+			},
+			nodes: [{ publicationId: 3 }]
+		}];
 		const mockCircuit = {
 			publication: {
 				title: 'Title',
@@ -361,11 +371,8 @@ describe('comparison functions', () => {
 			},
 			nodes: [{ publicationId: 3 }]
 		};
-
-		vi.mocked(getAllCircuits).mockResolvedValue(mockCircuits);
-		vi.mocked(getCircuitByPublicationId).mockResolvedValue(mockCircuit);
-		vi.mocked(compareNodesInBackground).mockResolvedValue(0.9);
-		vi.mocked(compareMetaInBackground).mockResolvedValue({
+		const compareNodesInBackground = vi.fn().mockResolvedValue(0.9);
+		const compareMetaInBackground = vi.fn().mockResolvedValue({
 			title: 0.9,
 			description: 0.8,
 			learningObjectives: 0.7,
@@ -373,6 +380,10 @@ describe('comparison functions', () => {
 			tags: 0.5,
 			difficulty: 0.4
 		});
+
+		vi.mocked(getAllCircuits).mockResolvedValue(mockCircuits);
+		vi.mocked(getCircuitByPublicationId).mockResolvedValue(mockCircuit);
+
 
 		await enqueueCircuitComparison(1);
 

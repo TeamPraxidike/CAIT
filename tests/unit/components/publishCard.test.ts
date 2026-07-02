@@ -20,13 +20,13 @@ import {
 	generateRandomString,
 	randomEnumValue,
 } from '../../utility/publicationsUtility';
-import { createUniqueUser } from '../../utility/users.ts';
+import { userMock } from '../../utility/users.ts';
 
 const pageState = {
 	data: { session: { user: { id: '12313' } } },
 };
 
-const mockUser = { ...(await createUniqueUser()), profilePicData: '' };
+const mockUser = { ...(userMock), profilePicData: '' };
 
 vi.mock('$app/state', () => ({
 	page: pageState,

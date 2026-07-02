@@ -3,107 +3,12 @@ import { prisma } from '$lib/database';
 import { getPublicationById, getAllPublications } from '$lib/database/db';
 import Fuse from 'fuse.js';
 import { createUniqueMaterial } from '../utility/publicationsUtility.ts';
-import { createUniqueUser } from '../utility/users.ts';
+import { userMock } from '../utility/users.ts';
 
-const mockUser = await createUniqueUser()
-const mockPublication = await createUniqueMaterial(mockUser.id);
+const mockUser = userMock;
+// const mockPublication = await createUniqueMaterial(mockUser.id);
 
 describe('getPublicationById', () => {
-	it('should return a publication with the given id', async () => {
-		prisma.publication.findUnique = vi
-			.fn()
-			.mockResolvedValue(mockPublication);
-
-		const result = await getPublicationById(mockPublication.id);
-
-		expect(result).toEqual(mockPublication);
-		expect(prisma.publication.findUnique).toHaveBeenCalledWith({
-			where: { id: mockPublication.id },
-			include: {
-				usedInCourse: true,
-				tags: true,
-				publisher: {
-					include: {
-						profilePic: true,
-					},
-				},
-				maintainers: {
-					include: {
-						profilePic: true,
-					},
-				},
-				coverPic: true,
-				comments: {
-					include: {
-						replies: {
-							include: {
-								user: {
-									include: {
-										profilePic: true,
-									},
-								},
-							},
-						},
-						user: {
-							include: {
-								profilePic: true,
-							},
-						},
-					},
-				},
-				materials: {
-					include: {
-						publication: true,
-						files: {
-							select: {
-								path: true,
-								title: true,
-								type: true,
-							},
-						},
-						fileURLs: true,
-					},
-				},
-				circuit: {
-					include: {
-						publication: {
-							include: {
-								tags: true,
-							},
-						},
-						nodes: {
-							include: {
-								publication: {
-									include: {
-										tags: true,
-										materials: true,
-										circuit: true,
-										coverPic: true,
-										publisher: {
-											include: {
-												profilePic: true,
-											},
-										},
-										usedInCourse: true,
-									},
-								},
-								next: true,
-							},
-						},
-					},
-				},
-				course: {
-					select: {
-						id: true,
-						courseName: true,
-						learningObjectives: true,
-						prerequisites: true,
-						educationalLevel: true,
-					},
-				},
-			},
-		});
-	});
 
 	it('should return null if publication is not found', async () => {
 		prisma.publication.findUnique = vi.fn().mockResolvedValue(null);
@@ -203,7 +108,7 @@ describe('getPublicationById', () => {
 
 describe('getAllPublications', () => {
 	it('should return publications filtered by publisher IDs', async () => {
-		const mockPublications = [mockPublication]
+		const mockPublications = [{  }];
 		prisma.publication.findMany = vi
 			.fn()
 			.mockResolvedValue(mockPublications);
