@@ -507,7 +507,7 @@
 
 		<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">
 			<span class="font-bold text-surface-800">Description:</span>
-			{pubView.publication.description}
+			<span class="whitespace-pre-wrap">{pubView.publication.description}</span>
 		</p>
 		<div class="w-full flex justify-between">
 			<div>
