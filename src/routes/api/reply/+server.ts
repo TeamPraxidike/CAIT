@@ -5,6 +5,7 @@ import {
 	updateReputation,
 } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
+import { Prisma } from '@prisma/client';
 
 export async function POST({ request, locals }) {
 	const body = await request.json();
@@ -37,6 +38,14 @@ export async function POST({ request, locals }) {
 
 		return new Response(JSON.stringify(reply), { status: 200 });
 	} catch (error) {
+		if (
+			error instanceof Prisma.PrismaClientKnownRequestError &&
+			error.code === 'P2003'
+		)
+			return new Response(
+				JSON.stringify({ error: 'Comment or user not found' }),
+				{ status: 404 },
+			);
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
 }
