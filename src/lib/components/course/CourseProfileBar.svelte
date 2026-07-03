@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
-	import ShareButton from '../ShareButton.svelte';
+	import ShareButton from '../publication/ShareButton.svelte';
 	import { UserProp } from '$lib';
 
 	export let course: CourseWithMaintainersAndProfilePic | undefined;
@@ -56,6 +56,7 @@
 		<ShareButton
 			path={`/courses/${encodeURIComponent(courseName)}`}
 			title={courseName}
+			learningObjectives={course?.learningObjectives ?? []}
 			style="flex items-center btn text-surface-500 px-2 py-1 border rounded-lg self-center" />
 	</div>
 	<hr class="w-11/12" />

@@ -22,7 +22,6 @@
 	import {typeToHumanString} from "$lib/util/types";
 	import LevelIcon from '$lib/components/publication/card/LevelIcon.svelte';
 	import BrowseCardShell from './BrowseCardShell.svelte';
-	import ShareButton from './ShareButton.svelte';
 
 	export let publication: Publication & {
 		materials : Material
@@ -313,7 +312,6 @@
 							<a href="/{publisher.username}/{publication.id}"
 							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"
 							   on:click={resetTab}>View</a>
-							<ShareButton path={`/${publisher.username}/${publication.id}`} title={publication.title} />
 						{:else if !selected}
 							<button type="button" class="py-1 px-4 bg-primary-600 text-surface-50 rounded-lg hover:bg-opacity-85"
 											on:click="{select}">Select

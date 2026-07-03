@@ -544,6 +544,8 @@
 						<ShareButton
 							path={`/${pubView.publication.publisher.username}/${pubView.publication.id}`}
 							title={pubView.publication.title}
+							description={pubView.publication.description}
+							learningObjectives={pubView.publication.learningObjectives}
 							style="flex items-center text-xl btn text-surface-500 px-2"
 						/>
 					{/if}

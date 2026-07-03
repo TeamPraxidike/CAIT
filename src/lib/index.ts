@@ -25,7 +25,7 @@ import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
 import UsedInCourse from '$lib/components/UsedInCourse.svelte';
 import PublishReview from '$lib/components/PublishReview.svelte';
-import ShareButton from '$lib/components/ShareButton.svelte';
+import ShareButton from '$lib/components/publication/ShareButton.svelte';
 import type { UserSanitizedWithProfilePicData } from '$lib/util/types';
 
 // util
