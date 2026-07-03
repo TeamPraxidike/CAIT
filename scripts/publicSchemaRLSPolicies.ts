@@ -31,21 +31,6 @@ async function main() {
 				(SELECT is_admin()) = TRUE
 			);
                    
-            -- Enable Row-Level Security (RLS) on public."PublicationUsedInCourse" if not already enabled
-            ALTER TABLE public."PublicationUsedInCourse" ENABLE ROW LEVEL SECURITY;
-                   
-            -- PublicationUsedInCourse
-            REVOKE SELECT, INSERT, UPDATE, DELETE ON public."PublicationUsedInCourse" FROM anon;
-            GRANT SELECT, INSERT, UPDATE, DELETE ON public."PublicationUsedInCourse" TO authenticated;
-
-            CREATE POLICY "Admin access to public PublicationUsedInCourse" ON public."PublicationUsedInCourse"
-            -- For all means for select, insert, update and delete
-			FOR ALL
-            TO authenticated
-			USING (
-				(SELECT is_admin()) = TRUE
-			);
-                   
             -- Enable Row-Level Security (RLS) on public."Publication" if not already enabled
             ALTER TABLE public."Publication" ENABLE ROW LEVEL SECURITY;
                    

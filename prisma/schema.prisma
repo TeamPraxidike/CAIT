@@ -59,7 +59,6 @@ model User {
   posts            Publication[]
   liked            Publication[]             @relation("liked")
   reported         Publication[]             @relation("reported")
-  usedPublications PublicationUsedInCourse[]
 
   savedByAllTime SavedByAllTime[]
 
@@ -75,19 +74,6 @@ model User {
   courses              Course[]             @relation("CourseInstructors")
 
   publicationHistory PublicationHistory[]
-}
-
-model PublicationUsedInCourse {
-  // the user that is using the publication
-  userId String @db.Uuid
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  publicationId Int
-  publication   Publication @relation(fields: [publicationId], references: [id])
-
-  course String
-
-  @@id([publicationId, course])
 }
 
 model Publication {
@@ -128,7 +114,6 @@ model Publication {
 
   materials    Material?
   circuit      Circuit?
-  usedInCourse PublicationUsedInCourse[]
 
   history PublicationHistory[]
 }

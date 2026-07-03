@@ -7,11 +7,6 @@ export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
 		posts: {
 			include: {
 				tags: true;
-				usedInCourse: {
-					select: {
-						course: true;
-					};
-				};
 			};
 		};
 		profilePic: true;
@@ -140,11 +135,6 @@ export async function getUserById(
 			posts: {
 				include: {
 					tags: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 				},
 			},
 			profilePic: true,
@@ -162,11 +152,6 @@ export async function getUserByUsername(
 			posts: {
 				include: {
 					tags: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 				},
 			},
 			profilePic: true,
