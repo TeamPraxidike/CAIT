@@ -59,6 +59,7 @@ import {
 	getLikedReplies,
 	getLikedComments,
 	updateReputation,
+	setEmailVisibility,
 } from '$lib/database/user';
 
 import {
@@ -287,6 +288,7 @@ export {
 	deleteMaterialByPublicationId,
 	deleteUser,
 	editUser,
+	setEmailVisibility,
 	updateComment,
 	createComment,
 	deleteComment,

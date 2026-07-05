@@ -6,8 +6,10 @@ import {
 } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
 import { PublicationType } from '@prisma/client';
+import { getEmailViewer } from '$lib/database/auth';
+import { redactEmail } from '$lib/util/emailVisibility';
 
-export async function GET({ params }) {
+export async function GET({ params, locals }) {
 	const publicationId = parseInt(params.publicationId);
 
 	if (isNaN(publicationId) || publicationId <= 0) {
@@ -30,40 +32,42 @@ export async function GET({ params }) {
 			);
 		}
 
-		publication.publisher = {
+		const viewer = await getEmailViewer(locals);
+
+		publication.publisher = redactEmail({
 			...publication.publisher,
 			// @ts-ignore
 			profilePicData: (await profilePicFetcher(publication.publisher.profilePic))
 				.data,
-		};
+		}, viewer);
 
 		publication.comments = await Promise.all(publication.comments.map(async (comment) => {
 			return {
 				...comment,
-				user: {
+				user: redactEmail({
 					...comment.user,
 					profilePicData: (await profilePicFetcher(comment.user.profilePic))
 						.data,
-				},
+				}, viewer),
 				replies: await Promise.all(comment.replies.map(async (reply) => {
 					return {
 						...reply,
-						user: {
+						user: redactEmail({
 							...reply.user,
 							profilePicData: (await profilePicFetcher(
 								reply.user.profilePic,
 							)).data,
-						},
+						}, viewer),
 					};
 				})),
 			};
 		}));
 
 		publication.maintainers = await Promise.all(publication.maintainers.map(async (user) => {
-			return {
+			return redactEmail({
 				...user,
 				profilePicData: (await profilePicFetcher(user.profilePic)).data,
-			};
+			}, viewer);
 		}));
 
 
@@ -111,12 +115,12 @@ export async function GET({ params }) {
 						...node,
 						publication: {
 							...node.publication,
-							publisher: {
+							publisher: redactEmail({
 								...node.publication.publisher,
 								profilePicData: (await profilePicFetcher(
 									node.publication.publisher.profilePic,
 								)).data,
-							},
+							}, viewer),
 							coverPicData: coverPicData,
 						},
 					};

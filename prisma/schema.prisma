@@ -42,12 +42,19 @@ enum PublicationEventType {
   UPDATE   // Every other event
 }
 
+enum EmailVisibility {
+  HIDDEN
+  PUBLIC
+}
+
 model User {
   id            String    @id @default(uuid()) @db.Uuid
   firstName     String
   lastName      String
   username      String    @unique @default(dbgenerated("gen_random_uuid()"))
   email         String    @default("noemail@abv.bg")
+  emailVisibility         EmailVisibility @default(PUBLIC)
+  emailVisibilityPrompted Boolean         @default(false)
   emailVerified DateTime? // TODO: REMOVE THIS
   reputation    Int       @default(0)
   password      String? // hashed password    // TODO: REMOVE THIS

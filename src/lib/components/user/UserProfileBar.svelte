@@ -57,7 +57,9 @@
         <h2 class="text-lg md:text-xl">{user.firstName} {user.lastName}</h2>
 
         <div class="hidden md:flex items-start flex-col gap-4 text-surface-700 dark:text-surface-200 ">
-            <p class="lg:text-sm 2xl:text-base">Email: {user.email}</p>
+            {#if user.email}
+                <p class="lg:text-sm 2xl:text-base">Email: {user.email}</p>
+            {/if}
             {#if memberSince}
                 <p class="lg:text-sm 2xl:text-base text-surface-500 dark:text-surface-400">Member since {formatMemberSince(memberSince)}</p>
             {/if}
@@ -84,6 +86,8 @@
                     <div class="flex gap-2">
                         <a type="button" href="/{user.username}/edit"  class="btn bg-surface-800 text-surface-50 rounded-lg
                            dark:bg-surface-700">Edit Profile</a>
+                        <a type="button" href="/{user.username}/settings" class="btn bg-surface-800 text-surface-50 rounded-lg
+                           dark:bg-surface-700">Settings</a>
                     </div>
                 {/if}
             </div>
@@ -116,7 +120,9 @@
     <!--  VISIBLE ON PHONES   -->
     <div class="px-4 w-full dark:text-surface-200 flex flex-col items-stretch gap-4
                 md:hidden">
-        <p>Email: {user.email}</p>
+        {#if user.email}
+            <p>Email: {user.email}</p>
+        {/if}
         {#if memberSince}
             <p class="text-sm text-surface-500 dark:text-surface-400">Member since {formatMemberSince(memberSince)}</p>
         {/if}
@@ -127,8 +133,8 @@
             <div class="flex gap-4">
                 <a type="button" href="./edit" class="btn bg-surface-800 text-surface-50 rounded-lg
                                dark:bg-surface-700">Edit Profile</a>
-                <button class="btn bg-surface-800 text-surface-50 rounded-lg
-                               dark:bg-surface-700">Settings</button>
+                <a type="button" href="./settings" class="btn bg-surface-800 text-surface-50 rounded-lg
+                               dark:bg-surface-700">Settings</a>
             </div>
         {/if}
     </div>
