@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { prisma, fileSystem } from '$lib/database';
 import {
 	profilePicFetcher,
@@ -15,14 +15,24 @@ import path from 'path';
 
 vi.mock('fs');
 vi.mock('path');
-//
-// describe('bufToBase64', () => {
-// 	it('should convert buffer data to base64', async () => {
-// 		const files = [{ fileId: '1', data: 'test' }];
-// 		const result = await bufToBase64(files);
-// 		expect(result[0].data).toBe('test');
-// 	});
-// });
+vi.mock('$lib/database', () => ({
+	fileSystem: {
+		readFile: vi.fn().mockResolvedValue(Buffer.from('test')),
+		saveFile: vi.fn(),
+		deleteFile: vi.fn(),
+	},
+	prisma: {
+		file: {
+			create: vi.fn(),
+			update: vi.fn(),
+			delete: vi.fn(),
+			findMany: vi.fn(),
+		},
+		fileChunk: {
+			deleteMany: vi.fn(),
+		},
+	},
+}));
 
 describe('profilePicFetcher', () => {
 	beforeEach(() => {
@@ -56,8 +66,9 @@ describe('profilePicFetcher', () => {
 			materialId: null,
 			courseId: null
 		};
-		const mockFileData = Buffer.from('profilePicData');
-		fileSystem.readFile = vi.fn().mockReturnValue(mockFileData);
+		const mockFileData = Buffer.from('U2VjcmV0IHN0cmluZyBpbiBiYXNlNjQ=');
+
+		fileSystem.readFile = vi.fn().mockResolvedValue(mockFileData);
 
 		const result = await profilePicFetcher(profilePic);
 		expect(result).toEqual({
@@ -100,8 +111,8 @@ describe('coverPicFetcher', () => {
 			materialId: null,
 			courseId: null
 		};
-		const mockFileData = Buffer.from('coverPicData');
-		fileSystem.readFile = vi.fn().mockReturnValue(mockFileData);
+		const mockFileData =  Buffer.from('coverPicData');
+		fileSystem.readFile = vi.fn().mockResolvedValue(mockFileData);
 
 		const result = await coverPicFetcher('assignment', coverPic);
 		expect(result).toEqual({

@@ -56,6 +56,7 @@ const piscina = new Piscina({
  * Method which sends task to a worker thread (circuit)
  * @param pubANodes
  * @param pubBNodes
+ * @param piscinaInstance
  */
 export async function compareNodesInBackground(
     pubANodes: number[],
@@ -69,6 +70,7 @@ export async function compareNodesInBackground(
  * Method which sends task to a worker thread (meta)
  * @param pubAMeta
  * @param pubBMeta
+ * @param piscinaInstance
  */
 export async function compareMetaInBackground(
     pubAMeta: PublicationMeta,
@@ -82,6 +84,7 @@ export async function compareMetaInBackground(
  * Method which sends task to a worker thread (files)
  * @param pubAFiles
  * @param pubBFiles
+ * @param piscinaInstance
  */
 export async function compareFilesInBackground(
     pubAFiles: PrismaFile[],
@@ -94,6 +97,7 @@ export async function compareFilesInBackground(
 /**
  * Method which sends task to a worker thread (complete initial parsing of uploaded/edited publication)
  * @param pubFiles
+ * @param piscinaInstance
  */
 export async function initialMaterialFileParseInBackground(
     pubFiles: PrismaFile[],
