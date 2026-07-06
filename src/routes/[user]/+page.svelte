@@ -126,14 +126,16 @@
                 <p class="col-span-full text-center">So empty... There are no publications here</p>
             {:else}
                 <div class="grid grid-cols-2 gap-4">
-                {#each cardPosts as publication, i}
-                    <PublicationCard imgSrc={publication.coverPicData}
-                                     publication={publication}
-                                     liked={liked.includes(publication.id)}
-                                     courses={posts[i].usedInCourse.map(x => x.course)}
-                                     saved={data.savedByUser.includes(publication.id)}
-                                     publisher={publication.publisher}/>
-                {/each}
+					{#each cardPosts as publication, i}
+						<div class="col-span-1">
+							<PublicationCard imgSrc={publication.coverPicData}
+											 publication={publication}
+											 liked={liked.includes(publication.id)}
+											 courses={posts[i].usedInCourse.map(x => x.course)}
+											 saved={data.savedByUser.includes(publication.id)}
+											 publisher={publication.publisher}/>
+						</div>
+					{/each}
                 </div>
             {/if}
     {/if}
