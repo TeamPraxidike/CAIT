@@ -2,11 +2,9 @@ import { describe, it, expect, vi } from 'vitest';
 import { prisma } from '$lib/database';
 import { getPublicationById, getAllPublications } from '$lib/database/db';
 import Fuse from 'fuse.js';
-import { createUniqueMaterial } from '../utility/publicationsUtility.ts';
 import { userMock } from '../utility/users.ts';
 
 const mockUser = userMock;
-// const mockPublication = await createUniqueMaterial(mockUser.id);
 
 describe('getPublicationById', () => {
 

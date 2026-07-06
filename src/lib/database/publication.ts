@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
-import { getPublicationById, getPublicationByIdLight } from '$lib/database/db';
+import { getPublicationByIdLight } from '$lib/database/db';
 
 ////////////////////////////////////////////////
 //   HELPER METHODS
