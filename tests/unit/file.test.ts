@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prisma, fileSystem } from '$lib/database';
 import {
 	profilePicFetcher,
@@ -90,8 +90,6 @@ describe('coverPicFetcher', () => {
 			'defaultCoverPic',
 			`${encapsulatingType}.jpg`,
 		);
-		const mockFileData = Buffer.from('defaultCoverPicData');
-
 
 		const result = await coverPicFetcher(encapsulatingType, null);
 		expect(result).toEqual({

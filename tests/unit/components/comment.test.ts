@@ -8,9 +8,8 @@ import {
 	offset,
 	arrow,
 } from '@floating-ui/dom';
-import { initializeStores, storePopup } from '@skeletonlabs/skeleton';
+import { storePopup } from '@skeletonlabs/skeleton';
 import { userMock } from '../../utility/users.ts';
-import { vi } from 'vitest';
 import ToastStoreWrapper from './ToastStoreWrapper.svelte';
 
 storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });

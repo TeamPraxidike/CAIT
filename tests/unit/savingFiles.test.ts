@@ -58,6 +58,6 @@ describe('Local File Handling', () => {
 		expect(data2.toString()).toEqual('I am a new blob');
 
 		fileSystem.deleteFile(pathSaved);
-		expect(async () => await fileSystem.readFile(pathSaved)).toThrowError();
+		expect(async () => await fileSystem.readFile(pathSaved)).rejects.toThrowError();
 	});
 });

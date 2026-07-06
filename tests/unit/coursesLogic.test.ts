@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { changeCourse, type UserWithProfilePic } from '$lib/util/coursesLogic';
 import type {
 	CourseWithCoverPic,
-	CourseWithMaintainersAndProfilePic,
 } from '$lib/database/courses';
 
 
