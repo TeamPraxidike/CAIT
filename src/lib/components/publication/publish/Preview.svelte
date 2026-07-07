@@ -23,7 +23,7 @@
 			{/each}
 		</div>
 
-		<p class="text-surface-800 text-sm">{data.description}</p>
+		<p class="text-surface-800 text-sm whitespace-pre-wrap">{data.description}</p>
 
 		{#if !isCircuit && dataMaterial}
 			<p class="text-surface-500 text-sm">

@@ -1,4 +1,4 @@
-import { coverPicFetcher, fileSystem } from '$lib/database';
+import { coverPicFetcher } from '$lib/database';
 import {PublicationType} from '@prisma/client';
 import { profilePicFetcher } from '$lib/database/file';
 import {getSimilarPublications} from "$lib/database/similarity";
@@ -37,10 +37,9 @@ export async function GET({ locals, params }) {
                     info.publication.coverPic,
                 )).data;
             } else {
-                const filePath = info.publication.coverPic!.path;
                 coverPicData = (await coverPicFetcher(
                     null,
-                    info.publication.coverPic!,
+                    info.publication.coverPic,
                 )).data;
             }
             return {

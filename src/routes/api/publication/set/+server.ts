@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { getAllPublications, getAllPublicationsByIds } from '$lib/database/db';
 import { PublicationType } from '@prisma/client';
-import { coverPicFetcher, fileSystem } from '$lib/database';
+import { coverPicFetcher } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -22,13 +22,10 @@ export const GET: RequestHandler = async ({ url }) => {
 					publication.coverPic,
 				)).data;
 			} else {
-				const filePath = publication.coverPic!.path;
 				coverPicData = (await coverPicFetcher(
 					null,
 					publication.coverPic,
 				)).data;
-				// const currentFileData = await fileSystem.readFile(filePath);
-				// coverPicData = currentFileData.toString('base64');
 			}
 			return {
 				...publication,

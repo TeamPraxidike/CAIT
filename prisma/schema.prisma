@@ -38,22 +38,20 @@ enum PublicationType {
 }
 
 enum PublicationEventType {
-  CREATE   // The Genesis event of the publication
-  UPDATE   // Every other event
+  CREATE // The Genesis event of the publication
+  UPDATE // Every other event
 }
 
 model User {
-  id            String    @id @default(uuid()) @db.Uuid
+  id            String @id @default(uuid()) @db.Uuid
   firstName     String
   lastName      String
-  username      String    @unique @default(dbgenerated("gen_random_uuid()"))
-  email         String    @default("noemail@abv.bg")
-  emailVerified DateTime? // TODO: REMOVE THIS
-  reputation    Int       @default(0)
-  password      String? // hashed password    // TODO: REMOVE THIS
-  aboutMe       String    @default("")
-  platformId    String    @default("")
-  institutionId String    @default("")
+  username      String @unique @default(dbgenerated("gen_random_uuid()"))
+  email         String @default("noemail@abv.bg")
+  reputation    Int    @default(0)
+  aboutMe       String @default("")
+  platformId    String @default("")
+  institutionId String @default("")
 
   saved            Publication[]             @relation("saved")
   posts            Publication[]
@@ -71,8 +69,8 @@ model User {
   replies     Reply[]
   isAdmin     Boolean       @default(false)
 
-  profilePic           File?                @relation("ProfilePic")
-  courses              Course[]             @relation("CourseInstructors")
+  profilePic File?    @relation("ProfilePic")
+  courses    Course[] @relation("CourseInstructors")
 
   publicationHistory PublicationHistory[]
 }
@@ -134,8 +132,8 @@ model Publication {
 }
 
 model PublicationHistory {
-  id        String                       @id @default(uuid())
-  createdAt DateTime                     @default(now())
+  id        String               @id @default(uuid())
+  createdAt DateTime             @default(now())
   action    PublicationEventType
 
   // Optional user explanation on the change
