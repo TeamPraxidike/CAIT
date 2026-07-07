@@ -180,6 +180,7 @@ model Material {
   encapsulatingType MaterialType
   timeEstimate      Int?
   theoryPractice    Float?
+  selfMade          Boolean      @default(true)
   files             File[]       @relation("Files")
   fileURLs          FileURL[]    @relation("MaterialFileURLs")
 

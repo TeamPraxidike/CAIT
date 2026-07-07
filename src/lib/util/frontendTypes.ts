@@ -48,6 +48,7 @@ export type ParamsMutableMaterial = {
 	coverPic: File | undefined;
 	estimate: number;
 	copyright: string;
+	selfMade: boolean;
 };
 
 export type ParamsMutableCircuit = {
@@ -197,6 +198,7 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 			copyright: data.get('copyright')?.toString() || '',
 			timeEstimate: Number(data.get('estimate')?.toString()),
 			theoryPractice: Number(data.get('theoryToApplication')),
+			selfMade: data.get('selfMade')?.toString() !== 'false',
 			tags: JSON.parse(tagsDataEntry.toString()),
 			maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 			materialType: materialTypes,
