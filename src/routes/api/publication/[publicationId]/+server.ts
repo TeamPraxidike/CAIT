@@ -1,7 +1,6 @@
 import {
 	coverPicFetcher,
 	type FetchedFileItem,
-	fileSystem,
 	getPublicationById,
 } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
@@ -103,13 +102,10 @@ export async function GET({ params, locals }) {
 							node.publication.coverPic,
 						)).data;
 					} else {
-						const filePath = node.publication.coverPic!.path;
 						coverPicData = (await coverPicFetcher(
 							null,
-							node.publication.coverPic!,
+							node.publication.coverPic,
 						)).data;
-						// const currentFileData = await fileSystem.readFile(filePath);
-						// coverPicData = currentFileData.toString('base64');
 					}
 					return {
 						...node,

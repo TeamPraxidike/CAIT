@@ -1,8 +1,5 @@
 import { verifyAuth } from '$lib/database/auth';
-import {
-	coverPicFetcher,
-	fileSystem,
-} from '$lib/database';
+import { coverPicFetcher } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
 import { getCircuitsContainingPublication } from '$lib/database/circuit';
 
@@ -33,10 +30,6 @@ export async function GET({ locals, params }) {
 		}
 
 		circuits = await Promise.all(circuits.map(async (circuit) => {
-			const filePath = circuit.publication.coverPic!.path;
-
-			const currentFileData = await fileSystem.readFile(filePath);
-
 			return {
 				...circuit,
 				publisher: {
@@ -46,7 +39,8 @@ export async function GET({ locals, params }) {
 					)).data,
 				},
 				coverPicData: (await coverPicFetcher(
-					circuit.publication.coverPic!.path
+					null,
+					circuit.publication.coverPic,
 				)).data,
 			};
 		}));
