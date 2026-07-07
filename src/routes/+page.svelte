@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Meta, Section } from '$lib';
+	import { Meta, Section, YouTubeEmbed } from '$lib';
 	import type { PageServerData } from './$types';
 
 	export let data: PageServerData;
@@ -46,6 +46,13 @@
 
 
 
+
+<section class="col-span-full flex flex-col gap-4 mt-16" aria-label="Introduction video">
+	<h2 class="text-xl font-semibold text-surface-800 dark:text-surface-100">Watch the introduction</h2>
+	<div class="mx-auto w-full max-w-3xl">
+		<YouTubeEmbed videoId="-Pe1rEs6RUs" title="Introduction to CAIT" />
+	</div>
+</section>
 
 <main class="col-span-full flex flex-col gap-10 my-20">
 	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publication.png" mdFlex="md:flex-row-reverse" iconList={true}/>

@@ -13,7 +13,7 @@
 	import rust from 'highlight.js/lib/languages/rust';
 	import scala from 'highlight.js/lib/languages/scala';
 	import plaintext from 'highlight.js/lib/languages/plaintext';
-	import { Footer, Grid, Header } from '$lib';
+	import { CookieBanner, Footer, Grid, Header } from '$lib';
 
 	// Floating UI for Popups
 	import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
@@ -91,3 +91,5 @@
 </div>
 
 <Footer />
+
+<CookieBanner />
