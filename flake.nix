@@ -15,12 +15,12 @@
         in {
         devShells.default = pkgs.mkShell {
             nativeBuildInputs = with pkgs; [
-            nodejs_20
-            nodePackages.yarn
-            nodePackages.node-gyp
+            nodejs_26
+            yarn
+            node-gyp
             vips
             python3
-            prisma-engines
+            prisma-engines_6
             openssl
             docker-compose
             ];
@@ -41,10 +41,10 @@
             ];
 
             shellHook = ''
-                export PRISMA_SCHEMA_ENGINE_BINARY="${pkgs.prisma-engines}/bin/schema-engine"
-                export PRISMA_QUERY_ENGINE_BINARY="${pkgs.prisma-engines}/bin/query-engine"
-                export PRISMA_QUERY_ENGINE_LIBRARY="${pkgs.prisma-engines}/lib/libquery_engine.node"
-                export PRISMA_FMT_BINARY="${pkgs.prisma-engines}/bin/prisma-fmt"
+                export PRISMA_SCHEMA_ENGINE_BINARY="${pkgs.prisma-engines_6}/bin/schema-engine"
+                export PRISMA_QUERY_ENGINE_BINARY="${pkgs.prisma-engines_6}/bin/query-engine"
+                export PRISMA_QUERY_ENGINE_LIBRARY="${pkgs.prisma-engines_6}/lib/libquery_engine.node"
+                export PRISMA_FMT_BINARY="${pkgs.prisma-engines_6}/bin/prisma-fmt"
                 export PATH="$PWD/node_modules/.bin/:$PATH"
             '';
         };
