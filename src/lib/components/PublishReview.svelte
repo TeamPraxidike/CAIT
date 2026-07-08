@@ -13,23 +13,6 @@
 	export let maintainers: UserWithProfilePic[];
 	export let publisher: UserWithProfilePic;
 
-	// todo: ask bobby and remove if unnecessary.
-	// let p = $page.data.session?.user as User & {profilePic: string};
-	// let publisher = {
-	// 	id: p.id,
-	// 	firstName: p.firstName,
-	// 	lastName: p.lastName,
-	// 	username: p.username,
-	// 	aboutMe: p.aboutMe,
-	// 	email: p.email,
-	// 	emailVerified: p.emailVerified,
-	// 	reputation: p.reputation,
-	// 	password: p.password,
-	// 	isAdmin: p.isAdmin,
-	// 	createdAt: p.createdAt,
-	// 	updatedAt: p.updatedAt
-	// }
-
 </script>
 
 <div class="flex flex-col gap-4 my-4">

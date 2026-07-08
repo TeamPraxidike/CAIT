@@ -4,103 +4,87 @@ import { SERVICE_ROLE_KEY } from '$env/static/private';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 
 import {
-	getMaterialByPublicationId,
-	getAllMaterials,
-	updateMaterialByPublicationId,
-	deleteMaterialByPublicationId,
 	createMaterialPublication,
+	deleteMaterialByPublicationId,
+	getAllMaterials,
+	getMaterialByPublicationId,
+	updateMaterialByPublicationId
 } from './material';
 
 import {
-	getCircuitByPublicationId,
-	getAllCircuits,
-	updateCircuitByPublicationId,
-	deleteCircuitByPublicationId,
 	createCircuitPublication,
+	deleteCircuitByPublicationId,
+	getAllCircuits,
+	getCircuitByPublicationId,
+	updateCircuitByPublicationId
 } from './circuit';
 
 import {
-	updatePublicationConnectTags,
-	updatePublicationConnectMaintainers,
 	connectMaintainers,
 	connectTags,
+	getPublisherId,
 	handleConnections,
 	updateAllTimeSaved,
-	getPublisherId
+	updatePublicationConnectMaintainers,
+	updatePublicationConnectTags
 } from './publication';
 
-import {
-	addTag,
-	addTags,
-	getAllTags,
-	getTagByContent,
-	deleteTagByContent,
-} from '$lib/database/tag';
+import { addTag, addTags, deleteTagByContent, getAllTags, getTagByContent } from '$lib/database/tag';
 
-import {
-	handleEdges,
-	fetchExtensions,
-	addNode,
-	editNode,
-	deleteNode,
-} from './node';
+import { addNode, deleteNode, editNode, fetchExtensions, handleEdges } from './node';
 
-import { savePublication, getSavedPublications } from '$lib/database/save';
+import { getSavedPublications, savePublication } from '$lib/database/save';
 
+import type { userEditData } from '$lib/database/user';
 import {
-	getUserById,
 	createUser,
 	deleteUser,
 	editUser,
-	likePublication,
-	getLikedPublications,
-	likesReplyUpdate,
-	likesCommentUpdate,
-	getLikedReplies,
 	getLikedComments,
-	updateReputation,
+	getLikedPublications,
+	getLikedReplies,
+	getUserById,
+	likePublication,
+	likesCommentUpdate,
+	likesReplyUpdate,
+	updateReputation
 } from '$lib/database/user';
 
+import type { createCommentData, editCommentData } from '$lib/database/comment';
 import {
 	createComment,
 	deleteComment,
 	getComment,
-	updateComment,
 	getCommentsByPublicationId,
+	updateComment
 } from '$lib/database/comment';
 
-import {
-	getReply,
-	deleteReply,
-	updateReply,
-	createReply,
-	getRepliesByCommentId,
-} from '$lib/database/reply';
+import type { createReplyData, editReplyData } from '$lib/database/reply';
+import { createReply, deleteReply, getRepliesByCommentId, getReply, updateReply } from '$lib/database/reply';
 
 import {
 	addPublicationToUsedInCourse,
 	coursesUsingPublication,
-	publicationsAUserUses,
+	publicationsAUserUses
 } from '$lib/database/usedInCourse';
 
-import type { userEditData } from '$lib/database/user';
-import type { editReplyData, createReplyData } from '$lib/database/reply';
-import type { createCommentData, editCommentData } from '$lib/database/comment';
-
 import {
+	addCoverPic,
 	addFile,
+	coverPicFetcher,
 	deleteFile,
 	editFile,
-	addCoverPic,
-	coverPicFetcher,
 	updateCoverPic,
-	updateFiles,
+	updateFiles
 } from '$lib/database/file';
 
-import {handleSimilarity} from "$lib/database/similarity";
+import { handleSimilarity } from '$lib/database/similarity';
 
 import { prisma } from './prisma';
 import { Difficulty, MaterialType } from '@prisma/client';
+import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
+import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
+import type { ChangeLogPayload } from '$lib/database/publicationHistory';
 
 /**
  * MaterialForm is the type of the form data that is sent to the server when creating a new material.
@@ -170,21 +154,12 @@ type CircuitForm = {
  *
  * @note These changes are evaluated on the server in `+page.server.ts` and then sent like this
  * to the server in the POST request to `/api/materials`
- * @todo may be much better to use an object with keys `add`, `delete`, and `edit` instead of arrays
  */
 type FileDiffActions = {
 	add: { title: string; type: string; info: string }[];
 	delete: { path: string }[];
 	edit: { path: string; title: string; info: string }[];
 };
-
-/**
- * Fetched file item with the id and the data in the form of a base64 string.
- */
-// type FetchedFileItem = {
-// 	fileId: string;
-// 	data: string | null;
-// };
 
 type FetchedFileItem = {
 	fileId: string;
@@ -225,10 +200,6 @@ type NodeDiffActions = {
 /////////////////////////////////////////////////////////
 /// SELECT FILESYSTEM TYPE BASED ON .ENV VARIABLE
 ////////////////////////////////////////////////////////
-
-import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
-import { LocalFileSystem } from '$lib/FileSystemPort/LocalFileSystem';
-import type { ChangeLogPayload } from '$lib/database/publicationHistory';
 
 export const basePath = "uploadedFiles"
 let fileSystem: SupabaseFileSystem | LocalFileSystem;

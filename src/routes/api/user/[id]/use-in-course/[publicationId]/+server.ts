@@ -1,9 +1,4 @@
-import {
-	addPublicationToUsedInCourse,
-	getPublicationById,
-	getUserById,
-	updateReputation,
-} from '$lib/database';
+import { addPublicationToUsedInCourse, getUserById, updateReputation } from '$lib/database';
 import { verifyAuth } from '$lib/database/auth';
 import { getPublicationByIdLight } from '$lib/database/db.ts';
 
@@ -36,7 +31,7 @@ export async function POST({ params, request, locals }) {
 	const body = await request.json();
 	try {
 		await addPublicationToUsedInCourse(
-			id, //todo fix
+			id,
 			parseInt(publicationId),
 			body.courses,
 		);
