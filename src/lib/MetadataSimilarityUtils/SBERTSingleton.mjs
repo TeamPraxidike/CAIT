@@ -1,4 +1,5 @@
-import { pipeline } from '@xenova/transformers';
+// @ts-nocheck
+import { pipeline } from '@huggingface/transformers';
 
 class SBERTSingleton{
     static instance;

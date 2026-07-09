@@ -6,7 +6,7 @@ import {
 import { testingUrl } from '../setup';
 import { createUniqueUser } from '../../utility/users';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
-import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
+import { randomUUID as uuid } from 'node:crypto';
 
 describe('[POST] /user/:id/use-in-course/:publicationId', () => {
 	it('should successfully use a publication in a course', async () => {
