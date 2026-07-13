@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getDateDifference, mapToDifficulty, mapToType, formatFileSize } from '$lib';
 import { Difficulty, MaterialType } from '@prisma/client';
 import { typeToHumanString } from '$lib/util/types';
+import { formatMemberSince } from '$lib/util/date';
 
 describe('formatFileSize', () => {
 	it('should convert byte numbers to KBs', () => {
@@ -76,6 +77,16 @@ describe('date difference method', () => {
 		expect(getDateDifference(date2, date1)).toEqual('1 minute ago');
 		date2 = new Date(2024, 5, 12, 13, 59, 30);
 		expect(getDateDifference(date2, date1)).toEqual('just now');
+	});
+});
+
+describe('formatMemberSince', () => {
+	it('should format a Date object to month and year', () => {
+		expect(formatMemberSince(new Date(2022, 0, 15))).toEqual('January 2022');
+		expect(formatMemberSince(new Date(2020, 11, 1))).toEqual('December 2020');
+	});
+	it('should accept an ISO string', () => {
+		expect(formatMemberSince('2021-06-01T00:00:00.000Z')).toEqual('June 2021');
 	});
 });
 
