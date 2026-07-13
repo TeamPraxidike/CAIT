@@ -64,6 +64,7 @@ docker exec supabase-db psql -U supabase_admin -d postgres -c "
     LOOP
       EXECUTE format('TRUNCATE TABLE public.%I RESTART IDENTITY CASCADE', r.tablename);
     END LOOP;
+    TRUNCATE auth.users CASCADE;
   END
   \$\$;
 "

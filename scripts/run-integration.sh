@@ -79,6 +79,7 @@ else
       LOOP
         EXECUTE format('TRUNCATE TABLE public.%I RESTART IDENTITY CASCADE', r.tablename);
       END LOOP;
+      TRUNCATE auth.users CASCADE;
     END
     \$\$;
   "
