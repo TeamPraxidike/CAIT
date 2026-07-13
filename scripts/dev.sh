@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-<<<<<<< HEAD
 # early exit if 5173 is occupied
 # TODO: account for flexible port allocation (e.g. 5174, 5175, etc.)
 if lsof -i :5173 &>/dev/null; then
