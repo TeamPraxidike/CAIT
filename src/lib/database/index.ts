@@ -118,6 +118,7 @@ type MaterialForm = {
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
+		selfMade: boolean;
 		tags: string[];
 		maintainers: string[];
 		isDraft: boolean;
