@@ -1,7 +1,8 @@
-import { verifyAuth } from '$lib/database/auth';
-import { type FetchedFileItem, getUserById } from '$lib/database';
+import { getEmailViewer, verifyAuth } from '$lib/database/auth';
+import { type FetchedFileItem } from '$lib/database';
 import { profilePicFetcher } from '$lib/database/file';
 import { getUserByUsername } from '$lib/database/user';
+import { redactEmail } from '$lib/util/emailVisibility';
 
 export async function GET({ params, locals }) {
 	const authError = await verifyAuth(locals);
@@ -15,12 +16,15 @@ export async function GET({ params, locals }) {
 				status: 404,
 			});
 
+		const viewer = await getEmailViewer(locals);
+		const sanitizedUser = redactEmail(user, viewer);
+
 		// profilePic return
 		const profilePicData: FetchedFileItem = await profilePicFetcher(
 			user.profilePic,
 		);
 
-		return new Response(JSON.stringify({ user, profilePicData }), {
+		return new Response(JSON.stringify({ user: sanitizedUser, profilePicData }), {
 			status: 200,
 		});
 	} catch (error) {
