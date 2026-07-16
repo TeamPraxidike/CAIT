@@ -219,6 +219,7 @@ export async function createMaterialPublication(
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
+		selfMade: boolean;
 		isDraft: boolean;
 		course: number;
 	},
@@ -229,6 +230,7 @@ export async function createMaterialPublication(
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,
+			selfMade: metaData.selfMade,
 			encapsulatingType: metaData.materialType[0],
 			publication: {
 				create: {
@@ -274,6 +276,7 @@ export async function updateMaterialByPublicationId(
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
+		selfMade: boolean;
 		isDraft: boolean;
 		fileURLs: string[];
 		course: number | null
@@ -301,6 +304,7 @@ export async function updateMaterialByPublicationId(
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,
+			selfMade: metaData.selfMade,
 			publication: {
 				update: {
 					where: {

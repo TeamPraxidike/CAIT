@@ -125,6 +125,7 @@ describe('create materials', () => {
 			copyright: '© 2024 Quantum Learning Inc.',
 			timeEstimate: 120, // time in minutes
 			theoryPractice: 70,
+			selfMade: false,
 		});
 		expect(material).toMatchObject({
 			id: 3,
@@ -132,6 +133,27 @@ describe('create materials', () => {
 			publicationId: 1,
 		});
 		expect(prisma.material.create).toHaveBeenCalled();
+		const createArg = (prisma.material.create as any).mock.calls[0][0];
+		expect(createArg.data.selfMade).toBe(false);
+	});
+
+	it('should default selfMade to true when omitted resolves via metaData', async () => {
+		prisma.material.create = vi.fn().mockResolvedValue({ id: 9, publicationId: 2 });
+
+		await createMaterialPublication('11', {
+			title: 'T',
+			description: 'D',
+			difficulty: Difficulty.easy,
+			learningObjectives: [],
+			prerequisites: [],
+			materialType: MaterialType.other,
+			copyright: 'c',
+			timeEstimate: 10,
+			theoryPractice: 50,
+			selfMade: true,
+		});
+		const createArg = (prisma.material.create as any).mock.calls[0][0];
+		expect(createArg.data.selfMade).toBe(true);
 	});
 });
 
@@ -162,6 +184,9 @@ describe('update materials', () => {
 			copyright: '© 2024 Quantum Learning Inc.',
 			timeEstimate: 120, // time in minutes
 			theoryPractice: 70,
+			selfMade: false,
+			fileURLs: [],
+			course: 0,
 		});
 		expect(material).toMatchObject({
 			id: 3,
@@ -169,5 +194,7 @@ describe('update materials', () => {
 			publicationId: 1,
 		});
 		expect(prisma.material.update).toHaveBeenCalled();
+		const updateArg = (prisma.material.update as any).mock.calls[0][0];
+		expect(updateArg.data.selfMade).toBe(false);
 	});
 });

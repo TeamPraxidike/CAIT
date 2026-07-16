@@ -518,6 +518,7 @@
 							<span class="font-bold">Time Estimate:</span> {pubView.publication.materials.timeEstimate} </p>
 					{/if}
 					<p class="text-surface-800 "><span class="font-bold">Copyright:</span> {pubView.publication.materials.copyright}</p>
+					<p class="text-surface-800 "><span class="font-bold">Made by uploader:</span> {pubView.publication.materials.selfMade ? 'Yes' : 'No'}</p>
 				{/if}
 			</div>
 			<div class="col-span-full flex flex-col items-start mt-2">
