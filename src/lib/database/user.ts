@@ -67,7 +67,6 @@ export async function createUser(
 		firstName: string;
 		lastName: string;
 		email: string;
-		password: string;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<User> {
@@ -79,7 +78,6 @@ export async function createUser(
 			username: username,
 			email: data.email,
 			isAdmin: false,
-			password: data.password,
 		},
 	});
 }

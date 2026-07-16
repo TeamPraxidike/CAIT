@@ -217,6 +217,7 @@
 						formData.append('type', JSON.stringify(dataMaterial.selectedTypes));
 						formData.append('estimate', JSON.stringify(dataMaterial.estimate));
 						formData.append('copyright', dataMaterial.copyright);
+						formData.append('selfMade', JSON.stringify(dataMaterial.selfMade));
 						formData.append('coverPic', dataMaterial.coverPic || '');
 						formData.append('course', dataMaterial.course ? dataMaterial.course.toString() : 'null');
 

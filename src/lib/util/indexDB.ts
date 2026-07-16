@@ -32,6 +32,7 @@ export type FormSnapshot = {
 	difficulty?: Difficulty; // -- for materials ONLY
 	estimate?: number;  // -- for materials ONLY
 	copyright?: string;  // -- for materials ONLY
+	selfMade?: boolean;  // -- for materials ONLY
 	theoryApplicationRatio?: number;  // -- for materials ONLY
 	fileURLs?: string[]; // -- for materials ONLY
 	circuitNodes?: NodeInfo[]; // -- for circuits ONLY
