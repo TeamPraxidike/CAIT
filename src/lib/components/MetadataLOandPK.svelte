@@ -121,7 +121,7 @@
 
 <div class="flex flex-col md:flex-row justify-between gap-10">
 
-    <div class="flex flex-col space-y-1 w-full max-w-full min-w-0">
+    <div class="flex flex-col space-y-1 w-full max-w-full min-w-0 min-h-0">
         <label for="learningObjective" class="block font-medium">Learning Objectives {#if adding}(at least one)<span class="text-error-300">*</span>{/if}:</label>
 
         <div class="w-full max-w-full">
@@ -143,7 +143,7 @@
             {/if}
 
 
-            <div class="overflow-y-auto max-h-56 mt-1 space-y-1 flex flex-col max-w-full min-w-0">
+            <div class="overflow-y-auto max-h-56 mt-1 space-y-1 max-w-full min-w-0">
                 {#each LOs as LO, index}
                     {#if editingLO && index === editingIndexLO}
                         <input class="focus:border-primary-500 dark:bg-surface-700 bg-surface-200 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md"
@@ -195,7 +195,7 @@
             </div>
         {/if}
 
-        <div class="overflow-y-auto max-h-56 mt-1 space-y-1 flex flex-col max-w-full min-w-0">
+        <div class="overflow-y-auto max-h-56 mt-1 space-y-1 max-w-full min-w-0">
             {#each priorKnowledge as pk, index}
                 {#if editingPK && index === editingIndexPK}
                     <input class="focus:border-primary-500 bg-surface-200 dark:bg-surface-700 focus:ring-0 ring-0 rounded-lg max-h-full w-full text-md" bind:value={editingPKText} on:keypress={handlePKEdit}/>
