@@ -1,7 +1,7 @@
-import postgres from "postgres";
-import "dotenv/config";
+import postgres from 'postgres';
+import 'dotenv/config';
 
-const dbUrl = process.env.DATABASE_URL;
+const dbUrl = process.env.ADMIN_DATABASE_URL ?? process.env.DATABASE_URL;
 
 if (!dbUrl) {
 	throw new Error("Couldn't find db url");

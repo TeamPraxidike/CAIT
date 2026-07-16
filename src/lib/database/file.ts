@@ -2,7 +2,7 @@ import {
 	type FetchedFileItem,
 	type FileDiffActions,
 	fileSystem,
-	prisma
+	prisma,
 } from '$lib/database';
 import { Prisma } from '@prisma/client/extension';
 import type { File as PrismaFile, FileChunk } from '@prisma/client';
@@ -11,53 +11,31 @@ import type { FileChunks } from '$lib/PiscinaUtils/runner';
 import { addFileURL } from '$lib/database/fileURL';
 import { SupabaseFileSystem } from '$lib/FileSystemPort/SupabaseFileSystem';
 
-
-// // TODO: This seems to be useless, could remove if nothing breaks
-// export async function bufToBase64(files: FetchedFileArray) {
-// 	// If JSON stringify cannot handle raw Buffer, use this:
-// 	return files.map((file) => ({
-// 		...file,
-// 		data: file.data.toString(),
-// 	}));
-// }
-// export type ProfilePic = {
-// 	fileId: string;
-// 	data: string | null;
-// }
-
-export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<FetchedFileItem> {
+export async function profilePicFetcher(
+	profilePic: PrismaFile | null,
+): Promise<FetchedFileItem> {
 	let filePath;
 
 	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
 	if (!profilePic) {
-
 		// TODO: Let frontend handle this, just return null and use static content as usual
 
 		filePath = path.join('static', 'defaultProfilePic', 'profile.jpg');
-
-		//const currentFileData = fs.readFileSync(filePath);
-		//const currentFileData = fileSystem.readFile(filePath);
-
 		return {
 			fileId: filePath,
 			//data: currentFileData.toString('base64'),
-			data: null
+			data: null,
 		};
 	} else {
 		// since photo is defined, read the file based on the path (just like a File)
 		filePath = profilePic.path;
-
-		// const currentFileData = await fileSystem.readFile(filePath);
-		// return {
-		// 	fileId: filePath,
-		// 	data: currentFileData.toString('base64'),
-		// };
 		let currentFileData;
 		if (fileSystem instanceof SupabaseFileSystem) {
 			currentFileData = await fileSystem.readFileURL(filePath);
-		}
-		else {
-			currentFileData = (await fileSystem.readFile(filePath)).toString('base64'); //skipcheck
+		} else {
+			currentFileData = (await fileSystem.readFile(filePath)).toString(
+				'base64',
+			); //skipcheck
 		}
 
 		return {
@@ -74,13 +52,11 @@ export async function profilePicFetcher(profilePic: PrismaFile | null): Promise<
  */
 export async function coverPicFetcher(
 	encapsulatingType: string | null = null,
-	coverPic: PrismaFile | null = null
-) : Promise<FetchedFileItem> {
+	coverPic: PrismaFile | null = null,
+): Promise<FetchedFileItem> {
 	let filePath;
 
-	// if coverPic is not defined (falsy), fetch default photo based on encapsulating type
 	if (!coverPic) {
-
 		// TODO: Figure out if this picture is good enough for default
 
 		// TODO: Let frontend handle this, just return null and use static content as usual
@@ -91,30 +67,22 @@ export async function coverPicFetcher(
 			'assignment' + '.jpg',
 		);
 
-		//const currentFileData = fs.readFileSync(filePath);
-		//const currentFileData = fileSystem.readFile(filePath);
-
 		return {
 			fileId: filePath,
-			//data: currentFileData.toString('base64'),
-			data: null
+			data: null,
 		};
 	} else {
 		// since photo is defined, read the file based on the path (just like a File)
 		filePath = coverPic.path;
 
-		// const currentFileData = await fileSystem.readFile(filePath);
-		// return {
-		// 	fileId: filePath,
-		// 	data: currentFileData.toString('base64'),
-		// };
 		let currentFileData;
 		if (fileSystem instanceof SupabaseFileSystem) {
 			currentFileData = await fileSystem.readFileURL(filePath);
-		}
-		else {
+		} else {
 			// TODO: frontend expects urls currently, add base64 checks jic
-			currentFileData = (await fileSystem.readFile(filePath)).toString('base64'); //skipcheck
+			currentFileData = (await fileSystem.readFile(filePath)).toString(
+				'base64',
+			); //skipcheck
 		}
 
 		return {
@@ -140,7 +108,7 @@ export async function addCoverPic(
 				path: path,
 				title: title,
 				type,
-			}
+			};
 			if (isCourse) {
 				query.courseId = id;
 			} else {
@@ -224,9 +192,9 @@ export async function updateCoverPic(
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	// handle both courses and publications
-	let query : any = {publicationId : id}
+	let query: any = { publicationId: id };
 	if (isCourse) {
-		query = {courseId : id}
+		query = { courseId: id };
 	}
 	// check if the publication already has a coverPic
 	const coverFile = await prismaContext.file.findUnique({
@@ -275,10 +243,9 @@ export async function addFile(
 ) {
 	try {
 		let path: string;
-		if (info instanceof Buffer){
+		if (info instanceof Buffer) {
 			path = await fileSystem.saveFile(info, title, ownerId, type);
-		}
-		else path = info;
+		} else path = info;
 
 		try {
 			return prismaContext.file.create({
@@ -363,14 +330,21 @@ export async function updateFiles(
 ) {
 	// add files
 	for (const file of fileInfo.add) {
-		if (file.type == "URL" ) {
+		if (file.type == 'URL') {
 			await addFileURL(file.title, file.info, materialId, prismaContext);
 			continue;
 		}
 		// const buffer: Buffer = Buffer.from(file.info, 'base64');
 		const path: string = file.info;
 
-		await addFile(file.title, file.type, userId, path, materialId, prismaContext);
+		await addFile(
+			file.title,
+			file.type,
+			userId,
+			path,
+			materialId,
+			prismaContext,
+		);
 	}
 
 	// delete files
@@ -393,18 +367,18 @@ export async function updateFiles(
  */
 export async function handleFileTokens(
 	filesToUpdate: { filePath: string; tokens: string; chunks: FileChunks }[],
-	prismaContext: Prisma.TransactionClient = prisma
+	prismaContext: Prisma.TransactionClient = prisma,
 ) {
 	for (const dataCurrent of filesToUpdate) {
 		// Update file text
 		await prisma.file.update({
 			where: { path: dataCurrent.filePath },
-			data: { text: dataCurrent.tokens }
+			data: { text: dataCurrent.tokens },
 		});
 
 		// Delete previous documents
 		await prisma.fileChunk.deleteMany({
-			where: { filePath: dataCurrent.filePath }
+			where: { filePath: dataCurrent.filePath },
 		});
 
 		// Insert new documents using raw SQL for the vector type
@@ -425,7 +399,9 @@ export async function handleFileTokens(
 }
 
 // Select embeddings which are at least 40% similar to the user query, return at most 5
-export async function performCosineSimilarityWithHNSWIndex(embeddedUserQuery: number[]): Promise<(FileChunk & {similarity: number})[]>{
+export async function performCosineSimilarityWithHNSWIndex(
+	embeddedUserQuery: number[],
+): Promise<(FileChunk & { similarity: number })[]> {
 	return prisma.$queryRaw`
     SELECT id, content, metadata, "filePath", 
            (1 - (embedding <=> ${embeddedUserQuery}::vector)) AS similarity
@@ -454,7 +430,9 @@ export async function getFileChunks() {
 		content: doc.content,
 		metadata: doc.metadata,
 		filePath: doc.filePath,
-		embedding: doc.embedding_text ? parseVectorString(doc.embedding_text) : null
+		embedding: doc.embedding_text
+			? parseVectorString(doc.embedding_text)
+			: null,
 	}));
 }
 
@@ -467,19 +445,15 @@ function parseVectorString(vectorStr: string): number[] {
 			.replace('[', '')
 			.replace(']', '')
 			.split(',')
-			.map(num => parseFloat(num.trim()));
+			.map((num) => parseFloat(num.trim()));
 	} catch (e) {
 		console.error('Error parsing vector string:', e);
 		return [];
 	}
 }
 
-
-
-export async function getFilesForMaterial(
-	materialId: number
-) {
+export async function getFilesForMaterial(materialId: number) {
 	return prisma.file.findMany({
 		where: { materialId: materialId },
-	})
+	});
 }

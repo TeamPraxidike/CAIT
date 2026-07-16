@@ -1,7 +1,7 @@
 import postgres from "postgres";
 import "dotenv/config";
 
-const dbUrl = process.env.DATABASE_URL;
+const dbUrl = process.env.ADMIN_DATABASE_URL ?? process.env.DATABASE_URL;
 
 if (!dbUrl) {
 	throw new Error("Couldn't find db url");
@@ -23,6 +23,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."User" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."User" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public User" ON public."User";
             CREATE POLICY "Admin access to public User" ON public."User"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -38,6 +39,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."PublicationUsedInCourse" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."PublicationUsedInCourse" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public PublicationUsedInCourse" ON public."PublicationUsedInCourse";
             CREATE POLICY "Admin access to public PublicationUsedInCourse" ON public."PublicationUsedInCourse"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -53,6 +55,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."Publication" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."Publication" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public Publication" ON public."Publication";
             CREATE POLICY "Admin access to public Publication" ON public."Publication"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -68,6 +71,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."SimilarContent" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."SimilarContent" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public SimilarContent" ON public."SimilarContent";
             CREATE POLICY "Admin access to public SimilarContent" ON public."SimilarContent"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -83,6 +87,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."Material" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."Material" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public Material" ON public."Material";
             CREATE POLICY "Admin access to public Material" ON public."Material"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -98,6 +103,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."File" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."File" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public File" ON public."File";
             CREATE POLICY "Admin access to public File" ON public."File"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -113,6 +119,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."Circuit" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."Circuit" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public Circuit" ON public."Circuit";
             CREATE POLICY "Admin access to public Circuit" ON public."Circuit"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -128,6 +135,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."Node" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."Node" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public Node" ON public."Node";
             CREATE POLICY "Admin access to public Node" ON public."Node"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -143,6 +151,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."Edge" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."Edge" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public Edge" ON public."Edge";
             CREATE POLICY "Admin access to public Edge" ON public."Edge"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -158,6 +167,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."Tag" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."Tag" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public Tag" ON public."Tag";
             CREATE POLICY "Admin access to public Tag" ON public."Tag"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -173,6 +183,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."Comment" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."Comment" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public Comment" ON public."Comment";
             CREATE POLICY "Admin access to public Comment" ON public."Comment"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -188,6 +199,7 @@ async function main() {
             REVOKE SELECT, INSERT, UPDATE, DELETE ON public."Reply" FROM anon;
             GRANT SELECT, INSERT, UPDATE, DELETE ON public."Reply" TO authenticated;
 
+            DROP POLICY IF EXISTS "Admin access to public Reply" ON public."Reply";
             CREATE POLICY "Admin access to public Reply" ON public."Reply"
             -- For all means for select, insert, update and delete
 			FOR ALL
@@ -200,6 +212,7 @@ async function main() {
 	}
 	catch (error) {
 		console.error(error);
+		process.exit(1);
 	}
 
 	console.log(

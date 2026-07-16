@@ -8,7 +8,7 @@ import {
 } from '$lib/database';
 import { Prisma } from '@prisma/client';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
-import { uuid } from '@supabase/supabase-js/dist/main/lib/helpers';
+import { randomUUID as uuid } from 'node:crypto';
 import { createUniqueUser, createUserInputObject, type UserInput } from '../../utility/users';
 
 //await resetUserTable();

@@ -1,17 +1,10 @@
 <script lang="ts">
-	import {
-		Meta,
-		PublicationCard
-	} from '$lib';
+	import { Meta, PublicationCard } from '$lib';
 	import CourseProfileBar from '$lib/components/course/CourseProfileBar.svelte';
 	import type { LayoutData, PageServerData } from './$types';
-	import {
-		type User,
-		type Reply,
-		type Comment as PrismaComment,
-	} from '@prisma/client';
+	import { type Comment as PrismaComment, type Reply, type User } from '@prisma/client';
 	import { page } from '$app/state';
-	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
+	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 
 	/* This is the data that was returned from the server */
 	export let data: LayoutData & PageServerData;
@@ -145,43 +138,6 @@
 				{/await}
 			
 			</div>
-			<!-- {:else if tabSet === 1}
-				<span class="bg-red-600"
-					>Currently commenting does not work, as courses do not
-					support comments to be added</span>
-					
-				{#if data.session?.user && course?.id}
-					<AddInteractionForm
-						publisher={loggedUser}
-						on:addedReply={addComment}
-						addComment={true}
-						commentId={1}
-						publicationId={course.id} />
-				{/if}
-
-				{#each comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as comment (comment.id)}
-					<Comment
-						commenter={loggedUser}
-						on:likeUpdate={updateLikes}
-						on:ReplyAction={addReply}
-						interaction={comment}
-						photoUrl={comment.user.profilePicData}
-						isReply={false}
-						userName="{comment.user.firstName} {comment.user
-							.lastName}"
-						liked={likedComments.includes(comment.id)} />
-					{#each comment.replies.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) as reply (reply.id)}
-						<Comment
-							commenter={loggedUser}
-							on:likeUpdate={updateLikes}
-							interaction={reply}
-							isReply={true}
-							photoUrl={reply.user.profilePicData}
-							userName="{reply.user.firstName} {reply.user
-								.lastName}"
-							liked={likedReplies.includes(reply.id)} />
-					{/each}
-				{/each} -->
 			{/if}
 		</svelte:fragment>
 	</TabGroup>
