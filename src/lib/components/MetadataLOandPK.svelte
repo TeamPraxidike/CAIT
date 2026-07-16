@@ -121,7 +121,7 @@
 
 <div class="flex flex-col md:flex-row justify-between gap-10">
 
-    <div class="flex flex-col space-y-1 w-full max-w-full min-w-0 min-h-0">
+    <div class="flex flex-col space-y-1 w-full max-w-full min-w-0">
         <label for="learningObjective" class="block font-medium">Learning Objectives {#if adding}(at least one)<span class="text-error-300">*</span>{/if}:</label>
 
         <div class="w-full max-w-full">
