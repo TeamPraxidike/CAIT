@@ -1,5 +1,6 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
+import type { EmailVisibility } from '@prisma/client';
 import { createClient } from '@supabase/supabase-js';
 import { SERVICE_ROLE_KEY } from '$env/static/private';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
@@ -225,6 +226,20 @@ export async function editUser(
 			email: user.email,
 			username: username,
 			aboutMe: user.aboutMe,
+		},
+	});
+}
+
+export async function setEmailVisibility(
+	userId: string,
+	visibility: EmailVisibility,
+	prismaContext: Prisma.TransactionClient = prisma,
+): Promise<User> {
+	return prismaContext.user.update({
+		where: { id: userId },
+		data: {
+			emailVisibility: visibility,
+			emailVisibilityPrompted: true,
 		},
 	});
 }
