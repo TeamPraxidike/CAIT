@@ -25,6 +25,8 @@
 
 
 
+    $: hasEmail = !!target_user?.email;
+
     let createSubject = () => {
          if (isPublication){
             return `Question about your publication: ${subjectName} on CAIT`;
@@ -56,9 +58,11 @@
 
 </script>
 
-<a
-    href = {generateMailTo()}
-    class={style}
->
-Contact
-</a>
+{#if hasEmail}
+    <a
+        href = {generateMailTo()}
+        class={style}
+    >
+    Contact
+    </a>
+{/if}
