@@ -46,7 +46,7 @@
 
 <Meta title="Profile" description="CAIT" type="site" />
 
-<UserProfileBar user={user} userPhotoUrl={profilePic.data} bind:tabset={tabSet}/>
+<UserProfileBar user={user} userPhotoUrl={profilePic.data} bind:tabset={tabSet} memberSince={data.memberSince}/>
 
 
 

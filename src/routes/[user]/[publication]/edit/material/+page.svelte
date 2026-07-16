@@ -68,6 +68,7 @@
 	let course: number | null = data.pubView.publication.course?.id || null;
 	let estimate: number = data.pubView.publication.materials.timeEstimate || 0;
 	let copyright: string = data.pubView.publication.materials.copyright;
+	let selfMade: boolean = data.pubView.publication.materials.selfMade ?? true;
 	let selectedTypes: string[] = [data.pubView.publication.materials.encapsulatingType];
 
 	let loadingFiles: boolean = false;
@@ -165,7 +166,8 @@
 		course,
 		coverPic,
 		estimate,
-		copyright
+		copyright,
+		selfMade
 	}
 
 

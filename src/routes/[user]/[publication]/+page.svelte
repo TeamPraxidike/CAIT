@@ -7,7 +7,8 @@
 		FileTable,
 		getDateDifference, HorizontalScroll,
 		Meta, Tag,
-		UserProp
+		UserProp,
+		ShareButton
 	} from '$lib';
     import {fly} from 'svelte/transition';
     import {TabGroup, Tab} from '@skeletonlabs/skeleton';
@@ -488,6 +489,7 @@
 							<span class="font-bold">Time Estimate:</span> {pubView.publication.materials.timeEstimate} </p>
 					{/if}
 					<p class="text-surface-800 "><span class="font-bold">Copyright:</span> {pubView.publication.materials.copyright}</p>
+					<p class="text-surface-800 "><span class="font-bold">Made by uploader:</span> {pubView.publication.materials.selfMade ? 'Yes' : 'No'}</p>
 				{/if}
 			</div>
 			<div class="col-span-full flex flex-col items-start mt-2">
@@ -509,6 +511,16 @@
 							on:click={() => toggleSave()}>
 						<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
 					</button>
+
+					{#if !pubView.publication.isDraft}
+						<ShareButton
+							path={`/${pubView.publication.publisher.username}/${pubView.publication.id}`}
+							title={pubView.publication.title}
+							description={pubView.publication.description}
+							learningObjectives={pubView.publication.learningObjectives}
+							style="flex items-center text-xl btn text-surface-500 px-2"
+						/>
+					{/if}
 
 					<div bind:this={hoverDivReport}>
 						<button on:click={toggleReport} class="pl-2 pr-1">

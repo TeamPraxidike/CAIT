@@ -24,6 +24,7 @@ import HorizontalScroll from '$lib/components/HorizontalScroll.svelte';
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
 import PublishReview from '$lib/components/PublishReview.svelte';
+import ShareButton from '$lib/components/publication/ShareButton.svelte';
 import type { UserSanitizedWithProfilePicData } from '$lib/util/types';
 
 // util
@@ -68,6 +69,7 @@ export {
 	PublishReview,
 	HorizontalScroll,
 	MaterialTypes,
+	ShareButton,
 };
 
 export type { UserSanitizedWithProfilePicData };

@@ -259,7 +259,7 @@
 	</div>
 						
 
-	<span slot="interaction-buttons">
+	<span slot="interaction-buttons" class="flex items-center gap-2">
 		{#if !inCircuits}
 							<a href="/{publisher.username}/{publication.id}"
 							   class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"

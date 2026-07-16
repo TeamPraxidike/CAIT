@@ -5,6 +5,7 @@
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 	import CopyrightPopup from '../CopyrightPopup.svelte';
+	import { SlideToggle } from '@skeletonlabs/skeleton';
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial | null;
@@ -54,6 +55,15 @@
 				</div>
 
 			</div>
+		</div>
+
+		<div class="w-full">
+			<SlideToggle name="selfMade" size="sm" active="bg-primary-500" bind:checked={dataMaterial.selfMade}>
+				I made this material myself
+			</SlideToggle>
+			<p class="text-sm text-surface-500 dark:text-surface-400 mt-1">
+				Turn this off if you are sharing or linking material created by someone else.
+			</p>
 		</div>
 	{/if}
 
