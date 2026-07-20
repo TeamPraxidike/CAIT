@@ -92,6 +92,11 @@ export type PublicationGet = Prisma.PublicationGetPayload<{
 				profilePic: true,
 			},
 		},
+		course: {
+			select: {
+				educationalLevel: true
+			}
+		}
 	}
 }>;
 /**
@@ -231,6 +236,11 @@ export async function getAllPublications(publishers: string[], query: string,
 					profilePic: true
 				}
 			},
+			course: {
+				select: {
+					educationalLevel: true
+				}
+			}
 		},
 	});
 	if (!includeDrafts) {

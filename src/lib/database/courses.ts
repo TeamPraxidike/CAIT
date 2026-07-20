@@ -153,7 +153,8 @@ export async function findCourseByMantainerExtended(userId: string): Promise<Cou
 			maintainers: {
 				include: { profilePic: true }
 			},
-			coverPic: true
+			coverPic: true,
+			publications: true
 		}
 	});
 

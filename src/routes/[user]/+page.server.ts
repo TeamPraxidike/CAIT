@@ -39,8 +39,14 @@ export const load: PageServerLoad = async ({
 	const savedByUserRes = await fetch(
 		`/api/user/${session.user.id}/saved?fullPublications=false`,
 	);
+	const coursesRes = await fetch(
+		`/api/course-extended/user/${layoutData.user.id}`
+	);
 	if (![200, 204].includes(savedByUserRes.status)) {
 		throw new Error('Failed to fetch saved by user materials');
+	}
+	if (![200, 204].includes(coursesRes.status)) {
+		throw new Error('Failed to fetch courses by user');
 	}
 
 	const likedResponse = await fetch(`/api/user/${session.user.id}/liked`);
@@ -65,11 +71,17 @@ export const load: PageServerLoad = async ({
 		savedByUserRes.status === 204
 			? { saved: [] }
 			: await savedByUserRes.json();
+
+	const coursesWithPics = coursesRes.status === 204
+		? { coursesWithPics: [] }
+		: await coursesRes.json();
+
 	const publications: ExtendedPublication[] = (await pubsRes.json()).publications;
 	
 	return {
 		publications,
 		saved,
+		coursesWithPics,
 		savedFileData,
 		liked,
 		savedByUser: savedByUser.saved,
