@@ -8,6 +8,7 @@
 	import type { UserWithProfilePic } from '$lib/util/coursesLogic.ts';
 	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
+	import CourseModal2 from '$lib/components/course/CourseModal2.svelte';
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial;
@@ -88,7 +89,7 @@
 
 
 {#if showModal}
-	<CourseModal existingCourse={editingCourse} close={closeModal} publisher={data.loggedUser} bind:searchableUsers={data.searchableUsers} users={paramsImmutable.users}
+	<CourseModal2 existingCourse={editingCourse} close={closeModal} publisher={data.loggedUser} bind:searchableUsers={data.searchableUsers} users={paramsImmutable.users}
 				 bind:showCourseProgressRadial={dataMaterial.showCourseProgressRadial}
 				 bind:additionalMaintainers={courseMaintainers}
 				 on:courseDeleted={(event) => {
