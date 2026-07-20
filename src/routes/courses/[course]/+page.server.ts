@@ -110,11 +110,6 @@ export const load: PageServerLoad = async ({
 	// const liked =
 	// 	likedResponse.status === 200 ? await likedResponse.json() : [];
 
-	// const usedResponse = await fetch(
-	// 	`/api/user/${session.user.id}/use-in-course`,
-	// );
-	// const used = usedResponse.status === 200 ? await usedResponse.json() : [];
-
 	// const savedJson =
 	// 	savedRes === null || savedRes.status === 204
 	// 		? { saved: [], savedFileData: [] }
@@ -161,7 +156,4 @@ export type PublicationInfo = {
 		coverId: number | null;
 		materialId: number | null;
 	} | null;
-	usedInCourse: {
-		course: string;
-	}[];
 };

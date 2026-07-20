@@ -386,7 +386,6 @@ export const getExtensions = (
 	material: Material & {
 		publication: Publication & {
 			tags: Tag[];
-			usedInCourse: { course: string }[];
 		};
 		files: PrismaFile[];
 	},
