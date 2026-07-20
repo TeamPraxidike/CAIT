@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
-	import CourseModal from '$lib/components/publication/CourseModal.svelte';
+	import CourseModal from '$lib/components/course/CourseModal.svelte';
 	import ShareButton from '../publication/ShareButton.svelte';
 	import { UserProp } from '$lib';
 

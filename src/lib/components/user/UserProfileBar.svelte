@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from '$app/state';
     import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
-    import CourseModal from '$lib/components/publication/CourseModal.svelte';
+    import CourseModal from '$lib/components/course/CourseModal.svelte';
 	import ContactUser from './ContactUser.svelte';
 	import { formatMemberSince } from '$lib/util/date';
 
@@ -16,7 +16,6 @@
 
     const numPosts = user.posts.filter((x) => !x.isDraft).length
     const numDrafts = user.posts.filter((x) => x.isDraft).length
-    const courses = ["CSE3000"]
 
     /**
      * Check if the current user is the same as the user being viewed.

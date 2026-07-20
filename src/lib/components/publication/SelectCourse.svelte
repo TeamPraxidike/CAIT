@@ -95,14 +95,7 @@
 	}
 
 	const openNewCourseModal = () => {
-		showModal = true;
 		dispatch('showCourseModal');
-	};
-
-	const closeModal = () => (showModal = false);
-
-	const refresh = () => {
-		// invalidate current page data or manually refetch from endpoint
 	};
 </script>
 
