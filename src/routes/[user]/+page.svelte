@@ -46,6 +46,7 @@
         if(publication.type === PublicationType.Material) return publication.materials.encapsulatingType;
         else return PublicationType.Circuit;
     }
+
 	console.log(courses);
 </script>
 
@@ -107,9 +108,8 @@
 									 emptyMessage="So empty... There are no publications here"
 									 {liked} {data} {getEncapsulatingType} />
 				{:else if publicTabSet === 1}
-					<PublicationGrid publications={[]}
-									 emptyMessage="Nothing here yet"
-									 {liked} {data} {getEncapsulatingType} />
+					<CourseGrid courses={courses}
+								emptyMessage="So empty... There are no courses here" />
 				{/if}
 			</svelte:fragment>
 		</TabGroup>
