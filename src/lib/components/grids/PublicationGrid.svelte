@@ -12,7 +12,7 @@
 	<p class="col-span-2 text-center">{emptyMessage}</p>
 {:else}
 	<div class="grid grid-cols-2 gap-4">
-		{#each publications as publication, i}
+		{#each publications as publication}
 			<div class="col-span-1">
 				<PublicationCard imgSrc={publication.coverPicData}
 								 publication={publication}

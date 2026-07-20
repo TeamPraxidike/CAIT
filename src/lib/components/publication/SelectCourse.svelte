@@ -85,16 +85,6 @@
 		}
 	}
 
-	let showModal = false;
-
-	function handleDeletion(e: CustomEvent<{ courseId: number }>) {
-		const courseId = e.detail.courseId;
-		courses = courses.filter((c) => c.id !== courseId);
-		if (selectedCourseId === courseId) {
-			selectedCourseId = null;
-		}
-		dispatch('courseDeleted', { courseId });
-	}
 
 	function handleDeselection() {
 		dispatch('deselectCourse');

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Meta, PublicationCard, UserProfileBar } from '$lib';
+	import { Meta, UserProfileBar } from '$lib';
 	import type { LayoutData, PageServerData } from './$types';
     import { type Material, type Publication, PublicationType, type Tag, type User } from '@prisma/client';
 	import type { FetchedFileItem } from '$lib/database';

@@ -9,7 +9,7 @@
 	import type { CourseWithCoverPic } from '$lib/database/courses';
 	import MantainersEditBar from '$lib/components/user/MantainersEditBar.svelte';
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
-	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
 	import { deleteCourseById } from '$lib/util/coursesLogic';
 	import { downloadFileFromSupabase } from '$lib/util/file';

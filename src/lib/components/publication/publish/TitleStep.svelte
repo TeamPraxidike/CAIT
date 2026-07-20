@@ -6,7 +6,6 @@
 	import type { CourseWithCoverPic } from '$lib/database/courses.ts';
 	import { tick } from 'svelte';
 	import type { UserWithProfilePic } from '$lib/util/coursesLogic.ts';
-	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 	import CourseModal2 from '$lib/components/course/CourseModal2.svelte';
 
