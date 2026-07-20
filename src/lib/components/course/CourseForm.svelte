@@ -99,9 +99,6 @@
 
 <ConfirmDeleteCourse bind:this={confirmDelete} />
 
-
-<ConfirmDeleteCourse bind:this={confirmDelete} />
-
 <form
 	action={isEdit ? `?/editCourse` : "?/publishCourse"}
 	method="POST"

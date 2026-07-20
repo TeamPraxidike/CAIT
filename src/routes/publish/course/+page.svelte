@@ -1,5 +1,4 @@
 <script lang="ts">
-	import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { PageServerData } from './$types';
@@ -9,7 +8,7 @@
 	export let data: PageServerData;
 
 	const loggedUser = page.data.loggedUser as UserWithProfilePic;
-	let searchableUsers: UserWithProfilePic[] = data.users.filter((u) => u.id !== loggedUser.id);
+	let searchableUsers: UserWithProfilePic[] = data.users.filter((u: UserWithProfilePic) => u.id !== loggedUser.id);
 
 	// Get course ID from URL params if editing
 	const courseId = new URLSearchParams(page.url.search).get('id');
@@ -20,17 +19,17 @@
 		? (existingCourse.maintainers || []).filter((m: any) => m.id !== loggedUser.id)
 		: [];
 
-	function closeModal() {
-		goto(new URLSearchParams(page.url.search).get('returnTo') || '/publish/materials');
-	}
 </script>
 
-<CourseForm
-	existingCourse={null}
-	publisher={loggedUser}
-	bind:searchableUsers={searchableUsers}
-	users={data.users}
-	bind:showCourseProgressRadial
-	bind:additionalMaintainers
-	on:courseCreated={() => goto('/courses')}
-/>
+<div class="col-span-full">
+	<CourseForm
+		existingCourse={null}
+		publisher={loggedUser}
+		bind:searchableUsers={searchableUsers}
+		users={data.users}
+		close={() => {}}
+		bind:showCourseProgressRadial
+		bind:additionalMaintainers
+		on:courseCreated={() => goto('/browse?type=courses')}
+	/>
+</div>
