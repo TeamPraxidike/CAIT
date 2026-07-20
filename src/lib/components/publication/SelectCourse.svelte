@@ -135,10 +135,6 @@
 								bind:course
 								bind:selectedCourseId
 								bind:previousCourseId
-								canDelete={originalCourseIds.includes(
-									course.id,
-								)}
-								on:courseDeleted={handleDeletion}
 								on:deselectCourse={handleDeselection}
 								on:editCourse={handleEdit} />
 						{/each}
