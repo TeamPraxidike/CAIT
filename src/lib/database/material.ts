@@ -8,11 +8,6 @@ export type MaterialWithPublication = Prisma.MaterialGetPayload<{
 			include: {
 				tags: true,
 				coverPic: true,
-				usedInCourse: {
-					select: {
-						course: true,
-					},
-				},
 				publisher: {
 					include: {
 						profilePic: true,
@@ -81,11 +76,6 @@ export async function getMaterialByPublicationId(
 							user: true,
 						},
 					},
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 				},
 			},
 			files: true,
@@ -139,11 +129,6 @@ export async function getAllMaterials(
 				include: {
 					tags: true,
 					coverPic: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 					course: {
 						select: {
 							educationalLevel: true
@@ -341,11 +326,6 @@ export async function getMaterialForFile(
 						include: {
 							tags: true,
 							coverPic: true,
-							usedInCourse: {
-								select: {
-									course: true,
-								},
-							},
 							publisher: {
 								include: {
 									profilePic: true,

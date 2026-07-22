@@ -20,7 +20,6 @@
     type publication = (Publication & {
         materials: Material,
         tags: Tag[];
-        usedInCourse: {course: string}[];
         coverPicData: string;
         publisher: User & {profilePicData: string};
     });
@@ -74,7 +73,6 @@
                                     <PublicationCard imgSrc={publication.coverPicData}
                                                      publication={publication}
                                                      liked={liked.includes(publication.id)}
-                                                     courses={posts[i].usedInCourse.map(x => x.course)}
                                                      saved={data.savedByUser.includes(publication.id)}
                                                      publisher={publication.publisher}
                                                      materialType={getEncapsulatingType(publication)}/>
@@ -89,8 +87,6 @@
                                 <div class="col-span-1">
                                     <PublicationCard imgSrc={publication.coverPicData}
                                                      {publication} liked={liked.includes(publication.id)}
-                                                     markAsUsed={true}
-                                                     courses={publication.usedInCourse.map(x => x.course)}
                                                      publisher={publication.publisher}
                                                      materialType={getEncapsulatingType(publication)}/>
                                 </div>
@@ -107,7 +103,6 @@
                                     <PublicationCard imgSrc={publication.coverPicData}
                                                      publication={publication}
                                                      liked={liked.includes(publication.id)}
-                                                     courses={posts[i].usedInCourse.map(x => x.course)}
                                                      saved={data.savedByUser.includes(publication.id)}
                                                      publisher={publication.publisher}
                                                      materialType={getEncapsulatingType(publication)}/>
@@ -130,7 +125,6 @@
                     <PublicationCard imgSrc={publication.coverPicData}
                                      publication={publication}
                                      liked={liked.includes(publication.id)}
-                                     courses={posts[i].usedInCourse.map(x => x.course)}
                                      saved={data.savedByUser.includes(publication.id)}
                                      publisher={publication.publisher}/>
                 {/each}

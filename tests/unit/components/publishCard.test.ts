@@ -51,7 +51,6 @@ describe('Filter Component', () => {
 					publisherId: 'hello',
 					type: 'Material',
 					tags: [{ content: 'tag1' }],
-					usedInCourse: [],
 				},
 			},
 		});

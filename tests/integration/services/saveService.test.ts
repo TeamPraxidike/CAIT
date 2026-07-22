@@ -1,9 +1,6 @@
 import { it, expect, describe, beforeEach } from 'vitest';
 import { type User } from '@prisma/client';
 import {
-	addPublicationToUsedInCourse,
-} from '$lib/database';
-import {
 	getSavedPublications,
 	isPublicationSaved,
 	savePublication,
@@ -59,22 +56,6 @@ describe('Saving publications', () => {
 		if (saved === null)
 			throw new Error('Could not get saved publications list');
 		expect(saved.saved.length).toBe(1);
-	});
-
-	it('correctly returns used courses', async () => {
-		await addPublicationToUsedInCourse(user.id, publication.publicationId, [
-			'ADS',
-			'Calculus',
-		]);
-		const saved = await getSavedPublications(user.id);
-		if (saved === null)
-			throw new Error('Could not get saved publications list');
-
-		expect(saved.saved.length).toBe(1);
-		expect(saved.saved[0].usedInCourse).toHaveLength(2);
-		const used = saved.saved[0].usedInCourse.map((x) => x.course);
-		expect(used).toContain('ADS');
-		expect(used).toContain('Calculus');
 	});
 
 	it('should get whether a publication was saved', async () => {

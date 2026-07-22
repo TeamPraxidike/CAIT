@@ -160,7 +160,6 @@ describe('comparison functions', () => {
 				posts: [],
 				liked: [],
 				reported: [],
-				usedPublications: [],
 				likedComments: [],
 				likedReplies: [],
 				maintaining: [],
@@ -184,7 +183,6 @@ describe('comparison functions', () => {
 			coverPic: null,
 			similarToThis: [],
 			thisSimilarTo: [],
-			usedInCourse: []
 		}
 		const mockMaterial = {
 			id: 1,
@@ -236,7 +234,6 @@ describe('comparison functions', () => {
 				posts: [],
 				liked: [],
 				reported: [],
-				usedPublications: [],
 				likedComments: [],
 				likedReplies: [],
 				maintaining: [],
@@ -260,7 +257,6 @@ describe('comparison functions', () => {
 			coverPic: null,
 			similarToThis: [],
 			thisSimilarTo: [],
-			usedInCourse: []
 		}
 		const mockMaterial2 = {
 			id: 1,
