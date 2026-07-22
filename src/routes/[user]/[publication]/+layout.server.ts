@@ -86,7 +86,6 @@ export type PublicationView = {
 	isMaterial: boolean;
 	//fileData: Promise<FetchedFileArray>;
 	publication: Publication & {
-		usedInCourse: { course: string }[];
 		tags: Tag[];
 		publisher: UserPfp;
 		maintainers: UserPfp[];
@@ -104,7 +103,6 @@ export type PublicationView = {
 			nodes: (PrismaNode & {
 				publication: Publication & {
 					tags: Tag[];
-					usedInCourse: { course: string }[];
 					publisher: UserPfp;
 					coverPicData: string;
 					materials: Material;

@@ -265,7 +265,6 @@ export type PublicationWithRelations = Prisma.PublicationGetPayload<{
     thisSimilarTo: true;
     materials: true;
     circuit: true;
-    usedInCourse: true;
     course: true;
   };
 }>;
@@ -295,7 +294,6 @@ export async function getPublicationsForCourse(c: Number): Promise<PublicationWi
 			thisSimilarTo: true,
 			materials: true,
 			circuit: true,
-			usedInCourse: true,
 			course: true
 		} // optional, if you want newest first
 	});

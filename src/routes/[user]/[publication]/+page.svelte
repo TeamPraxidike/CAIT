@@ -341,14 +341,11 @@
 
 	let hoverDivReport: HTMLDivElement;
 	let isHoveredReport = false;
-	let hoverDiv: HTMLDivElement;
-	let isHovered = false;
 	let hoverEdit: HTMLButtonElement;
 	let isHoveredEdit = false;
 	let hoverDelete: HTMLButtonElement;
 	let isHoveredDelete = false;
 	const handleHoverReport = () => isHoveredReport = !isHoveredReport;
-	const handleHover = () => isHovered = !isHovered;
 	const handleHoverDelete = () => isHoveredDelete = !isHoveredDelete;
 	const handleHoverEdit = () => isHoveredEdit = !isHoveredEdit;
 
@@ -356,11 +353,9 @@
 	$: editIcon = isHoveredEdit ? 'mdi:pencil' : 'mdi:pencil-outline';
 
 	onMount(() => {
-		if (hoverDivReport && hoverDiv && hoverEdit && hoverDelete) {
+		if (hoverDivReport && hoverEdit && hoverDelete) {
 			hoverDivReport.addEventListener('mouseenter', handleHoverReport);
 			hoverDivReport.addEventListener('mouseleave', handleHoverReport);
-			hoverDiv.addEventListener('mouseenter', handleHover);
-			hoverDiv.addEventListener('mouseleave', handleHover);
 
 			hoverEdit.addEventListener('mouseenter', handleHoverEdit);
 			hoverEdit.addEventListener('mouseleave', handleHoverEdit);
@@ -370,8 +365,6 @@
 			return () => {
 				hoverDivReport.removeEventListener('mouseenter', handleHoverReport);
 				hoverDivReport.removeEventListener('mouseleave', handleHoverReport);
-				hoverDiv.removeEventListener('mouseenter', handleHover);
-				hoverDiv.removeEventListener('mouseleave', handleHover);
 
 				hoverEdit.removeEventListener('mouseenter', handleHoverEdit);
 				hoverDelete.removeEventListener('mouseenter', handleHoverDelete);
@@ -455,28 +448,6 @@
 
 	<!--  LEFT BIG COLUMN  -->
 	<div class="flex flex-col gap-2 lg:col-span-3">
-		<div class="grid grid-cols-6">
-			<div bind:this={hoverDiv} class="col-span-2">
-				{#if pubView.publication.usedInCourse.length === 1}
-					<p class="text-sm opacity-85 break-words max-w-full underline">Material is used
-						in {pubView.publication.usedInCourse.length} course</p>
-				{:else if pubView.publication.usedInCourse.length > 1}
-					<p class="text-sm opacity-85 break-words max-w-full underline">Material is used
-						in {pubView.publication.usedInCourse.length} courses</p>
-				{/if}
-
-				{#if isHovered}
-					<div
-						class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300 flex-col"
-						style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-						{#each pubView.publication.usedInCourse.map(x => x.course) as course}
-							<p class="text-sm opacity-85 break-words max-w-full">{course}</p>
-						{/each}
-					</div>
-				{/if}
-			</div>
-		</div>
-
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 			<section aria-labelledby="learning-objectives-heading">
 				<h2 id="learning-objectives-heading" class="text-lg font-semibold text-surface-900 dark:text-surface-50">

@@ -1,7 +1,7 @@
 <script lang="ts">
 
 
-	import { getDateDifference, Tag, UsedInCourse } from '$lib';
+	import { getDateDifference, Tag } from '$lib';
 
 	import Icon from '@iconify/svelte';
 	import { fly } from 'svelte/transition';
@@ -10,15 +10,10 @@
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { page } from '$app/state';
 	import {
-		getModalStore,
 		initializeStores,
-		Modal,
-		type ModalComponent,
-		type ModalSettings,
 		popup
 	} from '@skeletonlabs/skeleton';
     import {IconMapExtension, PublicationTypeIconMap} from '$lib/util/file';
-	import { coursesStore } from '$lib/stores/courses';
 	import {typeToHumanString} from "$lib/util/types";
 	import LevelIcon from '$lib/components/publication/card/LevelIcon.svelte';
 	import BrowseCardShell from './BrowseCardShell.svelte';
@@ -26,7 +21,6 @@
 	export let publication: Publication & {
 		materials : Material
 		tags: { content: string }[],
-		usedInCourse: { course: string }[]
 		course: { educationalLevel: string } | null
 	};
 
@@ -37,15 +31,11 @@
 
 	initializeStores();
 
-	const modalStore = getModalStore();
-
 	export let className: string = 'col-span-4 lg:col-span-3 3xl:col-span-2';
 	export let liked: boolean = true;
 	export let saved: boolean = true;
 	export let tags: string[] = publication.tags.map(tag => tag.content);
 	export let imgSrc: string | null;
-	// export let markAsUsed: boolean = false;
-	export let courses: string[] = publication.usedInCourse.map(usedInCourse => usedInCourse.course);
 
 	export let extensions: string[] = [];
 	export let materialType: string = "information";
@@ -61,7 +51,6 @@
 
 	$:likedColor = liked ? 'text-secondary-500' : 'text-surface-500';
 	$:savedColor = saved ? 'text-secondary-500' : 'text-surface-500';
-	$:used = courses.length;
 
     let likes = publication.likes;
     const toggleLike = async () => {
@@ -168,37 +157,6 @@
 		dispatch('resetTab', { tabValue: 0 });
 	};
 
-	let modalRegistry: Record<string, ModalComponent> = {
-		// Set a unique modal ID, then pass the component reference
-		useInCourseComponent: {
-			ref: UsedInCourse,
-			props: {
-				courses: courses,
-				publicationId: publication.id
-			}
-		}
-	};
-
-	const modal: ModalSettings = {
-		type: 'component',
-		component: 'useInCourseComponent',
-		response: () => {
-			if ($coursesStore.length !== 0) {
-				courses = $coursesStore.filter(x => x.publicationId === publication.id)[0].courses;
-				modalRegistry = {
-					useInCourseComponent: {
-						ref: UsedInCourse,
-						props: {
-							courses: courses,
-							publicationId: publication.id
-						}
-					}
-				};
-			}
-
-		}
-	};
-
 	const popupClickPubCard: PopupSettings = {
 		event: 'click',
 		target: popupName,
@@ -233,12 +191,6 @@
 				<div class="absolute mt-2 right-1 text-xs p-1 rounded-md bg-warning-100 text-warning-700 font-bold">
 					<p class="text-sm font-semibold">Draft</p>
 				</div>
-			<!--{:else if used === 1}-->
-			<!--	<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">-->
-			<!--		Used in {used} course</p>-->
-			<!--{:else if used > 0}-->
-			<!--	<p class="absolute mt-2 right-1 text-xs p-1 rounded-md variant-soft-surface bg-surface-100 font-bold">-->
-			<!--		Used in {used} courses</p>-->
 			{/if}
 	</div>
 
@@ -328,12 +280,6 @@
 								<div class="arrow bg-surface-100-token" />
 							</div>
 						{/if}
-
-						<!--{#if markAsUsed}-->
-						<!--	<button type="button" on:click={() => modalStore.trigger(modal)}>-->
-						<!--		<span class="w-full line-clamp-3 text-sm text-surface-500 dark:text-surface-400">Mark as used in a course</span>-->
-						<!--	</button>-->
-						<!--{/if}-->
 	</span>
 
 	<div slot="like-and-save" class="flex items-center bg-surface-50 dark:bg-surface-800 rounded-lg">
@@ -372,8 +318,6 @@
 			</div>
 		{/if}
 	</div>
-
-	<Modal slot="modal" components={modalRegistry}/>
 </BrowseCardShell>
 
 
