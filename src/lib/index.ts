@@ -25,7 +25,6 @@ import Download from '$lib/components/generic/Download.svelte';
 import HorizontalScroll from '$lib/components/HorizontalScroll.svelte';
 import FileTable from '$lib/components/FileTable.svelte';
 import Render from '$lib/components/Render.svelte';
-import UsedInCourse from '$lib/components/UsedInCourse.svelte';
 import PublishReview from '$lib/components/PublishReview.svelte';
 import ShareButton from '$lib/components/publication/ShareButton.svelte';
 import type { UserSanitizedWithProfilePicData } from '$lib/util/types';
@@ -71,7 +70,6 @@ export {
 	Filter,
 	CircuitComponent,
 	AddInteractionForm,
-	UsedInCourse,
 	PublishReview,
 	HorizontalScroll,
 	MaterialTypes,

@@ -14,6 +14,7 @@
 	import scala from 'highlight.js/lib/languages/scala';
 	import plaintext from 'highlight.js/lib/languages/plaintext';
 	import { CookieBanner, Footer, Grid, Header } from '$lib';
+	import EmailVisibilityPrompt from '$lib/components/user/EmailVisibilityPrompt.svelte';
 
 	// Floating UI for Popups
 	import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
@@ -53,6 +54,10 @@
 
 <Modal />
 <Toast />
+
+{#if loggedUser}
+	<EmailVisibilityPrompt {loggedUser} />
+{/if}
 
 <svelte:head>
 	<meta charset="utf-8">
