@@ -71,18 +71,7 @@ else
 
   # skip prisma migrations, otherwise it will try to reapply all of them and crash
   # because the tables/columns/constraints already exist, we're just removing rows
-  docker exec supabase-db psql -U supabase_admin -d postgres -c "
-    DO \$\$
-    DECLARE r RECORD;
-    BEGIN
-      FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != '_prisma_migrations')
-      LOOP
-        EXECUTE format('TRUNCATE TABLE public.%I RESTART IDENTITY CASCADE', r.tablename);
-      END LOOP;
-      TRUNCATE auth.users CASCADE;
-    END
-    \$\$;
-  "
+  docker exec -i supabase-db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < scripts/utility/wipe-db.sql
 fi
 
 # ---------------------------------------------------------------------------
