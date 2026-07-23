@@ -10,6 +10,9 @@ import {
 	updatePublicationConnectTags,
 	updateAllTimeSaved,
 	getReportsPublication,
+	archivePublication,
+	restorePublication,
+	getArchivedPublications,
 } from '$lib/database/publication';
 
 describe('handleConnections', () => {
@@ -32,11 +35,11 @@ describe('handleConnections', () => {
 
 		await handleConnections(['tag1'], [], 1);
 
-		expect(prisma.publication.update).toHaveBeenNthCalledWith(1, {
+		expect(prisma.publication.update).toHaveBeenNthCalledWith(3, {
 			where: { id: 1 },
 			data: { tags: { set: [] } },
 		});
-		expect(prisma.publication.update).toHaveBeenNthCalledWith(2, {
+		expect(prisma.publication.update).toHaveBeenNthCalledWith(4, {
 			where: { id: 1 },
 			data: { tags: { connect: [{ content: 'tag1' }] } },
 		});
@@ -156,40 +159,145 @@ describe('updateAllTimeSaved', () => {
 	});
 
 	it('should update savedByAllTime for a publication', async () => {
-		const mockPublication = { id: 1, savedByAllTime: [] };
-		prisma.publication.findUnique = vi
+		const mockPublication = { id: 1, publisherId: 'publisher' };
+		prisma.publication.findFirst = vi
 			.fn()
 			.mockResolvedValue(mockPublication);
-
-		prisma.publication.update = vi.fn().mockResolvedValue({});
+		prisma.savedByAllTime.findUnique = vi.fn().mockResolvedValue(null);
+		prisma.savedByAllTime.create = vi.fn().mockResolvedValue({});
 
 		const result = await updateAllTimeSaved('user1', 1);
 
 		expect(result).toEqual({});
-		expect(prisma.publication.update).toHaveBeenCalledWith({
-			where: { id: 1 },
-			data: { savedByAllTime: ['user1'] },
+		expect(prisma.savedByAllTime.create).toHaveBeenCalledWith({
+			data: { userId: 'user1', publicationId: 1 },
 		});
 	});
 
 	it('should return message if user already saved the publication', async () => {
-		const mockPublication = { id: 1, savedByAllTime: ['user'] };
-		prisma.publication.findUnique = vi
+		const mockPublication = { id: 1, publisherId: 'publisher' };
+		prisma.publication.findFirst = vi
 			.fn()
 			.mockResolvedValue(mockPublication);
+		prisma.savedByAllTime.findUnique = vi.fn().mockResolvedValue({
+			publicationId: 1,
+			userId: 'user',
+		});
+		prisma.savedByAllTime.create = vi.fn();
 
 		const result = await updateAllTimeSaved('user', 1);
 
 		expect(result).toEqual('User saved previously');
-		expect(prisma.publication.update).not.toHaveBeenCalled();
+		expect(prisma.savedByAllTime.create).not.toHaveBeenCalled();
 
 		vi.clearAllMocks();
 
-		prisma.publication.findUnique = vi.fn().mockResolvedValue(null);
+		prisma.publication.findFirst = vi.fn().mockResolvedValue(null);
 		const result2 = await updateAllTimeSaved('user', 1);
 
 		expect(result2).toEqual(undefined);
-		expect(prisma.publication.update).not.toHaveBeenCalled();
+		expect(prisma.savedByAllTime.create).not.toHaveBeenCalled();
+	});
+});
+
+describe('publication archive lifecycle', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('archives a publication without deleting it and records history', async () => {
+		prisma.publication.findUnique = vi.fn().mockResolvedValue({
+			id: 12,
+			archivedAt: null,
+		});
+		prisma.publication.update = vi.fn().mockResolvedValue({
+			id: 12,
+			archivedAt: new Date(),
+		});
+		prisma.publication.delete = vi.fn();
+		prisma.publicationHistory.create = vi.fn().mockResolvedValue({});
+		prisma.circuit.updateMany = vi.fn().mockResolvedValue({ count: 1 });
+
+		await archivePublication(12, 'actor-id', 'Outdated', prisma);
+
+		expect(prisma.publication.update).toHaveBeenCalledWith({
+			where: { id: 12 },
+			data: {
+				archivedAt: expect.any(Date),
+				archivedById: 'actor-id',
+				archiveReason: 'Outdated',
+			},
+		});
+		expect(prisma.publicationHistory.create).toHaveBeenCalledWith({
+			data: {
+				action: 'ARCHIVE',
+				publicationId: 12,
+				userId: 'actor-id',
+				comment: 'Outdated',
+			},
+		});
+		expect(prisma.circuit.updateMany).toHaveBeenCalledWith({
+			where: {
+				numNodes: { gt: 0 },
+				nodes: { some: { publicationId: 12 } },
+			},
+			data: { numNodes: { decrement: 1 } },
+		});
+		expect(prisma.publication.delete).not.toHaveBeenCalled();
+	});
+
+	it('restores an archived publication and records history', async () => {
+		prisma.publication.findUnique = vi.fn().mockResolvedValue({
+			id: 12,
+			archivedAt: new Date(),
+		});
+		prisma.publication.update = vi.fn().mockResolvedValue({
+			id: 12,
+			archivedAt: null,
+		});
+		prisma.publicationHistory.create = vi.fn().mockResolvedValue({});
+		prisma.circuit.updateMany = vi.fn().mockResolvedValue({ count: 1 });
+
+		await restorePublication(12, 'actor-id', 'Reviewed', prisma);
+
+		expect(prisma.publication.update).toHaveBeenCalledWith({
+			where: { id: 12 },
+			data: {
+				archivedAt: null,
+				archivedById: null,
+				archiveReason: null,
+			},
+		});
+		expect(prisma.publicationHistory.create).toHaveBeenCalledWith({
+			data: {
+				action: 'RESTORE',
+				publicationId: 12,
+				userId: 'actor-id',
+				comment: 'Reviewed',
+			},
+		});
+		expect(prisma.circuit.updateMany).toHaveBeenCalledWith({
+			where: { nodes: { some: { publicationId: 12 } } },
+			data: { numNodes: { increment: 1 } },
+		});
+	});
+
+	it('limits a regular user archive view to owned or maintained publications', async () => {
+		prisma.publication.findMany = vi.fn().mockResolvedValue([]);
+
+		await getArchivedPublications('user-id');
+
+		expect(prisma.publication.findMany).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: {
+					archivedAt: { not: null },
+					OR: [
+						{ publisherId: 'user-id' },
+						{ maintainers: { some: { id: 'user-id' } } },
+					],
+				},
+			}),
+		);
 	});
 });
 

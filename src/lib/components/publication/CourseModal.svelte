@@ -11,7 +11,7 @@
 	import CoverPicSelect from '$lib/components/publication/CoverPicSelect.svelte';
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
-	import { deleteCourseById } from '$lib/util/coursesLogic';
+	import { archiveCourseById } from '$lib/util/coursesLogic';
 	import { downloadFileFromSupabase } from '$lib/util/file';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import CourseButton from './courses/CourseButton.svelte';
@@ -63,7 +63,7 @@
 
 	async function confirmAndDelete(courseId: number) {
 		try {
-			await deleteCourseById(courseId);
+			await archiveCourseById(courseId);
 			dispatch('courseDeleted', { courseId });
 			onSuccess();
 			close();
@@ -265,5 +265,4 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
 </style>
-
 

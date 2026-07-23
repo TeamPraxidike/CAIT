@@ -93,6 +93,7 @@ export async function getSavedPublications(userId: string): Promise<SavedPublica
 		},
 		select: {
 			saved: {
+				where: { archivedAt: null },
 				include: {
 					tags: true,
 					materials: {
@@ -125,6 +126,7 @@ export async function isPublicationSaved(
 			saved: {
 				where: {
 					id: publicationId,
+					archivedAt: null,
 				},
 			},
 		},

@@ -1,5 +1,5 @@
 
-import { type Level, Prisma, type PrismaClient } from '@prisma/client';
+import { type CourseEventType, Prisma } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import type { UserWithProfilePic } from '$lib/util/coursesLogic';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
@@ -9,7 +9,7 @@ import { sensitive_fields_user } from '$lib/util/sensitive_fields.ts';
 export type createCourseData = {
 	learningObjectives: string[];
 	prerequisites: string[];
-	educationalLevel: Level;
+	educationalLevel: string;
 	courseName: string;
 	creatorId: string;
 	maintainers: string[];
@@ -36,6 +36,27 @@ export type CourseWithCoverPic = Prisma.CourseGetPayload<true> & {
 	maintainers: UserWithProfilePic[];
 };
 
+export type ArchivedCourse = Prisma.CourseGetPayload<{
+	include: {
+		maintainers: {
+			select: {
+				id: true;
+				firstName: true;
+				lastName: true;
+				username: true;
+			};
+		};
+		coverPic: true;
+		publications: {
+			select: {
+				id: true;
+				title: true;
+				archivedAt: true;
+			};
+		};
+	};
+}>;
+
 
 async function enrichMaintainers(course: Course & { maintainers: any[] }): Promise<CourseWithMaintainersAndProfilePic> {
 	const enrichedMaintainers: UserWithProfilePic[] = await Promise.all(
@@ -53,12 +74,15 @@ async function enrichMaintainers(course: Course & { maintainers: any[] }): Promi
 
 export async function getAllCoursesExtended(return_sensitive_fields=true): Promise<CourseWithMaintainersAndProfilePic[]> {
 	const courses = await prisma.course.findMany({
+		where: { archivedAt: null },
 		include: {
 			maintainers: {
 				...sensitive_fields_user(return_sensitive_fields)
 			},
 			coverPic: true,
-			publications: true
+			publications: {
+				where: { archivedAt: null },
+			},
 		}
 	});
 
@@ -66,8 +90,8 @@ export async function getAllCoursesExtended(return_sensitive_fields=true): Promi
 }
 
 export async function getCourseByIdExtended(courseId: number): Promise<CourseWithCoverPic> {
-	const course = await prisma.course.findUnique({
-		where: { id: courseId },
+	const course = await prisma.course.findFirst({
+		where: { id: courseId, archivedAt: null },
 		include: {
 			maintainers: {
 				include: { profilePic: true }
@@ -75,6 +99,7 @@ export async function getCourseByIdExtended(courseId: number): Promise<CourseWit
 			coverPic: true
 		}
 	});
+	if (!course) throw new Error(`Course with ID ${courseId} not found.`);
 
 	// course = await enrichMaintainers(course)
 	const coverPic = await coverPicFetcher(null, course.coverPic);
@@ -100,7 +125,7 @@ export async function createCourse(course: createCourseData): Promise<Course> {
 export type updateCourseData = {
 	id: number;
 	courseName: string;
-	educationalLevel: Level;
+	educationalLevel: string;
 	learningObjectives: string[];
 	prerequisites: string[];
 	maintainers: string[]; // user ids (excluding current user is allowed)
@@ -110,6 +135,11 @@ export type updateCourseData = {
 
 export async function updateCourse(data: updateCourseData): Promise<Course> {
 	const uniqueMaintainerIds = Array.from(new Set([data.currentUserId, ...data.maintainers]));
+	const existing = await prisma.course.findFirst({
+		where: { id: data.id, archivedAt: null },
+		select: { id: true },
+	});
+	if (!existing) throw new Error(`Course with ID ${data.id} not found.`);
 
 	return prisma.course.update({
 		where: { id: data.id },
@@ -129,7 +159,7 @@ export async function updateCourse(data: updateCourseData): Promise<Course> {
 
 export async function findCourseByNameExtended(courseName: string): Promise<CourseWithMaintainersAndProfilePic | null> {
 	const course = await prisma.course.findFirst({
-		where: { courseName },
+		where: { courseName, archivedAt: null },
 		include: {
 			maintainers: {
 				include: { profilePic: true }
@@ -145,6 +175,7 @@ export async function findCourseByNameExtended(courseName: string): Promise<Cour
 export async function findCourseByMantainerExtended(userId: string): Promise<CourseWithMaintainersAndProfilePic[]> {
 	const courses = await prisma.course.findMany({
 		where: {
+			archivedAt: null,
 			maintainers: {
 				some: { id: userId }
 			}
@@ -167,12 +198,21 @@ export async function findCourseByMantainerExtended(userId: string): Promise<Cou
 export async function linkCourseToPublication(publicationId: number, courseId: number, prismaTransaction: Prisma.TransactionClient = prisma) {
 	if (!courseId) return;
 
-	const publication = await prismaTransaction.publication.findUnique({
-		where: { id: publicationId }
-	});
+	const [publication, course] = await Promise.all([
+		prismaTransaction.publication.findFirst({
+			where: { id: publicationId, archivedAt: null }
+		}),
+		prismaTransaction.course.findFirst({
+			where: { id: courseId, archivedAt: null },
+			select: { id: true },
+		}),
+	]);
 
 	if (!publication) {
 		throw new Error(`Publication with ID ${publicationId} not found.`);
+	}
+	if (!course) {
+		throw new Error(`Course with ID ${courseId} not found.`);
 	}
 
 	return prismaTransaction.publication.update({
@@ -207,28 +247,129 @@ export async function removeCourseFromPublications(courseId: number) {
 	});
 }
 
-export async function deleteCourse(courseId: number): Promise<Course> {
-	return prisma.$transaction(async (prismaTransaction: PrismaClient) => {
-		await removeCourseFromPublications(courseId);
-		return prismaTransaction.course.delete({
-			where: {
-				id: courseId
-			}
-		});
+export async function archiveCourse(
+	courseId: number,
+	actorId: string,
+	reason: string | null = null,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	const existing = await prismaContext.course.findUnique({
+		where: { id: courseId },
+		select: { id: true, archivedAt: true },
+	});
+	if (!existing) return null;
+	if (existing.archivedAt) return prismaContext.course.findUnique({ where: { id: courseId } });
+
+	const course = await prismaContext.course.update({
+		where: { id: courseId },
+		data: {
+			archivedAt: new Date(),
+			archivedById: actorId,
+			archiveReason: reason,
+		},
+	});
+
+	await prismaContext.courseHistory.create({
+		data: {
+			action: 'ARCHIVE' as CourseEventType,
+			courseId,
+			userId: actorId,
+			comment: reason,
+		},
+	});
+
+	return course;
+}
+
+export async function restoreCourse(
+	courseId: number,
+	actorId: string,
+	comment: string | null = null,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	const existing = await prismaContext.course.findUnique({
+		where: { id: courseId },
+		select: { id: true, archivedAt: true },
+	});
+	if (!existing) return null;
+	if (!existing.archivedAt) return prismaContext.course.findUnique({ where: { id: courseId } });
+
+	const course = await prismaContext.course.update({
+		where: { id: courseId },
+		data: {
+			archivedAt: null,
+			archivedById: null,
+			archiveReason: null,
+		},
+	});
+
+	await prismaContext.courseHistory.create({
+		data: {
+			action: 'RESTORE' as CourseEventType,
+			courseId,
+			userId: actorId,
+			comment,
+		},
+	});
+
+	return course;
+}
+
+export async function getCourseArchiveContext(courseId: number) {
+	return prisma.course.findUnique({
+		where: { id: courseId },
+		select: {
+			id: true,
+			archivedAt: true,
+			maintainers: { select: { id: true } },
+		},
 	});
 }
 
-export async function findCourseByName(courseName: string): Promise<Course> {
+export async function getArchivedCourses(
+	userId: string,
+	includeAll: boolean = false,
+): Promise<ArchivedCourse[]> {
+	return prisma.course.findMany({
+		where: {
+			archivedAt: { not: null },
+			...(includeAll ? {} : { maintainers: { some: { id: userId } } }),
+		},
+		orderBy: { archivedAt: 'desc' },
+		include: {
+			maintainers: {
+				select: {
+					id: true,
+					firstName: true,
+					lastName: true,
+					username: true,
+				},
+			},
+			coverPic: true,
+			publications: {
+				select: { id: true, title: true, archivedAt: true },
+			},
+		},
+	});
+}
+
+export async function findCourseByName(courseName: string): Promise<Course | null> {
 	return prisma.course.findFirst({
 		where: {
-			courseName: courseName
+			courseName: courseName,
+			archivedAt: null,
 		}
 	});
+}
+
+export async function findCourseByNameIncludingArchived(courseName: string): Promise<Course | null> {
+	return prisma.course.findUnique({ where: { courseName } });
 }
 
 export async function findCourseByMantainer(userId: string): Promise<Course[]> {
 	return prisma.course.findMany({
 		where: {
+			archivedAt: null,
 			maintainers: {
 				some: {
 					id: userId
@@ -239,7 +380,7 @@ export async function findCourseByMantainer(userId: string): Promise<Course[]> {
 }
 
 export async function getAllCourses(): Promise<Course[]> {
-	return prisma.course.findMany();
+	return prisma.course.findMany({ where: { archivedAt: null } });
 }
 
 
@@ -271,7 +412,11 @@ export type PublicationWithRelations = Prisma.PublicationGetPayload<{
 
 export async function getPublicationsForCourse(c: Number): Promise<PublicationWithRelations[]> {
 	return await prisma.publication.findMany({
-		where: { courseId: c },
+		where: {
+			courseId: c,
+			archivedAt: null,
+			course: { archivedAt: null },
+		},
 		orderBy: { createdAt: 'desc' },
 		include: {
 			maintainers: true,
@@ -303,4 +448,3 @@ export async function getPublicationsForCourse(c: Number): Promise<PublicationWi
 	// 	// coverPicData: (await coverPicFetcher(null, pub)).data
 	// })))
 }
-

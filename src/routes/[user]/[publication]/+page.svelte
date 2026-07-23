@@ -183,7 +183,7 @@
 		created = getDateDifference(pubView.publication.createdAt, new Date());
 	});
 
-	async function deletePublication() {
+	async function archivePublication() {
 		let url: string;
 		if (isMaterial) {
 			url = '/api/material/' + pubView.publication.id;
@@ -197,7 +197,7 @@
 			
 			if (response.status === 401){
 				toastStore.trigger({
-					message: 'You are not authorized to delete this publication',
+					message: 'You are not authorized to archive this publication',
 					background: 'bg-error-200',
 					classes: 'text-surface-900'
 				});
@@ -206,7 +206,7 @@
 
 			if (!response.ok){
 				toastStore.trigger({
-					message: 'Failed to delete publication',
+					message: 'Failed to archive publication',
 					background: 'bg-error-200',
 					classes: 'text-surface-900'
 				});
@@ -214,7 +214,7 @@
 			}
 			
 			toastStore.trigger({
-				message: 'Publication deleted successfully',
+				message: 'Publication moved to archive',
 				background: 'bg-success-200',
 				classes: 'text-surface-900'
 			});
@@ -228,13 +228,13 @@
 		}
 	}
 
-	function promptForDeletion() {
+	function promptForArchive() {
 		modalStore.trigger({
 			type: 'confirm',
-			title: 'Delete Publication',
-			body: 'Are you sure you want to delete this publication?',
+			title: 'Archive Publication',
+			body: 'Move this publication to the archive? It can be restored later.',
 			response: (r: boolean) => {
-				if (r) deletePublication();
+				if (r) archivePublication();
 			}
 		});
 	}
@@ -367,7 +367,7 @@
 	const handleHoverDelete = () => isHoveredDelete = !isHoveredDelete;
 	const handleHoverEdit = () => isHoveredEdit = !isHoveredEdit;
 
-	$: deleteIcon = isHoveredDelete ? 'mdi:trash-can' : 'mdi:trash-can-outline';
+	$: deleteIcon = isHoveredDelete ? 'mdi:archive' : 'mdi:archive-outline';
 	$: editIcon = isHoveredEdit ? 'mdi:pencil' : 'mdi:pencil-outline';
 
 	onMount(() => {
@@ -431,7 +431,7 @@
 						<Icon icon={editIcon} width="24" class="text-surface-700" />
 					</button>
 				{/if}
-				<button on:click={promptForDeletion} type="button" class="btn p-0 m-0" bind:this={hoverDelete}>
+				<button aria-label="Archive publication" on:click={promptForArchive} type="button" class="btn p-0 m-0" bind:this={hoverDelete}>
 					<Icon icon={deleteIcon} width="24" class="text-error-400" />
 				</button>
 			</div>

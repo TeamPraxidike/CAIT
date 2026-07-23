@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { User } from '@prisma/client';
 import { PublicationType } from '@prisma/client';
 import type { CourseWithMaintainersAndProfilePic } from '$lib/database/courses';
@@ -56,6 +56,7 @@ export const load: PageServerLoad = async ({
 	const coursename = params.course;
 
 	const course: CourseWithMaintainersAndProfilePic = (await pubsRes.json()).find((c: { courseName: string; }) => c.courseName === coursename);
+	if (!course) throw error(404, 'Course not found');
 
 
 	async function getPubsInCourse() {

@@ -1,5 +1,5 @@
 import { verifyAuth } from '$lib/database/auth';
-import { createCourse, type createCourseData, findCourseByName, getAllCourses, getCourseByIdExtended } from '$lib/database/courses';
+import { createCourse, type createCourseData, findCourseByNameIncludingArchived, getAllCourses, getCourseByIdExtended } from '$lib/database/courses';
 import { updateCoverPic } from '$lib/database';
 
 
@@ -33,7 +33,7 @@ export async function POST({ request, locals }) {
 			coverPic: body.coverPic
 		};
 
-		if (await findCourseByName(body.courseName) !== null) {
+		if (await findCourseByNameIncludingArchived(body.courseName) !== null) {
 			return new Response(JSON.stringify({ error: "Course with that name already exists" }), { status: 400 });
 		}
 

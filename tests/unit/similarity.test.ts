@@ -24,4 +24,15 @@ describe('create the similarity relations', () => {
 		await handleSimilarity([{ toPubId: 3, fromPubId: 2, similarity: 40 }]);
 		expect(prisma.similarContent.upsert).toHaveBeenCalledTimes(2);
 	});
+
+	it('ignores invalid similarity results', async () => {
+		prisma.similarContent.upsert = vi.fn();
+
+		await handleSimilarity([
+			{ toPubId: 3, fromPubId: 2, similarity: Number.NaN },
+			{ toPubId: 2, fromPubId: 2, similarity: 0.8 },
+		]);
+
+		expect(prisma.similarContent.upsert).not.toHaveBeenCalled();
+	});
 });

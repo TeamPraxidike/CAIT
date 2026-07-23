@@ -86,8 +86,11 @@ export const sortSwitch = (sort: string) => {
  * @param publicationId - id of publication linked to circuit
  */
 export async function getCircuitByPublicationId(publicationId: number): Promise<CircuitWithNodesAndPublication> {
-	return prisma.circuit.findUnique({
-		where: { publicationId: publicationId },
+	return prisma.circuit.findFirst({
+		where: {
+			publicationId: publicationId,
+			publication: { archivedAt: null },
+		},
 		include: {
 			publication: {
 				include: {
@@ -96,10 +99,21 @@ export async function getCircuitByPublicationId(publicationId: number): Promise<
 				},
 			},
 			nodes: {
+				where: {
+					publication: { archivedAt: null },
+				},
 				include: {
 					publication: true,
-					prerequisites: true,
-					next: true,
+					prerequisites: {
+						where: {
+							from: { publication: { archivedAt: null } },
+						},
+					},
+					next: {
+						where: {
+							to: { publication: { archivedAt: null } },
+						},
+					},
 				},
 			},
 		},
@@ -120,6 +134,7 @@ export async function getAllCircuits(
 // ): Promise<CircuitWithPublisher[]> {
 ) {
 	const where: any = { AND: [] };
+	where.AND.push({ publication: { archivedAt: null } });
 
 	if (publishers.length > 0) {
 		where.AND.push({ publication: { publisherId: { in: publishers } } });
@@ -152,7 +167,9 @@ export async function getAllCircuits(
 					},
 				},
 			},
-			nodes: withNodes,
+			nodes: withNodes
+				? { where: { publication: { archivedAt: null } } }
+				: false,
 		},
 	});
 
@@ -175,19 +192,6 @@ export async function getAllCircuits(
 
 	return circuits;
 }
-export async function deleteCircuitByPublicationId(
-	publicationId: number,
-	prismaContext: Prisma.TransactionClient = prisma,
-) {
-	return prismaContext.publication.delete({
-		where: { id: publicationId },
-		include: {
-			circuit: true,
-		},
-	});
-}
-
-
 /**
  * [POST] Returns a created publication of type Circuit
  * @param userId
@@ -283,10 +287,12 @@ export async function getCircuitsContainingPublication(publicationId: number): P
 			nodes: {
 				some: {
 					publicationId: publicationId,
+					publication: { archivedAt: null },
 				},
 			},
 			publication: {
-				isDraft: false
+				isDraft: false,
+				archivedAt: null,
 			}
 		},
 		include: {

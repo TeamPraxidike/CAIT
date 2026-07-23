@@ -6,7 +6,8 @@ import { publicationsWithCourses } from '../../utility/courses';
 import { getPublicationById } from '$lib/database';
 import {
 	type Course, type CourseWithMaintainersAndProfilePic, findCourseByMantainerExtended,
-	findCourseByName, findCourseByNameExtended, getAllCourses, getAllCoursesExtended
+	findCourseByName, findCourseByNameExtended, getAllCourses, getAllCoursesExtended,
+	getCourseArchiveContext,
 } from '$lib/database/courses';
 
 // await resetTagsTable();
@@ -70,8 +71,8 @@ describe('[GET] /api/course/', () => {
 
 });
 
-describe('[DELETE] /api/course/[courseId]', () => {
-	it('should add a course to the database', async () => {
+describe('[DELETE and restore] /api/course/[courseId]', () => {
+	it('archives and restores a course without unlinking publications', async () => {
 		const res = await publicationsWithCourses();
 		const response = await fetch(`${testingUrl}/course/${res.course.id}`, {
 			method: 'DELETE',
@@ -84,10 +85,20 @@ describe('[DELETE] /api/course/[courseId]', () => {
 		for (let i = 0; i < res.publications.length; i++) {
 			const pub = res.publications[i];
 			const publication = await getPublicationById(pub.publicationId);
-			expect(publication.courseId).toBeNull();
+			expect(publication.courseId).toBe(res.course.id);
 		}
 		const course = await findCourseByName(res.course.courseName);
 		expect(course).toBeNull();
+		expect((await getCourseArchiveContext(res.course.id))?.archivedAt).not.toBeNull();
+
+		const restoreResponse = await fetch(`${testingUrl}/course/${res.course.id}/restore`, {
+			method: 'POST',
+		});
+		expect(restoreResponse.status).toBe(200);
+		expect(await findCourseByName(res.course.courseName)).not.toBeNull();
+		for (const pub of res.publications) {
+			expect((await getPublicationById(pub.publicationId)).courseId).toBe(res.course.id);
+		}
 	});
 
 });
@@ -176,4 +187,3 @@ describe('[SERVICE] Course enrichment functions', () => {
 		});
 	});
 });
-

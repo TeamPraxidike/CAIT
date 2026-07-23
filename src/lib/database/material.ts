@@ -53,8 +53,11 @@ export async function getMaterialByPublicationId(
 	publicationId: number,
 	prismaContext: Prisma.TransactionClient = prisma,
 ){
-	return prismaContext.material.findUnique({
-		where: { publicationId: publicationId },
+	return prismaContext.material.findFirst({
+		where: {
+			publicationId: publicationId,
+			publication: { archivedAt: null },
+		},
 		include: {
 			publication: {
 				include: {
@@ -98,6 +101,7 @@ export async function getAllMaterials(
 ) {
 // ): Promise<MaterialWithPublication[]> {
 	const where: any = { AND: [], NOT: null };
+	where.AND.push({ publication: { archivedAt: null } });
 
 	if (publishers.length > 0) {
 		where.AND.push({ publication: { publisherId: { in: publishers } } });
@@ -164,29 +168,6 @@ export async function getAllMaterials(
 }
 
 /**
- * Deletes Publication, cascades to Material
- * @param publicationId
- * @param prismaContext
- */
-export async function deleteMaterialByPublicationId(
-	publicationId: number,
-	prismaContext: Prisma.TransactionClient = prisma,
-) {
-	return prismaContext.publication.delete({
-		where: { id: publicationId },
-		include: {
-			materials: {
-				include: {
-					files: true,
-				},
-			},
-			coverPic: true,
-		},
-	});
-}
-
-
-/**
  * [POST] Returns a created publication of type Material
  * @param userId
  * @param metaData
@@ -204,9 +185,9 @@ export async function createMaterialPublication(
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
-		selfMade: boolean;
+		selfMade?: boolean;
 		isDraft: boolean;
-		course: number;
+		course?: number | null;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
@@ -228,7 +209,7 @@ export async function createMaterialPublication(
 					publisher: {
 						connect: { id: userId }
 					},
-					...(metaData.course !== null && {
+					...(metaData.course != null && {
 						course: { connect: { id: metaData.course } },
 					}),
 					isDraft: metaData.isDraft,
@@ -317,8 +298,11 @@ export async function getMaterialForFile(
 	path: string,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	return prismaContext.file.findUnique({
-		where: {path: path},
+	return prismaContext.file.findFirst({
+		where: {
+			path: path,
+			material: { publication: { archivedAt: null } },
+		},
 		include: {
 			material: {
 				include: {

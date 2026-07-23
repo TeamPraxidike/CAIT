@@ -8,8 +8,8 @@
 
     const modal: ModalSettings = {
         type: 'confirm',
-        title: 'Are you sure you want to delete this course?',
-        body: 'It will be removed from all publications that are associated with it. Their metadata will remain the same.',
+		title: 'Archive this course?',
+		body: 'The course will be hidden, while its publications and links are preserved for restoration.',
         response: async (confirmed: boolean) => {
             if (confirmed && currentCourseId !== null && onConfirmFn) {
                 await onConfirmFn(currentCourseId);
@@ -25,5 +25,4 @@
         modalStore.trigger(modal);
     }
 </script>
-
 

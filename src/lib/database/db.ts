@@ -99,9 +99,10 @@ export type PublicationGet = Prisma.PublicationGetPayload<{
  * @param id
  */
 export async function getPublicationById(id: number): Promise<Publication> {
-	return prisma.publication.findUnique({
+	const publication = await prisma.publication.findFirst({
 		where: {
 			id: id,
+			archivedAt: null,
 		},
 		include: {
 			tags: true,
@@ -155,6 +156,9 @@ export async function getPublicationById(id: number): Promise<Publication> {
 						},
 					},
 					nodes: {
+						where: {
+							publication: { archivedAt: null },
+						},
 						include: {
 							publication: {
 								include: {
@@ -169,7 +173,11 @@ export async function getPublicationById(id: number): Promise<Publication> {
 									},
 								},
 							},
-							next: true,
+							next: {
+								where: {
+									to: { publication: { archivedAt: null } },
+								},
+							},
 						},
 					},
 				},
@@ -180,11 +188,19 @@ export async function getPublicationById(id: number): Promise<Publication> {
 					courseName: true,
 					learningObjectives: true,
 					prerequisites: true,
-					educationalLevel: true
+					educationalLevel: true,
+					archivedAt: true,
 				}
 			}
 		},
 	});
+
+	if (!publication?.course) return publication;
+	const { archivedAt, ...course } = publication.course;
+	return {
+		...publication,
+		course: archivedAt ? null : course,
+	};
 }
 
 /**
@@ -194,7 +210,8 @@ export async function getPublicationById(id: number): Promise<Publication> {
 export async function getPublicationByIdLight(id: number): Promise<{id: number, publisherId: string} | null>{
 	return prisma.publication.findFirst({
 		where: {
-			id: id
+			id: id,
+			archivedAt: null,
 		},
 		select: {
 			id: true,
@@ -208,6 +225,7 @@ export async function getAllPublications(publishers: string[], query: string,
 										 sort: string,
 										 includeDrafts?: boolean) {
 	const where: any = { AND: [] };
+	where.AND.push({ archivedAt: null });
 
 	if (publishers.length > 0) {
 		where.AND.push({ publisherId: { in: publishers } });
@@ -260,6 +278,7 @@ export async function getAllPublicationsByIds(ids: number[], sort: string) {
 	return prisma.publication.findMany({
 		where: {
 			id: { in: ids },
+			archivedAt: null,
 		},
 		orderBy: sortSwitch(sort).publication,
 		include: {

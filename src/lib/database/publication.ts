@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, type PublicationEventType } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import { getPublicationById, getPublicationByIdLight } from '$lib/database/db';
 
@@ -21,6 +21,171 @@ export type PublicationWithPublisherId = Prisma.PublicationGetPayload<{
 		publisherId: true
 	}
 }>;
+
+export type ArchivedPublication = Prisma.PublicationGetPayload<{
+	include: {
+		tags: true;
+		publisher: {
+			select: {
+				id: true;
+				firstName: true;
+				lastName: true;
+				username: true;
+			};
+		};
+		maintainers: {
+			select: {
+				id: true;
+				firstName: true;
+				lastName: true;
+				username: true;
+			};
+		};
+		materials: true;
+		circuit: true;
+		coverPic: true;
+	};
+}>;
+
+/**
+ * Moves a publication out of public view without deleting its database record
+ * or any associated files.
+ */
+export async function archivePublication(
+	publicationId: number,
+	actorId: string,
+	reason: string | null = null,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	const existing = await prismaContext.publication.findUnique({
+		where: { id: publicationId },
+		select: { id: true, archivedAt: true },
+	});
+
+	if (!existing) return null;
+	if (existing.archivedAt) {
+		return prismaContext.publication.findUnique({
+			where: { id: publicationId },
+		});
+	}
+
+	const publication = await prismaContext.publication.update({
+		where: { id: publicationId },
+		data: {
+			archivedAt: new Date(),
+			archivedById: actorId,
+			archiveReason: reason,
+		},
+	});
+
+	await prismaContext.circuit.updateMany({
+		where: {
+			numNodes: { gt: 0 },
+			nodes: { some: { publicationId } },
+		},
+		data: { numNodes: { decrement: 1 } },
+	});
+
+	await prismaContext.publicationHistory.create({
+		data: {
+			action: 'ARCHIVE' as PublicationEventType,
+			publicationId,
+			userId: actorId,
+			comment: reason,
+		},
+	});
+
+	return publication;
+}
+
+/** Restores an archived publication to its previous public/draft visibility. */
+export async function restorePublication(
+	publicationId: number,
+	actorId: string,
+	comment: string | null = null,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	const existing = await prismaContext.publication.findUnique({
+		where: { id: publicationId },
+		select: { id: true, archivedAt: true },
+	});
+
+	if (!existing) return null;
+	if (!existing.archivedAt) {
+		return prismaContext.publication.findUnique({
+			where: { id: publicationId },
+		});
+	}
+
+	const publication = await prismaContext.publication.update({
+		where: { id: publicationId },
+		data: {
+			archivedAt: null,
+			archivedById: null,
+			archiveReason: null,
+		},
+	});
+
+	await prismaContext.circuit.updateMany({
+		where: { nodes: { some: { publicationId } } },
+		data: { numNodes: { increment: 1 } },
+	});
+
+	await prismaContext.publicationHistory.create({
+		data: {
+			action: 'RESTORE' as PublicationEventType,
+			publicationId,
+			userId: actorId,
+			comment,
+		},
+	});
+
+	return publication;
+}
+
+/**
+ * Regular users see publications they publish or maintain; administrators can
+ * request all archived publications.
+ */
+export async function getArchivedPublications(
+	userId: string,
+	includeAll: boolean = false,
+): Promise<ArchivedPublication[]> {
+	return prisma.publication.findMany({
+		where: {
+			archivedAt: { not: null },
+			...(includeAll ? {} : {
+				OR: [
+					{ publisherId: userId },
+					{ maintainers: { some: { id: userId } } },
+				],
+			}),
+		},
+		orderBy: { archivedAt: 'desc' },
+		include: {
+			tags: true,
+			publisher: {
+				select: {
+					id: true,
+					firstName: true,
+					lastName: true,
+					username: true,
+				},
+			},
+			maintainers: {
+				select: {
+					id: true,
+					firstName: true,
+					lastName: true,
+					username: true,
+				},
+			},
+			materials: true,
+			circuit: true,
+			coverPic: true,
+		},
+	});
+}
 
 /**
  * Main method that handles linking/unlinking of tags and maintainerIds to publications
@@ -252,7 +417,7 @@ export async function getReportsPublication(publicationId: number): Promise<Publ
 	});
 }
 
-export async function getPublisherId(publicationId: number): Promise<PublicationWithPublisherId> {
+export async function getPublisherId(publicationId: number): Promise<PublicationWithPublisherId | null> {
 	return prisma.publication.findUnique({
 		where: {
 			id: publicationId,

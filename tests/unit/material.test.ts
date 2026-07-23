@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
 	createMaterialPublication,
-	deleteMaterialByPublicationId,
 	getAllMaterials,
 	getMaterialByPublicationId,
 	updateMaterialByPublicationId,
@@ -13,7 +12,7 @@ import { Difficulty, MaterialType } from '@prisma/client';
 
 describe('get specific material', () => {
 	it('should return a material by publicationId', async () => {
-		prisma.material.findUnique = vi.fn().mockResolvedValue({
+		prisma.material.findFirst = vi.fn().mockResolvedValue({
 			id: 2,
 			coverPic: 'cover1.jpg',
 			publicationId: 1,
@@ -77,24 +76,6 @@ describe('order of materials', () => {
 			publication: { createdAt: 'desc' },
 		}); // Default case
 		expect(sortSwitch('')).toEqual({ publication: { createdAt: 'desc' } }); // Default case
-	});
-});
-
-describe('delete materials', () => {
-	it('should return all deleted materials', async () => {
-		prisma.publication.delete = vi.fn().mockResolvedValue({
-			id: 3,
-			coverPic: 'cover1.jpg',
-			publicationId: 1,
-		});
-
-		const material = await deleteMaterialByPublicationId(1);
-		expect(material).toMatchObject({
-			id: 3,
-			coverPic: 'cover1.jpg',
-			publicationId: 1,
-		});
-		expect(prisma.publication.delete).toHaveBeenCalled();
 	});
 });
 

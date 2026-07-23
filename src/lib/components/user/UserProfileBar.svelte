@@ -88,6 +88,8 @@
                            dark:bg-surface-700">Edit Profile</a>
                         <a type="button" href="/{user.username}/settings" class="btn bg-surface-800 text-surface-50 rounded-lg
                            dark:bg-surface-700">Settings</a>
+                        <a type="button" href="/archive" class="btn bg-surface-800 text-surface-50 rounded-lg
+                           dark:bg-surface-700">Archive</a>
                     </div>
                 {/if}
             </div>
@@ -135,6 +137,8 @@
                                dark:bg-surface-700">Edit Profile</a>
                 <a type="button" href="./settings" class="btn bg-surface-800 text-surface-50 rounded-lg
                                dark:bg-surface-700">Settings</a>
+                <a type="button" href="/archive" class="btn bg-surface-800 text-surface-50 rounded-lg
+                               dark:bg-surface-700">Archive</a>
             </div>
         {/if}
     </div>

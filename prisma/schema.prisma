@@ -5,9 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["tracing"]
-  // previewFeatures = ["postgresqlExtensions"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -40,6 +38,13 @@ enum PublicationType {
 enum PublicationEventType {
   CREATE // The Genesis event of the publication
   UPDATE // Every other event
+  ARCHIVE
+  RESTORE
+}
+
+enum CourseEventType {
+  ARCHIVE
+  RESTORE
 }
 
 enum EmailVisibility {
@@ -71,6 +76,8 @@ model User {
   likedReplies  Reply[]   @relation("likedReplies")
 
   maintaining Publication[] @relation("maintainers")
+  archivedPublications Publication[] @relation("PublicationArchivedBy")
+  archivedCourses      Course[]      @relation("CourseArchivedBy")
   comments    Comment[]
   replies     Reply[]
   isAdmin     Boolean       @default(false)
@@ -79,6 +86,7 @@ model User {
   courses    Course[] @relation("CourseInstructors")
 
   publicationHistory PublicationHistory[]
+  courseHistory      CourseHistory[]
 }
 
 model Publication {
@@ -94,6 +102,10 @@ model Publication {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   isDraft            Boolean    @default(false)
+  archivedAt         DateTime?
+  archivedById       String?    @db.Uuid
+  archivedBy         User?      @relation("PublicationArchivedBy", fields: [archivedById], references: [id], onDelete: SetNull)
+  archiveReason      String?
   courseId           Int?
   course             Course?    @relation("CoursePublications", fields: [courseId], references: [id], onDelete: Cascade)
 
@@ -121,6 +133,8 @@ model Publication {
   circuit      Circuit?
 
   history PublicationHistory[]
+
+  @@index([archivedAt])
 }
 
 model PublicationHistory {
@@ -307,4 +321,26 @@ model Course {
   maintainers        User[]        @relation("CourseInstructors")
   coverPic           File?         @relation("CourseCoverPic")
   copyright          String        @default("")
+  archivedAt         DateTime?
+  archivedById       String?       @db.Uuid
+  archivedBy         User?         @relation("CourseArchivedBy", fields: [archivedById], references: [id], onDelete: SetNull)
+  archiveReason      String?
+  history            CourseHistory[]
+
+  @@index([archivedAt])
+}
+
+model CourseHistory {
+  id        String          @id @default(uuid())
+  createdAt DateTime        @default(now())
+  action    CourseEventType
+  comment   String?
+
+  userId String? @db.Uuid
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, createdAt])
 }

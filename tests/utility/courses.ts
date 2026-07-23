@@ -1,8 +1,9 @@
 import { createUniqueUser } from './users';
-import { createUniqueMaterial, generateRandomString, randomEnumValue } from './publicationsUtility';
+import { createUniqueMaterial, generateRandomString } from './publicationsUtility';
 import { createCourse, type createCourseData, linkCourseToPublication } from '$lib/database/courses';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
-import { Level } from '@prisma/client';
+
+const COURSE_LEVELS = ['Bachelor', 'Master', 'PhD'] as const;
 
 export async function publicationsWithCourses(numPublications: number = 5) {
 	const user = await createUniqueUser();
@@ -38,11 +39,12 @@ export function generateCourseData(creatorID: string): createCourseData{
 	return {
 		learningObjectives: learningObjectives,
 		prerequisites: prerequisitesArray,
-		educationalLevel: randomEnumValue(Level),
+		educationalLevel: COURSE_LEVELS[Math.floor(Math.random() * COURSE_LEVELS.length)],
 		courseName: generateRandomString(10),
 		copyright: generateRandomString(10),
 		maintainers: [],
-		creatorId: creatorID
+		creatorId: creatorID,
+		coverPic: null,
 	};
 }
 

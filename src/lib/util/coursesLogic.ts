@@ -47,7 +47,7 @@ export function changeCourse(newCourse: number | null, currentCourse: number | n
 	};
 }
 
-export async function deleteCourseById(courseId: number): Promise<void> {
+export async function archiveCourseById(courseId: number): Promise<void> {
 	const res = await fetch(`/api/course/${courseId}`, {
 		method: 'DELETE',
 		headers: {
@@ -61,6 +61,6 @@ export async function deleteCourseById(courseId: number): Promise<void> {
 		} catch {
 			// ignore
 		}
-		throw new Error(`Failed to delete course ${courseId}: ${res.status} ${body}`);
+		throw new Error(`Failed to archive course ${courseId}: ${res.status} ${body}`);
 	}
 }

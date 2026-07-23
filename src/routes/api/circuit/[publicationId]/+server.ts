@@ -1,11 +1,11 @@
 import {
 	addNode,
 	type CircuitForm, coverPicFetcher,
-	deleteCircuitByPublicationId,
+	archivePublication,
 	deleteNode,
 	editNode,
-	fileSystem,
 	getCircuitByPublicationId,
+	getPublicationByIdLight,
 	getPublisherId,
 	handleConnections,
 	handleEdges,
@@ -17,7 +17,6 @@ import {
 import { Prisma } from '@prisma/client';
 import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth';
 
-import type {File as PrismaFile} from '@prisma/client';
 import {enqueueCircuitComparison} from "$lib/PiscinaUtils/runner";
 import { getMaintainers, getPublisher } from '$lib/database/publication';
 
@@ -99,12 +98,22 @@ export async function PUT({ request, params, locals }) {
 			},
 		);
 	}
+	if (!(await getPublicationByIdLight(publicationId))) {
+		return new Response(JSON.stringify({ error: 'Circuit not found' }), {
+			status: 404,
+		});
+	}
 
 	try {
 		// TODO: should we trust frontend for this info? Probably not...
 		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
+		if (!publisherId) {
+			return new Response(JSON.stringify({ error: 'Publisher not found' }), {
+				status: 404,
+			});
+		}
 
 		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
 			return unauthResponse();
@@ -200,35 +209,48 @@ export async function DELETE({ params, locals }) {
 	}
 
 	const publication = await getPublisherId(publicationId);
-	const authError = await verifyAuth(locals, publication.publisherId);
+	if (!publication) {
+		return new Response(JSON.stringify({ error: 'Circuit not found' }), {
+			status: 404,
+		});
+	}
+	const authError = await verifyAuth(locals);
 	if (authError) return authError;
+	const session = await locals.safeGetSession();
+	const actorId = session?.user?.id ??
+		(process.env.NODE_ENV === 'test' ? publication.publisherId : null);
+	if (!actorId) return unauthResponse();
 
 	try {
 		// TODO: should we trust frontend for this info? Probably not...
 		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
+		if (!publisherId) {
+			return new Response(JSON.stringify({ error: 'Publisher not found' }), {
+				status: 404,
+			});
+		}
 
 		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "REMOVE")))
 			return unauthResponse();
 
-		const circuit = await prisma.$transaction(async (prismaTransaction) => {
-			const publication = await deleteCircuitByPublicationId(
+		const archivedPublication = await prisma.$transaction(async (prismaTransaction) => {
+			return archivePublication(
 				publicationId,
+				actorId,
+				null,
 				prismaTransaction,
 			);
-
-			const coverPic: PrismaFile = publication.coverPic;
-
-			// if there is a coverPic, delete
-			if (coverPic) {
-				fileSystem.deleteFile(coverPic.path);
-			}
-
-			return publication.circuit;
 		});
 
-		return new Response(JSON.stringify(circuit), { status: 200 });
+		if (!archivedPublication) {
+			return new Response(JSON.stringify({ error: 'Circuit not found' }), {
+				status: 404,
+			});
+		}
+
+		return new Response(JSON.stringify(archivedPublication), { status: 200 });
 	} catch (error) {
 		console.error(error);
 		if (

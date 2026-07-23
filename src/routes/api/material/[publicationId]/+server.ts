@@ -1,10 +1,11 @@
 import {
 	coverPicFetcher,
-	deleteMaterialByPublicationId,
+	archivePublication,
 	type FetchedFileArray,
 	type FetchedFileItem,
 	fileSystem,
 	getMaterialByPublicationId,
+	getPublicationByIdLight,
 	getPublisherId,
 	handleConnections,
 	type MaterialForm,
@@ -15,7 +16,6 @@ import {
 } from '$lib/database';
 
 import {
-	type File as PrismaFile,
 	Prisma,
 	type PrismaClient,
 	PublicationEventType,
@@ -48,6 +48,11 @@ export async function GET({ params, locals }) {
 				status: 400,
 			},
 		);
+	}
+	if (!(await getPublicationByIdLight(publicationId))) {
+		return new Response(JSON.stringify({ error: 'Material Not Found' }), {
+			status: 404,
+		});
 	}
 
 	try {
@@ -144,6 +149,11 @@ export async function PUT({ request, params, locals }) {
 				status: 400,
 			},
 		);
+	}
+	if (!(await getPublicationByIdLight(publicationId))) {
+		return new Response(JSON.stringify({ error: 'Material not found' }), {
+			status: 404,
+		});
 	}
 
 	try {
@@ -286,7 +296,7 @@ export async function PUT({ request, params, locals }) {
 	}
 }
 
-// @note: This endpoint does not need the log to be updates as it also deletes the publication which cascades to the history logs
+// DELETE is intentionally implemented as a reversible archive operation.
 export async function DELETE({ params, locals }) {
 	const publicationId = parseInt(params.publicationId);
 
@@ -300,8 +310,17 @@ export async function DELETE({ params, locals }) {
 	}
 
 	const publication = await getPublisherId(publicationId);
-	const authError = await verifyAuth(locals, publication.publisherId);
+	if (!publication) {
+		return new Response(JSON.stringify({ error: 'Material not found' }), {
+			status: 404,
+		});
+	}
+	const authError = await verifyAuth(locals);
 	if (authError) return authError;
+	const session = await locals.safeGetSession();
+	const actorId = session?.user?.id ??
+		(process.env.NODE_ENV === 'test' ? publication.publisherId : null);
+	if (!actorId) return unauthResponse();
 
 	try {
 		// TODO: should we trust frontend for this info? Probably not...
@@ -311,6 +330,11 @@ export async function DELETE({ params, locals }) {
 			) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
+		if (!publisherId) {
+			return new Response(JSON.stringify({ error: 'Publisher not found' }), {
+				status: 404,
+			});
+		}
 
 		if (
 			!(await canEditOrRemove(
@@ -322,30 +346,24 @@ export async function DELETE({ params, locals }) {
 		)
 			return unauthResponse();
 
-		const material = await prisma.$transaction(
-			async (prismaTransaction: PrismaClient) => {
-				const publication = await deleteMaterialByPublicationId(
+		const archivedPublication = await prisma.$transaction(
+			async (prismaTransaction) => {
+				return archivePublication(
 					publicationId,
+					actorId,
+					null,
 					prismaTransaction,
 				);
-
-				const coverPic: PrismaFile = publication.coverPic;
-
-				// if there is a coverPic, delete
-				if (coverPic) {
-					fileSystem.deleteFile(coverPic.path);
-				}
-
-				// delete all files
-				for (const file of publication.materials!.files) {
-					fileSystem.deleteFile(file.path);
-				}
-
-				return publication.materials;
 			},
 		);
 
-		return new Response(JSON.stringify(material), { status: 200 });
+		if (!archivedPublication) {
+			return new Response(JSON.stringify({ error: 'Material not found' }), {
+				status: 404,
+			});
+		}
+
+		return new Response(JSON.stringify(archivedPublication), { status: 200 });
 	} catch (error) {
 		console.error(error);
 		if (

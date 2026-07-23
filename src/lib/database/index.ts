@@ -1,4 +1,4 @@
-import { getPublicationById } from './db';
+import { getPublicationById, getPublicationByIdLight } from './db';
 
 import { SERVICE_ROLE_KEY } from '$env/static/private';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
@@ -7,7 +7,6 @@ import {
 	getMaterialByPublicationId,
 	getAllMaterials,
 	updateMaterialByPublicationId,
-	deleteMaterialByPublicationId,
 	createMaterialPublication,
 } from './material';
 
@@ -15,7 +14,6 @@ import {
 	getCircuitByPublicationId,
 	getAllCircuits,
 	updateCircuitByPublicationId,
-	deleteCircuitByPublicationId,
 	createCircuitPublication,
 } from './circuit';
 
@@ -26,7 +24,10 @@ import {
 	connectTags,
 	handleConnections,
 	updateAllTimeSaved,
-	getPublisherId
+	getPublisherId,
+	archivePublication,
+	restorePublication,
+	getArchivedPublications,
 } from './publication';
 
 import {
@@ -260,6 +261,7 @@ export {
 	createUser,
 	getUserById,
 	getPublicationById,
+	getPublicationByIdLight,
 	createCircuitPublication,
 	createMaterialPublication,
 	updateMaterialByPublicationId,
@@ -278,8 +280,9 @@ export {
 	addNode,
 	deleteNode,
 	editNode,
-	deleteCircuitByPublicationId,
-	deleteMaterialByPublicationId,
+	archivePublication,
+	restorePublication,
+	getArchivedPublications,
 	deleteUser,
 	editUser,
 	setEmailVisibility,

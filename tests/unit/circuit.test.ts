@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
 	createCircuitPublication,
-	deleteCircuitByPublicationId,
 	getAllCircuits,
 	getCircuitByPublicationId,
 	updateCircuitByPublicationId,
@@ -16,24 +15,12 @@ import { Difficulty } from '@prisma/client';
 
 describe('get specific circuit', () => {
 	it('should return a circuit by publicationId', async () => {
-		prisma.circuit.findUnique = vi.fn().mockResolvedValue({
+		prisma.circuit.findFirst = vi.fn().mockResolvedValue({
 			id: 2,
 			publicationId: 1,
 		});
 
 		const material = await getCircuitByPublicationId(1);
-		expect(material).toMatchObject({ id: 2, publicationId: 1 });
-	});
-});
-
-describe('delete specific circuit', () => {
-	it('should delete a circuit by publicationId', async () => {
-		prisma.publication.delete = vi.fn().mockResolvedValue({
-			id: 2,
-			publicationId: 1,
-		});
-
-		const material = await deleteCircuitByPublicationId(1);
 		expect(material).toMatchObject({ id: 2, publicationId: 1 });
 	});
 });

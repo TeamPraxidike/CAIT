@@ -88,6 +88,7 @@ export async function getCommentsByPublicationId(publicationId: number): Promise
 	return prisma.comment.findMany({
 		where: {
 			publicationId: publicationId,
+			publication: { archivedAt: null },
 		},
 		include: {
 			replies: {

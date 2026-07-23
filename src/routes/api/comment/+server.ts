@@ -13,6 +13,13 @@ export async function POST({ request, locals }) {
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
 	try {
+		const publication = await getPublicationByIdLight(body.publicationId);
+		if (!publication) {
+			return new Response(
+				JSON.stringify({ error: 'Publication not found' }),
+				{ status: 404 },
+			);
+		}
 
 		const commentData: createCommentData = {
 			userId: body.userId,
@@ -28,10 +35,7 @@ export async function POST({ request, locals }) {
 					status: 404,
 				},
 			);
-		//const publication = await getPublicationById(body.publicationId);
-		const publication = await getPublicationByIdLight(body.publicationId);
-
-		if (publication?.publisherId === body.userId) {
+		if (publication.publisherId === body.userId) {
 			await updateReputation(body.userId, 2);
 		} else {
 			await updateReputation(body.userId, 5);

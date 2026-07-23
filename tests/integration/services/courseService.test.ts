@@ -3,7 +3,7 @@ import { createUniqueUser } from '../../utility/users';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
 import { createMaterialsWithCourses, createRandomCourse } from '../../utility/courses';
 import {
-	type Course, deleteCourse,
+	type Course, archiveCourse, restoreCourse,
 	findCourseByMantainer, getAllCourses,
 	linkCourseToPublication, removeCourseFromPublication,
 	removeCourseFromPublications
@@ -78,17 +78,25 @@ describe('Courses interactions with publications', () => {
 
 	});
 
-	it('should unlink the course from other publications when deleted', async () => {
+	it('should preserve publication links when a course is archived and restored', async () => {
 		const user = await createUniqueUser();
 		const course = await createRandomCourse(user.id);
 
 		const publications = await createMaterialsWithCourses(user.id, course.id);
-		await deleteCourse(course.id);
+		await archiveCourse(course.id, user.id);
 
 		for (let i = 0; i < publications.length; i++) {
 			const pub = await getPublicationById(publications[i].publicationId);
 			expect(pub).toBeDefined();
-			expect(pub.courseId).toBeNull();
+			expect(pub.courseId).toBe(course.id);
+			expect(pub.course).toBeNull();
+		}
+
+		await restoreCourse(course.id, user.id);
+		for (const publication of publications) {
+			const pub = await getPublicationById(publication.publicationId);
+			expect(pub.courseId).toBe(course.id);
+			expect(pub.course?.id).toBe(course.id);
 		}
 	});
 

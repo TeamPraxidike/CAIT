@@ -3,7 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import ConfirmDeleteCourse from '$lib/components/publication/courses/ConfirmDeleteCourse.svelte';
-	import { deleteCourseById } from '$lib/util/coursesLogic';
+	import { archiveCourseById } from '$lib/util/coursesLogic';
 
 	const dispatch = createEventDispatcher();
 	let confirmDelete: any;
@@ -26,7 +26,7 @@
 
 	async function confirmAndDelete(courseId: number) {
 		try {
-			await deleteCourseById(courseId);
+			await archiveCourseById(courseId);
 			if (courseId === selectedCourseId) {
 				selectedCourseId = null;
 			}
@@ -63,12 +63,12 @@
 		<button
 			type="button"
 			class="absolute -top-2 -right-2.5 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs cursor-pointer"
-			aria-label="Delete course"
+			aria-label="Archive course"
 			on:click={() => {
 				confirmDelete.open({ courseId: course.id, onConfirm: confirmAndDelete });
 			}}
 		>
-			<Icon icon="mdi:close" width="12" height="12" />
+			<Icon icon="mdi:archive-outline" width="12" height="12" />
 		</button>
 	{/if}
 </button>

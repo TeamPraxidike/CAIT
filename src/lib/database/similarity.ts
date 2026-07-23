@@ -23,8 +23,17 @@ export async function handleSimilarity(
     comparisons: {fromPubId: number, toPubId: number, similarity: number}[],
     prismaContext: Prisma.TransactionClient = prisma,
 ) {
+    const validComparisons = comparisons.filter(({ fromPubId, toPubId, similarity }) =>
+        Number.isInteger(fromPubId) &&
+        Number.isInteger(toPubId) &&
+        fromPubId > 0 &&
+        toPubId > 0 &&
+        fromPubId !== toPubId &&
+        Number.isFinite(similarity)
+    );
+
     // Handle one way of connection
-    await Promise.all(comparisons.map(data =>
+    await Promise.all(validComparisons.map(data =>
         prismaContext.similarContent.upsert({
             where: {
                 similarFromId_similarToId: {
@@ -44,7 +53,7 @@ export async function handleSimilarity(
     ));
 
     // Switch connections
-    const switchedComparisons = comparisons.map(data => ({
+    const switchedComparisons = validComparisons.map(data => ({
         fromPubId: data.toPubId,
         toPubId: data.fromPubId,
         similarity: data.similarity
@@ -81,7 +90,8 @@ export async function getSimilarPublications(
                 gte: 0.4,
             },
             similarTo: {
-                isDraft: false
+				isDraft: false,
+				archivedAt: null,
             }
         },
         orderBy: {

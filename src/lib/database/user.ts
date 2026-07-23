@@ -137,6 +137,7 @@ export async function getUserById(
 		where: { id },
 		include: {
 			posts: {
+				where: { archivedAt: null },
 				include: {
 					tags: true,
 				},
@@ -154,6 +155,7 @@ export async function getUserByUsername(
 		where: { username },
 		include: {
 			posts: {
+				where: { archivedAt: null },
 				include: {
 					tags: true,
 				},
@@ -350,7 +352,9 @@ export async function getLikedPublications(userId: string): Promise<LikesOfUser>
 			id: userId,
 		},
 		select: {
-			liked: true,
+			liked: {
+				where: { archivedAt: null },
+			},
 		},
 	});
 }
@@ -367,6 +371,7 @@ export async function isPublicationLiked(
 			liked: {
 				where: {
 					id: publicationId,
+					archivedAt: null,
 				},
 			},
 		},

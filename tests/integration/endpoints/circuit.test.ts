@@ -4,8 +4,7 @@ import { resetCircuitTable, resetMaterialTable, testingUrl } from '../setup';
 import {
 	addNode,
 	getMaterialByPublicationId,
-	prisma,
-	updateCircuitCoverPic, updateCoverPic
+	prisma
 } from '$lib/database';
 import { createUniqueUser } from '../../utility/users';
 import { createUniqueCircuit, createUniqueMaterial } from '../../utility/publicationsUtility';
@@ -14,16 +13,6 @@ async function populate() {
 	const user = await createUniqueUser()
 	const circuit = await createUniqueCircuit(user.id);
 
-	// the prisma creation of a circuit does not update the profile picture, but the requests assume that it is updated and will crash if there is no
-	// picture. Because of that we need to give it some dummy data if we use prisma for creation.
-	await updateCoverPic(
-		{
-			info: "a",
-			type: "png"
-		},
-		circuit.publicationId,
-		user.id
-	);
 	return circuit;
 }
 
@@ -69,7 +58,7 @@ describe('Circuits', async () => {
 			expect(body).not.toHaveProperty('firstName');
 		});
 
-		it('should respond with 500 if a server-side error occurs during execution (no profile picture in circuit)', async () => {
+		it('should respond with 200 when the circuit has no cover picture', async () => {
 			const user = await createUniqueUser();
 			const circuit = await createUniqueCircuit(user.id)
 
@@ -77,7 +66,7 @@ describe('Circuits', async () => {
 				`${testingUrl}/circuit/${circuit.publicationId}`,
 				{ method: 'GET' },
 			);
-			expect(response.status).toBe(500);
+			expect(response.status).toBe(200);
 
 			await resetCircuitTable();
 		});
@@ -160,7 +149,7 @@ describe('Circuits', async () => {
 			expect(body).not.toHaveProperty('id');
 		});
 
-		it('should respond with 200 if successful deletion of everything related to circuit', async () => {
+		it('should archive a circuit without deleting its graph', async () => {
 			const circuit = await populate();
 			const user = await createUniqueUser();
 			const material = await createUniqueMaterial(user.id);
@@ -186,7 +175,13 @@ describe('Circuits', async () => {
 					}
 				}
 			});
-			expect(nodeAfter).toBeNull();
+			expect(nodeAfter).not.toBeNull();
+
+			const circuitAfter = await prisma.circuit.findUnique({
+				where: { id: circuit.id },
+				include: { publication: true },
+			});
+			expect(circuitAfter?.publication.archivedAt).not.toBeNull();
 
 			await resetCircuitTable();
 			await resetMaterialTable();
