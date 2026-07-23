@@ -5,6 +5,7 @@
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import ContactUser from './user/ContactUser.svelte';
 	import type { Publication } from '$lib/database/db';
+	import { formatMemberSince } from '$lib/util/date';
 
 
 	export let view: 'home' | 'publish' | 'material' | 'search';
@@ -14,6 +15,7 @@
 	export let role: 'Maintainer' | 'Publisher' | null;
 	export let className: string = 'col-span-2';
 	export let subject: Publication|Course|undefined = undefined;
+	export let memberSince: Date | undefined = undefined;
 
 	const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
 
@@ -59,6 +61,9 @@
 				<span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Rep: {user.reputation}</span>
 				<span class="dark:text-surface-50 text-surface-800 text-xs md:text-sm">Posts: {posts}</span>
 			</div>
+			{#if memberSince}
+				<span class="text-surface-500 dark:text-surface-400 text-xs">Since {formatMemberSince(memberSince)}</span>
+			{/if}
 		</div>
 	</a>
 
@@ -132,6 +137,9 @@
 				</div>
 				<span>Rep: {user.reputation}</span>
 				<span>Posts: {posts}</span>
+				{#if memberSince}
+					<span class="text-surface-500 dark:text-surface-400 text-xs">Since {formatMemberSince(memberSince)}</span>
+				{/if}
 			</div>
 		</div>
 	</a>

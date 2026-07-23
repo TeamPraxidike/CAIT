@@ -1,5 +1,11 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
+import type { EmailVisibility } from '@prisma/client';
+import { createClient } from '@supabase/supabase-js';
+import { SERVICE_ROLE_KEY } from '$env/static/private';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+
+const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, SERVICE_ROLE_KEY);
 
 
 export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
@@ -7,11 +13,6 @@ export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
 		posts: {
 			include: {
 				tags: true;
-				usedInCourse: {
-					select: {
-						course: true;
-					};
-				};
 			};
 		};
 		profilePic: true;
@@ -67,7 +68,6 @@ export async function createUser(
 		firstName: string;
 		lastName: string;
 		email: string;
-		password: string;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<User> {
@@ -79,7 +79,6 @@ export async function createUser(
 			username: username,
 			email: data.email,
 			isAdmin: false,
-			password: data.password,
 		},
 	});
 }
@@ -140,11 +139,6 @@ export async function getUserById(
 			posts: {
 				include: {
 					tags: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 				},
 			},
 			profilePic: true,
@@ -162,11 +156,6 @@ export async function getUserByUsername(
 			posts: {
 				include: {
 					tags: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 				},
 			},
 			profilePic: true,
@@ -222,6 +211,20 @@ export async function editUser(
 			email: user.email,
 			username: username,
 			aboutMe: user.aboutMe,
+		},
+	});
+}
+
+export async function setEmailVisibility(
+	userId: string,
+	visibility: EmailVisibility,
+	prismaContext: Prisma.TransactionClient = prisma,
+): Promise<User> {
+	return prismaContext.user.update({
+		where: { id: userId },
+		data: {
+			emailVisibility: visibility,
+			emailVisibilityPrompted: true,
 		},
 	});
 }
@@ -599,6 +602,12 @@ export async function isReported(userId: string, publicationId: number): Promise
 		if(reported === null) throw new Error("Unable to fetch reported applications")
 		return reported.reported.map(x => x.id).includes(publicationId);
 	});
+}
+
+export async function getUserMemberSince(userId: string): Promise<Date | null> {
+	const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId);
+	if (error || !data.user.email_confirmed_at) return null;
+	return new Date(data.user.email_confirmed_at);
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {

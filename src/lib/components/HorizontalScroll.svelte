@@ -11,7 +11,6 @@
 		publication: Publication & {
 			materials: Material,
 			tags: { content: string }[],
-			usedInCourse: { course: string }[]
 			publisher: User & {
 				profilePicData: string
 			};

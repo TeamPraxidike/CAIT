@@ -4,6 +4,7 @@ import {
 	differenceInMinutes,
 	differenceInMonths,
 	differenceInWeeks,
+	format,
 } from 'date-fns';
 
 /**
@@ -34,4 +35,8 @@ export function getDateDifference(startDate: Date, endDate: Date): string {
 	} else {
 		return 'just now';
 	}
+}
+
+export function formatMemberSince(date: Date | string): string {
+	return format(new Date(date), 'MMMM yyyy');
 }

@@ -101,4 +101,35 @@ describe('User Components', () => {
 		expect(host.innerHTML).toContain('Rep: 5');
 		expect(host.innerHTML).toContain('Ivan Guenov');
 	});
+
+	it('should show "Since" date when memberSince is provided', () => {
+		const instance = new UserProp({
+			target: host,
+			props: {
+				view: 'home',
+				user: user,
+				role: 'Maintainer',
+				posts: 7,
+				userPhotoUrl: '',
+				memberSince: new Date(2022, 0, 15),
+			},
+		});
+		expect(instance).toBeTruthy();
+		expect(host.innerHTML).toContain('Since January 2022');
+	});
+
+	it('should not show "Since" when memberSince is omitted', () => {
+		const instance = new UserProp({
+			target: host,
+			props: {
+				view: 'home',
+				user: user,
+				role: 'Maintainer',
+				posts: 7,
+				userPhotoUrl: '',
+			},
+		});
+		expect(instance).toBeTruthy();
+		expect(host.innerHTML).not.toContain('Since');
+	});
 });

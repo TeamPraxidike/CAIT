@@ -1,4 +1,13 @@
 import { isAdmin } from '$lib/database/user';
+import type { EmailViewer } from '$lib/util/emailVisibility';
+
+export const getEmailViewer = async (locals: App.Locals): Promise<EmailViewer> => {
+	const userId = locals.user?.id ?? null;
+	return {
+		id: userId,
+		isAdmin: userId ? await isAdmin(userId) : false,
+	};
+};
 
 export const verifyAuth = async (locals: App.Locals, userId?: string) => {
 	if (process.env.NODE_ENV === 'test') return null;

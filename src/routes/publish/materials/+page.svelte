@@ -53,6 +53,7 @@
 	let difficulty: Difficulty = 'easy';
 	let estimate: number = 0;
 	let copyright: string = '';
+	let selfMade: boolean = true;
 	let theoryApplicationRatio: number = 0.5;
 	let selectedTypes: string[] = [];
 	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
@@ -103,6 +104,7 @@
 		coverPic,
 		estimate,
 		copyright,
+		selfMade,
 	}
 
 
@@ -230,6 +232,7 @@
 				searchableUsers = existing.searchableUsers;
 				estimate = existing.estimate ?? 0;
 				copyright = existing.copyright ?? 'No copyright';
+				selfMade = existing.selfMade ?? true;
 				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
 				fileURLs = existing.fileURLs ?? [];
 			} else {
@@ -299,6 +302,7 @@
 				coverPic,
 				estimate,
 				copyright,
+				selfMade,
 			}
 
 			// start a 2-sec interval that captures a snapshot
@@ -318,6 +322,7 @@
 					searchableUsers: paramsMutable.searchableUsers,
 					estimate: paramsMutableMaterial.estimate,
 					copyright: paramsMutableMaterial.copyright,
+					selfMade: paramsMutableMaterial.selfMade,
 					fileURLs: paramsMutableMaterial.fileURLs,
 					theoryApplicationRatio: theoryApplicationRatio,
 					lastOpened: Date.now()
