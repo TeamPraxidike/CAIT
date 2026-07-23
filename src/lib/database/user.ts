@@ -1,5 +1,5 @@
 import { prisma } from '$lib/database';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import type { EmailVisibility } from '@prisma/client';
 
 
@@ -611,9 +611,24 @@ export async function getUserMemberSince(userId: string): Promise<Date | null> {
 export async function isAdmin(userId: string): Promise<boolean> {
 	const user = await prisma.user.findUnique({
 		where: { id: userId },
-		select: { isAdmin: true },
+		select: { isAdmin: true, role: true },
 	});
-	return user?.isAdmin === true;
+	return user?.isAdmin === true || user?.role === UserRole.ADMIN;
+}
+
+/**
+ * Moderators and administrators can manage content they do not own.
+ * Keep the legacy isAdmin check until that column is removed.
+ */
+export async function canModerate(userId: string): Promise<boolean> {
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { isAdmin: true, role: true },
+	});
+
+	return user?.isAdmin === true ||
+		user?.role === UserRole.MODERATOR ||
+		user?.role === UserRole.ADMIN;
 }
 
 export async function reportPublication(userId: string, publicationId: number) {

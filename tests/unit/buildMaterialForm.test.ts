@@ -16,7 +16,7 @@ function makeForm(overrides: Record<string, string> = {}): FormData {
 	fd.append('description', 'Desc');
 	fd.append('copyright', 'CC');
 	fd.append('estimate', '30');
-	fd.append('course', '0');
+	fd.append('course', 'null');
 	for (const [k, v] of Object.entries(overrides)) {
 		fd.set(k, v);
 	}
@@ -52,5 +52,43 @@ describe('buildMaterialForm selfMade parsing', () => {
 	it('only the exact literal "false" disables it', async () => {
 		const meta = metaOf(await buildMaterialForm(makeForm({ selfMade: 'FALSE' })));
 		expect(meta.selfMade).toBe(true);
+	});
+});
+
+describe('buildMaterialForm file validation', () => {
+	it('requires a file when creating a publication', async () => {
+		const form = makeForm();
+		form.delete('file');
+
+		await expect(buildMaterialForm(form)).resolves.toMatchObject({
+			status: 400,
+			message: 'No files provided',
+		});
+	});
+
+	it('allows a metadata-only edit of an existing publication', async () => {
+		const form = makeForm();
+		form.delete('file');
+
+		await expect(buildMaterialForm(form, false)).resolves.toHaveProperty('data');
+	});
+});
+
+describe('buildMaterialForm course parsing', () => {
+	it('represents no selected course as null', async () => {
+		const meta = metaOf(await buildMaterialForm(makeForm({ course: 'null' })));
+		expect(meta.course).toBeNull();
+	});
+
+	it('parses a selected course id', async () => {
+		const meta = metaOf(await buildMaterialForm(makeForm({ course: '42' })));
+		expect(meta.course).toBe(42);
+	});
+
+	it('rejects malformed course ids', async () => {
+		await expect(buildMaterialForm(makeForm({ course: 'not-a-course' }))).resolves.toMatchObject({
+			status: 400,
+			message: 'Invalid course',
+		});
 	});
 });

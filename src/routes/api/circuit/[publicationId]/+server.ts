@@ -6,7 +6,6 @@ import {
 	editNode,
 	fileSystem,
 	getCircuitByPublicationId,
-	getPublisherId,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
@@ -105,8 +104,13 @@ export async function PUT({ request, params, locals }) {
 		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
+		if (!publisherId) {
+			return new Response(JSON.stringify({ error: 'Circuit not found' }), {
+				status: 404,
+			});
+		}
 
-		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "EDIT")))
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds)))
 			return unauthResponse();
 
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {
@@ -199,8 +203,7 @@ export async function DELETE({ params, locals }) {
 		);
 	}
 
-	const publication = await getPublisherId(publicationId);
-	const authError = await verifyAuth(locals, publication.publisherId);
+	const authError = await verifyAuth(locals);
 	if (authError) return authError;
 
 	try {
@@ -208,8 +211,13 @@ export async function DELETE({ params, locals }) {
 		const maintainerIds = (await getMaintainers(publicationId))?.maintainers?.map(m => m.id) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
+		if (!publisherId) {
+			return new Response(JSON.stringify({ error: 'Circuit not found' }), {
+				status: 404,
+			});
+		}
 
-		if (!(await canEditOrRemove(locals, publisherId, maintainerIds, "REMOVE")))
+		if (!(await canEditOrRemove(locals, publisherId, maintainerIds)))
 			return unauthResponse();
 
 		const circuit = await prisma.$transaction(async (prismaTransaction) => {

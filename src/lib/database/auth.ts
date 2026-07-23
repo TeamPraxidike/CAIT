@@ -1,4 +1,4 @@
-import { isAdmin } from '$lib/database/user';
+import { canModerate, isAdmin } from '$lib/database/user';
 import type { EmailViewer } from '$lib/util/emailVisibility';
 
 export const getEmailViewer = async (locals: App.Locals): Promise<EmailViewer> => {
@@ -22,33 +22,23 @@ export const verifyAuth = async (locals: App.Locals, userId?: string) => {
 	return null;
 };
 
-// TODO: Either make operation ENUM or change logic
-
 /**
- * Allow owner, maintainers and admins to edit
+ * Allow owners, maintainers, moderators and admins to edit or remove content.
  * @param locals
  * @param ownerId
  * @param maintainerIds
- * @param operation - EDIT or REMOVE
  */
 export const canEditOrRemove = async (locals: App.Locals, ownerId: string,
-									  maintainerIds: string[], operation: string) => {
+									  maintainerIds: string[]) => {
 	if (process.env.NODE_ENV === 'test') return true;
 
 	const session = await locals.safeGetSession();
 	if (!session || !session.user) return false;
 
-	// Admins can remove but cannot edit
-	if (operation === "EDIT") {
-		return (String(session.user.id) === ownerId) ||
-			(maintainerIds.includes(String(session.user.id)));
-	}
-	else if (operation === "REMOVE") {
-		return (String(session.user.id) === ownerId) ||
-			(maintainerIds.includes(String(session.user.id))) ||
-			isAdmin(String(session.user.id));
-	}
-	else return false;
+	const userId = String(session.user.id);
+	return userId === ownerId ||
+		maintainerIds.includes(userId) ||
+		await canModerate(userId);
 };
 
 // /**

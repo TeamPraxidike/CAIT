@@ -9,11 +9,10 @@ import {
 	type UserForm,
 } from '$lib/database';
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
-import type { File as PrismaFile } from '@prisma/client';
-import { Prisma } from '@prisma/client';
-import { getEmailViewer, verifyAuth } from '$lib/database/auth';
+import { Prisma, UserRole } from '@prisma/client';
+import { canEditOrRemove, getEmailViewer, unauthResponse, verifyAuth } from '$lib/database/auth';
 import { redactEmail } from '$lib/util/emailVisibility';
-import type { User, TUserWithPostsAndProfilePic, TUserWithProfilePic } from '$lib/database/user';
+import { isAdmin, type User, type TUserWithPostsAndProfilePic, type TUserWithProfilePic } from '$lib/database/user';
 
 
 export type TGETuser = {user: TUserWithPostsAndProfilePic, profilePicData: FetchedFileItem};
@@ -59,31 +58,77 @@ export async function GET({ params, locals }) {
 export async function DELETE({ params, locals }) {
 	const { id: userId } = params;
 
-	// Right now only users can delete themselves, an admin cannot do it through the API.
-	const authError = await verifyAuth(locals, params.id);
-	if (authError) return authError;
+	if (!(await canEditOrRemove(locals, userId, []))) {
+		return unauthResponse();
+	}
 
 	try {
+		const existingUser = await prisma.user.findUnique({
+			where: { id: userId },
+			select: {
+				id: true,
+				isAdmin: true,
+				role: true,
+				profilePic: { select: { path: true } },
+				posts: {
+					select: {
+						coverPic: { select: { path: true } },
+						materials: { select: { files: { select: { path: true } } } },
+					},
+				},
+			},
+		});
+		if (!existingUser) {
+			return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
+		}
+
+		if (process.env.NODE_ENV !== 'test') {
+			const session = await locals.safeGetSession();
+			const actorId = String(session?.user?.id ?? '');
+			const targetIsPrivileged = existingUser.isAdmin ||
+				existingUser.role === UserRole.MODERATOR ||
+				existingUser.role === UserRole.ADMIN;
+			if (actorId !== userId && targetIsPrivileged && !(await isAdmin(actorId))) {
+				return unauthResponse();
+			}
+		}
+
+		const targetIsAdmin = existingUser.isAdmin || existingUser.role === UserRole.ADMIN;
+		if (targetIsAdmin) {
+			const adminCount = await prisma.user.count({
+				where: { OR: [{ role: UserRole.ADMIN }, { isAdmin: true }] },
+			});
+			if (adminCount <= 1) {
+				return new Response(JSON.stringify({ error: 'The last administrator cannot be deleted' }), {
+					status: 409,
+				});
+			}
+		}
+
+		// Use a single deletion path. The on_auth_user_deleted_jic database
+		// trigger removes the corresponding auth.users row after this delete.
+		const filePaths = new Set<string>();
+		if (existingUser.profilePic) filePaths.add(existingUser.profilePic.path);
+		for (const publication of existingUser.posts) {
+			if (publication.coverPic) filePaths.add(publication.coverPic.path);
+			for (const file of publication.materials?.files ?? []) filePaths.add(file.path);
+		}
+
 		const user: TUserWithProfilePic = await prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
 			const user: TUserWithProfilePic = await deleteUser(userId, prismaTransaction);
 			if(!user) {
 				throw "User not found";
 			}
-
-			// check if user has profilePic
-			const profilePic: PrismaFile | null = user.profilePic;
-
-			// remove if they do
-			if (profilePic) {
-				try {
-					fileSystem.deleteFile(profilePic.path);
-				} catch (errorFileSystem) {
-					throw new Error('Error while deleting profile picture');
-				}
-			}
-
 			return user;
 		});
+
+		for (const filePath of filePaths) {
+			try {
+				await fileSystem.deleteFile(filePath);
+			} catch (fileError) {
+				console.error(`User file cleanup failed for ${filePath}:`, fileError);
+			}
+		}
 
 		return new Response(JSON.stringify(user), { status: 200 });
 	} catch (error) {
