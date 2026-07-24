@@ -286,17 +286,8 @@ jobs:
           echo "Found container: $DB_CONTAINER"
     
           ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
-            "docker exec $DB_CONTAINER psql -U supabase_admin -d postgres -c \"
-              DO \\\$\\\$
-              DECLARE r RECORD;
-              BEGIN
-                FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != '_prisma_migrations')
-                LOOP
-                  EXECUTE format('TRUNCATE TABLE public.%I RESTART IDENTITY CASCADE', r.tablename);
-                END LOOP;
-              END
-              \\\$\\\$;
-            \""
+            "docker exec -i $DB_CONTAINER psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1" \
+            < scripts/utility/wipe-db.sql
 
       # -----------------------------------------------------------------------
       # STEP 4: Deploy SvelteKit and wait for it to be healthy
