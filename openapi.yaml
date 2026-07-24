@@ -29,38 +29,6 @@ servers:
 
 paths:
 
-  /publication/{publicationId}/use-in-course:
-    get:
-      tags:
-        - Publication
-      summary: Get a user with a given id
-      parameters:
-        - in: path
-          name: publicationId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the publication
-
-      responses:
-        '200':
-          description: Successfully retrieved courses
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-                  example: "ACC"
-
-        '400':
-          description: Bad request
-        '404':
-          description: This publication does not exist
-        '500':
-          description: Server Error
-
   /publication/{publicationId}/reported:
     get:
       tags:
@@ -564,80 +532,6 @@ paths:
           description: User cannot like this reply
         '404':
           description: User/Reply not found
-        '500':
-          description: Server Error
-
-  /user/{userId}/use-in-course:
-    get:
-      tags:
-        - User
-      summary: Return publications of a user that he has marked as used in course
-      parameters:
-        - in: path
-          name: userId
-          schema:
-            type: string
-          required: true
-          description: Numeric ID of the user
-
-      responses:
-        '200':
-          description: Successfully returned publications
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Publication'
-        '204':
-          description: Successful request but there are no used publications
-        '400':
-          description: Bad request
-        '404':
-          description: User not found
-        '500':
-          description: Server Error
-
-  /user/{userId}/use-in-course/{publicationId}:
-    post:
-      tags:
-        - User
-      summary: Mark publication as used in course. Replaces all courses in the publication with the ones you pass through the body
-      parameters:
-        - in: path
-          name: userId
-          schema:
-            type: string
-          required: true
-          description: Numeric ID of the user
-        - in: path
-          name: publicationId
-          schema:
-            type: number
-            format: long
-          required: true
-          description: Numeric ID of the publication (could be material or circuit)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                courses:
-                  type: array
-                  items:
-                    type: string
-                  description: List of course names
-      responses:
-        '200':
-          description: Successfully marked usage of publication
-        '400':
-          description: Bad request
-        '401':
-          description: Cannot perform action
-        '404':
-          description: User/Publication not found
         '500':
           description: Server Error
 
@@ -1819,10 +1713,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Publication'
-        publicationsUsedInCourse:
-          type: array
-          items:
-            $ref: '#/components/schemas/Publication'
         mantaining:
           type: array
           items:
@@ -1893,11 +1783,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
-        usedInCourse:
-          type: array
-          items:
-            type: string
-            example: Calculus
         reports:
           type: number
           description: How many reports does this publication have
@@ -2083,4 +1968,3 @@ components:
         updatedAt:
           type: string
           format: date
-

@@ -8,6 +8,7 @@
 		"build": "chmod +x scripts/dirname.sh && vite build && scripts/dirname.sh",
 		"start:preview": "chmod +x scripts/init-db.sh && scripts/init-db.sh && vite preview",
 		"start": "chmod +x scripts/init-db.sh && scripts/init-db.sh && node build",
+		"seed:test": "tsx ./scripts/seedTestData.ts",
 		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

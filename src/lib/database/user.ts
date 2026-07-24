@@ -1,5 +1,6 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
+import type { EmailVisibility } from '@prisma/client';
 
 
 export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
@@ -7,11 +8,6 @@ export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
 		posts: {
 			include: {
 				tags: true;
-				usedInCourse: {
-					select: {
-						course: true;
-					};
-				};
 			};
 		};
 		profilePic: true;
@@ -67,7 +63,6 @@ export async function createUser(
 		firstName: string;
 		lastName: string;
 		email: string;
-		password: string;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<User> {
@@ -79,7 +74,6 @@ export async function createUser(
 			username: username,
 			email: data.email,
 			isAdmin: false,
-			password: data.password,
 		},
 	});
 }
@@ -140,11 +134,6 @@ export async function getUserById(
 			posts: {
 				include: {
 					tags: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 				},
 			},
 			profilePic: true,
@@ -162,11 +151,6 @@ export async function getUserByUsername(
 			posts: {
 				include: {
 					tags: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 				},
 			},
 			profilePic: true,
@@ -222,6 +206,20 @@ export async function editUser(
 			email: user.email,
 			username: username,
 			aboutMe: user.aboutMe,
+		},
+	});
+}
+
+export async function setEmailVisibility(
+	userId: string,
+	visibility: EmailVisibility,
+	prismaContext: Prisma.TransactionClient = prisma,
+): Promise<User> {
+	return prismaContext.user.update({
+		where: { id: userId },
+		data: {
+			emailVisibility: visibility,
+			emailVisibilityPrompted: true,
 		},
 	});
 }
@@ -599,6 +597,15 @@ export async function isReported(userId: string, publicationId: number): Promise
 		if(reported === null) throw new Error("Unable to fetch reported applications")
 		return reported.reported.map(x => x.id).includes(publicationId);
 	});
+}
+
+export async function getUserMemberSince(userId: string): Promise<Date | null> {
+	// A User row shares its id with auth.users (see the on_auth_user_created
+	// trigger), so auth.users.created_at is the account's registration date.
+	const rows = await prisma.$queryRaw<{ created_at: Date }[]>`
+		SELECT created_at FROM auth.users WHERE id = ${userId}::uuid
+	`;
+	return rows[0]?.created_at ?? null;
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {

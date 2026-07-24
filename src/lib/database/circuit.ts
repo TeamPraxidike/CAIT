@@ -2,6 +2,7 @@ import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
 import { Difficulty, PublicationType } from '@prisma/client';
 import Fuse from 'fuse.js';
+import { sensitive_fields_user } from '$lib/util/sensitive_fields.ts';
 
 export type CircuitWithNodesAndPublication = Prisma.CircuitGetPayload<{
 	include: {
@@ -27,11 +28,6 @@ export type CircuitWithPublisher = Prisma.CommentGetPayload<{
 			include: {
 				tags: true,
 				coverPic: true,
-				usedInCourse: {
-					select: {
-						course: true,
-					},
-				},
 				publisher: {
 					include: {
 						profilePic: true,
@@ -49,11 +45,6 @@ export type CircuitWithoutNodes = Prisma.CommentGetPayload<{
 			include: {
 				tags: true,
 				coverPic: true,
-				usedInCourse: {
-					select: {
-						course: true,
-					},
-				},
 				publisher: {
 					include: {
 						profilePic: true,
@@ -124,7 +115,8 @@ export async function getAllCircuits(
 	limit: number,
 	sort: string,
 	query: string,
-	withNodes: boolean = false
+	withNodes: boolean = false,
+	return_sensitive_fields: boolean = true,
 // ): Promise<CircuitWithPublisher[]> {
 ) {
 	const where: any = { AND: [] };
@@ -155,15 +147,8 @@ export async function getAllCircuits(
 				include: {
 					tags: true,
 					coverPic: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 					publisher: {
-						include: {
-							profilePic: true,
-						},
+						...sensitive_fields_user(return_sensitive_fields)
 					},
 				},
 			},
@@ -309,11 +294,6 @@ export async function getCircuitsContainingPublication(publicationId: number): P
 				include: {
 					tags: true,
 					coverPic: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 					publisher: {
 						include: {
 							profilePic: true,

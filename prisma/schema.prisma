@@ -38,28 +38,32 @@ enum PublicationType {
 }
 
 enum PublicationEventType {
-  CREATE   // The Genesis event of the publication
-  UPDATE   // Every other event
+  CREATE // The Genesis event of the publication
+  UPDATE // Every other event
+}
+
+enum EmailVisibility {
+  HIDDEN
+  PUBLIC
 }
 
 model User {
-  id            String    @id @default(uuid()) @db.Uuid
+  id            String @id @default(uuid()) @db.Uuid
   firstName     String
   lastName      String
-  username      String    @unique @default(dbgenerated("gen_random_uuid()"))
-  email         String    @default("noemail@abv.bg")
-  emailVerified DateTime? // TODO: REMOVE THIS
-  reputation    Int       @default(0)
-  password      String? // hashed password    // TODO: REMOVE THIS
-  aboutMe       String    @default("")
-  platformId    String    @default("")
-  institutionId String    @default("")
+  username      String @unique @default(dbgenerated("gen_random_uuid()"))
+  email         String @default("noemail@abv.bg")
+  emailVisibility         EmailVisibility @default(PUBLIC)
+  emailVisibilityPrompted Boolean         @default(false)
+  reputation    Int    @default(0)
+  aboutMe       String @default("")
+  platformId    String @default("")
+  institutionId String @default("")
 
   saved            Publication[]             @relation("saved")
   posts            Publication[]
   liked            Publication[]             @relation("liked")
   reported         Publication[]             @relation("reported")
-  usedPublications PublicationUsedInCourse[]
 
   savedByAllTime SavedByAllTime[]
 
@@ -71,23 +75,10 @@ model User {
   replies     Reply[]
   isAdmin     Boolean       @default(false)
 
-  profilePic           File?                @relation("ProfilePic")
-  courses              Course[]             @relation("CourseInstructors")
+  profilePic File?    @relation("ProfilePic")
+  courses    Course[] @relation("CourseInstructors")
 
   publicationHistory PublicationHistory[]
-}
-
-model PublicationUsedInCourse {
-  // the user that is using the publication
-  userId String @db.Uuid
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  publicationId Int
-  publication   Publication @relation(fields: [publicationId], references: [id])
-
-  course String
-
-  @@id([publicationId, course])
 }
 
 model Publication {
@@ -128,14 +119,13 @@ model Publication {
 
   materials    Material?
   circuit      Circuit?
-  usedInCourse PublicationUsedInCourse[]
 
   history PublicationHistory[]
 }
 
 model PublicationHistory {
-  id        String                       @id @default(uuid())
-  createdAt DateTime                     @default(now())
+  id        String               @id @default(uuid())
+  createdAt DateTime             @default(now())
   action    PublicationEventType
 
   // Optional user explanation on the change
@@ -180,6 +170,7 @@ model Material {
   encapsulatingType MaterialType
   timeEstimate      Int?
   theoryPractice    Float?
+  selfMade          Boolean      @default(true)
   files             File[]       @relation("Files")
   fileURLs          FileURL[]    @relation("MaterialFileURLs")
 

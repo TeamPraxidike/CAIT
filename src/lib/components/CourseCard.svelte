@@ -139,11 +139,12 @@
 		</div>
 	</div>
 
-	<a
-		slot="interaction-buttons"
-		href="/courses/{course.courseName}"
-		class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"
-		on:click={resetTab}>View</a>
+	<div slot="interaction-buttons" class="flex gap-2 items-center">
+		<a
+			href="/courses/{course.courseName}"
+			class="py-1 px-4 bg-surface-700 text-surface-50 rounded-lg hover:bg-opacity-85"
+			on:click={resetTab}>View</a>
+	</div>
 
 	
 

@@ -2,16 +2,14 @@
 	import { MaterialTypes, Meta, PublicationCard, SearchBar, UserProp } from '$lib';
 	import { goto } from '$app/navigation';
 	import type { PageServerData } from './$types';
-	import type { Publication, User, Course } from '@prisma/client';
+	import type { Publication, User } from '@prisma/client';
 	import { onMount } from 'svelte';
 	import {type PaginationSettings, Paginator, ProgressRadial, SlideToggle} from '@skeletonlabs/skeleton';
 	import DropdownSelect from '$lib/components/designSystem/DropdownSelect.svelte';
-	import DropdownInput from '$lib/components/designSystem/DropdownInput.svelte';
 	import {semanticSearchActive} from '$lib/stores/semanticSearchActive'
 	import CourseCard from '$lib/components/CourseCard.svelte';
 	import { BROWSABLE_PAGE_TYPES, PageType, toPageType } from '$lib/util/frontendTypes';
 	import type { CourseWithProcessedProfilePic } from '../api/course-extended/+server';
-	import BrowseCardShell from '$lib/components/BrowseCardShell.svelte';
 
 	export let data: PageServerData;
 	let searchWord: string = '';
@@ -19,7 +17,6 @@
 	let circuits: any[] = [];
 	let idsMat: any[] = [];
 	let idsCirc: any[] = [];
-	
 
 	let amount = data.amount;
 	let source = data.type === 'circuits' ? idsCirc : idsMat;
@@ -39,7 +36,6 @@
 	let sortOptions: string[] = ['Most Recent', 'Most Liked', 'Oldest'];
 	let sortByText = 'Sort By';
 	let selectedDiff: ('Easy' | 'Medium' | 'Hard')[] = [];
-	let diffOptions: ('Easy' | 'Medium' | 'Hard')[] = ['Easy', 'Medium', 'Hard'];
 	let selectedTags: string[] = [];
 
 	let selectedPublisherIDs: string[] = [];//keeps track of selected users ids

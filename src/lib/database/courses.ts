@@ -4,6 +4,7 @@ import { prisma } from '$lib/database/prisma';
 import type { UserWithProfilePic } from '$lib/util/coursesLogic';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
 import type { FetchedFileItem } from '$lib/database/index';
+import { sensitive_fields_user } from '$lib/util/sensitive_fields.ts';
 
 export type createCourseData = {
 	learningObjectives: string[];
@@ -50,11 +51,11 @@ async function enrichMaintainers(course: Course & { maintainers: any[] }): Promi
 	};
 }
 
-export async function getAllCoursesExtended(): Promise<CourseWithMaintainersAndProfilePic[]> {
+export async function getAllCoursesExtended(return_sensitive_fields=true): Promise<CourseWithMaintainersAndProfilePic[]> {
 	const courses = await prisma.course.findMany({
 		include: {
 			maintainers: {
-				include: { profilePic: true }
+				...sensitive_fields_user(return_sensitive_fields)
 			},
 			coverPic: true,
 			publications: true
@@ -65,7 +66,7 @@ export async function getAllCoursesExtended(): Promise<CourseWithMaintainersAndP
 }
 
 export async function getCourseByIdExtended(courseId: number): Promise<CourseWithCoverPic> {
-	let course = await prisma.course.findUnique({
+	const course = await prisma.course.findUnique({
 		where: { id: courseId },
 		include: {
 			maintainers: {
@@ -264,7 +265,6 @@ export type PublicationWithRelations = Prisma.PublicationGetPayload<{
     thisSimilarTo: true;
     materials: true;
     circuit: true;
-    usedInCourse: true;
     course: true;
   };
 }>;
@@ -294,7 +294,6 @@ export async function getPublicationsForCourse(c: Number): Promise<PublicationWi
 			thisSimilarTo: true,
 			materials: true,
 			circuit: true,
-			usedInCourse: true,
 			course: true
 		} // optional, if you want newest first
 	});

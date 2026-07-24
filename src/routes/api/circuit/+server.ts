@@ -37,6 +37,8 @@ export async function GET({ url }) {
 			limit,
 			sort,
 			query,
+			false,
+			false
 		);
 
 		// circuits = circuits.filter((c: CircuitWithPublisher) => !c.publication.isDraft);

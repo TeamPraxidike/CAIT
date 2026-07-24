@@ -9,7 +9,7 @@ export type CourseWithProcessedProfilePic = Omit<CourseWithMaintainersAndProfile
 }
 export async function GET() {
 	try {
-		const courses: CourseWithMaintainersAndProfilePic[] = await getAllCoursesExtended();
+		const courses: CourseWithMaintainersAndProfilePic[] = await getAllCoursesExtended(false);
 		const coursesWithAdditionalInfo: CourseWithProcessedProfilePic[] = await Promise.all(
 			courses.map(async (course) => {
 				const coverPic = await coverPicFetcher(null, course.coverPic);

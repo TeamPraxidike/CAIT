@@ -23,6 +23,28 @@ async function getExistingUserIDs() {
 }
 
 describe('Users', () => {
+	describe('[GET] /user', () => {
+		it('should return only published posts for the publication count', async () => {
+			const user = await createUniqueUser();
+			const published = await createUniqueMaterial(user.id);
+			const draft = await createUniqueMaterial(user.id);
+
+			await prisma.publication.update({
+				where: { id: draft.publicationId },
+				data: { isDraft: true },
+			});
+
+			const response = await fetch(`${testingUrl}/user`);
+			const body = await response.json();
+			const returnedUser = body.users.find(
+				(candidate: { id: string }) => candidate.id === user.id,
+			);
+
+			expect(response.status).toBe(200);
+			expect(returnedUser.posts).toEqual([{ id: published.publicationId }]);
+		});
+	});
+
 	describe('[GET] /user/:id', () => {
 		it('should respond with 404 if the user does not exist', async () => {
 			const userIds: string[] = await getExistingUserIDs();
