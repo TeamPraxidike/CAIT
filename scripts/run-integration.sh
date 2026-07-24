@@ -33,25 +33,55 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [ -n "${CI:-}" ]; then
-  $COMPOSE up -d db analytics supavisor kong auth rest storage imgproxy minio minio-createbucket
-else
-  $COMPOSE up -d
-fi
-
 # ---------------------------------------------------------------------------
 # Wait for services to be ready
 # ---------------------------------------------------------------------------
 wait_healthy() {
   local service=$1
+  local container=""
+  if [ -n "${CI:-}" ]; then
+    case "$service" in
+      db) container="supabase-db" ;;
+      analytics) container="supabase-analytics" ;;
+      minio) container="supabase-minio-1" ;;
+      supavisor) container="supabase-pooler" ;;
+      kong) container="supabase-kong" ;;
+    esac
+  fi
   echo "Waiting for $service to be healthy..."
   for i in $(seq 1 60); do
-    STATUS=$($COMPOSE ps $service --format '{{.Health}}' 2>/dev/null || echo "unknown")
+    if [ -n "$container" ]; then
+      STATUS=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container" 2>/dev/null || echo "unknown")
+    else
+      STATUS=$($COMPOSE ps $service --format '{{.Health}}' 2>/dev/null || echo "unknown")
+    fi
     [ "$STATUS" = "healthy" ] && echo "$service is healthy." && return 0
     [ "$i" -eq 60 ] && echo "ERROR: $service not healthy (status: $STATUS)" && exit 1
     sleep 2
   done
 }
+
+if [ -n "${CI:-}" ]; then
+  # Start the CI stack in dependency-safe phases.  A single `up` over the
+  # whole graph can block on the one-shot MinIO bucket container before the
+  # health checks below ever run.
+  $COMPOSE up -d --no-deps db minio imgproxy
+  wait_healthy db
+  wait_healthy minio
+
+  $COMPOSE up -d --no-deps analytics
+  wait_healthy analytics
+
+  $COMPOSE run --rm minio-createbucket
+
+  $COMPOSE up -d --no-deps supavisor
+  wait_healthy supavisor
+
+  $COMPOSE up -d --no-deps rest auth
+  $COMPOSE up -d --no-deps kong storage
+else
+  $COMPOSE up -d
+fi
 
 wait_healthy db
 wait_healthy analytics

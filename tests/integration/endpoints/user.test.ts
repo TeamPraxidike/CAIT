@@ -34,7 +34,7 @@ describe('Users', () => {
 				data: { isDraft: true },
 			});
 
-			const response = await fetch(`${testingUrl}/user`);
+			const response = await fetch(`${apiTestingUrl}/user`);
 			const body = await response.json();
 			const returnedUser = body.users.find(
 				(candidate: { id: string }) => candidate.id === user.id,
