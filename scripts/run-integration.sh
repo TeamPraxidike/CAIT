@@ -21,7 +21,13 @@ if [ -n "${CI:-}" ]; then
   COMPOSE="docker compose -f docker/docker-compose.yml -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci"
 else
   echo "Starting Supabase services for local integration tests..."
-  COMPOSE="docker compose -f docker/docker-compose.yml --env-file docker/.env"
+  COMPOSE="docker compose -p cait-test -f docker/docker-compose.yml -f docker/docker-compose.test.yml --env-file docker/.env"
+
+  # test stack reuses the dev stack's host ports — refuse to start over a running dev stack
+  if [ -n "$(docker ps -q --filter 'name=^supabase-')" ]; then
+    echo "ERROR: dev Supabase stack is running. Stop it (exit dev.sh) before running tests."
+    exit 1
+  fi
 fi
 
 cleanup() {
@@ -29,15 +35,16 @@ cleanup() {
   [ -n "$SERVER_PID" ] && kill $SERVER_PID 2>/dev/null || true
   PORT_PID=$(lsof -t -i :4173 2>/dev/null || true)
   [ -n "$PORT_PID" ] && kill $PORT_PID 2>/dev/null || true
-  $COMPOSE down -v
+  if [ -n "${CI:-}" ]; then
+    $COMPOSE down -v
+  else
+    # stop, not down in non-CI: the test stack persists and is reused on the next run
+    $COMPOSE stop
+  fi
 }
 trap cleanup EXIT
 
-if [ -n "${CI:-}" ]; then
-  $COMPOSE up -d db analytics supavisor kong auth rest storage imgproxy minio minio-createbucket
-else
-  $COMPOSE up -d
-fi
+$COMPOSE up -d db analytics supavisor kong auth rest storage imgproxy minio minio-createbucket
 
 # ---------------------------------------------------------------------------
 # Wait for services to be ready
@@ -66,12 +73,10 @@ if [ -n "${CI:-}" ]; then
 else
   set -a && source .env && set +a
 
-  # TODO: split local dev and local test environments at some point
   echo "Wiping database..."
-
   # skip prisma migrations, otherwise it will try to reapply all of them and crash
   # because the tables/columns/constraints already exist, we're just removing rows
-  docker exec -i supabase-db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < scripts/utility/wipe-db.sql
+  $COMPOSE exec -T db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < scripts/utility/wipe-db.sql
 fi
 
 # ---------------------------------------------------------------------------

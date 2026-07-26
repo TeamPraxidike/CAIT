@@ -12,6 +12,14 @@ fi
 
 SERVER_PID=""
 
+COMPOSE="docker compose -p cait-test -f docker/docker-compose.yml -f docker/docker-compose.test.yml --env-file docker/.env"
+
+# test stack reuses the dev stack's host ports — refuse to start over a running dev stack
+if [ -n "$(docker ps -q --filter 'name=^supabase-')" ]; then
+  echo "ERROR: dev Supabase stack is running. Stop it (exit dev.sh) before running tests."
+  exit 1
+fi
+
 cleanup() {
   echo "Cleaning up..."
   echo "Killing server PID: $SERVER_PID"
@@ -19,18 +27,18 @@ cleanup() {
   PORT_PID=$(lsof -t -i :4173 2>/dev/null || true)
   echo "Killing port 4173 PID: $PORT_PID"
   [ -n "$PORT_PID" ] && kill $PORT_PID 2>/dev/null || true
-  docker compose -f docker/docker-compose.yml --env-file docker/.env down
+  # stop, not down: the test stack persists and is reused on the next run
+  $COMPOSE stop
 }
 trap cleanup EXIT
 
 
-echo "Starting Supabase services..."
-docker compose -f docker/docker-compose.yml --env-file docker/.env up -d
+echo "Starting Supabase test stack..."
+$COMPOSE up -d db analytics supavisor kong auth rest storage imgproxy minio minio-createbucket
 
 # ---------------------------------------------------------------------------
 # Wait for services to be ready
 # ---------------------------------------------------------------------------
-COMPOSE="docker compose -f docker/docker-compose.yml --env-file docker/.env"
 
 wait_healthy() {
   local service=$1
@@ -51,25 +59,8 @@ wait_healthy kong
 # -a auto-export, source the .env, +a turns off auto-export
 set -a && source .env && set +a
 
-# TODO: split local dev and local test environments at some point
 echo "Wiping database..."
-
-# skip prisma migrations, otherwise it will try to reapply all of them and crash
-# because the tables/columns/constraints already exist, we're just removing rows
-#docker exec supabase-db psql -U supabase_admin -d postgres -c "
-#  DO \$\$
-#  DECLARE r RECORD;
-#  BEGIN
-#    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != '_prisma_migrations')
-#    LOOP
-#      EXECUTE format('TRUNCATE TABLE public.%I RESTART IDENTITY CASCADE', r.tablename);
-#    END LOOP;
-#    TRUNCATE auth.users CASCADE;
-#  END
-#  \$\$;
-#"
-
-docker exec -i supabase-db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < scripts/utility/wipe-db.sql
+$COMPOSE exec -T db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < scripts/utility/wipe-db.sql
 
 echo "Building..."
 npm run build
