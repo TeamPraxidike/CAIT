@@ -6,7 +6,6 @@ import { sortSwitch } from '$lib/database/material.ts';
 
 export type Publication = Prisma.PublicationGetPayload<{
 	include: {
-		usedInCourse: true,
 		tags: true,
 		publisher: {
 			include: {
@@ -63,7 +62,6 @@ export type Publication = Prisma.PublicationGetPayload<{
 										profilePic: true,
 									},
 								},
-								usedInCourse: true,
 							},
 						},
 						next: true,
@@ -94,11 +92,6 @@ export type PublicationGet = Prisma.PublicationGetPayload<{
 				profilePic: true,
 			},
 		},
-		usedInCourse: {
-			select: {
-				course: true,
-			},
-		},
 	}
 }>;
 /**
@@ -111,7 +104,6 @@ export async function getPublicationById(id: number): Promise<Publication> {
 			id: id,
 		},
 		include: {
-			usedInCourse: true,
 			tags: true,
 			publisher: {
 				include: {
@@ -175,7 +167,6 @@ export async function getPublicationById(id: number): Promise<Publication> {
 											profilePic: true,
 										},
 									},
-									usedInCourse: true,
 								},
 							},
 							next: true,
@@ -240,11 +231,6 @@ export async function getAllPublications(publishers: string[], query: string,
 					profilePic: true
 				}
 			},
-			usedInCourse: {
-				select: {
-					course: true,
-				},
-			},
 		},
 	});
 	if (!includeDrafts) {
@@ -277,12 +263,6 @@ export async function getAllPublicationsByIds(ids: number[], sort: string) {
 		},
 		orderBy: sortSwitch(sort).publication,
 		include: {
-			// usedInCourse: true,
-			usedInCourse: {
-				select: {
-					course: true,
-				},
-			},
 			tags: true,
 			publisher: {
 				select: {

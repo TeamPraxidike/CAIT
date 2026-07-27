@@ -9,11 +9,6 @@ export type SimilarPublicationsResult = Prisma.SimilarContentGetPayload<{
                 coverPic: true,
                 materials: true,
                 circuit: true,
-                usedInCourse: {
-                    select: {
-                        course: true,
-                    },
-                },
                 publisher: {
                     include: {
                         profilePic: true,
@@ -99,11 +94,6 @@ export async function getSimilarPublications(
                     coverPic: true,
                     materials: true,
                     circuit: true,
-                    usedInCourse: {
-                        select: {
-                            course: true,
-                        },
-                    },
                     publisher: {
                         include: {
                             profilePic: true,

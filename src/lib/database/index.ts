@@ -78,12 +78,6 @@ import {
 	getRepliesByCommentId,
 } from '$lib/database/reply';
 
-import {
-	addPublicationToUsedInCourse,
-	coursesUsingPublication,
-	publicationsAUserUses,
-} from '$lib/database/usedInCourse';
-
 import type { userEditData } from '$lib/database/user';
 import type { editReplyData, createReplyData } from '$lib/database/reply';
 import type { createCommentData, editCommentData } from '$lib/database/comment';
@@ -301,9 +295,6 @@ export {
 	getLikedPublications,
 	savePublication,
 	getSavedPublications,
-	addPublicationToUsedInCourse,
-	coursesUsingPublication,
-	publicationsAUserUses,
 	getRepliesByCommentId,
 	getCommentsByPublicationId,
 	getLikedReplies,

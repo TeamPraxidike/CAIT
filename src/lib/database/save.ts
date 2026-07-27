@@ -14,14 +14,6 @@ export type SavedPublicationsResult = Prisma.UserGetPayload<{
 				},
 				circuit: true,
 				coverPic: true,
-				usedInCourse: {
-					select: {
-						course: true,
-					},
-					where: {
-						userId: string,
-					},
-				},
 				publisher: {
 					include: {
 						profilePic: true,
@@ -110,14 +102,6 @@ export async function getSavedPublications(userId: string): Promise<SavedPublica
 					},
 					circuit: true,
 					coverPic: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-						where: {
-							userId: userId,
-						},
-					},
 					publisher: {
 						include: {
 							profilePic: true,

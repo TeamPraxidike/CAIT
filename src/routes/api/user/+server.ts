@@ -52,6 +52,9 @@ export async function GET() {
 				...sensitive_fields_user_json,
 				// TODO: maybe just use a count and return the number of posts directly?
 				posts: {
+					where: {
+						isDraft: false,
+					},
 					select: {
 						id: true
 					}

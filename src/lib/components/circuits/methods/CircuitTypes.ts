@@ -4,7 +4,6 @@ import { type Material, type Node as PrismaNode, type Publication, PublicationTy
 export type CircuitNode = PrismaNode & {
 	publication: Publication & {
 		tags: { content: string }[],
-		usedInCourse: { course: string }[],
 		publisher: (User & { profilePicData: string })
 		coverPicData: string,
 		materials: Material,
@@ -28,8 +27,7 @@ export type DisplayedMaterials = {
 
 export type FullPublication = Publication & {
 	materials : Material
-	tags: { content: string }[],
-		usedInCourse: { course: string }[]
+	tags: { content: string }[]
 };
 
 export type FullMaterial = Material & {

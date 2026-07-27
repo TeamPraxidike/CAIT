@@ -191,20 +191,38 @@
 			url = '/api/circuit/' + pubView.publication.id;
 		}
 		try {
-			await fetch(url, {
+			const response = await fetch(url, {
 				method: 'DELETE'
-			}).then(() => {
+			})
+			
+			if (response.status === 401){
 				toastStore.trigger({
-					message: 'Publication deleted successfully',
-					background: 'bg-success-200',
+					message: 'You are not authorized to delete this publication',
+					background: 'bg-error-200',
 					classes: 'text-surface-900'
 				});
-				if (isMaterial) {
-					goto('/browse');
-				} else {
-					goto('/browse?type=circuits');
-				}
+				return;
+			}
+
+			if (!response.ok){
+				toastStore.trigger({
+					message: 'Failed to delete publication',
+					background: 'bg-error-200',
+					classes: 'text-surface-900'
+				});
+				return;
+			}
+			
+			toastStore.trigger({
+				message: 'Publication deleted successfully',
+				background: 'bg-success-200',
+				classes: 'text-surface-900'
 			});
+			if (isMaterial) {
+				goto('/browse');
+			} else {
+				goto('/browse?type=circuits');
+			}
 		} catch (e) {
 			console.error(e);
 		}
@@ -341,14 +359,11 @@
 
 	let hoverDivReport: HTMLDivElement;
 	let isHoveredReport = false;
-	let hoverDiv: HTMLDivElement;
-	let isHovered = false;
 	let hoverEdit: HTMLButtonElement;
 	let isHoveredEdit = false;
 	let hoverDelete: HTMLButtonElement;
 	let isHoveredDelete = false;
 	const handleHoverReport = () => isHoveredReport = !isHoveredReport;
-	const handleHover = () => isHovered = !isHovered;
 	const handleHoverDelete = () => isHoveredDelete = !isHoveredDelete;
 	const handleHoverEdit = () => isHoveredEdit = !isHoveredEdit;
 
@@ -356,11 +371,9 @@
 	$: editIcon = isHoveredEdit ? 'mdi:pencil' : 'mdi:pencil-outline';
 
 	onMount(() => {
-		if (hoverDivReport && hoverDiv && hoverEdit && hoverDelete) {
+		if (hoverDivReport && hoverEdit && hoverDelete) {
 			hoverDivReport.addEventListener('mouseenter', handleHoverReport);
 			hoverDivReport.addEventListener('mouseleave', handleHoverReport);
-			hoverDiv.addEventListener('mouseenter', handleHover);
-			hoverDiv.addEventListener('mouseleave', handleHover);
 
 			hoverEdit.addEventListener('mouseenter', handleHoverEdit);
 			hoverEdit.addEventListener('mouseleave', handleHoverEdit);
@@ -370,8 +383,6 @@
 			return () => {
 				hoverDivReport.removeEventListener('mouseenter', handleHoverReport);
 				hoverDivReport.removeEventListener('mouseleave', handleHoverReport);
-				hoverDiv.removeEventListener('mouseenter', handleHover);
-				hoverDiv.removeEventListener('mouseleave', handleHover);
 
 				hoverEdit.removeEventListener('mouseenter', handleHoverEdit);
 				hoverDelete.removeEventListener('mouseenter', handleHoverDelete);
@@ -455,28 +466,6 @@
 
 	<!--  LEFT BIG COLUMN  -->
 	<div class="flex flex-col gap-2 col-span-3">
-		<div class="grid grid-cols-6">
-			<div bind:this={hoverDiv} class="col-span-2">
-				{#if pubView.publication.usedInCourse.length === 1}
-					<p class="text-sm opacity-85 break-words max-w-full underline">Material is used
-						in {pubView.publication.usedInCourse.length} course</p>
-				{:else if pubView.publication.usedInCourse.length > 1}
-					<p class="text-sm opacity-85 break-words max-w-full underline">Material is used
-						in {pubView.publication.usedInCourse.length} courses</p>
-				{/if}
-
-				{#if isHovered}
-					<div
-						class="absolute mt-2 bg-surface-50 bg-opacity-100 shadow-md p-2 rounded-lg flex gap-2 items-center transition-all duration-300 flex-col"
-						style="z-index: 9999;" transition:fly={{ y: -8, duration: 400 }}>
-						{#each pubView.publication.usedInCourse.map(x => x.course) as course}
-							<p class="text-sm opacity-85 break-words max-w-full">{course}</p>
-						{/each}
-					</div>
-				{/if}
-			</div>
-		</div>
-
 		<div class="flex">
 				<div class=" w-1/2  pr-12">
 					<span class="font-bold text-surface-800">Learning Objectives:</span>

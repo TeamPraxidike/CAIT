@@ -53,7 +53,6 @@ async function main(userIdOld: string, userIdNew: string){
                          "aboutMe" = ${rowOld.aboutMe}, "isAdmin" = ${rowOld.isAdmin} WHERE id = ${userIdNew}`;
 
 		await tx`UPDATE public."Publication" SET "publisherId" = ${userIdNew} WHERE "publisherId" = ${userIdOld}`;
-		await tx`UPDATE public."PublicationUsedInCourse" SET "userId" = ${userIdNew} WHERE "userId" = ${userIdOld}`;
 		await tx`UPDATE public."SavedByAllTime" SET "userId" = ${userIdNew} WHERE "userId" = ${userIdOld}`;
 		await tx`UPDATE public."Comment" SET "userId" = ${userIdNew} WHERE "userId" = ${userIdOld}`;
 		await tx`UPDATE public."Reply" SET "userId" = ${userIdNew} WHERE "userId" = ${userIdOld}`;
