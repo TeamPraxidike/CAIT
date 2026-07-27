@@ -16,7 +16,9 @@
         coverPicData: string;
         publisher: User & {profilePicData: string};
     });
-    let tabSet: number = 0;
+    const getSelectedTab = () => page.url.searchParams.get('tab') === 'drafts' ? 2 : 0;
+
+    let tabSet: number = getSelectedTab();
     let currentProfileId = data.user.id;
 
     let user = data.user;
@@ -33,7 +35,11 @@
 
     $: if (data.user.id !== currentProfileId) {
         currentProfileId = data.user.id;
-        tabSet = 0;
+        tabSet = getSelectedTab();
+    }
+
+    $: if (page.url.searchParams.get('tab') === 'drafts') {
+        tabSet = 2;
     }
 
 
