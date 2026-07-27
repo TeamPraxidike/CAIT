@@ -59,6 +59,7 @@ import {
 	getLikedReplies,
 	getLikedComments,
 	updateReputation,
+	setEmailVisibility,
 } from '$lib/database/user';
 
 import {
@@ -76,12 +77,6 @@ import {
 	createReply,
 	getRepliesByCommentId,
 } from '$lib/database/reply';
-
-import {
-	addPublicationToUsedInCourse,
-	coursesUsingPublication,
-	publicationsAUserUses,
-} from '$lib/database/usedInCourse';
 
 import type { userEditData } from '$lib/database/user';
 import type { editReplyData, createReplyData } from '$lib/database/reply';
@@ -118,6 +113,7 @@ type MaterialForm = {
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
+		selfMade: boolean;
 		tags: string[];
 		maintainers: string[];
 		isDraft: boolean;
@@ -286,6 +282,7 @@ export {
 	deleteMaterialByPublicationId,
 	deleteUser,
 	editUser,
+	setEmailVisibility,
 	updateComment,
 	createComment,
 	deleteComment,
@@ -298,9 +295,6 @@ export {
 	getLikedPublications,
 	savePublication,
 	getSavedPublications,
-	addPublicationToUsedInCourse,
-	coursesUsingPublication,
-	publicationsAUserUses,
 	getRepliesByCommentId,
 	getCommentsByPublicationId,
 	getLikedReplies,

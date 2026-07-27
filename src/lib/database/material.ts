@@ -8,11 +8,6 @@ export type MaterialWithPublication = Prisma.MaterialGetPayload<{
 			include: {
 				tags: true,
 				coverPic: true,
-				usedInCourse: {
-					select: {
-						course: true,
-					},
-				},
 				publisher: {
 					include: {
 						profilePic: true,
@@ -81,11 +76,6 @@ export async function getMaterialByPublicationId(
 							user: true,
 						},
 					},
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 				},
 			},
 			files: true,
@@ -139,11 +129,6 @@ export async function getAllMaterials(
 				include: {
 					tags: true,
 					coverPic: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 					course: {
 						select: {
 							educationalLevel: true
@@ -219,8 +204,9 @@ export async function createMaterialPublication(
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
+		selfMade: boolean;
 		isDraft: boolean;
-		course: number;
+		course: number|null;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
@@ -229,6 +215,7 @@ export async function createMaterialPublication(
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,
+			selfMade: metaData.selfMade,
 			encapsulatingType: metaData.materialType[0],
 			publication: {
 				create: {
@@ -274,6 +261,7 @@ export async function updateMaterialByPublicationId(
 		copyright: string;
 		timeEstimate: number;
 		theoryPractice: number;
+		selfMade: boolean;
 		isDraft: boolean;
 		fileURLs: string[];
 		course: number | null
@@ -301,6 +289,7 @@ export async function updateMaterialByPublicationId(
 			copyright: metaData.copyright,
 			timeEstimate: metaData.timeEstimate,
 			theoryPractice: metaData.theoryPractice,
+			selfMade: metaData.selfMade,
 			publication: {
 				update: {
 					where: {
@@ -337,11 +326,6 @@ export async function getMaterialForFile(
 						include: {
 							tags: true,
 							coverPic: true,
-							usedInCourse: {
-								select: {
-									course: true,
-								},
-							},
 							publisher: {
 								include: {
 									profilePic: true,

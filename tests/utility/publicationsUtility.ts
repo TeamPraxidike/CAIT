@@ -107,7 +107,8 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 		materialType,
 		timeEstimate,
 		theoryPractice,
-		isDraft: false
+		isDraft: false,
+		course: null,
 	}
 
 	const publication = await createMaterialPublication(userId, inputData);

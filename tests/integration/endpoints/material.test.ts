@@ -1,9 +1,21 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { resetMaterialTable, testingUrl } from '../setup';
+import { resetMaterialTable, apiTestingUrl } from '../setup';
 import { createUniqueUser } from '../../utility/users';
-import { createMaterialData, createUniqueMaterial } from '../../utility/publicationsUtility';
+import {
+	createMaterialData,
+	createUniqueMaterial,
+	generateRandomString,
+	randomEnumValue,
+} from '../../utility/publicationsUtility';
 import type { User } from '$lib/database/user';
 import { getMaterialByPublicationId, getPublicationById } from '$lib/database';
+import {
+	getAllMaterials,
+	updateMaterialByPublicationId,
+	deleteMaterialByPublicationId,
+	getMaterialForFile,
+} from '$lib/database/material';
+import { Difficulty, MaterialType } from '@prisma/client';
 
 it('should be AEY', () => {
     expect(3).toBe(3);
@@ -14,7 +26,7 @@ it('should be AEY', () => {
 describe('Materials', async () => {
     describe('[GET] /material/:id', () => {
         it('should respond with 404 if the publication of type material does not exist', async () => {
-            const response = await fetch(`${testingUrl}/material/8534853`, {
+            const response = await fetch(`${apiTestingUrl}/material/8534853`, {
                 method: 'GET',
             });
             expect(response.status).toBe(404);
@@ -24,7 +36,7 @@ describe('Materials', async () => {
         });
 
         it('should respond with 400 if the id is < 0', async () => {
-            const response = await fetch(`${testingUrl}/material/-1`, {
+            const response = await fetch(`${apiTestingUrl}/material/-1`, {
                 method: 'GET',
             });
             expect(response.status).toBe(400);
@@ -34,7 +46,7 @@ describe('Materials', async () => {
         });
 
         it('should respond with 400 if the id is = 0', async () => {
-            const response = await fetch(`${testingUrl}/material/0`, {
+            const response = await fetch(`${apiTestingUrl}/material/0`, {
                 method: 'GET',
             });
             expect(response.status).toBe(400);
@@ -44,7 +56,7 @@ describe('Materials', async () => {
         });
 
         it('should respond with 400 if the id is malformed', async () => {
-            const response = await fetch(`${testingUrl}/material/yoan`, {
+            const response = await fetch(`${apiTestingUrl}/material/yoan`, {
                 method: 'GET',
             });
             expect(response.status).toBe(400);
@@ -58,7 +70,7 @@ describe('Materials', async () => {
             const material = await createUniqueMaterial(user.id);
 
             const response = await fetch(
-                `${testingUrl}/material/${material.publicationId}`,
+                `${apiTestingUrl}/material/${material.publicationId}`,
                 { method: 'GET' },
             );
             expect(response.status).toBe(200);
@@ -81,7 +93,7 @@ describe('Materials', async () => {
             const user = await createUniqueUser();
             await createUniqueMaterial(user.id);
 
-            const response = await fetch(`${testingUrl}/material`, { method: 'GET' });
+            const response = await fetch(`${apiTestingUrl}/material`, { method: 'GET' });
             expect(response.status).toBe(200);
 
             const responseBody = await response.json();
@@ -174,7 +186,7 @@ describe('Materials', async () => {
 
     describe('[DELETE] /material/:id', () => {
         it('should respond with 400 if the id is < 0', async () => {
-            const response = await fetch(`${testingUrl}/material/-1`, {
+            const response = await fetch(`${apiTestingUrl}/material/-1`, {
                 method: 'DELETE',
             });
             expect(response.status).toBe(400);
@@ -260,7 +272,7 @@ describe('Materials', async () => {
 
 
             const response = await fetch(
-                `${testingUrl}/material/${material.publication.id}`,
+                `${apiTestingUrl}/material/${material.publication.id}`,
                 {
                     method: 'PUT',
                     headers: {
@@ -296,7 +308,7 @@ describe('Materials', async () => {
             editData.metaData.course = NaN;
 
             const response = await fetch(
-                `${testingUrl}/material/${material.publication.id}`,
+                `${apiTestingUrl}/material/${material.publication.id}`,
                 {
                     method: 'PUT',
                     headers: {
@@ -315,6 +327,68 @@ describe('Materials', async () => {
             const pub = await getPublicationById(material.publicationId);
             expect(pub).toBeDefined();
             expect(pub.courseId).toBeNull();
+        });
+    });
+    
+    describe('material data layer', () => {
+        let user: User;
+        beforeEach(async () => {
+            user = await createUniqueUser();
+        });
+
+        it('lists a publisher\'s materials, fuzzy-searches and applies filters', async () => {
+            const material = await createUniqueMaterial(user.id);
+
+            const all = await getAllMaterials([], [user.id], [], [], 'Most Recent', '');
+            expect(all.map((m: { publicationId: number }) => m.publicationId)).toEqual([material.publicationId]);
+
+            const searched = await getAllMaterials([], [user.id], [], [], 'Most Recent', material.publication.title);
+            expect(searched[0].publicationId).toBe(material.publicationId);
+
+            // filtering by the material's own difficulty and type returns it
+            const matching = await getAllMaterials(
+                [],
+                [user.id],
+                [material.publication.difficulty],
+                [material.encapsulatingType],
+                'Most Recent',
+                '',
+            );
+            expect(matching.map((m: { publicationId: number }) => m.publicationId)).toContain(material.publicationId);
+
+            // a tag filter that matches nothing returns no materials
+            const noTag = await getAllMaterials(['no-such-tag'], [user.id], [], [], 'Oldest', '');
+            expect(noTag).toHaveLength(0);
+        });
+
+        it('updates a material through the data layer', async () => {
+            const material = await createUniqueMaterial(user.id);
+            const title = generateRandomString();
+
+            const updated = await updateMaterialByPublicationId(material.publicationId, {
+                title,
+                description: generateRandomString(50),
+                difficulty: randomEnumValue(Difficulty),
+                learningObjectives: [generateRandomString()],
+                prerequisites: [generateRandomString()],
+                materialType: [randomEnumValue(MaterialType)],
+                copyright: generateRandomString(10),
+                timeEstimate: 5,
+                theoryPractice: 0.5,
+                isDraft: false,
+                fileURLs: [],
+                course: null,
+            });
+            expect(updated.publicationId).toBe(material.publicationId);
+            expect(updated.publication.title).toBe(title);
+        });
+
+        it('returns null for an unknown file path and deletes a material', async () => {
+            expect(await getMaterialForFile('non/existent/path')).toBeNull();
+
+            const material = await createUniqueMaterial(user.id);
+            await deleteMaterialByPublicationId(material.publicationId);
+            expect(await getMaterialByPublicationId(material.publicationId)).toBeNull();
         });
     });
 });

@@ -11,8 +11,7 @@ export const resetDb = async () => {
 	//     prisma.tag.deleteMany(),
 	//     prisma.comment.deleteMany(),
 	//     prisma.reply.deleteMany(),
-	//     prisma.file.deleteMany(),
-	//     prisma.publicationUsedInCourse.deleteMany()
+	//     prisma.file.deleteMany()
 	// ])
 
 	const tablenames = await prisma.$queryRaw<
@@ -64,4 +63,4 @@ export async function resetTagsTable() {
 	}
 }
 
-export const testingUrl = 'http://localhost:4173/api';
+export const apiTestingUrl = 'http://localhost:4173/api';

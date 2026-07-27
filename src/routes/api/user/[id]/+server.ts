@@ -11,7 +11,8 @@ import {
 import { profilePicFetcher, updateProfilePic } from '$lib/database/file';
 import type { File as PrismaFile } from '@prisma/client';
 import { Prisma } from '@prisma/client';
-import { verifyAuth } from '$lib/database/auth';
+import { getEmailViewer, verifyAuth } from '$lib/database/auth';
+import { redactEmail } from '$lib/util/emailVisibility';
 import type { User, TUserWithPostsAndProfilePic, TUserWithProfilePic } from '$lib/database/user';
 
 
@@ -34,12 +35,15 @@ export async function GET({ params, locals }) {
 			});
 		}
 
+		const viewer = await getEmailViewer(locals);
+		const sanitizedUser = redactEmail(user, viewer);
+
 		// profilePic return
 		const profilePicData:FetchedFileItem = await profilePicFetcher(
 			user.profilePic,
 		);
 
-		return new Response(JSON.stringify({ user, profilePicData }), {
+		return new Response(JSON.stringify({ user: sanitizedUser, profilePicData }), {
 			status: 200,
 		});
 	} catch (error) {
@@ -82,9 +86,9 @@ export async function DELETE({ params, locals }) {
 		});
 
 		return new Response(JSON.stringify(user), { status: 200 });
-	} catch (error) {
+	} catch (error:any) {
 		if (
-			error == "User not found"
+			error == "User not found" || error.code == "P2025"
 		) {
 			return new Response(JSON.stringify({ error: 'User not found' }), {
 				status: 404,

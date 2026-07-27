@@ -29,10 +29,19 @@ export async function POST({ request }) {
 
 		if (error.code === 'P2002') {
 			return new Response(JSON.stringify('Email already exists'), {
-				status: 400,
+				status: 409,
 				statusText: 'Email already exists',
 			});
 		}
+
+		if (error instanceof TypeError) {
+			return new Response(JSON.stringify({ error: "Malformed request body"}), {
+				status: 400,
+				statusText: "Malformed Request"
+			})
+		}
+
+
 
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
@@ -52,6 +61,9 @@ export async function GET() {
 				...sensitive_fields_user_json,
 				// TODO: maybe just use a count and return the number of posts directly?
 				posts: {
+					where: {
+						isDraft: false,
+					},
 					select: {
 						id: true
 					}
