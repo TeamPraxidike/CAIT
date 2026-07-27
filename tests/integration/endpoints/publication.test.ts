@@ -221,7 +221,7 @@ describe('PUBLICATION API', () => {
 			expect((await getReportsPublication(material.publicationId))._count.reportedBy).toBe(1);
 		});
 
-		it('records an all-time save only once and no-ops for a missing publication', async () => {
+		it('records an all-time save only once and throws for a missing publication', async () => {
 			const material = await createUniqueMaterial(user.id);
 			const saver = await createUniqueUser();
 
@@ -231,7 +231,7 @@ describe('PUBLICATION API', () => {
 			const second = await updateAllTimeSaved(saver.id, material.publicationId);
 			expect(second).toBe('User saved previously');
 
-			expect(await updateAllTimeSaved(saver.id, 999999999)).toBeUndefined();
+			await expect(updateAllTimeSaved(saver.id, 999999999)).rejects.toThrow('Publication not found');
 		});
 	});
 });

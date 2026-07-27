@@ -8,6 +8,7 @@ import { createRandomCourse } from './courses';
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+
 export function generateRandomString(n: number = 20): string {
 	let result = '';
 	for (let i = 0; i < n; i++) {
@@ -82,6 +83,13 @@ export async function createMaterialData(userId: string): Promise<MaterialForm> 
 			delete: [],
 			edit: []
 		},
+		changeLog: {
+			globalComment: generateRandomString(),
+			fileComments: {
+				added: {},
+				deleted: {}
+			}
+		},
 		coverPic: null
 	}
 }
@@ -107,8 +115,8 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 		materialType,
 		timeEstimate,
 		theoryPractice,
-		isDraft: false,
 		course: null,
+		isDraft: false
 	}
 
 	const publication = await createMaterialPublication(userId, inputData);

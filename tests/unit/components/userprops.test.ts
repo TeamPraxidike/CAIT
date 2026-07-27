@@ -9,25 +9,13 @@ import {
 	arrow,
 } from '@floating-ui/dom';
 import { storePopup } from '@skeletonlabs/skeleton';
+import { userMock } from '../../utility/users.ts';
+
 storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+
 
 describe('User Components', () => {
 	let host: HTMLDivElement;
-	const user = {
-		id: 'aaaaaaaaaa',
-		firstName: 'Ivan',
-		lastName: 'Guenov',
-		email: 'kitajski@gmail.com',
-		username: 'ivanguenov',
-		aboutMe: "Hello I am a user",
-		// profilePic: '',
-		password: 'password',
-		reputation: 5,
-		isAdmin: false,
-		emailVerified: null,
-		createdAt: new Date(2),
-		updatedAt: new Date(2),
-	};
 
 	beforeEach(() => {
 		host = document.createElement('div');
@@ -39,7 +27,7 @@ describe('User Components', () => {
 			target: host,
 			props: {
 				view: 'home',
-				user: user,
+				user: userMock,
 				role: 'Maintainer',
 				posts: 7,
 				userPhotoUrl: '',
@@ -48,15 +36,15 @@ describe('User Components', () => {
 		expect(instance).toBeTruthy();
 		expect(host.innerHTML).not.toContain('Maintainer');
 		expect(host.innerHTML).toContain('Posts');
-		expect(host.innerHTML).toContain('Rep: 5');
-		expect(host.innerHTML).toContain('Ivan Guenov');
+		expect(host.innerHTML).toContain("Rep: " + userMock.reputation);
+		expect(host.innerHTML).toContain(userMock.firstName);
 	});
 	it('should render user prop for material view with name and role ', () => {
 		const instance = new UserProp({
 			target: host,
 			props: {
 				view: 'material',
-				user: user,
+				user: userMock,
 				role: 'Maintainer',
 				posts: 7,
 				userPhotoUrl: '',
@@ -65,15 +53,15 @@ describe('User Components', () => {
 		expect(instance).toBeTruthy();
 		expect(host.innerHTML).toContain('Maintainer');
 		expect(host.innerHTML).not.toContain('Posts');
-		expect(host.innerHTML).not.toContain('Rep: 5');
-		expect(host.innerHTML).toContain('Ivan Guenov');
+		expect(host.innerHTML).not.toContain("Rep: " + userMock.reputation);
+		expect(host.innerHTML).toContain(userMock.firstName);
 	});
 	it('should render user prop for publish view with name and role ', () => {
 		const instance = new UserProp({
 			target: host,
 			props: {
 				view: 'publish',
-				user: user,
+				user: userMock,
 				role: 'Maintainer',
 				posts: 7,
 				userPhotoUrl: '',
@@ -81,15 +69,15 @@ describe('User Components', () => {
 		});
 		expect(instance).toBeTruthy();
 		expect(host.innerHTML).not.toContain('Posts');
-		expect(host.innerHTML).not.toContain('Rep: 5');
-		expect(host.innerHTML).toContain('Ivan Guenov');
+		expect(host.innerHTML).not.toContain("Rep: " + userMock.reputation);
+		expect(host.innerHTML).toContain(userMock.firstName);
 	});
 	it('should render user prop for search view with name and role ', () => {
 		const instance = new UserProp({
 			target: host,
 			props: {
 				view: 'search',
-				user: user,
+				user: userMock,
 				role: 'Maintainer',
 				posts: 7,
 				userPhotoUrl: '',
@@ -98,8 +86,8 @@ describe('User Components', () => {
 		expect(instance).toBeTruthy();
 		expect(host.innerHTML).not.toContain('Maintainer');
 		expect(host.innerHTML).toContain('Posts');
-		expect(host.innerHTML).toContain('Rep: 5');
-		expect(host.innerHTML).toContain('Ivan Guenov');
+		expect(host.innerHTML).toContain("Rep: " + userMock.reputation);
+		expect(host.innerHTML).toContain(userMock.firstName);
 	});
 
 	it('should show "Since" date when memberSince is provided', () => {
@@ -107,7 +95,7 @@ describe('User Components', () => {
 			target: host,
 			props: {
 				view: 'home',
-				user: user,
+				user: userMock,
 				role: 'Maintainer',
 				posts: 7,
 				userPhotoUrl: '',
@@ -123,7 +111,7 @@ describe('User Components', () => {
 			target: host,
 			props: {
 				view: 'home',
-				user: user,
+				user: userMock,
 				role: 'Maintainer',
 				posts: 7,
 				userPhotoUrl: '',

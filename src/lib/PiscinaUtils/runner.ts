@@ -56,43 +56,66 @@ const piscina = new Piscina({
  * Method which sends task to a worker thread (circuit)
  * @param pubANodes
  * @param pubBNodes
+ * @param piscinaInstance
  */
-async function compareNodesInBackground(pubANodes: number[], pubBNodes: number[]): Promise<number> {
-    return piscina.run({ pubANodes, pubBNodes }, {name: 'compareNodes'});
+export async function compareNodesInBackground(
+    pubANodes: number[],
+    pubBNodes: number[],
+    piscinaInstance: Piscina = piscina
+): Promise<number> {
+    return piscinaInstance.run({ pubANodes, pubBNodes }, {name: 'compareNodes'});
 }
 
 /**
  * Method which sends task to a worker thread (meta)
  * @param pubAMeta
  * @param pubBMeta
+ * @param piscinaInstance
  */
-async function compareMetaInBackground(pubAMeta: PublicationMeta, pubBMeta: PublicationMeta): Promise<ResultMeta> {
-    return piscina.run({ pubA: pubAMeta, pubB: pubBMeta }, {name: 'compareMeta'});
+export async function compareMetaInBackground(
+    pubAMeta: PublicationMeta,
+    pubBMeta: PublicationMeta,
+    piscinaInstance: Piscina = piscina
+): Promise<ResultMeta> {
+    return piscinaInstance.run({ pubA: pubAMeta, pubB: pubBMeta }, {name: 'compareMeta'});
 }
 
 /**
  * Method which sends task to a worker thread (files)
  * @param pubAFiles
  * @param pubBFiles
+ * @param piscinaInstance
  */
-async function compareFilesInBackground(pubAFiles: PrismaFile[], pubBFiles: PrismaFile[]): Promise<ResultFile> {
-    return piscina.run({ pubAFiles, pubBFiles }, {name: 'compareFiles'});
+export async function compareFilesInBackground(
+    pubAFiles: PrismaFile[],
+    pubBFiles: PrismaFile[],
+    piscinaInstance: Piscina = piscina
+): Promise<ResultFile> {
+    return piscinaInstance.run({ pubAFiles, pubBFiles }, {name: 'compareFiles'});
 }
 
 /**
  * Method which sends task to a worker thread (complete initial parsing of uploaded/edited publication)
  * @param pubFiles
+ * @param piscinaInstance
  */
-async function initialMaterialFileParseInBackground(pubFiles: PrismaFile[]): Promise<FileTokenInfo> {
-    return piscina.run({ pubFiles }, {name: 'initialParse'});
+export async function initialMaterialFileParseInBackground(
+    pubFiles: PrismaFile[],
+    piscinaInstance: Piscina = piscina
+): Promise<FileTokenInfo> {
+    return piscinaInstance.run({ pubFiles }, {name: 'initialParse'});
 }
 
-export async function enqueueMaterialComparison(publicationId: number, materialId: number): Promise<void> {
+export async function enqueueMaterialComparison(
+    publicationId: number,
+    materialId: number,
+    piscinaInstance: Piscina = piscina
+): Promise<void> {
     try{
         const currentFiles: PrismaFile[] = await getFilesForMaterial(materialId)
 
         // INITIALLY PARSE CURRENT PUBLICATION FILES IN ORDER TO REUSE TOKENS LATER ON
-        const initialParsing = await initialMaterialFileParseInBackground(currentFiles);
+        const initialParsing = await initialMaterialFileParseInBackground(currentFiles, piscinaInstance);
 
         await handleFileTokens(initialParsing)
 
@@ -128,8 +151,8 @@ export async function enqueueMaterialComparison(publicationId: number, materialI
                 comparisons.push({
                     fromPubId: publicationId,
                     toPubId: materials[i].publicationId,
-                    similarityFile: compareFilesInBackground(currentMaterial.files, materials[i].files),
-                    similarityMeta: compareMetaInBackground(pubAMeta, pubBMeta)
+                    similarityFile: compareFilesInBackground(currentMaterial.files, materials[i].files, piscinaInstance),
+                    similarityMeta: compareMetaInBackground(pubAMeta, pubBMeta, piscinaInstance)
                 });
             }
         }
@@ -170,7 +193,7 @@ export async function enqueueMaterialComparison(publicationId: number, materialI
     }
 }
 
-export async function enqueueCircuitComparison(publicationId: number): Promise<void> {
+export async function enqueueCircuitComparison(publicationId: number, piscinaInstance: Piscina = piscina): Promise<void> {
     try{
         const circuits = await getAllCircuits([], [], 0, '', '', true);
         const currentCircuit = await getCircuitByPublicationId(publicationId)
@@ -190,7 +213,6 @@ export async function enqueueCircuitComparison(publicationId: number): Promise<v
 
         for (let i = 0; i < circuits.length; i++) {
             if (circuits[i].publicationId !== publicationId) {
-
                 const pubBMeta: PublicationMeta = {
                     title: circuits[i].publication.title,
                     description: circuits[i].publication.description,
@@ -205,8 +227,8 @@ export async function enqueueCircuitComparison(publicationId: number): Promise<v
                     fromPubId: publicationId,
                     toPubId: circuits[i].publicationId,
                     similarityNode: compareNodesInBackground(currentCircuit!.nodes.map(n => n.publicationId),
-                        circuits[i].nodes.map(n => n.publicationId)),
-                    similarityMeta: compareMetaInBackground(pubAMeta, pubBMeta)
+                        circuits[i].nodes.map(n => n.publicationId), piscinaInstance),
+                    similarityMeta: compareMetaInBackground(pubAMeta, pubBMeta, piscinaInstance)
                 });
             }
         }

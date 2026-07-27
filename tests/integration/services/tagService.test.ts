@@ -6,10 +6,10 @@ import {
 	getAllTags,
 	getTagByContent,
 } from '$lib/database';
-import { resetTagsTable } from '../setup';
+// import { resetTagsTable } from '../setup';
 import { generateRandomString } from '../../utility/publicationsUtility';
 
-await resetTagsTable();
+// await resetTagsTable();
 
 describe('tagService', () => {
 	it('should add a tag to a publication', async () => {

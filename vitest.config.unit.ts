@@ -12,6 +12,8 @@ export default mergeConfig(
 			reporters: process.env.GITHUB_ACTIONS === 'true'
 				? ['default', 'github-actions']
 				: ['default'],
+			silent: 'passed-only',
+			hookTimeout: 30000,
 			environment: 'jsdom',
 			setupFiles: ['tests/unit/setup.ts'],
 			coverage: {

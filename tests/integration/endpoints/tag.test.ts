@@ -55,7 +55,7 @@ describe('[POST]/[GET] /api/tags', () => {
 			(tag: { content: string }) => tag.content,
 		);
 
-		expect(body.filter((x: string) => x === 'a tag')).toHaveLength(1);
+		expect(body.filter((x: string) => x === 'hello')).toHaveLength(1);
 	});
 });
 
