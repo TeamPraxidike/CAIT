@@ -98,6 +98,7 @@ export async function enqueueMaterialComparison(publicationId: number, materialI
 
         const materials = await getAllMaterials([],[],[],[],'','', true);
         const currentMaterial = await getMaterialByPublicationId(publicationId)
+        if (!currentMaterial) return; // publication was deleted before background comparison
         const comparisons: {fromPubId: number, toPubId: number,
             similarityFile: Promise<ResultFile>, similarityMeta: Promise<ResultMeta>}[] = [];
         const filesToUpdatePrisma: FileTokenInfo = []
@@ -173,6 +174,7 @@ export async function enqueueCircuitComparison(publicationId: number): Promise<v
     try{
         const circuits = await getAllCircuits([], [], 0, '', '', true);
         const currentCircuit = await getCircuitByPublicationId(publicationId)
+        if (!currentCircuit) return; // publication was deleted before background comparison
 
         const comparisons: {fromPubId: number, toPubId: number,
             similarityNode: Promise<number>, similarityMeta: Promise<ResultMeta>}[] = [];

@@ -180,15 +180,16 @@ describe('COMMENT API', () => {
                 expect(responseComment.content).toBe(comment.content);
             })
             it("should respond with 404 when retrieving a comment that does not exist", async () => {
-                const nonExistingCommentId = uuid();
-
-                const getResponse = await fetch(`${apiTestingUrl}/comment/${nonExistingCommentId}`, {
-                    method: "GET", // use "GET" if your endpoint retrieves with GET
-                    headers: {
-                    "Content-Type": "application/json",
-                    },
+                const delResponse = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
                 });
+                expect(delResponse.status).toBe(200);
 
+                const getResponse = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
                 expect(getResponse.status).toBe(404);
             });
 
@@ -214,15 +215,17 @@ describe('COMMENT API', () => {
             })
 
             it("should 404 when deleting non existing comments", async () => {
-                const nonExistingCommentId = uuid();
-
-                let delResponse = await fetch(`${apiTestingUrl}/comment/${nonExistingCommentId}`, {
+                const delResponseFirst = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                 });
-                expect(delResponse.status).toBe(404);
+                expect(delResponseFirst.status).toBe(200);
+
+                const delResponseSecond = await fetch(`${apiTestingUrl}/comment/${comment.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                expect(delResponseSecond.status).toBe(404);
             })
             
         });
