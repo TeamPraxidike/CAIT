@@ -65,6 +65,8 @@
 				<!-- UsersDisplay should fill the wrapper -->
 				<UsersDisplay users={userList} />
 			</div>
+		{:else if $$slots.visual}
+			<slot name="visual" />
 		{:else}
 			<img src={img} alt={title} class="w-full rounded-lg object-cover" />
 		{/if}

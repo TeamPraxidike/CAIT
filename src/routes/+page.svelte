@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Meta, Section } from '$lib';
+	import { Meta, PublicationCard, Section } from '$lib';
 	import type { PageServerData } from './$types';
 
 	export let data: PageServerData;
@@ -48,7 +48,25 @@
 
 
 <main class="col-span-full flex flex-col gap-10 my-20">
-	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publication.png" mdFlex="md:flex-row-reverse" iconList={true}/>
+	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} mdFlex="md:flex-row-reverse" iconList={true}>
+		<svelte:fragment slot="visual">
+			{#if data.featuredPublication}
+				<PublicationCard
+					className="w-full"
+					publication={data.featuredPublication.publication}
+					publisher={data.featuredPublication.publisher}
+					imgSrc={data.featuredPublication.coverPicData}
+					materialType={data.featuredPublication.encapsulatingType}
+					liked={false}
+					saved={false}
+				/>
+			{:else}
+				<div class="flex min-h-[180px] w-full items-center justify-center rounded-lg bg-surface-100 p-6 text-center dark:bg-surface-800">
+					<p>No publications are available yet.</p>
+				</div>
+			{/if}
+		</svelte:fragment>
+	</Section>
 	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/images/about/circuit.png" isImageWider={true}/>
 	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} userList={data.topUsers} mdFlex="md:flex-row-reverse"/>
 </main>
