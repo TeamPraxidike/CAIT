@@ -27,7 +27,7 @@
 		publisher={loggedUser}
 		bind:searchableUsers={searchableUsers}
 		users={data.users}
-		close={() => {}}
+		close={() => {goto('/browse')}}
 		bind:showCourseProgressRadial
 		bind:additionalMaintainers
 		on:courseCreated={() => goto('/browse?type=courses')}

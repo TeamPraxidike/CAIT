@@ -191,20 +191,38 @@
 			url = '/api/circuit/' + pubView.publication.id;
 		}
 		try {
-			await fetch(url, {
+			const response = await fetch(url, {
 				method: 'DELETE'
-			}).then(() => {
+			})
+			
+			if (response.status === 401){
 				toastStore.trigger({
-					message: 'Publication deleted successfully',
-					background: 'bg-success-200',
+					message: 'You are not authorized to delete this publication',
+					background: 'bg-error-200',
 					classes: 'text-surface-900'
 				});
-				if (isMaterial) {
-					goto('/browse');
-				} else {
-					goto('/browse?type=circuits');
-				}
+				return;
+			}
+
+			if (!response.ok){
+				toastStore.trigger({
+					message: 'Failed to delete publication',
+					background: 'bg-error-200',
+					classes: 'text-surface-900'
+				});
+				return;
+			}
+			
+			toastStore.trigger({
+				message: 'Publication deleted successfully',
+				background: 'bg-success-200',
+				classes: 'text-surface-900'
 			});
+			if (isMaterial) {
+				goto('/browse');
+			} else {
+				goto('/browse?type=circuits');
+			}
 		} catch (e) {
 			console.error(e);
 		}

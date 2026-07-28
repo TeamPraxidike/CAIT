@@ -12,23 +12,32 @@
 	/* This is the data that was returned from the server */
 	export let data: LayoutData & PageServerData;
 
-    let user = data.user;
-    let profilePic: FetchedFileItem = data.profilePic;
-    // let saved = data.saved;
-    // let savedFileData = data.savedFileData;
-
-    let liked = data.liked;
-
     type publication = (Publication & {
         materials: Material,
         tags: Tag[];
         coverPicData: string;
         publisher: User & {profilePicData: string};
     });
+    let currentProfileId = data.user.id;
+
+    let user = data.user;
+    let profilePic: FetchedFileItem = data.profilePic;
+    let liked = data.liked;
     let saved: publication[] = data.saved;
     let posts = data.publications || [] as ExtendedPublication[];
 	let courses = data.coursesWithPics;
     let tabSet: number = 0;
+
+    $: user = data.user;
+    $: profilePic = data.profilePic;
+    $: liked = data.liked;
+    $: saved = data.saved;
+    $: posts = data.publications || [] as ExtendedPublication[];
+
+    $: if (data.user.id !== currentProfileId) {
+        currentProfileId = data.user.id;
+        tabSet = 0;
+    }
 
 	let publicTabSet = 0;
 
@@ -38,16 +47,17 @@
     }
 
 
-    let cardPosts = transformPosts(posts).filter(x => !x.isDraft);
-    let cardDrafts = transformPosts(posts).filter(x => x.isDraft);
+    let cardPosts: publication[] = [];
+    let cardDrafts: publication[] = [];
+
+    $: cardPosts = transformPosts(posts).filter(x => !x.isDraft);
+    $: cardDrafts = transformPosts(posts).filter(x => x.isDraft);
 
 
     const getEncapsulatingType = (publication: any): string => {
         if(publication.type === PublicationType.Material) return publication.materials.encapsulatingType;
         else return PublicationType.Circuit;
     }
-
-	console.log(courses);
 </script>
 
 <Meta title="Profile" description="CAIT" type="site" />

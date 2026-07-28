@@ -14,6 +14,10 @@ export const verifyAuth = async (locals: App.Locals, userId?: string) => {
 
 	const session = await locals.safeGetSession();
 	if (!session || !session.user) return unauthResponse();
+
+	if (await isAdmin(String(session.user.id)))
+		return null;
+
 	if (userId !== undefined && userId != session.user.id) return unauthResponse();
 	return null;
 };
