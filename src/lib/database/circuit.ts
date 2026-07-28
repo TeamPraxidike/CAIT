@@ -28,11 +28,6 @@ export type CircuitWithPublisher = Prisma.CommentGetPayload<{
 			include: {
 				tags: true,
 				coverPic: true,
-				usedInCourse: {
-					select: {
-						course: true,
-					},
-				},
 				publisher: {
 					include: {
 						profilePic: true,
@@ -50,11 +45,6 @@ export type CircuitWithoutNodes = Prisma.CommentGetPayload<{
 			include: {
 				tags: true,
 				coverPic: true,
-				usedInCourse: {
-					select: {
-						course: true,
-					},
-				},
 				publisher: {
 					include: {
 						profilePic: true,
@@ -157,11 +147,6 @@ export async function getAllCircuits(
 				include: {
 					tags: true,
 					coverPic: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 					publisher: {
 						...sensitive_fields_user(return_sensitive_fields)
 					},
@@ -309,11 +294,6 @@ export async function getCircuitsContainingPublication(publicationId: number): P
 				include: {
 					tags: true,
 					coverPic: true,
-					usedInCourse: {
-						select: {
-							course: true,
-						},
-					},
 					publisher: {
 						include: {
 							profilePic: true,

@@ -21,7 +21,6 @@ describe('getPublicationById', () => {
 		expect(prisma.publication.findUnique).toHaveBeenCalledWith({
 			where: { id: 1 },
 			include: {
-				usedInCourse: true,
 				tags: true,
 				publisher: {
 					include: {
@@ -78,7 +77,6 @@ describe('getPublicationById', () => {
 												profilePic: true,
 											},
 										},
-										usedInCourse: true,
 									},
 								},
 								next: true,
@@ -99,7 +97,6 @@ describe('getPublicationById', () => {
 		expect(prisma.publication.findUnique).toHaveBeenCalledWith({
 			where: { id: 999 },
 			include: {
-				usedInCourse: true,
 				tags: true,
 				publisher: {
 					include: {
@@ -156,7 +153,6 @@ describe('getPublicationById', () => {
 												profilePic: true,
 											},
 										},
-										usedInCourse: true,
 									},
 								},
 								next: true,
@@ -193,11 +189,6 @@ describe('getAllPublications', () => {
 				publisher: {
 					include: {
 						profilePic: true,
-					},
-				},
-				usedInCourse: {
-					select: {
-						course: true,
 					},
 				},
 			},
@@ -248,11 +239,6 @@ describe('getAllPublications', () => {
 						profilePic: true,
 					},
 				},
-				usedInCourse: {
-					select: {
-						course: true,
-					},
-				},
 			},
 		});
 	});
@@ -280,11 +266,6 @@ describe('getAllPublications', () => {
 				publisher: {
 					include: {
 						profilePic: true,
-					},
-				},
-				usedInCourse: {
-					select: {
-						course: true,
 					},
 				},
 			},

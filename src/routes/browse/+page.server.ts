@@ -141,6 +141,5 @@ export type material = {
 			coverId: number | null;
 			materialId: number | null;
 		} | null;
-		usedInCourse: string[];
 	};
 };
