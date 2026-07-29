@@ -39,8 +39,8 @@
     import { SvelteFlowProvider } from '@xyflow/svelte';
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
 	import type { FetchedFileArray } from '$lib/database';
-	import List from '$lib/components/publication/preview/List.svelte';
 	import CircuitContributorList from '$lib/components/publication/preview/CircuitContributorList.svelte';
+	import MaterialDetails from '$lib/components/publication/preview/MaterialDetails.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -466,54 +466,54 @@
 	</div>
 </div>
 
-<div class="col-span-full grid grid-cols-4 gap-24 flex-row items-top justify-between w-full">
+<div class="col-span-full grid grid-cols-1 gap-8 lg:grid-cols-4 lg:gap-12 items-start w-full">
 
 	<!--  LEFT BIG COLUMN  -->
-	<div class="flex flex-col gap-2 col-span-3">
-		<div class="flex">
-				<div class=" w-1/2  pr-12">
-					<span class="font-bold text-surface-800">Learning Objectives:</span>
-					<ul class="list-inside">
-						{#if pubView.publication.learningObjectives.length === 0}
-							<span>No learning objectives have been indicated</span>
-						{:else}
+	<div class="flex flex-col gap-2 lg:col-span-3">
+		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+			<section aria-labelledby="learning-objectives-heading">
+				<h2 id="learning-objectives-heading" class="text-lg font-semibold text-surface-900 dark:text-surface-50">
+					Learning objectives
+				</h2>
+				{#if pubView.publication.learningObjectives.length === 0}
+					<p class="mt-1 text-surface-700 dark:text-surface-300">No learning objectives have been indicated.</p>
+				{:else}
+					<ul class="mt-2 list-disc space-y-1 pl-5 text-surface-700 dark:text-surface-300">
 							{#each pubView.publication.learningObjectives as lo}
-								<li class="list text-surface-700 text-sm list-disc">{lo}</li>
+								<li>{lo}</li>
 							{/each}
-						{/if}
 					</ul>
-				</div>
-				<div class="flex flex-col">
-					<span class="font-bold text-surface-800">Prior Knowledge:</span>
-					<ul class="list-inside">
-						{#if pubView.publication.prerequisites.length === 0}
-							<span class="text-surface-800">No prior knowledge has been indicated</span>
-						{:else}
-							{#each pubView.publication.prerequisites as pk}
-								<li class="list text-surface-700 text-sm list-disc">{pk}</li>
-							{/each}
-						{/if}
+				{/if}
+			</section>
+
+			<section aria-labelledby="prior-knowledge-heading">
+				<h2 id="prior-knowledge-heading" class="text-lg font-semibold text-surface-900 dark:text-surface-50">
+					Prior knowledge
+				</h2>
+				{#if pubView.publication.prerequisites.length === 0}
+					<p class="mt-1 text-surface-700 dark:text-surface-300">No prior knowledge has been indicated.</p>
+				{:else}
+					<ul class="mt-2 list-disc space-y-1 pl-5 text-surface-700 dark:text-surface-300">
+						{#each pubView.publication.prerequisites as pk}
+							<li>{pk}</li>
+						{/each}
 					</ul>
-			</div>
-
-
+				{/if}
+			</section>
 		</div>
 
 		<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">
 			<span class="font-bold text-surface-800">Description:</span>
 			<span class="whitespace-pre-wrap">{pubView.publication.description}</span>
 		</p>
-		<div class="w-full flex justify-between">
-			<div>
-				{#if isMaterial}
-					{#if pubView.publication.materials.timeEstimate}
-						<p class="text-surface-800 mt-4">
-							<span class="font-bold">Time Estimate:</span> {pubView.publication.materials.timeEstimate} </p>
-					{/if}
-					<p class="text-surface-800 "><span class="font-bold">Copyright:</span> {pubView.publication.materials.copyright}</p>
-					<p class="text-surface-800 "><span class="font-bold">Made by uploader:</span> {pubView.publication.materials.selfMade ? 'Yes' : 'No'}</p>
-				{/if}
-			</div>
+		{#if isMaterial}
+			<MaterialDetails
+				timeEstimate={pubView.publication.materials.timeEstimate}
+				copyright={pubView.publication.materials.copyright}
+				selfMade={pubView.publication.materials.selfMade} />
+		{/if}
+
+		<div class="w-full flex justify-end">
 			<div class="col-span-full flex flex-col items-start mt-2">
 				<div class="flex items-center text-3xl rounded-lg border mt-4">
 					<button type="button"
@@ -776,9 +776,6 @@
 					<span>course</span>
 				</div>
 			{/if}
-
-			<List list={pubView.publication.learningObjectives} isLO={true} />
-			<List list={pubView.publication.prerequisites} isLO={false} />
 
 			{#if !isMaterial}
 				<CircuitContributorList contributors={circuitContributors} />

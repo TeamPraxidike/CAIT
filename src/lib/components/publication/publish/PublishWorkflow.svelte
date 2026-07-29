@@ -186,8 +186,18 @@
 		<form method="POST"
 			  enctype="multipart/form-data"
 			  action={edit ? "?/edit" : "?/publish"}
-			  use:enhance={({ formData }) => {
+			  use:enhance={({ formData, cancel }) => {
 				  	if (!circuit && dataMaterial) {
+						if (dataMaterial.selfMade === null) {
+							cancel();
+							data.isSubmitting = false;
+							toastStore.trigger({
+								message: 'Please specify whether you made this material yourself',
+								background: 'bg-warning-200'
+							});
+							return;
+						}
+
 					  	// apparently files are automatically appended to the form using the
 						// file key, so just remove it
 						formData.delete('file')

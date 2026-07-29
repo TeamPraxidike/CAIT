@@ -17,6 +17,7 @@ function makeForm(overrides: Record<string, string> = {}): FormData {
 	fd.append('copyright', 'CC');
 	fd.append('estimate', '30');
 	fd.append('course', 'null');
+	fd.append('selfMade', 'true');
 	for (const [k, v] of Object.entries(overrides)) {
 		fd.set(k, v);
 	}
@@ -26,6 +27,11 @@ function makeForm(overrides: Record<string, string> = {}): FormData {
 function metaOf(result: Awaited<ReturnType<typeof buildMaterialForm>>) {
 	if (!('data' in result)) throw new Error(`buildMaterialForm rejected: ${JSON.stringify(result)}`);
 	return result.data.metaData;
+}
+
+function errorOf(result: Awaited<ReturnType<typeof buildMaterialForm>>) {
+	if ('data' in result) throw new Error('buildMaterialForm unexpectedly accepted the form');
+	return result;
 }
 
 describe('buildMaterialForm selfMade parsing', () => {
@@ -39,19 +45,24 @@ describe('buildMaterialForm selfMade parsing', () => {
 		expect(meta.selfMade).toBe(false);
 	});
 
-	it('defaults to true when selfMade is missing', async () => {
-		const meta = metaOf(await buildMaterialForm(makeForm()));
-		expect(meta.selfMade).toBe(true);
+	it('requires an explicit answer when selfMade is missing', async () => {
+		const form = makeForm();
+		form.delete('selfMade');
+		const error = errorOf(await buildMaterialForm(form));
+		expect(error).toMatchObject({
+			status: 400,
+			message: 'Please specify whether you made this material yourself',
+		});
 	});
 
-	it('defaults to true for an empty string (not the literal "false")', async () => {
-		const meta = metaOf(await buildMaterialForm(makeForm({ selfMade: '' })));
-		expect(meta.selfMade).toBe(true);
+	it('rejects an empty answer', async () => {
+		const error = errorOf(await buildMaterialForm(makeForm({ selfMade: '' })));
+		expect(error.status).toBe(400);
 	});
 
-	it('only the exact literal "false" disables it', async () => {
-		const meta = metaOf(await buildMaterialForm(makeForm({ selfMade: 'FALSE' })));
-		expect(meta.selfMade).toBe(true);
+	it('rejects values other than the exact boolean literals', async () => {
+		const error = errorOf(await buildMaterialForm(makeForm({ selfMade: 'FALSE' })));
+		expect(error.status).toBe(400);
 	});
 });
 
