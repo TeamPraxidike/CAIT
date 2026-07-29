@@ -126,6 +126,7 @@ describe('create materials', () => {
 			timeEstimate: 120, // time in minutes
 			theoryPractice: 70,
 			selfMade: false,
+			fileURLs: ['https://example.com/material'],
 		});
 		expect(material).toMatchObject({
 			id: 3,
@@ -135,6 +136,12 @@ describe('create materials', () => {
 		expect(prisma.material.create).toHaveBeenCalled();
 		const createArg = (prisma.material.create as any).mock.calls[0][0];
 		expect(createArg.data.selfMade).toBe(false);
+		expect(createArg.data.fileURLs.createMany.data).toEqual([
+			{
+				url: 'https://example.com/material',
+				name: 'https://example.com/material',
+			},
+		]);
 	});
 
 	it('should default selfMade to true when omitted resolves via metaData', async () => {
