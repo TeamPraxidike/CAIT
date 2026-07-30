@@ -1,8 +1,8 @@
-import type { PlaywrightTestConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 const isCI = !!process.env.CI;
 
-const config: PlaywrightTestConfig = {
+export default defineConfig({
 	// isCI gets set automatically by the github worker in CI/CD, otherwise resort to a local setup
 	use: {
 		baseURL: isCI ? process.env.STAGING_URL : 'http://localhost:4173',
@@ -14,6 +14,15 @@ const config: PlaywrightTestConfig = {
 	reporter: isCI
 		? [['github'], ['html', { open: 'never' }]]
 		: [['list'], ['html', { open: 'never' }]],
-};
-
-export default config;
+	projects: [
+		{
+			name: 'setup',
+			testMatch: /.*\.setup\.ts/
+		},
+		{
+			name: 'chromium',
+			use: { ...devices['Desktop Chrome'] },
+			dependencies: ['setup']
+		}
+	]
+});

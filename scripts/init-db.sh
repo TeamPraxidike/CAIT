@@ -14,5 +14,9 @@ export FILESYSTEM="SUPABASE"
 
 if [ "$FILESYSTEM" = "SUPABASE" ]; then
   echo 'Using the SUPABASE Filesystem, please wait for seeding...'
+  if [ "${SEED_TEST_DATA:-}" = "true" ]; then
+    echo "SEEDING E2E test data"
+    npx tsx ./scripts/seedTestData.ts
+  fi
   npx tsx ./scripts/seedBucket.ts
 fi

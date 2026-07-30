@@ -67,18 +67,18 @@ npm run build
 
 echo "Starting preview server with vite preview (for local build version)"
 # run it in background, $! captures PID of most recently executed background process
-npm run start:preview &
+SEED_TEST_DATA=true npm run start:preview &
 SERVER_PID=$!
 
 echo "Waiting for server to be ready..."
-for i in $(seq 1 30); do
+for i in $(seq 1 60); do
   # vite preview spins it up on port 4173, look for http code 200 in the healthcheck endpoint
   if curl -s -o /dev/null -w "%{http_code}" http://localhost:4173/api/health | grep -q "200"; then
     echo "Server is ready."
     break
   fi
-  if [ "$i" -eq 30 ]; then
-    echo "ERROR: Server did not start after 30s"
+  if [ "$i" -eq 60 ]; then
+    echo "ERROR: Server did not start after 60s"
     # goes to trap
     exit 1
   fi
@@ -87,5 +87,3 @@ done
 
 echo "Running Playwright tests..."
 npx playwright test
-
-
