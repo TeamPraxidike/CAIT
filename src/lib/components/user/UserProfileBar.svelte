@@ -10,7 +10,7 @@
         throw new Error("There was an error with exporting the user data. Please try again.");
     }
 
-    export let userPhotoUrl: string;
+    export let userPhotoUrl: string | null;
     export let tabset: number;
     export let memberSince: Date | undefined = undefined;
 

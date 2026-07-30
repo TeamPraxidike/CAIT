@@ -1,11 +1,6 @@
 import { prisma } from '$lib/database';
 import { Prisma } from '@prisma/client';
 import type { EmailVisibility } from '@prisma/client';
-import { createClient } from '@supabase/supabase-js';
-import { SERVICE_ROLE_KEY } from '$env/static/private';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-
-const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, SERVICE_ROLE_KEY);
 
 
 export type TUserWithPostsAndProfilePic = Prisma.UserGetPayload<{
@@ -610,9 +605,12 @@ export async function isReported(userId: string, publicationId: number): Promise
 }
 
 export async function getUserMemberSince(userId: string): Promise<Date | null> {
-	const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId);
-	if (error || !data.user.email_confirmed_at) return null;
-	return new Date(data.user.email_confirmed_at);
+	// A User row shares its id with auth.users (see the on_auth_user_created
+	// trigger), so auth.users.created_at is the account's registration date.
+	const rows = await prisma.$queryRaw<{ created_at: Date }[]>`
+		SELECT created_at FROM auth.users WHERE id = ${userId}::uuid
+	`;
+	return rows[0]?.created_at ?? null;
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {

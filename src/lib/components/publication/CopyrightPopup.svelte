@@ -18,6 +18,7 @@
 	};
 
 	type OwnershipStatus = 'yes' | 'no' | null;
+	export let ownershipStatus: OwnershipStatus = null;
 
 	const licenses: LicenseOption[] = [
 		{
@@ -100,7 +101,6 @@
 
 	const predefinedValues = new Set(licenses.map((item) => item.value));
 
-	let ownershipStatus: OwnershipStatus = null;
 	let customMode = false;
 	let customLicenseText = '';
 	let selectedLicenseValue = 'CC BY';
@@ -136,8 +136,7 @@
 		dispatch('apply', {
 			value,
 			customLicenseText: customMode ? customLicenseText.trim() : '',
-			suggestedLicense: customMode ? 'Custom' : selectedLicenseValue,
-			ownershipStatus
+			suggestedLicense: customMode ? 'Custom' : selectedLicenseValue
 		});
 	}
 
@@ -152,19 +151,10 @@
 		customMode = false;
 	}
 
-	function chooseOwnership(value: 'yes' | 'no') {
-		ownershipStatus = value;
-	}
-
-	function goBackToOwnershipStep() {
-		ownershipStatus = null;
-	}
-
 	$: canApply =
-		ownershipStatus !== null &&
-		(customMode
+		customMode
 			? customLicenseText.trim().length > 0
-			: selectedLicenseValue.length > 0);
+			: selectedLicenseValue.length > 0;
 </script>
 
 <div class="fixed inset-0 z-[11000] overflow-y-auto bg-black/50">
@@ -178,7 +168,7 @@
 						Choose a license
 					</h2>
 					<p class="mt-1 text-sm text-surface-600 dark:text-surface-400">
-						First tell us whether you own the material, then choose a license or enter a custom one.
+						Choose a predefined license or enter a custom one.
 					</p>
 				</div>
 
@@ -201,61 +191,12 @@
 					</div>
 				</div> -->
 
-					<div class="rounded-xl border border-gray-200 bg-surface-50 p-4">
-						<div class="mb-4">
-							<h3 class="text-sm font-semibold text-gray-900">
-								Do you own the material?
-							</h3>
-							<p class="mt-1 text-sm text-gray-600">
-								This determines which guidance we show before you choose a license.
-							</p>
-						</div>
-
-						<div class="flex flex-wrap gap-3">
-							<button
-								type="button"
-								on:click={() => chooseOwnership('yes')}
-								class:!bg-surface-900={ownershipStatus === 'yes'}
-								class:!text-white={ownershipStatus === 'yes'}
-								class:!border-surface-900={ownershipStatus === 'yes'}
-								class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 hover:bg-surface-100">
-								Yes, I own the material
-							</button>
-
-							<button
-								type="button"
-								on:click={() => chooseOwnership('no')}
-								class:!bg-surface-900={ownershipStatus === 'no'}
-								class:!text-white={ownershipStatus === 'no'}
-								class:!border-surface-900={ownershipStatus === 'no'}
-								class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 hover:bg-surface-100">
-								No, I do not own the material
-							</button>
-						</div>
-					</div>
-				{#if !(ownershipStatus === null)}
-
-					<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_560px]">
+					<div class="grid gap-6 {ownershipReference ? 'lg:grid-cols-[minmax(0,1fr)_560px]' : ''}">
 						<div class="rounded-xl border border-gray-200 bg-surface-50 p-4">
-							<div class="mb-4 flex items-start justify-between gap-4">
-								<div>
-									<h3 class="text-sm font-semibold text-gray-900">
-										License selection
-									</h3>
-									<!-- <p class="mt-1 text-sm text-gray-600">
-										Ownership status:
-										<span class="font-medium text-gray-900">
-											{ownershipStatus === 'yes' ? 'You own the material' : 'You do not own the material'}
-										</span>
-									</p> -->
-								</div>
-
-								<button
-									type="button"
-									on:click={goBackToOwnershipStep}
-									class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-surface-50">
-									Back
-								</button>
+							<div class="mb-4">
+								<h3 class="text-sm font-semibold text-gray-900">
+									License selection
+								</h3>
 							</div>
 
 							<div class="flex flex-wrap items-center gap-2">
@@ -418,7 +359,6 @@
 							</aside>
 						{/if}
 					</div>
-				{/if}
 			</div>
 
 			<div class="flex items-center justify-between border-t border-surface-200 px-6 py-4 dark:border-surface-700">
