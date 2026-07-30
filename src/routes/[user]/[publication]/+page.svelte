@@ -41,6 +41,7 @@
 	import type { FetchedFileArray } from '$lib/database';
 	import CircuitContributorList from '$lib/components/publication/preview/CircuitContributorList.svelte';
 	import MaterialDetails from '$lib/components/publication/preview/MaterialDetails.svelte';
+	import DraftShareButton from '$lib/components/publication/DraftShareButton.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -536,6 +537,12 @@
 							title={pubView.publication.title}
 							description={pubView.publication.description}
 							learningObjectives={pubView.publication.learningObjectives}
+							style="flex items-center text-xl btn text-surface-500 px-2"
+						/>
+					{:else if pubView.publication.publisherId === page.data.session?.user.id}
+						<DraftShareButton
+							publicationId={pubView.publication.id}
+							path={`/${pubView.publication.publisher.username}/${pubView.publication.id}`}
 							style="flex items-center text-xl btn text-surface-500 px-2"
 						/>
 					{/if}
