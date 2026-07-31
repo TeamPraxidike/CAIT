@@ -1,7 +1,15 @@
 import type { UserForm } from '$lib/database';
-import type { Actions } from './$types';
+import type {Actions, PageServerLoad} from './$types';
 import { redirect } from '@sveltejs/kit';
 
+export const load: PageServerLoad = async ({ parent, locals }) => {
+	const { user } = await parent();
+
+	if (!locals.user) throw redirect(303, '/signin');
+	if (locals.user.id !== user.id) throw redirect(303, `/${user.username}`);
+
+	return {};
+};
 
 export const actions = {
 	edit: async ({ request, fetch, locals }) => {
