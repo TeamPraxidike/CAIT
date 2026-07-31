@@ -18,3 +18,4 @@ static/nutrient-viewer-lib
 TODO
 playwright-report
 test-results
+tests/e2e/storage
