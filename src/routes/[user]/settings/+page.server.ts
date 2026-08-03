@@ -29,4 +29,11 @@ export const actions: Actions = {
 
 		return { success: true, emailVisibility: visibility };
 	},
+
+	deleteUserProfile: async ({request, locals}) => {
+		const session = await locals.safeGetSession();
+		if (!session?.user) throw redirect(303, '/signin');
+
+		console.log("DELETING");
+	}
 } satisfies Actions;
