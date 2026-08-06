@@ -124,32 +124,32 @@ jobs:
       - name: Run Unit Tests
         run: npm run test:unit
 
-      - name: Restore Docker Image cache
-        if: always()
-        id: docker-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.docker-cache
-          key: docker-${{ runner.os }}-${{ hashFiles('cicd/docker-compose.ci.yml') }}
-          save-always: true
-
-      - name: Load cached images
-        if: always() && steps.docker-cache.outputs.cache-hit == 'true'
-        run: |
-          for f in ~/.docker-cache/*.tar; do docker load -i "$f"; done
+#      - name: Restore Docker Image cache
+#        if: always()
+#        id: docker-cache
+#        uses: actions/cache@v4
+#        with:
+#          path: ~/.docker-cache
+#          key: docker-${{ runner.os }}-${{ hashFiles('cicd/docker-compose.ci.yml') }}
+#          save-always: true
+#
+#      - name: Load cached images
+#        if: always() && steps.docker-cache.outputs.cache-hit == 'true'
+#        run: |
+#          for f in ~/.docker-cache/*.tar; do docker load -i "$f"; done
 
       - name: Run Integration Tests
         if: always()
         run: npm run test:integration
 
-      - name: Save images to cache
-        if: steps.docker-cache.outputs.cache-hit != 'true' && always()
-        run: |
-          mkdir -p ~/.docker-cache
-          docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci config --images | while read img; do
-            fname=$(echo "$img" | tr '/:' '__')
-            docker save "$img" -o ~/.docker-cache/"$fname".tar
-          done
+#      - name: Save images to cache
+#        if: steps.docker-cache.outputs.cache-hit != 'true' && always()
+#        run: |
+#          mkdir -p ~/.docker-cache
+#          docker compose -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci config --images | while read img; do
+#            fname=$(echo "$img" | tr '/:' '__')
+#            docker save "$img" -o ~/.docker-cache/"$fname".tar
+#          done
 
 
       - name: Upload unit coverage
@@ -190,7 +190,6 @@ jobs:
           vite-config-path: vitest.config.integration.ts
 
   e2e:
-    # TODO: add a needs: unit-integration section
     name: End-to-End tests with playwright
     runs-on: ubuntu-latest
     permissions:
