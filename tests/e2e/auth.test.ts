@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { answerEmailVisibilityPrompt } from './helpers/ui'
 import fs from 'node:fs';
 
 // Auth flows start anonymous by default; tests that need a session either use
@@ -28,17 +29,20 @@ async function registerFreshAccount(page: Page) {
     // autoconfirm stack: signUp mints a live session, action redirects to '/'
     await expect(page).toHaveURL('/');
 
-    const prompt = page.getByRole('dialog', { name: 'Display your email address?' });
-    await expect(prompt).toBeVisible();
-    await prompt.getByRole('button', { name: 'Save' }).click();
-    await expect(prompt).toBeHidden();
+    await answerEmailVisibilityPrompt(page);
 
     return { email, password };
 }
 
 async function login(page: Page, creds: { email: string; password: string }) {
     await page.goto('/signin');
-    await page.getByRole('button', { name: 'Email & Password' }).click();
+    const emailField = page.getByLabel('Email');
+    await expect(async () => {
+        if (!(await emailField.isVisible())) {
+            await page.getByRole('button', { name: 'Email & Password' }).click();
+        }
+        await expect(emailField).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
     await page.getByLabel('Email').fill(creds.email);
     await page.getByLabel('Password').fill(creds.password);
     await page.getByRole('button', { name: 'Login' }).click();

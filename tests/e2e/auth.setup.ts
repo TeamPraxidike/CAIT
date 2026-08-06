@@ -1,4 +1,5 @@
 import { test as setup, expect, type Page } from '@playwright/test'
+import { answerEmailVisibilityPrompt } from './helpers/ui';
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -27,16 +28,7 @@ async function registerPersona(page: Page, name: 'author' | 'visitor'): Promise<
 
     // answer the first-login email-visibility prompt now, or it will sit on top
     // of every page and intercept clicks in all logged-in tests
-    const prompt = page.getByRole('dialog', { name: 'Display your email address?' });
-    await expect(prompt).toBeVisible();
-    // Click Save, and if the dialog
-    // is still up after 5s, click it again like a user would.
-    await expect(async () => {
-        if (await prompt.isVisible()) {
-            await prompt.getByRole('button', { name: 'Save' }).click();
-        }
-        await expect(prompt).toBeHidden({ timeout: 5_000 });
-    }).toPass({ timeout: 30_000 });
+    await answerEmailVisibilityPrompt(page);
 
     // the user menu markup is attached (hidden) in the header popup - read the
     // generated username from its profile link without hover choreography
