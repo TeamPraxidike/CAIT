@@ -69,12 +69,20 @@ test('AUTH-06: sign out from an auth-dependent page', async ({ page }) => {
 
     // UserMenu wraps signOut in confirm() on some URLs - accept it if it appears
     page.on('dialog', (dialog) => dialog.accept());
-    await page.getByTestId('profile-picture').click();
-    // scope to the popup: "Log out" also exists in the hidden mobile-menu DOM
-    await page
+
+    // NOTE: staging hydrates slowly: a click ~20ms after goto lands on server-rendered
+    // DOM whose use:popup listener isn't attached yet and silently does nothing
+    // (trace-verified). Retry opening until the menu is actually showing
+    const logout = page
         .locator('[data-popup="popupHover"]')
-        .getByRole('button', { name: 'Log out' })
-        .click();
+        .getByRole('button', { name: 'Log out' });
+    await expect(async () => {
+        if (!(await logout.isVisible())) {
+            await page.getByTestId('profile-picture').click();
+        }
+        await expect(logout).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
+    await logout.click();
 
     // onAuthStateChange → invalidate('supabase:auth') → publish guard reruns
     // with no session → bounced to /signin. Pins graceful handling of a
