@@ -1,4 +1,4 @@
-import type { FetchedFileArray } from '$lib/database';
+import { type FetchedFileArray, getAllTags } from '$lib/database';
 import type { User } from '@prisma/client';
 import type { CourseWithProcessedProfilePic } from '../api/course-extended/+server';
 
@@ -83,7 +83,7 @@ export async function load({ url, fetch, locals }) {
 		saved: [],
 		savedFileData: [],
 	};
-	let tags: { content: string }[] = [];
+	const tags: { content: string }[] = await getAllTags();
 
 	const selectedTag = url.searchParams.get('tags') || '';
 
@@ -104,7 +104,6 @@ export async function load({ url, fetch, locals }) {
 			saved = { saved: [], savedFileData: [] };
 		}
 
-		tags = await (await fetch(`/api/tags`)).json();
 	}
 	
 	return {

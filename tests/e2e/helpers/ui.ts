@@ -10,3 +10,11 @@ export async function answerEmailVisibilityPrompt(page: Page) {
         await expect(prompt).toBeHidden({ timeout: 5_000 });
     }).toPass({ timeout: 30_000 });
 }
+
+// Opens a DropdownSelect (left rail on /browse) by its title and clicks an option.
+// Call only after a hydration barrier (e.g. a seed card is visible) - the
+// dropdown is a client-side toggle.
+export async function selectDropdownOption(page: Page, dropdown: string, option: string) {
+    await page.getByRole('button', { name: dropdown, exact: true }).click();
+    await page.getByRole('listbox').getByRole('button', { name: option, exact: true }).click();
+}
