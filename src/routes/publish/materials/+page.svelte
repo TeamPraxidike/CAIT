@@ -53,7 +53,7 @@
 	let difficulty: Difficulty = 'easy';
 	let estimate: number = 0;
 	let copyright: string = '';
-	let selfMade: boolean = true;
+	let selfMade: boolean | null = null;
 	let theoryApplicationRatio: number = 0.5;
 	let selectedTypes: string[] = [];
 	$: selectedType = selectedTypes.length > 0 ? selectedTypes[0] : 'Select type';
@@ -232,7 +232,7 @@
 				searchableUsers = existing.searchableUsers;
 				estimate = existing.estimate ?? 0;
 				copyright = existing.copyright ?? 'No copyright';
-				selfMade = existing.selfMade ?? true;
+				selfMade = existing.selfMadeConfirmed ? (existing.selfMade ?? null) : null;
 				theoryApplicationRatio = existing.theoryApplicationRatio ?? 0.5;
 				fileURLs = existing.fileURLs ?? [];
 			} else {
@@ -323,6 +323,7 @@
 					estimate: paramsMutableMaterial.estimate,
 					copyright: paramsMutableMaterial.copyright,
 					selfMade: paramsMutableMaterial.selfMade,
+					selfMadeConfirmed: paramsMutableMaterial.selfMade !== null,
 					fileURLs: paramsMutableMaterial.fileURLs,
 					theoryApplicationRatio: theoryApplicationRatio,
 					lastOpened: Date.now()

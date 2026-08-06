@@ -28,6 +28,11 @@ function metaOf(result: Awaited<ReturnType<typeof buildMaterialForm>>) {
 	return result.data.metaData;
 }
 
+function errorOf(result: Awaited<ReturnType<typeof buildMaterialForm>>) {
+	if ('data' in result) throw new Error('buildMaterialForm unexpectedly accepted the form');
+	return result;
+}
+
 describe('buildMaterialForm selfMade parsing', () => {
 	it('parses "true" as true', async () => {
 		const meta = metaOf(await buildMaterialForm(makeForm({ selfMade: 'true' })));
@@ -39,18 +44,21 @@ describe('buildMaterialForm selfMade parsing', () => {
 		expect(meta.selfMade).toBe(false);
 	});
 
-	it('defaults to true when selfMade is missing', async () => {
-		const meta = metaOf(await buildMaterialForm(makeForm()));
-		expect(meta.selfMade).toBe(true);
+	it('requires an explicit answer when selfMade is missing', async () => {
+		const error = errorOf(await buildMaterialForm(makeForm()));
+		expect(error).toMatchObject({
+			status: 400,
+			message: 'Please specify whether you made this material yourself',
+		});
 	});
 
-	it('defaults to true for an empty string (not the literal "false")', async () => {
-		const meta = metaOf(await buildMaterialForm(makeForm({ selfMade: '' })));
-		expect(meta.selfMade).toBe(true);
+	it('rejects an empty answer', async () => {
+		const error = errorOf(await buildMaterialForm(makeForm({ selfMade: '' })));
+		expect(error.status).toBe(400);
 	});
 
-	it('only the exact literal "false" disables it', async () => {
-		const meta = metaOf(await buildMaterialForm(makeForm({ selfMade: 'FALSE' })));
-		expect(meta.selfMade).toBe(true);
+	it('rejects values other than the exact boolean literals', async () => {
+		const error = errorOf(await buildMaterialForm(makeForm({ selfMade: 'FALSE' })));
+		expect(error.status).toBe(400);
 	});
 });

@@ -5,7 +5,6 @@
 	import TagsSelect from '$lib/components/TagsSelect.svelte';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 	import CopyrightPopup from '../CopyrightPopup.svelte';
-	import { SlideToggle } from '@skeletonlabs/skeleton';
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial | null;
@@ -25,7 +24,7 @@
 		customLicenseText = event.detail.customLicenseText;
 		popupOpen = false;
 		if (dataMaterial){
-			dataMaterial.copyright = licenseValue
+			dataMaterial.copyright = licenseValue;
 		}
   	}
 
@@ -47,9 +46,18 @@
 						placeholder="Enter License"
 						class="mt-1 mr-1 rounded-lg dark:bg-surface-800 bg-surface-50 w-full text-surface-700 dark:text-surface-400 focus:border-primary-500 focus:ring-0">
 					
-						<button class="inline-flex items-center shrink-0 p-2 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 dark:text-surface-50" on:click={()=> (popupOpen = true)} type="button"> License picker </button>
+						<button
+							class="inline-flex items-center shrink-0 p-2 text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md transition duration-200 dark:text-surface-50 disabled:cursor-not-allowed disabled:opacity-50"
+							on:click={()=> (popupOpen = true)}
+							disabled={dataMaterial.selfMade === null}
+							type="button">
+							License picker
+						</button>
 					{#if popupOpen}
-						<CopyrightPopup on:close={()=>(popupOpen = false)} on:apply={handleApply}/>
+						<CopyrightPopup
+							ownershipStatus={dataMaterial.selfMade === true ? 'yes' : dataMaterial.selfMade === false ? 'no' : null}
+							on:close={()=>(popupOpen = false)}
+							on:apply={handleApply}/>
 						
 					{/if}
 				</div>
@@ -57,14 +65,37 @@
 			</div>
 		</div>
 
-		<div class="w-full">
-			<SlideToggle name="selfMade" size="sm" active="bg-primary-500" bind:checked={dataMaterial.selfMade}>
-				I made this material myself
-			</SlideToggle>
-			<p class="text-sm text-surface-500 dark:text-surface-400 mt-1">
-				Turn this off if you are sharing or linking material created by someone else.
+		<fieldset class="w-full">
+			<legend class="font-medium">
+				Did you make this material yourself?<span class="text-error-500">*</span>
+			</legend>
+			<p class="mt-1 text-sm text-surface-500 dark:text-surface-400">
+				Your answer determines which licensing guidance is shown.
 			</p>
-		</div>
+			<div class="mt-3 flex flex-wrap gap-3">
+				<button
+					type="button"
+					on:click={() => dataMaterial && (dataMaterial.selfMade = true)}
+					aria-pressed={dataMaterial.selfMade === true}
+					class:!bg-primary-600={dataMaterial.selfMade === true}
+					class:!text-white={dataMaterial.selfMade === true}
+					class="rounded-xl border border-surface-400 bg-surface-50 px-4 py-2 text-sm font-medium text-surface-800 hover:bg-surface-200 dark:bg-surface-700 dark:text-surface-50">
+					Yes, I made it
+				</button>
+				<button
+					type="button"
+					on:click={() => dataMaterial && (dataMaterial.selfMade = false)}
+					aria-pressed={dataMaterial.selfMade === false}
+					class:!bg-primary-600={dataMaterial.selfMade === false}
+					class:!text-white={dataMaterial.selfMade === false}
+					class="rounded-xl border border-surface-400 bg-surface-50 px-4 py-2 text-sm font-medium text-surface-800 hover:bg-surface-200 dark:bg-surface-700 dark:text-surface-50">
+					No, someone else made it
+				</button>
+			</div>
+			{#if dataMaterial.selfMade === null}
+				<p class="mt-2 text-sm text-error-500">Choose an answer before opening the license picker.</p>
+			{/if}
+		</fieldset>
 	{/if}
 
 	<div class="w-full">

@@ -121,13 +121,12 @@ describe('create materials', () => {
 				'Basic knowledge of classical physics',
 				'Familiarity with algebra and calculus',
 			],
-			materialType: [MaterialType.other],
+			materialType: MaterialType.other,
 			copyright: '© 2024 Quantum Learning Inc.',
 			timeEstimate: 120, // time in minutes
 			theoryPractice: 70,
 			selfMade: false,
-			isDraft: false,
-			course: null
+			fileURLs: ['https://example.com/material'],
 		});
 		expect(material).toMatchObject({
 			id: 3,
@@ -137,6 +136,12 @@ describe('create materials', () => {
 		expect(prisma.material.create).toHaveBeenCalled();
 		const createArg = (prisma.material.create as any).mock.calls[0][0];
 		expect(createArg.data.selfMade).toBe(false);
+		expect(createArg.data.fileURLs.createMany.data).toEqual([
+			{
+				url: 'https://example.com/material',
+				name: 'https://example.com/material',
+			},
+		]);
 	});
 
 	it('should default selfMade to true when omitted resolves via metaData', async () => {
@@ -148,13 +153,11 @@ describe('create materials', () => {
 			difficulty: Difficulty.easy,
 			learningObjectives: [],
 			prerequisites: [],
-			materialType: [MaterialType.other],
+			materialType: MaterialType.other,
 			copyright: 'c',
 			timeEstimate: 10,
 			theoryPractice: 50,
 			selfMade: true,
-			isDraft: false,
-			course: null
 		});
 		const createArg = (prisma.material.create as any).mock.calls[0][0];
 		expect(createArg.data.selfMade).toBe(true);
@@ -168,9 +171,6 @@ describe('update materials', () => {
 			coverPic: 'cover1.jpg',
 			publicationId: 1,
 		});
-
-		prisma.publication.findUnique = vi.fn().mockResolvedValue({})
-		prisma.publication.update = vi.fn().mockResolvedValue({})
 
 		const material = await updateMaterialByPublicationId(11, {
 			title: 'Introduction to Quantum Physics',
@@ -187,14 +187,13 @@ describe('update materials', () => {
 				'Basic knowledge of classical physics',
 				'Familiarity with algebra and calculus',
 			],
-			materialType: [MaterialType.other],
+			materialType: MaterialType.other,
 			copyright: '© 2024 Quantum Learning Inc.',
 			timeEstimate: 120, // time in minutes
 			theoryPractice: 70,
 			selfMade: false,
 			fileURLs: [],
-			isDraft: false,
-			course: null
+			course: 0,
 		});
 		expect(material).toMatchObject({
 			id: 3,
