@@ -426,12 +426,15 @@
 				{#if pubView.publication.publisherId === page.data.session?.user.id
 				|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")}
 					<button bind:this={hoverEdit}
+							data-testid="edit-publication"
 							on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit/${isMaterial ? 'material' : 'circuit'}`)}
 							type="button" class="btn self-center p-0 m-0">
 						<Icon icon={editIcon} width="24" class="text-surface-700" />
 					</button>
 				{/if}
-				<button on:click={promptForDeletion} type="button" class="btn p-0 m-0" bind:this={hoverDelete}>
+				<button on:click={promptForDeletion} type="button" class="btn p-0 m-0"
+						data-testid="delete-publication"
+						bind:this={hoverDelete}>
 					<Icon icon={deleteIcon} width="24" class="text-error-400" />
 				</button>
 			</div>
