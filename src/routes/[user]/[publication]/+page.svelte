@@ -516,6 +516,7 @@
 			<div class="col-span-full flex flex-col items-start mt-2">
 				<div class="flex items-center text-3xl rounded-lg border mt-4">
 					<button type="button"
+							data-testid="like-button"
 							class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
 							on:click={() => toggleLike()}>
 						<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
@@ -527,7 +528,7 @@
 							<Icon class="xl:text-2xl" icon="material-symbols:download" />
 						</button>
 					{/if}
-					<button type="button"
+					<button type="button" data-testid="save-button"
 							class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
 							on:click={() => toggleSave()}>
 						<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
@@ -544,7 +545,7 @@
 					{/if}
 
 					<div bind:this={hoverDivReport}>
-						<button on:click={toggleReport} class="pl-2 pr-1">
+						<button on:click={toggleReport} data-testid="report-button" class="pl-2 pr-1">
 							{#if reported}
 								<Icon icon="material-symbols:flag" class="self-center size-6 text-surface-600" />
 							{:else}
