@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { registerFreshAccount, logoutViaHeader } from './helpers/ui';
 
 // Publication pages are login-walled (the [user] layout guard), so every view
 // test runs as the visitor persona. Anonymous access redirects to /signin and
@@ -74,4 +75,39 @@ test('PUB-09: visitor sees no owner controls', async ({ page }) => {
     await openSeed(page, SEED_MATERIAL, 'materials');
     await expect(page.getByTestId('edit-publication')).toBeHidden();
     await expect(page.getByTestId('delete-publication')).toBeHidden();
+});
+
+test.describe('anonymous', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
+
+    test('PUB-13: anonymous user cannot open a publication', async ({ page }) => {
+        // browse is public; the card href is in the anonymous HTML - read it
+        // without a session, then try to open it directly
+        await page.goto('/browse');
+        const card = page.getByRole('link', { name: SEED_MATERIAL });
+        await expect(card).toBeVisible();
+        const href = await card.getAttribute('href') ;
+        const target = new URL(href!, page.url()).pathname;
+
+        await page.goto(target);
+        await expect(page).toHaveURL(/\/signin/);
+    });
+});
+
+test.describe('fresh disposable account', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
+
+    test('PUB-14: logging out while viewing a publication redirects to /signin', async ({ page }) => {
+        // disposable account: signOut revokes refresh tokens, so never the shared
+        // visitor persona. Any logged-in user can view a seed publication.
+        await registerFreshAccount(page);
+        await openSeed(page, SEED_MATERIAL, 'materials');
+
+        // the publication page is session-heavy (reads session.user.id); this pins
+        // that it survives the session vanishing - the [user] guard reruns via
+        // depends('supabase:auth') and bounces to /signin without crashing
+        await logoutViaHeader(page);
+        await expect(page).toHaveURL(/\/signin/);
+        await expect(page.getByRole('link', { name: 'Sign In' })).toBeVisible();
+    });
 });

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { answerEmailVisibilityPrompt } from './helpers/ui'
+import { answerEmailVisibilityPrompt, registerFreshAccount, logoutViaHeader } from './helpers/ui'
 import fs from 'node:fs';
 
 // Auth flows start anonymous by default; tests that need a session either use
@@ -13,25 +13,6 @@ const VISITOR_STORAGE = 'tests/e2e/storage/visitor.json';
 
 function readPersonas() {
     return JSON.parse(fs.readFileSync('tests/e2e/storage/personas.json', 'utf-8'));
-}
-
-async function registerFreshAccount(page: Page) {
-    const email = `e2e-auth-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.org`;
-    const password = 'e2e-auth-password';
-
-    await page.goto('/register');
-    await page.getByLabel('First Name').fill('E2E');
-    await page.getByLabel('Last Name').fill('Auth');
-    await page.getByLabel('Email').fill(email);
-    await page.getByLabel('Password').fill(password);
-    await page.getByRole('button', { name: 'Register' }).click();
-
-    // autoconfirm stack: signUp mints a live session, action redirects to '/'
-    await expect(page).toHaveURL('/');
-
-    await answerEmailVisibilityPrompt(page);
-
-    return { email, password };
 }
 
 async function login(page: Page, creds: { email: string; password: string }) {
@@ -77,16 +58,7 @@ test('AUTH-06: sign out from an auth-dependent page', async ({ page }) => {
     // NOTE: staging hydrates slowly: a click ~20ms after goto lands on server-rendered
     // DOM whose use:popup listener isn't attached yet and silently does nothing
     // (trace-verified). Retry opening until the menu is actually showing
-    const logout = page
-        .locator('[data-popup="popupHover"]')
-        .getByRole('button', { name: 'Log out' });
-    await expect(async () => {
-        if (!(await logout.isVisible())) {
-            await page.getByTestId('profile-picture').click();
-        }
-        await expect(logout).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 15_000 });
-    await logout.click();
+    await logoutViaHeader(page);
 
     // onAuthStateChange → invalidate('supabase:auth') → publish guard reruns
     // with no session → bounced to /signin. Pins graceful handling of a
