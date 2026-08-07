@@ -1,5 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { registerFreshAccount, logoutViaHeader } from './helpers/ui';
+import fs from 'node:fs';
+import { createMaterial } from './helpers/api';
 
 // Publication pages are login-walled (the [user] layout guard), so every view
 // test runs as the visitor persona. Anonymous access redirects to /signin and
@@ -77,6 +79,31 @@ test('PUB-09: visitor sees no owner controls', async ({ page }) => {
     await expect(page.getByTestId('delete-publication')).toBeHidden();
 });
 
+test.describe('owner controls', () => {
+    test.use({ storageState: 'tests/e2e/storage/author.json' });
+
+    test('PUB-10: author sees edit + delete on own material; visitor does not', async ({ page, browser }) => {
+        const { author } = JSON.parse(fs.readFileSync('tests/e2e/storage/personas.json', 'utf-8'));
+        const { id, title } = await createMaterial(page, author.username);
+        const url = `/${author.username}/${id}`;
+
+        // author (owner) sees the controls
+        await page.goto(url);
+        await expect(page.getByRole('heading', { name: title })).toBeVisible();
+        await expect(page.getByTestId('edit-publication')).toBeVisible();
+        await expect(page.getByTestId('delete-publication')).toBeVisible();
+
+        // visitor (non-owner) sees neither
+        const vCtx = await browser.newContext({ storageState: 'tests/e2e/storage/visitor.json' });
+        const vPage = await vCtx.newPage();
+        await vPage.goto(url);
+        await expect(vPage.getByRole('heading', { name: title })).toBeVisible();
+        await expect(vPage.getByTestId('edit-publication')).toBeHidden();
+        await expect(vPage.getByTestId('delete-publication')).toBeHidden();
+        await vCtx.close();
+    });
+});
+
 test.describe('anonymous', () => {
     test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -111,3 +138,4 @@ test.describe('fresh disposable account', () => {
         await expect(page.getByRole('link', { name: 'Sign In' })).toBeVisible();
     });
 });
+
