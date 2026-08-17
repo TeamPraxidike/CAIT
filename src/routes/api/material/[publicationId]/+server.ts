@@ -5,7 +5,6 @@ import {
 	type FetchedFileItem,
 	fileSystem,
 	getMaterialByPublicationId,
-	getPublisherId,
 	handleConnections,
 	type MaterialForm,
 	prisma,
@@ -299,8 +298,7 @@ export async function DELETE({ params, locals }) {
 		);
 	}
 
-	const publication = await getPublisherId(publicationId);
-	const authError = await verifyAuth(locals, publication.publisherId);
+	const authError = await verifyAuth(locals);
 	if (authError) return authError;
 
 	try {

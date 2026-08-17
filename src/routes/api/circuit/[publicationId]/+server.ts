@@ -6,7 +6,6 @@ import {
 	editNode,
 	fileSystem,
 	getCircuitByPublicationId,
-	getPublisherId,
 	handleConnections,
 	handleEdges,
 	type NodeDiffActions,
@@ -199,8 +198,7 @@ export async function DELETE({ params, locals }) {
 		);
 	}
 
-	const publication = await getPublisherId(publicationId);
-	const authError = await verifyAuth(locals, publication.publisherId);
+	const authError = await verifyAuth(locals);
 	if (authError) return authError;
 
 	try {

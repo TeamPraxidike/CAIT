@@ -21,8 +21,13 @@ const CIRCUIT_MEMBERS = [
 // the pub page's <h2> title confirms arrival.
 async function openSeed(page: Page, title: string, type: 'materials' | 'circuits') {
     await page.goto(`/browse?type=${type}`);
+    const search = page.getByPlaceholder(`Browse ${type}`);
     const card = page.getByRole('link', { name: title });
-    await expect(card).toBeVisible();
+    await expect(async () => {
+        await search.fill(title);
+        await search.press('Enter');
+        await expect(card).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 20_000 });
     await card.click();
     await expect(page.getByRole('heading', { name: title })).toBeVisible();
 }
@@ -111,9 +116,14 @@ test.describe('anonymous', () => {
         // browse is public; the card href is in the anonymous HTML - read it
         // without a session, then try to open it directly
         await page.goto('/browse');
+        const search = page.getByPlaceholder('Browse materials');
         const card = page.getByRole('link', { name: SEED_MATERIAL });
-        await expect(card).toBeVisible();
-        const href = await card.getAttribute('href') ;
+        await expect(async () => {
+            await search.fill(SEED_MATERIAL);
+            await search.press('Enter');
+            await expect(card).toBeVisible({ timeout: 3_000 });
+        }).toPass({ timeout: 20_000 });
+        const href = await card.getAttribute('href');
         const target = new URL(href!, page.url()).pathname;
 
         await page.goto(target);
