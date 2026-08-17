@@ -14,8 +14,12 @@ import IconLink from '$lib/components/generic/IconLink.svelte';
 import UserMenu from '$lib/components/user/UserMenu.svelte';
 import Footer from '$lib/components/page/Footer.svelte';
 import Section from '$lib/components/generic/Section.svelte';
+import CookieBanner from '$lib/components/generic/CookieBanner.svelte';
+import YouTubeEmbed from '$lib/components/generic/YouTubeEmbed.svelte';
+import TheoryAppBar from '$lib/components/TheoryAppBar.svelte';
 import PublicationCard from '$lib/components/PublicationCard.svelte';
 import Comment from '$lib/components/Comment.svelte';
+import Filter from '$lib/components/Filter.svelte';
 import CircuitComponent from '$lib/components/circuits/components/CircuitComponent.svelte';
 import Download from '$lib/components/generic/Download.svelte';
 import HorizontalScroll from '$lib/components/HorizontalScroll.svelte';
@@ -51,6 +55,7 @@ export {
 	DifficultySelection,
 	DiffBar,
 	UserProfileBar,
+	TheoryAppBar,
 	PublicationCard,
 	SearchBar,
 	UserProp,
@@ -59,7 +64,10 @@ export {
 	UserMenu,
 	Footer,
 	Section,
+	CookieBanner,
+	YouTubeEmbed,
 	lorem,
+	Filter,
 	CircuitComponent,
 	AddInteractionForm,
 	PublishReview,
