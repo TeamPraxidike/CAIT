@@ -2,7 +2,9 @@ import { test, expect } from '@playwright/test';
 
 test('landing page loads and shows hero text', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.locator('h2')).toContainText('Community Archive for Integrated Teaching');
+	await expect(
+		page.getByRole('heading', { name: 'Community Archive for Integrated Teaching' })
+	).toBeVisible();
 });
 
 test('landing page has See Publications button linking to browse', async ({ page }) => {
