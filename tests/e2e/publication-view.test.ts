@@ -1,12 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
 import { registerFreshAccount, logoutViaHeader } from './helpers/ui';
-import fs from 'node:fs';
 import { createMaterial } from './helpers/api';
+import {ANON_STATE, AUTHOR_STATE, readPersonas, VISITOR_STATE} from "./helpers/personas";
 
 // Publication pages are login-walled (the [user] layout guard), so every view
 // test runs as the visitor persona. Anonymous access redirects to /signin and
 // is covered by the layout guard / AUTH-08, not here.
-test.use({ storageState: 'tests/e2e/storage/visitor.json' });
+test.use({ storageState: VISITOR_STATE });
 
 const SEED_MATERIAL = '[SEED] Gradient Descent by Hand';
 const SEED_CIRCUIT = '[SEED] From Optimisation to Transformers';
@@ -85,10 +85,10 @@ test('PUB-09: visitor sees no owner controls', async ({ page }) => {
 });
 
 test.describe('owner controls', () => {
-    test.use({ storageState: 'tests/e2e/storage/author.json' });
+    test.use({ storageState: AUTHOR_STATE });
 
     test('PUB-10: author sees edit + delete on own material; visitor does not', async ({ page, browser }) => {
-        const { author } = JSON.parse(fs.readFileSync('tests/e2e/storage/personas.json', 'utf-8'));
+        const { author } = readPersonas();
         const { id, title } = await createMaterial(page, author.username);
         const url = `/${author.username}/${id}`;
 
@@ -99,7 +99,7 @@ test.describe('owner controls', () => {
         await expect(page.getByTestId('delete-publication')).toBeVisible();
 
         // visitor (non-owner) sees neither
-        const vCtx = await browser.newContext({ storageState: 'tests/e2e/storage/visitor.json' });
+        const vCtx = await browser.newContext({ storageState: VISITOR_STATE });
         const vPage = await vCtx.newPage();
         await vPage.goto(url);
         await expect(vPage.getByRole('heading', { name: title })).toBeVisible();
@@ -110,7 +110,7 @@ test.describe('owner controls', () => {
 });
 
 test.describe('anonymous', () => {
-    test.use({ storageState: { cookies: [], origins: [] } });
+    test.use({ storageState: ANON_STATE });
 
     test('PUB-13: anonymous user cannot open a publication', async ({ page }) => {
         // browse is public; the card href is in the anonymous HTML - read it
@@ -132,7 +132,7 @@ test.describe('anonymous', () => {
 });
 
 test.describe('fresh disposable account', () => {
-    test.use({ storageState: { cookies: [], origins: [] } });
+    test.use({ storageState: ANON_STATE });
 
     test('PUB-14: logging out while viewing a publication redirects to /signin', async ({ page }) => {
         // disposable account: signOut revokes refresh tokens, so never the shared

@@ -1,10 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
-import fs from 'fs';
 import { createMaterial } from './helpers/api';
-
-const AUTHOR_STATE = 'tests/e2e/storage/author.json';
-const VISITOR_STATE = 'tests/e2e/storage/visitor.json';
-const { author, visitor } = JSON.parse(fs.readFileSync('tests/e2e/storage/personas.json', 'utf-8'));
+import {ANON_STATE, AUTHOR_STATE, type Persona, readPersonas, VISITOR_STATE} from "./helpers/personas";
 
 // The edit stepper renders inside an `{#await files}` block that only resolves onMount
 async function openEditStepper(page: Page, editUrl: string) {
@@ -55,6 +51,13 @@ async function deleteViaModal(page: Page, pubUrl: string, id: number) {
 test.describe('EDIT - owner edits and deletes own content', () => {
     test.use({storageState: AUTHOR_STATE});
 
+    let author: Persona;
+
+    test.beforeAll(async () => {
+        const personas = readPersonas();
+        author = personas.author;
+    })
+
     test('EDIT-01: author edits title and description via the edit stepper', async ({ page }) => {
         const { id } = await createMaterial(page, author.username, { title: `e2e-edit-01-${Date.now()}` });
         const pubUrl = `/${author.username}/${id}`;
@@ -73,7 +76,6 @@ test.describe('EDIT - owner edits and deletes own content', () => {
         expect(resp?.status()).toBeGreaterThanOrEqual(400);
         await expect(page.getByRole('heading', { name: title })).toHaveCount(0);
     });
-
 
     test('EDIT-03: cancelling the delete modal leaves the publication intact', async ({ page }) => {
         const { id, title } = await createMaterial(page, author.username, { title: `e2e-edit-03-${Date.now()}` });
@@ -103,6 +105,8 @@ test.describe('EDIT - access control as non-owner vs maintainer (visitor)', () =
     let maintainedDeleteUrl: string; let maintainedDeleteId: number;
 
     test.beforeAll(async ({ browser }) => {
+        const { author, visitor } = readPersonas();
+
         const ctx = await browser.newContext({ storageState: AUTHOR_STATE });
         const page = await ctx.newPage();
         const who = await page.request.get(`/api/user/username/${visitor.username}`);
@@ -148,12 +152,14 @@ test.describe('EDIT - access control as non-owner vs maintainer (visitor)', () =
 });
 
 test.describe('EDIT - anonymous user is walled out', () => {
-    test.use({ storageState: { cookies: [], origins: [] } }); // no session
+    test.use({ storageState: ANON_STATE });
 
     let pubUrl: string;
     let pubId: number;
 
     test.beforeAll(async ({ browser }) => {
+        const { author } = readPersonas();
+
         const ctx = await browser.newContext({ storageState: AUTHOR_STATE });
         const page = await ctx.newPage();
         const { id } = await createMaterial(page, author.username, { title: `e2e-edit-12-${Date.now()}` });

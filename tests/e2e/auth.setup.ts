@@ -2,14 +2,7 @@ import { test as setup, expect, type Page } from '@playwright/test'
 import { answerEmailVisibilityPrompt } from './helpers/ui';
 import fs from 'node:fs'
 import path from 'node:path'
-
-const STORAGE_DIR = 'tests/e2e/storage'
-
-type Persona = {
-    email: string,
-    password: string,
-    username: string
-}
+import {type Persona, STORAGE_DIR} from "./helpers/personas";
 
 async function registerPersona(page: Page, name: 'author' | 'visitor'): Promise<Persona> {
     const email = `${name}-${Date.now()}@example.org`;

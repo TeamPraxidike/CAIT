@@ -1,19 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
 import { answerEmailVisibilityPrompt, registerFreshAccount, logoutViaHeader } from './helpers/ui'
-import fs from 'node:fs';
+import {ANON_STATE, readPersonas, VISITOR_STATE} from "./helpers/personas";
 
-// Auth flows start anonymous by default; tests that need a session either use
-// the visitor persona's storageState (see describe below) or mint their own
-// disposable account. NO module-level state is shared between tests: Playwright
-// replaces the worker process after any failure, which re-imports this file and
-// resets module variables - anything shared must live on disk (personas.json).
-test.use({ storageState: { cookies: [], origins: [] } });
-
-const VISITOR_STORAGE = 'tests/e2e/storage/visitor.json';
-
-function readPersonas() {
-    return JSON.parse(fs.readFileSync('tests/e2e/storage/personas.json', 'utf-8'));
-}
+// Auth flows start anonymous by default
+test.use({ storageState: ANON_STATE });
 
 async function login(page: Page, creds: { email: string; password: string }) {
     await page.goto('/signin');
@@ -57,7 +47,6 @@ test('AUTH-06: sign out from an auth-dependent page', async ({ page }) => {
 
     // NOTE: staging hydrates slowly: a click ~20ms after goto lands on server-rendered
     // DOM whose use:popup listener isn't attached yet and silently does nothing
-    // (trace-verified). Retry opening until the menu is actually showing
     await logoutViaHeader(page);
 
     // onAuthStateChange → invalidate('supabase:auth') → publish guard reruns
@@ -84,7 +73,7 @@ test('AUTH-08: anonymous access to another user\'s settings and edit pages is de
 
 // These three need "logged in as someone who isn't the author" and never sign out
 test.describe('as visitor persona', () => {
-    test.use({ storageState: VISITOR_STORAGE });
+    test.use({ storageState: VISITOR_STATE });
 
     test('AUTH-10: opening another user\'s settings or edit page bounces to that profile', async ({ page }) => {
         const { author } = readPersonas();

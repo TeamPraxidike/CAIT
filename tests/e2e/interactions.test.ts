@@ -1,17 +1,17 @@
 import { test, expect, type Page } from '@playwright/test';
-import fs from 'node:fs';
 import { createMaterial } from './helpers/api';
+import {AUTHOR_STATE, readPersonas, VISITOR_STATE} from "./helpers/personas";
 
 // visitor interacts with a publication the AUTHOR owns - never [SEED] content,
 // since likes/comments mutate shared state
-test.use({ storageState: 'tests/e2e/storage/visitor.json' });
+test.use({ storageState: VISITOR_STATE });
 
 let pubUrl: string;
 let pubTitle: string;
 
 test.beforeAll(async ({ browser }) => {
-    const { author } = JSON.parse(fs.readFileSync('tests/e2e/storage/personas.json', 'utf-8'));
-    const ctx = await browser.newContext({ storageState: 'tests/e2e/storage/author.json' });
+    const { author } = readPersonas();
+    const ctx = await browser.newContext({ storageState: AUTHOR_STATE });
     const page = await ctx.newPage();
     const { id, title } = await createMaterial(page, author.username, { title: `e2e-int-${Date.now()}` });
     pubUrl = `/${author.username}/${id}`;
@@ -74,7 +74,7 @@ test('INT-01/02: like toggles both directions and persists each way', async ({ p
 });
 
 test('INT-03: save shows in the profile Saved tab; unsave removes it', async ({ page }) => {
-    const { visitor } = JSON.parse(fs.readFileSync('tests/e2e/storage/personas.json', 'utf-8'));
+    const { visitor } = readPersonas();
     const profileUrl = `/${visitor.username}`;
     const card = page.getByRole('link', { name: pubTitle });
 

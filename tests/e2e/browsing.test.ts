@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { selectDropdownOption } from './helpers/ui';
+import {VISITOR_STATE} from "./helpers/personas";
 
 // TODO: link with seedTestData.ts
 // Browsing is anonymous: no storageState, fresh context per test.
@@ -95,7 +96,7 @@ test('BRW-06: tag filter narrows materials to the tagged one', async ({ page }) 
 });
 
 test.describe('as visitor persona', () => {
-    test.use({ storageState: 'tests/e2e/storage/visitor.json' });
+    test.use({ storageState: VISITOR_STATE });
 
     test('BRW-12: clicking a material card opens its publication page', async ({ page }) => {
         await openBrowseMaterials(page);
