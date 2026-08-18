@@ -19,7 +19,8 @@
 				<Icon icon="mdi:cookie-outline" class="mt-0.5 shrink-0 text-2xl text-primary-500" />
 				<p class="text-sm text-surface-700 dark:text-surface-200">
 					We use cookies to show embedded content such as YouTube videos. These are only
-					loaded once you accept.
+					loaded once you accept. See our
+					<a href="/legal/cookies" class="underline">Cookie Policy</a>.
 				</p>
 			</div>
 			<div class="flex shrink-0 gap-3">
