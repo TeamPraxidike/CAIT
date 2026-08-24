@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Meta, Section, YouTubeEmbed } from '$lib';
+	import { Meta, PublicationCard, Section, YouTubeEmbed  } from '$lib';
 	import type { PageServerData } from './$types';
 
 	export let data: PageServerData;
@@ -42,6 +42,7 @@
 	</section>
 	<hr class="col-span-full row-start-2">
 </section>
+
 <main class="col-span-full my-20 flex flex-col gap-12">
 	<section
 		aria-labelledby="introduction-heading"
@@ -90,7 +91,27 @@
 		<div class="h-px flex-1 bg-surface-300 dark:bg-surface-600"></div>
 	</div>
 
-	<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} img="/images/about/publication.png" mdFlex="md:flex-row-reverse" iconList={true}/>
+
+		<Section title="Materials" description={matDescription} subtitle="Share your resources" onAbout={true} mdFlex="md:flex-row-reverse" iconList={true}>
+			<svelte:fragment slot="visual">
+				{#if data.featuredPublication}
+					<PublicationCard
+						className="w-full"
+						publication={data.featuredPublication.publication}
+						publisher={data.featuredPublication.publisher}
+						imgSrc={data.featuredPublication.coverPicData}
+						materialType={data.featuredPublication.encapsulatingType}
+						liked={false}
+						saved={false}
+					/>
+				{:else}
+					<div class="flex min-h-[180px] w-full items-center justify-center rounded-lg bg-surface-100 p-6 text-center dark:bg-surface-800">
+						<p>No publications are available yet.</p>
+					</div>
+				{/if}
+			</svelte:fragment>
+		</Section>
+
 	<Section title="Circuits" description={circuitDescription} subtitle="Define your workflow" onAbout={true} img="/images/about/circuit.png" isImageWider={true}/>
 	<Section title="Reputation" description={repText}  subtitle="Community contribution and activity" onAbout={true} userList={data.topUsers} mdFlex="md:flex-row-reverse"/>
 </main>
