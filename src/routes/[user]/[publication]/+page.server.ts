@@ -6,6 +6,7 @@ export const load: PageServerLoad = async ({
 	params,
 	fetch,
 	locals,
+	url,
 }) => {
 	await parent();
 	const session = await locals.safeGetSession();
@@ -86,8 +87,10 @@ export const load: PageServerLoad = async ({
 
 	async function getHistory() {
 		try {
+			const draftToken = url.searchParams.get('draftToken');
+			const draftQuery = draftToken ? `?draftToken=${encodeURIComponent(draftToken)}` : '';
 			const historyRes = await fetch(
-				`/api/publication/${params.publication}/history`,
+				`/api/publication/${params.publication}/history${draftQuery}`,
 			);
 			if (!historyRes.ok) {
 				console.error(

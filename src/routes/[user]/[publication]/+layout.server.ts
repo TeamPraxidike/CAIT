@@ -20,6 +20,7 @@ export const load: LayoutServerLoad = async ({
 	fetch,
 	locals,
 	parent,
+	url,
 }) => {
 	await parent();
 
@@ -27,7 +28,9 @@ export const load: LayoutServerLoad = async ({
 	const session = locals.session
 	if (!session || !session.user) throw redirect(303, '/signin');
 
-	const publicationResponse = await fetch(`/api/publication/${params.publication}`);
+	const draftToken = url.searchParams.get('draftToken');
+	const draftQuery = draftToken ? `?draftToken=${encodeURIComponent(draftToken)}` : '';
+	const publicationResponse = await fetch(`/api/publication/${params.publication}${draftQuery}`);
 	if (publicationResponse.status !== 200) error(publicationResponse.status, publicationResponse.statusText);
 
 	const userRes = await fetch(
@@ -48,7 +51,7 @@ export const load: LayoutServerLoad = async ({
 	// Utilizes "Streaming with promises" in SvelteKit
 	async function fetchFiles() {
 		try {
-			const res = await fetch(`/api/material/${params.publication}/files`);
+			const res = await fetch(`/api/material/${params.publication}/files${draftQuery}`);
 			if (!res.ok && res.status === 404) {
 				// it is not a material publication, possible so we handle gracefully
 				return null;

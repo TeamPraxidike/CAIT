@@ -7,8 +7,9 @@ import { profilePicFetcher } from '$lib/database/file';
 import { PublicationType } from '@prisma/client';
 import { getEmailViewer } from '$lib/database/auth';
 import { redactEmail } from '$lib/util/emailVisibility';
+import { canViewPublication } from '$lib/server/draftShare';
 
-export async function GET({ params, locals }) {
+export async function GET({ params, locals, url }) {
 	const publicationId = parseInt(params.publicationId);
 
 	if (isNaN(publicationId) || publicationId <= 0) {
@@ -21,6 +22,17 @@ export async function GET({ params, locals }) {
 	}
 
 	try {
+		const mayView = await canViewPublication(
+			publicationId,
+			locals.user?.id,
+			url.searchParams.get('draftToken'),
+		);
+		if (!mayView) {
+			return new Response(JSON.stringify({ error: 'Material Not Found' }), {
+				status: 404,
+			});
+		}
+
 		const publication = await getPublicationById(publicationId);
 		if (!publication) {
 			return new Response(

@@ -1,15 +1,25 @@
 import { prisma } from '$lib/database/prisma';
 import type { RequestHandler } from './$types';
 import { profilePicFetcher } from '$lib/database/file';
+import { canViewPublication } from '$lib/server/draftShare';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, locals, url }) => {
 	const publicationId = parseInt(params.publicationId);
 
-	if (isNaN(publicationId)) {
+	if (isNaN(publicationId) || publicationId <= 0) {
 		return new Response('Invalid publication ID', { status: 400 });
 	}
 
 	try {
+		const mayView = await canViewPublication(
+			publicationId,
+			locals.user?.id,
+			url.searchParams.get('draftToken'),
+		);
+		if (!mayView) {
+			return new Response('Publication not found', { status: 404 });
+		}
+
 		const history = await prisma.publicationHistory.findMany({
 			where: {
 				publicationId: publicationId
