@@ -16,7 +16,9 @@
         coverPicData: string;
         publisher: User & {profilePicData: string};
     });
-    let tabSet: number = 0;
+    const getSelectedTab = () => page.url.searchParams.get('tab') === 'drafts' ? 2 : 0;
+
+    let tabSet: number = getSelectedTab();
     let currentProfileId = data.user.id;
 
     let user = data.user;
@@ -33,7 +35,11 @@
 
     $: if (data.user.id !== currentProfileId) {
         currentProfileId = data.user.id;
-        tabSet = 0;
+        tabSet = getSelectedTab();
+    }
+
+    $: if (page.url.searchParams.get('tab') === 'drafts') {
+        tabSet = 2;
     }
 
 
@@ -132,14 +138,16 @@
             {#if posts.length === 0}
                 <p class="col-span-full text-center">So empty... There are no publications here</p>
             {:else}
-                <div class="grid grid-cols-2 gap-4">
-                {#each cardPosts as publication, i}
-                    <PublicationCard imgSrc={publication.coverPicData}
-                                     publication={publication}
-                                     liked={liked.includes(publication.id)}
-                                     saved={data.savedByUser.includes(publication.id)}
-                                     publisher={publication.publisher}/>
-                {/each}
+				<div class="grid grid-cols-2 gap-4">
+					{#each cardPosts as publication}
+						<div class="col-span-1">
+							<PublicationCard imgSrc={publication.coverPicData}
+											 publication={publication}
+											 liked={liked.includes(publication.id)}
+											 saved={data.savedByUser.includes(publication.id)}
+											 publisher={publication.publisher}/>
+						</div>
+					{/each}
                 </div>
             {/if}
     {/if}

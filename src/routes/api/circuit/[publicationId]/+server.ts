@@ -19,9 +19,10 @@ import { canEditOrRemove, unauthResponse, verifyAuth } from '$lib/database/auth'
 import type {File as PrismaFile} from '@prisma/client';
 import {enqueueCircuitComparison} from "$lib/PiscinaUtils/runner";
 import { getMaintainers, getPublisher } from '$lib/database/publication';
+import { canViewPublication } from '$lib/server/draftShare';
 
 
-export async function GET({ params, locals }) {
+export async function GET({ params, locals, url }) {
 	try {
 		const authError = await verifyAuth(locals);
 		if (authError) return authError;
@@ -35,6 +36,17 @@ export async function GET({ params, locals }) {
 					status: 400,
 				},
 			);
+		}
+
+		const mayView = await canViewPublication(
+			publicationId,
+			locals.user?.id,
+			url.searchParams.get('draftToken'),
+		);
+		if (!mayView) {
+			return new Response(JSON.stringify({ error: 'Circuit Not Found' }), {
+				status: 404,
+			});
 		}
 
 		const circuit = await getCircuitByPublicationId(publicationId);

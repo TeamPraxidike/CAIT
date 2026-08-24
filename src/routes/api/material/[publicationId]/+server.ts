@@ -33,8 +33,9 @@ import {
 	type ChangeLogPayload,
 	type FileChangeLog,
 } from '$lib/database/publicationHistory.js';
+import { canViewPublication } from '$lib/server/draftShare';
 
-export async function GET({ params, locals }) {
+export async function GET({ params, locals, url }) {
 	const authError = await verifyAuth(locals);
 	if (authError) return authError;
 
@@ -50,6 +51,17 @@ export async function GET({ params, locals }) {
 	}
 
 	try {
+		const mayView = await canViewPublication(
+			publicationId,
+			locals.user?.id,
+			url.searchParams.get('draftToken'),
+		);
+		if (!mayView) {
+			return new Response(JSON.stringify({ error: 'Material Not Found' }), {
+				status: 404,
+			});
+		}
+
 		const material = await getMaterialByPublicationId(publicationId);
 		if (!material) {
 			return new Response(
