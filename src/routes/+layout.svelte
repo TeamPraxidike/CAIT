@@ -13,7 +13,7 @@
 	import rust from 'highlight.js/lib/languages/rust';
 	import scala from 'highlight.js/lib/languages/scala';
 	import plaintext from 'highlight.js/lib/languages/plaintext';
-	import { Footer, Grid, Header } from '$lib';
+	import { CookieBanner, Footer, Grid, Header } from '$lib';
 	import EmailVisibilityPrompt from '$lib/components/user/EmailVisibilityPrompt.svelte';
 
 	// Floating UI for Popups
@@ -96,3 +96,5 @@
 </div>
 
 <Footer />
+
+<CookieBanner />

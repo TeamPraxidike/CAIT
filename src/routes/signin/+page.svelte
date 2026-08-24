@@ -67,5 +67,11 @@
 			<p class="text-center text-sm mt-2">Don't have an account? <a class="anchor text-primary-600" href="/register">Create
 				one</a></p>
 		{/if}
+		<p class="mt-4 text-center text-xs text-surface-500">
+			By signing in, you agree to our
+			<a class="anchor text-primary-600" href="/legal/terms">Terms</a>
+			and
+			<a class="anchor text-primary-600" href="/legal/privacy">Privacy Statement</a>.
+		</p>
 	</form>
 </div>

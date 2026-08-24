@@ -33,6 +33,11 @@
                     <a href="/about">About</a>
                     <a href="/browse">Browse</a>
                 </div>
+                <div class="flex flex-col gap-2">
+                    <a href="/legal/privacy">Privacy</a>
+                    <a href="/legal/terms">Terms</a>
+                    <a href="/legal/cookies">Cookies</a>
+                </div>
             </div>
         </div>
 
