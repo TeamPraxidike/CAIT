@@ -370,7 +370,7 @@ describe('COMMENT API', () => {
             })
 
             it("should 404 when retrieving non-existend publications", async () => {
-                const resp = await fetch(`${apiTestingUrl}/comment/publication/${material.publicationId+100000000000}`, {
+                const resp = await fetch(`${apiTestingUrl}/comment/publication/${material.publicationId+1000000}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

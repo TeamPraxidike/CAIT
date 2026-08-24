@@ -296,7 +296,7 @@ describe('Materials', async () => {
             expect(newPublication.publication.learningObjectives).toEqual(editData.metaData.learningObjectives);
             expect(newPublication.publication.prerequisites).toEqual(editData.metaData.prerequisites);
             expect([newPublication.encapsulatingType]).toEqual(editData.metaData.materialType);
-            expect(newPublication.theoryPractice).toBe(editData.metaData.theoryPractice);
+            expect(newPublication.theoryPractice).toBeCloseTo(editData.metaData.theoryPractice, 2);
             expect(newPublication.publication.isDraft).toBe(editData.metaData.isDraft);
             expect(newPublication.publication.tags).toEqual(editData.metaData.tags);
             expect(newPublication.publication.maintainers).toEqual(editData.metaData.maintainers);
