@@ -16,7 +16,8 @@ function makeForm(overrides: Record<string, string> = {}): FormData {
 	fd.append('description', 'Desc');
 	fd.append('copyright', 'CC');
 	fd.append('estimate', '30');
-	fd.append('course', '0');
+	fd.append('course', 'null');
+	fd.append('selfMade', 'true');
 	for (const [k, v] of Object.entries(overrides)) {
 		fd.set(k, v);
 	}
@@ -45,7 +46,9 @@ describe('buildMaterialForm selfMade parsing', () => {
 	});
 
 	it('requires an explicit answer when selfMade is missing', async () => {
-		const error = errorOf(await buildMaterialForm(makeForm()));
+		const form = makeForm();
+		form.delete('selfMade');
+		const error = errorOf(await buildMaterialForm(form));
 		expect(error).toMatchObject({
 			status: 400,
 			message: 'Please specify whether you made this material yourself',
@@ -60,5 +63,43 @@ describe('buildMaterialForm selfMade parsing', () => {
 	it('rejects values other than the exact boolean literals', async () => {
 		const error = errorOf(await buildMaterialForm(makeForm({ selfMade: 'FALSE' })));
 		expect(error.status).toBe(400);
+	});
+});
+
+describe('buildMaterialForm file validation', () => {
+	it('requires a file when creating a publication', async () => {
+		const form = makeForm();
+		form.delete('file');
+
+		await expect(buildMaterialForm(form)).resolves.toMatchObject({
+			status: 400,
+			message: 'No files provided',
+		});
+	});
+
+	it('allows a metadata-only edit of an existing publication', async () => {
+		const form = makeForm();
+		form.delete('file');
+
+		await expect(buildMaterialForm(form, false)).resolves.toHaveProperty('data');
+	});
+});
+
+describe('buildMaterialForm course parsing', () => {
+	it('represents no selected course as null', async () => {
+		const meta = metaOf(await buildMaterialForm(makeForm({ course: 'null' })));
+		expect(meta.course).toBeNull();
+	});
+
+	it('parses a selected course id', async () => {
+		const meta = metaOf(await buildMaterialForm(makeForm({ course: '42' })));
+		expect(meta.course).toBe(42);
+	});
+
+	it('rejects malformed course ids', async () => {
+		await expect(buildMaterialForm(makeForm({ course: 'not-a-course' }))).resolves.toMatchObject({
+			status: 400,
+			message: 'Invalid course',
+		});
 	});
 });

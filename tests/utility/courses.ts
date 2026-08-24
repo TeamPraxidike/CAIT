@@ -1,8 +1,13 @@
 import { createUniqueUser } from './users';
-import { createUniqueMaterial, generateRandomString, randomEnumValue } from './publicationsUtility';
+import { createUniqueMaterial, generateRandomString } from './publicationsUtility';
 import { createCourse, type createCourseData, linkCourseToPublication } from '$lib/database/courses';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+<<<<<<< HEAD
 let Level = ["Bachelor", "Master", "PhD"]
+=======
+
+const EDUCATIONAL_LEVELS = ['Bachelor', 'Master', 'PhD'];
+>>>>>>> main
 
 export async function publicationsWithCourses(numPublications: number = 5) {
 	const user = await createUniqueUser();
@@ -38,7 +43,7 @@ export function generateCourseData(creatorID: string): createCourseData{
 	return {
 		learningObjectives: learningObjectives,
 		prerequisites: prerequisitesArray,
-		educationalLevel: randomEnumValue(Level),
+		educationalLevel: EDUCATIONAL_LEVELS[Math.floor(Math.random() * EDUCATIONAL_LEVELS.length)],
 		courseName: generateRandomString(10),
 		copyright: generateRandomString(10),
 		maintainers: [],

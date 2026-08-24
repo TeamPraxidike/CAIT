@@ -207,7 +207,7 @@ export async function createMaterialPublication(
 		selfMade: boolean;
 		isDraft: boolean;
 		fileURLs?: string[];
-		course: number;
+		course: number | null;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
@@ -237,7 +237,7 @@ export async function createMaterialPublication(
 					publisher: {
 						connect: { id: userId }
 					},
-					...(metaData.course !== null && {
+					...(typeof metaData.course === 'number' && Number.isInteger(metaData.course) && metaData.course > 0 && {
 						course: { connect: { id: metaData.course } },
 					}),
 					isDraft: metaData.isDraft,

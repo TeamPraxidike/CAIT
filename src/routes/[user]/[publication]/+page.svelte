@@ -369,6 +369,15 @@
 
 	$: deleteIcon = isHoveredDelete ? 'mdi:trash-can' : 'mdi:trash-can-outline';
 	$: editIcon = isHoveredEdit ? 'mdi:pencil' : 'mdi:pencil-outline';
+	$: canManagePublication =
+		pubView.publication.publisherId === page.data.session?.user.id ||
+		(Array.isArray(pubView.publication.maintainers) &&
+			pubView.publication.maintainers.some(
+				(maintainer) => maintainer.id === page.data.session?.user.id,
+			)) ||
+		loggedUser?.isAdmin === true ||
+		loggedUser?.role === 'MODERATOR' ||
+		loggedUser?.role === 'ADMIN';
 
 	onMount(() => {
 		if (hoverDivReport && hoverEdit && hoverDelete) {
@@ -419,19 +428,14 @@
 			</div>
 		{/if}
 
-		{#if pubView.publication.publisherId === page.data.session?.user.id
-		|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")
-		|| loggedUser.isAdmin}
+		{#if canManagePublication}
 			<div class="space-x-1">
-				{#if pubView.publication.publisherId === page.data.session?.user.id
-				|| pubView.publication.maintainers.map(x => x.id).includes(page.data.session?.user.id || "-1")}
-					<button bind:this={hoverEdit}
-							data-testid="edit-publication"
-							on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit/${isMaterial ? 'material' : 'circuit'}`)}
-							type="button" class="btn self-center p-0 m-0">
-						<Icon icon={editIcon} width="24" class="text-surface-700" />
-					</button>
-				{/if}
+				<button bind:this={hoverEdit}
+						data-testid="edit-publication"
+						on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit/${isMaterial ? 'material' : 'circuit'}`)}
+						type="button" class="btn self-center p-0 m-0">
+					<Icon icon={editIcon} width="24" class="text-surface-700" />
+				</button>
 				<button on:click={promptForDeletion} type="button" class="btn p-0 m-0"
 						data-testid="delete-publication"
 						bind:this={hoverDelete}>

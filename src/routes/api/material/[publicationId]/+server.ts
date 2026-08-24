@@ -174,7 +174,7 @@ export async function PUT({ request, params, locals }) {
 		}
 
 		if (
-			!(await canEditOrRemove(locals, publisherId, maintainerIds, 'EDIT'))
+			!(await canEditOrRemove(locals, publisherId, maintainerIds))
 		)
 			return unauthResponse();
 
@@ -239,7 +239,9 @@ export async function PUT({ request, params, locals }) {
 			},
 		);
 
-		await updateCoverPic(coverPic, publicationId, body.userId);
+		if (coverPic) {
+			await updateCoverPic(coverPic, publicationId, body.userId);
+		}
 
 		await updateFiles(fileDiff, body.materialId, body.userId);
 
@@ -321,13 +323,17 @@ export async function DELETE({ params, locals }) {
 			) || [];
 		const publisher = await getPublisher(publicationId);
 		const publisherId = publisher?.publisher?.id;
+		if (!publisherId) {
+			return new Response(JSON.stringify({ error: 'Material not found' }), {
+				status: 404,
+			});
+		}
 
 		if (
 			!(await canEditOrRemove(
 				locals,
 				publisherId,
 				maintainerIds,
-				'REMOVE',
 			))
 		)
 			return unauthResponse();
@@ -339,7 +345,7 @@ export async function DELETE({ params, locals }) {
 					prismaTransaction,
 				);
 
-				const coverPic: PrismaFile = publication.coverPic;
+				const coverPic: PrismaFile | null = publication.coverPic;
 
 				// if there is a coverPic, delete
 				if (coverPic) {
