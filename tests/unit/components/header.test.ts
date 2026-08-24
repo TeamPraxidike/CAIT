@@ -1,8 +1,35 @@
-import { expect, it } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/svelte';
+import { afterEach, describe, expect, it } from 'vitest';
+import UserMenu from '$lib/components/user/UserMenu.svelte';
 
-it('should render header when signed in', async () => {
-	// Test goes here
-	expect(true).toBe(true);
+const loggedUser = {
+	id: 'user-id',
+	username: 'alice',
+	firstName: 'Alice',
+	lastName: 'Example',
+	profilePicData: null,
+} as any;
+
+const supabase = {
+	auth: {
+		signOut: () => undefined,
+	},
+} as any;
+
+afterEach(cleanup);
+
+describe('User menu', () => {
+	it.each(['desktop', 'mobile'] as const)(
+		'links to draft publications on %s',
+		(device) => {
+			render(UserMenu, { supabase, loggedUser, device });
+
+			expect(screen.getByRole('link', { name: 'Draft Publications' })).toHaveAttribute(
+				'href',
+				'/alice?tab=drafts',
+			);
+		},
+	);
 });
 
 // import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
