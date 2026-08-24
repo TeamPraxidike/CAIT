@@ -44,7 +44,7 @@ async function completePublication(page: Page) {
 }
 
 test.describe('PMAT - publish a material', () => {
-    test.use({ storageState: AUTHOR_STATE });
+    test.use({storageState: AUTHOR_STATE});
 
     let author: Persona;
 
@@ -53,7 +53,7 @@ test.describe('PMAT - publish a material', () => {
         author = readPersonas().author;
     });
 
-    test('PMAT-01: publish a material end-to-end - upload, preview, complete, then verify in browse, profile, and download', async ({ page }) => {
+    test('PMAT-01: publish a material end-to-end - upload, preview, complete, then verify in browse, profile, and download', async ({page}) => {
         const title = `e2e-pmat-01-${Date.now()}`;
         const description = `Published by the PMAT-01 flagship ${Date.now()}.`;
 
@@ -66,22 +66,22 @@ test.describe('PMAT - publish a material', () => {
         const previewFrame = page.locator('iframe[title="sample.pdf"]');
         await expect(async () => {
             await page.getByText('sample.pdf').first().click();
-            await expect(previewFrame).toBeVisible({ timeout: 3_000 });
-        }).toPass({ timeout: 15_000 });
-        await page.locator('.modal').getByRole('button', { name: 'Close' }).click();
+            await expect(previewFrame).toBeVisible({timeout: 3_000});
+        }).toPass({timeout: 15_000});
+        await page.locator('.modal').getByRole('button', {name: 'Close'}).click();
         await expect(previewFrame).toHaveCount(0);
 
-        await page.getByRole('button', { name: 'Next →' }).click();
+        await page.getByRole('button', {name: 'Next →'}).click();
         await fillTitleStep(page, title);
         await fillMetaStep(page, description);
         await completePublication(page);
 
         // --- view page ---
-        await page.getByRole('button', { name: 'View publication' }).click();
+        await page.getByRole('button', {name: 'View publication'}).click();
         await expect(page).toHaveURL(new RegExp(`/${author.username}/\\d+$`));
         const pubPath = new URL(page.url()).pathname;
 
-        await expect(page.getByRole('heading', { name: title })).toBeVisible();
+        await expect(page.getByRole('heading', {name: title})).toBeVisible();
         await expect(page.getByText(description)).toBeVisible();
         await expect(page.getByText('Understand the E2E publish flow.')).toBeVisible();
         await expect(page.getByText('sample.pdf').first()).toBeVisible();
@@ -89,20 +89,20 @@ test.describe('PMAT - publish a material', () => {
         // --- appears in browse ---
         await page.goto('/browse?type=materials');
         const search = page.getByPlaceholder('Browse materials');
-        const browseCard = page.getByRole('link', { name: title });
+        const browseCard = page.getByRole('link', {name: title});
         await expect(async () => {
             await search.fill(title);
             await search.press('Enter');
-            await expect(browseCard).toBeVisible({ timeout: 3_000 });
-        }).toPass({ timeout: 20_000 });
+            await expect(browseCard).toBeVisible({timeout: 3_000});
+        }).toPass({timeout: 20_000});
 
         // --- appears in author's "Your Publications" ---
         await page.goto(`/${author.username}`);
-        const profileCard = page.getByRole('link', { name: title });
+        const profileCard = page.getByRole('link', {name: title});
         await expect(async () => {
             await page.getByText('Your Publications').click();
-            await expect(profileCard).toBeVisible({ timeout: 3_000 });
-        }).toPass({ timeout: 20_000 });
+            await expect(profileCard).toBeVisible({timeout: 3_000});
+        }).toPass({timeout: 20_000});
 
         // --- download all files as zip ---
         await page.goto(pubPath);
@@ -112,7 +112,7 @@ test.describe('PMAT - publish a material', () => {
         expect((await download).suggestedFilename()).toBe(`${title}.zip`);
     });
 
-    test('PMAT-11: a file over 6MB is uploaded in chunks (multi-request TUS)', async ({ page }) => {
+    test('PMAT-11: a file over 6MB is uploaded in chunks (multi-request TUS)', async ({page}) => {
         const title = `e2e-pmat-11-${Date.now()}`;
 
         // since the file is 10MB, TUS will receive 2 chunks (6MB + 4MB)
@@ -126,11 +126,69 @@ test.describe('PMAT - publish a material', () => {
         await startMaterialPublish(page);
         await page.locator('input[type="file"]').setInputFiles(LARGE_PDF);
         await expect(page.getByText('large.pdf')).toBeVisible();
-        await page.getByRole('button', { name: 'Next →' }).click();
+        await page.getByRole('button', {name: 'Next →'}).click();
         await fillTitleStep(page, title);
         await fillMetaStep(page);
         await completePublication(page);
 
         expect(patchCount).toBeGreaterThanOrEqual(1);
+    });
+
+    test('PMAT-02: publish a material with an external file URL (no upload)', async ({page}) => {
+        const title = `e2e-pmat-02-${Date.now()}`;
+        const fileUrl = `https://example.com/e2e-${Date.now()}.pdf`;
+
+        await startMaterialPublish(page);
+        await page.locator('#urlInput').fill(fileUrl);
+        await page.getByRole('button', {name: 'Add'}).click();
+        await expect(page.getByText(fileUrl)).toBeVisible(); // URL row added
+
+        await page.getByRole('button', {name: 'Next →'}).click();
+        await fillTitleStep(page, title);
+        await fillMetaStep(page);
+        await completePublication(page);
+
+        await page.getByRole('button', {name: 'View publication'}).click();
+        await expect(page).toHaveURL(new RegExp(`/${author.username}/\\d+$`));
+        await expect(page.getByRole('heading', {name: title})).toBeVisible();
+        await expect(page.getByText(fileUrl)).toBeVisible(); // URL listed in the files tab
+    });
+
+    test('PMAT-03: complete the stepper marked as a draft', async ({page}) => {
+        const title = `e2e-pmat-03-${Date.now()}`;
+        const fileUrl = `https://example.com/e2e-${Date.now()}.pdf`;
+
+        await startMaterialPublish(page);
+        await page.locator('#urlInput').fill(fileUrl);
+        await page.getByRole('button', {name: 'Add'}).click();
+        await expect(page.getByText(fileUrl)).toBeVisible();
+
+        await page.getByRole('button', {name: 'Next →'}).click();
+        await fillTitleStep(page, title);
+        await fillMetaStep(page);
+
+        // On Review, flip "Save as a draft"
+        await page.locator('input[type="checkbox"].toggle').check();
+        await completePublication(page);
+        await expect(page.getByText('Your publication has been saved as a draft - only you can see it')).toBeVisible();
+
+        // view page: draft badge present
+        await page.getByRole('button', {name: 'View publication'}).click();
+        await expect(page.getByText('Draft', {exact: true})).toBeVisible();
+
+        // excluded from /browse
+        await page.goto('/browse?type=materials');
+        const search = page.getByPlaceholder('Browse materials');
+        await search.fill(title);
+        await search.press('Enter');
+        await expect(page.getByRole('link', {name: title})).toHaveCount(0);
+
+        // present in the author's "Draft Publications" tab
+        await page.goto(`/${author.username}`);
+        const draftCard = page.getByRole('link', {name: title});
+        await expect(async () => {
+            page.getByTestId('tab-group').getByText('Draft Publications').click();
+            await expect(draftCard).toBeVisible({timeout: 3_000});
+        }).toPass({timeout: 20_000});
     });
 });
