@@ -10,6 +10,7 @@ import {
 	editCourseAction,
 	publishCourseAction,
 } from '$lib/server/courseActions.ts';
+import { prisma } from '$lib/database/prisma';
 
 // export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 // 	await parent();
@@ -39,13 +40,27 @@ export const actions = {
 		const publisherId = data.get('publisherId')?.toString() || '';
 
 
-		const materialForm = await buildMaterialForm(data);
+		// Existing publications may be legacy/seed records without a file.
+		// Metadata-only edits must not require adding one retroactively.
+		const materialForm = await buildMaterialForm(data, false);
 
 		// if there was an error building the material form, return it directly
 		if (!materialForm || typeof materialForm !== 'object' || !('data' in materialForm)) {
 			return materialForm;
 		}
 		const material: MaterialForm & {materialId: number, publisherId: string} = {...materialForm.data, publisherId: publisherId, materialId: Number(mid)};
+		const existingMaterial = await prisma.material.findUnique({
+			where: { publicationId: Number(params.publication) },
+			select: {
+				theoryPractice: true,
+				publication: { select: { difficulty: true } },
+			},
+		});
+		if (!existingMaterial) {
+			return { status: 404, message: 'Material not found', context: 'publication-form' };
+		}
+		material.metaData.difficulty = existingMaterial.publication.difficulty;
+		material.metaData.theoryPractice = existingMaterial.theoryPractice ?? 0;
 		const newTagsArray: string[] = materialForm.tags;
 
 		if (newTagsArray.length !== 0) {

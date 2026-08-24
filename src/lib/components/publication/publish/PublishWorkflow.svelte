@@ -4,7 +4,7 @@
 	import { Meta } from '$lib';
 	import Banner from '$lib/components/publication/Banner.svelte';
 	import { fade } from 'svelte/transition';
-	import { isMaterialDraft } from '$lib/util/validatePublication.ts';
+	import { getValidationFileCount, isPublicationDraft } from '$lib/util/validatePublication.ts';
 	import { enhance } from '$app/forms';
 	import { allUploadsDone } from '$lib/util/file';
 	import { getToastStore, ProgressRadial } from '@skeletonlabs/skeleton';
@@ -35,6 +35,9 @@
 	export let originalFiles: any[] = [];
 	// Here we pass the name of the file
 	export let originalFileNames: string[] = [];
+	// Legacy publications can exist without files. Only grandfather that state
+	// when the publication started the edit with no files at all.
+	const initialFileCount = (dataMaterial?.fileURLs || []).length + (dataMaterial?.files || []).length;
 
 	export let saveInterval: number | undefined = undefined;
 	const toastStore = getToastStore();
@@ -123,7 +126,8 @@
 	};
 	$: numNodes = dataCircuit ? dataCircuit.circuitData.numNodes : 0;
 	$: numMaterials = (dataMaterial?.fileURLs || []).length + (dataMaterial?.files || []).length;
-	$: draft = isMaterialDraft(metadata, numMaterials);
+	$: validationFileCount = getValidationFileCount(numMaterials, initialFileCount, edit);
+	$: draft = isPublicationDraft(metadata, validationFileCount);
 
 	let bannerFieldsList: string[] = [];
 	// TODO: cool but it's not working as expected, I've removed one condition
@@ -174,7 +178,7 @@
 
 {#if !showAnimation}
 	<div class="col-span-full" out:fade={{duration: 400}}>
-		<Banner bind:fieldsList={bannerFieldsList} metadata={metadata} files={numMaterials} materialType={metadata.materialType} numNodes={numNodes}/>
+		<Banner bind:fieldsList={bannerFieldsList} metadata={metadata} files={validationFileCount} materialType={metadata.materialType} numNodes={numNodes}/>
 	</div>
 
 	<div class="form-container col-span-full px-5 pt-5 pb-5 shadow"
@@ -182,8 +186,18 @@
 		<form method="POST"
 			  enctype="multipart/form-data"
 			  action={edit ? "?/edit" : "?/publish"}
-			  use:enhance={({ formData }) => {
+			  use:enhance={({ formData, cancel }) => {
 				  	if (!circuit && dataMaterial) {
+						if (dataMaterial.selfMade === null) {
+							cancel();
+							data.isSubmitting = false;
+							toastStore.trigger({
+								message: 'Please specify whether you made this material yourself',
+								background: 'bg-warning-200'
+							});
+							return;
+						}
+
 					  	// apparently files are automatically appended to the form using the
 						// file key, so just remove it
 						formData.delete('file')

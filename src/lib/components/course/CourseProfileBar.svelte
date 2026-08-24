@@ -3,6 +3,10 @@
 	import CourseModal from '$lib/components/course/CourseModal.svelte';
 	import ShareButton from '../publication/ShareButton.svelte';
 	import { UserProp } from '$lib';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	import Icon from '@iconify/svelte';
 
 	export let course: CourseWithMaintainersAndProfilePic | undefined;
 	if (!course) {
@@ -10,6 +14,7 @@
 			'There was an error with exporting the course data. Please try again.',
 		);
 	}
+	const deletionTarget = course;
 
 	let coverpic = course?.coverPic?.data;
 
@@ -20,6 +25,32 @@
 	// const numDrafts = user.posts.filter((x) => x.isDraft).length
 
 	const courseName = course.courseName;
+	const modalStore = getModalStore();
+	$: canDeleteCourse =
+		course.maintainers.some((maintainer) => maintainer.id === page.data.session?.user.id) ||
+		page.data.loggedUser?.isAdmin === true ||
+		page.data.loggedUser?.role === 'MODERATOR' ||
+		page.data.loggedUser?.role === 'ADMIN';
+
+	async function deleteCourse() {
+		const response = await fetch(`/api/course/${deletionTarget.id}`, { method: 'DELETE' });
+		if (!response.ok) {
+			throw new Error(`Failed to delete course: ${response.status}`);
+		}
+		await goto('/browse?type=courses');
+	}
+
+	function confirmCourseDeletion() {
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: 'Delete course',
+			body: 'Delete this course? Its publications will be kept and unlinked from it.',
+			response: async (confirmed: boolean) => {
+				if (confirmed) await deleteCourse();
+			},
+		};
+		modalStore.trigger(modal);
+	}
 
 	const defaultProfilePicturePath = '/defaultProfilePic/profile.jpg';
 	function openModal() {
@@ -51,13 +82,25 @@
 		alt="course"
 		class="w-full max-h-[400px] object-cover border rounded" />
 
-	<div class="flex w-full px-2 justify-between items-center gap-2">
-		<h2 class="text-lg md:text-xl">{courseName}</h2>
-		<ShareButton
-			path={`/courses/${encodeURIComponent(courseName)}`}
-			title={courseName}
-			learningObjectives={course?.learningObjectives ?? []}
-			style="flex items-center btn text-surface-500 px-2 py-1 border rounded-lg self-center" />
+	<div class="flex w-full min-w-0 flex-col px-2 gap-2">
+		<h2 class="text-lg md:text-xl break-words min-w-0">{courseName}</h2>
+		<div class="flex flex-wrap items-center gap-2">
+			<ShareButton
+				path={`/courses/${encodeURIComponent(courseName)}`}
+				title={courseName}
+				learningObjectives={course?.learningObjectives ?? []}
+				style="flex items-center btn text-surface-500 px-2 py-1 border rounded-lg" />
+			{#if canDeleteCourse}
+				<button
+					type="button"
+					class="btn p-1"
+					aria-label="Delete course"
+					title="Delete course"
+					on:click={confirmCourseDeletion}>
+					<Icon icon="mdi:trash-can-outline" width="24" class="text-error-400" />
+				</button>
+			{/if}
+		</div>
 	</div>
 	<hr class="w-11/12" />
 	<div class="flex items-start gap-2">

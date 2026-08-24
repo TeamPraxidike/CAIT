@@ -206,7 +206,8 @@ export async function createMaterialPublication(
 		theoryPractice: number;
 		selfMade: boolean;
 		isDraft: boolean;
-		course: number;
+		fileURLs?: string[];
+		course: number | null;
 	},
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<MaterialWithPublicationNoFiles> {
@@ -217,6 +218,14 @@ export async function createMaterialPublication(
 			theoryPractice: metaData.theoryPractice,
 			selfMade: metaData.selfMade,
 			encapsulatingType: metaData.materialType[0],
+			fileURLs: {
+				createMany: {
+					data: (metaData.fileURLs ?? []).map((url) => ({
+						url,
+						name: url,
+					})),
+				},
+			},
 			publication: {
 				create: {
 					title: metaData.title,
@@ -228,7 +237,7 @@ export async function createMaterialPublication(
 					publisher: {
 						connect: { id: userId }
 					},
-					...(metaData.course !== null && {
+					...(typeof metaData.course === 'number' && Number.isInteger(metaData.course) && metaData.course > 0 && {
 						course: { connect: { id: metaData.course } },
 					}),
 					isDraft: metaData.isDraft,

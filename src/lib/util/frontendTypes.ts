@@ -48,7 +48,7 @@ export type ParamsMutableMaterial = {
 	coverPic: File | undefined;
 	estimate: number;
 	copyright: string;
-	selfMade: boolean;
+	selfMade: boolean | null;
 };
 
 export type ParamsMutableCircuit = {
@@ -110,7 +110,7 @@ export const BROWSABLE_PAGE_TYPES: PageType[] = [
 ];
 
 
-export async function buildMaterialForm(data: FormData): Promise<{data: MaterialForm, tags: string[]} | {
+export async function buildMaterialForm(data: FormData, requireFiles = true): Promise<{data: MaterialForm, tags: string[]} | {
 	status: number;
 	message: string;
 	context: string
@@ -128,7 +128,7 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	const fileURLs: URLtype[] = data
 		.getAll('fileURLs')
 		.map((x) => JSON.parse(x.toString())) as URLtype[];
-	if ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1)
+	if (requireFiles && ((!fileList && !fileURLs) || fileList.length + fileURLs.length < 1))
 		return {
 			status: 400,
 			message: 'No files provided',
@@ -152,6 +152,14 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 	const maintainersDataEntry = data.get('maintainers');
 	const coverPicFile = data.get('coverPic');
 	const isDraft = data.get('isDraft')?.toString() === 'true';
+	const selfMadeEntry = data.get('selfMade')?.toString();
+	if (selfMadeEntry !== 'true' && selfMadeEntry !== 'false') {
+		return {
+			status: 400,
+			message: 'Please specify whether you made this material yourself',
+			context: 'publication-form',
+		};
+	}
 	let coverPic = null;
 	const materialTypes = JSON.parse(
 		data.get('type')?.toString() as string,
@@ -181,6 +189,17 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 		data.get('changeLog')?.toString() ||
 			'{"globalComment": "", "fileComments": { "added": {}, "deleted": {} }}',
 	);
+	const courseEntry = data.get('course')?.toString();
+	const courseId = courseEntry && courseEntry !== 'null'
+		? Number(courseEntry)
+		: null;
+	if (courseId !== null && (!Number.isInteger(courseId) || courseId <= 0)) {
+		return {
+			status: 400,
+			message: 'Invalid course',
+			context: 'publication-form',
+		};
+	}
 
 	const dataForm = {
 		userId,
@@ -198,13 +217,13 @@ export async function buildMaterialForm(data: FormData): Promise<{data: Material
 			copyright: data.get('copyright')?.toString() || '',
 			timeEstimate: Number(data.get('estimate')?.toString()),
 			theoryPractice: Number(data.get('theoryToApplication')),
-			selfMade: data.get('selfMade')?.toString() !== 'false',
+			selfMade: selfMadeEntry === 'true',
 			tags: JSON.parse(tagsDataEntry.toString()),
 			maintainers: JSON.parse(maintainersDataEntry?.toString() || ''),
 			materialType: materialTypes,
 			isDraft: isDraft,
 			fileURLs: fileURLs.map((x) => x.title) || [],
-			course: Number(data.get('course')?.toString()),
+			course: courseId,
 		},
 		coverPic,
 		fileDiff: {
@@ -242,4 +261,3 @@ export async function loadCircuitData(locals: App.Locals, fetch: typeof globalTh
 
 	return { liked, saved };
 }
-

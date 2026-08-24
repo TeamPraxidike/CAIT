@@ -57,6 +57,7 @@
             <IconLink p="p-4" icon="ion:person-sharp" href="/{loggedUser.username}" link="Profile"/>
             <IconLink p="p-4" icon="ion:bookmark-sharp" href="/{loggedUser.username}/saved" link="Saved"/>
             <IconLink p="p-4" icon="ion:book" href="/{loggedUser.username}/publications" link="Publications"/>
+            <IconLink p="p-4" icon="ion:document-text-sharp" href="/{loggedUser.username}?tab=drafts" link="Draft Publications"/>
             <button on:click={handleSignOut} class="anchor col-start-2">Log out</button>
 
         </div>
@@ -67,17 +68,9 @@
                 <a href="/{loggedUser.username}" on:click={confirmPublishReset}
                    class="btn justify-start flex gap-2 items-center hover:bg-surface-200 rounded-lg p-1
                       dark:hover:bg-surface-700">
-                    {#if $page.data.session}
-<!--                        <img class="h-16 w-16 rounded-full object-cover" src={'data:image;base64,' + loggedUser.profilePicData} alt={loggedUser.firstName}/>-->
-                        <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
+                    <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
                         ? loggedUser.profilePicData
                         : defaultProfilePicturePath} alt={loggedUser.firstName}/>
-                    {:else}
-<!--                        <div class="h-16 w-16 placeholder-circle" />-->
-                        <img class="h-16 w-16 rounded-full object-cover" src={loggedUser.profilePicData
-                        ? loggedUser.profilePicData
-                        : defaultProfilePicturePath} alt={loggedUser.firstName}/>
-                    {/if}
                     <div class="flex flex-col">
                         <span>{loggedUser.firstName}</span>
                         <span class="text-sm">Go to profile</span>
@@ -85,6 +78,8 @@
                 </a>
                 <hr class="my-2">
                 <IconLink icon="ion:person-sharp" href="/{loggedUser.username}" link="Profile"/>
+                <hr class="my-2">
+                <IconLink icon="ion:document-text-sharp" href="/{loggedUser.username}?tab=drafts" link="Draft Publications"/>
                 <hr class="my-2">
             </div>
             <button on:click={handleSignOut} class="anchor">Log out</button>

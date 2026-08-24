@@ -1,5 +1,5 @@
 
-import { type Level, Prisma, type PrismaClient } from '@prisma/client';
+import { type Level, Prisma } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
 import type { UserWithProfilePic } from '$lib/util/coursesLogic';
 import { coverPicFetcher, profilePicFetcher } from '$lib/database/file';
@@ -197,8 +197,11 @@ export async function removeCourseFromPublication(publicationID: number) {
 	})
 }
 
-export async function removeCourseFromPublications(courseId: number) {
-	await prisma.publication.updateMany({
+export async function removeCourseFromPublications(
+	courseId: number,
+	prismaContext: Prisma.TransactionClient = prisma,
+) {
+	await prismaContext.publication.updateMany({
 		where: {
 			courseId: courseId
 		},
@@ -209,8 +212,8 @@ export async function removeCourseFromPublications(courseId: number) {
 }
 
 export async function deleteCourse(courseId: number): Promise<Course> {
-	return prisma.$transaction(async (prismaTransaction: PrismaClient) => {
-		await removeCourseFromPublications(courseId);
+	return prisma.$transaction(async (prismaTransaction: Prisma.TransactionClient) => {
+		await removeCourseFromPublications(courseId, prismaTransaction);
 		return prismaTransaction.course.delete({
 			where: {
 				id: courseId
@@ -304,4 +307,3 @@ export async function getPublicationsForCourse(c: number): Promise<PublicationWi
 	// 	// coverPicData: (await coverPicFetcher(null, pub)).data
 	// })))
 }
-

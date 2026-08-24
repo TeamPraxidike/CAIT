@@ -19,12 +19,14 @@
 	import BrowseCardShell from './BrowseCardShell.svelte';
 
 	export let publication: Publication & {
-		materials : Material
+		materials?: Material | null
 		tags: { content: string }[],
-		course: { educationalLevel: string } | null
+		course?: { educationalLevel: string } | null
 	};
 
-	export let publisher: User & { profilePicData: string };
+	export let publisher: Pick<User, 'username' | 'firstName' | 'lastName'> & {
+		profilePicData: string | null
+	};
 
 	let popupName = publication.id.toString().concat(publication.title);
 
@@ -319,8 +321,6 @@
 		{/if}
 	</div>
 </BrowseCardShell>
-
-
 
 
 

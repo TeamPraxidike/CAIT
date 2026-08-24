@@ -15,7 +15,11 @@ async function main() {
 		  RETURNS boolean AS
 		$$
 		BEGIN
-			return exists(select from public."User" where auth.uid() = id and "isAdmin" = TRUE);
+				return exists(
+					select from public."User"
+					where auth.uid() = id
+					and ("isAdmin" = TRUE or "role" = 'ADMIN')
+				);
 		END;
 		$$ language plpgsql security definer;
 	`

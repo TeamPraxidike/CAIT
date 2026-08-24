@@ -26,7 +26,9 @@
 		});
 	};
 
-	let previousCourse: number | null = null;
+	// Do not reapply course defaults when opening an existing publication.
+	// They should only be applied after the user explicitly changes the course.
+	let previousCourse: number | null = dataMaterial?.course ?? null;
 	$: if (dataMaterial && dataMaterial.course !== previousCourse) {
 		const currentCourse = dataMaterial.courses.find(c => c.id === dataMaterial?.course);
 		data.maintainers = [];

@@ -18,6 +18,9 @@
         coverPicData: string;
         publisher: User & {profilePicData: string};
     });
+    const getSelectedTab = () => page.url.searchParams.get('tab') === 'drafts' ? 2 : 0;
+
+    let tabSet: number = getSelectedTab();
     let currentProfileId = data.user.id;
 
     let user = data.user;
@@ -26,7 +29,6 @@
     let saved: publication[] = data.saved;
     let posts = data.publications || [] as ExtendedPublication[];
 	let courses = data.coursesWithPics;
-    let tabSet: number = 0;
 
     $: user = data.user;
     $: profilePic = data.profilePic;
@@ -36,7 +38,11 @@
 
     $: if (data.user.id !== currentProfileId) {
         currentProfileId = data.user.id;
-        tabSet = 0;
+        tabSet = getSelectedTab();
+    }
+
+    $: if (page.url.searchParams.get('tab') === 'drafts') {
+        tabSet = 2;
     }
 
 	let publicTabSet = 0;
@@ -102,9 +108,6 @@
 			</svelte:fragment>
 		</TabGroup>
 	{:else}
-		<h3 class="text-xl mt-8 text-surface-900 col-span-full text-center dark:text-surface-50">
-			{user.firstName}'s Publications
-		</h3>
 		<TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
 			<Tab bind:group={publicTabSet} name="publicTab1" value={0}>
 				<p>Publications</p>
