@@ -84,24 +84,12 @@ export async function createMaterialData(userId: string): Promise<MaterialForm> 
 			delete: [],
 			edit: [],
 		},
-<<<<<<< HEAD
-		changeLog: {
-			globalComment: generateRandomString(),
-			fileComments: {
-				added: {},
-				deleted: {}
-			}
-		},
-		coverPic: null
-	}
-=======
 		coverPic: null,
 		changeLog: {
 			globalComment: '',
 			fileComments: { added: {}, deleted: {} },
 		},
 	};
->>>>>>> main
 }
 
 export async function createUniqueMaterial(userId: string): Promise<MaterialWithPublicationNoFiles> {
@@ -125,16 +113,10 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 		materialType,
 		timeEstimate,
 		theoryPractice,
-<<<<<<< HEAD
-		course: null,
-		isDraft: false
-	}
-=======
 		selfMade: true,
 		course: null,
 		isDraft: false,
 	};
->>>>>>> main
 
 	const publication = await createMaterialPublication(userId, inputData);
 

@@ -2,12 +2,8 @@ import { createUniqueUser } from './users';
 import { createUniqueMaterial, generateRandomString } from './publicationsUtility';
 import { createCourse, type createCourseData, linkCourseToPublication } from '$lib/database/courses';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
-<<<<<<< HEAD
-let Level = ["Bachelor", "Master", "PhD"]
-=======
 
 const EDUCATIONAL_LEVELS = ['Bachelor', 'Master', 'PhD'];
->>>>>>> main
 
 export async function publicationsWithCourses(numPublications: number = 5) {
 	const user = await createUniqueUser();

@@ -10,7 +10,7 @@ vi.mock('$lib/database', () => ({
 	editUser: vi.fn(),
 	fileSystem: { deleteFile: vi.fn() },
 	getUserById: vi.fn(),
-		prisma: {
+	prisma: {
 		user: { findUnique: vi.fn(), count: vi.fn() },
 		$transaction: transaction,
 	},

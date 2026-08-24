@@ -13,7 +13,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "eslint .",
-		"test:unit": "vitest --coverage -c ./vitest.config.unit.ts",
+		"test:unit": "prisma generate && vitest --coverage -c ./vitest.config.unit.ts",
 		"test:integration": "chmod +x scripts/run-integration.sh && scripts/run-integration.sh",
 		"test:e2e": "chmod +x scripts/run-e2e.sh && scripts/run-e2e.sh"
 	},
