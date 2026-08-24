@@ -32,8 +32,8 @@
 
 	let showAnimation = false;
 
-	let originalFiles: string[] = [];
-	let originalFileNames: string[] = [];
+	let originalFiles: string[] = data.pubView.publication.materials.files.map((file) => file.path);
+	let originalFileNames: string[] = data.pubView.publication.materials.files.map((file) => file.title);
 
 	const supabaseURL: string = data.PUBLIC_SUPABASE_URL;
 	let supabaseClient: any = page.data.supabase;
@@ -48,7 +48,8 @@
 	let allTags: PrismaTag[] = data.tags;
 	let newTags: string[] = [];
 
-	let files: FileList | Promise<FileList> = new Promise(() => {});
+	let files: FileList = [] as unknown as FileList;
+	let filesPromise: Promise<FileList> = new Promise(() => {});
 	let fileURLs: string[] = data.pubView.publication.materials.fileURLs.map(x => x.url);
 	let maintainers: UserWithProfilePic[] = data.pubView.publication.maintainers;
 	let courses = data.courses;
@@ -83,12 +84,25 @@
 	let fileTUSUploadObjects: { [key: string]: any } = {};
 	$: fileTUSUploadObjects = fileTUSUploadObjects
 
-	async function loadFiles(filesToLoad): Promise<FileList>{
-		const fetched: FetchedFileArray = await filesToLoad;
-		const downloaded = fetched
-				? await Promise.all(fetched.map((f) => downloadFileFromSupabase(supabaseClient, f)))
-				: [];
-		const fileArray: File[] = downloaded.filter((f): f is File => f instanceof File);
+	async function loadFiles(
+		filesToLoad: Promise<FetchedFileArray | null | undefined>,
+	): Promise<{ fileList: FileList; fetched: FetchedFileArray }>{
+		const fetched: FetchedFileArray = await filesToLoad ??
+			data.pubView.publication.materials.files.map((file) => ({
+				fileId: file.path,
+				name: file.title,
+				type: file.type,
+				data: null,
+			}));
+		const fileArray = await Promise.all(fetched.map(async (file) => {
+			try {
+				return await downloadFileFromSupabase(supabaseClient, file) ??
+					new File([], file.name ?? file.fileId, { type: file.type });
+			} catch {
+				// File contents are not required to preserve an existing file during an edit.
+				return new File([], file.name ?? file.fileId, { type: file.type });
+			}
+		}));
 		return {
 			fileList: arrayToFileList(fileArray),
 			fetched: fetched
@@ -102,16 +116,18 @@
 		(async () => {
 			loadingFiles = true;
 
-			files = loadFiles(data.fetchedFiles).then((resolved) => {
+			filesPromise = loadFiles(data.fetchedFiles).then((resolved) => {
 				for (const f of resolved.fetched){
-					fileTUSMetadata[f.name] = {
-						originalName: f.name,
+					const fileName = f.name ?? f.fileId;
+					fileTUSMetadata[fileName] = {
+						originalName: fileName,
 						isDone: true,
 						generatedName: f.fileId
 					}
 				}
 				originalFiles = Array.from(resolved.fetched).map(f => f.fileId);
 				originalFileNames = Array.from(resolved.fetched).map(f => f.name || '');
+				files = resolved.fileList;
 
 				paramsMutable = {
 					...paramsMutable,
@@ -214,14 +230,14 @@
 	</div>
 {/if}
 
-{#await files then _}
+{#await filesPromise then _}
 	<PublishWorkflow
 		bind:data={paramsMutable}
 		bind:dataMaterial={paramsMutableMaterial}
 		paramsImmutable={paramsImmutable}
-		bind:showAnimation={showAnimation}
-		edit={true}
-		originalFiles={originalFiles}
+			bind:showAnimation={showAnimation}
+			edit={true}
+			originalFiles={originalFiles}
 		originalFileNames={originalFileNames}
 		materialId={materialId}/>
 {:catch error}

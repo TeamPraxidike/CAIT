@@ -5,6 +5,7 @@ import {
 import type { Tag } from '@prisma/client';
 import { env } from '$env/dynamic/public';
 import { loadCircuitData } from '$lib/util/frontendTypes.ts';
+import { prisma } from '$lib/database/prisma';
 
 export const load: PageServerLoad = async ({ fetch, parent, locals }) => {
 	await parent();
@@ -69,6 +70,13 @@ export const actions = {
 		const circuitInfo = await circuitRes.json();
 		const circuitId = circuitInfo.id;
 		const publisherId = circuitInfo.publication?.publisherId || '';
+		const existingPublication = await prisma.publication.findUnique({
+			where: { id: Number(params.publication) },
+			select: { difficulty: true },
+		});
+		if (!existingPublication) {
+			return { status: 404, message: 'Circuit not found', context: 'publication-form' };
+		}
 
 		const circuit: CircuitForm & { circuitId: number, publisherId: string } = {
 			circuitId: circuitId,
@@ -77,7 +85,7 @@ export const actions = {
 			metaData: {
 				title: title,
 				description: description,
-				difficulty: 'easy',
+				difficulty: existingPublication.difficulty,
 				learningObjectives: JSON.parse(LOs),
 				prerequisites: JSON.parse(prior),
 				tags: JSON.parse(selectedTags),
@@ -104,4 +112,3 @@ export const actions = {
 		};
 	}
 } satisfies Actions;
-

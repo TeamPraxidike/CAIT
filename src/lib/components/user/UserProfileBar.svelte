@@ -1,14 +1,17 @@
 <script lang="ts">
     import { page } from '$app/state';
     import type { TUserWithPostsAndProfilePic } from '$lib/database/user';
-    import CourseModal from '$lib/components/publication/CourseModal.svelte';
 	import ContactUser from './ContactUser.svelte';
 	import { formatMemberSince } from '$lib/util/date';
+	import { getModalStore, getToastStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { goto, invalidateAll } from '$app/navigation';
+	type UserRoleValue = 'USER' | 'MODERATOR' | 'ADMIN';
 
     export let user:TUserWithPostsAndProfilePic;
     if (!user) {
         throw new Error("There was an error with exporting the user data. Please try again.");
     }
+	const deletionTarget = user;
 
     export let userPhotoUrl: string | null;
     export let tabset: number;
@@ -16,25 +19,76 @@
 
     const numPosts = user.posts.filter((x) => !x.isDraft).length
     const numDrafts = user.posts.filter((x) => x.isDraft).length
-    const courses = ["CSE3000"]
+	const availableRoles: UserRoleValue[] = ['USER', 'MODERATOR', 'ADMIN'];
+	let selectedRole: UserRoleValue = user.role;
+	let roleUpdatePending = false;
 
     /**
      * Check if the current user is the same as the user being viewed.
      */
     const currentlyAuth = () => page.data.session?.user.id === user.id;
+	const canDeleteUser = () => {
+		if (currentlyAuth()) return true;
+		const viewer = page.data.loggedUser;
+		if (viewer?.isAdmin === true || viewer?.role === 'ADMIN') return true;
+		const targetIsPrivileged = deletionTarget.isAdmin === true ||
+			deletionTarget.role === 'MODERATOR' ||
+			deletionTarget.role === 'ADMIN';
+		return viewer?.role === 'MODERATOR' && !targetIsPrivileged;
+	};
+	const modalStore = getModalStore();
+	const toastStore = getToastStore();
+	$: canManageRoles = page.data.loggedUser?.isAdmin === true || page.data.loggedUser?.role === 'ADMIN';
+
+	async function updateRole() {
+		roleUpdatePending = true;
+		try {
+			const response = await fetch(`/api/user/${deletionTarget.id}/role`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ role: selectedRole }),
+			});
+			if (!response.ok) {
+				const body = await response.json().catch(() => ({}));
+				throw new Error(body.error ?? `Failed to update role: ${response.status}`);
+			}
+			await invalidateAll();
+		} catch (error) {
+			toastStore.trigger({
+				message: error instanceof Error ? error.message : 'Failed to update role',
+				background: 'bg-error-200',
+			});
+			selectedRole = deletionTarget?.role ?? 'USER';
+		} finally {
+			roleUpdatePending = false;
+		}
+	}
+
+	async function deleteUser() {
+		const response = await fetch(`/api/user/${deletionTarget.id}`, { method: 'DELETE' });
+		if (!response.ok) {
+			throw new Error(`Failed to delete user: ${response.status}`);
+		}
+
+		if (currentlyAuth()) {
+			await page.data.supabase.auth.signOut();
+		}
+		await goto('/browse?type=people');
+	}
+
+	function confirmUserDeletion() {
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: currentlyAuth() ? 'Delete account' : 'Delete user',
+			body: `Permanently delete ${deletionTarget.firstName} ${deletionTarget.lastName} and their publications?`,
+			response: async (confirmed: boolean) => {
+				if (confirmed) await deleteUser();
+			},
+		};
+		modalStore.trigger(modal);
+	}
 
     const defaultProfilePicturePath = "/defaultProfilePic/profile.jpg"
-    function openModal() {
-        showModal = true;
-    }
-
-    function closeModal() {
-        showModal = false;
-    }
-
-
-    // const uploadFile
-    let showModal = false;
 </script>
 
 <div class="col-span-4 flex flex-col items-center gap-2 text-surface-800 rounded-b-lg pb-4 border border-surface-300 border-t-0 self-start
@@ -90,6 +144,11 @@
                            dark:bg-surface-700">Settings</a>
                     </div>
                 {/if}
+				{#if canDeleteUser()}
+					<button type="button" class="btn bg-error-500 text-white rounded-lg" on:click={confirmUserDeletion}>
+						{currentlyAuth() ? 'Delete Account' : 'Delete User'}
+					</button>
+				{/if}
             </div>
             <div class="flex gap-2 flex-wrap">
                 
@@ -137,13 +196,30 @@
                                dark:bg-surface-700">Settings</a>
             </div>
         {/if}
+		{#if canDeleteUser()}
+			<button type="button" class="btn bg-error-500 text-white rounded-lg" on:click={confirmUserDeletion}>
+				{currentlyAuth() ? 'Delete Account' : 'Delete User'}
+			</button>
+		{/if}
     </div>
+
+	{#if canManageRoles}
+		<div class="flex w-full items-end gap-2 px-4">
+			<label class="label flex-1" for="user-role">
+				<span>Role</span>
+				<select id="user-role" class="select" bind:value={selectedRole}>
+					{#each availableRoles as role}
+						<option value={role}>{role.toLowerCase()}</option>
+					{/each}
+				</select>
+			</label>
+			<button type="button" class="btn variant-filled-primary" disabled={roleUpdatePending || selectedRole === user.role} on:click={updateRole}>
+				{roleUpdatePending ? 'Saving…' : 'Save role'}
+			</button>
+		</div>
+	{/if}
 
     <div class="flex gap-2">
 
     </div>
 </div>
-
-{#if showModal}
-    <CourseModal existingCourse={null} close={closeModal} />
-{/if}

@@ -65,11 +65,12 @@ export async function createMaterialMetaData(userId: string): Promise<MaterialFo
 		materialType,
 		timeEstimate,
 		theoryPractice,
+		selfMade: true,
 		isDraft: false,
 		tags: [],
 		maintainers: [],
 		fileURLs: [],
-		course: course.id
+			course: course.id,
 	};
 }
 
@@ -80,10 +81,14 @@ export async function createMaterialData(userId: string): Promise<MaterialForm> 
 		fileDiff: {
 			add: [],
 			delete: [],
-			edit: []
+			edit: [],
 		},
-		coverPic: null
-	}
+		coverPic: null,
+		changeLog: {
+			globalComment: '',
+			fileComments: { added: {}, deleted: {} },
+		},
+	};
 }
 
 export async function createUniqueMaterial(userId: string): Promise<MaterialWithPublicationNoFiles> {
@@ -107,8 +112,10 @@ export async function createUniqueMaterial(userId: string): Promise<MaterialWith
 		materialType,
 		timeEstimate,
 		theoryPractice,
-		isDraft: false
-	}
+		selfMade: true,
+		course: null,
+		isDraft: false,
+	};
 
 	const publication = await createMaterialPublication(userId, inputData);
 

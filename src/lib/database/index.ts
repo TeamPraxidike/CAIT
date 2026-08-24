@@ -118,7 +118,7 @@ type MaterialForm = {
 		maintainers: string[];
 		isDraft: boolean;
 		fileURLs: string[];
-		course: number;
+		course: number | null;
 	};
 	coverPic: { type: string; info: string } | null;
 	fileDiff: FileDiffActions;

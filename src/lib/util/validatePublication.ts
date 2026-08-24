@@ -42,3 +42,13 @@ export function isMaterialDraft(metadata: Metadata, numFiles: number) {
 	return !validateMetadata(metadata) ||
 		numFiles < PUBLICATION_PARAMETERS.filesMin;
 }
+
+export function getValidationFileCount(currentFiles: number, initialFiles: number, edit: boolean) {
+	return edit && initialFiles === 0 ? Math.max(currentFiles, 1) : currentFiles;
+}
+
+export function isPublicationDraft(metadata: Metadata, numFiles: number) {
+	return metadata.isCircuit
+		? !validateMetadata(metadata)
+		: isMaterialDraft(metadata, numFiles);
+}
