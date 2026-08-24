@@ -5,6 +5,7 @@
 	import { enhance } from '$app/forms';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import { invalidate } from '$app/navigation';
+ 	import DeleteProfilePrompt from '$lib/components/user/DeleteProfilePrompt.svelte';
 
 	export let data: LayoutData;
 	export let form: ActionData;
@@ -26,6 +27,25 @@
 		},
 	];
 
+	let deletePrompt: any;
+
+	function promptForDeletion() {
+		if (deletePrompt) {
+			deletePrompt.open({
+				onConfirm: async () => {
+					// Looks for the element with that id, which is the form. It then submits it manually
+					const f = document.querySelector('#deleteProfileForm') as HTMLFormElement | null;
+					if (f) {
+						if (typeof f.requestSubmit === 'function') f.requestSubmit();
+						else f.submit();
+					}
+				}
+			});
+		} else {
+			console.error('DeleteProfilePrompt component is not initialized.');
+		}
+	}
+
 	$: if (form?.success) {
 		toastStore.trigger({
 			message: 'Email visibility updated.',
@@ -42,6 +62,8 @@
 </script>
 
 <Meta title="Settings" description="CAIT" type="site" />
+
+<DeleteProfilePrompt bind:this={deletePrompt} />
 
 <div class="col-span-6 flex flex-col gap-8 mt-8">
 	<h3 class="text-xl text-surface-900 text-center dark:text-surface-50">Settings</h3>
@@ -88,5 +110,22 @@
 		</div>
 
 		<button type="submit" class="btn variant-filled-primary self-start">Save</button>
+	</form>
+
+	<form
+		id="deleteProfileForm"
+		method="POST"
+		action="?/deleteUserProfile"
+		class="flex flex-col gap-6"
+		use:enhance={() => {
+			return async ({ update }) => {
+				await update({ reset: false });
+				invalidate('supabase:auth').catch(() => {});
+			};
+		}}
+	>
+		<button on:click={promptForDeletion} type="button" class="btn variant-filled-error self-start">
+			Delete Profile
+		</button>
 	</form>
 </div>

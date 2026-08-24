@@ -167,7 +167,7 @@ export async function deleteUser(
 	userId: string,
 	prismaContext: Prisma.TransactionClient = prisma,
 ): Promise<TUserWithProfilePic> {
-	return await prismaContext.user.delete({
+	return prismaContext.user.delete({
 		where: {
 			id: userId,
 		},
