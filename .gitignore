@@ -19,3 +19,4 @@ TODO
 playwright-report
 test-results
 tests/e2e/storage
+tests/e2e/fixtures/large.pdf

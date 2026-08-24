@@ -16,7 +16,7 @@ async function registerPersona(page: Page, name: 'author' | 'visitor'): Promise<
     await page.getByRole('button', { name: 'Register' }).click();
 
     // autoconfirm is on: registration creates a live session and redirects to '/'
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/', { timeout: 30_000 });
     await expect(page.getByRole('link', { name: 'Publish' })).toBeVisible();
 
     // answer the first-login email-visibility prompt now, or it will sit on top

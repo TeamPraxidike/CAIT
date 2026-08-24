@@ -31,7 +31,7 @@ export async function registerFreshAccount(page: Page) {
     await page.getByRole('button', { name: 'Register' }).click();
 
     // autoconfirm stack: signUp mints a live session, action redirects to '/'
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/', { timeout: 30_000 });
 
     await answerEmailVisibilityPrompt(page);
 

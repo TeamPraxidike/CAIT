@@ -27,7 +27,7 @@
         AccordionItem
     } from '@skeletonlabs/skeleton';
     import {goto} from '$app/navigation';
-    import { IconMapExtension, saveFile} from '$lib/util/file';
+	import {downloadFileFromSupabase, IconMapExtension, saveFile} from '$lib/util/file';
     import {
         type Comment as PrismaComment,
         type Difficulty,
@@ -38,7 +38,7 @@
     import {page} from '$app/state';
     import { SvelteFlowProvider } from '@xyflow/svelte';
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
-	import type { FetchedFileArray } from '$lib/database';
+	import type {FetchedFileArray, FetchedFileItem} from '$lib/database';
 	import CircuitContributorList from '$lib/components/publication/preview/CircuitContributorList.svelte';
 	import MaterialDetails from '$lib/components/publication/preview/MaterialDetails.svelte';
 
@@ -60,8 +60,6 @@
 	let isMaterial: boolean;
 	let likedComments: number[] = [];
 	let likedReplies: number[] = [];
-	// let files: FileList | [];
-	let files: FetchedFileArray | [];
 	let liked: boolean = false;
 	let likes: number;
 	let likedPublications: number[] = [];
@@ -242,10 +240,11 @@
 	async function downloadFiles() {
 		const zip = new JSZip();
 
+		const files: FetchedFileArray = await data.fetchedFiles;
 		for (let i = 0; i < files.length; i++) {
-			const file = files[i];
-			const blob = await file.arrayBuffer();
-			zip.file(file.name, blob);
+			const file: FetchedFileItem = files[i];
+			const downloaded = await downloadFileFromSupabase(supabaseClient, file);
+			if (downloaded) zip.file(downloaded.name, await downloaded.arrayBuffer());
 		}
 
 		const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -523,7 +522,7 @@
 						<span>{likes}</span>
 					</button>
 					{#if isMaterial}
-						<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+						<button type="button" data-testid="download-publication" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
 								on:click={downloadFiles}>
 							<Icon class="xl:text-2xl" icon="material-symbols:download" />
 						</button>
