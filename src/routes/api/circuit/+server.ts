@@ -99,7 +99,8 @@ export async function POST({ request, locals }) {
 	const coverPic = body.coverPic;
 	const numNodes = body.nodeDiff.numNodes;
 
-	if (!validateMetadata(metaData)) {
+	// a public circuit must have >= 1 nodes
+	if (!validateMetadata(metaData) || numNodes === 0) {
 		metaData.isDraft = true;
 	}
 

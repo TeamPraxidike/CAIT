@@ -100,4 +100,37 @@ test.describe('PCIR - publish a circuit', () => {
             await expect(card).toBeVisible({ timeout: 3_000 });
         }).toPass({ timeout: 20_000 });
     });
+
+    test('PCIR-04: publishing an empty circuit is forced to a draft', async ({ page }) => {
+        const title = `e2e-pcir-04-${Date.now()}`;
+
+        await startCircuitPublish(page);
+        // no nodes added
+        await nextStep(page);
+        await setTitle(page, title);
+        await nextStep(page);
+        await addLearningObjective(page, 'Empty circuit should be a draft.');
+        await addTag(page, 'machine learning');
+        await nextStep(page);
+        await completeStepper(page, 'publish');
+
+        // forced to a draft despite the "publish" path
+        await expect(page.getByText('Your publication has been saved as a draft - only you can see it')).toBeVisible();
+
+        // absent from browse circuits
+        await page.goto('/browse?type=circuits');
+        const search = page.getByPlaceholder('Browse circuits');
+        await search.fill(title);
+        await search.press('Enter');
+        await expect(page.getByRole('link', { name: title })).toHaveCount(0);
+
+        // confirm it lands in the author's Draft Publications
+        await page.goto(`/${author.username}`);
+        const tabs = page.getByTestId('tab-group');
+        await expect(async () => {
+            await tabs.getByText('Draft Publications').click();
+            await expect(page.getByRole('link', { name: title })).toBeVisible({ timeout: 3_000 });
+        }).toPass({ timeout: 20_000 });
+    });
 });
+

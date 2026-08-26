@@ -128,14 +128,14 @@
 	$: numNodes = dataCircuit ? dataCircuit.circuitData.numNodes : 0;
 	$: numMaterials = (dataMaterial?.fileURLs || []).length + (dataMaterial?.files || []).length;
 	$: validationFileCount = getValidationFileCount(numMaterials, initialFileCount, edit);
-	$: draft = isPublicationDraft(metadata, validationFileCount);
+	$: draft = isPublicationDraft(metadata, validationFileCount) || (circuit && numNodes === 0);
 
 	let bannerFieldsList: string[] = [];
 	// TODO: cool but it's not working as expected, I've removed one condition
 	// The selected type of the material is autofilled to 'Other' if none is selected but is still displayed in the banner to
 	// incentivize the user to fill it in. This is why here we have to check whether it is the only thing that is missing
 	// because if it the publication should not be a draft
-	$: showDraftMessage = (bannerFieldsList.length >= 1 || markedAsDraft);
+	$: showDraftMessage = (bannerFieldsList.length >= 1 || markedAsDraft || draft);
 
 	function buildChangeLog(
 		fileComments: { added: Record<string, string>; deleted: Record<string, string> },
