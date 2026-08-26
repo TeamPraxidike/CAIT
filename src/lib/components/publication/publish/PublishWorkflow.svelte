@@ -28,6 +28,7 @@
 	export let materialId: number | undefined = undefined;
 	export let edit: boolean = false;
 	export let circuit: boolean = false;
+	export let initialDraft: boolean = false;
 
 
 	// Editing mode needs to know what the original files were, so that it can delete only the ones that were removed
@@ -113,7 +114,7 @@
 		paramsImmutable.form = { ...paramsImmutable.form, context: "undefined" };
 	}
 
-	let markedAsDraft = false;
+	let markedAsDraft = initialDraft;
 	let draft = true;
 	$: metadata = {
 		isCircuit: circuit,

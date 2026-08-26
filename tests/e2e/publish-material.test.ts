@@ -1,6 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
 import { AUTHOR_STATE, type Persona, readPersonas } from './helpers/personas';
 import { SMALL_PDF, LARGE_PDF, ensureFixtures } from './helpers/fixtures';
+import {
+    addLearningObjective, nextStep, pickMaterialType, setDescription, setSelfMade, setTitle, addTag, completeStepper
+} from "./helpers/stepper.ts";
 
 const RESUMABLE = '/storage/v1/upload/resumable'; // Supabase TUS endpoint
 
@@ -13,34 +16,19 @@ async function startMaterialPublish(page: Page) {
 
 // Step 2 (title): fill title + pick a content type, advance to meta.
 async function fillTitleStep(page: Page, title: string) {
-    await page.getByPlaceholder('Title').fill(title);
-    await page.getByRole('button', { name: 'Lecture Notes' }).click(); // materialType
-    await page.getByRole('button', { name: 'Next →' }).click();
+    await setTitle(page, title);
+    await pickMaterialType(page);
+    await nextStep(page);
 }
 
 // Step 3 (meta): description, one LO, "made it yourself?", an existing tag.
 // All of these are required for a *published* (non-draft) material.
 async function fillMetaStep(page: Page, description = 'E2E published material.') {
-    await page.getByPlaceholder('Additional Description...').fill(description);
-    await page.locator('#learningObjective').fill('Understand the E2E publish flow.');
-    await page.locator('button[name="add_LO"]').click();
-    await page.getByRole('button', { name: 'Yes, I made it' }).click();
-
-    const tagInput = page.locator('.input-chip-field');
-    await tagInput.fill('machine learning');
-    await tagInput.press('Enter');
-    await expect(page.locator('.input-chip-list')).toContainText('machine learning');
-
-    await page.getByRole('button', { name: 'Next →' }).click();
-}
-
-async function completePublication(page: Page) {
-    const success = page.getByText('Publication uploaded successfully');
-    const complete = page.getByRole('button', { name: 'Complete' });
-    await expect(async () => {
-        if (!(await success.isVisible())) await complete.click();
-        await expect(success).toBeVisible({ timeout: 3_000 });
-    }).toPass({ timeout: 45_000 });
+    await setDescription(page, description);
+    await addLearningObjective(page, 'Understand the E2E publish flow.');
+    await setSelfMade(page, true);
+    await addTag(page, 'machine learning');
+    await nextStep(page);
 }
 
 test.describe('PMAT - publish a material', () => {
@@ -74,7 +62,7 @@ test.describe('PMAT - publish a material', () => {
         await page.getByRole('button', {name: 'Next →'}).click();
         await fillTitleStep(page, title);
         await fillMetaStep(page, description);
-        await completePublication(page);
+        await completeStepper(page, 'publish')
 
         // --- view page ---
         await page.getByRole('button', {name: 'View publication'}).click();
@@ -129,7 +117,7 @@ test.describe('PMAT - publish a material', () => {
         await page.getByRole('button', {name: 'Next →'}).click();
         await fillTitleStep(page, title);
         await fillMetaStep(page);
-        await completePublication(page);
+        await completeStepper(page, 'publish')
 
         expect(patchCount).toBeGreaterThanOrEqual(1);
     });
@@ -146,7 +134,7 @@ test.describe('PMAT - publish a material', () => {
         await page.getByRole('button', {name: 'Next →'}).click();
         await fillTitleStep(page, title);
         await fillMetaStep(page);
-        await completePublication(page);
+        await completeStepper(page, 'publish')
 
         await page.getByRole('button', {name: 'View publication'}).click();
         await expect(page).toHaveURL(new RegExp(`/${author.username}/\\d+$`));
@@ -169,7 +157,7 @@ test.describe('PMAT - publish a material', () => {
 
         // On Review, flip "Save as a draft"
         await page.locator('input[type="checkbox"].toggle').check();
-        await completePublication(page);
+        await completeStepper(page, 'publish')
         await expect(page.getByText('Your publication has been saved as a draft - only you can see it')).toBeVisible();
 
         // view page: draft badge present
