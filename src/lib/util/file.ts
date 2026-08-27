@@ -214,6 +214,16 @@ export async function downloadFileFromSupabase(supabaseClient: any, f: FetchedFi
 	});
 }
 
+export function isFetchedFileItem(x: any): x is FetchedFileItem {
+	return x && typeof x.fileId === 'string' && ('data' in x);
+}
+
+export function getURLFrontend(coverPic: FetchedFileItem | File | undefined): string | undefined {
+	if (isFetchedFileItem(coverPic)) return coverPic.data ?? undefined;
+	else if (coverPic instanceof File) return URL.createObjectURL(coverPic);
+	else return undefined;
+}
+
 /**
  * A map of file types to their respective icons.
  * @note the code below is bloated, but it is necessary to maintain the map.

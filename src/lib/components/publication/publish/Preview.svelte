@@ -2,10 +2,16 @@
 	import { FileTable, Tag, UserProp } from '$lib';
 	import type { ParamsImmutable, ParamsMutable, ParamsMutableMaterial } from '$lib/util/frontendTypes.ts';
 	import List from '$lib/components/publication/preview/List.svelte';
+	import type { FetchedFileItem } from '$lib/database';
+	import { getURLFrontend } from '$lib/util/file.ts';
 
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial | null;
 	export let paramsImmutable: ParamsImmutable;
+
+	const coverPic: FetchedFileItem | File | undefined = dataMaterial?.coverPic;
+	let picUrl = getURLFrontend(coverPic);
+
 
 	export let isCircuit = dataMaterial == null;
 
@@ -39,7 +45,7 @@
 	<div class="col-span-4 flex flex-col gap-4">
 		{#if dataMaterial && dataMaterial.coverPic}
 			<p class="font-bold"> Cover Picture: </p>
-			<img src={URL.createObjectURL(dataMaterial.coverPic)} alt="">
+			<img src={picUrl} alt="">
 		{/if}
 		<div class="flex flex-col">
 			<span class="font-bold">Maintainers:</span>
