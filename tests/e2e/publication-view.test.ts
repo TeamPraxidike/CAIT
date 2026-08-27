@@ -2,19 +2,12 @@ import { test, expect, type Page } from '@playwright/test';
 import { registerFreshAccount, logoutViaHeader } from './helpers/ui';
 import { createMaterial } from './helpers/api';
 import {ANON_STATE, AUTHOR_STATE, readPersonas, VISITOR_STATE} from "./helpers/personas";
+import { SEED_MATERIAL, SEED_CIRCUIT, CIRCUIT_MEMBERS } from './helpers/seed';
 
 // Publication pages are login-walled (the [user] layout guard), so every view
 // test runs as the visitor persona. Anonymous access redirects to /signin and
 // is covered by the layout guard / AUTH-08, not here.
 test.use({ storageState: VISITOR_STATE });
-
-const SEED_MATERIAL = '[SEED] Gradient Descent by Hand';
-const SEED_CIRCUIT = '[SEED] From Optimisation to Transformers';
-const CIRCUIT_MEMBERS = [
-    '[SEED] Gradient Descent by Hand',
-    '[SEED] Decision Trees and Information Gain',
-    '[SEED] Attention and the Transformer Block',
-];
 
 // Open a seed publication by clicking its card in /browse
 // A visible card is a hydration barrier

@@ -1,9 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
 import { AUTHOR_STATE, type Persona, readPersonas } from './helpers/personas';
 import { nextStep, setTitle, addLearningObjective, addTag, completeStepper } from './helpers/stepper';
+import { SEED_MATERIALS } from './helpers/seed';
+import { expectCardInTab } from './helpers/profile';
 
-const SEED_A = '[SEED] Gradient Descent by Hand';
-const SEED_B = '[SEED] Decision Trees and Information Gain';
+const [SEED_A, SEED_B] = SEED_MATERIALS;
 
 async function startCircuitPublish(page: Page) {
     await page.goto('/publish');
@@ -126,11 +127,7 @@ test.describe('PCIR - publish a circuit', () => {
 
         // confirm it lands in the author's Draft Publications
         await page.goto(`/${author.username}`);
-        const tabs = page.getByTestId('tab-group');
-        await expect(async () => {
-            await tabs.getByText('Draft Publications').click();
-            await expect(page.getByRole('link', { name: title })).toBeVisible({ timeout: 3_000 });
-        }).toPass({ timeout: 20_000 });
+        await expectCardInTab(page, 'Draft Publications', title);
     });
 });
 

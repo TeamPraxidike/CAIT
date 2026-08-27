@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AUTHOR_STATE, type Persona, readPersonas } from './helpers/personas';
 import { createCourseWithMaterial } from './helpers/api';
-
-const SEED_COURSE = '[SEED] Foundations of Machine Learning';
+import { SEED_COURSE } from './helpers/seed';
 
 test.describe('CRS - courses', () => {
     test.use({storageState: AUTHOR_STATE});

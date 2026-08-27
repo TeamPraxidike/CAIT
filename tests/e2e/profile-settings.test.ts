@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AUTHOR_STATE, VISITOR_STATE, type Persona, readPersonas } from './helpers/personas';
 import { createMaterial } from './helpers/api';
+import { expectCardInTab } from './helpers/profile';
 
 test.describe('PROF - author views own profile', () => {
     test.use({ storageState: AUTHOR_STATE });
@@ -22,17 +23,11 @@ test.describe('PROF - author views own profile', () => {
         await expect(tabs.getByText('Draft Publications')).toBeVisible();
 
         // Your Publications: the published material shows, the draft does not
-        await expect(async () => {
-            await tabs.getByText('Your Publications').click();
-            await expect(page.getByRole('link', { name: pub.title })).toBeVisible({ timeout: 3_000 });
-        }).toPass({ timeout: 20_000 });
+        await expectCardInTab(page, 'Your Publications', pub.title);
         await expect(page.getByRole('link', { name: draft.title })).toHaveCount(0);
 
         // Draft Publications: the draft shows here
-        await expect(async () => {
-            await tabs.getByText('Draft Publications').click();
-            await expect(page.getByRole('link', { name: draft.title })).toBeVisible({ timeout: 3_000 });
-        }).toPass({ timeout: 20_000 });
+        await expectCardInTab(page, 'Draft Publications', draft.title);
     });
 });
 

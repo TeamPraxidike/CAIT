@@ -4,6 +4,7 @@ import { SMALL_PDF, LARGE_PDF, ensureFixtures } from './helpers/fixtures';
 import {
     addLearningObjective, nextStep, pickMaterialType, setDescription, setSelfMade, setTitle, addTag, completeStepper
 } from "./helpers/stepper.ts";
+import { expectCardInTab } from './helpers/profile';
 
 const RESUMABLE = '/storage/v1/upload/resumable'; // Supabase TUS endpoint
 
@@ -86,11 +87,7 @@ test.describe('PMAT - publish a material', () => {
 
         // --- appears in author's "Your Publications" ---
         await page.goto(`/${author.username}`);
-        const profileCard = page.getByRole('link', {name: title});
-        await expect(async () => {
-            await page.getByText('Your Publications').click();
-            await expect(profileCard).toBeVisible({timeout: 3_000});
-        }).toPass({timeout: 20_000});
+        await expectCardInTab(page, 'Your Publications', title);
 
         // --- download all files as zip ---
         await page.goto(pubPath);
@@ -173,10 +170,6 @@ test.describe('PMAT - publish a material', () => {
 
         // present in the author's "Draft Publications" tab
         await page.goto(`/${author.username}`);
-        const draftCard = page.getByRole('link', {name: title});
-        await expect(async () => {
-            page.getByTestId('tab-group').getByText('Draft Publications').click();
-            await expect(draftCard).toBeVisible({timeout: 3_000});
-        }).toPass({timeout: 20_000});
+        await expectCardInTab(page, 'Draft Publications', title);
     });
 });

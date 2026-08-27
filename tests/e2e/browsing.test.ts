@@ -1,24 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { selectDropdownOption } from './helpers/ui';
 import {VISITOR_STATE} from "./helpers/personas";
-
-// TODO: link with seedTestData.ts
-// Browsing is anonymous: no storageState, fresh context per test.
-// All read-only assertions run against [SEED] fixtures.
-
-const SEED_MATERIALS = [
-    '[SEED] Gradient Descent by Hand',
-    '[SEED] Decision Trees and Information Gain',
-    '[SEED] Attention and the Transformer Block',
-];
-const SEED_CIRCUITS = [
-    '[SEED] From Optimisation to Transformers',
-    '[SEED] Deep Learning Shortcut',
-];
-const SEED_COURSES = [
-    '[SEED] Foundations of Machine Learning',
-    '[SEED] Deep Learning for Sequences',
-];
+import { SEED_MATERIALS, SEED_CIRCUITS, SEED_COURSES } from './helpers/seed';
 
 // Cards render exclusively client-side (onMount + streamed promises), so a
 // visible seed card is also a HYDRATION BARRIER: once it shows, client JS has
