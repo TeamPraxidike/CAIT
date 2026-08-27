@@ -1,10 +1,22 @@
 <script lang="ts">
 	import { FileButton, getToastStore } from '@skeletonlabs/skeleton';
 	import { saveCover } from '$lib/util/indexDB';
+	import type { FetchedFileItem } from '$lib/database/index.js';
 
-	export let coverPic: File | undefined = undefined;
+	export let coverPic: FetchedFileItem | File | undefined = undefined;
 	export let toastStore: any = null;
 
+	// If the picture was already uploaded it is type FetchedFileItem. Otherwise it is of type File, since it wasnt passed to the endpoint
+	function isFetchedFileItem(x: any): x is FetchedFileItem {
+		return x && typeof x.fileId === 'string' && ('data' in x);
+	}
+
+	let picUrl: string | undefined;
+	$: {
+		if (isFetchedFileItem(coverPic)) picUrl = coverPic.data ?? undefined;
+		else if (coverPic instanceof File) picUrl = URL.createObjectURL(coverPic);
+		else picUrl = undefined;
+	}
 
 	if (toastStore == null) {
 		toastStore = getToastStore();
@@ -42,7 +54,7 @@
 										border-2 border-dashed border-surface-700">
 		<div>
 			{#if coverPic}
-				<img src={URL.createObjectURL(coverPic)}
+				<img src={picUrl}
 					 alt="coverPicture"
 					 class="max-h-96 min-h-56 w-full h-auto object-contain block">
 			{/if}
