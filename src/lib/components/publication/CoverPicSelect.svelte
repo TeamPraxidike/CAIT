@@ -5,6 +5,7 @@
 
 	export let coverPic: FetchedFileItem | File | undefined = undefined;
 	export let toastStore: any = null;
+	export let isEditContext: boolean = false;
 
 	// If the picture was already uploaded it is type FetchedFileItem. Otherwise it is of type File, since it wasnt passed to the endpoint
 	function isFetchedFileItem(x: any): x is FetchedFileItem {
@@ -37,8 +38,12 @@
 
 			if (file.type === 'image/jpeg' || file.type === 'image/png') {
 				coverPic = file;
-				// Persist coverPic to IndexedDB
-				saveCover(file);
+
+				// Persist coverPic to IndexedDB. We only do that if we are not editing a publication, as otherwise
+				// the edited cover picture might show up when publishing a new material.
+				if (!isEditContext)
+					saveCover(file);
+
 			} else {
 				toastStore.trigger({
 					message: 'Invalid file type, please upload a .jpg or .png file',
