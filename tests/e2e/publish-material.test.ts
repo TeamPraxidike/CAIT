@@ -5,6 +5,7 @@ import {
     addLearningObjective, nextStep, pickMaterialType, setDescription, setSelfMade, setTitle, addTag, completeStepper
 } from "./helpers/stepper.ts";
 import { expectCardInTab } from './helpers/profile';
+import {expectAbsentFromBrowse, findOnBrowse} from "./helpers/browse.ts";
 
 const RESUMABLE = '/storage/v1/upload/resumable'; // Supabase TUS endpoint
 
@@ -76,14 +77,7 @@ test.describe('PMAT - publish a material', () => {
         await expect(page.getByText('sample.pdf').first()).toBeVisible();
 
         // --- appears in browse ---
-        await page.goto('/browse?type=materials');
-        const search = page.getByPlaceholder('Browse materials');
-        const browseCard = page.getByRole('link', {name: title});
-        await expect(async () => {
-            await search.fill(title);
-            await search.press('Enter');
-            await expect(browseCard).toBeVisible({timeout: 3_000});
-        }).toPass({timeout: 20_000});
+        await findOnBrowse(page, 'materials', title);
 
         // --- appears in author's "Your Publications" ---
         await page.goto(`/${author.username}`);
@@ -162,11 +156,7 @@ test.describe('PMAT - publish a material', () => {
         await expect(page.getByText('Draft', {exact: true})).toBeVisible();
 
         // excluded from /browse
-        await page.goto('/browse?type=materials');
-        const search = page.getByPlaceholder('Browse materials');
-        await search.fill(title);
-        await search.press('Enter');
-        await expect(page.getByRole('link', {name: title})).toHaveCount(0);
+        await expectAbsentFromBrowse(page, 'materials', title);
 
         // present in the author's "Draft Publications" tab
         await page.goto(`/${author.username}`);

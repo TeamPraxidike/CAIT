@@ -3,6 +3,7 @@ import { registerFreshAccount, logoutViaHeader } from './helpers/ui';
 import { createMaterial } from './helpers/api';
 import {ANON_STATE, AUTHOR_STATE, readPersonas, VISITOR_STATE, withContext} from "./helpers/personas";
 import { SEED_MATERIAL, SEED_CIRCUIT, CIRCUIT_MEMBERS } from './helpers/seed';
+import {findOnBrowse} from "./helpers/browse.ts";
 
 // Publication pages are login-walled (the [user] layout guard), so every view
 // test runs as the visitor persona. Anonymous access redirects to /signin and
@@ -13,14 +14,7 @@ test.use({ storageState: VISITOR_STATE });
 // A visible card is a hydration barrier
 // the pub page's <h2> title confirms arrival.
 async function openSeed(page: Page, title: string, type: 'materials' | 'circuits') {
-    await page.goto(`/browse?type=${type}`);
-    const search = page.getByPlaceholder(`Browse ${type}`);
-    const card = page.getByRole('link', { name: title });
-    await expect(async () => {
-        await search.fill(title);
-        await search.press('Enter');
-        await expect(card).toBeVisible({ timeout: 3_000 });
-    }).toPass({ timeout: 20_000 });
+    const card = await findOnBrowse(page, type, title);
     await card.click();
     await expect(page.getByRole('heading', { name: title })).toBeVisible();
 }
@@ -107,14 +101,7 @@ test.describe('anonymous', () => {
     test('PUB-13: anonymous user cannot open a publication', async ({ page }) => {
         // browse is public; the card href is in the anonymous HTML - read it
         // without a session, then try to open it directly
-        await page.goto('/browse');
-        const search = page.getByPlaceholder('Browse materials');
-        const card = page.getByRole('link', { name: SEED_MATERIAL });
-        await expect(async () => {
-            await search.fill(SEED_MATERIAL);
-            await search.press('Enter');
-            await expect(card).toBeVisible({ timeout: 3_000 });
-        }).toPass({ timeout: 20_000 });
+        const card = await findOnBrowse(page, 'materials', SEED_MATERIAL);
         const href = await card.getAttribute('href');
         const target = new URL(href!, page.url()).pathname;
 

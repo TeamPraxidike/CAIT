@@ -3,6 +3,7 @@ import { AUTHOR_STATE, type Persona, readPersonas } from './helpers/personas';
 import { nextStep, setTitle, addLearningObjective, addTag, completeStepper } from './helpers/stepper';
 import { SEED_MATERIALS } from './helpers/seed';
 import { expectCardInTab } from './helpers/profile';
+import {expectAbsentFromBrowse, findOnBrowse} from "./helpers/browse.ts";
 
 const [SEED_A, SEED_B] = SEED_MATERIALS;
 
@@ -92,14 +93,7 @@ test.describe('PCIR - publish a circuit', () => {
         await expect(page.getByText(SEED_B).first()).toBeVisible();
 
         // appears in browse circuits
-        await page.goto('/browse?type=circuits');
-        const search = page.getByPlaceholder('Browse circuits');
-        const card = page.getByRole('link', { name: title });
-        await expect(async () => {
-            await search.fill(title);
-            await search.press('Enter');
-            await expect(card).toBeVisible({ timeout: 3_000 });
-        }).toPass({ timeout: 20_000 });
+        await findOnBrowse(page, 'circuits', title);
     });
 
     test('PCIR-04: publishing an empty circuit is forced to a draft', async ({ page }) => {
@@ -119,11 +113,7 @@ test.describe('PCIR - publish a circuit', () => {
         await expect(page.getByText('Your publication has been saved as a draft - only you can see it')).toBeVisible();
 
         // absent from browse circuits
-        await page.goto('/browse?type=circuits');
-        const search = page.getByPlaceholder('Browse circuits');
-        await search.fill(title);
-        await search.press('Enter');
-        await expect(page.getByRole('link', { name: title })).toHaveCount(0);
+        await expectAbsentFromBrowse(page, 'circuits', title);
 
         // confirm it lands in the author's Draft Publications
         await page.goto(`/${author.username}`);
