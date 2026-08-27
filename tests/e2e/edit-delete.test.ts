@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { createMaterial } from './helpers/api';
 import {ANON_STATE, AUTHOR_STATE, type Persona, readPersonas, VISITOR_STATE, withContext} from "./helpers/personas";
 import { nextStep, setTitle, setDescription, draftToggle, setDraft, completeStepper } from './helpers/stepper';
-import { expectCardInTab } from './helpers/profile';
+import {expectCardInTab, openTab} from './helpers/profile';
 
 // The edit stepper renders inside an `{#await files}` block that only resolves onMount
 async function openEditStepper(page: Page, editUrl: string) {
@@ -215,7 +215,7 @@ test.describe('EDIT - author promotes a draft', () => {
         // profile: moved into Your Publications, gone from Draft Publications
         await page.goto(`/${author.username}`);
         await expectCardInTab(page, 'Your Publications', title);
-        await page.getByTestId('tab-group').getByText('Draft Publications').click();
+        await openTab(page, 'Draft Publications');
         await expect(page.getByRole('link', {name: title})).toHaveCount(0);
     });
 });
