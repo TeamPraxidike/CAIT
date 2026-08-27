@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { createMaterial } from './helpers/api';
-import {AUTHOR_STATE, readPersonas, VISITOR_STATE} from "./helpers/personas";
+import {AUTHOR_STATE, readPersonas, VISITOR_STATE, withContext} from "./helpers/personas";
 
 // visitor interacts with a publication the AUTHOR owns - never [SEED] content,
 // since likes/comments mutate shared state
@@ -11,12 +11,11 @@ let pubTitle: string;
 
 test.beforeAll(async ({ browser }) => {
     const { author } = readPersonas();
-    const ctx = await browser.newContext({ storageState: AUTHOR_STATE });
-    const page = await ctx.newPage();
-    const { id, title } = await createMaterial(page, author.username, { title: `e2e-int-${Date.now()}` });
-    pubUrl = `/${author.username}/${id}`;
-    pubTitle = title;
-    await ctx.close();
+    await withContext(browser, AUTHOR_STATE, async (page) => {
+        const { id, title } = await createMaterial(page, author.username, { title: `e2e-int-${Date.now()}` });
+        pubUrl = `/${author.username}/${id}`;
+        pubTitle = title;
+    });
 });
 
 // Hydration barrier: retry opening the Discussion tab until its client-rendered

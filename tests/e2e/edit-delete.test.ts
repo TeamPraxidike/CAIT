@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { createMaterial } from './helpers/api';
-import {ANON_STATE, AUTHOR_STATE, type Persona, readPersonas, VISITOR_STATE} from "./helpers/personas";
+import {ANON_STATE, AUTHOR_STATE, type Persona, readPersonas, VISITOR_STATE, withContext} from "./helpers/personas";
 import { nextStep, setTitle, setDescription, draftToggle, setDraft, completeStepper } from './helpers/stepper';
 import { expectCardInTab } from './helpers/profile';
 
@@ -114,23 +114,21 @@ test.describe('EDIT - access control as non-owner vs maintainer (visitor)', () =
     test.beforeAll(async ({ browser }) => {
         const { author, visitor } = readPersonas();
 
-        const ctx = await browser.newContext({ storageState: AUTHOR_STATE });
-        const page = await ctx.newPage();
-        const who = await page.request.get(`/api/user/username/${visitor.username}`);
-        const visitorId = (await who.json()).user.id;
+        await withContext(browser, AUTHOR_STATE, async (page) => {
+            const who = await page.request.get(`/api/user/username/${visitor.username}`);
+            const visitorId = (await who.json()).user.id;
 
-        const foreign = await createMaterial(page, author.username, { title: `e2e-edit-07-${Date.now()}` });
-        foreignId = foreign.id;
-        foreignUrl = `/${author.username}/${foreign.id}`;
+            const foreign = await createMaterial(page, author.username, { title: `e2e-edit-07-${Date.now()}` });
+            foreignId = foreign.id;
+            foreignUrl = `/${author.username}/${foreign.id}`;
 
-        const mEdit = await createMaterial(page, author.username, { title: `e2e-edit-09-${Date.now()}`, maintainers: [visitorId] });
-        maintainedEditUrl = `/${author.username}/${mEdit.id}`;
+            const mEdit = await createMaterial(page, author.username, { title: `e2e-edit-09-${Date.now()}`, maintainers: [visitorId] });
+            maintainedEditUrl = `/${author.username}/${mEdit.id}`;
 
-        const mDel = await createMaterial(page, author.username, { title: `e2e-edit-13-${Date.now()}`, maintainers: [visitorId] });
-        maintainedDeleteId = mDel.id;
-        maintainedDeleteUrl = `/${author.username}/${mDel.id}`;
-
-        await ctx.close();
+            const mDel = await createMaterial(page, author.username, { title: `e2e-edit-13-${Date.now()}`, maintainers: [visitorId] });
+            maintainedDeleteId = mDel.id;
+            maintainedDeleteUrl = `/${author.username}/${mDel.id}`;
+        });
     });
 
     test('EDIT-07: non-owner is blocked from the edit page and the mutation endpoints', async ({ page }) => {
@@ -167,12 +165,11 @@ test.describe('EDIT - anonymous user is walled out', () => {
     test.beforeAll(async ({ browser }) => {
         const { author } = readPersonas();
 
-        const ctx = await browser.newContext({ storageState: AUTHOR_STATE });
-        const page = await ctx.newPage();
-        const { id } = await createMaterial(page, author.username, { title: `e2e-edit-12-${Date.now()}` });
-        pubId = id;
-        pubUrl = `/${author.username}/${id}`;
-        await ctx.close();
+        await withContext(browser, AUTHOR_STATE, async (page) => {
+            const { id } = await createMaterial(page, author.username, { title: `e2e-edit-12-${Date.now()}` });
+            pubId = id;
+            pubUrl = `/${author.username}/${id}`;
+        });
     });
 
     test('EDIT-12: anonymous user is redirected to sign-in and endpoints reject them', async ({ page }) => {

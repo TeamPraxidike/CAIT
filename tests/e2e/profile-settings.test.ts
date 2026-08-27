@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { AUTHOR_STATE, VISITOR_STATE, type Persona, readPersonas } from './helpers/personas';
+import {AUTHOR_STATE, VISITOR_STATE, type Persona, readPersonas, withContext} from './helpers/personas';
 import { createMaterial } from './helpers/api';
 import { expectCardInTab } from './helpers/profile';
 
@@ -41,11 +41,10 @@ test.describe('PROF - visitor views another user profile', () => {
     test.beforeAll(async ({ browser }) => {
         author = readPersonas().author;
         // seed the author's content from an author context (visitor can't create it)
-        const ctx = await browser.newContext({ storageState: AUTHOR_STATE });
-        const p = await ctx.newPage();
-        pubTitle = (await createMaterial(p, author.username, { title: `e2e-prof-02-pub-${Date.now()}` })).title;
-        draftTitle = (await createMaterial(p, author.username, { title: `e2e-prof-02-draft-${Date.now()}`, isDraft: true })).title;
-        await ctx.close();
+        await withContext(browser, AUTHOR_STATE, async (p) => {
+            pubTitle = (await createMaterial(p, author.username, { title: `e2e-prof-02-pub-${Date.now()}` })).title;
+            draftTitle = (await createMaterial(p, author.username, { title: `e2e-prof-02-draft-${Date.now()}`, isDraft: true })).title;
+        });
     });
 
     test('PROF-02: visitor sees only the author\'s published items - no tabs, no drafts', async ({ page }) => {

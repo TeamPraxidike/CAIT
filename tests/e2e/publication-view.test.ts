@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { registerFreshAccount, logoutViaHeader } from './helpers/ui';
 import { createMaterial } from './helpers/api';
-import {ANON_STATE, AUTHOR_STATE, readPersonas, VISITOR_STATE} from "./helpers/personas";
+import {ANON_STATE, AUTHOR_STATE, readPersonas, VISITOR_STATE, withContext} from "./helpers/personas";
 import { SEED_MATERIAL, SEED_CIRCUIT, CIRCUIT_MEMBERS } from './helpers/seed';
 
 // Publication pages are login-walled (the [user] layout guard), so every view
@@ -92,13 +92,12 @@ test.describe('owner controls', () => {
         await expect(page.getByTestId('delete-publication')).toBeVisible();
 
         // visitor (non-owner) sees neither
-        const vCtx = await browser.newContext({ storageState: VISITOR_STATE });
-        const vPage = await vCtx.newPage();
-        await vPage.goto(url);
-        await expect(vPage.getByRole('heading', { name: title })).toBeVisible();
-        await expect(vPage.getByTestId('edit-publication')).toBeHidden();
-        await expect(vPage.getByTestId('delete-publication')).toBeHidden();
-        await vCtx.close();
+        await withContext(browser, VISITOR_STATE, async (vPage) => {
+            await vPage.goto(url);
+            await expect(vPage.getByRole('heading', { name: title })).toBeVisible();
+            await expect(vPage.getByTestId('edit-publication')).toBeHidden();
+            await expect(vPage.getByTestId('delete-publication')).toBeHidden();
+        });
     });
 });
 
