@@ -1,12 +1,16 @@
 import { expect, type Page } from '@playwright/test';
 
-// Click a profile tab (scoped to the owner tab strip) and assert a publication
+export async function openTab(page: Page, tabName: string) {
+    const tab = page.getByRole('tab', { name: tabName });
+    await expect(async () => {
+        if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
+        await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
+}
+
+// Click a profile tab and assert a publication
 // card is listed under it.
 export async function expectCardInTab(page: Page, tabName: string, title: string) {
-    const tabs = page.getByTestId('tab-group');
-    const card = page.getByRole('link', { name: title });
-    await expect(async () => {
-        await tabs.getByText(tabName).click();
-        await expect(card).toBeVisible({ timeout: 3_000 });
-    }).toPass({ timeout: 20_000 });
+    await openTab(page, tabName);
+    await expect(page.getByRole('link', { name: title })).toBeVisible();
 }

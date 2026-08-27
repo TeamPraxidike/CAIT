@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { createMaterial } from './helpers/api';
 import {AUTHOR_STATE, readPersonas, VISITOR_STATE, withContext} from "./helpers/personas";
+import {openTab} from "./helpers/profile.ts";
 
 // visitor interacts with a publication the AUTHOR owns - never [SEED] content,
 // since likes/comments mutate shared state
@@ -28,18 +29,6 @@ async function openDiscussion(page: Page) {
             await page.getByRole('tab', { name: 'Discussion' }).click();
         }
         await expect(box).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 15_000 });
-}
-
-// Opens the profile "Saved Publications" tab. Barrier via aria-selected (Skeleton
-// sets it) - content-independent, so it works whether the tab is empty or not.
-async function openSavedTab(page: Page) {
-    const tab = page.getByRole('tab', { name: 'Saved Publications' });
-    await expect(async () => {
-        if ((await tab.getAttribute('aria-selected')) !== 'true') {
-            await tab.click();
-        }
-        await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 2_000 });
     }).toPass({ timeout: 15_000 });
 }
 
@@ -85,7 +74,7 @@ test('INT-03: save shows in the profile Saved tab; unsave removes it', async ({ 
 
     // it appears in the visitor's own profile Saved tab
     await page.goto(profileUrl);
-    await openSavedTab(page);
+    await openTab(page, 'Saved Publications');
     await expect(card).toBeVisible();
 
     // unsave
@@ -96,7 +85,7 @@ test('INT-03: save shows in the profile Saved tab; unsave removes it', async ({ 
 
     // and it's gone from the Saved tab
     await page.goto(profileUrl);
-    await openSavedTab(page);
+    await openTab(page, 'Saved Publications');
     await expect(card).toBeHidden();
 });
 

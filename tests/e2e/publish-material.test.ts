@@ -2,10 +2,18 @@ import { test, expect, type Page } from '@playwright/test';
 import { AUTHOR_STATE, type Persona, readPersonas } from './helpers/personas';
 import { SMALL_PDF, LARGE_PDF, ensureFixtures } from './helpers/fixtures';
 import {
-    addLearningObjective, nextStep, pickMaterialType, setDescription, setSelfMade, setTitle, addTag, completeStepper
-} from "./helpers/stepper.ts";
+    addLearningObjective,
+    nextStep,
+    pickMaterialType,
+    setDescription,
+    setSelfMade,
+    setTitle,
+    addTag,
+    completeStepper,
+    setDraft
+} from "./helpers/stepper";
 import { expectCardInTab } from './helpers/profile';
-import {expectAbsentFromBrowse, findOnBrowse} from "./helpers/browse.ts";
+import {expectAbsentFromBrowse, findOnBrowse} from "./helpers/browse";
 
 const RESUMABLE = '/storage/v1/upload/resumable'; // Supabase TUS endpoint
 
@@ -61,7 +69,7 @@ test.describe('PMAT - publish a material', () => {
         await page.locator('.modal').getByRole('button', {name: 'Close'}).click();
         await expect(previewFrame).toHaveCount(0);
 
-        await page.getByRole('button', {name: 'Next →'}).click();
+        await nextStep(page);
         await fillTitleStep(page, title);
         await fillMetaStep(page, description);
         await completeStepper(page, 'publish')
@@ -105,7 +113,7 @@ test.describe('PMAT - publish a material', () => {
         await startMaterialPublish(page);
         await page.locator('input[type="file"]').setInputFiles(LARGE_PDF);
         await expect(page.getByText('large.pdf')).toBeVisible();
-        await page.getByRole('button', {name: 'Next →'}).click();
+        await nextStep(page);
         await fillTitleStep(page, title);
         await fillMetaStep(page);
         await completeStepper(page, 'publish')
@@ -122,7 +130,7 @@ test.describe('PMAT - publish a material', () => {
         await page.getByRole('button', {name: 'Add'}).click();
         await expect(page.getByText(fileUrl)).toBeVisible(); // URL row added
 
-        await page.getByRole('button', {name: 'Next →'}).click();
+        await nextStep(page);
         await fillTitleStep(page, title);
         await fillMetaStep(page);
         await completeStepper(page, 'publish')
@@ -142,12 +150,12 @@ test.describe('PMAT - publish a material', () => {
         await page.getByRole('button', {name: 'Add'}).click();
         await expect(page.getByText(fileUrl)).toBeVisible();
 
-        await page.getByRole('button', {name: 'Next →'}).click();
+        await nextStep(page);
         await fillTitleStep(page, title);
         await fillMetaStep(page);
 
         // On Review, flip "Save as a draft"
-        await page.locator('input[type="checkbox"].toggle').check();
+        await setDraft(page, true);
         await completeStepper(page, 'publish')
         await expect(page.getByText('Your publication has been saved as a draft - only you can see it')).toBeVisible();
 
