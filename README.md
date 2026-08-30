@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" alt="Docker">
 </p>
 
-# CAIT - Community for AI Teachers
+# CAIT - Community Archive for Integrated Teaching
 
 CAIT (pronounced "kite") is a community platform for teachers and lecturers of AI and machine
 learning. Educators use it to publish, share, and discover teaching materials, and to build
