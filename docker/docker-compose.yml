@@ -11,6 +11,8 @@ services:
     container_name: supabase-studio
     image: supabase/studio:20241202-71e5240
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     healthcheck:
       test:
         [
@@ -26,6 +28,7 @@ services:
       analytics:
         condition: service_healthy
     environment:
+      HOSTNAME: 0.0.0.0
       STUDIO_PG_META_URL: http://meta:8080
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
@@ -60,6 +63,11 @@ services:
       analytics:
         condition: service_healthy
     environment:
+      KONG_STORAGE_CONNECT_TIMEOUT: '60'
+      KONG_STORAGE_WRITE_TIMEOUT: '3600'
+      KONG_STORAGE_READ_TIMEOUT: '3600'
+      KONG_STORAGE_REQUEST_BUFFERING: 'false'
+      KONG_STORAGE_RESPONSE_BUFFERING: 'false'
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
       # https://github.com/supabase/cli/issues/14
@@ -222,14 +230,45 @@ services:
       DB_AFTER_CONNECT_QUERY: 'SET search_path TO _realtime'
       DB_ENC_KEY: supabaserealtime
       API_JWT_SECRET: ${JWT_SECRET}
-      SECRET_KEY_BASE: UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE_REALTIME}
       ERL_AFLAGS: -proto_dist inet_tcp
       DNS_NODES: "''"
       RLIMIT_NOFILE: "10000"
       APP_NAME: realtime
       SEED_SELF_HOST: true
 
-  # To use S3 backed storage: docker compose -f docker-compose.yml -f docker-compose.s3.yml up
+  minio:
+    image: minio/minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      #      MINIO_ROOT_USER: supa-storage
+      #      MINIO_ROOT_PASSWORD: secret1234
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://minio:9000/minio/health/live" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./volumes/storage:/data:z
+
+  minio-createbucket:
+    image: minio/mc
+    restart: "no"
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set supa-minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb --ignore-existing supa-minio/stub;
+      exit 0;
+      "
+
   storage:
     container_name: supabase-storage
     image: supabase/storage-api:v1.14.6
@@ -241,6 +280,8 @@ services:
         condition: service_started
       imgproxy:
         condition: service_started
+      minio:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -249,7 +290,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://storage:5000/status"
+          "http://127.0.0.1:5000/status"
         ]
       timeout: 5s
       interval: 5s
@@ -262,14 +303,22 @@ services:
       PGRST_JWT_SECRET: ${JWT_SECRET}
       DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       FILE_SIZE_LIMIT: 104857600
-      STORAGE_BACKEND: file
+      STORAGE_BACKEND: s3
+      GLOBAL_S3_BUCKET: stub
+      GLOBAL_S3_ENDPOINT: http://minio:9000
+      GLOBAL_S3_PROTOCOL: http
+      GLOBAL_S3_FORCE_PATH_STYLE: true
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      AWS_DEFAULT_REGION: stub
       FILE_STORAGE_BACKEND_PATH: /var/lib/storage
       TENANT_ID: stub
       # TODO: https://github.com/supabase/storage-api/issues/55
       REGION: stub
-      GLOBAL_S3_BUCKET: stub
       ENABLE_IMAGE_TRANSFORMATION: "true"
       IMGPROXY_URL: http://imgproxy:5001
+#      REQUEST_ALLOW_X_FORWARDED_PATH: 'true'
+#      TUS_URL_PATH: upload/resumable
       TUS_URL_PATH: /storage/v1/upload/resumable
     volumes:
       - ./volumes/storage:/var/lib/storage:z
@@ -284,11 +333,8 @@ services:
       retries: 3
     environment:
       IMGPROXY_BIND: ":5001"
-      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
       IMGPROXY_USE_ETAG: "true"
       IMGPROXY_ENABLE_WEBP_DETECTION: ${IMGPROXY_ENABLE_WEBP_DETECTION}
-    volumes:
-      - ./volumes/storage:/var/lib/storage:z
 
   meta:
     container_name: supabase-meta
@@ -439,7 +485,7 @@ services:
       retries: 3
     volumes:
       - ./volumes/logs/vector.yml:/etc/vector/vector.yml:ro
-      - ${DOCKER_SOCKET_LOCATION}:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       LOGFLARE_API_KEY: ${LOGFLARE_API_KEY}
     command: [ "--config", "/etc/vector/vector.yml" ]
@@ -473,8 +519,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_URL=ecto://supabase_admin:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/_supabase
       - CLUSTER_POSTGRES=true
-      - SECRET_KEY_BASE=UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
-      - VAULT_ENC_KEY=your-encryption-key-32-chars-min
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - VAULT_ENC_KEY=${VAULT_ENC_KEY}
       - API_JWT_SECRET=${JWT_SECRET}
       - METRICS_JWT_SECRET=${JWT_SECRET}
       - REGION=local

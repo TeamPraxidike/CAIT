@@ -196,12 +196,13 @@
 			{/if}
 	</div>
 
-	<img draggable="false" slot="cover" class="w-full h-full object-cover rounded-t-lg hover:shadow-md select-none" src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="" />
+	<img draggable="false" slot="cover" class="w-full h-full object-cover rounded-t-lg hover:shadow-md select-none" src={imgSrc ? imgSrc : defaultCoverPicturePath } alt=""/>
 
 
 	<div slot="icons" class="flex gap-2">
 		{#if publication.type === PublicationType.Circuit}
 			<Icon
+				data-testid="publication-card-circuit-icon"
 				icon="tabler:binary-tree-2"
 				class="text-xl self-center text-primary-500" />
 		{:else}
@@ -306,8 +307,11 @@
 
 	<div slot="user-pfp" bind:this={pfpElement} class="relative inline-flex items-center">
 		<a href="/{publisher.username}" class="flex-none">
-			<img class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
-					src={publisher.profilePicData ? publisher.profilePicData : defaultProfilePicturePath} alt="CAIT Logo" />
+			<img
+				class="w-5 h-5 md:w-6 md:h-6 rounded-full border object-cover"
+				data-testid="publication-card-profile-img"
+				src={publisher.profilePicData ? publisher.profilePicData : defaultProfilePicturePath}
+				alt="CAIT Logo" />
 		</a>
 		{#if isHoveredPfp}
 			<div
@@ -321,6 +325,3 @@
 		{/if}
 	</div>
 </BrowseCardShell>
-
-
-

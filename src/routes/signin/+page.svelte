@@ -47,7 +47,7 @@
 		{:else}
 			<label for="email">
 				Email
-				<input class="input rounded-lg bg-white" name="email" type="email" bind:value={email}
+				<input id="email" class="input rounded-lg bg-white" name="email" type="email" bind:value={email}
 					   on:keypress={handleInputEnter} />
 			</label>
 			<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
@@ -55,7 +55,7 @@
 			</div>
 			<label for="password">
 				Password
-				<input class="input rounded-lg bg-white" name="password" type="password" bind:value={password}
+				<input id="password" class="input rounded-lg bg-white" name="password" type="password" bind:value={password}
 					   on:keypress={handleInputEnter} />
 			</label>
 			<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">

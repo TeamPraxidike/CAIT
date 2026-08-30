@@ -1,0 +1,58 @@
+# Test-stack override. Run as a SECOND compose project alongside (but never at the
+# same time as) the dev stack - same host ports, so exclusive running is enforced
+# by a guard in the test scripts.
+#
+# Only container names and DATA mounts are overridden (compose merges volume lists
+# by container target path, so config/init mounts stay shared with the dev stack).
+# The db-config named volume is auto-namespaced by the -p cait-test project.
+#
+# realtime keeps its canonical DNS name as a network alias: kong.yml routes to it
+# and realtime parses its tenant id ("realtime-dev") from the hostname.
+# NOTE: vector.yml routes logs by exact container name — if vector is ever added
+# to the test stack, its rules won't match the test-* names.
+#
+# Usage (what run-e2e.sh / run-integration.sh do):
+#   docker compose -p cait-test -f docker/docker-compose.yml -f docker/docker-compose.test.yml \
+#     --env-file docker/.env up -d <services>
+#
+# Full reset: docker compose -p cait-test -f docker/docker-compose.yml \
+#   -f docker/docker-compose.test.yml --env-file docker/.env down -v \
+#   && sudo rm -rf docker/volumes-test
+services:
+  db:
+    container_name: test-supabase-db
+    volumes:
+      - ./volumes-test/db/data:/var/lib/postgresql/data:Z
+  storage:
+    container_name: test-supabase-storage
+    volumes:
+      - ./volumes-test/storage:/var/lib/storage:z
+  minio:
+    volumes:
+      - ./volumes-test/storage:/data:z
+  kong:
+    container_name: test-supabase-kong
+  auth:
+    container_name: test-supabase-auth
+  rest:
+    container_name: test-supabase-rest
+  imgproxy:
+    container_name: test-supabase-imgproxy
+  analytics:
+    container_name: test-supabase-analytics
+  supavisor:
+    container_name: test-supabase-pooler
+  studio:
+    container_name: test-supabase-studio
+  meta:
+    container_name: test-supabase-meta
+  functions:
+    container_name: test-supabase-edge-functions
+  vector:
+    container_name: test-supabase-vector
+  realtime:
+    container_name: test-realtime-dev.supabase-realtime
+    networks:
+      default:
+        aliases:
+          - realtime-dev.supabase-realtime

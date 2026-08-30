@@ -1,38 +1,103 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
 export NODE_ENV=test
 
-DIR="$(cd "$(dirname "$0")" && pwd)"                                       # get the current directory
-ENV=$(grep -v '^#' .env | xargs)                                           # load the environment variables
-
-
-# Check if we are in a CI environment
-if [ -z "$CI" ]; then
-  docker-compose up -d db-test                                              # start the database
-  echo '🟡 - Waiting for database to be ready...'                            # wait for the database to be ready
-  "$DIR"/wait-for-it.sh "${DATABASE_URL}" -- echo '🟢 - Database is ready!'  # wait for the database to be ready
+# early exit if 4173 is occupied
+# TODO: this could be better, vite will try to use the next available, you can also try to follow that logic
+if lsof -i :4173 &>/dev/null; then
+    echo "ERROR: Port 4173 is already in use"
+    lsof -i :4173
+    exit 1
 fi
 
-npx prisma migrate dev --name init                                         # run the migrations
-npm run build                                                              # build the project
-npm run preview &                                                          # start the server in the background - port 4173
-#npx vite build
-#npx vite preview &
-SERVER_PID=$!                                                              # save the server PID so we can kill it later
-echo "Server started with PID: $SERVER_PID"
-npx vitest -c ./vitest.config.integration.ts                                   # run your tests
+SERVER_PID=""
 
-kill $SERVER_PID                                                           # kill the server once the tests are done
-echo "Killed PID: $SERVER_PID"
-
-# Get PID of the process using port 4173
-SOCKET_PID=$(lsof -t -i :4173)
-
-# Kill the server process that is actually using the port
-if [[ ! -z "$SOCKET_PID" ]]; then
-    echo "Found PID holding up the port, performing cleanup"
-    kill $SOCKET_PID
-    echo "Killed PID: $SOCKET_PID"
+# ---------------------------------------------------------------------------
+# Determine compose command based on environment
+# ---------------------------------------------------------------------------
+if [ -n "${CI:-}" ]; then
+  echo "Starting Supabase services for CI integration tests..."
+  COMPOSE="docker compose -f docker/docker-compose.yml -f cicd/docker-compose.ci.yml --env-file cicd/.env.ci"
 else
-    echo "No process found using port."
+  echo "Starting Supabase services for local integration tests..."
+  COMPOSE="docker compose -p cait-test -f docker/docker-compose.yml -f docker/docker-compose.test.yml --env-file docker/.env"
+
+  # test stack reuses the dev stack's host ports — refuse to start over a running dev stack
+  if [ -n "$(docker ps -q --filter 'name=^supabase-')" ]; then
+    echo "ERROR: dev Supabase stack is running. Stop it (exit dev.sh) before running tests."
+    exit 1
+  fi
 fi
 
+cleanup() {
+  echo "Cleaning up..."
+  [ -n "$SERVER_PID" ] && kill $SERVER_PID 2>/dev/null || true
+  PORT_PID=$(lsof -t -i :4173 2>/dev/null || true)
+  [ -n "$PORT_PID" ] && kill $PORT_PID 2>/dev/null || true
+  if [ -n "${CI:-}" ]; then
+    $COMPOSE down -v
+  else
+    # stop, not down in non-CI: the test stack persists and is reused on the next run
+    $COMPOSE stop
+  fi
+}
+trap cleanup EXIT
+
+$COMPOSE up -d db analytics supavisor kong auth rest storage imgproxy minio minio-createbucket
+
+# ---------------------------------------------------------------------------
+# Wait for services to be ready
+# ---------------------------------------------------------------------------
+wait_healthy() {
+  local service=$1
+  echo "Waiting for $service to be healthy..."
+  for i in $(seq 1 60); do
+    STATUS=$($COMPOSE ps $service --format '{{.Health}}' 2>/dev/null || echo "unknown")
+    [ "$STATUS" = "healthy" ] && echo "$service is healthy." && return 0
+    [ "$i" -eq 60 ] && echo "ERROR: $service not healthy (status: $STATUS)" && exit 1
+    sleep 2
+  done
+}
+
+wait_healthy db
+wait_healthy analytics
+wait_healthy supavisor
+wait_healthy kong
+
+# ---------------------------------------------------------------------------
+# Set env vars for the SvelteKit app
+# ---------------------------------------------------------------------------
+if [ -n "${CI:-}" ]; then
+  set -a && source cicd/.env.app.ci && set +a
+else
+  set -a && source .env && set +a
+
+  echo "Wiping database..."
+  # skip prisma migrations, otherwise it will try to reapply all of them and crash
+  # because the tables/columns/constraints already exist, we're just removing rows
+  $COMPOSE exec -T db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 < scripts/utility/wipe-db.sql
+fi
+
+# ---------------------------------------------------------------------------
+# Build and start preview server
+# ---------------------------------------------------------------------------
+echo "Building app..."
+npm run build
+
+echo "Starting preview server..."
+npm run start:preview &
+SERVER_PID=$!
+
+for i in $(seq 1 15); do
+  curl -sf http://localhost:4173/ > /dev/null 2>&1 && break
+  [ "$i" -eq 15 ] && echo "ERROR: Preview server not ready" && exit 1
+  sleep 2
+done
+echo "Preview server is ready."
+
+# ---------------------------------------------------------------------------
+# Run integration tests
+# ---------------------------------------------------------------------------
+echo "Running integration tests..."
+npx vitest run -c ./vitest.config.integration.ts

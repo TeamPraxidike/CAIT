@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { testingUrl } from '../setup';
+import { apiTestingUrl } from '../setup';
 import {
 	getUserById,
 	likePublication,
@@ -34,7 +34,7 @@ describe('Users', () => {
 				data: { isDraft: true },
 			});
 
-			const response = await fetch(`${testingUrl}/user`);
+			const response = await fetch(`${apiTestingUrl}/user`);
 			const body = await response.json();
 			const returnedUser = body.users.find(
 				(candidate: { id: string }) => candidate.id === user.id,
@@ -54,7 +54,7 @@ describe('Users', () => {
 				randomID = uuid();
 			} while (userIds.includes(randomID));
 
-			const response = await fetch(`${testingUrl}/user/${randomID}`, {
+			const response = await fetch(`${apiTestingUrl}/user/${randomID}`, {
 				method: 'GET',
 			});
 			expect(response.status).toBe(404);
@@ -65,7 +65,7 @@ describe('Users', () => {
 
 		it('should respond with 200 and the user if it exists', async () => {
 			const newUser = await createUniqueUser();
-			const response = await fetch(`${testingUrl}/user/${newUser.id}`, {
+			const response = await fetch(`${apiTestingUrl}/user/${newUser.id}`, {
 				method: 'GET',
 			});
 			expect(response.status).toBe(200);
@@ -80,7 +80,7 @@ describe('Users', () => {
 		beforeEach(async () => {
 			userInput = { metaData: createUserInputObject() };
 
-			response = await fetch(`${testingUrl}/user`, {
+			response = await fetch(`${apiTestingUrl}/user`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -99,17 +99,17 @@ describe('Users', () => {
 			);
 		});
 
-		it('should respond with 500 if body is malformed', async () => {
+		it('should respond with 400 if body is malformed', async () => {
 			const body = createUserInputObject();
 
-			response = await fetch(`${testingUrl}/user`, {
+			response = await fetch(`${apiTestingUrl}/user`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify(body),
 			});
-			expect(response.status).toBe(500);
+			expect(response.status).toBe(400);
 		});
 	});
 
@@ -118,7 +118,7 @@ describe('Users', () => {
 		beforeEach(async () => {
 			const body = {metaData: createUserInputObject()}
 
-			response = await fetch(`${testingUrl}/user`, {
+			response = await fetch(`${apiTestingUrl}/user`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ describe('Users', () => {
 		it('should succesfully delete already existing users', async () => {
 			const user = await response.json();
 			const deleteResponse = await fetch(
-				`${testingUrl}/user/${user.user.id}`,
+				`${apiTestingUrl}/user/${user.user.id}`,
 				{
 					method: 'DELETE',
 					headers: {
@@ -140,6 +140,30 @@ describe('Users', () => {
 			);
 			expect(deleteResponse.status).toBe(200);
 		});
+
+		it('should fail gracefull when deleting non-existing users', async () => {
+			const user = await response.json();
+			const deleteResponse = await fetch(
+				`${apiTestingUrl}/user/${user.user.id}`,
+				{
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				},
+			);
+			expect(deleteResponse.status).toBe(200);
+			const deleteResponse2 = await fetch(
+				`${apiTestingUrl}/user/${user.user.id}`,
+				{
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				},
+			);
+			expect(deleteResponse2.status).toBe(404);
+		});
 	});
 
 	describe('[PUT] /user/:id', () => {
@@ -147,7 +171,7 @@ describe('Users', () => {
 			const newUser = await createUniqueUser();
 
 			const editUser = { metaData: { ...createUserInputObject(), aboutMe: "This is a test user" }, profilePic: null };
-			const response = await fetch(`${testingUrl}/user/${newUser.id}`, {
+			const response = await fetch(`${apiTestingUrl}/user/${newUser.id}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
@@ -159,19 +183,46 @@ describe('Users', () => {
 
 			expect(user).toHaveProperty('firstName', editUser.metaData.firstName);
 		});
+
+		it('should fail gracefull when editing non-existing users', async () => {
+			const newUser = await createUniqueUser();
+
+			const deleteResponse = await fetch(
+				`${apiTestingUrl}/user/${newUser.id}`,
+				{
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				},
+			);
+
+			const editUser = { metaData: { ...createUserInputObject(), aboutMe: "This is a test user" }, profilePic: null };
+			const response = await fetch(`${apiTestingUrl}/user/${newUser.id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(editUser),
+			});
+			const user = await response.json();
+			expect(response.status).toBe(404);
+			
+			expect(user).toHaveProperty('error');
+		});
 	});
 
 	describe('[GET] /user/:id/liked', () => {
 		it('should return an empty list for a newly created user', async () => {
 			const user = await createUniqueUser();
 
-			const response = await fetch(`${testingUrl}/user/${user.id}/liked`);
+			const response = await fetch(`${apiTestingUrl}/user/${user.id}/liked`);
 			expect(response.status).toBe(204);
 		});
 
 		it('should return 404 when user does not exist', async () => {
 			const response = await fetch(
-				`${testingUrl}/user/${uuid()}/liked`,
+				`${apiTestingUrl}/user/${uuid()}/liked`,
 			);
 			expect(response.status).toBe(404);
 		});
@@ -181,13 +232,13 @@ describe('Users', () => {
 			const publication = await createUniqueMaterial(user.id);
 
 			await fetch(
-				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/liked/${publication.publicationId}`,
 				{
 					method: 'POST',
 				},
 			);
 
-			const response = await fetch(`${testingUrl}/user/${user.id}/liked`);
+			const response = await fetch(`${apiTestingUrl}/user/${user.id}/liked`);
 
 			const responseBody = await response.json();
 
@@ -197,13 +248,13 @@ describe('Users', () => {
 			const publication2 = await createUniqueMaterial(user.id);
 
 			await fetch(
-				`${testingUrl}/user/${user.id}/liked/${publication2.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/liked/${publication2.publicationId}`,
 				{
 					method: 'POST',
 				},
 			);
 			const response2 = await fetch(
-				`${testingUrl}/user/${user.id}/liked`,
+				`${apiTestingUrl}/user/${user.id}/liked`,
 			);
 			const responseBody2 = await response2.json();
 			expect(responseBody2).toHaveLength(2);
@@ -218,7 +269,7 @@ describe('Users', () => {
 			const publication = await createUniqueMaterial(user.id);
 
 			const response = await fetch(
-				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/liked/${publication.publicationId}`,
 				{
 					method: 'POST',
 				},
@@ -229,12 +280,12 @@ describe('Users', () => {
 			expect(responseBody.message).toBe('Publication liked successfully');
 
 			const likedRes = await fetch(
-				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/liked/${publication.publicationId}`,
 			);
 			expect(await likedRes.json()).toBe(true);
 
 			const response2 = await fetch(
-				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/liked/${publication.publicationId}`,
 				{
 					method: 'POST',
 				},
@@ -247,14 +298,14 @@ describe('Users', () => {
 			);
 
 			const likedRes2 = await fetch(
-				`${testingUrl}/user/${user.id}/liked/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/liked/${publication.publicationId}`,
 			);
 			expect(await likedRes2.json()).toBe(false);
 		});
 
 		it('should return 404 when user does not exist', async () => {
 			const response = await fetch(
-				`${testingUrl}/user/${uuid()}/liked/${34567890}`,
+				`${apiTestingUrl}/user/${uuid()}/liked/${34567890}`,
 				{
 					method: 'POST',
 				},
@@ -268,7 +319,7 @@ describe('Users', () => {
 			const user = await createUniqueUser();
 
 			const response = await fetch(
-				`${testingUrl}/user/${user.id}/liked/${34567890}`,
+				`${apiTestingUrl}/user/${user.id}/liked/${34567890}`,
 				{
 					method: 'POST',
 				},
@@ -282,7 +333,7 @@ describe('Users', () => {
 	describe('[GET] /user/:id/liked/:publicationId', () => {
 		it('should return 404 when user does not exist', async () => {
 			const response = await fetch(
-				`${testingUrl}/user/${uuid()}/liked/${34567890}`,
+				`${apiTestingUrl}/user/${uuid()}/liked/${34567890}`,
 			);
 			expect(response.status).toBe(404);
 			const responseBody = await response.json();
@@ -293,24 +344,39 @@ describe('Users', () => {
 			const user = await createUniqueUser();
 
 			const response = await fetch(
-				`${testingUrl}/user/${user.id}/liked/${34567890}`,
+				`${apiTestingUrl}/user/${user.id}/liked/${34567890}`,
 			);
 			expect(response.status).toBe(404);
 			const responseBody = await response.json();
 			expect(responseBody.error).toBe('Publication not found');
 		});
+
+		it('should return the publicationId when retrieving a liked publication', async () => {
+			const user = await createUniqueUser();
+			const material = await createUniqueMaterial(user.id);
+			const response = await fetch(
+				`${apiTestingUrl}/user/${user.id}/liked/${material.publicationId}`,
+				{
+					method: 'GET',
+				},
+			)
+
+			expect(response.status).toBe(200);
+			expect(await response.json()).toBe(false);
+
+		})
 	});
 
 	describe('[GET] /user/:id/saved', () => {
 		it('should return an empty list for a newly created user', async () => {
 			const user = await createUniqueUser();
 
-			const response = await fetch(`${testingUrl}/user/${user.id}/saved`);
+			const response = await fetch(`${apiTestingUrl}/user/${user.id}/saved`);
 			expect(response.status).toBe(204);
 		});
 
 		it('should return 404 when user does not exist', async () => {
-			const response = await fetch(`${testingUrl}/user/${uuid()}/saved`);
+			const response = await fetch(`${apiTestingUrl}/user/${uuid()}/saved`);
 			expect(response.status).toBe(404);
 		});
 
@@ -319,13 +385,13 @@ describe('Users', () => {
 			const publication = await createUniqueMaterial(user.id);
 
 			await fetch(
-				`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/saved/${publication.publicationId}`,
 				{
 					method: 'POST',
 				},
 			);
 
-			const response = await fetch(`${testingUrl}/user/${user.id}/saved`);
+			const response = await fetch(`${apiTestingUrl}/user/${user.id}/saved`);
 			const responseBody = await response.json();
 
 			expect(responseBody.saved).toHaveLength(1);
@@ -334,13 +400,13 @@ describe('Users', () => {
 			const publication2 = await createUniqueMaterial(user.id);
 
 			await fetch(
-				`${testingUrl}/user/${user.id}/saved/${publication2.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/saved/${publication2.publicationId}`,
 				{
 					method: 'POST',
 				},
 			);
 			const response2 = await fetch(
-				`${testingUrl}/user/${user.id}/saved`,
+				`${apiTestingUrl}/user/${user.id}/saved`,
 			);
 			const responseBody2 = await response2.json();
 			expect(responseBody2.saved).toHaveLength(2);
@@ -356,7 +422,7 @@ describe('Users', () => {
 			const publication = await createUniqueMaterial(user.id);
 
 			const response = await fetch(
-				`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/saved/${publication.publicationId}`,
 				{
 					method: 'POST',
 				},
@@ -367,7 +433,7 @@ describe('Users', () => {
 			expect(responseBody.message).toBe('Publication saved successfully');
 
 			const response2 = await fetch(
-				`${testingUrl}/user/${user.id}/saved/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/saved/${publication.publicationId}`,
 				{
 					method: 'POST',
 				},
@@ -382,7 +448,7 @@ describe('Users', () => {
 
 		it('should return 404 when user does not exist', async () => {
 			const response = await fetch(
-				`${testingUrl}/user/${uuid()}/saved/${34567890}`,
+				`${apiTestingUrl}/user/${uuid()}/saved/${34567890}`,
 				{
 					method: 'POST',
 				},
@@ -396,7 +462,7 @@ describe('Users', () => {
 			const user = await createUniqueUser();
 
 			const response = await fetch(
-				`${testingUrl}/user/${user.id}/saved/${34567890}`,
+				`${apiTestingUrl}/user/${user.id}/saved/${34567890}`,
 				{
 					method: 'POST',
 				},
@@ -413,7 +479,7 @@ describe('Users', () => {
 			const publication = await createUniqueMaterial(user.id);
 
 			const response1 = await fetch(
-				`${testingUrl}/user/${user.id}/publicationInfo/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/publicationInfo/${publication.publicationId}`,
 			);
 			const info1 = await response1.json();
 
@@ -424,7 +490,7 @@ describe('Users', () => {
 			await savePublication(user.id, publication.publicationId);
 
 			const response2 = await fetch(
-				`${testingUrl}/user/${user.id}/publicationInfo/${publication.publicationId}`,
+				`${apiTestingUrl}/user/${user.id}/publicationInfo/${publication.publicationId}`,
 			);
 			const info2 = await response2.json();
 
@@ -434,7 +500,7 @@ describe('Users', () => {
 
 		it('should return 404 when user does not exist', async () => {
 			const response1 = await fetch(
-				`${testingUrl}/user/${uuid()}/publicationInfo/${7747474}`,
+				`${apiTestingUrl}/user/${uuid()}/publicationInfo/${7747474}`,
 			);
 			expect(response1.status).toBe(404);
 		});
@@ -443,9 +509,21 @@ describe('Users', () => {
 			const user = await createUniqueUser();
 
 			const response1 = await fetch(
-				`${testingUrl}/user/${user.id}/publicationInfo/${7747474}`,
+				`${apiTestingUrl}/user/${user.id}/publicationInfo/${7747474}`,
 			);
 			expect(response1.status).toBe(404);
 		});
 	});
+
+	describe('[GET] user/[id]/publicationInfo', async () => {
+		it('should correctly 404 for unused paths', async () => {
+			const user = await createUniqueUser();
+
+			const response1 = await fetch(
+				`${apiTestingUrl}/user/${user.id}/publicationInfo/`,
+			);
+			
+			expect(response1.status).toBe(404);
+		})
+	})
 });

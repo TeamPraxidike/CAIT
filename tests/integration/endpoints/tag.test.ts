@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { testingUrl } from '../setup';
+import { apiTestingUrl } from '../setup';
 
 // await resetTagsTable();
 
 describe('[POST]/[GET] /api/tags', () => {
 	it('should add a tag to the database', async () => {
-		const response = await fetch(`${testingUrl}/tags`, {
+		const response = await fetch(`${apiTestingUrl}/tags`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -17,7 +17,7 @@ describe('[POST]/[GET] /api/tags', () => {
 
 		expect(response.status).toBe(200);
 
-		const response2 = await fetch(`${testingUrl}/tags`);
+		const response2 = await fetch(`${apiTestingUrl}/tags`);
 		expect(response2.status).toBe(200);
 		const body = (await response2.json()).map(
 			(tag: { content: string }) => tag.content,
@@ -27,7 +27,7 @@ describe('[POST]/[GET] /api/tags', () => {
 	});
 
 	it('should return 200 when adding duplicates', async () => {
-		const response = await fetch(`${testingUrl}/tags`, {
+		const response = await fetch(`${apiTestingUrl}/tags`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ describe('[POST]/[GET] /api/tags', () => {
 		});
 		expect(response.status).toBe(200);
 
-		const response2 = await fetch(`${testingUrl}/tags`, {
+		const response2 = await fetch(`${apiTestingUrl}/tags`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -49,19 +49,19 @@ describe('[POST]/[GET] /api/tags', () => {
 		});
 		expect(response2.status).toBe(200);
 
-		const response3 = await fetch(`${testingUrl}/tags`);
+		const response3 = await fetch(`${apiTestingUrl}/tags`);
 		expect(response3.status).toBe(200);
 		const body = (await response3.json()).map(
 			(tag: { content: string }) => tag.content,
 		);
 
-		expect(body.filter((x: string) => x === 'a tag')).toHaveLength(1);
+		expect(body.filter((x: string) => x === 'hello')).toHaveLength(1);
 	});
 });
 
 describe('[GET] /api/tags/{content}', () => {
 	it('should return 200 when tag exists', async () => {
-		const response1 = await fetch(`${testingUrl}/tags`, {
+		const response1 = await fetch(`${apiTestingUrl}/tags`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ describe('[GET] /api/tags/{content}', () => {
 		});
 		expect(response1.status).toBe(200);
 
-		const response2 = await fetch(`${testingUrl}/tags/bojidar`);
+		const response2 = await fetch(`${apiTestingUrl}/tags/bojidar`);
 		expect(response2.status).toBe(200);
 
 		const body = await response2.json();
@@ -80,7 +80,7 @@ describe('[GET] /api/tags/{content}', () => {
 	});
 
 	it('should return 404 when tag does not exist', async () => {
-		const response = await fetch(`${testingUrl}/tags/does not exist`);
+		const response = await fetch(`${apiTestingUrl}/tags/does not exist`);
 		expect(response.status).toBe(404);
 	});
 });
@@ -88,7 +88,7 @@ describe('[GET] /api/tags/{content}', () => {
 describe('[DELETE] /api/tags/{content}', () => {
 	it('should delete existing tags', async () => {
 		const tagName = "coolTag12313"
-		const response1 = await fetch(`${testingUrl}/tags`, {
+		const response1 = await fetch(`${apiTestingUrl}/tags`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -99,17 +99,17 @@ describe('[DELETE] /api/tags/{content}', () => {
 		});
 		expect(response1.status).toBe(200);
 
-		const response2 = await fetch(`${testingUrl}/tags/${tagName}`, {
+		const response2 = await fetch(`${apiTestingUrl}/tags/${tagName}`, {
 			method: 'DELETE',
 		});
 		expect(response2.status).toBe(200);
 
-		const response3 = await fetch(`${testingUrl}/tags/${tagName}`);
+		const response3 = await fetch(`${apiTestingUrl}/tags/${tagName}`);
 		expect(response3.status).toBe(404);
 	});
 
 	it('should return 404 if tag doesnt exist', async () => {
-		const response2 = await fetch(`${testingUrl}/tags/doesNotExist`, {
+		const response2 = await fetch(`${apiTestingUrl}/tags/doesNotExist`, {
 			method: 'DELETE',
 		});
 		expect(response2.status).toBe(404);

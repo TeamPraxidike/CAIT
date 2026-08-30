@@ -1,0 +1,19 @@
+services:
+  db:
+    # here we override the volumes list to remove the following from the original dev comp:
+    # - ./volumes/db/data:/var/lib/postgresql/data:Z
+    # - db-config:/etc/postgresql-custom
+    # we also add the tmpfs for the github runner
+    volumes: !override
+      - ../docker/volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      - ../docker/volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      - ../docker/volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      - ../docker/volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
+      - ../docker/volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:Z
+      - ../docker/volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+      - ../docker/volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
+    tmpfs:
+      - /var/lib/postgresql/data
+
+# due to the tmpfs settings, no persistent volumes: override to remove from the original dev comp
+volumes: !override {}

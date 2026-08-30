@@ -31,14 +31,14 @@ export function validateMetadata(metadata: Omit<Metadata, "materialType">) {
 
 export function isMaterialValid(metadata: MetadataWithURLs, fileInfo: FileDiffActions) {
 	if(metadata.isDraft) return true;
-	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return false;
+	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType?.length) return false;
 	return validateMetadata(metadata) &&
 		(fileInfo.add.length - fileInfo.delete.length) + metadata.fileURLs.length >= PUBLICATION_PARAMETERS.filesMin;
 }
 
 export function isMaterialDraft(metadata: Metadata, numFiles: number) {
 	if (metadata.isCircuit) return false;
-	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType) return true;
+	if (PUBLICATION_PARAMETERS.materialTypeRequired && !metadata.materialType?.length) return true;
 	return !validateMetadata(metadata) ||
 		numFiles < PUBLICATION_PARAMETERS.filesMin;
 }

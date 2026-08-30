@@ -13,7 +13,7 @@ type FeaturedMaterial = {
 	coverPicData: string | null;
 };
 
-export function pickRandomPublication<T>(publications: T[], random = Math.random): T | null {
+export function _pickRandomPublication<T>(publications: T[], random = Math.random): T | null {
 	if (publications.length === 0) return null;
 
 	return publications[Math.floor(random() * publications.length)];
@@ -33,6 +33,6 @@ export async function load({ fetch }) {
 
 	return {
 		topUsers: users,
-		featuredPublication: pickRandomPublication(publications),
+		featuredPublication: _pickRandomPublication(publications),
 	};
 }

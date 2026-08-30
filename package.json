@@ -4,20 +4,18 @@
 	"private": true,
 	"scripts": {
 		"setup": "npm install && npx prisma generate",
+		"dev": "chmod +x scripts/createSAMLidp.sh && chmod +x scripts/dev.sh && scripts/dev.sh",
+		"build": "chmod +x scripts/dirname.sh && vite build && scripts/dirname.sh",
+		"start:preview": "chmod +x scripts/init-db.sh && scripts/init-db.sh && vite preview",
+		"start": "chmod +x scripts/init-db.sh && scripts/init-db.sh && node build",
 		"seed:test": "tsx ./scripts/seedTestData.ts",
-		"dev": "chmod +x scripts/createSAMLidp.sh && scripts/dev.sh",
-		"prebuild": "chmod +x scripts/dirname.sh && chmod +x scripts/createSAMLidp.sh && npx prisma generate && prisma migrate deploy",
-		"build": "npm run prebuild && scripts/createSAMLidp.sh && vite build && scripts/dirname.sh",
-		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "eslint .",
-		"test:unit": "vitest --coverage -c ./vitest.config.unit.ts",
-		"test:integration": "scripts/run-integration.sh",
-		"test:e2e": "scripts/run-e2e.sh",
-		"test:e2e:report": "scripts/run-e2e.sh && playwright show-report",
-		"test:e2e:generator": "npx playwright codegen localhost:5173/"
+		"test:unit": "prisma generate && vitest --coverage -c ./vitest.config.unit.ts",
+		"test:integration": "chmod +x scripts/run-integration.sh && scripts/run-integration.sh",
+		"test:e2e": "chmod +x scripts/run-e2e.sh && scripts/run-e2e.sh"
 	},
 	"engines": {
 		"node": ">=22"

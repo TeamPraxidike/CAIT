@@ -34,11 +34,19 @@ describe('handleConnections', () => {
 
 		expect(prisma.publication.update).toHaveBeenNthCalledWith(1, {
 			where: { id: 1 },
-			data: { tags: { set: [] } },
+			data: { maintainers: { set: [] } },
 		});
 		expect(prisma.publication.update).toHaveBeenNthCalledWith(2, {
 			where: { id: 1 },
-			data: { tags: { connect: [{ content: 'tag1' }] } },
+			data: { maintainers: { connect: [] }},
+		});
+		expect(prisma.publication.update).toHaveBeenNthCalledWith(3, {
+			where: { id: 1 },
+			data: { tags: { set: [] } },
+		});
+		expect(prisma.publication.update).toHaveBeenNthCalledWith(4, {
+			where: { id: 1 },
+			data: { tags: { connect: [{content: 'tag1' }]  }},
 		});
 	});
 });
@@ -157,18 +165,20 @@ describe('updateAllTimeSaved', () => {
 
 	it('should update savedByAllTime for a publication', async () => {
 		const mockPublication = { id: 1, savedByAllTime: [] };
-		prisma.publication.findUnique = vi
+		prisma.savedByAllTime.findUnique = vi
+			.fn()
+			.mockResolvedValue(null);
+		prisma.publication.findFirst = vi
 			.fn()
 			.mockResolvedValue(mockPublication);
 
-		prisma.publication.update = vi.fn().mockResolvedValue({});
+		prisma.savedByAllTime.create = vi.fn().mockResolvedValue({});
 
 		const result = await updateAllTimeSaved('user1', 1);
 
 		expect(result).toEqual({});
-		expect(prisma.publication.update).toHaveBeenCalledWith({
-			where: { id: 1 },
-			data: { savedByAllTime: ['user1'] },
+		expect(prisma.savedByAllTime.create).toHaveBeenCalledWith({
+			data: { userId: 'user1', publicationId: 1 },
 		});
 	});
 
@@ -177,6 +187,11 @@ describe('updateAllTimeSaved', () => {
 		prisma.publication.findUnique = vi
 			.fn()
 			.mockResolvedValue(mockPublication);
+		prisma.publication.findFirst = vi
+			.fn()
+			.mockResolvedValue(mockPublication);
+
+		prisma.savedByAllTime.findUnique = vi.fn().mockResolvedValue({ userId: 'user', publicationId: 1 });
 
 		const result = await updateAllTimeSaved('user', 1);
 
@@ -185,10 +200,9 @@ describe('updateAllTimeSaved', () => {
 
 		vi.clearAllMocks();
 
-		prisma.publication.findUnique = vi.fn().mockResolvedValue(null);
-		const result2 = await updateAllTimeSaved('user', 1);
+		prisma.publication.findFirst = vi.fn().mockResolvedValue(null);
 
-		expect(result2).toEqual(undefined);
+		await expect(updateAllTimeSaved('user', 1)).rejects.toThrowError();
 		expect(prisma.publication.update).not.toHaveBeenCalled();
 	});
 });
