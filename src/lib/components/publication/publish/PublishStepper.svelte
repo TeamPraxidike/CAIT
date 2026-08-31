@@ -83,6 +83,7 @@
 			<TitleStep bind:data={data}
 					   bind:dataMaterial={dataMaterial}
 					   paramsImmutable={paramsImmutable}
+					   isEditContext={edit}
 			/>
 		{/if}
 	</Step>

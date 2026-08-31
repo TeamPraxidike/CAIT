@@ -12,6 +12,7 @@
 	export let data: ParamsMutable;
 	export let dataMaterial: ParamsMutableMaterial;
 	export let paramsImmutable: ParamsImmutable;
+	export let isEditContext: boolean = false;
 
 	const toastStore = getToastStore();
 	let editingCourse: CourseWithCoverPic | null = null;
@@ -83,7 +84,7 @@
 			/>
 		</div>
 	</div>
-	<CoverPicSelect bind:coverPic={dataMaterial.coverPic} toastStore={toastStore} />
+	<CoverPicSelect bind:coverPic={dataMaterial.coverPic} toastStore={toastStore} isEditContext={isEditContext} />
 </div>
 
 
