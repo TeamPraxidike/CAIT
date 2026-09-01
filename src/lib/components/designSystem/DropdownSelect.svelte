@@ -16,7 +16,7 @@
 	let open = false;
 	let lastOpen: boolean = false;
 
-	let searchTerm: string = '';
+	export let searchTerm: string = '';
 
 	// keep those separate (no else if)
 	// otherwise both will rerun because open is on the RHS

@@ -49,12 +49,21 @@
 
 	let numberNodes: string;
 
+	let searchTags = '';
+	let searchPub = '';
+	let searchType = '';
+
+
+
 	const resetFilters = () => {
 		// Todo: discuss expected behaviour
 		// page = 0;
 		// amount = 9;
 		// paginationSettings.page = 0;
 		// paginationSettings.limit = amount;
+		searchTags = '';
+		searchPub = '';
+		searchType = '';
 		selectedTags = [];
 		selectedTypes = [];
 		selectedPublisherIDs = [];
@@ -346,18 +355,18 @@
 <!--						disabled={isSemanticActive}/>-->
 		<DropdownSelect title="Tags" multiselect={true} options={tags.map(x => x.content)}
 						bind:selected={selectedTags} on:select={() => searchActive = true}
-						disabled={isSemanticActive} searchable={true} maxHeight="10rem"/>
+						disabled={isSemanticActive} searchable={true} maxHeight="10rem" bind:searchTerm={searchTags}/>
 		<DropdownSelect title="Publisher" multiselect={true}
 						options={allPublishersObjects.map(x => x.id)}
 						overwriteDisplays={allPublishersObjects.map(x => x.content)}
 						bind:selected={selectedPublisherIDs} on:select={() => searchActive = true}
-						disabled={isSemanticActive} searchable={true} maxHeight="10rem"/>
+						disabled={isSemanticActive} searchable={true} maxHeight="10rem" bind:searchTerm={searchPub}/>
 	{/if}
 
 	{#if pageType === PageType.MATERIALS}
 		<DropdownSelect title="Content" multiselect={true} options={allTypes}
 						bind:selected={selectedTypes} on:select={() => searchActive = true}
-						disabled={isSemanticActive} searchable={true} maxHeight="10rem"/>
+						disabled={isSemanticActive} searchable={true} maxHeight="10rem" bind:searchTerm={searchType}/>
 	{/if}
 
 	<!--{#if pageType === 'circuits'}-->
