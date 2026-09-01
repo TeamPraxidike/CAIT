@@ -49,12 +49,21 @@
 
 	let numberNodes: string;
 
+	let searchTags = '';
+	let searchPub = '';
+	let searchType = '';
+
+
+
 	const resetFilters = () => {
 		// Todo: discuss expected behaviour
 		// page = 0;
 		// amount = 9;
 		// paginationSettings.page = 0;
 		// paginationSettings.limit = amount;
+		searchTags = '';
+		searchPub = '';
+		searchType = '';
 		selectedTags = [];
 		selectedTypes = [];
 		selectedPublisherIDs = [];
@@ -336,9 +345,9 @@
 	</div>
 
 	<DropdownSelect title="Type" multiselect={false} options={BROWSABLE_PAGE_TYPES}
-					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive} />
+					bind:selected={pageType} on:select={switchToBrowsePage} disabled={isSemanticActive}/>
 	<DropdownSelect title="Sort By" multiselect={false} options={sortOptions}
-					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive} />
+					bind:selected={sortByText} on:select={() => searchActive = true} disabled={isSemanticActive}/>
 
 	{#if pageType !== PageType.PEOPLE}
 <!--		<DropdownSelect title="Education Level" multiselect={true} options={diffOptions}-->
@@ -346,18 +355,18 @@
 <!--						disabled={isSemanticActive}/>-->
 		<DropdownSelect title="Tags" multiselect={true} options={tags.map(x => x.content)}
 						bind:selected={selectedTags} on:select={() => searchActive = true}
-						disabled={isSemanticActive}/>
+						disabled={isSemanticActive} searchable={true} maxHeight="12rem" bind:searchTerm={searchTags}/>
 		<DropdownSelect title="Publisher" multiselect={true}
 						options={allPublishersObjects.map(x => x.id)}
 						overwriteDisplays={allPublishersObjects.map(x => x.content)}
 						bind:selected={selectedPublisherIDs} on:select={() => searchActive = true}
-						disabled={isSemanticActive}/>
+						disabled={isSemanticActive} searchable={true} maxHeight="12rem" bind:searchTerm={searchPub}/>
 	{/if}
 
 	{#if pageType === PageType.MATERIALS}
 		<DropdownSelect title="Content" multiselect={true} options={allTypes}
 						bind:selected={selectedTypes} on:select={() => searchActive = true}
-						disabled={isSemanticActive}/>
+						disabled={isSemanticActive} bind:searchTerm={searchType}/>
 	{/if}
 
 	<!--{#if pageType === 'circuits'}-->
