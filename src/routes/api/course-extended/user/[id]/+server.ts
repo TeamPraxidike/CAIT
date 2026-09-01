@@ -3,11 +3,10 @@ import {
 	type CourseWithMaintainersAndProfilePic,
 	findCourseByMantainerExtended
 } from '$lib/database/courses';
-import { coverPicFetcher, type FetchedFileItem } from '$lib/database';
-import { profilePicFetcher } from '$lib/database/file';
+import { coverPicFetcher } from '$lib/database';
 
 export async function GET({ locals, params }) {
-	const authError = await verifyAuth(locals, params.id);
+	const authError = await verifyAuth(locals);
 	if (authError) return authError;
 
 	try {
