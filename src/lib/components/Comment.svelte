@@ -200,7 +200,7 @@
 
 
     <div bind:this={commentDiv}
-     class="{isReply ? 'col-start-2 ': 'col-start-1'} col-span-full  rounded-lg flex gap-2 p-1 ">
+     class="{isReply ? 'md:col-start-2 col-start-1 bg-surface-50 dark:bg-surface-800/80 rounded-lg p-2 border-l-4 border-primary-200 dark:border-primary-700' : 'col-start-1 p-1 rounded-lg'} col-span-full flex gap-2">
 <!--        <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border" src={'data:image;base64,' + photoUrl} alt="CAIT Logo" />-->
         <img class="w-10 h-10 md:w-14 md:h-14 rounded-full border"
              src={photoUrl ? photoUrl : defaultProfilePicturePath}
@@ -209,6 +209,10 @@
 
         <div class="flex gap-3 items-center max-w-full">
             <span class="text-surface-800 dark:text-surface-50 font-bold text-l">{userName}</span>
+            {#if isReply}
+                <!-- small reply indicator on mobile to distinguish replies from top-level comments -->
+                <span class="inline-block md:hidden ml-2 text-xs px-2 py-0.5 rounded bg-surface-200 dark:bg-surface-700 text-surface-600">Reply</span>
+            {/if}
             <span class="text-surface-400 text-sm">{created}</span>
 
 
