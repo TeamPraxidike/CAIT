@@ -25,7 +25,7 @@
 
 		<!--  Hero Heading  -->
 		<section class="flex flex-col gap-4" aria-label="Hero section">
-			<img alt="Logo of CAIT with text" data-testid="xl-hero" class="w-1/2" src="/images/home/caitText.png">
+			<img alt="Logo of CAIT with text" data-testid="xl-hero" class="w-1/2 mx-auto md:mx-0" src="/images/home/caitText.png">
 			<h2 class="xl:pr-10 xl:text-1xl dark:text-surface-200">
 				Community Archive for Integrated Teaching: Contribute and search for
 				lecture materials, assignments, exam questions and more!
