@@ -6,7 +6,7 @@ export default defineConfig({
 	// isCI gets set automatically by the github worker in CI/CD, otherwise resort to a local setup
 	use: {
 		baseURL: isCI ? process.env.STAGING_URL : 'http://localhost:4173',
-		trace: 'on-first-retry',
+		trace: isCI ? 'on-first-retry' : 'retain-on-failure',
 	},
 	expect: { timeout: isCI ? 10_000 : 5_000 },
 	retries: isCI ? 1 : 0,
