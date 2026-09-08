@@ -18,7 +18,7 @@ stop_and_wait() {
   fi
 
   echo "Sending stop request..."
-  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET \
+  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "$COOLIFY_URL/api/v1/applications/$APP_UUID/stop" \
     -H "Authorization: Bearer $TOKEN")
 
