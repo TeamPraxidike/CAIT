@@ -5,6 +5,7 @@
 	let isHoveredCir = false;
 	let circuitPath = '/publish/circuit';
 	let materialsPath = '/publish/materials';
+	let rowWidth = 0;
 
 	const handleMouseEnterMat = () => {
 		isHoveredMat = true;
@@ -26,14 +27,14 @@
 
 <Meta title="Publish" description="Publish Materials or Circuit" type="site" />
 
-<div class="col-start-1 col-span-full mt-24 mb-28 flex flex-col gap-6 items-center justify-center">
+<div class="col-start-1 col-span-full mt-24 mb-28 flex flex-col gap-4 items-center justify-center">
 	<div class="flex flex-col gap-1 items-center text-center w-full">
 		<h1 class="w-full text-2xl text-surface-800 font-bold dark:text-surface-100 dark:text-opacity-97">Choose Your
 			Publication Type</h1>
 		<h2 class="w-full text-md text-surface-500 text-opacity-80 dark:text-surface-300">Upload your materials or connect
 			materials in a circuit</h2>
 	</div>
-	<div class="flex-col flex md:flex-row items-center">
+	<div class="flex-col flex md:flex-row items-center" bind:clientWidth={rowWidth}>
 		<a
 			data-testid="goto_publish_material"
 			href={materialsPath}
@@ -417,6 +418,8 @@
 				</svg>
 			{/if}
 		</a>
-
 	</div>
+	<a href="/publish/course" class="p-2 border-2 border-gray-800 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.3)] group hover:shadow-[0_0_20px_rgba(0,0,0,0.4)] transition-shadow duration-300" style="width: {rowWidth/2}px">
+		<p class="group-hover:scale-110 group-hover:text-primary-500 font-bold">Make a course</p>
+	</a>
 </div>

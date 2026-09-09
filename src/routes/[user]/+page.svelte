@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { Meta, PublicationCard, UserProfileBar } from '$lib';
+	import { Meta, UserProfileBar } from '$lib';
 	import type { LayoutData, PageServerData } from './$types';
     import { type Material, type Publication, PublicationType, type Tag, type User } from '@prisma/client';
 	import type { FetchedFileItem } from '$lib/database';
 	import { page } from '$app/state';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
     import type { ExtendedPublication } from '../api/publication/+server';
+	import PublicationGrid from '$lib/components/grids/PublicationGrid.svelte';
+	import CourseGrid from '$lib/components/grids/CourseGrid.svelte';
 
 	/* This is the data that was returned from the server */
 	export let data: LayoutData & PageServerData;
@@ -26,6 +28,7 @@
     let liked = data.liked;
     let saved: publication[] = data.saved;
     let posts = data.publications || [] as ExtendedPublication[];
+	let courses = data.coursesWithPics;
 
     $: user = data.user;
     $: profilePic = data.profilePic;
@@ -42,6 +45,7 @@
         tabSet = 2;
     }
 
+	let publicTabSet = 0;
 
     function transformPosts(posts: ExtendedPublication[]): publication[] {
         return posts
@@ -69,86 +73,58 @@
 
 
 <div class="col-span-8">
-    {#if page.data.session?.user.id === user.id}
-        <TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
-            <Tab bind:group={tabSet} name="tab1" value={1}>
-                <p>Saved Publications</p>
-            </Tab>
-            <Tab bind:group={tabSet} name="tab2" value={0}>
-                <p>Your Publications</p>
-            </Tab>
-            <Tab bind:group={tabSet} name="tab3" value={2}>
-                <p>Draft Publications</p>
-            </Tab>
-            <svelte:fragment slot="panel">
-                {#if tabSet === 0}
-                    {#if posts.length === 0}
-                        <p class="col-span-2 text-center">So empty... There are no publications here </p>
-                    {:else}
-                        <div class="grid grid-cols-2 gap-4">
-                            {#each cardPosts as publication, i}
-                                <div class="col-span-1">
-                                    <PublicationCard imgSrc={publication.coverPicData}
-                                                     publication={publication}
-                                                     liked={liked.includes(publication.id)}
-                                                     saved={data.savedByUser.includes(publication.id)}
-                                                     publisher={publication.publisher}
-                                                     materialType={getEncapsulatingType(publication)}/>
-                                </div>
-                            {/each}
-                        </div>
-                    {/if}
-                {:else if tabSet === 1}
-                    <div class="grid grid-cols-2 gap-4">
-                        {#if saved.length !== 0}
-                            {#each saved as publication}
-                                <div class="col-span-1">
-                                    <PublicationCard imgSrc={publication.coverPicData}
-                                                     {publication} liked={liked.includes(publication.id)}
-                                                     publisher={publication.publisher}
-                                                     materialType={getEncapsulatingType(publication)}/>
-                                </div>
-                            {/each}
-                        {/if}
-                    </div>
-                {:else if tabSet === 2}
-                    {#if posts.length === 0}
-                        <p class="col-span-2 text-center">You don't have any draft publications</p>
-                    {:else}
-                        <div class="grid grid-cols-2 gap-4">
-                            {#each cardDrafts as publication, i}
-                                <div class="col-span-1">
-                                    <PublicationCard imgSrc={publication.coverPicData}
-                                                     publication={publication}
-                                                     liked={liked.includes(publication.id)}
-                                                     saved={data.savedByUser.includes(publication.id)}
-                                                     publisher={publication.publisher}
-                                                     materialType={getEncapsulatingType(publication)}/>
-                                </div>
-                            {/each}
-                        </div>
-                    {/if}
-                {/if}
-            </svelte:fragment>
-        </TabGroup>
-    {:else}
-            <h3 class="text-xl mt-8 text-surface-900 col-span-full text-center dark:text-surface-50">
-                {user.firstName}'s Publications
-            </h3>
-            {#if posts.length === 0}
-                <p class="col-span-full text-center">So empty... There are no publications here</p>
-            {:else}
-				<div class="grid grid-cols-2 gap-4">
-					{#each cardPosts as publication}
-						<div class="col-span-1">
-							<PublicationCard imgSrc={publication.coverPicData}
-											 publication={publication}
-											 liked={liked.includes(publication.id)}
-											 saved={data.savedByUser.includes(publication.id)}
-											 publisher={publication.publisher}/>
-						</div>
-					{/each}
-                </div>
-            {/if}
-    {/if}
+	{#if page.data.session?.user.id === user.id}
+		<TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
+			<Tab bind:group={tabSet} name="tab2" value={0}>
+				<p>Your Publications</p>
+			</Tab>
+			<Tab bind:group={tabSet} name="tab2" value={1}>
+				<p>My Courses</p>
+			</Tab>
+			<Tab bind:group={tabSet} name="tab1" value={2}>
+				<p>Saved Publications</p>
+			</Tab>
+			<Tab bind:group={tabSet} name="tab3" value={3}>
+				<p>Draft Publications</p>
+			</Tab>
+
+			<svelte:fragment slot="panel">
+				{#if tabSet === 0}
+					<PublicationGrid publications={cardPosts}
+									 emptyMessage="So empty... There are no publications here"
+									 {liked} {data} {getEncapsulatingType} />
+				{:else if tabSet === 1}
+					<CourseGrid courses={courses}
+							 emptyMessage="So empty... There are no courses here" />
+				{:else if tabSet === 2}
+					<PublicationGrid publications={saved}
+									 emptyMessage="So empty... There are no saved publications"
+									 {liked} {data} {getEncapsulatingType} />
+				{:else if tabSet === 3}
+					<PublicationGrid publications={cardDrafts}
+									 emptyMessage="You don't have any draft publications"
+									 {liked} {data} {getEncapsulatingType} />
+				{/if}
+			</svelte:fragment>
+		</TabGroup>
+	{:else}
+		<TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
+			<Tab bind:group={publicTabSet} name="publicTab1" value={0}>
+				<p>Publications</p>
+			</Tab>
+			<Tab bind:group={publicTabSet} name="publicTab2" value={1}>
+				<p>Courses</p>
+			</Tab>
+			<svelte:fragment slot="panel">
+				{#if publicTabSet === 0}
+					<PublicationGrid publications={cardPosts}
+									 emptyMessage="So empty... There are no publications here"
+									 {liked} {data} {getEncapsulatingType} />
+				{:else if publicTabSet === 1}
+					<CourseGrid courses={courses}
+								emptyMessage="So empty... There are no courses here" />
+				{/if}
+			</svelte:fragment>
+		</TabGroup>
+	{/if}
 </div>
