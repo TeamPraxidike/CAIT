@@ -89,3 +89,21 @@ The tests reuse the dev stack's host ports, so stop `npm run dev` before running
 Notes:
 - The team uses [YouTrack](https://praxidike.youtrack.cloud/) for stories, issues, and documentation
 - The `docker/` folder has its own README describing the Compose files.
+
+## License
+
+This project is licensed under the Apache License, Version 2.0. See the
+[LICENSE](LICENSE) file for the full text.
+
+### Third-party code
+
+The self-hosted Supabase stack in the `docker/` directory is derived from
+[Supabase](https://github.com/supabase/supabase) and their respective `docker/` setup, which is licensed under the
+Apache License, Version 2.0. Some of these files have been modified for this
+project.
+
+Copyright 2024 Supabase
+
+The original license text is available at
+https://github.com/supabase/supabase/blob/master/LICENSE and at
+https://www.apache.org/licenses/LICENSE-2.0.
