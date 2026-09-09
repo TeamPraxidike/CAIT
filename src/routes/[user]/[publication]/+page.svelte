@@ -418,7 +418,8 @@
 
 <Meta title={pubView.publication.title} description="CAIT" type="site" />
 
-<div class="flex flex-col col-span-full">
+<div class="flex flex-col col-span-full overflow-x:hidden">
+	<img src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="Cover" class="w-full object-cover border rounded select-none lg:hidden my-4" draggable="false" />
 	<div class="flex flex-row justify-start items-center mt-20">
 
 		<h2 class="text-lg md:text-xl lg:text-2xl xl:text-4xl font-semibold break-words pr-2 self-center">{pubView.publication.title}</h2>
@@ -444,6 +445,29 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if pubView.publication.course !== null}
+		<div class="text-surface-700 text-sm md:hidden">
+			<span>Part of the</span>
+			<a href={`/courses/${pubView.publication.course.courseName}`} class="font-semibold text-primary-600 hover:underline">{pubView.publication.course.courseName}</a>
+			<span>course</span>
+		</div>
+	{/if}
+	<!-- Mobile: show publisher below title -->
+	<div class="md:hidden flex-col gap-2 ">
+		<UserProp role="Publisher"
+				  userPhotoUrl={pubView.publication.publisher.profilePicData}
+				  view="material"
+				  bind:user={pubView.publication.publisher}
+				  subject={pubView.publication}/>
+
+		{#each pubView.publication.maintainers as maintainer}
+			{#if maintainer.id != pubView.publication.publisher.id}
+				<UserProp role="Maintainer" userPhotoUrl={maintainer.profilePicData}
+						  view="material" user={maintainer} subject={pubView.publication} />
+			{/if}
+		{/each}
+	</div>
 	<div class="flex gap-4 items-center">
 		<div class="flex gap-2">
 			<p class="text-sm text-surface-500">{created}</p>
@@ -468,7 +492,6 @@
 		</div>
 	</div>
 </div>
-
 <div class="col-span-full grid grid-cols-1 gap-8 lg:grid-cols-4 lg:gap-12 items-start w-full">
 
 	<!--  LEFT BIG COLUMN  -->
@@ -505,10 +528,10 @@
 			</section>
 		</div>
 
-		<p class="text-surface-700 dark:text-surface-400 w-full max-w-full break-words">
-			<span class="font-bold text-surface-800">Description:</span>
-			<span class="whitespace-pre-wrap">{pubView.publication.description}</span>
-		</p>
+					<section aria-labelledby="description-heading">
+						<h2 id="description-heading" class="text-lg font-semibold text-surface-900 dark:text-surface-50">Description</h2>
+						<p class="mt-1 text-surface-700 dark:text-surface-400 w-full max-w-full break-words whitespace-pre-wrap">{pubView.publication.description}</p>
+					</section>
 		{#if isMaterial}
 			<MaterialDetails
 				timeEstimate={pubView.publication.materials.timeEstimate}
@@ -763,8 +786,8 @@
 	{#key pubView.publication.id}
 		<!--   RIGHT SINGLE 1/4 COLUMN   -->
 		<div class="flex flex-col gap-4">
-			<img src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="Cover" class="w-full max-h-[400px] object-cover border rounded select-none" draggable="false"/>
-			<div class="flex flex-col gap-2">
+						<img src={imgSrc ? imgSrc : defaultCoverPicturePath } alt="Cover" class="w-full max-h-[400px] object-cover border rounded select-none hidden lg:block" draggable="false"/>
+			<div class="hidden md:flex flex-col gap-2 ">
 				<UserProp role="Publisher"
 						  userPhotoUrl={pubView.publication.publisher.profilePicData}
 						  view="material"
@@ -780,7 +803,7 @@
 			</div>
 
 			{#if pubView.publication.course !== null}
-				<div class="text-surface-700 text-sm">
+				<div class="text-surface-700 text-sm hidden md:block">
 					<span>Part of the</span>
 					<a href={`/courses/${pubView.publication.course.courseName}`} class="font-semibold text-primary-600 hover:underline">{pubView.publication.course.courseName}</a>
 					<span>course</span>
