@@ -2,7 +2,7 @@ set -euo pipefail
 
 echo "Initiating deployment for SvelteKit App"
 
-curl -s -X GET \
+curl -fsS -X POST \
   "$COOLIFY_URL/api/v1/applications/$SVELTEKIT_UUID/start" \
   -H "Authorization: Bearer $TOKEN"
 

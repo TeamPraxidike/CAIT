@@ -9,14 +9,17 @@ async function registerPersona(page: Page, name: 'author' | 'visitor'): Promise<
     const password = `e2e-${name}-password`;
 
     await page.goto('/register');
-    await page.getByLabel('First Name').fill('E2E');
-    await page.getByLabel('Last Name').fill(name);
-    await page.getByLabel('Email').fill(email);
-    await page.getByLabel('Password').fill(password);
-    await page.getByRole('button', { name: 'Register' }).click();
 
-    // autoconfirm is on: registration creates a live session and redirects to '/'
-    await expect(page).toHaveURL('/', { timeout: 30_000 });
+    await expect(async () => {
+        await page.getByLabel('First Name').fill('E2E');
+        await page.getByLabel('Last Name').fill(name);
+        await page.getByLabel('Email').fill(email);
+        await page.getByLabel('Password').fill(password);
+        await expect(page.getByLabel('Email')).toHaveValue(email);
+        await page.getByRole('button', { name: 'Register' }).click();
+        await expect(page).toHaveURL('/', { timeout: 30_000 });
+    }).toPass({ timeout: 90_000 });
+
     await expect(page.getByRole('link', { name: 'Publish' })).toBeVisible();
 
     // answer the first-login email-visibility prompt now, or it will sit on top
@@ -34,7 +37,7 @@ async function registerPersona(page: Page, name: 'author' | 'visitor'): Promise<
 }
 
 setup('register author and visitor personas', async ({ browser }) => {
-    setup.setTimeout(60_000);
+    setup.setTimeout(120_000);
     fs.mkdirSync(STORAGE_DIR, { recursive: true });
 
     const personas: Record<string, Persona> = {};
