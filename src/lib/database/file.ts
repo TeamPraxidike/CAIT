@@ -223,23 +223,23 @@ export async function updateCoverPic(
 	isCourse: boolean = false,
 	prismaContext: Prisma.TransactionClient = prisma,
 ) {
-	// handle both courses and publications
-	let query : any = {publicationId : id}
-	if (isCourse) {
-		query = {courseId : id}
-	}
-	// check if the publication already has a coverPic
-	const coverFile = await prismaContext.file.findUnique({
-		where: query,
-	});
-
-	// remove if it does
-	if (coverFile) {
-		await deleteFile(coverFile.path, prismaContext);
-	}
-
 	// if received info about coverPic (so not default)
 	if (coverPic) {
+		// handle both courses and publications
+		let query : any = {publicationId : id}
+		if (isCourse) {
+			query = {courseId : id}
+		}
+		// check if the publication already has a coverPic
+		const coverFile = await prismaContext.file.findUnique({
+			where: query,
+		});
+
+		// remove if it does
+		if (coverFile) {
+			await deleteFile(coverFile.path, prismaContext);
+		}
+
 		// upload new coverPic
 		const buffer: Buffer = Buffer.from(coverPic.info, 'base64'); //correct, skipcheck
 		await addCoverPic(

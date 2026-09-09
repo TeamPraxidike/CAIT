@@ -8,6 +8,7 @@ import {
 } from '@prisma/client';
 import type {
 	FetchedFileArray,
+	FetchedFileItem,
 	MaterialForm,
 	NodeDiffActions,
 	UploadMaterialFileFormat,
@@ -45,7 +46,7 @@ export type ParamsMutableMaterial = {
 	originalCourseIds: number[];
 	courses: CourseWithCoverPic[];
 	course: number | null;
-	coverPic: File | undefined;
+	coverPic: FetchedFileItem | File | undefined;
 	estimate: number;
 	copyright: string;
 	selfMade: boolean | null;

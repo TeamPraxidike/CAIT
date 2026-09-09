@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { FileButton, getToastStore } from '@skeletonlabs/skeleton';
 	import { saveCover } from '$lib/util/indexDB';
+	import type { FetchedFileItem } from '$lib/database/index.js';
+	import { getURLFrontend } from '$lib/util/file.ts';
 
-	export let coverPic: File | undefined = undefined;
+	export let coverPic: FetchedFileItem | File | undefined = undefined;
 	export let toastStore: any = null;
+	export let isEditContext: boolean = false;
 
+	// If the picture was already uploaded it is type FetchedFileItem. Otherwise it is of type File, since it wasnt passed to the endpoint.
+	$: picUrl = getURLFrontend(coverPic);
 
 	if (toastStore == null) {
 		toastStore = getToastStore();
@@ -25,8 +30,12 @@
 
 			if (file.type === 'image/jpeg' || file.type === 'image/png') {
 				coverPic = file;
-				// Persist coverPic to IndexedDB
-				saveCover(file);
+
+				// Persist coverPic to IndexedDB. We only do that if we are not editing a publication, as otherwise
+				// the edited cover picture might show up when publishing a new material.
+				if (!isEditContext)
+					saveCover(file);
+
 			} else {
 				toastStore.trigger({
 					message: 'Invalid file type, please upload a .jpg or .png file',
@@ -42,7 +51,7 @@
 										border-2 border-dashed border-surface-700">
 		<div>
 			{#if coverPic}
-				<img src={URL.createObjectURL(coverPic)}
+				<img src={picUrl}
 					 alt="coverPicture"
 					 class="max-h-96 min-h-56 w-full h-auto object-contain block">
 			{/if}
