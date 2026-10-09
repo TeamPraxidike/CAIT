@@ -45,6 +45,30 @@ cp docker/.env.example docker/.env
 - `../cicd/docker-compose.ci.yml`: the CI override (kept next to the other CI files). It runs
   the database on tmpfs so CI needs no cleanup. See the CI/CD article on YouTrack for details.
 
+## MinIO images
+
+MinIO deleted its official Docker Hub images (`minio/minio`, `minio/mc`) on 2026-09-11. The stack uses
+Chainguard's builds instead (`cgr.dev/chainguard/minio` and `cgr.dev/chainguard/minio-client`), pinned by
+digest in both `docker-compose.yml` and `docker-compose.prod.yml`. Pinning means every environment runs the
+same tested build, and a new upstream build never reaches staging or production by surprise.
+
+The MinIO service runs as root (`user: "0:0"`) because existing storage data is owned by root, while the
+Chainguard image defaults to a non-root user.
+
+### Upgrading to a newer MinIO build
+
+1. Look up the newest builds. Each command prints a `Digest:` line at the top; use that one, not the
+   per-platform digests listed under "Manifests".
+
+       docker buildx imagetools inspect cgr.dev/chainguard/minio:latest
+       docker buildx imagetools inspect cgr.dev/chainguard/minio-client:latest-dev
+
+2. In both compose files, replace the hash after `@sha256:` in the `minio` image line with the first
+   digest, and in the `minio-createbucket` image line with the second.
+3. Open a PR. CI tests the new build on a fresh runner and on staging.
+4. Production uses manual deploys, so merging does not change it. Before deploying production, run the new
+   image against a copy of production's storage data and check that existing files still open.
+
 ## Ports (local)
 
 | Service | Local address |

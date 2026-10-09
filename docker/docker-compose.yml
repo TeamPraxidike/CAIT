@@ -238,18 +238,20 @@ services:
       SEED_SELF_HOST: true
 
   minio:
-    image: minio/minio
+    # Chainguard build pinned by digest (MinIO deleted its Docker Hub images on 2026-09-11).
+    # Refresh: docker buildx imagetools inspect cgr.dev/chainguard/minio:latest
+    image: cgr.dev/chainguard/minio:latest@sha256:25bc63a89475bc494bfbce9bbeddb0421aece3f3968d77c809db5104d07b4545
+    # The image defaults to uid 65532, but the existing ./volumes/storage data is root-owned
+    user: "0:0"
     ports:
       - '9000:9000'
       - '9001:9001'
     environment:
-      #      MINIO_ROOT_USER: supa-storage
-      #      MINIO_ROOT_PASSWORD: secret1234
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server --console-address ":9001" /data
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://minio:9000/minio/health/live" ]
+      test: [ "CMD", "mc", "ready", "local" ]
       interval: 2s
       timeout: 10s
       retries: 5
@@ -257,17 +259,18 @@ services:
       - ./volumes/storage:/data:z
 
   minio-createbucket:
-    image: minio/mc
+    # -dev variant: includes /bin/sh
+    image: cgr.dev/chainguard/minio-client:latest-dev@sha256:e63984c5dfdbe43726c3f4de5eeb30939c5388113e7278d67630f3286954c60e
     restart: "no"
     depends_on:
       minio:
         condition: service_healthy
     entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc alias set supa-minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
-      /usr/bin/mc mb --ignore-existing supa-minio/stub;
-      exit 0;
+      /bin/sh -ec "
+      mc alias set supa-minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
+      mc mb --ignore-existing supa-minio/stub
       "
+
 
   storage:
     container_name: supabase-storage
@@ -282,6 +285,8 @@ services:
         condition: service_started
       minio:
         condition: service_healthy
+      minio-createbucket:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
