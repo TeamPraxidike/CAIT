@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Meta } from '$lib';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let sponsorContainer: HTMLDivElement | null = null;
 	let intervalId: ReturnType<typeof setInterval> | null = null;
@@ -37,14 +37,11 @@
 
 	onMount(() => {
 		if (window.innerWidth < 768) startAutoScroll();
-		window.addEventListener('resize', handleResize);
-	});
-
-	onDestroy(() => {
-		stopAutoScroll();
-		window.removeEventListener('resize', handleResize);
+		return stopAutoScroll();
 	});
 </script>
+
+<svelte:window on:resize={handleResize} />
 
 <Meta title="About" description="CAIT" type="site" />
 
