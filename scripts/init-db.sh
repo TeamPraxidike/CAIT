@@ -7,6 +7,7 @@ chmod +x scripts/createSAMLidp.sh
 
 npx tsx ./scripts/seedTriggers.ts
 npx tsx ./scripts/publicSchemaRLSPolicies.ts
+npx tsx ./scripts/seedRetentionJobs.ts
 
 echo 'Checking type of Filesystem...'
 
