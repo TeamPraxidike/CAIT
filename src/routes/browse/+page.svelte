@@ -322,13 +322,13 @@
 
 <Meta title="Browse" description="Browse CAIT publications - slides, videos, exam questions etc." type="website" />
 
-<div class="col-span-full mt-24">
+<div class="col-span-full mt-24 mb-6">
 	<SearchBar searchType={pageType} bind:isSemanticActive={isSemanticActive} bind:inputKeywords={searchWord}
 			   on:press={() => searchActive = true}
 			   on:SearchQuery={onSearch} on:SemanticSearchQuery={onSemanticSearch} />
 </div>
 
-<div class="col-span-3 border-gray-700">
+<div class="col-span-full md:col-span-3 border-gray-700">
 
 	<div class="flex">
 		<div>
@@ -386,7 +386,7 @@
 	{/if}
 </div>
 
-<div class="col-span-9 grid grid-cols-3 gap-2 auto-rows-min">
+<div class="col-span-full md:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-2 auto-rows-min">
 	{#if (pageType !== PageType.PEOPLE) && (pageType !== PageType.SEMANTIC) }
 		<div class="col-span-full">
 			<Paginator

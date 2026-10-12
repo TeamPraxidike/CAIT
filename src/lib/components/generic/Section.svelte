@@ -16,9 +16,9 @@
 
 	// if the image is wider than it is high we get it looks very small so we need a different width
 	export let isImageWider = false;
-	const widthClass = isImageWider ? 'w-5/12' : 'w-1/3';
+	const widthClass = isImageWider ? 'md:w-5/12 lg:w-5/12' : 'md:w-1/3 lg:w-1/3';
 	// make the container wider when showing the user list (use 2/3 so it takes more space)
-	$: containerClass = userList ? 'md:w-2/3 lg:w-2/3 w-full' : widthClass;
+	$: containerClass = userList ? 'w-full md:w-2/3 lg:w-2/3' : 'w-full ' + widthClass;
 
 
     const icons = ["akar-icons:video", "icon-park-solid:notes", "material-symbols:assignment", "mdi:presentation", "healthicons:i-exam-multiple-choice", "mage:dots-horizontal-circle"]

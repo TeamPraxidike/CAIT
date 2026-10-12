@@ -72,20 +72,23 @@
     {#if page.data.session?.user.id === user.id}
         <TabGroup justify="justify-center" class="col-span-8 lg:col-span-full">
             <Tab bind:group={tabSet} name="tab1" value={1}>
-                <p>Saved Publications</p>
+                <span class="md:hidden">Saved</span>
+                <span class="hidden md:inline">Saved Publications</span>
             </Tab>
             <Tab bind:group={tabSet} name="tab2" value={0}>
-                <p>Your Publications</p>
+                <span class="md:hidden">Your</span>
+                <span class="hidden md:inline">Your Publications</span>
             </Tab>
             <Tab bind:group={tabSet} name="tab3" value={2}>
-                <p>Draft Publications</p>
+                <span class="md:hidden">Draft</span>
+                <span class="hidden md:inline">Draft Publications</span>
             </Tab>
             <svelte:fragment slot="panel">
                 {#if tabSet === 0}
                     {#if posts.length === 0}
                         <p class="col-span-2 text-center">So empty... There are no publications here </p>
                     {:else}
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {#each cardPosts as publication, i}
                                 <div class="col-span-1">
                                     <PublicationCard imgSrc={publication.coverPicData}
@@ -99,7 +102,7 @@
                         </div>
                     {/if}
                 {:else if tabSet === 1}
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {#if saved.length !== 0}
                             {#each saved as publication}
                                 <div class="col-span-1">
@@ -115,7 +118,7 @@
                     {#if posts.length === 0}
                         <p class="col-span-2 text-center">You don't have any draft publications</p>
                     {:else}
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {#each cardDrafts as publication, i}
                                 <div class="col-span-1">
                                     <PublicationCard imgSrc={publication.coverPicData}
