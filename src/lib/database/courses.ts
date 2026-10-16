@@ -153,7 +153,8 @@ export async function findCourseByMantainerExtended(userId: string): Promise<Cou
 			maintainers: {
 				include: { profilePic: true }
 			},
-			coverPic: true
+			coverPic: true,
+			publications: true
 		}
 	});
 
@@ -272,7 +273,7 @@ export type PublicationWithRelations = Prisma.PublicationGetPayload<{
   };
 }>;
 
-export async function getPublicationsForCourse(c: Number): Promise<PublicationWithRelations[]> {
+export async function getPublicationsForCourse(c: number): Promise<PublicationWithRelations[]> {
 	return await prisma.publication.findMany({
 		where: { courseId: c },
 		orderBy: { createdAt: 'desc' },
