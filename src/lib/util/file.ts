@@ -140,6 +140,8 @@ export function appendFile(
  * @param files
  */
 export function allUploadsDone(fileTUSMetadata: { [key: string] : FileTUSMetadata }, files: FileList): boolean{
+	if (files.length == 0) return true;
+
 	for (const f of files){
 		if (!(fileTUSMetadata[f.name]['isDone'])){
 			return false;

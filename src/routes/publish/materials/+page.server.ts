@@ -31,7 +31,7 @@ export const actions = {
 	publish: async ({ request, fetch }) => {
 		const data = await request.formData();
 
-		const materialForm = await buildMaterialForm(data);
+		const materialForm = await buildMaterialForm(data, false);
 
 		// if there was an error building the material form, return it directly
 		if (!materialForm || typeof materialForm !== 'object' || !('data' in materialForm)) {
