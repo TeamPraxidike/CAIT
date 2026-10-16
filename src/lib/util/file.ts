@@ -215,6 +215,26 @@ export async function downloadFileFromSupabase(supabaseClient: any, f: FetchedFi
 }
 
 /**
+ * Checks whether a coverPic is of type FetchedFileItem, since something at runtime prevents us from just using instanceof
+ * (idk why, if you know how to, feel free to remove this function)
+ * @param x
+ */
+export function isFetchedFileItem(x: any): x is FetchedFileItem {
+	return x && typeof x.fileId === 'string' && ('data' in x);
+}
+
+/**
+ * In publishing or editing we can receive the cover picture as a File (if it was just uploaded or fetched from the indexDB)
+ * or as a FileFetchedItem (if it was fetched from the database). This function returns the URL of the cover picture, regardless of its type.
+ * @param coverPic
+ */
+export function getURLFrontend(coverPic: FetchedFileItem | File | undefined): string | undefined {
+	if (isFetchedFileItem(coverPic)) return coverPic.data ?? undefined;
+	else if (coverPic instanceof File) return URL.createObjectURL(coverPic);
+	else return undefined;
+}
+
+/**
  * A map of file types to their respective icons.
  * @note the code below is bloated, but it is necessary to maintain the map.
  */

@@ -20,6 +20,7 @@
 	import PublishWorkflow from '$lib/components/publication/publish/PublishWorkflow.svelte';
 	import type {FetchedFileArray} from "$lib/database";
 	import {ProgressRadial} from "@skeletonlabs/skeleton";
+	import type { FetchedFileItem } from '$lib/database/index.js';
 
 
 	export let form: ActionData;
@@ -150,7 +151,7 @@
 	});
 
 	// cover
-	let coverPic: File | undefined = undefined;
+	let coverPic: FetchedFileItem | File | undefined = data.pubView.coverFileData;
 	$: uid = page.data.session?.user.id;
 	let showCourseProgressRadial = false;
 
