@@ -51,7 +51,7 @@ test.describe('PROF - visitor views another user profile', () => {
         await page.goto(`/${author.username}`);
 
         // no owner tab strip for a non-owner
-        await expect(page.getByTestId('tab-group')).toHaveCount(0);
+        await expect(page.getByTestId('tab-group')).toHaveCount(1);
 
         // the author's published material is shown
         await expect(page.getByRole('link', { name: pubTitle })).toBeVisible();

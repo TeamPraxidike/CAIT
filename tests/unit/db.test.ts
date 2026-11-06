@@ -126,6 +126,11 @@ describe('getAllPublications', () => {
 				materials: true,
 				circuit: true,
 				coverPic: true,
+				course: {
+					select: {
+						educationalLevel: true
+					}
+				},
 				publisher: {
 					select: {
 						firstName: true,
@@ -185,6 +190,11 @@ describe('getAllPublications', () => {
 				materials: true,
 				circuit: true,
 				coverPic: true,
+				course: {
+					select: {
+						educationalLevel: true
+					}
+				},
 				publisher: {
 					select: {
 						firstName: true,
@@ -225,6 +235,11 @@ describe('getAllPublications', () => {
 				materials: true,
 				circuit: true,
 				coverPic: true,
+				course: {
+					select: {
+						educationalLevel: true
+					}
+				},
 				publisher: {
 					select: {
 						firstName: true,

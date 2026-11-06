@@ -85,16 +85,6 @@
 		}
 	}
 
-	let showModal = false;
-
-	function handleDeletion(e: CustomEvent<{ courseId: number }>) {
-		const courseId = e.detail.courseId;
-		courses = courses.filter((c) => c.id !== courseId);
-		if (selectedCourseId === courseId) {
-			selectedCourseId = null;
-		}
-		dispatch('courseDeleted', { courseId });
-	}
 
 	function handleDeselection() {
 		dispatch('deselectCourse');
@@ -105,14 +95,7 @@
 	}
 
 	const openNewCourseModal = () => {
-		showModal = true;
 		dispatch('showCourseModal');
-	};
-
-	const closeModal = () => (showModal = false);
-
-	const refresh = () => {
-		// invalidate current page data or manually refetch from endpoint
 	};
 </script>
 
@@ -135,10 +118,6 @@
 								bind:course
 								bind:selectedCourseId
 								bind:previousCourseId
-								canDelete={originalCourseIds.includes(
-									course.id,
-								)}
-								on:courseDeleted={handleDeletion}
 								on:deselectCourse={handleDeselection}
 								on:editCourse={handleEdit} />
 						{/each}
