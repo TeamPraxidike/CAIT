@@ -42,22 +42,22 @@
 		<h3 class="text-center mt-4 text-surface-700 font-semibold text-xl">Register</h3>
 		<label for="firstName">
 			First Name
-			<input class="input rounded-lg bg-white" name="firstName" type="text" bind:value={firstName} on:keypress={handleInputEnter}/>
+			<input id="firstName" class="input rounded-lg bg-white" name="firstName" type="text" bind:value={firstName} on:keypress={handleInputEnter}/>
 		</label>
 		<label for="lastName">
 			Last Name
-			<input class="input rounded-lg bg-white" name="lastName" type="text" bind:value={lastName} on:keypress={handleInputEnter}/>
+			<input id="lastName" class="input rounded-lg bg-white" name="lastName" type="text" bind:value={lastName} on:keypress={handleInputEnter}/>
 		</label>
 		<label for="email">
 			Email
-			<input class="input rounded-lg bg-white" name="email" type="email" bind:value={email} on:keypress={handleInputEnter}/>
+			<input id="email" class="input rounded-lg bg-white" name="email" type="email" bind:value={email} on:keypress={handleInputEnter}/>
 		</label>
 		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
 			<span>{validationErrors.email}</span>
 		</div>
 		<label for="password">
 			Password
-			<input minlength="8" maxlength="32" class="input rounded-lg bg-white" name="password" type="password" bind:value={password} on:keypress={handleInputEnter}/>
+			<input id="password" minlength="8" maxlength="32" class="input rounded-lg bg-white" name="password" type="password" bind:value={password} on:keypress={handleInputEnter}/>
 		</label>
 		<div class="text-sm px-2 rounded-lg variant-soft-error text-wrap">
 			<span>{validationErrors.password}</span>

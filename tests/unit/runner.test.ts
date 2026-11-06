@@ -5,7 +5,6 @@ import {
 	getCircuitByPublicationId,
 	handleSimilarity
 } from "$lib/database";
-import {getFilesForMaterial, handleFileTokens} from "$lib/database/file";
 import {
 	compareNodesInBackground,
 	compareMetaInBackground,
@@ -78,7 +77,7 @@ describe('comparison functions', () => {
 	it('should compare files in background', async () => {
 		const mockResultFile: ResultFile = {
 			similarity: 0.9,
-			filesToUpdate: [{ filePath: 'path/to/file', tokens: 'tokenString' }]
+			filesToUpdate: [{ filePath: 'path/to/file', tokens: 'tokenString', chunks: [] }]
 		};
 		mockPiscinaRun.mockResolvedValue(mockResultFile);
 		const mockFileA = {
@@ -88,6 +87,7 @@ describe('comparison functions', () => {
 			text: 'some text',
 			userId: 'user1',
 			publicationId: 1,
+			courseId: null,
 			materialId: 1
 		};
 		const mockFileB = {
@@ -97,6 +97,7 @@ describe('comparison functions', () => {
 			text: 'some other text',
 			userId: 'user2',
 			publicationId: 2,
+			courseId: null,
 			materialId: 2
 		};
 		const result = await compareFilesInBackground([mockFileA], [mockFileB], mockPiscinaInstance);
@@ -105,7 +106,7 @@ describe('comparison functions', () => {
 	});
 
 	it('should parse initial material file in background', async () => {
-		const mockFileTokenInfo: FileTokenInfo = [{ filePath: 'path/to/file', tokens: 'tokenString' }];
+		const mockFileTokenInfo: FileTokenInfo = [{ filePath: 'path/to/file', tokens: 'tokenString', chunks: [] }];
 		mockPiscinaRun.mockResolvedValue(mockFileTokenInfo);
 		const mockFile = {
 			path: 'path/to/file',
@@ -114,6 +115,7 @@ describe('comparison functions', () => {
 			text: 'some text',
 			userId: 'user1',
 			publicationId: 1,
+			courseId: null,
 			materialId: 1
 		};
 		const result = await initialMaterialFileParseInBackground([mockFile], mockPiscinaInstance);
@@ -145,6 +147,8 @@ describe('comparison functions', () => {
 			prerequisites: ['PR'],
 			createdAt: new Date(),
 			updatedAt: new Date(),
+			isDraft: false,
+			courseId: null,
 			comments: [],
 			publisher: {
 				id: 'pub1',
@@ -156,6 +160,8 @@ describe('comparison functions', () => {
 				reputation: 0,
 				password: null,
 				aboutMe: '',
+				platformId: 'platform1',
+				institutionId: 'institution1',
 				saved: [],
 				posts: [],
 				liked: [],
@@ -174,13 +180,13 @@ describe('comparison functions', () => {
 				Authenticator: []
 			},
 			publisherId: 'pub1',
+			coverPic: null,
 			savedBy: [],
 			likedBy: [],
 			reportedBy: [],
 			type: PublicationType.Material,
 			node: [],
 			savedByAllTime: [],
-			coverPic: null,
 			similarToThis: [],
 			thisSimilarTo: [],
 		}
@@ -193,7 +199,7 @@ describe('comparison functions', () => {
 			theoryPractice: null,
 			publication: publication,
 			files: mockFiles
-		};
+		} as any;
 
 		///////////////////
 		const mockFiles2 = [{
@@ -205,6 +211,7 @@ describe('comparison functions', () => {
 			profilePic: null,
 			publicationId: 2,
 			coverPic: null,
+			courseId: null,
 			materialId: 1
 		}];
 		const publication2 = {
@@ -219,6 +226,8 @@ describe('comparison functions', () => {
 			prerequisites: ['PR'],
 			createdAt: new Date(),
 			updatedAt: new Date(),
+			isDraft: false,
+			courseId: null,
 			comments: [],
 			publisher: {
 				id: 'pub1',
@@ -248,13 +257,13 @@ describe('comparison functions', () => {
 				Authenticator: []
 			},
 			publisherId: 'pub2',
+			coverPic: null,
 			savedBy: [],
 			likedBy: [],
 			reportedBy: [],
 			type: PublicationType.Material,
 			node: [],
 			savedByAllTime: [],
-			coverPic: null,
 			similarToThis: [],
 			thisSimilarTo: [],
 		}
@@ -267,7 +276,7 @@ describe('comparison functions', () => {
 			theoryPractice: null,
 			publication: publication2,
 			files: mockFiles2
-		};
+		} as any;
 		///////////////////
 
 		// Dynamically import the modules
@@ -275,31 +284,12 @@ describe('comparison functions', () => {
 		const fileModule = await import('$lib/database/file');
 		const piscinaUtilsModule = await import('$lib/PiscinaUtils/runner');
 
-		const mockReturnValue = [mockMaterial, mockMaterial2] as unknown as ReturnType<typeof databaseModule.getAllMaterials>;
-
-		const handleSimilarity = vi.spyOn(databaseModule, 'handleSimilarity').mockImplementation(async () => {
-			return;
-		});
-
-		const handleFileTokens = vi.spyOn(fileModule, 'handleFileTokens').mockImplementation(async () => {
-			return;
-		});
+		const mockReturnValue = [mockMaterial, mockMaterial2] as any;
 
 		const getFilesMock = vi.spyOn(fileModule, 'getFilesForMaterial').mockResolvedValue(mockFiles);
-		const initialMaterialMock= vi.spyOn(piscinaUtilsModule, 'initialMaterialFileParseInBackground');
 
 		const getAllMaterialsMock= vi.spyOn(databaseModule, 'getAllMaterials').mockImplementation( () => mockReturnValue);
 		const getMaterialPubIdMock = vi.spyOn(databaseModule, 'getMaterialByPublicationId').mockResolvedValue(mockMaterial);
-
-		const compareFilesMock = vi.spyOn(piscinaUtilsModule, 'compareFilesInBackground').mockResolvedValue({ similarity: 0.9, filesToUpdate: [] });
-		const compareMetaMock = vi.spyOn(piscinaUtilsModule, 'compareMetaInBackground').mockResolvedValue({
-			title: 0.9,
-			description: 0.8,
-			learningObjectives: 0.7,
-			prerequisites: 0.6,
-			tags: 0.5,
-			difficulty: 0.4
-		});
 
 		mockPiscinaRun
 			// first call initial parsing
@@ -319,33 +309,53 @@ describe('comparison functions', () => {
 
 		// Assert that the mocks were called with the correct arguments
 		expect(getFilesMock).toHaveBeenCalledWith(1);
-		expect(initialMaterialMock).toHaveBeenCalledWith(mockFiles, mockPiscinaInstance);
-		//expect(initialMaterialMock).toHaveBeenCalled();
 		expect(getAllMaterialsMock).toHaveBeenCalled();
 		expect(getMaterialPubIdMock).toHaveBeenCalledWith(1);
-		// expect(compareFilesMock).toHaveBeenCalledWith(mockFiles, mockFiles, mockPiscinaInstance);
-		// expect(compareMetaMock).toHaveBeenCalledWith({
-		// 	title: 'Title',
-		// 	description: 'Description',
-		// 	learningObjectives: ['LO'],
-		// 	prerequisites: ['PR'],
-		// 	tags: ['tag'],
-		// 	difficulty: 'EASY'
-		// }, {
-		// 	title: 'Title',
-		// 	description: 'Description',
-		// 	learningObjectives: ['LO'],
-		// 	prerequisites: ['PR'],
-		// 	tags: ['tag'],
-		// 	difficulty: 'EASY'
-		// }, mockPiscinaInstance);
-		expect(handleSimilarity).toHaveBeenCalled();
-		expect(handleFileTokens).toHaveBeenCalled();
+		expect(mockPiscinaRun).toHaveBeenNthCalledWith(1, { pubFiles: mockFiles }, { name: 'initialParse' });
+		expect(mockPiscinaRun).toHaveBeenNthCalledWith(2, { pubAFiles: mockFiles, pubBFiles: mockFiles2 }, { name: 'compareFiles' });
+		expect(mockPiscinaRun).toHaveBeenNthCalledWith(3, {
+			pubA: {
+				title: 'Title',
+				description: 'Description',
+				learningObjectives: ['LO'],
+				prerequisites: ['PR'],
+				tags: ['tag'],
+				difficulty: Difficulty.easy
+			},
+			pubB: {
+				title: 'Title 2',
+				description: 'Description 2',
+				learningObjectives: ['LO'],
+				prerequisites: ['PR'],
+				tags: ['tag'],
+				difficulty: Difficulty.hard
+			}
+		}, { name: 'compareMeta' });
+		expect(databaseModule.handleSimilarity).toHaveBeenCalled();
+		expect(fileModule.handleFileTokens).toHaveBeenCalled();
 
 	});
 
 	it('should enqueue circuit comparison', async () => {
-		const mockCircuits = [{ publicationId: 2 }];
+		const mockCircuits = [{ publicationId: 2,
+			publication: {
+				title: 'Title',
+				description: 'Description',
+				learningObjectives: ['LO'],
+				prerequisites: ['PR'],
+				tags: [{ content: 'tag' }],
+				difficulty: 'EASY',
+				coverPic: null,
+				id: 2,
+				likes: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isDraft: false,
+				courseId: null,
+				publisherId: 'pub2'
+			},
+			nodes: [{ publicationId: 3 }]
+		}] as any;
 		const mockCircuit = {
 			publication: {
 				title: 'Title',
@@ -353,43 +363,56 @@ describe('comparison functions', () => {
 				learningObjectives: ['LO'],
 				prerequisites: ['PR'],
 				tags: [{ content: 'tag' }],
-				difficulty: 'EASY'
+				difficulty: 'EASY',
+				coverPic: null,
+				id: 1,
+				likes: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isDraft: false,
+				courseId: null,
+				publisherId: 'pub1'
 			},
 			nodes: [{ publicationId: 3 }]
-		};
-
+		} as any;
 		vi.mocked(getAllCircuits).mockResolvedValue(mockCircuits);
 		vi.mocked(getCircuitByPublicationId).mockResolvedValue(mockCircuit);
-		vi.mocked(compareNodesInBackground).mockResolvedValue(0.9);
-		vi.mocked(compareMetaInBackground).mockResolvedValue({
-			title: 0.9,
-			description: 0.8,
-			learningObjectives: 0.7,
-			prerequisites: 0.6,
-			tags: 0.5,
-			difficulty: 0.4
-		});
 
-		await enqueueCircuitComparison(1);
+
+		mockPiscinaRun
+			.mockResolvedValueOnce(0.9)
+			.mockResolvedValueOnce({
+				title: 0.9,
+				description: 0.8,
+				learningObjectives: 0.7,
+				prerequisites: 0.6,
+				tags: 0.5,
+				difficulty: 0.4
+			});
+
+		await enqueueCircuitComparison(1, mockPiscinaInstance);
 
 		expect(getAllCircuits).toHaveBeenCalled();
 		expect(getCircuitByPublicationId).toHaveBeenCalledWith(1);
-		expect(compareNodesInBackground).toHaveBeenCalledWith([3], [3], mockPiscinaInstance);
-		expect(compareMetaInBackground).toHaveBeenCalledWith({
-			title: 'Title',
-			description: 'Description',
-			learningObjectives: ['LO'],
-			prerequisites: ['PR'],
-			tags: ['tag'],
-			difficulty: 'EASY'
-		}, {
-			title: 'Title',
-			description: 'Description',
-			learningObjectives: ['LO'],
-			prerequisites: ['PR'],
-			tags: ['tag'],
-			difficulty: 'EASY'
-		}, mockPiscinaInstance);
+		expect(mockPiscinaRun).toHaveBeenNthCalledWith(1, { pubANodes: [3], pubBNodes: [3] }, { name: 'compareNodes' });
+		expect(mockPiscinaRun).toHaveBeenNthCalledWith(2, {
+			pubA: {
+				title: 'Title',
+				description: 'Description',
+				learningObjectives: ['LO'],
+				prerequisites: ['PR'],
+				tags: ['tag'],
+				difficulty: 'EASY'
+			},
+			pubB: {
+				title: 'Title',
+				description: 'Description',
+				learningObjectives: ['LO'],
+				prerequisites: ['PR'],
+				tags: ['tag'],
+				difficulty: 'EASY'
+			}
+		}, { name: 'compareMeta' });
 		expect(handleSimilarity).toHaveBeenCalled();
 	});
 });

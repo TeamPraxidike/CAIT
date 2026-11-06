@@ -28,8 +28,26 @@ export async function GET({ params, locals }) {
 
 export async function DELETE({ params, locals }) {
 	const { commentId } = params;
+	let comment;
+	try {
 
-	const comment = await getComment(parseInt(commentId));
+		comment = await getComment(parseInt(commentId));
+	} catch (error) {
+		return new Response(
+					JSON.stringify({ error: 'Comment not found' }),
+					{
+						status: 404,
+					},
+				);
+	}
+	if (!comment)
+			return new Response(
+					JSON.stringify({ error: 'Comment not found' }),
+					{
+						status: 404,
+					},
+				);
+
 
 	const authError = await verifyAuth(locals, comment.userId);
 	if (authError) return authError;
@@ -46,7 +64,19 @@ export async function DELETE({ params, locals }) {
 
 export async function PUT({ params, request, locals }) {
 	const body = await request.json();
+
+	if (parseInt(body.commentId) !== parseInt(params.commentId)){
+		return new Response(JSON.stringify({ error:"Mismatch found" }), { status: 409 }); 
+	}
+
 	const comment = await getComment(parseInt(body.commentId));
+	if (!comment)
+		return new Response(
+				JSON.stringify({ error: 'Comment not found' }),
+				{
+					status: 404,
+				},
+			);
 
 	const authError = await verifyAuth(locals, comment.userId);
 	if (authError) return authError;

@@ -138,9 +138,10 @@
 	bind:data={paramsMutable}
 	paramsImmutable={paramsImmutable}
 	dataCircuit={dataCircuit}
-		bind:showAnimation={showAnimation}
-		edit={true}
-		originalFiles={originalFiles}
+	bind:showAnimation={showAnimation}
+	edit={true}
+	initialDraft={data.pubView.publication.isDraft}
+	originalFiles={originalFiles}
 	originalFileNames={originalFileNames}
 	circuit={true}
 />
