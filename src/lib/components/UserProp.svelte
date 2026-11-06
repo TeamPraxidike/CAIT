@@ -1,4 +1,4 @@
-<script lang="ts">
+ <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { Course, User } from '@prisma/client';

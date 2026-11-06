@@ -235,9 +235,10 @@
 		bind:data={paramsMutable}
 		bind:dataMaterial={paramsMutableMaterial}
 		paramsImmutable={paramsImmutable}
-			bind:showAnimation={showAnimation}
-			edit={true}
-			originalFiles={originalFiles}
+		bind:showAnimation={showAnimation}
+		edit={true}
+		initialDraft={data.pubView.publication.isDraft}
+		originalFiles={originalFiles}
 		originalFileNames={originalFileNames}
 		materialId={materialId}/>
 {:catch error}

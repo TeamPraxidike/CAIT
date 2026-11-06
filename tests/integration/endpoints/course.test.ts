@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { testingUrl } from '../setup';
+import { apiTestingUrl } from '../setup';
 import { createRandomCourse, generateCourseData } from '../../utility/courses';
 import { createUniqueUser } from '../../utility/users';
 import { publicationsWithCourses } from '../../utility/courses';
@@ -14,7 +14,7 @@ import {
 describe('[POST] /api/course', () => {
 	it('should add a course to the database', async () => {
 		const user = await createUniqueUser();
-		const response = await fetch(`${testingUrl}/course`, {
+		const response = await fetch(`${apiTestingUrl}/course`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ describe('[POST] /api/course', () => {
 	it('should not add a courses with the same name', async () => {
 		const user = await createUniqueUser();
 		const courseData = generateCourseData(user.id);
-		const response = await fetch(`${testingUrl}/course`, {
+		const response = await fetch(`${apiTestingUrl}/course`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ describe('[POST] /api/course', () => {
 
 		const courseData2 = generateCourseData(user.id);
 		courseData2.courseName = courseData.courseName;
-		const response2 = await fetch(`${testingUrl}/course`, {
+		const response2 = await fetch(`${apiTestingUrl}/course`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ describe('[GET] /api/course/', () => {
 			courses.push((await createRandomCourse((await createUniqueUser()).id)).courseName);
 		}
 
-		const response = await fetch(`${testingUrl}/course`);
+		const response = await fetch(`${apiTestingUrl}/course`);
 		expect(response.status).toBe(200);
 		const data = await response.json();
 		expect(data).toBeDefined();
@@ -73,7 +73,7 @@ describe('[GET] /api/course/', () => {
 describe('[DELETE] /api/course/[courseId]', () => {
 	it('should add a course to the database', async () => {
 		const res = await publicationsWithCourses();
-		const response = await fetch(`${testingUrl}/course/${res.course.id}`, {
+		const response = await fetch(`${apiTestingUrl}/course/${res.course.id}`, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ describe('[GET] /api/course-extended/user/[id]', () => {
 		const user = await createUniqueUser();
 		await createRandomCourse(user.id);
 
-		const response = await fetch(`${testingUrl}/course-extended/user/${user.id}`);
+		const response = await fetch(`${apiTestingUrl}/course-extended/user/${user.id}`);
 		expect(response.status).toBe(200);
 
 		const data: CourseWithMaintainersAndProfilePic[] = await response.json();
@@ -116,7 +116,7 @@ describe('[GET] /api/course-extended', () => {
 		const user = await createUniqueUser();
 		await createRandomCourse(user.id);
 
-		const response = await fetch(`${testingUrl}/course-extended`);
+		const response = await fetch(`${apiTestingUrl}/course-extended`);
 		expect(response.status).toBe(200);
 
 		const data: CourseWithMaintainersAndProfilePic[] = await response.json();

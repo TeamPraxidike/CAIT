@@ -3,3 +3,14 @@ providers = ['node']
 [phases.setup]
 # vps setup also includes openssl
 nixPkgs = ["nodejs_22", "openssl"]
+aptPkgs = ["jq", "curl", "wget"]
+
+[phases.install]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+# this runs npm start, which includes node build (for prod)
+cmd = "npm start"
