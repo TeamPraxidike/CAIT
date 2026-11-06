@@ -77,7 +77,7 @@ export const load: LayoutServerLoad = async ({
 	};
 };
 
-type UserPfp = User & {
+export type UserPfp = User & {
 	profilePicData: string;
 };
 /**

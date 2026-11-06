@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { load, pickRandomPublication } from '../../src/routes/+page.server';
+import { load, _pickRandomPublication } from '../../src/routes/+page.server';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -7,12 +7,12 @@ describe('homepage featured publication', () => {
 	it('picks a publication using the supplied random value', () => {
 		const publications = Array.from({ length: 10 }, (_, index) => index + 1);
 
-		expect(pickRandomPublication(publications, () => 0)).toBe(1);
-		expect(pickRandomPublication(publications, () => 0.99)).toBe(10);
+		expect(_pickRandomPublication(publications, () => 0)).toBe(1);
+		expect(_pickRandomPublication(publications, () => 0.99)).toBe(10);
 	});
 
 	it('returns null when there are no publications', () => {
-		expect(pickRandomPublication([], vi.fn())).toBeNull();
+		expect(_pickRandomPublication([], vi.fn())).toBeNull();
 	});
 
 	it('loads and selects from the ten most-liked publications', async () => {

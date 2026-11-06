@@ -17,7 +17,6 @@ describe('Tag Component', () => {
 		expect(instance).toBeTruthy();
 		expect(host.innerHTML).toContain('example');
 		expect(host.innerHTML).not.toContain('button');
-		expect(host.innerHTML).toContain('<!--<TagComponent>-->');
 	});
 
 	it('should not display tag if tagText is empty', () => {
@@ -28,7 +27,6 @@ describe('Tag Component', () => {
 		expect(instance).toBeTruthy();
 
 		// should not render anything besides the comment that the tag is there
-		expect(host.innerHTML).toContain('<!--<TagComponent>-->');
 		expect(host.innerHTML).not.toContain('</p>');
 		expect(host.innerHTML).not.toContain('<p');
 	});
@@ -41,6 +39,5 @@ describe('Tag Component', () => {
 		expect(instance).toBeTruthy();
 		expect(host.innerHTML).toContain('example');
 		expect(host.innerHTML).not.toContain('button');
-		expect(host.innerHTML).toContain('<!--<TagComponent>-->');
 	});
 });

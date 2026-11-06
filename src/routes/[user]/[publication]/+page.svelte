@@ -27,7 +27,7 @@
         AccordionItem
     } from '@skeletonlabs/skeleton';
     import {goto} from '$app/navigation';
-    import { IconMapExtension, saveFile} from '$lib/util/file';
+	import {downloadFileFromSupabase, IconMapExtension, saveFile} from '$lib/util/file';
     import {
         type Comment as PrismaComment,
         type Difficulty,
@@ -38,7 +38,7 @@
     import {page} from '$app/state';
     import { SvelteFlowProvider } from '@xyflow/svelte';
     import type { NodeInfo } from '$lib/components/circuits/methods/CircuitTypes';
-	import type { FetchedFileArray } from '$lib/database';
+	import type {FetchedFileArray, FetchedFileItem} from '$lib/database';
 	import CircuitContributorList from '$lib/components/publication/preview/CircuitContributorList.svelte';
 	import MaterialDetails from '$lib/components/publication/preview/MaterialDetails.svelte';
 	import DraftShareButton from '$lib/components/publication/DraftShareButton.svelte';
@@ -61,8 +61,6 @@
 	let isMaterial: boolean;
 	let likedComments: number[] = [];
 	let likedReplies: number[] = [];
-	// let files: FileList | [];
-	let files: FetchedFileArray | [];
 	let liked: boolean = false;
 	let likes: number;
 	let likedPublications: number[] = [];
@@ -243,10 +241,11 @@
 	async function downloadFiles() {
 		const zip = new JSZip();
 
+		const files: FetchedFileArray = await data.fetchedFiles;
 		for (let i = 0; i < files.length; i++) {
-			const file = files[i];
-			const blob = await file.arrayBuffer();
-			zip.file(file.name, blob);
+			const file: FetchedFileItem = files[i];
+			const downloaded = await downloadFileFromSupabase(supabaseClient, file);
+			if (downloaded) zip.file(downloaded.name, await downloaded.arrayBuffer());
 		}
 
 		const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -432,11 +431,14 @@
 		{#if canManagePublication}
 			<div class="space-x-1">
 				<button bind:this={hoverEdit}
+						data-testid="edit-publication"
 						on:click={() => goto(`/${pubView.publication.publisher.username}/${pubView.publication.id}/edit/${isMaterial ? 'material' : 'circuit'}`)}
 						type="button" class="btn self-center p-0 m-0">
 					<Icon icon={editIcon} width="24" class="text-surface-700" />
 				</button>
-				<button on:click={promptForDeletion} type="button" class="btn p-0 m-0" bind:this={hoverDelete}>
+				<button on:click={promptForDeletion} type="button" class="btn p-0 m-0"
+						data-testid="delete-publication"
+						bind:this={hoverDelete}>
 					<Icon icon={deleteIcon} width="24" class="text-error-400" />
 				</button>
 			</div>
@@ -518,18 +520,19 @@
 			<div class="col-span-full flex flex-col items-start mt-2">
 				<div class="flex items-center text-3xl rounded-lg border mt-4">
 					<button type="button"
+							data-testid="like-button"
 							class="text-xs flex gap-x-1 items-center px-2 btn rounded-l-lg"
 							on:click={() => toggleLike()}>
 						<Icon class="text-2xl {likedColor}" icon="material-symbols:star" />
 						<span>{likes}</span>
 					</button>
 					{#if isMaterial}
-						<button type="button" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
+						<button type="button" data-testid="download-publication" class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
 								on:click={downloadFiles}>
 							<Icon class="xl:text-2xl" icon="material-symbols:download" />
 						</button>
 					{/if}
-					<button type="button"
+					<button type="button" data-testid="save-button"
 							class="flex items-center text-xl btn text-surface-500 px-2 rounded-r-lg"
 							on:click={() => toggleSave()}>
 						<Icon class="xl:text-2xl {savedColor}" icon="ic:baseline-bookmark" />
@@ -552,7 +555,7 @@
 					{/if}
 
 					<div bind:this={hoverDivReport}>
-						<button on:click={toggleReport} class="pl-2 pr-1">
+						<button on:click={toggleReport} data-testid="report-button" class="pl-2 pr-1">
 							{#if reported}
 								<Icon icon="material-symbols:flag" class="self-center size-6 text-surface-600" />
 							{:else}

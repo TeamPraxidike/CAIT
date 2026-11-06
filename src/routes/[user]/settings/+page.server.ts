@@ -4,11 +4,10 @@ import { setEmailVisibility } from '$lib/database';
 import { isEmailVisibility } from '$lib/util/emailVisibility';
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
-	const session = await locals.safeGetSession();
 	const { user } = await parent();
 
-	if (!session?.user) throw redirect(303, '/signin');
-	if (session.user.id !== user.id) throw redirect(303, `/${user.username}`);
+	if (!locals.user) throw redirect(303, '/signin');
+	if (locals.user.id !== user.id) throw redirect(303, `/${user.username}`);
 
 	return {};
 };

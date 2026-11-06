@@ -24,8 +24,8 @@ describe('get specific material', () => {
 			{ content: 'new tag' },
 		]);
 		expect(prisma.tag.findMany).toHaveBeenCalledWith({
-			include: {
-				publication: false,
+			select: {
+				content: true,
 			},
 		});
 	});
