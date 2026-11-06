@@ -15,3 +15,8 @@ static/uploadedFiles
 .direnv/
 static/nutrient-viewer-lib
 *.swp
+TODO
+playwright-report
+test-results
+tests/e2e/storage
+tests/e2e/fixtures/large.pdf

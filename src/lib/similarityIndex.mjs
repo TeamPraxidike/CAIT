@@ -1,6 +1,24 @@
 import SBERTSingleton from "./MetadataSimilarityUtils/SBERTSingleton.mjs";
 
-export const model = await SBERTSingleton.getInstance();
+// Loading the transformer model is intentionally deferred until a similarity
+// operation is actually requested.  Import-time model loading made every SSR
+// build (including the integration-test preview build) reach out to
+// HuggingFace, even when semantic search was never used.
+let modelPromise;
+
+function getModel() {
+    modelPromise ??= SBERTSingleton.getInstance();
+    return modelPromise;
+}
+
+export const model = {
+    computeEmbeddingsTextPair(...args) {
+        return getModel().then(instance => instance.computeEmbeddingsTextPair(...args));
+    },
+    computeEmbeddingSingleText(...args) {
+        return getModel().then(instance => instance.computeEmbeddingSingleText(...args));
+    },
+};
 
 /**
  * Calculates the cosine similarity between two vectors.

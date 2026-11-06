@@ -84,6 +84,9 @@ export async function jaccardComparison(data1, data2) {
         // calculate union
         const union = new Set([...set1Unique, ...set2Unique]);
 
+        // guard against empty sets
+        if (union.size === 0) return 0;
+
         // Jaccard similarity
         return intersection.size / union.size;
     } catch (error) {

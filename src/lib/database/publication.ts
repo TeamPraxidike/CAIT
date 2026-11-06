@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '$lib/database/prisma';
-import { getPublicationById, getPublicationByIdLight } from '$lib/database/db';
+import { getPublicationByIdLight } from '$lib/database/db';
 
 ////////////////////////////////////////////////
 //   HELPER METHODS
@@ -235,6 +235,8 @@ export async function updateAllTimeSaved(id: string, publicationId: number) {
 		}
 		return 'User saved previously';
 	}
+
+	throw Error("Publication not found");
 }
 
 export async function getReportsPublication(publicationId: number): Promise<PublicationReportsCount> {

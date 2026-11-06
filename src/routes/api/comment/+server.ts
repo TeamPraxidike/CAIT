@@ -9,6 +9,14 @@ import { getPublicationByIdLight } from '$lib/database/db.ts';
 
 export async function POST({ request, locals }) {
 	const body = await request.json();
+	if (body.content.length > 1000)
+		return new Response(
+					JSON.stringify({ error: 'Payload too large' }),
+					{
+						status: 413,
+					},
+				);
+	
 
 	const authError = await verifyAuth(locals, body.userId);
 	if (authError) return authError;
@@ -19,15 +27,19 @@ export async function POST({ request, locals }) {
 			publicationId: body.publicationId,
 			content: body.content,
 		};
-
-		const comment = await createComment(commentData);
-		if (!comment)
+		let comment;
+		try {
+			comment = await createComment(commentData);
+		} catch (error){
+			// console.error(error);
 			return new Response(
-				JSON.stringify({ error: 'Publication or user not found' }),
-				{
-					status: 404,
-				},
-			);
+					JSON.stringify({ error: 'Comment not found' }),
+					{
+						status: 404,
+					},
+				);
+		}
+			
 		//const publication = await getPublicationById(body.publicationId);
 		const publication = await getPublicationByIdLight(body.publicationId);
 
@@ -39,6 +51,7 @@ export async function POST({ request, locals }) {
 
 		return new Response(JSON.stringify(comment), { status: 200 });
 	} catch (error) {
+		// console.error(error);
 		return new Response(JSON.stringify({ error }), { status: 500 });
 	}
 }

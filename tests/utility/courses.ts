@@ -43,7 +43,8 @@ export function generateCourseData(creatorID: string): createCourseData{
 		courseName: generateRandomString(10),
 		copyright: generateRandomString(10),
 		maintainers: [],
-		creatorId: creatorID
+		creatorId: creatorID,
+		coverPic: null
 	};
 }
 
