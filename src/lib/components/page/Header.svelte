@@ -137,7 +137,7 @@
     }
 </script>
 
-<header  class="sticky top-0 z-[2000] w-full">
+<header  class="md:sticky top-0 z-[2000] w-full">
     <div class="w-full shadow-lg dark:bg-surface-900 bg-surface-50 border-b border-surface-300 dark:border-surface-50 md:border-none">
         <!--   Progress Bar     -->
         <!-- apparently there is a component for this in Skeleton... TODO? (https://v2.skeleton.dev/components/progress-bars) -->
@@ -149,7 +149,7 @@
             <a href="/" class = "col-start-1" on:click={confirmPublishReset}>
                 <enhanced:img class="h-16 w-16" src="/static/images/favicons/favicon-128.png" alt="CAIT Logo"/>
             </a>
-            
+
 
             <div class="hidden col-start-2 col-span-7 items-center gap-6 md:flex lg:gap-12">
                 {#each navOptions as opt}
@@ -191,7 +191,7 @@
                     </div>
                 {/each}
             </div>
-            
+
 
             <div class="z-60 hidden md:flex col-start-11 col-span-2 md:gap-2 xl:gap-4 items-center justify-self-end">
                 {#if loggedUser}
@@ -284,7 +284,7 @@
 
 
                 {#if $page.data.session?.user}
-                    <div class="flex gap-2 items-center">
+                    <div class="flex gap-2 items-center hidden">
                         <button on:click={handleSignOut} class="anchor col-start-2">Log out</button>
                     </div>
                 {:else}
