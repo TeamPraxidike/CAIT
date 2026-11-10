@@ -1,9 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
-	getPublicationById,
-	getUserById,
-	updateReputation,
+	getPublicationById, getUserById, updateReputation, prisma, deleteUser
 } from '$lib/database';
 import {
 	editUser,
@@ -16,8 +14,81 @@ import { type User } from '@prisma/client';
 import { createUniqueUser, createUserInputObject } from '../../utility/users';
 import { createUniqueMaterial } from '../../utility/publicationsUtility';
 import type { MaterialWithPublicationNoFiles } from '$lib/database/material';
+import { randomUUID } from 'crypto';
+import { createClient } from '@supabase/supabase-js';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { SERVICE_ROLE_KEY } from '$env/static/private';
 
 await resetUserTable();
+
+const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, SERVICE_ROLE_KEY, {
+	auth: { persistSession: false, autoRefreshToken: false },
+});
+
+async function createAuthUser(): Promise<string> {
+	const { data, error } = await supabaseAdmin.auth.admin.createUser({
+		email: `${randomUUID()}@example.com`,
+		password: 'password',
+		email_confirm: true,
+		user_metadata: { firstName: 'Audit', lastName: 'Test' },
+	});
+	if (error) throw error;
+	return data.user.id;
+
+}
+
+async function addAuditEntry(actorId: string) {
+	const payload = JSON.stringify({ actor_id: actorId, action: 'login', log_type: 'account' });
+	await prisma.$executeRaw`
+		INSERT INTO auth.audit_log_entries (id, payload, created_at)
+		VALUES (${randomUUID()}::uuid, ${payload}::json, now())
+	`;
+}
+
+async function countAuditEntries(actorId: string){
+	const rows = await prisma.$queryRaw<{ count: bigint }[]>`
+		SELECT count(*) FROM auth.audit_log_entries 
+		WHERE payload->>'actor_id' = ${actorId}
+		   OR payload->'traits'->>'user_id' = ${actorId}
+	`;
+
+	return Number(rows[0].count);
+}
+
+describe('Deleting users', () => {
+	it('removes their auth audit log entries when deleting through Prisma', async () => {
+		const deletedId = await createAuthUser();
+		await addAuditEntry(deletedId);
+		await addAuditEntry(deletedId);
+
+		await deleteUser(deletedId);
+
+		expect(await countAuditEntries(deletedId)).toBe(0);
+	});
+
+	it('removes their auth audit log entries when deleting through Supabase', async () => {
+		const deletedId = await createAuthUser();
+		await addAuditEntry(deletedId);
+		await addAuditEntry(deletedId);
+
+		const { error } = await supabaseAdmin.auth.admin.deleteUser(deletedId);
+		if (error) throw error;
+
+		expect(await countAuditEntries(deletedId)).toBe(0);
+	});
+
+	it('does not remove logs of other users', async () => {
+		const deletedId = await createAuthUser();
+		const keptId = await createAuthUser();
+		await addAuditEntry(deletedId);
+		await addAuditEntry(keptId);
+		const keptBefore = await countAuditEntries(keptId);
+
+		await deleteUser(deletedId);
+
+		expect(await countAuditEntries(keptId)).toEqual(keptBefore);
+	});
+});
 
 describe('Creating users', () => {
 	it('should increase the id by 1', async () => {
