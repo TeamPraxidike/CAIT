@@ -117,6 +117,10 @@ async function main() {
 		 SECURITY DEFINER
 		AS $function$
         BEGIN
+		DELETE FROM auth.audit_log_entries
+		WHERE payload->>'actor_id' = OLD.id::text
+		   OR payload->'traits'->>'user_id' = OLD.id::text;
+
 		DELETE FROM public."User"
 		WHERE id = OLD.id;
 		RETURN OLD;
