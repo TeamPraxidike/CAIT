@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { UserProp } from '$lib';
 	import Icon from '@iconify/svelte';
-	import type { User } from '@prisma/client';
 	import { page } from '$app/stores';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { type UserWithProfilePic} from '$lib/util/coursesLogic';
@@ -92,13 +91,13 @@
 
 <div class="flex flex-col gap-1 w-full">
 	<label for="maintainers" class="block font-medium">Maintainers<span class="text-error-300">*</span>:</label>
-	<div class="flex flex-wrap flex-grow-0 gap-1 items-center w-full">
+	<div class="flex flex-wrap flex-grow-0 gap-1 items-center w-full group">
 		<UserProp role="Publisher" view="publish" user={publisher} userPhotoUrl={publisher.profilePicData}/>
 		{#each additionalMaintainers as maintainer, key (maintainer.id)}
 			{#if maintainer.id !== publisher.id}
-			<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
-								role="Maintainer" userPhotoUrl={maintainer.profilePicData} />
-				{/if}
+				<UserProp on:removeMaintainer={()=>handleRemoveMaintainer(key)} user={maintainer} view="publish"
+									role="Maintainer" userPhotoUrl={maintainer.profilePicData} />
+			{/if}
 		{/each}
 
 		<button type="button" name="add_maintainer" use:popup={popupAdd} class="btn rounded-lg hover:bg-opacity-85 text-center" >
